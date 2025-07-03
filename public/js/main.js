@@ -1,9 +1,9 @@
 <html>
-<script type="module" src="js/carousel.js"></script>
-<script type="module" src="js/hover-modal.js"></script>
-<script type="module" src="js/details-modal.js"></script>
-<script type="module" src="js/video-modal.js"></script>
-<script type="module" src="js/video-modal.js"></script>
+<script type="module" src="https://jfl4bur.github.io/Todogram/public/js/carousel.js"></script>
+<script type="module" src="jhttps://jfl4bur.github.io/Todogram/public/s/hover-modal.js"></script>
+<script type="module" src="https://jfl4bur.github.io/Todogram/public/js/details-modal.js"></script>
+<script type="module" src="https://jfl4bur.github.io/Todogram/public/js/video-modal.js"></script>
+<script type="module" src="https://jfl4bur.github.io/Todogram/public/js/video-modal.js"></script>
 </html>
 
 document.addEventListener("DOMContentLoaded", function () {
