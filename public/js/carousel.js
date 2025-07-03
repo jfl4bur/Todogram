@@ -1,7 +1,7 @@
 class Carousel {
     constructor(containerId, items, category) {
         this.container = document.getElementById(containerId);
-        this.items = items || [];  // Manejo de undefined
+        this.items = items || [];
         this.category = category;
         this.init();
     }
@@ -17,7 +17,6 @@ class Carousel {
     }
 
     generateHTML() {
-        // Verificar si hay items
         if (!this.items || this.items.length === 0) {
             return `<div class="error-carrusel">No hay datos disponibles</div>`;
         }
@@ -54,8 +53,8 @@ class Carousel {
             contenedor.scrollBy({ left: 500, behavior: 'smooth' });
         });
 
-        // Touch events para móviles
-        let startX, scrollLeft;
+        let startX;
+        let scrollLeft;
         
         contenedor.addEventListener('touchstart', (e) => {
             startX = e.touches[0].pageX - contenedor.offsetLeft;

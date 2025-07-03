@@ -1,6 +1,10 @@
 class HoverModal {
     constructor() {
         this.modal = document.getElementById('mini-modal');
+        if (!this.modal) {
+            console.error("Elemento #mini-modal no encontrado");
+            return;
+        }
         this.init();
     }
 

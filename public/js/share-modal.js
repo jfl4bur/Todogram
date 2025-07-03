@@ -1,6 +1,10 @@
 class ShareModal {
     constructor() {
         this.modal = document.getElementById('share-modal');
+        if (!this.modal) {
+            console.error("Elemento #share-modal no encontrado");
+            return;
+        }
         this.content = this.modal.querySelector('.modal-content');
         this.init();
     }
@@ -14,12 +18,17 @@ class ShareModal {
     }
 
     open(pelicula) {
+        if (!this.content) return;
         this.content.innerHTML = this.generateContent(pelicula);
         this.modal.style.display = 'block';
         
-        // Añadir eventos a los botones de compartir
-        this.content.querySelector('.btn-copiar').addEventListener('click', this.copiarEnlace.bind(this));
-        this.content.querySelectorAll('.btn-compartir').forEach(btn => {
+        const btnCopiar = this.content.querySelector('.btn-copiar');
+        if (btnCopiar) {
+            btnCopiar.addEventListener('click', this.copiarEnlace.bind(this));
+        }
+        
+        const btnsCompartir = this.content.querySelectorAll('.btn-compartir');
+        btnsCompartir.forEach(btn => {
             btn.addEventListener('click', () => {
                 this.compartirEnRed(btn.dataset.red, pelicula);
             });
@@ -59,11 +68,15 @@ class ShareModal {
 
     copiarEnlace() {
         const input = document.getElementById('enlace-pelicula');
+        if (!input) return;
+        
         input.select();
+        input.setSelectionRange(0, 99999);
         document.execCommand('copy');
         
-        // Mostrar feedback
         const btn = this.content.querySelector('.btn-copiar');
+        if (!btn) return;
+        
         const originalText = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
         
@@ -75,6 +88,7 @@ class ShareModal {
     compartirEnRed(red, pelicula) {
         const enlace = encodeURIComponent(`https://tudominio.com/pelicula/${pelicula.id}`);
         const titulo = encodeURIComponent(`Mira "${pelicula.titulo}" en Todogram`);
+        const texto = encodeURIComponent(`${pelicula.titulo}: ${pelicula.sinopsis.slice(0, 100)}...`);
         
         let url;
         switch(red) {

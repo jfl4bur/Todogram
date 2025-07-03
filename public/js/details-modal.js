@@ -1,6 +1,10 @@
 class DetailsModal {
     constructor() {
         this.modal = document.getElementById('modal-detalles');
+        if (!this.modal) {
+            console.error("Elemento #modal-detalles no encontrado");
+            return;
+        }
         this.content = this.modal.querySelector('.modal-content');
         this.init();
     }
@@ -14,17 +18,27 @@ class DetailsModal {
     }
 
     open(pelicula) {
+        if (!this.content) return;
         this.content.innerHTML = this.generateContent(pelicula);
         this.modal.style.display = 'block';
         
-        // Añadir eventos a los botones
-        this.content.querySelector('.btn-reproducir').addEventListener('click', () => {
-            window.videoModal.play(pelicula.url);
-        });
+        const btnReproducir = this.content.querySelector('.btn-reproducir');
+        if (btnReproducir) {
+            btnReproducir.addEventListener('click', () => {
+                if (window.videoModal) {
+                    window.videoModal.play(pelicula.url);
+                }
+            });
+        }
         
-        this.content.querySelector('.btn-compartir').addEventListener('click', () => {
-            window.shareModal.open(pelicula);
-        });
+        const btnCompartir = this.content.querySelector('.btn-compartir');
+        if (btnCompartir) {
+            btnCompartir.addEventListener('click', () => {
+                if (window.shareModal) {
+                    window.shareModal.open(pelicula);
+                }
+            });
+        }
     }
 
     close() {
