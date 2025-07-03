@@ -14,7 +14,11 @@ class Carousel {
         this.moviesData = [];
         this.hoverTimeouts = {};
         
-        this.init();
+        if (this.wrapper && this.skeleton) {
+            this.init();
+        } else {
+            console.error("Elementos del carrusel no encontrados");
+        }
     }
 
     init() {
@@ -24,10 +28,13 @@ class Carousel {
     }
 
     calculateItemsPerPage() {
-        const itemWidth = 194; // var(--item-width)
+        const itemWidth = 194;
         const gap = 4;
-        const containerWidth = this.wrapper.clientWidth;
-        this.itemsPerPage = Math.floor(containerWidth / (itemWidth + gap));
+        
+        if (this.wrapper) {
+            const containerWidth = this.wrapper.clientWidth;
+            this.itemsPerPage = Math.floor(containerWidth / (itemWidth + gap));
+        }
     }
 
     setupEventListeners() {
