@@ -1,8 +1,10 @@
-import { initCarousel } from './carousel.js';
-import { showModal } from './hover-modal.js';
-import { showDetailsModal } from './details-modal.js';
-import { showVideoModal } from './video-modal.js';
-import { showShareModal } from './share-modal.js';
+<html>
+<script type="module" src="js/carousel.js"></script>
+<script type="module" src="js/hover-modal.js"></script>
+<script type="module" src="js/details-modal.js"></script>
+<script type="module" src="js/video-modal.js"></script>
+<script type="module" src="js/video-modal.js"></script>
+</html>
 
 document.addEventListener("DOMContentLoaded", function () {
     // Variables globales
