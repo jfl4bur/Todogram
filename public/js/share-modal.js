@@ -1,137 +1,99 @@
-// Variables
-const shareModalOverlay = document.getElementById('share-modal-overlay');
-const shareModalContent = document.getElementById('share-modal-content');
-const shareModalClose = document.getElementById('share-modal-close');
-const sharePreviewImage = document.getElementById('share-preview-image');
-const sharePreviewTitle = document.getElementById('share-preview-title');
-const sharePreviewDescription = document.getElementById('share-preview-description');
-const shareLinkInput = document.getElementById('share-link-input');
-const shareLinkButton = document.getElementById('share-link-button');
-let currentShareUrl = '';
-
-export function showShareModal(item) {
-    if (!item) return;
-    
-    // Crear URL de compartir
-    const normalizedTitle = normalizeText(item.title);
-    currentShareUrl = `${window.location.origin}${window.location.pathname}#id=${item.id}&title=${normalizedTitle}`;
-    
-    // Actualizar elementos del modal
-    sharePreviewImage.src = item.posterUrl;
-    sharePreviewImage.onerror = function() {
-        this.src = 'https://via.placeholder.com/194x271';
-    };
-    
-    sharePreviewTitle.textContent = item.title;
-    
-    // Limitar la descripción a 120 caracteres con puntos suspensivos
-    const maxLength = 120;
-    let description = item.description || 'Descripción no disponible';
-    if (description.length > maxLength) {
-        description = description.substring(0, maxLength) + '...';
+class ShareModal {
+    constructor() {
+        this.modal = document.getElementById('share-modal');
+        this.content = this.modal.querySelector('.modal-content');
+        this.init();
     }
-    sharePreviewDescription.textContent = description;
-    
-    shareLinkInput.value = currentShareUrl;
-    
-    // Actualizar metatags para compartir
-    updateMetaTags(item);
-    
-    // Mostrar el modal
-    shareModalOverlay.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-    
-    setTimeout(() => {
-        shareModalContent.style.opacity = '1';
-        shareModalContent.style.transform = 'translateY(0)';
-    }, 10);
+
+    init() {
+        this.modal.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal') || e.target.classList.contains('cerrar')) {
+                this.close();
+            }
+        });
+    }
+
+    open(pelicula) {
+        this.content.innerHTML = this.generateContent(pelicula);
+        this.modal.style.display = 'block';
+        
+        // Añadir eventos a los botones de compartir
+        this.content.querySelector('.btn-copiar').addEventListener('click', this.copiarEnlace.bind(this));
+        this.content.querySelectorAll('.btn-compartir').forEach(btn => {
+            btn.addEventListener('click', () => {
+                this.compartirEnRed(btn.dataset.red, pelicula);
+            });
+        });
+    }
+
+    close() {
+        this.modal.style.display = 'none';
+    }
+
+    generateContent(pelicula) {
+        return `
+            <span class="cerrar">&times;</span>
+            <h2>Compartir "${pelicula.titulo}"</h2>
+            <div class="redes-sociales">
+                <button class="btn-compartir" data-red="facebook">
+                    <i class="fab fa-facebook"></i> Facebook
+                </button>
+                <button class="btn-compartir" data-red="twitter">
+                    <i class="fab fa-twitter"></i> Twitter
+                </button>
+                <button class="btn-compartir" data-red="whatsapp">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </button>
+                <button class="btn-compartir" data-red="telegram">
+                    <i class="fab fa-telegram"></i> Telegram
+                </button>
+            </div>
+            <div class="enlace-compartir">
+                <input type="text" id="enlace-pelicula" value="https://tudominio.com/pelicula/${pelicula.id}" readonly>
+                <button class="btn-copiar">
+                    <i class="fas fa-copy"></i> Copiar
+                </button>
+            </div>
+        `;
+    }
+
+    copiarEnlace() {
+        const input = document.getElementById('enlace-pelicula');
+        input.select();
+        document.execCommand('copy');
+        
+        // Mostrar feedback
+        const btn = this.content.querySelector('.btn-copiar');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+        }, 2000);
+    }
+
+    compartirEnRed(red, pelicula) {
+        const enlace = encodeURIComponent(`https://tudominio.com/pelicula/${pelicula.id}`);
+        const titulo = encodeURIComponent(`Mira "${pelicula.titulo}" en Todogram`);
+        
+        let url;
+        switch(red) {
+            case 'facebook':
+                url = `https://www.facebook.com/sharer/sharer.php?u=${enlace}`;
+                break;
+            case 'twitter':
+                url = `https://twitter.com/intent/tweet?url=${enlace}&text=${titulo}`;
+                break;
+            case 'whatsapp':
+                url = `https://api.whatsapp.com/send?text=${titulo}%20${enlace}`;
+                break;
+            case 'telegram':
+                url = `https://t.me/share/url?url=${enlace}&text=${titulo}`;
+                break;
+            default:
+                return;
+        }
+        
+        window.open(url, '_blank', 'width=600,height=400');
+    }
 }
-
-function shareOnSocial(network) {
-    if (!currentShareUrl || !activeItem) return;
-    
-    const title = `Mira ${activeItem.title} en nuestra plataforma`;
-    const text = `${activeItem.title}: ${activeItem.description ? activeItem.description.substring(0, 100) + '...' : 'Una gran película que no te puedes perder'}`;
-    const imageUrl = activeItem.posterUrl || 'https://via.placeholder.com/194x271';
-    
-    let shareUrl = '';
-    
-    switch(network) {
-        case 'facebook':
-            shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(currentShareUrl)}`;
-            break;
-        case 'twitter':
-            shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(currentShareUrl)}`;
-            break;
-        case 'whatsapp':
-            shareUrl = `https://wa.me/?text=${encodeURIComponent(title + ' ' + currentShareUrl)}`;
-            break;
-        case 'telegram':
-            shareUrl = `https://t.me/share/url?url=${encodeURIComponent(currentShareUrl)}&text=${encodeURIComponent(title)}`;
-            break;
-        default:
-            return;
-    }
-    
-    window.open(shareUrl, '_blank', 'width=600,height=400');
-}
-
-function copyShareLink() {
-    if (!currentShareUrl) return;
-    
-    shareLinkInput.select();
-    document.execCommand('copy');
-    
-    // Mostrar feedback
-    const originalText = shareLinkButton.textContent;
-    shareLinkButton.textContent = '¡Copiado!';
-    shareLinkButton.style.backgroundColor = '#4CAF50';
-    
-    setTimeout(() => {
-        shareLinkButton.textContent = originalText;
-        shareLinkButton.style.backgroundColor = '';
-    }, 2000);
-}
-
-function closeShareModal() {
-    shareModalContent.style.opacity = '0';
-    shareModalContent.style.transform = 'translateY(20px)';
-    
-    setTimeout(() => {
-        shareModalOverlay.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }, 300);
-}
-
-shareModalOverlay.addEventListener('click', (e) => {
-    if (e.target === shareModalOverlay) {
-        closeShareModal();
-    }
-});
-
-shareModalClose.addEventListener('click', (e) => {
-    e.stopPropagation();
-    closeShareModal();
-});
-
-shareLinkButton.addEventListener('click', copyShareLink);
-
-// Event listeners para los botones de compartir
-document.addEventListener('click', function(e) {
-    // Botones de redes sociales
-    if (e.target.closest('#share-facebook')) {
-        shareOnSocial('facebook');
-    }
-    if (e.target.closest('#share-twitter')) {
-        shareOnSocial('twitter');
-    }
-    if (e.target.closest('#share-whatsapp')) {
-        shareOnSocial('whatsapp');
-    }
-    if (e.target.closest('#share-telegram')) {
-        shareOnSocial('telegram');
-    }
-    if (e.target.closest('#share-link')) {
-        copyShareLink();
-    }
-});
