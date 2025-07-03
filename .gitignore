@@ -23,10 +23,15 @@ logs
 # Sistema
 Thumbs.db
 
-# Ignorar los scripts de sincronización locales
+# Ignorar los backups
+backups
 
+# Ignorar carpetas
+UTILES/
 
 #  SECRET_KEYS
 .env
 
-
+# Ignorar los scripts de sincronización locales
+start.js
+panel.js

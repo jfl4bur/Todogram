@@ -10,6 +10,7 @@ import readline from 'readline';
 import { execSync } from 'child_process';
 import ora from 'ora';
 import os from 'os';
+import chalk from 'chalk';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -29,7 +30,47 @@ const TMDB_RATE_LIMIT = 100; // Reducido para procesamiento paralelo
 const delay = (ms) => new Promise((res) => setTimeout(res, ms));
 const now = () => new Date().toISOString().replace('T', ' ').substring(0, 19);
 
+const color = {
+  reset: "\x1b[0m",
+  blue: "\x1b[34m",
+  green: "\x1b[32m",
+  red: "\x1b[31m",
+  yellow: "\x1b[33m",
+  cyan: "\x1b[36m",
+  bright: "\x1b[1m",
+  magenta: "\x1b[35m",
+  gray: "\x1b[90m"
+};
+
 let lastNotionInfo = null;
+
+// Función para centrar texto
+function centerText(text, width) {
+  const padding = Math.max(0, width - getDisplayLength(text));
+  const leftPadding = Math.floor(padding / 2);
+  return ' '.repeat(leftPadding) + text + ' '.repeat(padding - leftPadding);
+}
+
+// Función para imprimir el encabezado con logo
+function printHeader() {
+  const totalWidth = 80;
+  const border = '═'.repeat(totalWidth);
+  
+  console.log(chalk.cyan(`╔${border}╗`));
+  console.log(chalk.cyan(`║${chalk.blue(' '.repeat(totalWidth))}║`));
+  console.log(chalk.cyan(`║${chalk.blue('     ████████╗ ██████╗ ██████╗  ██████╗  ██████╗ ██████╗  █████╗ ███╗   ███╗    ')}║`));
+  console.log(chalk.cyan(`║${chalk.blue('     ╚══██╔══╝██╔═══██╗██╔══██╗██╔═══██╗██╔════╝ ██╔══██╗██╔══██╗████╗ ████║    ')}║`));
+  console.log(chalk.cyan(`║${chalk.blue('        ██║   ██║   ██║██║  ██║██║   ██║██║  ███╗██████╔╝███████║██╔████╔██║    ')}║`));
+  console.log(chalk.cyan(`║${chalk.blue('        ██║   ██║   ██║██║  ██║██║   ██║██║   ██║██╔══██╗██╔══██║██║╚██╔╝██║    ')}║`));
+  console.log(chalk.cyan(`║${chalk.blue('        ██║   ╚██████╔╝██████╔╝╚██████╔╝╚██████╔╝██║  ██║██║  ██║██║ ╚═╝ ██║    ')}║`));
+  console.log(chalk.cyan(`║${chalk.blue('        ╚═╝    ╚═════╝ ╚═════╝  ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝    ')}║`));
+  console.log(chalk.cyan(`║${' '.repeat(totalWidth)}║`));
+  console.log(chalk.cyan(`║${chalk.yellow(centerText('🔥 SISTEMA DE GESTIÓN TODOGRAM 🔥', totalWidth))}║`));
+  console.log(chalk.cyan(`║${' '.repeat(totalWidth)}║`));
+  console.log(chalk.cyan(`║${chalk.blue(centerText(`NODE:${process.version} │ RAM:${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(1)}MB`, totalWidth))}║`));
+  console.log(chalk.cyan(`║${' '.repeat(totalWidth)}║`));
+  console.log(chalk.cyan(`╚${border}╝`));
+}
 
 // Funciones mejoradas para extraer datos de Notion
 const getText = (property) => {
@@ -141,7 +182,7 @@ const logProgress = (count, total, status, missingFields = [], batchSize = 10, n
   const filled = Math.floor(percent / 4);
   const filledBar = '█'.repeat(filled);
   const emptyBar = '░'.repeat(25 - filled);
-  const bar = `\x1b[38;5;27m${filledBar}\x1b[38;5;75m${emptyBar}\x1b[0m`;
+  const bar = `\x1b[34m${filledBar}\x1b[38;5;75m${emptyBar}\x1b[0m`;
   const movieTitle = status.replace('Procesando: ', '');
   const truncatedTitle = truncateText(movieTitle, 40);
   const percentText = `\x1b[1m\x1b[31m${percent.toString().padStart(3, ' ')}%\x1b[0m`;
@@ -150,32 +191,32 @@ const logProgress = (count, total, status, missingFields = [], batchSize = 10, n
   const lines = [];
 
   lines.push(`\x1b[999F`);
-  lines.push(`\x1b[1m\x1b[36m╔═══════════════════════════════════════════════════════════════════════════════════════╗\x1b[0m`);
-  lines.push(`\x1b[1m\x1b[36m║                              \x1b[33m🎬 PROCESANDO PELÍCULAS 🎬\x1b[36m                               ║\x1b[0m`);
-  lines.push(`\x1b[1m\x1b[36m╠═══════════════════════════════════════════════════════════════════════════════════════╣\x1b[0m`);
+  lines.push(`\x1b[1m\x1b[36m┌──────────────────────────────────────────────────────────────────────────────────────┐\x1b[0m`);
+  lines.push(`\x1b[1m\x1b[36m│                              \x1b[33m🎬 PROCESANDO PELÍCULAS 🎬\x1b[36m                               │\x1b[0m`);
+  lines.push(`\x1b[1m\x1b[36m├──────────────────────────────────────────────────────────────────────────────────────┤\x1b[0m`);
 
   if (lastNotionInfo) {
-    lines.push(`\x1b[1m\x1b[36m║ \x1b[34m🚀 Extrayendo datos de Notion:\x1b[0m \x1b[32mLote ${lastNotionInfo.currentBatch} (${lastNotionInfo.entriesInBatch} entradas)\x1b[0m${' '.repeat(30)}    \x1b[36m║\x1b[0m`);
+    lines.push(`\x1b[1m\x1b[36m│ \x1b[34m🔰 Extrayendo datos de Notion:\x1b[0m \x1b[32mLote ${lastNotionInfo.currentBatch} (${lastNotionInfo.entriesInBatch} entradas)\x1b[0m${' '.repeat(30)}    \x1b[36m│\x1b[0m`);
 
     const infoLine =
-      `📦 Total extraído: \x1b[1m\x1b[32m${lastNotionInfo.totalExtracted.toString().padStart(3, ' ')}\x1b[0m ` +
+      `📊 Total extraído: \x1b[1m\x1b[32m${lastNotionInfo.totalExtracted.toString().padStart(3, ' ')}\x1b[0m ` +
       `│ Total lotes: \x1b[1m\x1b[32m${lastNotionInfo.currentBatch.toString().padStart(2, ' ')}\x1b[0m ` +
       `│ Estado: \x1b[32m${lastNotionInfo.status}\x1b[0m`;
     const visibleLength = getDisplayLength(infoLine);
     const padding = Math.max(0, 86 - visibleLength);
-    lines.push(`\x1b[1m\x1b[36m║${infoLine}${' '.repeat(padding)}║\x1b[0m`);
+    lines.push(`\x1b[1m\x1b[36m│${infoLine}${' '.repeat(padding)}│\x1b[0m`);
 
-    lines.push(`\x1b[1m\x1b[36m╠═══════════════════════════════════════════════════════════════════════════════════════╣\x1b[0m`);
+    lines.push(`\x1b[1m\x1b[36m├──────────────────────────────────────────────────────────────────────────────────────┤\x1b[0m`);
   }
 
-  lines.push(`\x1b[1m\x1b[36m║ \x1b[33m📊 Total películas: \x1b[1m\x1b[32m${total.toString().padStart(3, ' ')}\x1b[0m \x1b[33m│ Procesamiento paralelo: \x1b[1m\x1b[32m${batchSize.toString().padStart(2, ' ')}\x1b[0m \x1b[33mhilos simultáneos\x1b[0m             \x1b[36m   ║\x1b[0m`);
-  lines.push(`\x1b[1m\x1b[36m╠═══════════════════════════════════════════════════════════════════════════════════════╣\x1b[0m`);
-  lines.push(`║ ${bar} ║ ${percentText} │ ${countText} │ \x1b[1m\x1b[32m${truncatedTitle.padEnd(40)}   ║\x1b[0m`);
-  lines.push(`\x1b[1m\x1b[36m╠═══════════════════════════════════════════════════════════════════════════════════════╣\x1b[0m`);
-  lines.push(`\x1b[1m\x1b[36m║                              \x1b[31m⚠️  CAMPOS FALTANTES ⚠️\x1b[36m                                  ║\x1b[0m`);
-  lines.push(`\x1b[1m\x1b[36m╠═══════════════════════════════════════════════════════════════════════════════════════╣\x1b[0m`);
-  lines.push(`\x1b[1m\x1b[36m║ \x1b[1m\x1b[33mTÍTULO                                 \x1b[36m│ \x1b[1m\x1b[31mCAMPOS FALTANTES\x1b[36m                             ║\x1b[0m`);
-  lines.push(`\x1b[1m\x1b[36m╠═══════════════════════════════════════════════════════════════════════════════════════╣\x1b[0m`);
+  lines.push(`\x1b[1m\x1b[36m│ \x1b[33m📚 Total películas: \x1b[1m\x1b[32m${total.toString().padStart(3, ' ')}\x1b[0m \x1b[33m│ Procesamiento paralelo: \x1b[1m\x1b[32m${batchSize.toString().padStart(2, ' ')}\x1b[0m \x1b[33mhilos simultáneos\x1b[0m             \x1b[36m   │\x1b[0m`);
+  lines.push(`\x1b[1m\x1b[36m├──────────────────────────────────────────────────────────────────────────────────────┤\x1b[0m`);
+  lines.push(`│ ${bar} │ ${percentText} │ ${countText} │ \x1b[1m\x1b[32m${truncatedTitle.padEnd(40)}   │\x1b[0m`);
+  lines.push(`\x1b[1m\x1b[36m├──────────────────────────────────────────────────────────────────────────────────────┤\x1b[0m`);
+  lines.push(`\x1b[1m\x1b[36m│                              \x1b[31m⚠️  CAMPOS FALTANTES ⚠️\x1b[36m                                  │\x1b[0m`);
+  lines.push(`\x1b[1m\x1b[36m├──────────────────────────────────────────────────────────────────────────────────────┤\x1b[0m`);
+  lines.push(`\x1b[1m\x1b[36m│ \x1b[1m\x1b[33mTÍTULO                                 \x1b[36m│ \x1b[1m\x1b[31mCAMPOS FALTANTES\x1b[36m                             │\x1b[0m`);
+  lines.push(`\x1b[1m\x1b[36m├──────────────────────────────────────────────────────────────────────────────────────┤\x1b[0m`);
 
   const recentMissing = missingFieldsTable.slice(-12);
   for (let i = 0; i < 12; i++) {
@@ -183,21 +224,21 @@ const logProgress = (count, total, status, missingFields = [], batchSize = 10, n
     if (entry) {
       const title = truncateText(entry.title, 38);
       const fields = truncateText(entry.fields.join(', '), 44);
-      lines.push(`\x1b[1m\x1b[36m║ \x1b[33m${title}\x1b[36m │ \x1b[31m${fields}\x1b[36m`);
+      lines.push(`\x1b[1m\x1b[36m│ \x1b[33m${title}\x1b[36m │ \x1b[31m${fields}\x1b[36m`);
     } else {
-      lines.push(`\x1b[36m║ ${' '.repeat(86)}║\x1b[0m`);
+      lines.push(`\x1b[36m│ ${' '.repeat(86)}│\x1b[0m`);
     }
   }
 
   if (missingFieldsTable.length > 12) {
     const remaining = missingFieldsTable.length - 12;
     const remainingText = truncateText(`... y ${remaining} más`, 84);
-    lines.push(`\x1b[36m║\x1b[2m\x1b[37m ${remainingText}\x1b[0m  ║\x1b[0m`);
+    lines.push(`\x1b[36m│\x1b[2m\x1b[37m ${remainingText}\x1b[0m  │\x1b[0m`);
   } else {
-    lines.push(`\x1b[36m║ ${' '.repeat(86)}║\x1b[0m`);
+    lines.push(`\x1b[36m│ ${' '.repeat(86)}│\x1b[0m`);
   }
 
-  lines.push(`\x1b[1m\x1b[36m╚═══════════════════════════════════════════════════════════════════════════════════════╝\x1b[0m`);
+  lines.push(`\x1b[1m\x1b[36m└──────────────────────────────────────────────────────────────────────────────────────┘\x1b[0m`);
 
   process.stdout.write(lines.join('\n'));
 };
@@ -244,6 +285,7 @@ async function fetchTMDBDetails(tmdbId, title) {
     return null;
   }
 }
+
 async function getAllPages() {
   let results = [];
   let cursor;
@@ -477,11 +519,11 @@ async function validateEnvironment() {
   if (!process.env.TMDB_API_KEY) missingVars.push('TMDB_API_KEY');
   
   if (missingVars.length > 0) {
-    console.error('\x1b[31m❌ Faltan variables de entorno:\x1b[0m');
+    console.error('\x1b[31m✖ Faltan variables de entorno:\x1b[0m');
     missingVars.forEach(varName => {
       console.error(`   - ${varName}`);
     });
-    console.error('\n\x1b[33m💡 Asegúrate de tener un archivo .env con:\x1b[0m');
+    console.error('\n\x1b[33m🔰 Asegúrate de tener un archivo .env con:\x1b[0m');
     console.error('   NOTION_API_KEY=tu_token_notion');
     console.error('   NOTION_DATABASE_ID=tu_database_id');
     console.error('   TMDB_API_KEY=tu_tmdb_key');
@@ -501,35 +543,35 @@ function exec(cmd, silent = false) {
 
 async function autoPush() {
   const spinner = ora({
-    text: '🚀 Iniciando auto-push a GitHub...',
+    text: '🔰 Iniciando auto-push a GitHub...',
     color: 'yellow'
   }).start();
 
   try {
-    // Ejecutar el archivo auto-push.js desde la carpeta home
-    const homeDir = os.homedir();
-    const autoPushScript = path.join(homeDir, 'auto-push.js');
+    // Ejecutar el archivo auto-push.js desde la raíz del repositorio
+    const repoRoot = process.cwd(); // Usa el directorio actual de trabajo
+    const autoPushScript = path.join(repoRoot, 'auto-push.js');
     
     if (!fs.existsSync(autoPushScript)) {
-      spinner.fail('❌ No se encontró el archivo auto-push.js en la carpeta home');
+      spinner.fail('✖ No se encontró el archivo auto-push.js en la raíz del repositorio');
       return;
     }
     
-    spinner.text = '🔄 Ejecutando script de auto-push...';
+    spinner.text = '📦 Ejecutando script de auto-push...';
     
     const result = execSync(`node ${autoPushScript}`, { stdio: 'pipe' }).toString();
     
     if (result.includes('error') || result.includes('fatal')) {
-      spinner.fail('❌ Error durante la ejecución del auto-push');
+      spinner.fail('✖ Error durante la ejecución del auto-push');
       console.log(result);
       return;
     }
     
-    spinner.succeed('✅ Auto-push completado con éxito');
+    spinner.succeed('✓ Auto-push completado con éxito');
     console.log(result);
 
   } catch (error) {
-    spinner.fail('❌ Error durante el auto-push');
+    spinner.fail('✖ Error durante el auto-push');
     console.error(error.message);
   }
 }
@@ -555,14 +597,14 @@ async function askForAutoPush() {
     const timeColor = '\x1b[38;5;208m'; // Naranja
     const resetColor = '\x1b[0m';
     
-    lines.push('\x1b[1m\x1b[36m╔═══════════════════════════════════════════════════════════════════════════════════════╗\x1b[0m');
-    lines.push('\x1b[1m\x1b[36m║ \x1b[33m🚀 AUTO-PUSH A GITHUB - CONFIRMACIÓN \x1b[36m                                      ║\x1b[0m');
-    lines.push('\x1b[1m\x1b[36m╠═══════════════════════════════════════════════════════════════════════════════════════╣\x1b[0m');
-    lines.push(`\x1b[1m\x1b[36m║ \x1b[37m¿Deseas ejecutar el auto-push a GitHub? (Presiona cualquier tecla para confirmar) \x1b[36m║\x1b[0m`);
-    lines.push(`\x1b[1m\x1b[36m║ \x1b[31mPresiona \x1b[1mN\x1b[0m\x1b[31m o \x1b[1mESC\x1b[0m\x1b[31m para cancelar \x1b[36m                                                 ║\x1b[0m`);
-    lines.push('\x1b[1m\x1b[36m╠═══════════════════════════════════════════════════════════════════════════════════════╣\x1b[0m');
-    lines.push(`\x1b[1m\x1b[36m║ \x1b[33mTiempo restante: ${timeColor}${timeLeft.toString().padStart(2, '0')}s${resetColor} \x1b[36m                                                  ║\x1b[0m`);
-    lines.push('\x1b[1m\x1b[36m╚═══════════════════════════════════════════════════════════════════════════════════════╝\x1b[0m');
+    lines.push('\x1b[1m\x1b[36m┌──────────────────────────────────────────────────────────────────────────────────────┐\x1b[0m');
+    lines.push('\x1b[1m\x1b[36m│ \x1b[33m🔰 AUTO-PUSH A GITHUB - CONFIRMACIÓN \x1b[36m                                      │\x1b[0m');
+    lines.push('\x1b[1m\x1b[36m├──────────────────────────────────────────────────────────────────────────────────────┤\x1b[0m');
+    lines.push(`\x1b[1m\x1b[36m│ \x1b[37m¿Deseas ejecutar el auto-push a GitHub? (Presiona cualquier tecla para confirmar) \x1b[36m│\x1b[0m`);
+    lines.push(`\x1b[1m\x1b[36m│ \x1b[31mPresiona \x1b[1mN\x1b[0m\x1b[31m o \x1b[1mESC\x1b[0m\x1b[31m para cancelar \x1b[36m                                                 │\x1b[0m`);
+    lines.push('\x1b[1m\x1b[36m├──────────────────────────────────────────────────────────────────────────────────────┤\x1b[0m');
+    lines.push(`\x1b[1m\x1b[36m│ \x1b[33mTiempo restante: ${timeColor}${timeLeft.toString().padStart(2, '0')}s${resetColor} \x1b[36m                                                  │\x1b[0m`);
+    lines.push('\x1b[1m\x1b[36m└──────────────────────────────────────────────────────────────────────────────────────┘\x1b[0m');
     
     // Mover cursor arriba para sobreescribir
     process.stdout.write('\x1b[7F');
@@ -629,7 +671,7 @@ async function askForAutoPush() {
     process.stdin.setRawMode(false);
     process.stdin.pause();
     rl.close();
-    console.log('\x1b[1m\x1b[31m❌ Error al leer la respuesta:\x1b[0m', error.message);
+    console.log('\x1b[1m\x1b[31m✖ Error al leer la respuesta:\x1b[0m', error.message);
     return false;
   }
 }
@@ -639,6 +681,9 @@ async function askForAutoPush() {
   const startTime = Date.now();
   
   try {
+    // Mostrar el encabezado con logo
+    printHeader();
+    
     await validateEnvironment();
     
     // Obtener todas las páginas de Notion (optimizado sin delays innecesarios)
@@ -671,46 +716,46 @@ async function askForAutoPush() {
     function createLine(content, targetWidth = 82) {
         const contentLength = getDisplayLength(content);
         const spaces = Math.max(0, targetWidth - contentLength);
-        return `\x1b[1m\x1b[36m ║  ${content}${' '.repeat(spaces)}\x1b[1m\x1b[36m║\x1b[0m`;
+        return `\x1b[1m\x1b[36m │  ${content}${' '.repeat(spaces)}\x1b[1m\x1b[36m│\x1b[0m`;
     }
 
     console.log('\n');
-    console.log('\x1b[1m\x1b[36m ╔══════════════════════════════════════════════════════════════════════════════════════╗\x1b[0m');
-    console.log('\x1b[1m\x1b[36m ║                             \x1b[1m\x1b[33m🎬 PROCESO COMPLETADO 🎬\x1b[1m\x1b[36m                                 ║\x1b[0m');
-    console.log('\x1b[1m\x1b[36m ╠══════════════════════════════════════════════════════════════════════════════════════╣\x1b[0m');
-    console.log('\x1b[1m\x1b[36m ║                                                                                      ║\x1b[0m');
+    console.log('\x1b[1m\x1b[36m ┌──────────────────────────────────────────────────────────────────────────────────────┐\x1b[0m');
+    console.log('\x1b[1m\x1b[36m │                             \x1b[1m\x1b[33m🎬 PROCESO COMPLETADO 🎬\x1b[1m\x1b[36m                                 │\x1b[0m');
+    console.log('\x1b[1m\x1b[36m ├──────────────────────────────────────────────────────────────────────────────────────┤\x1b[0m');
+    console.log('\x1b[1m\x1b[36m │                                                                                      │\x1b[0m');
 
-    console.log(createLine(`\x1b[32m✅ Archivo actualizado:\x1b[0m \x1b[1m\x1b[37mdata.json\x1b[0m`));
-    console.log('\x1b[1m\x1b[36m ║                                                                                      ║\x1b[0m');
+    console.log(createLine(`\x1b[32m✓ Archivo actualizado:\x1b[0m \x1b[1m\x1b[37mdata.json\x1b[0m`));
+    console.log('\x1b[1m\x1b[36m │                                                                                      │\x1b[0m');
 
     console.log(createLine(`\x1b[35m📁 Ubicación:\x1b[0m`));
     console.log(createLine(`  \x1b[2m\x1b[37m${truncateText(output, 70)}\x1b[0m`));
-    console.log('\x1b[1m\x1b[36m ║                                                                                      ║\x1b[0m');
+    console.log('\x1b[1m\x1b[36m │                                                                                      │\x1b[0m');
 
-    console.log(createLine(`\x1b[33m📊 Total procesadas:\x1b[0m \x1b[1m\x1b[32m${items.length.toString().padStart(3, ' ')}\x1b[0m \x1b[33mpelículas\x1b[0m`));
-    console.log('\x1b[1m\x1b[36m ║                                                                                      ║\x1b[0m');
-    console.log(createLine(`\x1b[35m📥 Extracción Notion:\x1b[0m \x1b[32m${lastNotionInfo.totalExtracted} películas en ${lastNotionInfo.currentBatch} lotes\x1b[0m`));
-    console.log('\x1b[1m\x1b[36m ║                                                                                      ║\x1b[0m');
+    console.log(createLine(`\x1b[33m📚 Total procesadas:\x1b[0m \x1b[1m\x1b[32m${items.length.toString().padStart(3, ' ')}\x1b[0m \x1b[33mpelículas\x1b[0m`));
+    console.log('\x1b[1m\x1b[36m │                                                                                      │\x1b[0m');
+    console.log(createLine(`\x1b[35m📊 Extracción Notion:\x1b[0m \x1b[32m${lastNotionInfo.totalExtracted} películas en ${lastNotionInfo.currentBatch} lotes\x1b[0m`));
+    console.log('\x1b[1m\x1b[36m │                                                                                      │\x1b[0m');
 
     console.log(createLine(`\x1b[31m⚠️  Campos faltantes:\x1b[0m \x1b[1m\x1b[31m${missingFieldsTable.length.toString().padStart(3, ' ')}\x1b[0m \x1b[31mentradas con datos incompletos\x1b[0m`));
-    console.log('\x1b[1m\x1b[36m ║                                                                                      ║\x1b[0m');
+    console.log('\x1b[1m\x1b[36m │                                                                                      │\x1b[0m');
 
     console.log(createLine(`\x1b[35m⏱️  Tiempo ejecución:\x1b[0m \x1b[1m\x1b[36m${timeString.padStart(8, ' ')}\x1b[0m`));
-    console.log('\x1b[1m\x1b[36m ║                                                                                      ║\x1b[0m');
+    console.log('\x1b[1m\x1b[36m │                                                                                      │\x1b[0m');
 
     console.log(createLine(`\x1b[37m🕒 Completado:\x1b[0m \x1b[2m\x1b[37m${now()}\x1b[0m`));
-    console.log('\x1b[1m\x1b[36m ║                                                                                      ║\x1b[0m');
+    console.log('\x1b[1m\x1b[36m │                                                                                      │\x1b[0m');
 
-    console.log(createLine(`\x1b[36m💡 Cache TMDB:\x1b[0m \x1b[1m\x1b[35m${tmdbCache.size.toString().padStart(3, ' ')}\x1b[0m \x1b[35mrequests guardados\x1b[0m`));
-    console.log('\x1b[1m\x1b[36m ║                                                                                      ║\x1b[0m');
+    console.log(createLine(`\x1b[36m🔰 Cache TMDB:\x1b[0m \x1b[1m\x1b[35m${tmdbCache.size.toString().padStart(3, ' ')}\x1b[0m \x1b[35mrequests guardados\x1b[0m`));
+    console.log('\x1b[1m\x1b[36m │                                                                                      │\x1b[0m');
 
     console.log(createLine(`\x1b[33m🎯 PRIORIDAD NOTION:\x1b[0m \x1b[32mDatos de Notion primero\x1b[0m`));
-    console.log('\x1b[1m\x1b[36m ║                                                                                      ║\x1b[0m');
+    console.log('\x1b[1m\x1b[36m │                                                                                      │\x1b[0m');
 
-    console.log(createLine(`\x1b[35m🚀 Procesamiento:\x1b[0m \x1b[32mParalelo (15 simultáneos)\x1b[0m`));
-    console.log('\x1b[1m\x1b[36m ║                                                                                      ║\x1b[0m');
+    console.log(createLine(`\x1b[35m⚡ Procesamiento:\x1b[0m \x1b[32mParalelo (15 simultáneos)\x1b[0m`));
+    console.log('\x1b[1m\x1b[36m │                                                                                      │\x1b[0m');
 
-    console.log('\x1b[1m\x1b[36m ╚══════════════════════════════════════════════════════════════════════════════════════╝\x1b[0m');
+    console.log('\x1b[1m\x1b[36m └──────────────────────────────────────────────────────────────────────────────────────┘\x1b[0m');
     console.log('\n');
     
     // Ejecutar auto-push si se seleccionó
@@ -719,11 +764,11 @@ async function askForAutoPush() {
     }
     
   } catch (error) {
-    console.error('\n\x1b[31m❌ Error durante la ejecución:\x1b[0m');
+    console.error('\n\x1b[31m✖ Error durante la ejecución:\x1b[0m');
     console.error(error.message);
     
     if (error.code === 'unauthorized') {
-      console.error('\n\x1b[33m💡 Posibles soluciones:\x1b[0m');
+      console.error('\n\x1b[33m🔰 Posibles soluciones:\x1b[0m');
       console.error('   1. Verifica tu NOTION_API_KEY en el archivo .env');
       console.error('   2. Asegúrate de que la integración esté conectada a la base de datos');
       console.error('   3. Verifica que el NOTION_DATABASE_ID sea correcto');
