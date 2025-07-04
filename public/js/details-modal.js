@@ -15,6 +15,41 @@ class DetailsModal {
         }
 
         this.setupEventListeners();
+
+        // ================== GALERÍA MODAL ================== //
+        // Crear elementos para la galería modal
+        this.galleryModal = document.createElement('div');
+        this.galleryModal.id = 'gallery-modal';
+        this.galleryModal.className = 'gallery-modal';
+        this.galleryModal.innerHTML = `
+            <div class="gallery-modal-content">
+                <span class="gallery-modal-close">&times;</span>
+                <img class="gallery-modal-image">
+                <div class="gallery-modal-counter"></div>
+                <button class="gallery-modal-prev">&#10094;</button>
+                <button class="gallery-modal-next">&#10095;</button>
+            </div>
+        `;
+        document.body.appendChild(this.galleryModal);
+
+        // Referencias a los nuevos elementos
+        this.galleryImage = this.galleryModal.querySelector('.gallery-modal-image');
+        this.galleryCounter = this.galleryModal.querySelector('.gallery-modal-counter');
+        this.galleryClose = this.galleryModal.querySelector('.gallery-modal-close');
+        this.galleryPrev = this.galleryModal.querySelector('.gallery-modal-prev');
+        this.galleryNext = this.galleryModal.querySelector('.gallery-modal-next');
+
+        // Eventos para la galería
+        this.galleryClose.addEventListener('click', () => this.closeGallery());
+        this.galleryPrev.addEventListener('click', () => this.navigateGallery(-1));
+        this.galleryNext.addEventListener('click', () => this.navigateGallery(1));
+        this.galleryModal.addEventListener('click', (e) => {
+            if (e.target === this.galleryModal) this.closeGallery();
+        });
+
+        // Inicializar propiedades de la galería
+        this.galleryImages = [];
+        this.currentGalleryIndex = 0;
     }
 
     setupEventListeners() {
@@ -304,6 +339,7 @@ class DetailsModal {
                 });
             });
             
+            // ===== EVENTOS PARA GALERÍA MODAL ===== //
             this.detailsModalBody.querySelectorAll('.details-modal-gallery-item').forEach(item => {
                 item.addEventListener('click', (e) => {
                     const galleryType = item.getAttribute('data-gallery-type');
@@ -312,9 +348,9 @@ class DetailsModal {
                     const images = galleryType === 'posters' ? posters : backdrops;
                     
                     if (showMore === 'true') {
-                        window.galleryModal.show(images, 0);
+                        this.showGallery(images, 0);
                     } else if (images && images.length > 0) {
-                        window.galleryModal.show(images, index);
+                        this.showGallery(images, index);
                     }
                 });
             });
@@ -343,6 +379,83 @@ class DetailsModal {
             this.restoreUrl();
         }, 300);
     }
+    
+    // ================== MÉTODOS DE GALERÍA ================== //
+    showGallery(images, startIndex = 0) {
+        if (!images || images.length === 0) return;
+        
+        this.galleryImages = images;
+        this.currentGalleryIndex = startIndex;
+        
+        this.updateGalleryImage();
+        this.galleryModal.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        
+        // Eventos de teclado para navegación
+        document.addEventListener('keydown', this.handleGalleryKeydown);
+        // Evento de rueda del ratón
+        this.galleryModal.addEventListener('wheel', this.handleGalleryWheel);
+    }
+
+    closeGallery() {
+        this.galleryModal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+        
+        // Limpiar eventos
+        document.removeEventListener('keydown', this.handleGalleryKeydown);
+        this.galleryModal.removeEventListener('wheel', this.handleGalleryWheel);
+    }
+
+    updateGalleryImage() {
+        const image = this.galleryImages[this.currentGalleryIndex];
+        this.galleryImage.src = image.file_path;
+        this.galleryCounter.textContent = `${this.currentGalleryIndex + 1} / ${this.galleryImages.length}`;
+        
+        // Actualizar estado de botones
+        this.galleryPrev.disabled = this.currentGalleryIndex === 0;
+        this.galleryNext.disabled = this.currentGalleryIndex === this.galleryImages.length - 1;
+    }
+
+    navigateGallery(direction) {
+        this.currentGalleryIndex += direction;
+        
+        // Asegurarse de que el índice esté dentro de los límites
+        if (this.currentGalleryIndex < 0) {
+            this.currentGalleryIndex = this.galleryImages.length - 1;
+        } else if (this.currentGalleryIndex >= this.galleryImages.length) {
+            this.currentGalleryIndex = 0;
+        }
+        
+        this.updateGalleryImage();
+    }
+
+    handleGalleryKeydown = (e) => {
+        if (!this.galleryModal.style.display || this.galleryModal.style.display === 'none') return;
+        
+        switch (e.key) {
+            case 'ArrowLeft':
+                this.navigateGallery(-1);
+                break;
+            case 'ArrowRight':
+                this.navigateGallery(1);
+                break;
+            case 'Escape':
+                this.closeGallery();
+                break;
+        }
+    };
+
+    handleGalleryWheel = (e) => {
+        if (!this.galleryModal.style.display || this.galleryModal.style.display === 'none') return;
+        
+        e.preventDefault();
+        if (e.deltaY > 0) {
+            this.navigateGallery(1); // Scroll hacia abajo = siguiente imagen
+        } else {
+            this.navigateGallery(-1); // Scroll hacia arriba = imagen anterior
+        }
+    };
+    // ================== FIN MÉTODOS DE GALERÍA ================== //
 
     isIOS() {
         return /iPad|iPhone|iPod/.test(navigator.platform) || 
