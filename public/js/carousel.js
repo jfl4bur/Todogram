@@ -45,40 +45,45 @@ class Carousel {
     }
 
     async loadMoviesData() {
-        try {
-            const response = await fetch(DATA_URL);
-            if (!response.ok) throw new Error('No se pudo cargar data.json');
-            const data = await response.json();
-            
-            // Filtrar solo películas y mapear datos
-            this.moviesData = data
-                .filter(item => item['Categoría'] === 'Películas')
-                .map((item, index) => ({
-                    id: index.toString(),
-                    title: item['Título'] || 'Sin título',
-                    description: item['Synopsis'] || 'Descripción no disponible',
-                    posterUrl: item['Portada'] || '',
-                    backgroundUrl: item['Fondo'] || '',
-                    year: item['Año'] ? item['Año'].toString() : '',
-                    duration: item['Duración'] || '',
-                    genre: item['Géneros'] || '',
-                    rating: item['Puntuación 1-10'] ? item['Puntuación 1-10'].toString() : '',
-                    ageRating: item['Clasificación'] || '',
-                    link: item['Enlace'] || '#',
-                    trailerUrl: item['Trailer'] || '',
-                    videoUrl: item['Video iframe'] || '',
-                    tmdbUrl: item['TMDB'] || '',
-                    audiosCount: item['Audios'] ? item['Audios'].split(',').length : 0,
-                    subtitlesCount: item['Subtítulos'] ? item['Subtítulos'].split(',').length : 0,
-                    audioList: item['Audios'] ? item['Audios'].split(',') : [],
-                    subtitleList: item['Subtítulos'] ? item['Subtítulos'].split(',') : []
-                }));
+    try {
+        const response = await fetch(DATA_URL);
+        if (!response.ok) throw new Error('No se pudo cargar data.json');
+        const data = await response.json();
 
-            this.showCarousel();
-            this.renderItems();
-        } catch (error) {
-            console.error('Error cargando datos:', error);
-            // Mostrar datos de ejemplo si hay error
+        // Registrar elementos problemáticos
+        data.forEach((item, index) => {
+            if (!item || typeof item !== 'object') {
+                console.warn(`Elemento inválido en data.json en el índice ${index}:`, item);
+            }
+        });
+        
+        // Filtrar solo películas y asegurarse de que los elementos sean objetos válidos
+        this.moviesData = data
+            .filter(item => item && typeof item === 'object' && item['Categoría'] === 'Películas')
+            .map((item, index) => ({
+                id: index.toString(),
+                title: item['Título'] || 'Sin título',
+                description: item['Synopsis'] || 'Descripción no disponible',
+                posterUrl: item['Portada'] || '',
+                backgroundUrl: item['Fondo'] || '',
+                year: item['Año'] ? item['Año'].toString() : '',
+                duration: item['Duración'] || '',
+                genre: item['Géneros'] || '',
+                rating: item['Puntuación 1-10'] ? item['Puntuación 1-10'].toString() : '',
+                ageRating: item['Clasificación'] || '',
+                link: item['Enlace'] || '#',
+                trailerUrl: item['Trailer'] || '',
+                videoUrl: item['Video iframe'] || '',
+                tmdbUrl: item['TMDB'] || '',
+                audiosCount: item['Audios'] ? item['Audios'].split(',').length : 0,
+                subtitlesCount: item['Subtítulos'] ? item['Subtítulos'].split(',').length : 0,
+                audioList: item['Audios'] ? item['Audios'].split(',') : [],
+                subtitleList: item['Subtítulos'] ? item['Subtítulos'].split(',') : []
+            }));
+
+        if (this.moviesData.length === 0) {
+            console.warn('No se encontraron películas válidas en data.json');
+            // Usar datos de ejemplo si no hay películas válidas
             this.moviesData = [
                 {
                     id: "12345",
@@ -101,10 +106,39 @@ class Carousel {
                     subtitleList: ["Español"]
                 }
             ];
-            this.showCarousel();
-            this.renderItems();
         }
+
+        this.showCarousel();
+        this.renderItems();
+    } catch (error) {
+        console.error('Error cargando datos:', error);
+        // Mostrar datos de ejemplo si hay error
+        this.moviesData = [
+            {
+                id: "12345",
+                title: "Ejemplo de película",
+                description: "Esta es una película de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
+                posterUrl: "https://via.placeholder.com/194x271",
+                backgroundUrl: "https://via.placeholder.com/194x271",
+                year: "2023",
+                duration: "120 min",
+                genre: "Acción",
+                rating: "8.5",
+                ageRating: "16",
+                link: "#",
+                trailerUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                videoUrl: "https://ejemplo.com/video.mp4",
+                tmdbUrl: "https://www.themoviedb.org/movie/12345",
+                audiosCount: 1,
+                subtitlesCount: 1,
+                audioList: ["Español"],
+                subtitleList: ["Español"]
+            }
+        ];
+        this.showCarousel();
+        this.renderItems();
     }
+}
 
     showCarousel() {
         this.skeleton.style.display = 'none';

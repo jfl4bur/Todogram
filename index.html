@@ -3,81 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Todogram</title>
-    <link rel="stylesheet" href="public/css/styles.css">
+    <title>CinePlus - Carrusel de Películas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://jfl4bur.github.io/Todogram/public/css/styles.css">
+    
+    <!-- Metatags dinámicos para compartir -->
+    <div id="dynamic-meta-tags" style="display:none;">
+        <meta property="og:title" id="og-title" content="">
+        <meta property="og:description" id="og-description" content="">
+        <meta property="og:image" id="og-image" content="">
+        <meta property="og:url" id="og-url" content="">
+        <meta property="og:type" content="website">
+        <meta name="twitter:card" content="summary_large_image">
+        <meta name="twitter:title" id="twitter-title" content="">
+        <meta name="twitter:description" id="twitter-description" content="">
+        <meta name="twitter:image" id="twitter-image" content="">
+    </div>
 </head>
 <body>
-    <div id="app">
-        <div class="carrusel-container" id="carrusel-peliculas"></div>
-        <div id="mini-modal" class="mini-modal"></div>
-        <div id="modal-detalles" class="modal">
-            <div class="modal-content"></div>
-        </div>
-        <div id="video-modal" class="modal">
-            <div class="modal-content"></div>
-        </div>
-        <div id="share-modal" class="modal">
-            <div class="modal-content"></div>
+    <!-- Div helper para iOS -->
+    <div id="ios-helper" class="ios-helper" style="display:none;"></div>
+
+    <!-- Carrusel -->
+    <div class="carousel-section">
+        <h1 class="carousel-title">Películas</h1>
+        <div class="carousel-container">
+            <div class="carousel-skeleton" id="carousel-skeleton">
+                <!-- Skeleton items se generarán dinámicamente -->
+            </div>
+            <div id="carousel-wrapper" style="display:none;"></div>
+            <div class="carousel-progress">
+                <div class="carousel-progress-bar"></div>
+            </div>
+            <div class="carousel-nav" id="carousel-nav">
+                <button class="carousel-nav-btn prev" id="carousel-prev"><i class="fas fa-chevron-left"></i></button>
+                <button class="carousel-nav-btn next" id="carousel-next"><i class="fas fa-chevron-right"></i></button>
+            </div>
         </div>
     </div>
 
+    <!-- Modales -->
+    <div class="modal-overlay" id="modal-overlay">
+        <div class="modal-content" id="modal-content">
+            <div class="modal-header">
+                <img class="modal-backdrop" id="modal-backdrop" src="" alt="">
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+        </div>
+    </div>
+
+    <div class="details-modal-overlay" id="details-modal-overlay">
+        <div class="details-modal-content" id="details-modal-content">
+            <button class="details-modal-close" id="details-modal-close">&times;</button>
+            <div class="details-modal-header">
+                <img class="details-modal-backdrop" id="details-modal-backdrop" src="" alt="">
+            </div>
+            <div class="details-modal-body" id="details-modal-body"></div>
+        </div>
+    </div>
+
+    <div class="video-modal-overlay" id="video-modal-overlay">
+        <div class="video-modal-content">
+            <button class="video-modal-close" id="video-modal-close">&times;</button>
+            <iframe class="video-iframe" id="video-iframe" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <div class="gallery-image-modal" id="gallery-image-modal">
+        <button class="gallery-image-modal-close" id="gallery-image-modal-close">&times;</button>
+        <div class="gallery-image-modal-nav">
+            <button class="gallery-image-modal-nav-btn" id="gallery-image-modal-prev"><i class="fas fa-chevron-left"></i></button>
+            <button class="gallery-image-modal-nav-btn" id="gallery-image-modal-next"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div class="gallery-image-modal-content">
+            <img class="gallery-image-modal-img" id="gallery-image-modal-img" src="" alt="">
+        </div>
+    </div>
+
+    <!-- Modal para compartir -->
+    <div class="share-modal-overlay" id="share-modal-overlay">
+        <div class="share-modal-content" id="share-modal-content">
+            <button class="share-modal-close" id="share-modal-close">&times;</button>
+            <h3 class="share-modal-title">Compartir película</h3>
+            
+            <div class="share-preview" id="share-preview">
+                <img class="share-preview-image" id="share-preview-image" src="" alt="Portada">
+                <div class="share-preview-content">
+                    <h4 class="share-preview-title" id="share-preview-title"></h4>
+                    <p class="share-preview-description" id="share-preview-description"></p>
+                </div>
+            </div>
+            
+            <div class="share-options">
+                <div class="share-option" id="share-facebook">
+                    <div class="share-icon facebook">
+                        <i class="fab fa-facebook-f"></i>
+                    </div>
+                    <span class="share-option-text">Facebook</span>
+                </div>
+                
+                <div class="share-option" id="share-twitter">
+                    <div class="share-icon twitter">
+                        <i class="fab fa-twitter"></i>
+                    </div>
+                    <span class="share-option-text">Twitter</span>
+                </div>
+                
+                <div class="share-option" id="share-whatsapp">
+                    <div class="share-icon whatsapp">
+                        <i class="fab fa-whatsapp"></i>
+                    </div>
+                    <span class="share-option-text">WhatsApp</span>
+                </div>
+                
+                <div class="share-option" id="share-telegram">
+                    <div class="share-icon telegram">
+                        <i class="fab fa-telegram-plane"></i>
+                    </div>
+                    <span class="share-option-text">Telegram</span>
+                </div>
+                
+                <div class="share-option" id="share-link">
+                    <div class="share-icon link">
+                        <i class="fas fa-link"></i>
+                    </div>
+                    <span class="share-option-text">Copiar enlace</span>
+                </div>
+            </div>
+            
+            <div class="share-link-container">
+                <input type="text" class="share-link-input" id="share-link-input" readonly>
+                <button class="share-link-button" id="share-link-button">Copiar</button>
+            </div>
+        </div>
+    </div>
     <script>
-        // Datos de películas (ejemplo completo)
-        window.peliculas = [
-            {
-                id: 1,
-                titulo: "Avengers: Endgame",
-                portada: "https://image.tmdb.org/t/p/w500/or06FN3Dka5tukK1e9sl16pB3iy.jpg",
-                año: 2019,
-                duracion: "181 min",
-                genero: "Acción, Aventura, Ciencia Ficción",
-                rating: 4.8,
-                calidad: "4K",
-                sinopsis: "Los Vengadores restantes deben encontrar una manera de recuperar a sus aliados para un enfrentamiento épico con Thanos, el malvado que diezmó el planeta y el universo.",
-                url: "https://upnshare.com/embed/12345",
-                actores: ["Robert Downey Jr.", "Chris Evans", "Mark Ruffalo"],
-                director: "Anthony Russo, Joe Russo",
-                masInfo: "PG-13 | 28 de abril de 2019 | $2,798 millones"
-            },
-            {
-                id: 2,
-                titulo: "Spider-Man: No Way Home",
-                portada: "https://image.tmdb.org/t/p/w500/1g0dhYtq4irTY1GPXvft6k4YLjm.jpg",
-                año: 2021,
-                duracion: "148 min",
-                genero: "Acción, Aventura, Ciencia Ficción",
-                rating: 4.7,
-                calidad: "4K",
-                sinopsis: "Peter Parker es desenmascarado y por tanto no es capaz de separar su vida normal de los enormes riesgos que conlleva ser un superhéroe. Cuando pide ayuda a Doctor Strange, los riesgos pasan a ser aún más peligrosos, obligándole a descubrir lo que realmente significa ser Spider-Man.",
-                url: "https://upnshare.com/embed/67890",
-                actores: ["Tom Holland", "Zendaya", "Benedict Cumberbatch"],
-                director: "Jon Watts",
-                masInfo: "PG-13 | 17 de diciembre de 2021 | $1,916 millones"
-            },
-            {
-                id: 3,
-                titulo: "The Batman",
-                portada: "https://image.tmdb.org/t/p/w500/seyWFgGInaLqW7nOZvu0ZC95rtx.jpg",
-                año: 2022,
-                duracion: "176 min",
-                genero: "Acción, Crimen, Drama",
-                rating: 4.3,
-                calidad: "4K",
-                sinopsis: "Cuando un asesino apunta a la élite de Gotham con una serie de maquinaciones sádicas, un rastro de pistas crípticas envía Batman a una investigación en los bajos fondos.",
-                url: "https://upnshare.com/embed/54321",
-                actores: ["Robert Pattinson", "Zoë Kravitz", "Paul Dano"],
-                director: "Matt Reeves",
-                masInfo: "PG-13 | 4 de marzo de 2022 | $771 millones"
-            }
-        ];
+        // URL del archivo JSON en GitHub Pages
+        const DATA_URL = "https://jfl4bur.github.io/Todogram/public/data.json";
+        window.peliculas = []; // Se llenará con los datos cargados
     </script>
-    
-    <script src="public/js/carousel.js"></script>
-    <script src="public/js/hover-modal.js"></script>
-    <script src="public/js/details-modal.js"></script>
-    <script src="public/js/video-modal.js"></script>
-    <script src="public/js/share-modal.js"></script>
-    <script src="public/js/main.js"></script>
+    <script src="https://jfl4bur.github.io/Todogram/public/js/carousel.js"></script>
+    <script src="https://jfl4bur.github.io/Todogram/public/js/hover-modal.js"></script>
+    <script src="https://jfl4bur.github.io/Todogram/public/js/details-modal.js"></script>
+    <script src="https://jfl4bur.github.io/Todogram/public/js/video-modal.js"></script>
+    <script src="https://jfl4bur.github.io/Todogram/public/js/share-modal.js"></script>
+    <script src="https://jfl4bur.github.io/Todogram/public/js/main.js"></script>
 </body>
 </html>
