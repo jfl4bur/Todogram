@@ -16,21 +16,21 @@
         const urlParams = new URLSearchParams(window.location.search);
         const title = urlParams.get('title') || 'Todogram - Películas';
         const description = urlParams.get('description') || 'Explora las mejores películas en Todogram.';
-        const image = urlParams.get('image') || 'https://via.placeholder.com/194x271';
-        const url = window.location.href;
+        const image = urlParams.get('image') || 'https://via.placeholder.com/194x271'; // Fallback público
+        const originalUrl = urlParams.get('originalUrl') || 'https://todogram.softr.app';
 
         // Actualizar metadatos
         document.querySelector('meta[property="og:title"]').setAttribute('content', title);
         document.querySelector('meta[property="og:description"]').setAttribute('content', description);
         document.querySelector('meta[property="og:image"]').setAttribute('content', image);
-        document.querySelector('meta[property="og:url"]').setAttribute('content', url);
+        document.querySelector('meta[property="og:url"]').setAttribute('content', window.location.href);
         document.querySelector('meta[name="twitter:title"]').setAttribute('content', title);
         document.querySelector('meta[name="twitter:description"]').setAttribute('content', description);
         document.querySelector('meta[name="twitter:image"]').setAttribute('content', image);
 
-        // Redirigir a la página principal después de 1 segundo (opcional)
+        // Redirigir a la URL original con hash después de 1 segundo
         setTimeout(() => {
-            window.location.href = 'https://todogram.softr.app' + window.location.hash;
+            window.location.href = originalUrl + window.location.hash || 'https://todogram.softr.app';
         }, 1000);
     </script>
 </head>

@@ -42,10 +42,13 @@ document.addEventListener('DOMContentLoaded', function () {
             if (e.target.closest('#share-button')) {
                 const item = window.activeItem;
                 if (item) {
-                    const shareUrl = generateShareUrl(item);
-                    shareModal.show({ ...item, shareUrl });
+                    const currentUrl = window.location.href;
+                    const shareUrl = generateShareUrl(item, currentUrl);
                     navigator.clipboard.writeText(shareUrl).then(() => {
                         console.log('URL copiada al portapapeles:', shareUrl);
+                        alert('Enlace copiado: ' + shareUrl); // Feedback al usuario
+                    }).catch(err => {
+                        console.error('Error al copiar al portapapeles:', err);
                     });
                 }
             }
@@ -70,6 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (itemElement) {
                         console.log('Elemento DOM encontrado:', itemElement);
                         detailsModal.show(item, itemElement);
+                        window.activeItem = item; // Actualizar el item activo
                     } else if (retryCount < maxRetries) {
                         console.warn(`Elemento DOM no encontrado para itemId: ${urlParams.id}, reintentando (${retryCount + 1}/${maxRetries})`);
                         setTimeout(() => processUrlParams(retryCount + 1, maxRetries), 200);
@@ -85,9 +89,9 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // Función para generar la URL de compartir
-        function generateShareUrl(item) {
+        function generateShareUrl(item, originalUrl) {
             const staticBaseUrl = 'https://jfl4bur.github.io/Todogram/public/template/movie-template.html';
-            return `${staticBaseUrl}?title=${encodeURIComponent(item.title)}&description=${encodeURIComponent(item.description || 'Explora esta película en Todogram.')}&image=${encodeURIComponent(item.posterUrl || 'https://via.placeholder.com/194x271')}`;
+            return `${staticBaseUrl}?title=${encodeURIComponent(item.title)}&description=${encodeURIComponent(item.description || 'Explora esta película en Todogram.')}&image=${encodeURIComponent(item.posterUrl || 'https://via.placeholder.com/194x271')}&originalUrl=${encodeURIComponent(originalUrl)}`;
         }
 
         // Manejar parámetros de URL al cargar la página
