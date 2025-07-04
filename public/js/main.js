@@ -50,30 +50,38 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
+        // Función para procesar parámetros de URL
+        function processUrlParams(retryCount = 0, maxRetries = 5) {
+            console.log('Procesando URL:', window.location.hash);
+            const urlParams = detailsModal.getItemIdFromUrl();
+            if (urlParams) {
+                console.log('Parámetros de URL encontrados:', urlParams);
+                const item = carousel.moviesData.find(movie => movie.id === urlParams.id);
+                if (item) {
+                    console.log('Película encontrada:', item);
+                    const itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
+                    if (itemElement) {
+                        console.log('Elemento DOM encontrado:', itemElement);
+                        detailsModal.show(item, itemElement);
+                    } else if (retryCount < maxRetries) {
+                        console.warn(`Elemento DOM no encontrado para itemId: ${urlParams.id}, reintentando (${retryCount + 1}/${maxRetries})`);
+                        setTimeout(() => processUrlParams(retryCount + 1, maxRetries), 200); // Reducido de 500ms a 200ms
+                    } else {
+                        console.error('Elemento DOM no encontrado para itemId:', urlParams.id);
+                    }
+                } else {
+                    console.error('Película no encontrada para id:', urlParams.id);
+                }
+            } else {
+                console.log('No se encontraron parámetros de URL');
+            }
+        }
+
         // Manejar parámetros de URL al cargar la página
         window.addEventListener('load', function() {
             setTimeout(() => {
-                console.log('Procesando URL al cargar:', window.location.hash);
-                const urlParams = detailsModal.getItemIdFromUrl();
-                if (urlParams) {
-                    console.log('Parámetros de URL encontrados:', urlParams);
-                    const item = carousel.moviesData.find(movie => movie.id === urlParams.id);
-                    if (item) {
-                        console.log('Película encontrada:', item);
-                        const itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
-                        if (itemElement) {
-                            console.log('Elemento DOM encontrado:', itemElement);
-                            detailsModal.show(item, itemElement);
-                        } else {
-                            console.error('Elemento DOM no encontrado para itemId:', urlParams.id);
-                        }
-                    } else {
-                        console.error('Película no encontrada para id:', urlParams.id);
-                    }
-                } else {
-                    console.log('No se encontraron parámetros de URL');
-                }
-            }, 1000);
+                processUrlParams();
+            }, 500); // Reducido de 2000ms a 500ms
         });
 
         // Manejar cambios en el hash de la URL
@@ -84,26 +92,8 @@ document.addEventListener('DOMContentLoaded', function () {
                 lastHash = newHash;
                 console.log('Hash cambió a:', newHash);
                 setTimeout(() => {
-                    const urlParams = detailsModal.getItemIdFromUrl();
-                    if (urlParams) {
-                        console.log('Parámetros de URL en hashchange:', urlParams);
-                        const item = carousel.moviesData.find(movie => movie.id === urlParams.id);
-                        if (item) {
-                            console.log('Película encontrada en hashchange:', item);
-                            const itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
-                            if (itemElement) {
-                                console.log('Elemento DOM encontrado en hashchange:', itemElement);
-                                detailsModal.show(item, itemElement);
-                            } else {
-                                console.error('Elemento DOM no encontrado para itemId:', urlParams.id);
-                            }
-                        } else {
-                            console.error('Película no encontrada para id:', urlParams.id);
-                        }
-                    } else {
-                        console.log('No se encontraron parámetros de URL en hashchange');
-                    }
-                }, 300);
+                    processUrlParams();
+                }, 300); // Reducido de 1000ms a 300ms
             }
         });
 
