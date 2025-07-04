@@ -12,25 +12,14 @@
     <meta name="twitter:description" content="Explora las mejores películas en Todogram."> <!-- Fallback para bots -->
     <meta name="twitter:image" content="https://via.placeholder.com/194x271"> <!-- Fallback para bots -->
     <script>
-        // Extraer parámetros de la URL
+        // Extraer parámetros de la URL (solo para depuración y redirección)
         const urlParams = new URLSearchParams(window.location.search);
-        const title = urlParams.get('title') || 'Todogram - Películas';
-        const description = urlParams.get('description') || 'Explora las mejores películas en Todogram.';
-        const image = urlParams.get('image') || 'https://via.placeholder.com/194x271'; // Fallback público
         const originalUrl = urlParams.get('originalUrl') || 'https://todogram.softr.app';
         const hash = urlParams.get('hash') || window.location.hash;
 
-        // Actualizar metadatos para usuarios (no para bots)
-        document.querySelector('meta[property="og:title"]').setAttribute('content', title);
-        document.querySelector('meta[property="og:description"]').setAttribute('content', description);
-        document.querySelector('meta[property="og:image"]').setAttribute('content', image);
-        document.querySelector('meta[property="og:url"]').setAttribute('content', window.location.href);
-        document.querySelector('meta[name="twitter:title"]').setAttribute('content', title);
-        document.querySelector('meta[name="twitter:description"]').setAttribute('content', description);
-        document.querySelector('meta[name="twitter:image"]').setAttribute('content', image);
-
         // Redirigir a la URL original con hash después de 1 segundo
         setTimeout(() => {
+            console.log('Redirigiendo a:', originalUrl + hash);
             window.location.href = originalUrl + hash;
         }, 1000);
     </script>

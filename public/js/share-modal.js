@@ -73,6 +73,13 @@ class ShareModal {
         this.shareLinkInput.value = item.shareUrl;
         this.currentShareUrl = item.shareUrl;
         
+        console.log('Datos mostrados en el modal:', {
+            title: item.title,
+            description: description,
+            image: item.posterUrl,
+            shareUrl: item.shareUrl
+        }); // Depuración
+        
         // Mostrar el modal
         this.shareModalOverlay.style.display = 'flex';
         document.body.style.overflow = 'hidden';
@@ -134,13 +141,5 @@ class ShareModal {
         }
         
         window.open(shareUrl, '_blank', 'width=600,height=400');
-    }
-
-    normalizeText(text) {
-        return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-            .toLowerCase()
-            .replace(/[^a-z0-9]/g, '-')
-            .replace(/-+/g, '-')
-            .replace(/^-|-$/g, '');
     }
 }
