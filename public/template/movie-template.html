@@ -12,16 +12,76 @@
     <meta name="twitter:description" content="Explora las mejores películas en Todogram.">
     <meta name="twitter:image" content="https://via.placeholder.com/194x271">
     <script>
+        // Extraer parámetros de la URL
         const urlParams = new URLSearchParams(window.location.search);
+        const title = urlParams.get('title') || 'Todogram - Películas';
+        const description = urlParams.get('description') || 'Explora las mejores películas en Todogram.';
+        const image = urlParams.get('image') || 'https://via.placeholder.com/194x271';
         const originalUrl = urlParams.get('originalUrl') || 'https://todogram.softr.app';
         const hash = urlParams.get('hash') || window.location.hash;
+
+        // Actualizar metadatos para usuarios (no para bots)
+        document.querySelector('meta[property="og:title"]').setAttribute('content', title);
+        document.querySelector('meta[property="og:description"]').setAttribute('content', description);
+        document.querySelector('meta[property="og:image"]').setAttribute('content', image);
+        document.querySelector('meta[property="og:url"]').setAttribute('content', window.location.href);
+        document.querySelector('meta[name="twitter:title"]').setAttribute('content', title);
+        document.querySelector('meta[name="twitter:description"]').setAttribute('content', description);
+        document.querySelector('meta[name="twitter:image"]').setAttribute('content', image);
+
+        // Redirigir después de 5 segundos para dar tiempo a ver la página
         setTimeout(() => {
             console.log('Redirigiendo a:', originalUrl + hash);
             window.location.href = originalUrl + hash;
-        }, 10);
+        }, 5000);
     </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .movie-preview {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .movie-image {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+        }
+        .movie-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .movie-description {
+            font-size: 16px;
+            color: #333;
+            margin: 10px 0;
+        }
+        .movie-promo {
+            font-size: 18px;
+            color: #0066cc;
+            margin: 10px 0;
+        }
+    </style>
 </head>
 <body>
-    <h1>Cargando...</h1>
+    <div class="movie-preview">
+        <img src="" alt="Portada de la película" class="movie-image" id="movie-image">
+        <div class="movie-title" id="movie-title"></div>
+        <div class="movie-description" id="movie-description"></div>
+        <div class="movie-promo" id="movie-promo"></div>
+    </div>
+    <script>
+        // Renderizar contenido dinámico
+        document.getElementById('movie-image').src = image;
+        document.getElementById('movie-title').textContent = title;
+        document.getElementById('movie-description').textContent = description;
+        document.getElementById('movie-promo').textContent = `Mira ${title} en nuestra plataforma`;
+    </script>
 </body>
 </html>

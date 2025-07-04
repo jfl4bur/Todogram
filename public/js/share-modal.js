@@ -61,7 +61,7 @@ class ShareModal {
             this.src = 'https://via.placeholder.com/194x271';
         };
         
-        this.sharePreviewTitle.textContent = `Mira ${item.title || 'Título no disponible'} en nuestra plataforma`;
+        this.sharePreviewTitle.textContent = item.title || 'Título no disponible';
         
         const maxLength = 120;
         let description = item.description || 'Descripción no disponible';
@@ -119,7 +119,7 @@ class ShareModal {
     shareOnSocial(network) {
         if (!this.currentShareUrl) return;
         
-        const title = this.sharePreviewTitle.textContent;
+        const title = `Mira ${this.sharePreviewTitle.textContent} en nuestra plataforma`;
         const text = `${this.sharePreviewTitle.textContent}: ${this.sharePreviewDescription.textContent}`;
         let shareUrl = '';
         
