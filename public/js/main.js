@@ -86,7 +86,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Función para generar la URL de compartir
         function generateShareUrl(item) {
-            const staticBaseUrl = 'https://jfl4bur.github.io/todogram/movie-template.html';
+            const staticBaseUrl = 'https://jfl4bur.github.io/Todogram/public/template/movie-template.html';
             return `${staticBaseUrl}?title=${encodeURIComponent(item.title)}&description=${encodeURIComponent(item.description || 'Explora esta película en Todogram.')}&image=${encodeURIComponent(item.posterUrl || 'https://via.placeholder.com/194x271')}`;
         }
 
