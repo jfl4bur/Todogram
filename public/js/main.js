@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (item && window.shareModal) {
                     const currentUrl = window.location.href;
                     const shareUrl = generateShareUrl(item, currentUrl);
-                    console.log('Share URL generada:', shareUrl); // Depuración
+                    console.log('Datos pasados al modal:', { ...item, shareUrl }); // Depuración
                     window.shareModal.show({ ...item, shareUrl });
                 } else {
                     console.error('Item o shareModal no definidos:', { item, shareModal: window.shareModal });

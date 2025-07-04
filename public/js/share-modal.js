@@ -74,10 +74,10 @@ class ShareModal {
         this.currentShareUrl = item.shareUrl;
         
         console.log('Datos mostrados en el modal:', {
-            title: item.title,
-            description: description,
-            image: item.posterUrl,
-            shareUrl: item.shareUrl
+            title: this.sharePreviewTitle.textContent,
+            description: this.sharePreviewDescription.textContent,
+            image: this.sharePreviewImage.src,
+            shareUrl: this.currentShareUrl
         }); // Depuración
         
         // Mostrar el modal

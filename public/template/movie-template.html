@@ -3,25 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta property="og:title" content="Todogram - Películas"> <!-- Fallback para bots -->
-    <meta property="og:description" content="Explora las mejores películas en Todogram."> <!-- Fallback para bots -->
-    <meta property="og:image" content="https://via.placeholder.com/194x271"> <!-- Fallback para bots -->
-    <meta property="og:url" content="https://jfl4bur.github.io/Todogram/public/template/movie-template.html"> <!-- Fallback para bots -->
-    <meta name="twitter:card" content="summary_large_image"> <!-- Fallback para bots -->
-    <meta name="twitter:title" content="Todogram - Películas"> <!-- Fallback para bots -->
-    <meta name="twitter:description" content="Explora las mejores películas en Todogram."> <!-- Fallback para bots -->
-    <meta name="twitter:image" content="https://via.placeholder.com/194x271"> <!-- Fallback para bots -->
+    <meta property="og:title" content="Todogram - Películas">
+    <meta property="og:description" content="Explora las mejores películas en Todogram.">
+    <meta property="og:image" content="https://via.placeholder.com/194x271">
+    <meta property="og:url" content="https://jfl4bur.github.io/Todogram/public/template/movie-template.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Todogram - Películas">
+    <meta name="twitter:description" content="Explora las mejores películas en Todogram.">
+    <meta name="twitter:image" content="https://via.placeholder.com/194x271">
     <script>
-        // Extraer parámetros de la URL (solo para depuración y redirección)
         const urlParams = new URLSearchParams(window.location.search);
         const originalUrl = urlParams.get('originalUrl') || 'https://todogram.softr.app';
         const hash = urlParams.get('hash') || window.location.hash;
-
-        // Redirigir a la URL original con hash después de 1 segundo
         setTimeout(() => {
             console.log('Redirigiendo a:', originalUrl + hash);
             window.location.href = originalUrl + hash;
-        }, 1000);
+        }, 10);
     </script>
 </head>
 <body>
