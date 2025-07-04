@@ -40,7 +40,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         document.addEventListener('click', function(e) {
             if (e.target.closest('#share-button')) {
-                shareModal.show(window.activeItem);
+                const item = window.activeItem;
+                if (item) {
+                    const shareUrl = generateShareUrl(item);
+                    shareModal.show({ ...item, shareUrl });
+                    navigator.clipboard.writeText(shareUrl).then(() => {
+                        console.log('URL copiada al portapapeles:', shareUrl);
+                    });
+                }
             }
         });
 
@@ -50,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // Función para procesar parámetros de URL y actualizar metadatos
+        // Función para procesar parámetros de URL
         function processUrlParams(retryCount = 0, maxRetries = 5) {
             console.log('Procesando URL:', window.location.hash);
             const urlParams = detailsModal.getItemIdFromUrl();
@@ -63,9 +70,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (itemElement) {
                         console.log('Elemento DOM encontrado:', itemElement);
                         detailsModal.show(item, itemElement);
-
-                        // Actualizar metadatos para previsualización en redes sociales
-                        updateMetaTags(item);
                     } else if (retryCount < maxRetries) {
                         console.warn(`Elemento DOM no encontrado para itemId: ${urlParams.id}, reintentando (${retryCount + 1}/${maxRetries})`);
                         setTimeout(() => processUrlParams(retryCount + 1, maxRetries), 200);
@@ -77,38 +81,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             } else {
                 console.log('No se encontraron parámetros de URL');
-                // Limpiar metadatos si no hay parámetros
-                updateMetaTags(null);
             }
         }
 
-        // Función para actualizar las etiquetas meta
-        function updateMetaTags(item) {
-            const baseUrl = window.location.origin + window.location.pathname;
-            const metaTags = [
-                { name: 'og:title', content: item ? item.title : 'Todogram - Películas' },
-                { name: 'og:description', content: item ? item.description : 'Explora las mejores películas en Todogram.' },
-                { name: 'og:image', content: item ? item.posterUrl || 'https://via.placeholder.com/194x271' : 'https://via.placeholder.com/194x271' },
-                { name: 'og:url', content: item ? `${baseUrl}#id=${item.id}&title=${encodeURIComponent(item.title)}` : baseUrl },
-                { name: 'twitter:card', content: 'summary_large_image' },
-                { name: 'twitter:title', content: item ? item.title : 'Todogram - Películas' },
-                { name: 'twitter:description', content: item ? item.description : 'Explora las mejores películas en Todogram.' },
-                { name: 'twitter:image', content: item ? item.posterUrl || 'https://via.placeholder.com/194x271' : 'https://via.placeholder.com/194x271' }
-            ];
-
-            metaTags.forEach(tag => {
-                let meta = document.querySelector(`meta[name="${tag.name}"]`) || document.querySelector(`meta[property="${tag.name}"]`);
-                if (!meta) {
-                    meta = document.createElement('meta');
-                    if (tag.name.startsWith('og:')) {
-                        meta.setAttribute('property', tag.name);
-                    } else {
-                        meta.setAttribute('name', tag.name);
-                    }
-                    document.head.appendChild(meta);
-                }
-                meta.setAttribute('content', tag.content);
-            });
+        // Función para generar la URL de compartir
+        function generateShareUrl(item) {
+            const staticBaseUrl = 'https://jfl4bur.github.io/todogram/movie-template.html';
+            return `${staticBaseUrl}?title=${encodeURIComponent(item.title)}&description=${encodeURIComponent(item.description || 'Explora esta película en Todogram.')}&image=${encodeURIComponent(item.posterUrl || 'https://via.placeholder.com/194x271')}`;
         }
 
         // Manejar parámetros de URL al cargar la página
@@ -133,11 +112,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
         DetailsModal.prototype.getItemIdFromUrl = function() {
             const path = window.location.hash.substring(1);
+            console.log('Hash procesado:', path);
             if (!path) return null;
             
             const params = new URLSearchParams(path);
             const id = params.get('id');
             const title = params.get('title');
+            console.log('Parámetros extraídos:', { id, title });
             
             if (!id || !title) return null;
             

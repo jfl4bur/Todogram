@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="">
+    <meta property="og:description" content="">
+    <meta property="og:image" content="">
+    <meta property="og:url" content="">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="">
+    <meta name="twitter:description" content="">
+    <meta name="twitter:image" content="">
+    <script>
+        // Extraer parámetros de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const title = urlParams.get('title') || 'Todogram - Películas';
+        const description = urlParams.get('description') || 'Explora las mejores películas en Todogram.';
+        const image = urlParams.get('image') || 'https://via.placeholder.com/194x271';
+        const url = window.location.href;
+
+        // Actualizar metadatos
+        document.querySelector('meta[property="og:title"]').setAttribute('content', title);
+        document.querySelector('meta[property="og:description"]').setAttribute('content', description);
+        document.querySelector('meta[property="og:image"]').setAttribute('content', image);
+        document.querySelector('meta[property="og:url"]').setAttribute('content', url);
+        document.querySelector('meta[name="twitter:title"]').setAttribute('content', title);
+        document.querySelector('meta[name="twitter:description"]').setAttribute('content', description);
+        document.querySelector('meta[name="twitter:image"]').setAttribute('content', image);
+
+        // Redirigir a la página principal después de 1 segundo (opcional)
+        setTimeout(() => {
+            window.location.href = 'https://todogram.softr.app' + window.location.hash;
+        }, 1000);
+    </script>
+</head>
+<body>
+    <h1>Cargando...</h1>
+</body>
+</html>
