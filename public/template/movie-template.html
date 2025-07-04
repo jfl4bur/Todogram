@@ -33,9 +33,10 @@
         document.querySelector('meta[name="twitter:image"]').setAttribute('content', image);
 
         // Redirigir después de 5 segundos
+        const redirectUrl = originalUrl + (hash ? hash : '');
         setTimeout(() => {
-            console.log('Redirigiendo a:', originalUrl + hash);
-            window.location.href = originalUrl + hash;
+            console.log('Redirigiendo a:', redirectUrl);
+            window.location.href = redirectUrl;
         }, 5000);
     </script>
     <style>
