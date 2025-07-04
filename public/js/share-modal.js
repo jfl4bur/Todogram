@@ -10,8 +10,18 @@ class ShareModal {
         this.shareLinkButton = document.getElementById('share-link-button');
         this.currentShareUrl = '';
 
-        if (!this.shareModalOverlay || !this.shareModalContent) {
-            console.error("Elementos del modal de compartir no encontrados");
+        if (!this.shareModalOverlay || !this.shareModalContent || !this.shareModalClose || !this.sharePreviewImage || 
+            !this.sharePreviewTitle || !this.sharePreviewDescription || !this.shareLinkInput || !this.shareLinkButton) {
+            console.error("Algunos elementos del modal de compartir no encontrados:", {
+                shareModalOverlay: this.shareModalOverlay,
+                shareModalContent: this.shareModalContent,
+                shareModalClose: this.shareModalClose,
+                sharePreviewImage: this.sharePreviewImage,
+                sharePreviewTitle: this.sharePreviewTitle,
+                sharePreviewDescription: this.sharePreviewDescription,
+                shareLinkInput: this.shareLinkInput,
+                shareLinkButton: this.shareLinkButton
+            });
             return;
         }
 
@@ -33,29 +43,27 @@ class ShareModal {
         this.shareLinkButton.addEventListener('click', () => this.copyShareLink());
         
         // Eventos para los botones de compartir en redes sociales
-        document.getElementById('share-facebook').addEventListener('click', () => this.shareOnSocial('facebook'));
-        document.getElementById('share-twitter').addEventListener('click', () => this.shareOnSocial('twitter'));
-        document.getElementById('share-whatsapp').addEventListener('click', () => this.shareOnSocial('whatsapp'));
-        document.getElementById('share-telegram').addEventListener('click', () => this.shareOnSocial('telegram'));
-        document.getElementById('share-link').addEventListener('click', () => this.copyShareLink());
+        document.getElementById('share-facebook')?.addEventListener('click', () => this.shareOnSocial('facebook'));
+        document.getElementById('share-twitter')?.addEventListener('click', () => this.shareOnSocial('twitter'));
+        document.getElementById('share-whatsapp')?.addEventListener('click', () => this.shareOnSocial('whatsapp'));
+        document.getElementById('share-telegram')?.addEventListener('click', () => this.shareOnSocial('telegram'));
+        document.getElementById('share-link')?.addEventListener('click', () => this.copyShareLink());
     }
 
     show(item) {
-        if (!item) return;
-        
-        // Crear URL de compartir
-        const normalizedTitle = this.normalizeText(item.title);
-        this.currentShareUrl = `${window.location.origin}${window.location.pathname}#id=${item.id}&title=${normalizedTitle}`;
+        if (!item || !item.shareUrl) {
+            console.error('Item o shareUrl no definidos:', item);
+            return;
+        }
         
         // Actualizar elementos del modal
-        this.sharePreviewImage.src = item.posterUrl;
+        this.sharePreviewImage.src = item.posterUrl || 'https://via.placeholder.com/194x271';
         this.sharePreviewImage.onerror = function() {
             this.src = 'https://via.placeholder.com/194x271';
         };
         
-        this.sharePreviewTitle.textContent = item.title;
+        this.sharePreviewTitle.textContent = item.title || 'Título no disponible';
         
-        // Limitar la descripción a 120 caracteres con puntos suspensivos
         const maxLength = 120;
         let description = item.description || 'Descripción no disponible';
         if (description.length > maxLength) {
@@ -63,10 +71,8 @@ class ShareModal {
         }
         this.sharePreviewDescription.textContent = description;
         
-        this.shareLinkInput.value = this.currentShareUrl;
-        
-        // Actualizar metatags para compartir
-        this.updateMetaTags(item);
+        this.shareLinkInput.value = item.shareUrl;
+        this.currentShareUrl = item.shareUrl;
         
         // Mostrar el modal
         this.shareModalOverlay.style.display = 'flex';
@@ -94,7 +100,6 @@ class ShareModal {
         this.shareLinkInput.select();
         document.execCommand('copy');
         
-        // Mostrar feedback
         const originalText = this.shareLinkButton.textContent;
         this.shareLinkButton.textContent = '¡Copiado!';
         this.shareLinkButton.style.backgroundColor = '#4CAF50';
@@ -106,12 +111,10 @@ class ShareModal {
     }
 
     shareOnSocial(network) {
-        if (!this.currentShareUrl || !window.activeItem) return;
+        if (!this.currentShareUrl) return;
         
-        const title = `Mira ${window.activeItem.title} en nuestra plataforma`;
-        const text = `${window.activeItem.title}: ${window.activeItem.description ? window.activeItem.description.substring(0, 100) + '...' : 'Una gran película que no te puedes perder'}`;
-        const imageUrl = window.activeItem.posterUrl || 'https://via.placeholder.com/194x271';
-        
+        const title = `Mira ${this.sharePreviewTitle.textContent} en nuestra plataforma`;
+        const text = `${this.sharePreviewTitle.textContent}: ${this.sharePreviewDescription.textContent}`;
         let shareUrl = '';
         
         switch(network) {
@@ -143,31 +146,7 @@ class ShareModal {
     }
 
     updateMetaTags(item) {
+        // Este método no se usa actualmente con la solución estática, pero se mantiene por compatibilidad
         if (!item) return;
-        
-        const title = `Mira ${item.title} en nuestra plataforma`;
-        const description = item.description || 'Una gran película que no te puedes perder';
-        const imageUrl = item.posterUrl || 'https://via.placeholder.com/194x271';
-        const url = `${window.location.origin}${window.location.pathname}#id=${item.id}&title=${this.normalizeText(item.title)}`;
-        
-        // Actualizar metatags
-        document.getElementById('og-title').content = title;
-        document.getElementById('og-description').content = description;
-        document.getElementById('og-image').content = imageUrl;
-        document.getElementById('og-url').content = url;
-        document.getElementById('twitter-title').content = title;
-        document.getElementById('twitter-description').content = description;
-        document.getElementById('twitter-image').content = imageUrl;
-        
-        // Actualizar también la URL canónica
-        const canonicalLink = document.querySelector('link[rel="canonical"]') || document.createElement('link');
-        canonicalLink.rel = 'canonical';
-        canonicalLink.href = url;
-        document.head.appendChild(canonicalLink);
-        
-        // Forzar a Facebook a refrescar los metatags
-        if (navigator.userAgent.includes('Facebook')) {
-            fetch(`https://graph.facebook.com/?id=${encodeURIComponent(url)}&scrape=true&method=post`);
-        }
     }
 }

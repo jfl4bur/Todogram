@@ -26,30 +26,28 @@ document.addEventListener('DOMContentLoaded', function () {
         const hoverModal = new HoverModal();
         const detailsModal = new DetailsModal();
         const videoModal = new VideoModal();
-        const shareModal = new ShareModal();
+        const shareModal = new ShareModal(); // Instanciar ShareModal
 
         window.carousel = carousel;
         window.hoverModal = hoverModal;
         window.detailsModal = detailsModal;
         window.videoModal = videoModal;
-        window.shareModal = shareModal;
+        window.shareModal = shareModal; // Hacerlo accesible globalmente
         window.isModalOpen = false;
         window.isDetailsModalOpen = false;
         window.activeItem = null;
         window.hoverModalItem = null;
 
+        // Evento para el botón "Share" dentro del modal de detalles
         document.addEventListener('click', function(e) {
             if (e.target.closest('#share-button')) {
                 const item = window.activeItem;
-                if (item) {
+                if (item && window.shareModal) {
                     const currentUrl = window.location.href;
                     const shareUrl = generateShareUrl(item, currentUrl);
-                    navigator.clipboard.writeText(shareUrl).then(() => {
-                        console.log('URL copiada al portapapeles:', shareUrl);
-                        alert('Enlace copiado: ' + shareUrl); // Feedback al usuario
-                    }).catch(err => {
-                        console.error('Error al copiar al portapapeles:', err);
-                    });
+                    window.shareModal.show({ ...item, shareUrl }); // Abrir el modal de compartir
+                } else {
+                    console.error('Item o shareModal no definidos:', { item, shareModal: window.shareModal });
                 }
             }
         });
@@ -91,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // Función para generar la URL de compartir
         function generateShareUrl(item, originalUrl) {
             const staticBaseUrl = 'https://jfl4bur.github.io/Todogram/public/template/movie-template.html';
-            return `${staticBaseUrl}?title=${encodeURIComponent(item.title)}&description=${encodeURIComponent(item.description || 'Explora esta película en Todogram.')}&image=${encodeURIComponent(item.posterUrl || 'https://via.placeholder.com/194x271')}&originalUrl=${encodeURIComponent(originalUrl)}`;
+            return `${staticBaseUrl}?title=${encodeURIComponent(item.title)}&description=${encodeURIComponent(item.description || 'Explora esta película en Todogram.')}&image=${encodeURIComponent(item.posterUrl || 'https://via.placeholder.com/194x271')}&originalUrl=${encodeURIComponent(originalUrl)}&hash=${encodeURIComponent(window.location.hash)}`;
         }
 
         // Manejar parámetros de URL al cargar la página
