@@ -23,12 +23,12 @@
 
         console.log('Parámetros extraídos:', { title, description, image, originalUrl, hash });
 
-        // Función para obtener imagen de TMDB usando variable de entorno
+        // Función para obtener imagen de TMDB usando clave inyectada
         async function getTmdbImage(movieTitle) {
-            // Intentar obtener la clave de la variable de entorno inyectada por GitHub
-            const tmdbApiKey = process.env.TMDB_API_KEY || ''; // Esto depende de la inyección
-            if (!tmdbApiKey) {
-                console.warn('TMDB_API_KEY no encontrada en el entorno, usando fallback');
+            // Marcador que será reemplazado por GitHub Actions
+            const tmdbApiKey = '{{TMDB_API_KEY}}';
+            if (!tmdbApiKey || tmdbApiKey === '{{TMDB_API_KEY}}') {
+                console.warn('TMDB_API_KEY no inyectada, usando fallback');
                 return 'https://via.placeholder.com/194x271';
             }
 
