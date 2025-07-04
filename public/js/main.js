@@ -50,42 +50,62 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        if (detailsModal.isIOS()) {
-            window.addEventListener('load', function() {
+        // Manejar parámetros de URL al cargar la página
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                console.log('Procesando URL al cargar:', window.location.hash);
+                const urlParams = detailsModal.getItemIdFromUrl();
+                if (urlParams) {
+                    console.log('Parámetros de URL encontrados:', urlParams);
+                    const item = carousel.moviesData.find(movie => movie.id === urlParams.id);
+                    if (item) {
+                        console.log('Película encontrada:', item);
+                        const itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
+                        if (itemElement) {
+                            console.log('Elemento DOM encontrado:', itemElement);
+                            detailsModal.show(item, itemElement);
+                        } else {
+                            console.error('Elemento DOM no encontrado para itemId:', urlParams.id);
+                        }
+                    } else {
+                        console.error('Película no encontrada para id:', urlParams.id);
+                    }
+                } else {
+                    console.log('No se encontraron parámetros de URL');
+                }
+            }, 1000);
+        });
+
+        // Manejar cambios en el hash de la URL
+        let lastHash = window.location.hash;
+        window.addEventListener('hashchange', function() {
+            const newHash = window.location.hash;
+            if (newHash !== lastHash) {
+                lastHash = newHash;
+                console.log('Hash cambió a:', newHash);
                 setTimeout(() => {
                     const urlParams = detailsModal.getItemIdFromUrl();
                     if (urlParams) {
+                        console.log('Parámetros de URL en hashchange:', urlParams);
                         const item = carousel.moviesData.find(movie => movie.id === urlParams.id);
                         if (item) {
+                            console.log('Película encontrada en hashchange:', item);
                             const itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
                             if (itemElement) {
+                                console.log('Elemento DOM encontrado en hashchange:', itemElement);
                                 detailsModal.show(item, itemElement);
+                            } else {
+                                console.error('Elemento DOM no encontrado para itemId:', urlParams.id);
                             }
+                        } else {
+                            console.error('Película no encontrada para id:', urlParams.id);
                         }
+                    } else {
+                        console.log('No se encontraron parámetros de URL en hashchange');
                     }
-                }, 1000);
-            });
-            
-            let lastHash = window.location.hash;
-            window.addEventListener('hashchange', function() {
-                const newHash = window.location.hash;
-                if (newHash !== lastHash) {
-                    lastHash = newHash;
-                    setTimeout(() => {
-                        const urlParams = detailsModal.getItemIdFromUrl();
-                        if (urlParams) {
-                            const item = carousel.moviesData.find(movie => movie.id === urlParams.id);
-                            if (item) {
-                                const itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
-                                if (itemElement) {
-                                    detailsModal.show(item, itemElement);
-                                }
-                            }
-                        }
-                    }, 300);
-                }
-            });
-        }
+                }, 300);
+            }
+        });
 
         DetailsModal.prototype.getItemIdFromUrl = function() {
             const path = window.location.hash.substring(1);
