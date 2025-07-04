@@ -148,115 +148,114 @@ class Carousel {
         }
     }
 
-    async renderItems() {
-        const end = Math.min(this.index + this.step, this.moviesData.length);
-        
-        for (let i = this.index; i < end; i++) {
-            const item = this.moviesData[i];
-            const div = document.createElement("div");
-            div.className = "custom-carousel-item";
-            div.dataset.itemId = i;
+    renderItems() {
+    const end = Math.min(this.index + this.step, this.moviesData.length);
+    
+    for (let i = this.index; i < end; i++) {
+        const item = this.moviesData[i];
+        const div = document.createElement("div");
+        div.className = "custom-carousel-item";
+        div.dataset.itemId = i;
 
-            const metaInfo = [];
-            if (item.year) metaInfo.push(`<span>${item.year}</span>`);
-            if (item.duration) metaInfo.push(`<span>${item.duration}</span>`);
-            if (item.genre) metaInfo.push(`<span>${item.genre}</span>`);
-            if (item.rating) metaInfo.push(`<div class="carousel-rating"><i class="fas fa-star"></i><span>${item.rating}</span></div>`);
-            if (item.ageRating) metaInfo.push(`<span class="age-rating">${item.ageRating}</span>`);
+        const metaInfo = [];
+        if (item.year) metaInfo.push(`<span>${item.year}</span>`);
+        if (item.duration) metaInfo.push(`<span>${item.duration}</span>`);
+        if (item.genre) metaInfo.push(`<span>${item.genre}</span>`);
+        if (item.rating) metaInfo.push(`<div class="carousel-rating"><i class="fas fa-star"></i><span>${item.rating}</span></div>`);
+        if (item.ageRating) metaInfo.push(`<span class="age-rating">${item.ageRating}</span>`);
 
-            let posterUrl = item.posterUrl;
-            // Usar placeholder si no hay imagen
-            if (!posterUrl) {
-                posterUrl = 'https://via.placeholder.com/194x271';
-            }
+        let posterUrl = item.posterUrl;
+        if (!posterUrl) {
+            posterUrl = 'https://via.placeholder.com/194x271';
+        }
 
-            div.innerHTML = `
-                <div class="loader"><i class="fas fa-spinner"></i></div>
-                <div class="poster-container">
-                    <img class="poster-image" src="${posterUrl}" alt="${item.title}" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease">
-                </div>
-                <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none">
-                <div class="carousel-overlay">
-                    <div class="carousel-title">${item.title}</div>
-                    ${metaInfo.length ? `<div class="carousel-meta">${metaInfo.join('')}</div>` : ''}
-                    ${item.description ? `<div class="carousel-description">${item.description}</div>` : ''}
-                </div>
-            `;
+        div.innerHTML = `
+            <div class="loader"><i class="fas fa-spinner"></i></div>
+            <div class="poster-container">
+                <img class="poster-image" src="${posterUrl}" alt="${item.title}" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease">
+            </div>
+            <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none">
+            <div class="carousel-overlay">
+                <div class="carousel-title">${item.title}</div>
+                ${metaInfo.length ? `<div class="carousel-meta">${metaInfo.join('')}</div>` : ''}
+                ${item.description ? `<div class="carousel-description">${item.description}</div>` : ''}
+            </div>
+        `;
 
-            if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-                div.addEventListener('mouseenter', function(e) {
-                    const itemId = this.dataset.itemId;
-                    
-                    if (this.hoverTimeouts[itemId]) {
-                        clearTimeout(this.hoverTimeouts[itemId].details);
-                        clearTimeout(this.hoverTimeouts[itemId].modal);
-                    }
-                    
-                    const rect = this.getBoundingClientRect();
-                    this.hoverModalOrigin = {
-                        x: rect.left + rect.width / 2,
-                        y: rect.top + rect.height / 2
-                    };
-                    
-                    this.hoverTimeouts[itemId] = {
-                        details: setTimeout(() => {
-                            const background = this.querySelector('.detail-background');
-                            const overlay = this.querySelector('.carousel-overlay');
-                            background.style.display = 'block';
-                            background.style.opacity = '1';
-                            overlay.style.opacity = '1';
-                            overlay.style.transform = 'translateY(0)';
-                            
-                            this.hoverTimeouts[itemId].modal = setTimeout(() => {
-                                if (!window.isModalOpen && !window.isDetailsModalOpen) {
-                                    window.hoverModalItem = this;
-                                    window.hoverModal.show(item, this);
-                                }
-                            }, 200);
-                        }, 900)
-                    };
-                });
-
-                div.addEventListener('mouseleave', function() {
-                    const itemId = this.dataset.itemId;
-                    
-                    if (this.hoverTimeouts[itemId]) {
-                        clearTimeout(this.hoverTimeouts[itemId].details);
-                        clearTimeout(this.hoverTimeouts[itemId].modal);
-                        delete this.hoverTimeouts[itemId];
-                    }
-                    
-                    const poster = this.querySelector('.poster-image');
-                    const background = this.querySelector('.detail-background');
-                    const overlay = this.querySelector('.carousel-overlay');
-                    
-                    poster.style.opacity = '1';
-                    background.style.opacity = '0';
-                    overlay.style.opacity = '0';
-                    overlay.style.transform = 'translateY(20px)';
-                    
-                    setTimeout(() => {
-                        background.style.display = 'none';
-                    }, 300);
-                });
-            }
-
-            div.addEventListener('click', (e) => {
-                e.preventDefault();
-                const itemId = div.dataset.itemId;
+        if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+            div.addEventListener('mouseenter', (e) => {
+                const itemId = div.dataset.itemId; // Usar div.dataset.itemId en lugar de this.dataset.itemId
+                
                 if (this.hoverTimeouts[itemId]) {
                     clearTimeout(this.hoverTimeouts[itemId].details);
                     clearTimeout(this.hoverTimeouts[itemId].modal);
                 }
-                window.detailsModal.show(item, div);
+                
+                const rect = div.getBoundingClientRect();
+                this.hoverModalOrigin = {
+                    x: rect.left + rect.width / 2,
+                    y: rect.top + rect.height / 2
+                };
+                
+                this.hoverTimeouts[itemId] = {
+                    details: setTimeout(() => {
+                        const background = div.querySelector('.detail-background');
+                        const overlay = div.querySelector('.carousel-overlay');
+                        background.style.display = 'block';
+                        background.style.opacity = '1';
+                        overlay.style.opacity = '1';
+                        overlay.style.transform = 'translateY(0)';
+                        
+                        this.hoverTimeouts[itemId].modal = setTimeout(() => {
+                            if (!window.isModalOpen && !window.isDetailsModalOpen) {
+                                window.hoverModalItem = div;
+                                window.hoverModal.show(item, div);
+                            }
+                        }, 200);
+                    }, 900)
+                };
             });
 
-            this.wrapper.appendChild(div);
+            div.addEventListener('mouseleave', () => {
+                const itemId = div.dataset.itemId;
+                
+                if (this.hoverTimeouts[itemId]) {
+                    clearTimeout(this.hoverTimeouts[itemId].details);
+                    clearTimeout(this.hoverTimeouts[itemId].modal);
+                    delete this.hoverTimeouts[itemId];
+                }
+                
+                const poster = div.querySelector('.poster-image');
+                const background = div.querySelector('.detail-background');
+                const overlay = div.querySelector('.carousel-overlay');
+                
+                poster.style.opacity = '1';
+                background.style.opacity = '0';
+                overlay.style.opacity = '0';
+                overlay.style.transform = 'translateY(20px)';
+                
+                setTimeout(() => {
+                    background.style.display = 'none';
+                }, 300);
+            });
         }
 
-        this.index = end;
-        this.updateProgressBar();
+        div.addEventListener('click', (e) => {
+            e.preventDefault();
+            const itemId = div.dataset.itemId;
+            if (this.hoverTimeouts[itemId]) {
+                clearTimeout(this.hoverTimeouts[itemId].details);
+                clearTimeout(this.hoverTimeouts[itemId].modal);
+            }
+            window.detailsModal.show(item, div);
+        });
+
+        this.wrapper.appendChild(div);
     }
+
+    this.index = end;
+    this.updateProgressBar();
+}
 
     scrollToNextPage() {
         const itemWidth = 194;

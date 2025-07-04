@@ -1,13 +1,13 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Verificar si los elementos existen antes de inicializar
     const carouselWrapper = document.getElementById('carousel-wrapper');
     const skeleton = document.getElementById('carousel-skeleton');
+    const carouselContainer = document.querySelector('.carousel-container');
     
-    if (!carouselWrapper || !skeleton) {
-        // Si no existen, esperar a que Softr cargue el bloque
+    if (!carouselWrapper || !skeleton || !carouselContainer) {
         const observer = new MutationObserver(() => {
             if (document.getElementById('carousel-wrapper') && 
-                document.getElementById('carousel-skeleton')) {
+                document.getElementById('carousel-skeleton') && 
+                document.querySelector('.carousel-container')) {
                 observer.disconnect();
                 initializeComponents();
             }
@@ -22,14 +22,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function initializeComponents() {
-        // Inicializar componentes
         const carousel = new Carousel();
         const hoverModal = new HoverModal();
         const detailsModal = new DetailsModal();
         const videoModal = new VideoModal();
         const shareModal = new ShareModal();
 
-        // Asignar a window para acceso global
         window.carousel = carousel;
         window.hoverModal = hoverModal;
         window.detailsModal = detailsModal;
@@ -40,21 +38,18 @@ document.addEventListener('DOMContentLoaded', function () {
         window.activeItem = null;
         window.hoverModalItem = null;
 
-        // Evento para abrir modal de compartir desde el modal de detalles
         document.addEventListener('click', function(e) {
             if (e.target.closest('#share-button')) {
                 shareModal.show(window.activeItem);
             }
         });
 
-        // Manejar el evento popstate
         window.addEventListener('popstate', function() {
             if (window.detailsModal.isDetailsModalOpen) {
                 window.detailsModal.close();
             }
         });
 
-        // Manejo específico para iOS
         if (detailsModal.isIOS()) {
             window.addEventListener('load', function() {
                 setTimeout(() => {
@@ -92,7 +87,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        // Añadir función getItemIdFromUrl a DetailsModal
         DetailsModal.prototype.getItemIdFromUrl = function() {
             const path = window.location.hash.substring(1);
             if (!path) return null;

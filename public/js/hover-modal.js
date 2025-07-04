@@ -4,18 +4,35 @@ class HoverModal {
         this.modalContent = document.getElementById('modal-content');
         this.modalBackdrop = document.getElementById('modal-backdrop');
         this.modalBody = document.getElementById('modal-body');
+        this.carouselContainer = document.querySelector('.carousel-container'); // Inicializar carouselContainer
         this.activeItem = null;
         this.hoverModalItem = null;
         this.hoverModalOrigin = { x: 0, y: 0 };
         this.hoverModalTimeout = null;
 
-        if (!this.modalOverlay || !this.modalContent) {
-            console.error("Elementos del hover modal no encontrados");
+        // Logs de depuración para verificar los elementos
+        console.log('modalOverlay:', this.modalOverlay);
+        console.log('modalContent:', this.modalContent);
+        console.log('modalBackdrop:', this.modalBackdrop);
+        console.log('modalBody:', this.modalBody);
+        console.log('carouselContainer:', this.carouselContainer);
+
+        if (!this.modalOverlay || !this.modalContent || !this.carouselContainer) {
+            console.error("Elementos del hover modal no encontrados", {
+                modalOverlay: this.modalOverlay,
+                modalContent: this.modalContent,
+                carouselContainer: this.carouselContainer
+            });
             return;
         }
     }
 
     show(item, itemElement) {
+        if (!itemElement || !(itemElement instanceof HTMLElement)) {
+            console.error('itemElement no está definido o no es un elemento DOM válido:', itemElement);
+            return;
+        }
+
         window.isModalOpen = true;
         
         // Priorizar imágenes de data.json
@@ -125,6 +142,16 @@ class HoverModal {
     }
 
     calculateModalPosition(itemElement) {
+        if (!itemElement || !(itemElement instanceof HTMLElement)) {
+            console.error('itemElement no es un elemento DOM válido:', itemElement);
+            return { top: 0, left: 0 }; // Posición por defecto
+        }
+
+        if (!this.carouselContainer || !(this.carouselContainer instanceof HTMLElement)) {
+            console.error('carouselContainer no está definido o no es un elemento DOM válido:', this.carouselContainer);
+            return { top: 0, left: 0 }; // Posición por defecto
+        }
+
         const rect = itemElement.getBoundingClientRect();
         const carouselRect = this.carouselContainer.getBoundingClientRect();
         const modalWidth = parseFloat(getComputedStyle(this.modalContent).width);

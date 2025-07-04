@@ -35,3 +35,4 @@ UTILES/
 # Ignorar los scripts de sincronización locales
 start.js
 panel.js
+index_local.html
