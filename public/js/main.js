@@ -26,13 +26,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const hoverModal = new HoverModal();
         const detailsModal = new DetailsModal();
         const videoModal = new VideoModal();
-        const shareModal = new ShareModal(); // Instanciar ShareModal
+        const shareModal = new ShareModal();
 
         window.carousel = carousel;
         window.hoverModal = hoverModal;
         window.detailsModal = detailsModal;
         window.videoModal = videoModal;
-        window.shareModal = shareModal; // Hacerlo accesible globalmente
+        window.shareModal = shareModal;
         window.isModalOpen = false;
         window.isDetailsModalOpen = false;
         window.activeItem = null;
@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (item && window.shareModal) {
                     const currentUrl = window.location.href;
                     const shareUrl = generateShareUrl(item, currentUrl);
-                    window.shareModal.show({ ...item, shareUrl }); // Abrir el modal de compartir
+                    window.shareModal.show({ ...item, shareUrl }); // Pasar shareUrl al modal
                 } else {
                     console.error('Item o shareModal no definidos:', { item, shareModal: window.shareModal });
                 }
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (itemElement) {
                         console.log('Elemento DOM encontrado:', itemElement);
                         detailsModal.show(item, itemElement);
-                        window.activeItem = item; // Actualizar el item activo
+                        window.activeItem = item;
                     } else if (retryCount < maxRetries) {
                         console.warn(`Elemento DOM no encontrado para itemId: ${urlParams.id}, reintentando (${retryCount + 1}/${maxRetries})`);
                         setTimeout(() => processUrlParams(retryCount + 1, maxRetries), 200);

@@ -42,7 +42,6 @@ class ShareModal {
         
         this.shareLinkButton.addEventListener('click', () => this.copyShareLink());
         
-        // Eventos para los botones de compartir en redes sociales
         document.getElementById('share-facebook')?.addEventListener('click', () => this.shareOnSocial('facebook'));
         document.getElementById('share-twitter')?.addEventListener('click', () => this.shareOnSocial('twitter'));
         document.getElementById('share-whatsapp')?.addEventListener('click', () => this.shareOnSocial('whatsapp'));
@@ -56,7 +55,7 @@ class ShareModal {
             return;
         }
         
-        // Actualizar elementos del modal
+        // Actualizar elementos del modal con datos dinámicos del item
         this.sharePreviewImage.src = item.posterUrl || 'https://via.placeholder.com/194x271';
         this.sharePreviewImage.onerror = function() {
             this.src = 'https://via.placeholder.com/194x271';
@@ -143,10 +142,5 @@ class ShareModal {
             .replace(/[^a-z0-9]/g, '-')
             .replace(/-+/g, '-')
             .replace(/^-|-$/g, '');
-    }
-
-    updateMetaTags(item) {
-        // Este método no se usa actualmente con la solución estática, pero se mantiene por compatibilidad
-        if (!item) return;
     }
 }
