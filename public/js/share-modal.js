@@ -134,11 +134,16 @@ class ShareModal {
                 break;
             case 'telegram':
                 shareUrl = `https://t.me/share/url?url=${encodeURIComponent(this.currentShareUrl)}&text=${encodeURIComponent(text)}`;
+                // Intentar forzar la imagen (aunque Telegram no siempre la usa directamente)
+                if (imageUrl) {
+                    shareUrl += `&preview_url=${encodeURIComponent(imageUrl)}`;
+                }
                 break;
             default:
                 return;
         }
         
+        console.log('Enlace de Telegram generado:', shareUrl); // Depuración
         window.open(shareUrl, '_blank', 'width=600,height=400');
     }
 }

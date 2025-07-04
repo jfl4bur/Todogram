@@ -70,7 +70,7 @@
     </style>
 </head>
 <body>
-    <div class="movie-preview">
+    <div class="movie-template">
         <img src="" alt="Portada de la película" class="movie-image" id="movie-image">
         <div class="movie-title" id="movie-title"></div>
         <div class="movie-description" id="movie-description"></div>
@@ -81,7 +81,8 @@
         const movieImage = document.getElementById('movie-image');
         movieImage.src = image;
         movieImage.onerror = function() {
-            this.src = 'https://via.placeholder.com/194x271'; // Fallback si la imagen falla
+            this.src = 'https://via.placeholder.com/194x271'; // Fallback público
+            console.log('Imagen original falló, usando fallback:', this.src);
         };
         document.getElementById('movie-title').textContent = title;
         document.getElementById('movie-description').textContent = description;
