@@ -123,7 +123,7 @@ class ShareModal {
         console.log('Ejecutando shareOnSocial para:', network);
         const title = `Mira ${this.sharePreviewTitle.textContent} en nuestra plataforma`;
         const text = `${this.sharePreviewTitle.textContent}: ${this.sharePreviewDescription.textContent}`;
-        const imageUrl = this.sharePreviewImage.src || 'https://via.placeholder.com/194x271'; // Fallback público
+        const imageUrl = this.sharePreviewImage.src; // Usará el fallback si falla
         let shareUrl = '';
         
         switch(network) {

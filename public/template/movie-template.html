@@ -17,9 +17,9 @@
         const urlParams = new URLSearchParams(window.location.search);
         const title = urlParams.get('title') || 'Todogram - Películas';
         const description = urlParams.get('description') || 'Explora las mejores películas en Todogram.';
-        const image = urlParams.get('image') || 'https://via.placeholder.com/194x271';
+        const image = urlParams.get('image') || 'https://via.placeholder.com/194x271'; // Fallback público
         const originalUrl = urlParams.get('originalUrl') || 'https://todogram.softr.app';
-        const hash = urlParams.get('hash') || window.location.hash;
+        const hash = urlParams.get('hash') || '';
 
         console.log('Parámetros extraídos:', { title, description, image, originalUrl, hash });
 
@@ -33,7 +33,7 @@
         document.querySelector('meta[name="twitter:image"]').setAttribute('content', image);
 
         // Redirigir después de 5 segundos
-        const redirectUrl = originalUrl + (hash ? hash : '');
+        const redirectUrl = originalUrl + (hash ? '#' + hash.replace(/^#/, '') : '');
         setTimeout(() => {
             console.log('Redirigiendo a:', redirectUrl);
             window.location.href = redirectUrl;
