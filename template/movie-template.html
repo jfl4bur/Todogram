@@ -26,8 +26,8 @@
         // Función para obtener imagen de TMDB usando clave inyectada
         async function getTmdbImage(movieTitle) {
             // Marcador que será reemplazado por GitHub Actions
-            const tmdbApiKey = '{{TMDB_API_KEY}}';
-            if (!tmdbApiKey || tmdbApiKey === '{{TMDB_API_KEY}}') {
+            const tmdbApiKey = 'f28077ae6a89b54c86be927ea88d64d9';
+            if (!tmdbApiKey || tmdbApiKey === 'f28077ae6a89b54c86be927ea88d64d9') {
                 console.warn('TMDB_API_KEY no inyectada, usando fallback');
                 return 'https://via.placeholder.com/194x271';
             }
