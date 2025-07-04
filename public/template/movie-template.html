@@ -5,19 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta property="og:title" content="Todogram - Películas">
     <meta property="og:description" content="Explora las mejores películas en Todogram.">
-    <meta property="og:image" content="https://via.placeholder.com/194x271">
+    <meta property="og:image" content="https://placehold.co/194x271">
     <meta property="og:url" content="https://jfl4bur.github.io/Todogram/public/template/movie-template.html">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="Todogram - Películas">
     <meta name="twitter:description" content="Explora las mejores películas en Todogram.">
-    <meta name="twitter:image" content="https://via.placeholder.com/194x271">
+    <meta name="twitter:image" content="https://placehold.co/194x271">
     <script>
         console.log('Script en <head> ejecutándose');
         // Extraer parámetros de la URL
         const urlParams = new URLSearchParams(window.location.search);
         const title = urlParams.get('title') || 'Todogram - Películas';
         const description = urlParams.get('description') || 'Explora las mejores películas en Todogram.';
-        const image = urlParams.get('image') || 'https://via.placeholder.com/194x271';
+        const image = urlParams.get('image') || 'https://placehold.co/194x271';
         const originalUrl = urlParams.get('originalUrl') || 'https://todogram.softr.app';
         const hash = urlParams.get('hash') || '';
 
@@ -29,7 +29,7 @@
             const tmdbApiKey = '{{TMDB_API_KEY}}';
             if (!tmdbApiKey || tmdbApiKey === '{{TMDB_API_KEY}}') {
                 console.warn('TMDB_API_KEY no inyectada, usando fallback');
-                return 'https://via.placeholder.com/194x271';
+                return 'https://placehold.co/194x271';
             }
 
             const encodedTitle = encodeURIComponent(movieTitle);
@@ -45,10 +45,10 @@
                     }
                 }
                 console.log('No se encontró imagen en TMDB para:', movieTitle);
-                return 'https://via.placeholder.com/194x271';
+                return 'https://placehold.co/194x271';
             } catch (error) {
                 console.error('Error al consultar TMDB:', error);
-                return 'https://via.placeholder.com/194x271';
+                return 'https://placehold.co/194x271';
             }
         }
 
@@ -123,7 +123,7 @@
             const tmdbImage = await getTmdbImage(title);
             movieImage.src = tmdbImage;
             movieImage.onerror = function() {
-                this.src = 'https://via.placeholder.com/194x271';
+                this.src = 'https://placehold.co/194x271';
                 console.log('Imagen TMDB falló, usando fallback:', this.src);
             };
         })();
