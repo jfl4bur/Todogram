@@ -12,17 +12,20 @@
     <meta name="twitter:description" content="Explora las mejores películas en Todogram.">
     <meta name="twitter:image" content="https://via.placeholder.com/194x271">
     <script>
+        console.log('Script en <head> ejecutándose');
         // Extraer parámetros de la URL
         const urlParams = new URLSearchParams(window.location.search);
         const title = urlParams.get('title') || 'Todogram - Películas';
         const description = urlParams.get('description') || 'Explora las mejores películas en Todogram.';
-        const image = urlParams.get('image') || 'https://via.placeholder.com/194x271'; // Fallback público
+        const image = urlParams.get('image') || 'https://via.placeholder.com/194x271';
         const originalUrl = urlParams.get('originalUrl') || 'https://todogram.softr.app';
         const hash = urlParams.get('hash') || window.location.hash;
 
-        // Actualizar metadatos para usuarios (no para bots, pero intentamos optimizar)
+        console.log('Parámetros extraídos:', { title, description, image, originalUrl, hash });
+
+        // Actualizar metadatos para usuarios
         document.querySelector('meta[property="og:title"]').setAttribute('content', title);
-        document.querySelector('meta[property="og:description"]').setAttribute('content', description.substring(0, 200)); // Limitar a 200 caracteres
+        document.querySelector('meta[property="og:description"]').setAttribute('content', description.substring(0, 200));
         document.querySelector('meta[property="og:image"]').setAttribute('content', image);
         document.querySelector('meta[property="og:url"]').setAttribute('content', window.location.href);
         document.querySelector('meta[name="twitter:title"]').setAttribute('content', title);
@@ -43,7 +46,7 @@
             padding: 20px;
             background-color: #f5f5f5;
         }
-        .movie-preview {
+        .movie-template {
             max-width: 600px;
             margin: 0 auto;
         }
@@ -77,16 +80,18 @@
         <div class="movie-promo" id="movie-promo"></div>
     </div>
     <script>
+        console.log('Script en <body> ejecutándose');
         // Renderizar contenido dinámico
         const movieImage = document.getElementById('movie-image');
         movieImage.src = image;
         movieImage.onerror = function() {
-            this.src = 'https://via.placeholder.com/194x271'; // Fallback público
+            this.src = 'https://via.placeholder.com/194x271';
             console.log('Imagen original falló, usando fallback:', this.src);
         };
         document.getElementById('movie-title').textContent = title;
         document.getElementById('movie-description').textContent = description;
         document.getElementById('movie-promo').textContent = `Mira ${title} en nuestra plataforma`;
+        console.log('Contenido renderizado:', { title, description, image });
     </script>
 </body>
 </html>

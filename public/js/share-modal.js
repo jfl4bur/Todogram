@@ -25,6 +25,7 @@ class ShareModal {
             return;
         }
 
+        console.log('ShareModal inicializado correctamente');
         this.setupEventListeners();
     }
 
@@ -55,9 +56,11 @@ class ShareModal {
             return;
         }
         
+        console.log('Mostrando modal con item:', item);
         this.sharePreviewImage.src = item.posterUrl || 'https://via.placeholder.com/194x271';
         this.sharePreviewImage.onerror = function() {
             this.src = 'https://via.placeholder.com/194x271';
+            console.log('Imagen en modal falló, usando fallback:', this.src);
         };
         
         this.sharePreviewTitle.textContent = item.title || 'Título no disponible';
@@ -117,6 +120,7 @@ class ShareModal {
     shareOnSocial(network) {
         if (!this.currentShareUrl) return;
         
+        console.log('Ejecutando shareOnSocial para:', network);
         const title = `Mira ${this.sharePreviewTitle.textContent} en nuestra plataforma`;
         const text = `${this.sharePreviewTitle.textContent}: ${this.sharePreviewDescription.textContent}`;
         const imageUrl = this.sharePreviewImage.src;
@@ -134,7 +138,6 @@ class ShareModal {
                 break;
             case 'telegram':
                 shareUrl = `https://t.me/share/url?url=${encodeURIComponent(this.currentShareUrl)}&text=${encodeURIComponent(text)}`;
-                // Intentar forzar la imagen (aunque Telegram no siempre la usa directamente)
                 if (imageUrl) {
                     shareUrl += `&preview_url=${encodeURIComponent(imageUrl)}`;
                 }
@@ -143,7 +146,7 @@ class ShareModal {
                 return;
         }
         
-        console.log('Enlace de Telegram generado:', shareUrl); // Depuración
+        console.log('Enlace de Telegram generado:', shareUrl);
         window.open(shareUrl, '_blank', 'width=600,height=400');
     }
 }
