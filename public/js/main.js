@@ -1,74 +1,134 @@
-// main.js
 document.addEventListener('DOMContentLoaded', function () {
-    initializeComponents();
+    const carouselWrapper = document.getElementById('carousel-wrapper');
+    const skeleton = document.getElementById('carousel-skeleton');
+    const carouselContainer = document.querySelector('.carousel-container');
+    
+    if (!carouselWrapper || !skeleton || !carouselContainer) {
+        const observer = new MutationObserver(() => {
+            if (document.getElementById('carousel-wrapper') && 
+                document.getElementById('carousel-skeleton') && 
+                document.querySelector('.carousel-container')) {
+                observer.disconnect();
+                initializeComponents();
+            }
+        });
+        
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    } else {
+        initializeComponents();
+    }
 
     function initializeComponents() {
-        console.log('Inicializando componentes');
-        const urlParams = new URLSearchParams(window.location.hash.slice(1)); // Extraer parámetros del hash
-        console.log('Procesando URL:', window.location.hash);
-        const id = urlParams.get('id');
-        const title = urlParams.get('title');
+        const carousel = new Carousel();
+        const hoverModal = new HoverModal();
+        const detailsModal = new DetailsModal();
+        const videoModal = new VideoModal();
+        const shareModal = new ShareModal();
 
-        if (id && title) {
-            console.log('Hash procesado:', `id=${id}&title=${title}`);
-            const params = { id, normalizedTitle: title.replace(/-/g, ' ') };
-            console.log('Parámetros de URL encontrados:', params);
+        window.carousel = carousel;
+        window.hoverModal = hoverModal;
+        window.detailsModal = detailsModal;
+        window.videoModal = videoModal;
+        window.shareModal = shareModal;
+        window.isModalOpen = false;
+        window.isDetailsModalOpen = false;
+        window.activeItem = null;
+        window.hoverModalItem = null;
 
-            // Simulación de datos (reemplaza con tu data.json o fuente real)
-            const movies = [
-                { id: '4', title: 'Los salvajes', description: 'En el siglo XIII, Batu Khan pasó dos meses intentando tomar la ciudad de Kozelsk...', posterUrl: '', backgroundUrl: '' },
-                { id: '3', title: 'Lee Miller', description: 'La historia de la fotógrafa Elizabeth \'Lee\' Miller...', posterUrl: '', backgroundUrl: '' },
-                // Agrega más películas según necesites
-            ];
-
-            const movie = movies.find(m => m.id === id);
-            if (movie) {
-                console.log('Película encontrada:', movie);
-
-                // Integrar API de TMDB para obtener la imagen
-                const TMDB_API_KEY = 'f28077ae6a89b54c86be927ea88d64d9'; // Reemplaza con tu clave API
-                fetch(`https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(movie.title)}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.results && data.results.length > 0) {
-                            const tmdbPosterPath = data.results[0].poster_path;
-                            movie.posterUrl = tmdbPosterPath ? `https://image.tmdb.org/t/p/w500${tmdbPosterPath}` : 'https://via.placeholder.com/194x271';
-                            console.log('Imagen de TMDB asignada:', movie.posterUrl);
-                        } else {
-                            movie.posterUrl = 'https://via.placeholder.com/194x271'; // Fallback si no se encuentra
-                            console.log('No se encontró imagen en TMDB, usando fallback:', movie.posterUrl);
-                        }
-
-                        const itemElement = document.querySelector(`[data-item-id="${id}"]`);
-                        if (itemElement) {
-                            console.log('Elemento DOM encontrado:', itemElement);
-                            const shareUrl = `https://jfl4bur.github.io/Todogram/public/template/movie-template.html?title=${encodeURIComponent(movie.title)}&description=${encodeURIComponent(movie.description)}&image=${encodeURIComponent(movie.posterUrl)}&originalUrl=https://todogram.softr.app/&hash=#id=${id}&title=${title}`;
-                            const modalData = { ...movie, shareUrl };
-                            console.log('Datos pasados al modal:', modalData);
-
-                            // Iniciar el modal con los datos actualizados
-                            const shareModal = new ShareModal();
-                            shareModal.show(modalData);
-                        } else {
-                            console.error('Elemento DOM no encontrado para id:', id);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error al consultar TMDB:', error);
-                        movie.posterUrl = 'https://via.placeholder.com/194x271'; // Fallback en caso de error
-                        const itemElement = document.querySelector(`[data-item-id="${id}"]`);
-                        if (itemElement) {
-                            const shareUrl = `https://jfl4bur.github.io/Todogram/public/template/movie-template.html?title=${encodeURIComponent(movie.title)}&description=${encodeURIComponent(movie.description)}&image=${encodeURIComponent(movie.posterUrl)}&originalUrl=https://todogram.softr.app/&hash=#id=${id}&title=${title}`;
-                            const modalData = { ...movie, shareUrl };
-                            const shareModal = new ShareModal();
-                            shareModal.show(modalData);
-                        }
-                    });
-            } else {
-                console.error('Película no encontrada para id:', id);
+        // Evento para el botón "Share" dentro del modal de detalles
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('#share-button')) {
+                const item = window.activeItem;
+                if (item && window.shareModal) {
+                    const currentUrl = window.location.href;
+                    const shareUrl = generateShareUrl(item, currentUrl);
+                    console.log('Datos pasados al modal:', { ...item, shareUrl }); // Depuración
+                    window.shareModal.show({ ...item, shareUrl });
+                } else {
+                    console.error('Item o shareModal no definidos:', { item, shareModal: window.shareModal });
+                }
             }
-        } else {
-            console.log('No se encontraron parámetros de URL válidos');
+        });
+
+        window.addEventListener('popstate', function() {
+            if (window.detailsModal.isDetailsModalOpen) {
+                window.detailsModal.close();
+            }
+        });
+
+        // Función para procesar parámetros de URL
+        function processUrlParams(retryCount = 0, maxRetries = 5) {
+            console.log('Procesando URL:', window.location.hash);
+            const urlParams = detailsModal.getItemIdFromUrl();
+            if (urlParams) {
+                console.log('Parámetros de URL encontrados:', urlParams);
+                const item = carousel.moviesData.find(movie => movie.id === urlParams.id);
+                if (item) {
+                    console.log('Película encontrada:', item);
+                    const itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
+                    if (itemElement) {
+                        console.log('Elemento DOM encontrado:', itemElement);
+                        detailsModal.show(item, itemElement);
+                        window.activeItem = item;
+                    } else if (retryCount < maxRetries) {
+                        console.warn(`Elemento DOM no encontrado para itemId: ${urlParams.id}, reintentando (${retryCount + 1}/${maxRetries})`);
+                        setTimeout(() => processUrlParams(retryCount + 1, maxRetries), 200);
+                    } else {
+                        console.error('Elemento DOM no encontrado para itemId:', urlParams.id);
+                    }
+                } else {
+                    console.error('Película no encontrada para id:', urlParams.id);
+                }
+            } else {
+                console.log('No se encontraron parámetros de URL');
+            }
         }
+
+        // Función para generar la URL de compartir
+        function generateShareUrl(item, originalUrl) {
+            const staticBaseUrl = 'https://jfl4bur.github.io/Todogram/public/template/movie-template.html';
+            return `${staticBaseUrl}?title=${encodeURIComponent(item.title)}&description=${encodeURIComponent(item.description || 'Explora esta película en Todogram.')}&image=${encodeURIComponent(item.posterUrl || 'https://via.placeholder.com/194x271')}&originalUrl=${encodeURIComponent(originalUrl)}&hash=${encodeURIComponent(window.location.hash)}`;
+        }
+
+        // Manejar parámetros de URL al cargar la página
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                processUrlParams();
+            }, 500);
+        });
+
+        // Manejar cambios en el hash de la URL
+        let lastHash = window.location.hash;
+        window.addEventListener('hashchange', function() {
+            const newHash = window.location.hash;
+            if (newHash !== lastHash) {
+                lastHash = newHash;
+                console.log('Hash cambió a:', newHash);
+                setTimeout(() => {
+                    processUrlParams();
+                }, 300);
+            }
+        });
+
+        DetailsModal.prototype.getItemIdFromUrl = function() {
+            const path = window.location.hash.substring(1);
+            console.log('Hash procesado:', path);
+            if (!path) return null;
+            
+            const params = new URLSearchParams(path);
+            const id = params.get('id');
+            const title = params.get('title');
+            console.log('Parámetros extraídos:', { id, title });
+            
+            if (!id || !title) return null;
+            
+            return {
+                id: id,
+                normalizedTitle: title
+            };
+        };
     }
 });

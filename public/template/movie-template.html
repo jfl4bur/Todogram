@@ -17,20 +17,55 @@
         const urlParams = new URLSearchParams(window.location.search);
         const title = urlParams.get('title') || 'Todogram - Películas';
         const description = urlParams.get('description') || 'Explora las mejores películas en Todogram.';
-        const image = urlParams.get('image') || 'https://via.placeholder.com/194x271'; // Fallback público
+        const image = urlParams.get('image') || 'https://via.placeholder.com/194x271';
         const originalUrl = urlParams.get('originalUrl') || 'https://todogram.softr.app';
         const hash = urlParams.get('hash') || '';
 
         console.log('Parámetros extraídos:', { title, description, image, originalUrl, hash });
 
+        // Función para obtener imagen de TMDB usando variable de entorno
+        async function getTmdbImage(movieTitle) {
+            // Intentar obtener la clave de la variable de entorno inyectada por GitHub
+            const tmdbApiKey = process.env.TMDB_API_KEY || ''; // Esto depende de la inyección
+            if (!tmdbApiKey) {
+                console.warn('TMDB_API_KEY no encontrada en el entorno, usando fallback');
+                return 'https://via.placeholder.com/194x271';
+            }
+
+            const encodedTitle = encodeURIComponent(movieTitle);
+            const url = `https://api.themoviedb.org/3/search/movie?api_key=${tmdbApiKey}&query=${encodedTitle}&language=es`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                if (data.results && data.results.length > 0) {
+                    const posterPath = data.results[0].poster_path;
+                    if (posterPath) {
+                        return `https://image.tmdb.org/t/p/w500${posterPath}`;
+                    }
+                }
+                console.log('No se encontró imagen en TMDB para:', movieTitle);
+                return 'https://via.placeholder.com/194x271';
+            } catch (error) {
+                console.error('Error al consultar TMDB:', error);
+                return 'https://via.placeholder.com/194x271';
+            }
+        }
+
+        // Actualizar metadatos con imagen de TMDB
+        (async () => {
+            const tmdbImage = await getTmdbImage(title);
+            document.querySelector('meta[property="og:image"]').setAttribute('content', tmdbImage);
+            document.querySelector('meta[name="twitter:image"]').setAttribute('content', tmdbImage);
+            console.log('Imagen de TMDB asignada:', tmdbImage);
+        })();
+
         // Actualizar metadatos para usuarios
         document.querySelector('meta[property="og:title"]').setAttribute('content', title);
         document.querySelector('meta[property="og:description"]').setAttribute('content', description.substring(0, 200));
-        document.querySelector('meta[property="og:image"]').setAttribute('content', image);
         document.querySelector('meta[property="og:url"]').setAttribute('content', window.location.href);
         document.querySelector('meta[name="twitter:title"]').setAttribute('content', title);
         document.querySelector('meta[name="twitter:description"]').setAttribute('content', description.substring(0, 200));
-        document.querySelector('meta[name="twitter:image"]').setAttribute('content', image);
 
         // Redirigir después de 5 segundos
         const redirectUrl = originalUrl + (hash ? '#' + hash.replace(/^#/, '') : '');
@@ -84,11 +119,14 @@
         console.log('Script en <body> ejecutándose');
         // Renderizar contenido dinámico
         const movieImage = document.getElementById('movie-image');
-        movieImage.src = image;
-        movieImage.onerror = function() {
-            this.src = 'https://via.placeholder.com/194x271';
-            console.log('Imagen original falló, usando fallback:', this.src);
-        };
+        (async () => {
+            const tmdbImage = await getTmdbImage(title);
+            movieImage.src = tmdbImage;
+            movieImage.onerror = function() {
+                this.src = 'https://via.placeholder.com/194x271';
+                console.log('Imagen TMDB falló, usando fallback:', this.src);
+            };
+        })();
         document.getElementById('movie-title').textContent = title;
         document.getElementById('movie-description').textContent = description;
         document.getElementById('movie-promo').textContent = `Mira ${title} en nuestra plataforma`;
