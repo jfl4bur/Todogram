@@ -3,134 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta property="og:title" content="Todogram - Películas">
-    <meta property="og:description" content="Explora las mejores películas en Todogram.">
-    <meta property="og:image" content="https://placehold.co/194x271">
-    <meta property="og:url" content="https://jfl4bur.github.io/Todogram/public/template/movie-template.html">
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Todogram - Películas">
-    <meta name="twitter:description" content="Explora las mejores películas en Todogram.">
-    <meta name="twitter:image" content="https://placehold.co/194x271">
+    <meta property="og:title" content="Todogram - Películas"> <!-- Fallback para bots -->
+    <meta property="og:description" content="Explora las mejores películas en Todogram."> <!-- Fallback para bots -->
+    <meta property="og:image" content="https://via.placeholder.com/194x271"> <!-- Fallback para bots -->
+    <meta property="og:url" content="https://jfl4bur.github.io/Todogram/public/template/movie-template.html"> <!-- Fallback para bots -->
+    <meta name="twitter:card" content="summary_large_image"> <!-- Fallback para bots -->
+    <meta name="twitter:title" content="Todogram - Películas"> <!-- Fallback para bots -->
+    <meta name="twitter:description" content="Explora las mejores películas en Todogram."> <!-- Fallback para bots -->
+    <meta name="twitter:image" content="https://via.placeholder.com/194x271"> <!-- Fallback para bots -->
     <script>
-        console.log('Script en <head> ejecutándose');
         // Extraer parámetros de la URL
         const urlParams = new URLSearchParams(window.location.search);
         const title = urlParams.get('title') || 'Todogram - Películas';
         const description = urlParams.get('description') || 'Explora las mejores películas en Todogram.';
-        const image = urlParams.get('image') || 'https://placehold.co/194x271';
+        const image = urlParams.get('image') || 'https://via.placeholder.com/194x271'; // Fallback público
         const originalUrl = urlParams.get('originalUrl') || 'https://todogram.softr.app';
-        const hash = urlParams.get('hash') || '';
+        const hash = urlParams.get('hash') || window.location.hash;
 
-        console.log('Parámetros extraídos:', { title, description, image, originalUrl, hash });
-
-        // Función para obtener imagen de TMDB usando clave inyectada
-        async function getTmdbImage(movieTitle) {
-            // Marcador que será reemplazado por GitHub Actions
-            const tmdbApiKey = '{{TMDB_API_KEY}}';
-            if (!tmdbApiKey || tmdbApiKey === '{{TMDB_API_KEY}}') {
-                console.warn('TMDB_API_KEY no inyectada, usando fallback');
-                return 'https://placehold.co/194x271';
-            }
-
-            const encodedTitle = encodeURIComponent(movieTitle);
-            const url = `https://api.themoviedb.org/3/search/movie?api_key=${tmdbApiKey}&query=${encodedTitle}&language=es`;
-
-            try {
-                const response = await fetch(url);
-                const data = await response.json();
-                if (data.results && data.results.length > 0) {
-                    const posterPath = data.results[0].poster_path;
-                    if (posterPath) {
-                        return `https://image.tmdb.org/t/p/w500${posterPath}`;
-                    }
-                }
-                console.log('No se encontró imagen en TMDB para:', movieTitle);
-                return 'https://placehold.co/194x271';
-            } catch (error) {
-                console.error('Error al consultar TMDB:', error);
-                return 'https://placehold.co/194x271';
-            }
-        }
-
-        // Actualizar metadatos con imagen de TMDB
-        (async () => {
-            const tmdbImage = await getTmdbImage(title);
-            document.querySelector('meta[property="og:image"]').setAttribute('content', tmdbImage);
-            document.querySelector('meta[name="twitter:image"]').setAttribute('content', tmdbImage);
-            console.log('Imagen de TMDB asignada:', tmdbImage);
-        })();
-
-        // Actualizar metadatos para usuarios
+        // Actualizar metadatos para usuarios (no para bots)
         document.querySelector('meta[property="og:title"]').setAttribute('content', title);
-        document.querySelector('meta[property="og:description"]').setAttribute('content', description.substring(0, 200));
+        document.querySelector('meta[property="og:description"]').setAttribute('content', description);
+        document.querySelector('meta[property="og:image"]').setAttribute('content', image);
         document.querySelector('meta[property="og:url"]').setAttribute('content', window.location.href);
         document.querySelector('meta[name="twitter:title"]').setAttribute('content', title);
-        document.querySelector('meta[name="twitter:description"]').setAttribute('content', description.substring(0, 200));
+        document.querySelector('meta[name="twitter:description"]').setAttribute('content', description);
+        document.querySelector('meta[name="twitter:image"]').setAttribute('content', image);
 
-        // Redirigir después de 5 segundos
-        const redirectUrl = originalUrl + (hash ? '#' + hash.replace(/^#/, '') : '');
+        // Redirigir a la URL original con hash después de 1 segundo
         setTimeout(() => {
-            console.log('Redirigiendo a:', redirectUrl);
-            window.location.href = redirectUrl;
-        }, 5000);
+            window.location.href = originalUrl + hash;
+        }, 1000);
     </script>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 0;
-            padding: 20px;
-            background-color: #f5f5f5;
-        }
-        .movie-template {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        .movie-image {
-            width: 100%;
-            max-height: 400px;
-            object-fit: cover;
-        }
-        .movie-title {
-            font-size: 24px;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-        .movie-description {
-            font-size: 16px;
-            color: #333;
-            margin: 10px 0;
-        }
-        .movie-promo {
-            font-size: 18px;
-            color: #0066cc;
-            margin: 10px 0;
-        }
-    </style>
 </head>
 <body>
-    <div class="movie-template">
-        <img src="" alt="Portada de la película" class="movie-image" id="movie-image">
-        <div class="movie-title" id="movie-title"></div>
-        <div class="movie-description" id="movie-description"></div>
-        <div class="movie-promo" id="movie-promo"></div>
-    </div>
-    <script>
-        console.log('Script en <body> ejecutándose');
-        // Renderizar contenido dinámico
-        const movieImage = document.getElementById('movie-image');
-        (async () => {
-            const tmdbImage = await getTmdbImage(title);
-            movieImage.src = tmdbImage;
-            movieImage.onerror = function() {
-                this.src = 'https://placehold.co/194x271';
-                console.log('Imagen TMDB falló, usando fallback:', this.src);
-            };
-        })();
-        document.getElementById('movie-title').textContent = title;
-        document.getElementById('movie-description').textContent = description;
-        document.getElementById('movie-promo').textContent = `Mira ${title} en nuestra plataforma`;
-        console.log('Contenido renderizado:', { title, description, image });
-    </script>
+    <h1>Cargando...</h1>
 </body>
 </html>

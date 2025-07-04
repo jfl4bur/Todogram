@@ -25,7 +25,6 @@ class ShareModal {
             return;
         }
 
-        console.log('ShareModal inicializado correctamente');
         this.setupEventListeners();
     }
 
@@ -56,11 +55,10 @@ class ShareModal {
             return;
         }
         
-        console.log('Mostrando modal con item:', item);
+        // Actualizar elementos del modal con datos dinámicos del item
         this.sharePreviewImage.src = item.posterUrl || 'https://via.placeholder.com/194x271';
         this.sharePreviewImage.onerror = function() {
             this.src = 'https://via.placeholder.com/194x271';
-            console.log('Imagen en modal falló, usando fallback:', this.src);
         };
         
         this.sharePreviewTitle.textContent = item.title || 'Título no disponible';
@@ -75,13 +73,7 @@ class ShareModal {
         this.shareLinkInput.value = item.shareUrl;
         this.currentShareUrl = item.shareUrl;
         
-        console.log('Datos mostrados en el modal:', {
-            title: this.sharePreviewTitle.textContent,
-            description: this.sharePreviewDescription.textContent,
-            image: this.sharePreviewImage.src,
-            shareUrl: this.currentShareUrl
-        });
-        
+        // Mostrar el modal
         this.shareModalOverlay.style.display = 'flex';
         document.body.style.overflow = 'hidden';
         
@@ -120,10 +112,8 @@ class ShareModal {
     shareOnSocial(network) {
         if (!this.currentShareUrl) return;
         
-        console.log('Ejecutando shareOnSocial para:', network);
         const title = `Mira ${this.sharePreviewTitle.textContent} en nuestra plataforma`;
         const text = `${this.sharePreviewTitle.textContent}: ${this.sharePreviewDescription.textContent}`;
-        const imageUrl = this.sharePreviewImage.src; // Usará el fallback si falla
         let shareUrl = '';
         
         switch(network) {
@@ -137,16 +127,20 @@ class ShareModal {
                 shareUrl = `https://wa.me/?text=${encodeURIComponent(title + ' ' + this.currentShareUrl)}`;
                 break;
             case 'telegram':
-                shareUrl = `https://t.me/share/url?url=${encodeURIComponent(this.currentShareUrl)}&text=${encodeURIComponent(text)}`;
-                if (imageUrl) {
-                    shareUrl += `&preview_url=${encodeURIComponent(imageUrl)}`;
-                }
+                shareUrl = `https://t.me/share/url?url=${encodeURIComponent(this.currentShareUrl)}&text=${encodeURIComponent(title)}`;
                 break;
             default:
                 return;
         }
         
-        console.log('Enlace de Telegram generado:', shareUrl);
         window.open(shareUrl, '_blank', 'width=600,height=400');
+    }
+
+    normalizeText(text) {
+        return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .replace(/[^a-z0-9]/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
     }
 }
