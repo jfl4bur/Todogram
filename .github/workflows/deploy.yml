@@ -16,7 +16,7 @@ jobs:
           node-version: '16'
       - name: Inject environment variables
         run: |
-          sed -i 's|process.env.TMDB_API_KEY|'"${{ secrets.TMDB_API_KEY }}"'|' public/template/movie-template.html
+          sed -i 's|{{TMDB_API_KEY}}|'"${{ secrets.TMDB_API_KEY }}"'|' public/template/movie-template.html
         env:
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }} # Asegúrate de que esta clave esté en Settings > Secrets
       - name: Deploy
