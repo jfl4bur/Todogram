@@ -55,7 +55,6 @@ class ShareModal {
             return;
         }
         
-        // Actualizar elementos del modal con datos dinámicos del item
         this.sharePreviewImage.src = item.posterUrl || 'https://via.placeholder.com/194x271';
         this.sharePreviewImage.onerror = function() {
             this.src = 'https://via.placeholder.com/194x271';
@@ -78,9 +77,8 @@ class ShareModal {
             description: this.sharePreviewDescription.textContent,
             image: this.sharePreviewImage.src,
             shareUrl: this.currentShareUrl
-        }); // Depuración
+        });
         
-        // Mostrar el modal
         this.shareModalOverlay.style.display = 'flex';
         document.body.style.overflow = 'hidden';
         
@@ -121,6 +119,7 @@ class ShareModal {
         
         const title = `Mira ${this.sharePreviewTitle.textContent} en nuestra plataforma`;
         const text = `${this.sharePreviewTitle.textContent}: ${this.sharePreviewDescription.textContent}`;
+        const imageUrl = this.sharePreviewImage.src;
         let shareUrl = '';
         
         switch(network) {
@@ -134,7 +133,7 @@ class ShareModal {
                 shareUrl = `https://wa.me/?text=${encodeURIComponent(title + ' ' + this.currentShareUrl)}`;
                 break;
             case 'telegram':
-                shareUrl = `https://t.me/share/url?url=${encodeURIComponent(this.currentShareUrl)}&text=${encodeURIComponent(title)}`;
+                shareUrl = `https://t.me/share/url?url=${encodeURIComponent(this.currentShareUrl)}&text=${encodeURIComponent(text)}`;
                 break;
             default:
                 return;
