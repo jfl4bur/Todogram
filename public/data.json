@@ -1,5 +1,6 @@
 [
   {
+<<<<<<< HEAD
     "Título": "El amo",
     "ID TMDB": "744334",
     "TMDB": "https://www.themoviedb.org/movie/744334-hozyain",
@@ -24,6 +25,58 @@
     "Categoría": "",
     "Video iframe": "https://todogram.upn.one/#loctvh",
     "Video iframe 1": "https://todogram.strp2p.live/#dnc3i"
+=======
+    "Título": "joder tio",
+    "ID TMDB": "1061474",
+    "TMDB": "https://www.themoviedb.org/movie/1061474-superman",
+    "Synopsis": "❌ [2025-07-09T22:25:33.733Z] ERROR: ❌ Error al obtener estadísticas: body failed validation: body.start_cursor should be a string or `undefined`,",
+    "Portada": "https://res.cloudinary.com/de7knrhj7/image/upload/v1752100066/notion-uploads/1752100063678-fvUJb08yatV2b3NUSwuYdQKYoFd.webp.webp",
+    "Carteles": "https://res.cloudinary.com/de7knrhj7/image/upload/v1752100067/notion-uploads/1752100065102-eU7IfdWq8KQy0oNd4kKXS0QUR08.webp.webp",
+    "Géneros": "Terror · Western",
+    "Año": "2025",
+    "Duración": "8h 25m",
+    "Puntuación 1-10": "8.9",
+    "Trailer": "https://www.youtube.com/watch?v=KWoJAz9YiPc",
+    "Ver Película": "",
+    "Audios": "🇹🇷 Turco(Türkçe)",
+    "Subtítulos": "[㏄] Inglés (English)",
+    "Título original": "Superman",
+    "Productora(s)": "DC Studios, Troll Court Entertainment, The Safran Company",
+    "Idioma(s) original(es)": "en",
+    "País(es)": "United States of America",
+    "Director(es)": "James Gunn",
+    "Escritor(es)": "James Gunn",
+    "Reparto principal": "David Corenswet, Rachel Brosnahan, Nicholas Hoult, Edi Gathegi, Anthony Carrigan",
+    "Categoría": "",
+    "Video iframe": "https://todogram.upn.one/#pkshnv",
+    "Video iframe 1": "https://todogram.strp2p.live/#rlwqe"
+  },
+  {
+    "Título": "vale ahora si",
+    "ID TMDB": "1376434",
+    "TMDB": "https://www.themoviedb.org/movie/1376434-predator-killer-of-killers",
+    "Synopsis": "El primer ministro del Reino Unido y el presidente de EE. UU. tienen una rivalidad pública que pone en riesgo la alianza entre sus países. Pero cuando se convierten en el blanco de un poderoso enemigo, se ven obligados a confiar el uno en el otro. Aliados con Noel, una agente del MI6, intenta frustrar una conspiración que amenaza al mundo libre.\n\n\nvale le",
+    "Portada": "https://res.cloudinary.com/de7knrhj7/image/upload/v1752052729/notion-uploads/1752052726338-qHDsrBZJRx6ZCO4tocFh3gnbosU.webp.webp",
+    "Carteles": "https://res.cloudinary.com/de7knrhj7/image/upload/v1752052730/notion-uploads/1752052728161-a3F9cXjRH488qcOqFmFZwqawBMU.webp.webp",
+    "Géneros": "Acción",
+    "Año": "2025",
+    "Duración": "8h 25m",
+    "Puntuación 1-10": "7.4",
+    "Trailer": "https://www.youtube.com/watch?v=6LxrgVndwgk",
+    "Ver Película": "",
+    "Audios": "",
+    "Subtítulos": "",
+    "Título original": "Predator: Killer of Killers",
+    "Productora(s)": "20th Century Studios, Davis Entertainment, Lawrence Gordon Productions, Toberoff Productions",
+    "Idioma(s) original(es)": "en",
+    "País(es)": "United States of America",
+    "Director(es)": "Dan Trachtenberg",
+    "Escritor(es)": "Micho Rutare",
+    "Reparto principal": "Lindsay LaVanchy, Louis Ozawa, Rick Gonzalez, Michael Biehn, Doug Cockle",
+    "Categoría": "Películas",
+    "Video iframe": "https://todogram.upn.one/#pkshnv",
+    "Video iframe 1": "https://chat.deepseek.com/a/chat/s/1901e70d-5967-4dc5-9f7d-e2ffca4bbb2d"
+>>>>>>> 500547f0531fd4cdbde77a23799bb5a7bd25f794
   },
   {
     "Título": "Jefes de Estado",
@@ -487,7 +540,7 @@
     "Idioma(s) original(es)": "en",
     "País(es)": "Italy, United States of America",
     "Director(es)": "Scott Weintrob",
-    "Escritor(es)": "Samuel Bartlett, Andrea Iervolino, Ferdinando Dell'Omo",
+    "Escritor(es)": "Ferdinando Dell'Omo, Samuel Bartlett, Andrea Iervolino",
     "Reparto principal": "Ольга Куриленко, Harvey Keitel, Oliver Trevena, Alice Astons, Talia Asseraf",
     "Categoría": "Películas",
     "Video iframe": "https://todogram.upn.one/#8topnj",
@@ -981,7 +1034,7 @@
     "Idioma(s) original(es)": "fr",
     "País(es)": "France",
     "Director(es)": "Nils Tavernier",
-    "Escritor(es)": "Nils Tavernier, Guy Birenbaum, Laurent Bertoni",
+    "Escritor(es)": "Laurent Bertoni, Nils Tavernier, Guy Birenbaum",
     "Reparto principal": "Violette Guillon, Guillaume Gallienne, Adeline D'Hermy, Sandrine Bonnaire, Laurent Bateau",
     "Categoría": "Películas",
     "Video iframe": "https://todogram.upn.one/#isyqoz",
@@ -1267,7 +1320,7 @@
     "Idioma(s) original(es)": "ro",
     "País(es)": "Hungary, Romania",
     "Director(es)": "Tudor Giurgiu",
-    "Escritor(es)": "Cecilia Ștefănescu, Tudor Giurgiu",
+    "Escritor(es)": "Tudor Giurgiu, Cecilia Ștefănescu",
     "Reparto principal": "Alex Calangiu, Catalin Herlo, Iulian Postelnicu, Ionuţ Caras, Alexandru Papadopol",
     "Categoría": "Películas",
     "Video iframe": "https://todogram.upn.one/#jckwj3",
@@ -2255,7 +2308,7 @@
     "Idioma(s) original(es)": "fr",
     "País(es)": "Belgium, France",
     "Director(es)": "Gilles Lellouche",
-    "Escritor(es)": "Gilles Lellouche, Audrey Diwan, Ahmed Hamidi, Julien Lambroschini",
+    "Escritor(es)": "Gilles Lellouche, Audrey Diwan, Julien Lambroschini, Ahmed Hamidi",
     "Reparto principal": "Adèle Exarchopoulos, François Civil, Mallory Wanecque, Malik Frikah, Alain Chabat",
     "Categoría": "Películas",
     "Video iframe": "https://todogram.upn.one/#6hvvwn",
@@ -4101,7 +4154,7 @@
     "Idioma(s) original(es)": "en",
     "País(es)": "United States of America",
     "Director(es)": "Jonathan Eusebio",
-    "Escritor(es)": "Luke Passmore, Matthew Murray, Josh Stoddard",
+    "Escritor(es)": "Luke Passmore, Josh Stoddard, Matthew Murray",
     "Reparto principal": "Ke Huy Quan, Ariana DeBose, Daniel Wu, Mustafa Shakir, Lio Tipton",
     "Categoría": "Películas",
     "Video iframe": "https://todogram.upn.one/#3vibjm",
@@ -4725,7 +4778,11 @@
     "Idioma(s) original(es)": "fr",
     "País(es)": "Germany, Belgium, France",
     "Director(es)": "Mareike Engelhardt",
+<<<<<<< HEAD
     "Escritor(es)": "Bastian Wiegelmann, Céline Martelet, Mareike Engelhardt",
+=======
+    "Escritor(es)": "Mareike Engelhardt, Céline Martelet, Bastian Wiegelmann",
+>>>>>>> 500547f0531fd4cdbde77a23799bb5a7bd25f794
     "Reparto principal": "Megan Northam, Lubna Azabal, Natacha Krief, Lena Lauzemis, Klara Wöedermann",
     "Categoría": "Películas",
     "Video iframe": "https://todogram.upn.one/#onwai3",
@@ -4933,7 +4990,7 @@
     "Idioma(s) original(es)": "en",
     "País(es)": "United States of America",
     "Director(es)": "Patricia Riggen",
-    "Escritor(es)": "Noah Miller, Logan Miller, Caitlin Parrish, Erica Weiss",
+    "Escritor(es)": "Logan Miller, Noah Miller, Caitlin Parrish, Erica Weiss",
     "Reparto principal": "Viola Davis, Anthony Anderson, Marsai Martin, Ramón Rodríguez, Antony Starr",
     "Categoría": "Películas",
     "Video iframe": "https://todogram.upn.one/#s9c8j1",
@@ -5452,7 +5509,7 @@
     "Productora(s)": "Ekipa, Open Mind Production",
     "Idioma(s) original(es)": "pl",
     "País(es)": "Poland",
-    "Director(es)": "Barbara Białowąs, Tomasz Mandes",
+    "Director(es)": "Tomasz Mandes, Barbara Białowąs",
     "Escritor(es)": "Tomasz Mandes, Mojca Tirš, Blanka Lipińska",
     "Reparto principal": "Anna-Maria Sieklucka, Michele Morrone, Simone Susinna, Magdalena Lamparska, Otar Saralidze",
     "Categoría": "Películas",
@@ -7064,7 +7121,7 @@
     "Productora(s)": "Ekipa, Open Mind Production",
     "Idioma(s) original(es)": "pl",
     "País(es)": "Poland",
-    "Director(es)": "Barbara Białowąs, Tomasz Mandes",
+    "Director(es)": "Tomasz Mandes, Barbara Białowąs",
     "Escritor(es)": "Tomasz Mandes, Mojca Tirš, Blanka Lipińska",
     "Reparto principal": "Anna-Maria Sieklucka, Michele Morrone, Simone Susinna, Magdalena Lamparska, Otar Saralidze",
     "Categoría": "Películas",
@@ -7377,7 +7434,7 @@
     "Idioma(s) original(es)": "de",
     "País(es)": "Austria, Germany",
     "Director(es)": "Severin Fiala, Veronika Franz",
-    "Escritor(es)": "Severin Fiala, Veronika Franz",
+    "Escritor(es)": "Veronika Franz, Severin Fiala",
     "Reparto principal": "Anja Plaschg, Maria Hofstätter, David Scheid, Natalya Baranova, Lukas Walcher",
     "Categoría": "Películas",
     "Video iframe": "https://todogram.upn.one/#jcvv9f",
@@ -8781,7 +8838,7 @@
     "Idioma(s) original(es)": "en",
     "País(es)": "United States of America",
     "Director(es)": "R.J. Daniel Hanna",
-    "Escritor(es)": "R.J. Daniel Hanna, Christian Sander",
+    "Escritor(es)": "Christian Sander, R.J. Daniel Hanna",
     "Reparto principal": "Matthew Modine, Cynthia Kaye McWilliams, Jahking Guillory, Jackson Kelly, Zachary T. Robbins",
     "Categoría": "Películas",
     "Video iframe": "https://todogram.strp2p.live/#uncoq",
@@ -8832,7 +8889,7 @@
     "Productora(s)": "Ekipa, Open Mind Production",
     "Idioma(s) original(es)": "pl",
     "País(es)": "Poland",
-    "Director(es)": "Barbara Białowąs, Tomasz Mandes",
+    "Director(es)": "Tomasz Mandes, Barbara Białowąs",
     "Escritor(es)": "Tomasz Mandes, Mojca Tirš, Blanka Lipińska",
     "Reparto principal": "Anna-Maria Sieklucka, Michele Morrone, Simone Susinna, Magdalena Lamparska, Otar Saralidze",
     "Categoría": "Películas",
@@ -13524,7 +13581,11 @@
     "ID TMDB": "850931",
     "TMDB": "https://www.themoviedb.org/movie/850931",
     "Synopsis": "El viaje por carretera de la familia Matthews se torna aterrador cuando son desviados a un pequeño pueblo del que no pueden salir. Cuando su autocaravana se estrella, el sheriff Boyd Stevens y otros residentes se apresuran a salvarlos antes de que se ponga el sol.",
+<<<<<<< HEAD
     "Portada": "https://prod-files-secure.s3.us-west-2.amazonaws.com/540bbcc7-4564-40af-854c-3f5347dbae03/01e94103-5c25-432f-95a4-8d2a2cc0b3ac/6VKsznJrIq1q87Hot5EEPuvub1g.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB466TC4XW27C%2F20250710%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250710T102126Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIBoG2O5TFO%2BtR16kzNAlkLdftqfiT7cqtnZ2uUyu%2FvuRAiASsHaijbNEz3g0C5os7Bt2HFgc0AA4xeabIsqSB2nSAyqIBAi7%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAAaDDYzNzQyMzE4MzgwNSIM7SKWpkNW2U5%2Fz02KKtwDhhYi0Vs7ZFb7r0bJgeTOcedN2vfAtGTLTMXf1UTLHXx7kB%2BZM5yHlmo4Cis0yGK6Ntbk9T9JhUYxTh%2B0nbfYHCyZR091QVRdygtO6jhgYT%2BKoOU6DP7rjNpBIU5trp1IkQ3QFD8bMsjaIwTkO%2F3EBGGPwsagd2agBaJaxoDA2httmm%2BYcTyyvciz62%2FfVqD%2FDgly70ehjd0bF2N1Q9jnUpTXt%2FAO7Dz%2Feq32RNt6Dc%2FS4yCjjArAeSt7LgK4THN80H%2F%2B3UVKWhiBLq0BnDvcU9fzWaztcsWjam3YtFVeZaZJWcXEMNuuPpfiR1y2hunrT5wEwgHWbs7InzYtdZqfdsWhQG29HFKDcjPPxCgHuRW1fyqKfxCOpMuUcLjrlAEXnfJYBI%2B8JeDQUm54jkUYktePAAuUI0zfWsz297FchGiWg3cuEiBOP2wKP1J2ZpEio7%2Fz4YkePDmvT77CwAj1evRP10LmUDnYWkYIkeMVyL0JsuRk41fMRBcrajTmGlhmChXg6MQ9nak2uV3Yp9AqDdBE6b1AptIrq1pBKOgIJN377sKKnmn1yxn1cqt7y2G52fFwiGWAM329A3v9aWe7HYbJKvIM3bl3R%2B1EpLGp1S2TEqjeTcCcky0qfKIwsI%2B%2BwwY6pgFOgNc0qsrD3d4UbaHH8ABJ21B3tRkBm0nQ0Hr419axCQjYogvWZox670tmGiI6G%2FWAtg15SsOcXwNg8qnvzkHOye1GJ5Pd5pT2Tky9ZO9tDXqpDbOl8m3kGeVvIaKng5p8ER%2B96DD5%2Bj8jCRV9U4BKiAOC%2FGcF30S7Pwl09Jk5PsaTveeU7wr%2F5N1w1QqywFKjcw1MlzQ6VKHCEHhYnKhP724A71tP&X-Amz-Signature=7c069e4ec3a05fb5b80539f21f98dfda14b6c63f6f8360f277d81e7cbf897d72&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject",
+=======
+    "Portada": "https://prod-files-secure.s3.us-west-2.amazonaws.com/540bbcc7-4564-40af-854c-3f5347dbae03/01e94103-5c25-432f-95a4-8d2a2cc0b3ac/6VKsznJrIq1q87Hot5EEPuvub1g.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB4663ZMAHMVC%2F20250710%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250710T035350Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDCYjprOFarnVEap6aRdRWbHafzFCTcrnKtm4KdQPWTUgIgM1HIBDZKu0uyUGj4lcOA1u2so%2FeYxJhKEeZOiu1PnfMqiAQItf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw2Mzc0MjMxODM4MDUiDBOmUMJRoaJ%2FRl7WZSrcA9znELaogPuEBZhxDh2j9JBGrgYQQtuxJYce8YuYjcNJmkbo0NZ4JC4%2FOwHdM2orqQcd8ekPJgagbpZlwp%2FjZpbjKjYEdKW8MpNkxtbxtbuv144KFv2eASfe0jpfYP9IFAXNCKTyeLzjLgXK%2BXVecCyG15Gk%2BenQrMr9xKm6aiB2ENERSn%2BxQrGLguq5F75E6eKmHtRx%2B5nST%2F0PbJ47%2B9yRc7nrg6QvLd74S0C%2Fs0Orbl6M4xpNR3cwzuwBoOI0nl1cVh%2BwRm%2BJeIWCpwwtnv8wvaCOvO77y23vtyUnsa0bliZA%2BUcfxWqVqptRyt3vS0BJE1gjBeA%2BlQWARNWeT6ovhV%2BUzLnMo%2BYG%2BJyXpRW2XjphOTRH3uK%2B6n5%2FJefZVPFNAbJ3uEDo582SCzWy1KtW84ZTLMio51qRwHm0H5feVrC%2FE6fLOFyf2TKg0KyCIo3I0IORGqO2N0RcPfeiH3OVz3TCxnysWWtqpYvBVDOn%2FhvvuEELhRPPs6fOHohC68CJRDRkc6cGjE7huIrt8f4%2FbY00b2%2FpkeDL%2FaetbdxxbLF94fPvE6dUc68emSC00oOWLNqRkcXMNqcDbyv%2BarzV4DmbS%2BKwH626Lxq2CEyAgCdVcMXPUjkbpY9RMIDlvMMGOqUBNnmW7hWZtWNUezL3TT2%2FC1D%2BriZ%2Fq3yT8m0Q8tRdc5ouVZT7eIr3BUOfR1nEAhxQWpsD1n6S4ggWAhUenP75RQoIfJbqeCKxikxbwFFjfDluPhtH11OW4C1%2BjDZ9%2Fp9wO2LapIT%2FJWQNYttzQlUztMWKwB8JLvXGWKjS%2FGbd3sj1xKejWU0kSXQ0bwPngFSXOZUOp9VjohlhGwL7y6cvmeXUUQ2o&X-Amz-Signature=2e407b4a841f407fb3ce53dd02975981831a3d936d5eccf1c8e997bbd9eae65f&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject",
+>>>>>>> 500547f0531fd4cdbde77a23799bb5a7bd25f794
     "Carteles": "",
     "Géneros": "Terror",
     "Año": "2020",
@@ -14980,7 +15041,11 @@
     "ID TMDB": "507241",
     "TMDB": "https://www.themoviedb.org/movie/507241",
     "Synopsis": "Ganar está en la ejecución.\n\nJoe Flood, un sicario con enfermedad terminal, contrata a un asesino para acabar con su vida. Tras descubrir que su diagnóstico era erróneo, debe enfrentarse a antiguos colegas que intentan matarlo.",
+<<<<<<< HEAD
     "Portada": "https://prod-files-secure.s3.us-west-2.amazonaws.com/540bbcc7-4564-40af-854c-3f5347dbae03/e142273e-ff76-4f7d-8d4f-62390c987274/El_juego_del_asesino.Todogram.webp?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB466TC4XW27C%2F20250710%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250710T102127Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIBoG2O5TFO%2BtR16kzNAlkLdftqfiT7cqtnZ2uUyu%2FvuRAiASsHaijbNEz3g0C5os7Bt2HFgc0AA4xeabIsqSB2nSAyqIBAi7%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAAaDDYzNzQyMzE4MzgwNSIM7SKWpkNW2U5%2Fz02KKtwDhhYi0Vs7ZFb7r0bJgeTOcedN2vfAtGTLTMXf1UTLHXx7kB%2BZM5yHlmo4Cis0yGK6Ntbk9T9JhUYxTh%2B0nbfYHCyZR091QVRdygtO6jhgYT%2BKoOU6DP7rjNpBIU5trp1IkQ3QFD8bMsjaIwTkO%2F3EBGGPwsagd2agBaJaxoDA2httmm%2BYcTyyvciz62%2FfVqD%2FDgly70ehjd0bF2N1Q9jnUpTXt%2FAO7Dz%2Feq32RNt6Dc%2FS4yCjjArAeSt7LgK4THN80H%2F%2B3UVKWhiBLq0BnDvcU9fzWaztcsWjam3YtFVeZaZJWcXEMNuuPpfiR1y2hunrT5wEwgHWbs7InzYtdZqfdsWhQG29HFKDcjPPxCgHuRW1fyqKfxCOpMuUcLjrlAEXnfJYBI%2B8JeDQUm54jkUYktePAAuUI0zfWsz297FchGiWg3cuEiBOP2wKP1J2ZpEio7%2Fz4YkePDmvT77CwAj1evRP10LmUDnYWkYIkeMVyL0JsuRk41fMRBcrajTmGlhmChXg6MQ9nak2uV3Yp9AqDdBE6b1AptIrq1pBKOgIJN377sKKnmn1yxn1cqt7y2G52fFwiGWAM329A3v9aWe7HYbJKvIM3bl3R%2B1EpLGp1S2TEqjeTcCcky0qfKIwsI%2B%2BwwY6pgFOgNc0qsrD3d4UbaHH8ABJ21B3tRkBm0nQ0Hr419axCQjYogvWZox670tmGiI6G%2FWAtg15SsOcXwNg8qnvzkHOye1GJ5Pd5pT2Tky9ZO9tDXqpDbOl8m3kGeVvIaKng5p8ER%2B96DD5%2Bj8jCRV9U4BKiAOC%2FGcF30S7Pwl09Jk5PsaTveeU7wr%2F5N1w1QqywFKjcw1MlzQ6VKHCEHhYnKhP724A71tP&X-Amz-Signature=078751317c26e5b4753368cad80b2649677494879ec2aff99b7d35be2895b777&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject",
+=======
+    "Portada": "https://prod-files-secure.s3.us-west-2.amazonaws.com/540bbcc7-4564-40af-854c-3f5347dbae03/e142273e-ff76-4f7d-8d4f-62390c987274/El_juego_del_asesino.Todogram.webp?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB4663ZMAHMVC%2F20250710%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250710T035351Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDCYjprOFarnVEap6aRdRWbHafzFCTcrnKtm4KdQPWTUgIgM1HIBDZKu0uyUGj4lcOA1u2so%2FeYxJhKEeZOiu1PnfMqiAQItf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw2Mzc0MjMxODM4MDUiDBOmUMJRoaJ%2FRl7WZSrcA9znELaogPuEBZhxDh2j9JBGrgYQQtuxJYce8YuYjcNJmkbo0NZ4JC4%2FOwHdM2orqQcd8ekPJgagbpZlwp%2FjZpbjKjYEdKW8MpNkxtbxtbuv144KFv2eASfe0jpfYP9IFAXNCKTyeLzjLgXK%2BXVecCyG15Gk%2BenQrMr9xKm6aiB2ENERSn%2BxQrGLguq5F75E6eKmHtRx%2B5nST%2F0PbJ47%2B9yRc7nrg6QvLd74S0C%2Fs0Orbl6M4xpNR3cwzuwBoOI0nl1cVh%2BwRm%2BJeIWCpwwtnv8wvaCOvO77y23vtyUnsa0bliZA%2BUcfxWqVqptRyt3vS0BJE1gjBeA%2BlQWARNWeT6ovhV%2BUzLnMo%2BYG%2BJyXpRW2XjphOTRH3uK%2B6n5%2FJefZVPFNAbJ3uEDo582SCzWy1KtW84ZTLMio51qRwHm0H5feVrC%2FE6fLOFyf2TKg0KyCIo3I0IORGqO2N0RcPfeiH3OVz3TCxnysWWtqpYvBVDOn%2FhvvuEELhRPPs6fOHohC68CJRDRkc6cGjE7huIrt8f4%2FbY00b2%2FpkeDL%2FaetbdxxbLF94fPvE6dUc68emSC00oOWLNqRkcXMNqcDbyv%2BarzV4DmbS%2BKwH626Lxq2CEyAgCdVcMXPUjkbpY9RMIDlvMMGOqUBNnmW7hWZtWNUezL3TT2%2FC1D%2BriZ%2Fq3yT8m0Q8tRdc5ouVZT7eIr3BUOfR1nEAhxQWpsD1n6S4ggWAhUenP75RQoIfJbqeCKxikxbwFFjfDluPhtH11OW4C1%2BjDZ9%2Fp9wO2LapIT%2FJWQNYttzQlUztMWKwB8JLvXGWKjS%2FGbd3sj1xKejWU0kSXQ0bwPngFSXOZUOp9VjohlhGwL7y6cvmeXUUQ2o&X-Amz-Signature=2f070a4d68c885aca518b5fbccf4a824b10be3c52ab72bf9ff1ab42755a604f1&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject",
+>>>>>>> 500547f0531fd4cdbde77a23799bb5a7bd25f794
     "Carteles": "https://image.tmdb.org/t/p/w1280/zGLQmrmIB56kMZPnzqReIOBay1B.jpg",
     "Géneros": "Comedia · Acción · Crimen",
     "Año": "2024",
@@ -15202,8 +15267,13 @@
     "Productora(s)": "Bloody Disgusting, Shudder, Cinepocalypse, Studio71, Spooky Pictures, Image Nation Abu Dhabi",
     "Idioma(s) original(es)": "en",
     "País(es)": "United States of America",
+<<<<<<< HEAD
     "Director(es)": "Jordan Downey, Christian Long, Justin Long, Kate Siegel, Virat Pal, Justin Martinez, Jay Cheel",
     "Escritor(es)": "Mike Flanagan, Christian Long, Justin Long, Virat Pal, Evan Dickson, Jordan Downey, Kevin Stewart, Ben Turner",
+=======
+    "Director(es)": "Jordan Downey, Justin Martinez, Kate Siegel, Virat Pal, Christian Long, Justin Long, Jay Cheel",
+    "Escritor(es)": "Virat Pal, Christian Long, Mike Flanagan, Justin Long, Evan Dickson, Jordan Downey, Kevin Stewart, Ben Turner",
+>>>>>>> 500547f0531fd4cdbde77a23799bb5a7bd25f794
     "Reparto principal": "Brian Baker, Trevor Dow, Gerry Eng, Sam Gorski, Mitch Horowitz",
     "Categoría": "Películas",
     "Video iframe": "https://todogram.strp2p.live/#hd9c",
@@ -15240,7 +15310,11 @@
     "ID TMDB": "",
     "TMDB": "",
     "Synopsis": "Material que plantea la posibilidad de controlar el tiempo.",
+<<<<<<< HEAD
     "Portada": "https://prod-files-secure.s3.us-west-2.amazonaws.com/540bbcc7-4564-40af-854c-3f5347dbae03/d6d452a7-ba77-4202-b14b-0e88179f82cd/Descifrando_el_tiempo_con_Michio_Kaku_Todogram.webp?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB466TC4XW27C%2F20250710%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250710T102127Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIBoG2O5TFO%2BtR16kzNAlkLdftqfiT7cqtnZ2uUyu%2FvuRAiASsHaijbNEz3g0C5os7Bt2HFgc0AA4xeabIsqSB2nSAyqIBAi7%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAAaDDYzNzQyMzE4MzgwNSIM7SKWpkNW2U5%2Fz02KKtwDhhYi0Vs7ZFb7r0bJgeTOcedN2vfAtGTLTMXf1UTLHXx7kB%2BZM5yHlmo4Cis0yGK6Ntbk9T9JhUYxTh%2B0nbfYHCyZR091QVRdygtO6jhgYT%2BKoOU6DP7rjNpBIU5trp1IkQ3QFD8bMsjaIwTkO%2F3EBGGPwsagd2agBaJaxoDA2httmm%2BYcTyyvciz62%2FfVqD%2FDgly70ehjd0bF2N1Q9jnUpTXt%2FAO7Dz%2Feq32RNt6Dc%2FS4yCjjArAeSt7LgK4THN80H%2F%2B3UVKWhiBLq0BnDvcU9fzWaztcsWjam3YtFVeZaZJWcXEMNuuPpfiR1y2hunrT5wEwgHWbs7InzYtdZqfdsWhQG29HFKDcjPPxCgHuRW1fyqKfxCOpMuUcLjrlAEXnfJYBI%2B8JeDQUm54jkUYktePAAuUI0zfWsz297FchGiWg3cuEiBOP2wKP1J2ZpEio7%2Fz4YkePDmvT77CwAj1evRP10LmUDnYWkYIkeMVyL0JsuRk41fMRBcrajTmGlhmChXg6MQ9nak2uV3Yp9AqDdBE6b1AptIrq1pBKOgIJN377sKKnmn1yxn1cqt7y2G52fFwiGWAM329A3v9aWe7HYbJKvIM3bl3R%2B1EpLGp1S2TEqjeTcCcky0qfKIwsI%2B%2BwwY6pgFOgNc0qsrD3d4UbaHH8ABJ21B3tRkBm0nQ0Hr419axCQjYogvWZox670tmGiI6G%2FWAtg15SsOcXwNg8qnvzkHOye1GJ5Pd5pT2Tky9ZO9tDXqpDbOl8m3kGeVvIaKng5p8ER%2B96DD5%2Bj8jCRV9U4BKiAOC%2FGcF30S7Pwl09Jk5PsaTveeU7wr%2F5N1w1QqywFKjcw1MlzQ6VKHCEHhYnKhP724A71tP&X-Amz-Signature=21b840ed91dbee6dfd13e97af94aeb72bcf0fb7b9e7c0e4f6d45ee186d93a81d&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject",
+=======
+    "Portada": "https://prod-files-secure.s3.us-west-2.amazonaws.com/540bbcc7-4564-40af-854c-3f5347dbae03/d6d452a7-ba77-4202-b14b-0e88179f82cd/Descifrando_el_tiempo_con_Michio_Kaku_Todogram.webp?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB4663ZMAHMVC%2F20250710%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250710T035351Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDCYjprOFarnVEap6aRdRWbHafzFCTcrnKtm4KdQPWTUgIgM1HIBDZKu0uyUGj4lcOA1u2so%2FeYxJhKEeZOiu1PnfMqiAQItf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw2Mzc0MjMxODM4MDUiDBOmUMJRoaJ%2FRl7WZSrcA9znELaogPuEBZhxDh2j9JBGrgYQQtuxJYce8YuYjcNJmkbo0NZ4JC4%2FOwHdM2orqQcd8ekPJgagbpZlwp%2FjZpbjKjYEdKW8MpNkxtbxtbuv144KFv2eASfe0jpfYP9IFAXNCKTyeLzjLgXK%2BXVecCyG15Gk%2BenQrMr9xKm6aiB2ENERSn%2BxQrGLguq5F75E6eKmHtRx%2B5nST%2F0PbJ47%2B9yRc7nrg6QvLd74S0C%2Fs0Orbl6M4xpNR3cwzuwBoOI0nl1cVh%2BwRm%2BJeIWCpwwtnv8wvaCOvO77y23vtyUnsa0bliZA%2BUcfxWqVqptRyt3vS0BJE1gjBeA%2BlQWARNWeT6ovhV%2BUzLnMo%2BYG%2BJyXpRW2XjphOTRH3uK%2B6n5%2FJefZVPFNAbJ3uEDo582SCzWy1KtW84ZTLMio51qRwHm0H5feVrC%2FE6fLOFyf2TKg0KyCIo3I0IORGqO2N0RcPfeiH3OVz3TCxnysWWtqpYvBVDOn%2FhvvuEELhRPPs6fOHohC68CJRDRkc6cGjE7huIrt8f4%2FbY00b2%2FpkeDL%2FaetbdxxbLF94fPvE6dUc68emSC00oOWLNqRkcXMNqcDbyv%2BarzV4DmbS%2BKwH626Lxq2CEyAgCdVcMXPUjkbpY9RMIDlvMMGOqUBNnmW7hWZtWNUezL3TT2%2FC1D%2BriZ%2Fq3yT8m0Q8tRdc5ouVZT7eIr3BUOfR1nEAhxQWpsD1n6S4ggWAhUenP75RQoIfJbqeCKxikxbwFFjfDluPhtH11OW4C1%2BjDZ9%2Fp9wO2LapIT%2FJWQNYttzQlUztMWKwB8JLvXGWKjS%2FGbd3sj1xKejWU0kSXQ0bwPngFSXOZUOp9VjohlhGwL7y6cvmeXUUQ2o&X-Amz-Signature=c5fdce643e20eb0a84a70b53c4dafe69c0cd0a67f571434087d1b47f373a023a&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject",
+>>>>>>> 500547f0531fd4cdbde77a23799bb5a7bd25f794
     "Carteles": "",
     "Géneros": "Documental",
     "Año": "",
@@ -15266,7 +15340,11 @@
     "ID TMDB": "17210",
     "TMDB": "https://www.themoviedb.org/movie/17210",
     "Synopsis": "Le invitamos al mayor viaje cósmico desde el planeta Tierra hasta los lí­mites del Universo... Con una combinación única de imágenes reales obtenidas por naves espaciales, los mayores telescopios del mundo y el Hubble, y efectos visuales de última generación e imágenes por ordenador, creamos el primer viaje realista de aquí­ al infinito..",
+<<<<<<< HEAD
     "Portada": "https://prod-files-secure.s3.us-west-2.amazonaws.com/540bbcc7-4564-40af-854c-3f5347dbae03/90bf3bb7-f367-436b-9ce5-fc7480bcd9e5/Viaje_a_los_limites_del_universo_Todogram.webp?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB466TC4XW27C%2F20250710%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250710T102127Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJGMEQCIBoG2O5TFO%2BtR16kzNAlkLdftqfiT7cqtnZ2uUyu%2FvuRAiASsHaijbNEz3g0C5os7Bt2HFgc0AA4xeabIsqSB2nSAyqIBAi7%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F8BEAAaDDYzNzQyMzE4MzgwNSIM7SKWpkNW2U5%2Fz02KKtwDhhYi0Vs7ZFb7r0bJgeTOcedN2vfAtGTLTMXf1UTLHXx7kB%2BZM5yHlmo4Cis0yGK6Ntbk9T9JhUYxTh%2B0nbfYHCyZR091QVRdygtO6jhgYT%2BKoOU6DP7rjNpBIU5trp1IkQ3QFD8bMsjaIwTkO%2F3EBGGPwsagd2agBaJaxoDA2httmm%2BYcTyyvciz62%2FfVqD%2FDgly70ehjd0bF2N1Q9jnUpTXt%2FAO7Dz%2Feq32RNt6Dc%2FS4yCjjArAeSt7LgK4THN80H%2F%2B3UVKWhiBLq0BnDvcU9fzWaztcsWjam3YtFVeZaZJWcXEMNuuPpfiR1y2hunrT5wEwgHWbs7InzYtdZqfdsWhQG29HFKDcjPPxCgHuRW1fyqKfxCOpMuUcLjrlAEXnfJYBI%2B8JeDQUm54jkUYktePAAuUI0zfWsz297FchGiWg3cuEiBOP2wKP1J2ZpEio7%2Fz4YkePDmvT77CwAj1evRP10LmUDnYWkYIkeMVyL0JsuRk41fMRBcrajTmGlhmChXg6MQ9nak2uV3Yp9AqDdBE6b1AptIrq1pBKOgIJN377sKKnmn1yxn1cqt7y2G52fFwiGWAM329A3v9aWe7HYbJKvIM3bl3R%2B1EpLGp1S2TEqjeTcCcky0qfKIwsI%2B%2BwwY6pgFOgNc0qsrD3d4UbaHH8ABJ21B3tRkBm0nQ0Hr419axCQjYogvWZox670tmGiI6G%2FWAtg15SsOcXwNg8qnvzkHOye1GJ5Pd5pT2Tky9ZO9tDXqpDbOl8m3kGeVvIaKng5p8ER%2B96DD5%2Bj8jCRV9U4BKiAOC%2FGcF30S7Pwl09Jk5PsaTveeU7wr%2F5N1w1QqywFKjcw1MlzQ6VKHCEHhYnKhP724A71tP&X-Amz-Signature=d5acca1aa4d5226bd7c59e64a9fed7cf80b6eb4b60f8c5487671fd550f5c98fd&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject",
+=======
+    "Portada": "https://prod-files-secure.s3.us-west-2.amazonaws.com/540bbcc7-4564-40af-854c-3f5347dbae03/90bf3bb7-f367-436b-9ce5-fc7480bcd9e5/Viaje_a_los_limites_del_universo_Todogram.webp?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB4663ZMAHMVC%2F20250710%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250710T035351Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDCYjprOFarnVEap6aRdRWbHafzFCTcrnKtm4KdQPWTUgIgM1HIBDZKu0uyUGj4lcOA1u2so%2FeYxJhKEeZOiu1PnfMqiAQItf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw2Mzc0MjMxODM4MDUiDBOmUMJRoaJ%2FRl7WZSrcA9znELaogPuEBZhxDh2j9JBGrgYQQtuxJYce8YuYjcNJmkbo0NZ4JC4%2FOwHdM2orqQcd8ekPJgagbpZlwp%2FjZpbjKjYEdKW8MpNkxtbxtbuv144KFv2eASfe0jpfYP9IFAXNCKTyeLzjLgXK%2BXVecCyG15Gk%2BenQrMr9xKm6aiB2ENERSn%2BxQrGLguq5F75E6eKmHtRx%2B5nST%2F0PbJ47%2B9yRc7nrg6QvLd74S0C%2Fs0Orbl6M4xpNR3cwzuwBoOI0nl1cVh%2BwRm%2BJeIWCpwwtnv8wvaCOvO77y23vtyUnsa0bliZA%2BUcfxWqVqptRyt3vS0BJE1gjBeA%2BlQWARNWeT6ovhV%2BUzLnMo%2BYG%2BJyXpRW2XjphOTRH3uK%2B6n5%2FJefZVPFNAbJ3uEDo582SCzWy1KtW84ZTLMio51qRwHm0H5feVrC%2FE6fLOFyf2TKg0KyCIo3I0IORGqO2N0RcPfeiH3OVz3TCxnysWWtqpYvBVDOn%2FhvvuEELhRPPs6fOHohC68CJRDRkc6cGjE7huIrt8f4%2FbY00b2%2FpkeDL%2FaetbdxxbLF94fPvE6dUc68emSC00oOWLNqRkcXMNqcDbyv%2BarzV4DmbS%2BKwH626Lxq2CEyAgCdVcMXPUjkbpY9RMIDlvMMGOqUBNnmW7hWZtWNUezL3TT2%2FC1D%2BriZ%2Fq3yT8m0Q8tRdc5ouVZT7eIr3BUOfR1nEAhxQWpsD1n6S4ggWAhUenP75RQoIfJbqeCKxikxbwFFjfDluPhtH11OW4C1%2BjDZ9%2Fp9wO2LapIT%2FJWQNYttzQlUztMWKwB8JLvXGWKjS%2FGbd3sj1xKejWU0kSXQ0bwPngFSXOZUOp9VjohlhGwL7y6cvmeXUUQ2o&X-Amz-Signature=acb7a9e8bfc5a4794c7d1e7297829379be76261c8cdea46ddcc76c7c41eee628&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject",
+>>>>>>> 500547f0531fd4cdbde77a23799bb5a7bd25f794
     "Carteles": "https://image.tmdb.org/t/p/w1280/t4YCK5T4SEAaUycwbmNgQ1zjy4v.jpg",
     "Géneros": "Documental",
     "Año": "2008",
@@ -15957,7 +16035,7 @@
     "Idioma(s) original(es)": "en",
     "País(es)": "United States of America",
     "Director(es)": "Bradley Parker",
-    "Escritor(es)": "Carey van Dyke, Oren Peli, Shane van Dyke",
+    "Escritor(es)": "Shane van Dyke, Carey van Dyke, Oren Peli",
     "Reparto principal": "Olivia Taylor Dudley, Jesse McCartney, Devin Kelley, Jonathan Sadowski, Ingrid Bolsø Berdal",
     "Categoría": "Películas",
     "Video iframe": "https://todogram.strp2p.live/#awwu",
@@ -16113,7 +16191,7 @@
     "Idioma(s) original(es)": "es",
     "País(es)": "Spain",
     "Director(es)": "Alfonso Sánchez",
-    "Escritor(es)": "Alfonso Sánchez, Sergio Rubio, Alfonso Sánchez",
+    "Escritor(es)": "Alfonso Sánchez, Alfonso Sánchez, Sergio Rubio",
     "Reparto principal": "Alfonso Sánchez, Alberto López, Carmen Canivell, Carlos Olalla, Teresa Arbolí",
     "Categoría": "Películas",
     "Video iframe": "",
@@ -16373,7 +16451,11 @@
     "Idioma(s) original(es)": "pl",
     "País(es)": "Poland",
     "Director(es)": "Filip Zylber",
+<<<<<<< HEAD
     "Escritor(es)": "Wiktor Piątkowski, Marianna Pochron, Natalia Matuszek",
+=======
+    "Escritor(es)": "Wiktor Piątkowski, Natalia Matuszek, Marianna Pochron",
+>>>>>>> 500547f0531fd4cdbde77a23799bb5a7bd25f794
     "Reparto principal": "Anna Próchniak, Michał Czernecki, Iwo Rajski, Piotr Rogucki, Monika Krzywkowska",
     "Categoría": "Películas",
     "Video iframe": "",
@@ -17179,7 +17261,7 @@
     "Idioma(s) original(es)": "da",
     "País(es)": "Denmark, Germany, Norway, Sweden",
     "Director(es)": "Christoffer Boe",
-    "Escritor(es)": "Mikkel Nørgaard, Bo Hr. Hansen, Nikolaj Arcel",
+    "Escritor(es)": "Bo Hr. Hansen, Nikolaj Arcel, Mikkel Nørgaard",
     "Reparto principal": "Nikolaj Lie Kaas, Fares Fares, Johanne Louise Schmidt, Søren Pilmark, Fanny Leander Bornedal",
     "Categoría": "Películas",
     "Video iframe": "",
@@ -17283,7 +17365,7 @@
     "Idioma(s) original(es)": "en",
     "País(es)": "United States of America",
     "Director(es)": "Pearry Reginald Teo",
-    "Escritor(es)": "Josh Nadler, Pearry Reginald Teo",
+    "Escritor(es)": "Pearry Reginald Teo, Josh Nadler",
     "Reparto principal": "Alexis Iacono, India Eisley, Bruce Davison, Ethan Peck, Zack Ward",
     "Categoría": "Películas",
     "Video iframe": "",
@@ -17372,7 +17454,11 @@
     "ID TMDB": "823625",
     "TMDB": "https://www.themoviedb.org/movie/823625",
     "Synopsis": "Travis Block, un agente del gobierno en la sombra que se especializa en eliminar operativos cuyas coberturas han sido expuestas, descubre una conspiración mortal dentro de sus propias filas que alcanza los niveles más altos del poder.",
+<<<<<<< HEAD
     "Portada": "https://prod-files-secure.s3.us-west-2.amazonaws.com/540bbcc7-4564-40af-854c-3f5347dbae03/5aefd1db-a2dc-48f8-9b82-7e4e2cdbdaab/portadaTodogram_Notion.webp?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB4666DZ6CFPX%2F20250710%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250710T102129Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDRHwtEa%2BkqWbQ1OkQitB2LjnxgTktwNnDnSqDqs010PwIgKzEVLQX0Nm%2B%2Fbhu9T308zbJ9ESa9Ym%2BV2KdpjhOX96oqiAQIu%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw2Mzc0MjMxODM4MDUiDE97Czkbw3T3i08KPircAxRm%2B4BBNDpibilL%2FVRKSmH3GO%2FdaFGRx44k%2B2rbwCy27C5bZ%2FOzahO3%2BdQ0cXj5jJkmtkfQ3bl%2BalbeRkfXVrzf7EqBbHZhRyfbZgTiAsGzvsPozR9IGJltE6QQ2VjPzECC5flOhNCQBZx9L8Ao6pNxf0X9eS%2B1QXaPkSSG8aC3Lx4XgkXIEiGMieIlz7yCAnJ8V%2BR6ZG%2Fle3SxDAAL8CgSrWtLkCynmJBCaLfoy8toWM%2FLwviBenT5JIe9qQSbIogdmDAnkLDWv6osCopqcUYPVkL%2FeFdNU5kzyA%2ByYQsp4yYB4Um8Xil%2FYg1lfxpZjrluA3YUITOJbcwhtOX0SG9lVzYGA0WI42s8gQ3yexWNEppVJ917eHA7TaJX5ACaVjmtjN8gAeJsWwVFXf4ASbHdKJwS9OkTwIxFq52xxPBQB%2BvJAt5n6Vrjn1YWQtlPNPxTTuhQ9K4%2B%2FNxidMUWNOMH80pg87vzrtSE%2FtqSGrOznyjSfIa9VoFzvOsCeB%2FL3E5mORAuTkbrR3ChpFhU%2FP90p6Udls2y1m2w0hE6hmte94KyauHnNtD%2F51T25Q%2FYzGOErx4VDrmdR2J3o2I6NuwJOSrT9p6%2F3qwtaA3EJiYpLf2Mz41qVWPZoSqFMJGPvsMGOqUBb9Nsgkke%2Bp59ktbR%2BhOkyMafS0oGTr5lOSsSI57hZsqyCnJhrAbCbztwfEO31fqh2a0X7ahi2WYEArkg7MYAZVFJCsc87DF56ks3fa1mGe24et0oz%2Fu57sMvJWCplIw%2FkNUKVhNPtM8SoTmmslXiHk8YjTq%2BfUodSaLF5wNwaWHsZHJRKkzD0mkpGn4e68C14u%2FIxSVF2BlhOOCwuojRMm1xA2xF&X-Amz-Signature=1319574c68266d40e4ea27083b9f50d4fc481aa030342d9deb164a89fc25064a&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject",
+=======
+    "Portada": "https://prod-files-secure.s3.us-west-2.amazonaws.com/540bbcc7-4564-40af-854c-3f5347dbae03/5aefd1db-a2dc-48f8-9b82-7e4e2cdbdaab/portadaTodogram_Notion.webp?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB466XKFKZMLS%2F20250710%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250710T035352Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQD2gkt8GDjU%2B3oVQGBmLetzet4MXui40u2zJkBZn%2FZvpQIgY17vgZ%2BCHIXttf4D1YaUmZqBqDd6xwa5O1%2Fco7boJk0qiAQItf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw2Mzc0MjMxODM4MDUiDA5mO8ZGBX1swJl8uyrcAzqTVli8uJhv5Tf7MlEYtO0b3aE1lhqUYYsGwbXUnI6XTLqkaT6izH%2BZQda8XdYqncYtm7AXisMy9REl8oyGlhKNd0hIPWkIxJK7lu4xVUv3Fud2QVvUub5ARmPnX1BM%2BttsujmTaL7Zn%2FMLr%2FDjgq8%2BE%2BwYfF0GpR8xUUGqTz9hNKyjcDwEnIkGPVtJcFuKYQ2xi3cnykn5tvS9yxMIGMeL3x84gbbqun5E4%2B17vppJ0TJtzyHWwxdWSFmFXgbC6uswzi4%2FMvdNRbtrZ%2FyF4czr%2F%2Fa9Ovv4rYkAvc%2BTXLRa6s8HiIqBrE4P87YShzJOk5V8ZnkLE1QUDFSiSp5FuhYDG9mdhUWXynfXBCcV868Xa3yFkuAG0n2WshbhHdhjwiPPamOE09wtG%2F6iq5%2B9iKX7ZkFSDuzCi08bB1nOUeGIUS5BDNIpsvqwHuKnyAoS5rAEpzlMVpYqx8nBC9C6qneiUY8xiN2N8jJzVw9pM43RV6guA%2FE1aU9Gk3UWTt9LLDAHcTpaFyzchpcmDinGVkRHf1PfGfRfxibJlsThFauLni1%2Fo3u9qguMPOvdVpKs5%2FvfKumJrTsUilR94Oj7mRxYXARs9anSu%2FnETev7lhe1iFmu13038h6eK30%2BMIrlvMMGOqUBSW7XaXeZOWNQjc1R60Hybha6Q%2FwWRXbYA7kgOjh68mYxeBp0plGoyMAb6iOG1eWJsVBzbMYSY8spLyV24nWuXC8EAL7ryR30Nt%2Fhj%2BDMqwuz1eX0tvcmBx3f%2FVSbIMfKcpIxanaeOhkc0MGw3MLpfkj1mfVU343%2FzvdCpZMGpCMUUT6gxusfAQTKoJBSacRFSwlxNMo0VTwU37Jtowe%2Frl%2FvMh4E&X-Amz-Signature=7aeea5d975e779be6c0791d5b9bcbb59110c2a2cbe48feab716fbdb70ba635e7&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject",
+>>>>>>> 500547f0531fd4cdbde77a23799bb5a7bd25f794
     "Carteles": "https://image.tmdb.org/t/p/w1280/el7Bt94ctUYx4cZQ5sJ2HSLA1Jn.jpg",
     "Géneros": "Acción · Suspense · Drama · Aventura",
     "Año": "2022",
@@ -17398,7 +17484,11 @@
     "ID TMDB": "517320",
     "TMDB": "https://www.themoviedb.org/movie/517320",
     "Synopsis": "Karen Blixen de 63 años está en la cima del éxito y parece ser la próxima en ganar el Premio Nobel de Literatura. Tras dejar atrás su renuncia a la famosa granja en África para regresar a su Dinamarca natal y habiendo perdido al amor de su vida, ahora Karen se ha reinventado a sí misma como una sensación literaria. Ella sigue siendo un genio aislado. Sin embargo, su vida se tambaleará el día que conoce a un talentoso poeta de 30 años. Karen le promete el estrellato literario si él a cambio la obedece incondicionalmente, incluso a costa de perderlo todo en su vida...",
+<<<<<<< HEAD
     "Portada": "https://prod-files-secure.s3.us-west-2.amazonaws.com/540bbcc7-4564-40af-854c-3f5347dbae03/13e05331-39b2-4bbe-a4a0-c1c727308c3e/portadaTodogram_Notion.webp?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB4666DZ6CFPX%2F20250710%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250710T102129Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDRHwtEa%2BkqWbQ1OkQitB2LjnxgTktwNnDnSqDqs010PwIgKzEVLQX0Nm%2B%2Fbhu9T308zbJ9ESa9Ym%2BV2KdpjhOX96oqiAQIu%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw2Mzc0MjMxODM4MDUiDE97Czkbw3T3i08KPircAxRm%2B4BBNDpibilL%2FVRKSmH3GO%2FdaFGRx44k%2B2rbwCy27C5bZ%2FOzahO3%2BdQ0cXj5jJkmtkfQ3bl%2BalbeRkfXVrzf7EqBbHZhRyfbZgTiAsGzvsPozR9IGJltE6QQ2VjPzECC5flOhNCQBZx9L8Ao6pNxf0X9eS%2B1QXaPkSSG8aC3Lx4XgkXIEiGMieIlz7yCAnJ8V%2BR6ZG%2Fle3SxDAAL8CgSrWtLkCynmJBCaLfoy8toWM%2FLwviBenT5JIe9qQSbIogdmDAnkLDWv6osCopqcUYPVkL%2FeFdNU5kzyA%2ByYQsp4yYB4Um8Xil%2FYg1lfxpZjrluA3YUITOJbcwhtOX0SG9lVzYGA0WI42s8gQ3yexWNEppVJ917eHA7TaJX5ACaVjmtjN8gAeJsWwVFXf4ASbHdKJwS9OkTwIxFq52xxPBQB%2BvJAt5n6Vrjn1YWQtlPNPxTTuhQ9K4%2B%2FNxidMUWNOMH80pg87vzrtSE%2FtqSGrOznyjSfIa9VoFzvOsCeB%2FL3E5mORAuTkbrR3ChpFhU%2FP90p6Udls2y1m2w0hE6hmte94KyauHnNtD%2F51T25Q%2FYzGOErx4VDrmdR2J3o2I6NuwJOSrT9p6%2F3qwtaA3EJiYpLf2Mz41qVWPZoSqFMJGPvsMGOqUBb9Nsgkke%2Bp59ktbR%2BhOkyMafS0oGTr5lOSsSI57hZsqyCnJhrAbCbztwfEO31fqh2a0X7ahi2WYEArkg7MYAZVFJCsc87DF56ks3fa1mGe24et0oz%2Fu57sMvJWCplIw%2FkNUKVhNPtM8SoTmmslXiHk8YjTq%2BfUodSaLF5wNwaWHsZHJRKkzD0mkpGn4e68C14u%2FIxSVF2BlhOOCwuojRMm1xA2xF&X-Amz-Signature=993f26aad97bc559deeefdf6324b38502da3d0aaf08333199651cfd67832d19d&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject",
+=======
+    "Portada": "https://prod-files-secure.s3.us-west-2.amazonaws.com/540bbcc7-4564-40af-854c-3f5347dbae03/13e05331-39b2-4bbe-a4a0-c1c727308c3e/portadaTodogram_Notion.webp?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB466XKFKZMLS%2F20250710%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250710T035352Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQD2gkt8GDjU%2B3oVQGBmLetzet4MXui40u2zJkBZn%2FZvpQIgY17vgZ%2BCHIXttf4D1YaUmZqBqDd6xwa5O1%2Fco7boJk0qiAQItf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw2Mzc0MjMxODM4MDUiDA5mO8ZGBX1swJl8uyrcAzqTVli8uJhv5Tf7MlEYtO0b3aE1lhqUYYsGwbXUnI6XTLqkaT6izH%2BZQda8XdYqncYtm7AXisMy9REl8oyGlhKNd0hIPWkIxJK7lu4xVUv3Fud2QVvUub5ARmPnX1BM%2BttsujmTaL7Zn%2FMLr%2FDjgq8%2BE%2BwYfF0GpR8xUUGqTz9hNKyjcDwEnIkGPVtJcFuKYQ2xi3cnykn5tvS9yxMIGMeL3x84gbbqun5E4%2B17vppJ0TJtzyHWwxdWSFmFXgbC6uswzi4%2FMvdNRbtrZ%2FyF4czr%2F%2Fa9Ovv4rYkAvc%2BTXLRa6s8HiIqBrE4P87YShzJOk5V8ZnkLE1QUDFSiSp5FuhYDG9mdhUWXynfXBCcV868Xa3yFkuAG0n2WshbhHdhjwiPPamOE09wtG%2F6iq5%2B9iKX7ZkFSDuzCi08bB1nOUeGIUS5BDNIpsvqwHuKnyAoS5rAEpzlMVpYqx8nBC9C6qneiUY8xiN2N8jJzVw9pM43RV6guA%2FE1aU9Gk3UWTt9LLDAHcTpaFyzchpcmDinGVkRHf1PfGfRfxibJlsThFauLni1%2Fo3u9qguMPOvdVpKs5%2FvfKumJrTsUilR94Oj7mRxYXARs9anSu%2FnETev7lhe1iFmu13038h6eK30%2BMIrlvMMGOqUBSW7XaXeZOWNQjc1R60Hybha6Q%2FwWRXbYA7kgOjh68mYxeBp0plGoyMAb6iOG1eWJsVBzbMYSY8spLyV24nWuXC8EAL7ryR30Nt%2Fhj%2BDMqwuz1eX0tvcmBx3f%2FVSbIMfKcpIxanaeOhkc0MGw3MLpfkj1mfVU343%2FzvdCpZMGpCMUUT6gxusfAQTKoJBSacRFSwlxNMo0VTwU37Jtowe%2Frl%2FvMh4E&X-Amz-Signature=73a01b8ad756f4ac7f90cc242b59941d5a05b42edc6a59d9ca5c4d5ececd38f0&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject",
+>>>>>>> 500547f0531fd4cdbde77a23799bb5a7bd25f794
     "Carteles": "https://image.tmdb.org/t/p/w1280/zcTinIK3viPag7sn4XYjO4DzDaN.jpg",
     "Géneros": "Drama",
     "Año": "2018",
@@ -17424,7 +17514,11 @@
     "ID TMDB": "534038",
     "TMDB": "https://www.themoviedb.org/movie/534038",
     "Synopsis": "Cuando Michael es sacado de la escena de su accidente automovilístico y se encuentra en una habitación muy iluminada con una dama muy extraña, se entera de que para que su alma llegue al siguiente avión, necesita encontrar una pareja. Si crees que las citas en vida fueron difíciles, en la muerte es más difícil.",
+<<<<<<< HEAD
     "Portada": "https://prod-files-secure.s3.us-west-2.amazonaws.com/540bbcc7-4564-40af-854c-3f5347dbae03/ff75a598-5706-4bd3-8ff2-114b846a2e4a/portadaTodogram_Notion.webp?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB4666DZ6CFPX%2F20250710%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250710T102129Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELL%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQDRHwtEa%2BkqWbQ1OkQitB2LjnxgTktwNnDnSqDqs010PwIgKzEVLQX0Nm%2B%2Fbhu9T308zbJ9ESa9Ym%2BV2KdpjhOX96oqiAQIu%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw2Mzc0MjMxODM4MDUiDE97Czkbw3T3i08KPircAxRm%2B4BBNDpibilL%2FVRKSmH3GO%2FdaFGRx44k%2B2rbwCy27C5bZ%2FOzahO3%2BdQ0cXj5jJkmtkfQ3bl%2BalbeRkfXVrzf7EqBbHZhRyfbZgTiAsGzvsPozR9IGJltE6QQ2VjPzECC5flOhNCQBZx9L8Ao6pNxf0X9eS%2B1QXaPkSSG8aC3Lx4XgkXIEiGMieIlz7yCAnJ8V%2BR6ZG%2Fle3SxDAAL8CgSrWtLkCynmJBCaLfoy8toWM%2FLwviBenT5JIe9qQSbIogdmDAnkLDWv6osCopqcUYPVkL%2FeFdNU5kzyA%2ByYQsp4yYB4Um8Xil%2FYg1lfxpZjrluA3YUITOJbcwhtOX0SG9lVzYGA0WI42s8gQ3yexWNEppVJ917eHA7TaJX5ACaVjmtjN8gAeJsWwVFXf4ASbHdKJwS9OkTwIxFq52xxPBQB%2BvJAt5n6Vrjn1YWQtlPNPxTTuhQ9K4%2B%2FNxidMUWNOMH80pg87vzrtSE%2FtqSGrOznyjSfIa9VoFzvOsCeB%2FL3E5mORAuTkbrR3ChpFhU%2FP90p6Udls2y1m2w0hE6hmte94KyauHnNtD%2F51T25Q%2FYzGOErx4VDrmdR2J3o2I6NuwJOSrT9p6%2F3qwtaA3EJiYpLf2Mz41qVWPZoSqFMJGPvsMGOqUBb9Nsgkke%2Bp59ktbR%2BhOkyMafS0oGTr5lOSsSI57hZsqyCnJhrAbCbztwfEO31fqh2a0X7ahi2WYEArkg7MYAZVFJCsc87DF56ks3fa1mGe24et0oz%2Fu57sMvJWCplIw%2FkNUKVhNPtM8SoTmmslXiHk8YjTq%2BfUodSaLF5wNwaWHsZHJRKkzD0mkpGn4e68C14u%2FIxSVF2BlhOOCwuojRMm1xA2xF&X-Amz-Signature=a8fd50a2a1f349161946953d495defde8ed174c2c6e55c2e61c3b010f147c7c5&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject",
+=======
+    "Portada": "https://prod-files-secure.s3.us-west-2.amazonaws.com/540bbcc7-4564-40af-854c-3f5347dbae03/ff75a598-5706-4bd3-8ff2-114b846a2e4a/portadaTodogram_Notion.webp?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB466XKFKZMLS%2F20250710%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20250710T035352Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEKz%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaCXVzLXdlc3QtMiJHMEUCIQD2gkt8GDjU%2B3oVQGBmLetzet4MXui40u2zJkBZn%2FZvpQIgY17vgZ%2BCHIXttf4D1YaUmZqBqDd6xwa5O1%2Fco7boJk0qiAQItf%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw2Mzc0MjMxODM4MDUiDA5mO8ZGBX1swJl8uyrcAzqTVli8uJhv5Tf7MlEYtO0b3aE1lhqUYYsGwbXUnI6XTLqkaT6izH%2BZQda8XdYqncYtm7AXisMy9REl8oyGlhKNd0hIPWkIxJK7lu4xVUv3Fud2QVvUub5ARmPnX1BM%2BttsujmTaL7Zn%2FMLr%2FDjgq8%2BE%2BwYfF0GpR8xUUGqTz9hNKyjcDwEnIkGPVtJcFuKYQ2xi3cnykn5tvS9yxMIGMeL3x84gbbqun5E4%2B17vppJ0TJtzyHWwxdWSFmFXgbC6uswzi4%2FMvdNRbtrZ%2FyF4czr%2F%2Fa9Ovv4rYkAvc%2BTXLRa6s8HiIqBrE4P87YShzJOk5V8ZnkLE1QUDFSiSp5FuhYDG9mdhUWXynfXBCcV868Xa3yFkuAG0n2WshbhHdhjwiPPamOE09wtG%2F6iq5%2B9iKX7ZkFSDuzCi08bB1nOUeGIUS5BDNIpsvqwHuKnyAoS5rAEpzlMVpYqx8nBC9C6qneiUY8xiN2N8jJzVw9pM43RV6guA%2FE1aU9Gk3UWTt9LLDAHcTpaFyzchpcmDinGVkRHf1PfGfRfxibJlsThFauLni1%2Fo3u9qguMPOvdVpKs5%2FvfKumJrTsUilR94Oj7mRxYXARs9anSu%2FnETev7lhe1iFmu13038h6eK30%2BMIrlvMMGOqUBSW7XaXeZOWNQjc1R60Hybha6Q%2FwWRXbYA7kgOjh68mYxeBp0plGoyMAb6iOG1eWJsVBzbMYSY8spLyV24nWuXC8EAL7ryR30Nt%2Fhj%2BDMqwuz1eX0tvcmBx3f%2FVSbIMfKcpIxanaeOhkc0MGw3MLpfkj1mfVU343%2FzvdCpZMGpCMUUT6gxusfAQTKoJBSacRFSwlxNMo0VTwU37Jtowe%2Frl%2FvMh4E&X-Amz-Signature=75d9637d6b19e89680956220b8d07783a70022f0266add008614a51895ee3724&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject",
+>>>>>>> 500547f0531fd4cdbde77a23799bb5a7bd25f794
     "Carteles": "https://image.tmdb.org/t/p/w1280/hJ2gZEjOFHofbpNFFUxvhkhdciy.jpg",
     "Géneros": "Fantasía · Comedia · Romance",
     "Año": "2020",
@@ -17673,7 +17767,7 @@
     "Idioma(s) original(es)": "es",
     "País(es)": "Spain",
     "Director(es)": "Ángeles González-Sinde",
-    "Escritor(es)": "Ángeles González-Sinde, Gabriela Ybarra",
+    "Escritor(es)": "Gabriela Ybarra, Ángeles González-Sinde",
     "Reparto principal": "Susana Abaitua, Ginés García Millán, Adriana Ozores, Fernando Oyagüez, Iñaki Miramón",
     "Categoría": "Películas",
     "Video iframe": "",
@@ -18089,7 +18183,7 @@
     "Idioma(s) original(es)": "es",
     "País(es)": "Spain, United States of America",
     "Director(es)": "Álex de la Iglesia",
-    "Escritor(es)": "Jorge Guerricaechevarría, Álex de la Iglesia",
+    "Escritor(es)": "Álex de la Iglesia, Jorge Guerricaechevarría",
     "Reparto principal": "Ingrid García Jonsson, Cosimo Fusco, Caterina Murino, Nico Romero, Silvia Alonso",
     "Categoría": "Películas",
     "Video iframe": "",
@@ -18115,7 +18209,7 @@
     "Idioma(s) original(es)": "en",
     "País(es)": "Italy",
     "Director(es)": "Elisa Amoruso",
-    "Escritor(es)": "Lorenzo Ura, Patrizia Fiorellini, Elisa Amoruso",
+    "Escritor(es)": "Elisa Amoruso, Lorenzo Ura, Patrizia Fiorellini",
     "Reparto principal": "Bella Thorne, Benjamin Mascolo, Sebastiano Pigazzi, Bonnie Baddoo, Giampiero Judica",
     "Categoría": "Películas",
     "Video iframe": "",
@@ -18427,7 +18521,11 @@
     "Idioma(s) original(es)": "pt",
     "País(es)": "Brazil, United States of America",
     "Director(es)": "Vicente Amorim",
+<<<<<<< HEAD
     "Escritor(es)": "Fernando Toste, Kimi Howl Lee, Tubaldini Shelling, Vicente Amorim",
+=======
+    "Escritor(es)": "Tubaldini Shelling, Vicente Amorim, Fernando Toste, Kimi Howl Lee",
+>>>>>>> 500547f0531fd4cdbde77a23799bb5a7bd25f794
     "Reparto principal": "Masumi, Jonathan Rhys Meyers, 伊原剛志, Eijiro Ozaki, Toshiji Takeshima",
     "Categoría": "Películas",
     "Video iframe": "",
