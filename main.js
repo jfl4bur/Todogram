@@ -116,21 +116,27 @@ async function getAllNotionPages(notion, databaseId) {
   log('info', 'Obteniendo películas desde Notion...');
   
   let allPages = [];
-  let cursor = null;
+  let cursor = undefined;
   let pageCount = 0;
   
   do {
     pageCount++;
     log('info', `Obteniendo página ${pageCount} de Notion...`);
     
-    const response = await notion.databases.query({
+    const queryOptions = {
       database_id: databaseId,
-      start_cursor: cursor,
       page_size: 100
-    });
+    };
+    
+    // Solo incluir start_cursor si no es undefined
+    if (cursor !== undefined) {
+      queryOptions.start_cursor = cursor;
+    }
+    
+    const response = await notion.databases.query(queryOptions);
     
     allPages = [...allPages, ...response.results];
-    cursor = response.has_more ? response.next_cursor : null;
+    cursor = response.has_more ? response.next_cursor : undefined;
     
     log('success', `Página ${pageCount}: ${response.results.length} películas (Total: ${allPages.length})`);
     
