@@ -8,7 +8,7 @@
     <img src="../images/logo.png" alt="Logo" width="180" height="180">
   </a>
 
-  <h1 align="center">🎬 Sistema de Gestión Todogram</h1>
+  <h1 align="center">🎬 Auto Push Todogram</h1>
 
   <p align="center">
     Extracción optimizada de datos de Notion !
