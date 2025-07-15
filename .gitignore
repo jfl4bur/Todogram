@@ -28,19 +28,9 @@ backups
 
 # Ignorar carpetas
 UTILES/
-Nueva/
-panel/
-manager/
-admin_claude0/
 admin/
 
 #  SECRET_KEYS
 .env
 
 # Ignorar los scripts de sincronización locales
-start.js
-panel.js
-index_local.html
-main_verbose.js
-README-Todogram.md
-README-todouno.md
