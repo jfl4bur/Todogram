@@ -41,6 +41,37 @@ const colors = {
   gray: '\x1b[90m'
 };
 
+// Spinner para progreso
+class Spinner {
+  constructor() {
+    this.frames = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+    this.current = 0;
+    this.interval = null;
+    this.message = '';
+  }
+
+  start(message = '') {
+    this.message = message;
+    this.current = 0;
+    this.interval = setInterval(() => {
+      process.stdout.write(`\r${this.frames[this.current]} ${this.message}`);
+      this.current = (this.current + 1) % this.frames.length;
+    }, 100);
+  }
+
+  update(message) {
+    this.message = message;
+  }
+
+  stop() {
+    if (this.interval) {
+      clearInterval(this.interval);
+      this.interval = null;
+      process.stdout.write('\r');
+    }
+  }
+}
+
 // Función para logs con colores
 function log(type, message, details = '') {
   const timestamp = new Date().toLocaleString('es-ES', {
@@ -78,13 +109,6 @@ function log(type, message, details = '') {
   console.log(
     `${colors.gray}[${timestamp}]${colors.reset} ${icon} ${color}${message}${colors.reset}${details ? ` ${colors.gray}${details}${colors.reset}` : ''}`
   );
-}
-
-// Función para mostrar progreso
-function showProgress(current, total, message = '') {
-  const percentage = Math.round((current / total) * 100);
-  const progressBar = '█'.repeat(Math.floor(percentage / 5)) + '░'.repeat(20 - Math.floor(percentage / 5));
-  log('progress', `[${progressBar}] ${percentage}% (${current}/${total})`, message);
 }
 
 // Función para mostrar memoria
@@ -277,6 +301,7 @@ async function processMovies(pages, tmdbApiKey) {
   const tmdbCache = new Map();
   const processedMovies = [];
   const moviesWithMissingFields = [];
+  const spinner = new Spinner();
   
   for (let i = 0; i < pages.length; i += BATCH_SIZE) {
     const batch = pages.slice(i, i + BATCH_SIZE);
@@ -285,11 +310,17 @@ async function processMovies(pages, tmdbApiKey) {
     
     log('info', `Procesando lote ${batchNumber}/${totalBatches} (${batch.length} películas)`);
     
+    // Iniciar spinner
+    spinner.start(`Procesando lote ${batchNumber}/${totalBatches}... 0/${batch.length}`);
+    
     // Procesar lote en paralelo
     const batchPromises = batch.map(async (page, index) => {
       const movieIndex = i + index + 1;
       const notionData = extractNotionData(page.properties);
       const title = notionData.titulo || `Película ${movieIndex}`;
+      
+      // Actualizar spinner
+      spinner.update(`Procesando lote ${batchNumber}/${totalBatches}... ${index + 1}/${batch.length} - ${title}`);
       
       log('movie', `[${movieIndex}/${pages.length}] Procesando: ${title}`);
       
@@ -317,7 +348,6 @@ async function processMovies(pages, tmdbApiKey) {
       const finalData = combineData(notionData, tmdbData);
       
       stats.processedMovies++;
-      showProgress(stats.processedMovies, stats.totalMovies, `Completada: ${title}`);
       
       return finalData;
     });
@@ -326,7 +356,10 @@ async function processMovies(pages, tmdbApiKey) {
     const batchResults = await Promise.all(batchPromises);
     processedMovies.push(...batchResults);
     
-    log('success', `Lote ${batchNumber} completado - ${batchResults.length} películas procesadas`);
+    // Detener spinner
+    spinner.stop();
+    
+    log('success', `Lote ${batchNumber} completado - ${batchResults.length} películas procesadas (${stats.processedMovies}/${stats.totalMovies})`);
     
     // Mostrar memoria cada 3 lotes
     if (batchNumber % 3 === 0) {
@@ -337,12 +370,23 @@ async function processMovies(pages, tmdbApiKey) {
   return { processedMovies, moviesWithMissingFields };
 }
 
+// Mostrar películas con campos faltantes
+function showMissingFields(moviesWithMissingFields) {
+  if (moviesWithMissingFields.length > 0) {
+    console.log('\n' + '⚠️  PELÍCULAS CON CAMPOS FALTANTES:'.padEnd(60, '-'));
+    moviesWithMissingFields.forEach((movie, index) => {
+      log('warning', `${index + 1}. "${movie.title}" - Faltan: ${movie.fields.join(', ')}`);
+    });
+  }
+}
+
 // Mostrar resumen final
-function showFinalSummary(processedMovies, moviesWithMissingFields) {
+function showFinalSummary(processedMovies, outputFile) {
   const executionTime = Math.round((Date.now() - stats.startTime) / 1000);
   const minutes = Math.floor(executionTime / 60);
   const seconds = executionTime % 60;
   const timeStr = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+  const fileSize = (fs.statSync(outputFile).size / 1024).toFixed(1);
   
   console.log('\n' + '='.repeat(60));
   log('success', `${colors.bright}🎉 PROCESAMIENTO COMPLETADO 🎉${colors.reset}`);
@@ -353,13 +397,8 @@ function showFinalSummary(processedMovies, moviesWithMissingFields) {
   log('info', `💾 Datos desde caché: ${colors.bright}${stats.tmdbCacheHits}${colors.reset}`);
   log('info', `⚠️  Campos faltantes: ${colors.bright}${stats.missingFields}${colors.reset}`);
   log('info', `⏱️  Tiempo total: ${colors.bright}${timeStr}${colors.reset}`);
-  
-  if (moviesWithMissingFields.length > 0) {
-    console.log('\n' + '⚠️  PELÍCULAS CON CAMPOS FALTANTES:'.padEnd(60, '-'));
-    moviesWithMissingFields.forEach((movie, index) => {
-      log('warning', `${index + 1}. "${movie.title}" - Faltan: ${movie.fields.join(', ')}`);
-    });
-  }
+  log('success', `Archivo guardado: ${outputFile}`);
+  log('success', `Tamaño del archivo: ${fileSize} KB`);
   
   console.log('\n');
 }
@@ -397,11 +436,11 @@ async function main() {
     const outputFile = path.join(outputDir, 'data.json');
     fs.writeFileSync(outputFile, JSON.stringify(processedMovies, null, 2));
     
-    log('success', `Archivo guardado: ${outputFile}`);
-    log('success', `Tamaño del archivo: ${(fs.statSync(outputFile).size / 1024).toFixed(1)} KB`);
+    // Mostrar películas con campos faltantes
+    showMissingFields(moviesWithMissingFields);
     
-    // Mostrar resumen
-    showFinalSummary(processedMovies, moviesWithMissingFields);
+    // Mostrar resumen final
+    showFinalSummary(processedMovies, outputFile);
     
     log('success', '¡Proceso completado exitosamente!');
     
