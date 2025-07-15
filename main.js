@@ -1,4 +1,4 @@
-// main.js
+#!/usr/bin/env node
 import fs from 'fs';
 import path from 'path';
 import axios from 'axios';
@@ -7,543 +7,423 @@ import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 import dotenv from 'dotenv';
 
-// Cargar variables de entorno
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const notion = new Client({ auth: process.env.NOTION_API_KEY });
-const databaseId = process.env.NOTION_DATABASE_ID;
-const tmdbApiKey = process.env.TMDB_API_KEY;
+// Configuración
+const NOTION_DELAY = 350; // ms entre requests
+const TMDB_DELAY = 100;   // ms entre requests
+const BATCH_SIZE = 15;    // películas por lote
 
-// Limites de la API de Notion: 3 requests por segundo (333ms entre requests)
-const NOTION_RATE_LIMIT = 350; // Un poco más conservador
-// TMDB permite 40 requests por 10 segundos - optimizamos para procesamiento paralelo
-const TMDB_RATE_LIMIT = 100; // Reducido para procesamiento paralelo
+// Contadores globales
+let stats = {
+  totalMovies: 0,
+  processedMovies: 0,
+  tmdbCalls: 0,
+  tmdbCacheHits: 0,
+  missingFields: 0,
+  startTime: Date.now()
+};
 
-const delay = (ms) => new Promise((res) => setTimeout(res, ms));
-const now = () => new Date().toISOString().replace('T', ' ').substring(0, 19);
+// Colores para consola
+const colors = {
+  reset: '\x1b[0m',
+  bright: '\x1b[1m',
+  red: '\x1b[31m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  blue: '\x1b[34m',
+  magenta: '\x1b[35m',
+  cyan: '\x1b[36m',
+  white: '\x1b[37m',
+  gray: '\x1b[90m'
+};
 
-// Funciones mejoradas para extraer datos de Notion
-const getText = (property) => {
-  if (!property) return '';
+// Función para logs con colores
+function log(type, message, details = '') {
+  const timestamp = new Date().toLocaleString('es-ES', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
   
-  // Rich text
-  if (property.rich_text && property.rich_text.length > 0) {
-    return property.rich_text.map(text => text.plain_text).join('');
+  const icons = {
+    info: '📋',
+    success: '✅',
+    warning: '⚠️',
+    error: '❌',
+    progress: '🔄',
+    movie: '🎬',
+    tmdb: '🎭',
+    memory: '💾'
+  };
+  
+  const typeColors = {
+    info: colors.blue,
+    success: colors.green,
+    warning: colors.yellow,
+    error: colors.red,
+    progress: colors.cyan,
+    movie: colors.magenta,
+    tmdb: colors.yellow,
+    memory: colors.gray
+  };
+  
+  const icon = icons[type] || '📌';
+  const color = typeColors[type] || colors.white;
+  
+  console.log(
+    `${colors.gray}[${timestamp}]${colors.reset} ${icon} ${color}${message}${colors.reset}${details ? ` ${colors.gray}${details}${colors.reset}` : ''}`
+  );
+}
+
+// Función para mostrar progreso
+function showProgress(current, total, message = '') {
+  const percentage = Math.round((current / total) * 100);
+  const progressBar = '█'.repeat(Math.floor(percentage / 5)) + '░'.repeat(20 - Math.floor(percentage / 5));
+  log('progress', `[${progressBar}] ${percentage}% (${current}/${total})`, message);
+}
+
+// Función para mostrar memoria
+function showMemory() {
+  const memoryMB = (process.memoryUsage().heapUsed / 1024 / 1024).toFixed(1);
+  log('memory', `Memoria utilizada: ${memoryMB} MB`);
+}
+
+// Delay helper
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+// Validar variables de entorno
+function validateEnvironment() {
+  const required = ['NOTION_API_KEY', 'NOTION_DATABASE_ID', 'TMDB_API_KEY'];
+  const missing = required.filter(key => !process.env[key]);
+  
+  if (missing.length > 0) {
+    log('error', 'Variables de entorno faltantes:');
+    missing.forEach(key => log('error', `  - ${key}`));
+    log('info', 'Verifica tu archivo .env');
+    process.exit(1);
   }
   
-  // Title
-  if (property.title && property.title.length > 0) {
-    return property.title.map(text => text.plain_text).join('');
-  }
+  log('success', 'Variables de entorno validadas correctamente');
+}
+
+// Obtener todas las páginas de Notion
+async function getAllNotionPages(notion, databaseId) {
+  log('info', 'Obteniendo películas desde Notion...');
   
-  // Plain text
-  if (property.plain_text) {
-    return property.plain_text;
-  }
+  let allPages = [];
+  let cursor = null;
+  let pageCount = 0;
   
-  // Formula result (para campos calculados)
-  if (property.formula && property.formula.string) {
-    return property.formula.string;
-  }
+  do {
+    pageCount++;
+    log('info', `Obteniendo página ${pageCount} de Notion...`);
+    
+    const response = await notion.databases.query({
+      database_id: databaseId,
+      start_cursor: cursor,
+      page_size: 100
+    });
+    
+    allPages = [...allPages, ...response.results];
+    cursor = response.has_more ? response.next_cursor : null;
+    
+    log('success', `Página ${pageCount}: ${response.results.length} películas (Total: ${allPages.length})`);
+    
+    if (cursor) await delay(NOTION_DELAY);
+    
+  } while (cursor);
   
-  return '';
-};
+  stats.totalMovies = allPages.length;
+  log('success', `Total de películas obtenidas: ${stats.totalMovies}`);
+  
+  return allPages;
+}
 
-const getNumber = (property) => {
-  if (!property) return '';
-  if (property.number !== null && property.number !== undefined) {
-    return property.number.toString();
-  }
-  return '';
-};
-
-const getSelect = (property) => {
-  if (!property) return '';
-  if (property.select && property.select.name) {
-    return property.select.name;
-  }
-  return '';
-};
-
-const getMultiSelect = (property) => {
-  if (!property) return '';
-  if (property.multi_select && Array.isArray(property.multi_select)) {
-    return property.multi_select.map(item => item.name).join(', ');
-  }
-  return '';
-};
-
-const getDate = (property) => {
-  if (!property) return '';
-  if (property.date && property.date.start) {
-    return property.date.start;
-  }
-  return '';
-};
-
-const getFileUrl = (property) => {
-  if (!property || !property.files || !Array.isArray(property.files)) return '';
-  const file = property.files.find((f) => f.type === 'external' || f.type === 'file');
-  return file?.external?.url || file?.file?.url || '';
-};
-
-const getUrl = (property) => {
-  if (!property) return '';
-  if (property.url) {
-    return property.url;
-  }
-  return '';
-};
-
-// Función para truncar texto y mantener ancho fijo
-const truncateText = (text, maxLength) => {
-  if (!text) return ''.padEnd(maxLength, ' ');
-  if (text.length <= maxLength) return text.padEnd(maxLength, ' ');
-  return text.substring(0, maxLength - 3) + '...';
-};
-
-// Tabla para campos faltantes
-const missingFieldsTable = [];
-
-const logProgress = (count, total, status, missingFields = [], batchSize = 10) => {
-  const percent = Math.floor((count / total) * 100);
-  const filled = Math.floor(percent / 4); // 25 bloques
-  const filledBar = '█'.repeat(filled);
-  const emptyBar = '░'.repeat(25 - filled);
-  const bar = `\x1b[38;5;27m${filledBar}\x1b[38;5;75m${emptyBar}\x1b[0m`;
-  const movieTitle = status.replace('Procesando: ', '');
-  const truncatedTitle = truncateText(movieTitle, 40);
-  const percentText = `\x1b[1m\x1b[31m${percent.toString().padStart(3, ' ')}%\x1b[0m`;
-  const countText = `\x1b[1m\x1b[33m${count.toString().padStart(3, ' ')}/${total}\x1b[0m`;
-
-  const lines = [];
-
-  lines.push(`\x1b[999F`); // Cursor al tope sin limpiar todo
-  lines.push(`\x1b[1m\x1b[36m╔═══════════════════════════════════════════════════════════════════════════════════════╗\x1b[0m`);
-  lines.push(`\x1b[1m\x1b[36m║                              \x1b[33m🎬 PROCESANDO PELÍCULAS 🎬\x1b[36m                               ║\x1b[0m`);
-  lines.push(`\x1b[1m\x1b[36m╠═══════════════════════════════════════════════════════════════════════════════════════╣\x1b[0m`);
-  lines.push(`\x1b[1m\x1b[36m║ \x1b[33m📊 Total películas: \x1b[1m\x1b[32m${total.toString().padStart(3, ' ')}\x1b[0m \x1b[33m│ Procesamiento paralelo: \x1b[1m\x1b[32m${batchSize.toString().padStart(2, ' ')}\x1b[0m \x1b[33mhilos simultáneos\x1b[0m             \x1b[36m   ║\x1b[0m`);
-  lines.push(`\x1b[1m\x1b[36m╠═══════════════════════════════════════════════════════════════════════════════════════╣\x1b[0m`);
-
-  lines.push(`║ ${bar} ║ ${percentText} │ ${countText} │ \x1b[1m\x1b[32m${truncatedTitle.padEnd(40)} ║\x1b[0m`);
-
-  lines.push(`\x1b[1m\x1b[36m╠═══════════════════════════════════════════════════════════════════════════════════════╣\x1b[0m`);
-  lines.push(`\x1b[1m\x1b[36m║                              \x1b[31m⚠️  CAMPOS FALTANTES ⚠️\x1b[36m                                  ║\x1b[0m`);
-  lines.push(`\x1b[1m\x1b[36m╠═══════════════════════════════════════════════════════════════════════════════════════╣\x1b[0m`);
-  lines.push(`\x1b[1m\x1b[36m║ \x1b[1m\x1b[33mTÍTULO                                 \x1b[36m│ \x1b[1m\x1b[31mCAMPOS FALTANTES\x1b[36m                             ║\x1b[0m`);
-  lines.push(`\x1b[1m\x1b[36m╠═══════════════════════════════════════════════════════════════════════════════════════╣\x1b[0m`);
-
-
-  const recentMissing = missingFieldsTable.slice(-12);
-  for (let i = 0; i < 12; i++) {
-    const entry = recentMissing[i];
-    if (entry) {
-      const title = truncateText(entry.title, 38);
-      const fields = truncateText(entry.fields.join(', '), 44);
-      lines.push(`\x1b[1m\x1b[36m║ \x1b[33m${title}\x1b[36m │ \x1b[31m${fields}\x1b[36m`);
-    } else {
-      lines.push(`\x1b[36m║ ${' '.repeat(86)}║\x1b[36m`);
-    }
-  }
-
-  if (missingFieldsTable.length > 12) {
-    const remaining = missingFieldsTable.length - 12;
-    const remainingText = truncateText(`... y ${remaining} más`, 84);
-    lines.push(`\x1b[36m║\x1b[2m\x1b[37m ${remainingText}\x1b[0m  ║\x1b[0m`);
-  } else {
-    lines.push(`\x1b[36m║ ${' '.repeat(86)}║\x1b[0m`);
-  }
-
-  lines.push(`\x1b[1m\x1b[36m╚═══════════════════════════════════════════════════════════════════════════════════════╝\x1b[0m`);
-
-  process.stdout.write(lines.join('\n'));
-};
-
-// Cache para datos de TMDB para evitar requests duplicados
-const tmdbCache = new Map();
-
-async function fetchTMDBDetails(tmdbId, title) {
+// Obtener datos de TMDB
+async function getTMDBData(tmdbId, title, apiKey, cache) {
   const cacheKey = tmdbId || title;
   
-  if (tmdbCache.has(cacheKey)) {
-    return tmdbCache.get(cacheKey);
+  // Verificar caché
+  if (cache.has(cacheKey)) {
+    stats.tmdbCacheHits++;
+    log('tmdb', `Datos obtenidos del caché para: ${title}`);
+    return cache.get(cacheKey);
   }
-
-  let endpoint = tmdbId
-    ? `https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${tmdbApiKey}&language=es-ES&append_to_response=videos,credits`
-    : `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(title)}&api_key=${tmdbApiKey}&language=es-ES`;
-
+  
   try {
-    await delay(TMDB_RATE_LIMIT); // Rate limiting para TMDB
-    
-    const res = await axios.get(endpoint);
     let movieData = null;
     
     if (tmdbId) {
-      movieData = res.data;
-    } else {
-      const found = res.data.results?.[0];
-      if (!found) {
-        tmdbCache.set(cacheKey, null);
-        return null;
-      }
+      // Buscar por ID
+      const url = `https://api.themoviedb.org/3/movie/${tmdbId}?api_key=${apiKey}&language=es-ES&append_to_response=credits,videos`;
+      await delay(TMDB_DELAY);
+      const response = await axios.get(url);
+      movieData = response.data;
+      stats.tmdbCalls++;
+    } else if (title) {
+      // Buscar por título
+      const searchUrl = `https://api.themoviedb.org/3/search/movie?query=${encodeURIComponent(title)}&api_key=${apiKey}&language=es-ES`;
+      await delay(TMDB_DELAY);
+      const searchResponse = await axios.get(searchUrl);
+      stats.tmdbCalls++;
       
-      await delay(TMDB_RATE_LIMIT);
-      const detailRes = await axios.get(`https://api.themoviedb.org/3/movie/${found.id}?api_key=${tmdbApiKey}&language=es-ES&append_to_response=videos,credits`);
-      movieData = detailRes.data;
+      if (searchResponse.data.results?.[0]) {
+        const movieId = searchResponse.data.results[0].id;
+        const detailUrl = `https://api.themoviedb.org/3/movie/${movieId}?api_key=${apiKey}&language=es-ES&append_to_response=credits,videos`;
+        await delay(TMDB_DELAY);
+        const detailResponse = await axios.get(detailUrl);
+        movieData = detailResponse.data;
+        stats.tmdbCalls++;
+      }
     }
     
-    tmdbCache.set(cacheKey, movieData);
+    if (movieData) {
+      cache.set(cacheKey, movieData);
+      log('tmdb', `Datos obtenidos de TMDB para: ${title}`);
+    } else {
+      log('warning', `No se encontraron datos en TMDB para: ${title}`);
+    }
+    
     return movieData;
+    
   } catch (error) {
-    console.error(`Error fetching TMDB data for ${cacheKey}:`, error.message);
-    tmdbCache.set(cacheKey, null);
+    log('error', `Error al obtener datos de TMDB para ${title}: ${error.message}`);
     return null;
   }
 }
 
-async function getAllPages() {
-  let results = [];
-  let cursor;
-  let batchCount = 0;
-  
-  console.log('\x1b[1m\x1b[34m🚀 Iniciando extracción optimizada de datos de Notion...\x1b[0m');
-  
-  do {
-    batchCount++;
-    console.log(`\x1b[1m\x1b[36m📦 Obteniendo lote ${batchCount} (100 entradas por lote)...\x1b[0m`);
-    
-    const res = await notion.databases.query({
-      database_id: databaseId,
-      start_cursor: cursor,
-      page_size: 100,
-    });
-    
-    results = [...results, ...res.results];
-    cursor = res.has_more ? res.next_cursor : null;
-    
-    console.log(`\x1b[32m✅ Lote ${batchCount} completado: +${res.results.length} entradas (Total: ${results.length})\x1b[0m`);
-    
-    // Solo aplicar rate limiting si hay más páginas por obtener
-    if (cursor) {
-      await delay(NOTION_RATE_LIMIT);
-    }
-    
-  } while (cursor);
-  
-  console.log(`\x1b[1m\x1b[33m🎯 Extracción completada: ${results.length} entradas obtenidas en ${batchCount} lotes\x1b[0m\n`);
-  return results;
-}
-
+// Extraer datos de propiedades de Notion
 function extractNotionData(properties) {
+  const getText = (prop) => {
+    if (!prop) return '';
+    if (prop.rich_text?.[0]?.plain_text) return prop.rich_text[0].plain_text;
+    if (prop.title?.[0]?.plain_text) return prop.title[0].plain_text;
+    if (prop.formula?.string) return prop.formula.string;
+    return '';
+  };
+  
+  const getUrl = (prop) => prop?.url || '';
+  const getFiles = (prop) => prop?.files?.[0]?.external?.url || prop?.files?.[0]?.file?.url || '';
+  
   return {
+    nId: getText(properties['Nº ID']),
     titulo: getText(properties['Título']),
     tmdbUrl: getUrl(properties['TMDB']),
     synopsis: getText(properties['Synopsis']),
-    portada: getFileUrl(properties['Portada']),
-    carteles: getFileUrl(properties['Carteles']),
-    // Usar los campos de fórmulas txt que ya tienes calculados
+    portada: getFiles(properties['Portada']),
     generos: getText(properties['Géneros txt']),
-    categoria: getText(properties['Categorías txt']),
-    audios: getText(properties['Audios txt']),
-    subtitulos: getText(properties['Subtitulos txt']),
-    año: getText(properties['Año']) || getDate(properties['Fecha de lanzamiento'])?.split('-')[0],
+    año: getText(properties['Año']),
     duracion: getText(properties['Duración']),
-    puntuacion: getText(properties['Puntuación 1-10']) || getNumber(properties['Puntuación 1-10']),
+    puntuacion: getText(properties['Puntuación 1-10']),
     trailer: getUrl(properties['Trailer']),
     verPelicula: getUrl(properties['Ver Película']),
     tituloOriginal: getText(properties['Título original']),
-    productoras: getText(properties['Productora(s)']),
-    idiomas: getText(properties['Idioma(s) original(es)']),
-    paises: getText(properties['País(es)']),
     directores: getText(properties['Director(es)']),
-    escritores: getText(properties['Escritor(es)']),
     reparto: getText(properties['Reparto principal']),
     videoIframe: getUrl(properties['Video iframe']),
     videoIframe1: getUrl(properties['Video iframe 1'])
   };
 }
 
-// Función para validar y limpiar datos - SI NO HAY DATOS EN NOTION NI TMDB = CAMPO VACÍO
-function cleanFieldData(notionValue, tmdbValue) {
-  // Si hay datos en Notion, usar Notion (prioridad)
-  if (notionValue && notionValue.trim() !== '') {
-    return notionValue.trim();
-  }
+// Combinar datos de Notion y TMDB
+function combineData(notionData, tmdbData) {
+  const cleanValue = (notionValue, tmdbValue) => {
+    if (notionValue && notionValue.trim()) return notionValue.trim();
+    if (tmdbValue && tmdbValue.toString().trim()) return tmdbValue.toString().trim();
+    return '';
+  };
   
-  // Si no hay datos en Notion pero sí en TMDB, usar TMDB como fallback
-  if (tmdbValue && tmdbValue.trim() !== '') {
-    return tmdbValue.trim();
-  }
-  
-  // Si no hay datos en ninguno, retornar cadena vacía
-  return '';
-}
-
-function mergeTMDBData(notionData, tmdbData) {
-  // Extraer datos útiles de TMDB como fallback
+  // Extraer datos de TMDB
   const tmdbGenres = tmdbData?.genres?.map(g => g.name).join(', ') || '';
   const tmdbDirectors = tmdbData?.credits?.crew?.filter(c => c.job === 'Director').map(d => d.name).join(', ') || '';
-  const tmdbWriters = tmdbData?.credits?.crew?.filter(c => c.job === 'Screenplay' || c.job === 'Writer').map(w => w.name).join(', ') || '';
   const tmdbCast = tmdbData?.credits?.cast?.slice(0, 5).map(c => c.name).join(', ') || '';
-  const tmdbProductionCompanies = tmdbData?.production_companies?.map(pc => pc.name).join(', ') || '';
-  const tmdbCountries = tmdbData?.production_countries?.map(pc => pc.name).join(', ') || '';
-  const tmdbTrailer = tmdbData?.videos?.results?.find(v => v.site === 'YouTube' && v.type === 'Trailer')?.key;
+  const tmdbTrailer = tmdbData?.videos?.results?.find(v => v.type === 'Trailer' && v.site === 'YouTube');
   
-  // USAR FUNCIÓN cleanFieldData PARA TODOS LOS CAMPOS
   return {
-    titulo: cleanFieldData(notionData.titulo, tmdbData?.title),
-    tmdbId: notionData.tmdbUrl?.match(/\/movie\/(\d+)/)?.[1] || tmdbData?.id?.toString() || '',
-    tmdbUrl: cleanFieldData(notionData.tmdbUrl, tmdbData?.id ? `https://www.themoviedb.org/movie/${tmdbData.id}` : ''),
-    synopsis: cleanFieldData(notionData.synopsis, tmdbData?.overview),
-    portada: cleanFieldData(notionData.portada, tmdbData?.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbData.poster_path}` : ''),
-    carteles: cleanFieldData(notionData.carteles, tmdbData?.backdrop_path ? `https://image.tmdb.org/t/p/w1280${tmdbData.backdrop_path}` : ''),
-    generos: cleanFieldData(notionData.generos, tmdbGenres),
-    categoria: notionData.categoria || '', // Solo Notion
-    audios: notionData.audios || '', // Solo Notion
-    subtitulos: notionData.subtitulos || '', // Solo Notion
-    año: cleanFieldData(notionData.año, tmdbData?.release_date?.split('-')[0]),
-    duracion: cleanFieldData(notionData.duracion, tmdbData?.runtime ? `${Math.floor(tmdbData.runtime / 60)}h ${tmdbData.runtime % 60}m` : ''),
-    puntuacion: cleanFieldData(notionData.puntuacion, tmdbData?.vote_average ? Math.round(tmdbData.vote_average).toString() : ''),
-    trailer: cleanFieldData(notionData.trailer, tmdbTrailer ? `https://www.youtube.com/watch?v=${tmdbTrailer}` : ''),
-    verPelicula: notionData.verPelicula || '', // Solo Notion
-    tituloOriginal: cleanFieldData(notionData.tituloOriginal, tmdbData?.original_title),
-    productoras: cleanFieldData(notionData.productoras, tmdbProductionCompanies),
-    idiomas: cleanFieldData(notionData.idiomas, tmdbData?.original_language),
-    paises: cleanFieldData(notionData.paises, tmdbCountries),
-    directores: cleanFieldData(notionData.directores, tmdbDirectors),
-    escritores: cleanFieldData(notionData.escritores, tmdbWriters),
-    reparto: cleanFieldData(notionData.reparto, tmdbCast),
-    videoIframe: notionData.videoIframe || '', // Solo Notion
-    videoIframe1: notionData.videoIframe1 || '' // Solo Notion
+    'Nº ID': notionData.nId,
+    'Título': cleanValue(notionData.titulo, tmdbData?.title),
+    'TMDB': cleanValue(notionData.tmdbUrl, tmdbData?.id ? `https://www.themoviedb.org/movie/${tmdbData.id}` : ''),
+    'Synopsis': cleanValue(notionData.synopsis, tmdbData?.overview),
+    'Portada': cleanValue(notionData.portada, tmdbData?.poster_path ? `https://image.tmdb.org/t/p/w500${tmdbData.poster_path}` : ''),
+    'Géneros': cleanValue(notionData.generos, tmdbGenres),
+    'Año': cleanValue(notionData.año, tmdbData?.release_date?.split('-')[0]),
+    'Duración': cleanValue(notionData.duracion, tmdbData?.runtime ? `${Math.floor(tmdbData.runtime / 60)}h ${tmdbData.runtime % 60}m` : ''),
+    'Puntuación 1-10': cleanValue(notionData.puntuacion, tmdbData?.vote_average ? Math.round(tmdbData.vote_average).toString() : ''),
+    'Trailer': cleanValue(notionData.trailer, tmdbTrailer ? `https://www.youtube.com/watch?v=${tmdbTrailer.key}` : ''),
+    'Ver Película': notionData.verPelicula,
+    'Título original': cleanValue(notionData.tituloOriginal, tmdbData?.original_title),
+    'Director(es)': cleanValue(notionData.directores, tmdbDirectors),
+    'Reparto principal': cleanValue(notionData.reparto, tmdbCast),
+    'Video iframe': notionData.videoIframe,
+    'Video iframe 1': notionData.videoIframe1
   };
 }
 
-// PROCESAMIENTO PARALELO Y OPTIMIZADO
-async function processMoviesInBatches(pages, batchSize = 10) {
-  const total = pages.length;
-  const items = [];
-  let processed = 0;
-
-  // Procesar en lotes paralelos
-  for (let i = 0; i < pages.length; i += batchSize) {
-    const batch = pages.slice(i, i + batchSize);
+// Procesar películas en lotes
+async function processMovies(pages, tmdbApiKey) {
+  log('info', `Iniciando procesamiento de ${pages.length} películas en lotes de ${BATCH_SIZE}`);
+  
+  const tmdbCache = new Map();
+  const processedMovies = [];
+  const moviesWithMissingFields = [];
+  
+  for (let i = 0; i < pages.length; i += BATCH_SIZE) {
+    const batch = pages.slice(i, i + BATCH_SIZE);
+    const batchNumber = Math.floor(i / BATCH_SIZE) + 1;
+    const totalBatches = Math.ceil(pages.length / BATCH_SIZE);
     
+    log('info', `Procesando lote ${batchNumber}/${totalBatches} (${batch.length} películas)`);
+    
+    // Procesar lote en paralelo
     const batchPromises = batch.map(async (page, index) => {
-      const currentIndex = i + index + 1;
-      
-      // Extraer datos de Notion PRIMERO (PRIORIDAD NOTION)
+      const movieIndex = i + index + 1;
       const notionData = extractNotionData(page.properties);
+      const title = notionData.titulo || `Película ${movieIndex}`;
       
-      // Detectar campos faltantes IMPORTANTES
+      log('movie', `[${movieIndex}/${pages.length}] Procesando: ${title}`);
+      
+      // Verificar campos faltantes
       const missingFields = [];
-      const fieldsToCheck = {};
-      if (!notionData.videoIframe || notionData.videoIframe.trim() === '') {
-        fieldsToCheck['Video iframe'] = '';
-      }
-      if (!notionData.videoIframe1 || notionData.videoIframe1.trim() === '') {
-        fieldsToCheck['Video iframe 1'] = '';
-      }
-
-      
-      Object.entries(fieldsToCheck).forEach(([field, value]) => {
-        if (!value || value.trim() === '') {
-          missingFields.push(field);
-        }
-      });
+      if (!notionData.videoIframe?.trim()) missingFields.push('Video iframe');
+      if (!notionData.videoIframe1?.trim()) missingFields.push('Video iframe 1');
       
       if (missingFields.length > 0) {
-        missingFieldsTable.push({
-          title: notionData.titulo || 'Sin título',
-          fields: missingFields
-        });
+        stats.missingFields++;
+        moviesWithMissingFields.push({ title, fields: missingFields });
+        log('warning', `"${title}" - Campos faltantes: ${missingFields.join(', ')}`);
       }
       
-      logProgress(currentIndex, total, `Procesando: ${notionData.titulo}`, missingFields, batchSize);
-
-      // Obtener ID de TMDB si existe
-      const tmdbId = notionData.tmdbUrl?.match(/\/movie\/(\d+)/)?.[1];
+      // Obtener datos de TMDB si es necesario
       let tmdbData = null;
+      const tmdbId = notionData.tmdbUrl?.match(/\/movie\/(\d+)/)?.[1];
+      const needsTMDB = !notionData.synopsis || !notionData.portada || !notionData.generos || !notionData.directores;
       
-      // Solo hacer request a TMDB si faltan datos importantes Y no están en Notion
-      const needsTMDB = (!notionData.synopsis || !notionData.portada || !notionData.generos ||
-                        !notionData.año || !notionData.tituloOriginal || !notionData.directores) && 
-                        (tmdbId || notionData.titulo);
-      
-      if (needsTMDB) {
-        tmdbData = await fetchTMDBDetails(tmdbId, notionData.titulo);
+      if (needsTMDB && (tmdbId || notionData.titulo)) {
+        tmdbData = await getTMDBData(tmdbId, notionData.titulo, tmdbApiKey, tmdbCache);
       }
-
-      // Combinar datos con PRIORIDAD DE NOTION
-      const finalData = mergeTMDBData(notionData, tmdbData);
-
-      return {
-        'Título': finalData.titulo,
-        'ID TMDB': finalData.tmdbId,
-        'TMDB': finalData.tmdbUrl,
-        'Synopsis': finalData.synopsis,
-        'Portada': finalData.portada,
-        'Carteles': finalData.carteles,
-        'Géneros': finalData.generos,
-        'Año': finalData.año,
-        'Duración': finalData.duracion,
-        'Puntuación 1-10': finalData.puntuacion,
-        'Trailer': finalData.trailer,
-        'Ver Película': finalData.verPelicula,
-        'Audios': finalData.audios,
-        'Subtítulos': finalData.subtitulos,
-        'Título original': finalData.tituloOriginal,
-        'Productora(s)': finalData.productoras,
-        'Idioma(s) original(es)': finalData.idiomas,
-        'País(es)': finalData.paises,
-        'Director(es)': finalData.directores,
-        'Escritor(es)': finalData.escritores,
-        'Reparto principal': finalData.reparto,
-        'Categoría': finalData.categoria,
-        'Video iframe': finalData.videoIframe,
-        'Video iframe 1': finalData.videoIframe1
-      };
+      
+      // Combinar datos
+      const finalData = combineData(notionData, tmdbData);
+      
+      stats.processedMovies++;
+      showProgress(stats.processedMovies, stats.totalMovies, `Completada: ${title}`);
+      
+      return finalData;
     });
     
-    // Esperar a que se complete el lote
+    // Esperar a que termine el lote
     const batchResults = await Promise.all(batchPromises);
-    items.push(...batchResults);
+    processedMovies.push(...batchResults);
     
-    processed += batch.length;
+    log('success', `Lote ${batchNumber} completado - ${batchResults.length} películas procesadas`);
     
-    // Pequeña pausa entre lotes para no saturar las APIs
-    if (i + batchSize < pages.length) {
-      await delay(100); // Pausa muy pequeña
+    // Mostrar memoria cada 3 lotes
+    if (batchNumber % 3 === 0) {
+      showMemory();
     }
   }
-
-  return items;
+  
+  return { processedMovies, moviesWithMissingFields };
 }
 
-async function validateEnvironment() {
-  const missingVars = [];
+// Mostrar resumen final
+function showFinalSummary(processedMovies, moviesWithMissingFields) {
+  const executionTime = Math.round((Date.now() - stats.startTime) / 1000);
+  const minutes = Math.floor(executionTime / 60);
+  const seconds = executionTime % 60;
+  const timeStr = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
   
-  if (!process.env.NOTION_API_KEY) missingVars.push('NOTION_API_KEY');
-  if (!process.env.NOTION_DATABASE_ID) missingVars.push('NOTION_DATABASE_ID');
-  if (!process.env.TMDB_API_KEY) missingVars.push('TMDB_API_KEY');
+  console.log('\n' + '='.repeat(60));
+  log('success', `${colors.bright}🎉 PROCESAMIENTO COMPLETADO 🎉${colors.reset}`);
+  console.log('='.repeat(60));
   
-  if (missingVars.length > 0) {
-    console.error('\x1b[31m❌ Faltan variables de entorno:\x1b[0m');
-    missingVars.forEach(varName => {
-      console.error(`   - ${varName}`);
+  log('info', `📊 Películas procesadas: ${colors.bright}${processedMovies.length}${colors.reset}`);
+  log('info', `🎭 Consultas TMDB: ${colors.bright}${stats.tmdbCalls}${colors.reset}`);
+  log('info', `💾 Datos desde caché: ${colors.bright}${stats.tmdbCacheHits}${colors.reset}`);
+  log('info', `⚠️  Campos faltantes: ${colors.bright}${stats.missingFields}${colors.reset}`);
+  log('info', `⏱️  Tiempo total: ${colors.bright}${timeStr}${colors.reset}`);
+  
+  if (moviesWithMissingFields.length > 0) {
+    console.log('\n' + '⚠️  PELÍCULAS CON CAMPOS FALTANTES:'.padEnd(60, '-'));
+    moviesWithMissingFields.forEach((movie, index) => {
+      log('warning', `${index + 1}. "${movie.title}" - Faltan: ${movie.fields.join(', ')}`);
     });
-    console.error('\n\x1b[33m💡 Asegúrate de tener un archivo .env con:\x1b[0m');
-    console.error('   NOTION_API_KEY=tu_token_notion');
-    console.error('   NOTION_DATABASE_ID=tu_database_id');
-    console.error('   TMDB_API_KEY=tu_tmdb_key');
-    process.exit(1);
   }
-}
-
-(async () => {
-  const startTime = Date.now();
   
+  console.log('\n');
+}
+
+// Función principal
+async function main() {
   try {
-    await validateEnvironment();
+    console.clear();
+    console.log(`${colors.bright}${colors.cyan}🎬 EXTRACTOR DE PELÍCULAS NOTION → TMDB 🎬${colors.reset}\n`);
     
-    // Obtener todas las páginas de Notion (optimizado sin delays innecesarios)
-const pages = await getAllPages();
-
-    // Procesar películas con procesamiento paralelo optimizado
-    const items = await processMoviesInBatches(pages, 15); // Procesar 15 en paralelo
-
-    console.log('\n');
+    // Validar entorno
+    validateEnvironment();
     
-    const output = path.join(__dirname, 'public', 'data.json');
+    // Inicializar cliente de Notion
+    const notion = new Client({ auth: process.env.NOTION_API_KEY });
+    const databaseId = process.env.NOTION_DATABASE_ID;
     
-    const publicDir = path.join(__dirname, 'public');
-    if (!fs.existsSync(publicDir)) {
-      fs.mkdirSync(publicDir, { recursive: true });
+    log('info', 'Iniciando extracción de datos...');
+    showMemory();
+    
+    // Obtener páginas de Notion
+    const pages = await getAllNotionPages(notion, databaseId);
+    
+    // Procesar películas
+    const { processedMovies, moviesWithMissingFields } = await processMovies(pages, process.env.TMDB_API_KEY);
+    
+    // Crear directorio de salida
+    const outputDir = path.join(__dirname, '../public');
+    if (!fs.existsSync(outputDir)) {
+      fs.mkdirSync(outputDir, { recursive: true });
+      log('info', `Directorio creado: ${outputDir}`);
     }
     
-    fs.writeFileSync(output, JSON.stringify(items, null, 2));
+    // Guardar archivo JSON
+    const outputFile = path.join(outputDir, 'data.json');
+    fs.writeFileSync(outputFile, JSON.stringify(processedMovies, null, 2));
     
-    const endTime = Date.now();
-    const executionTime = Math.round((endTime - startTime) / 1000);
-    const minutes = Math.floor(executionTime / 60);
-    const seconds = executionTime % 60;
-    const timeString = minutes > 0 ? `${minutes}m ${seconds}s` : `${seconds}s`;
+    log('success', `Archivo guardado: ${outputFile}`);
+    log('success', `Tamaño del archivo: ${(fs.statSync(outputFile).size / 1024).toFixed(1)} KB`);
     
-// Función que cuenta caracteres de manera más precisa para terminales
-function getDisplayLength(text) {
-    // Remover códigos ANSI
-    const clean = text.replace(/\x1b\[[0-9;]*m/g, '');
+    // Mostrar resumen
+    showFinalSummary(processedMovies, moviesWithMissingFields);
     
-    // Contar caracteres, considerando que algunos emojis ocupan 2 espacios
-    let length = 0;
-    for (const char of clean) {
-        // La mayoría de emojis ocupan 2 espacios en terminal
-        if (char.codePointAt(0) > 0x1F600) {
-            length += 2;
-        } else {
-            length += 1;
-        }
-    }
-    return length;
-}
-
-function createLine(content, targetWidth = 82) {
-    const contentLength = getDisplayLength(content);
-    const spaces = Math.max(0, targetWidth - contentLength);
-    return `\x1b[1m\x1b[36m ║  ${content}${' '.repeat(spaces)}\x1b[1m\x1b[36m║\x1b[0m`;
-}
-
-console.log('\n');
-console.log('\x1b[1m\x1b[36m ╔══════════════════════════════════════════════════════════════════════════════════════╗\x1b[0m');
-console.log('\x1b[1m\x1b[36m ║                             \x1b[1m\x1b[33m🎬 PROCESO COMPLETADO 🎬\x1b[1m\x1b[36m                                 ║\x1b[0m');
-console.log('\x1b[1m\x1b[36m ╠══════════════════════════════════════════════════════════════════════════════════════╣\x1b[0m');
-console.log('\x1b[1m\x1b[36m ║                                                                                      ║\x1b[0m');
-
-console.log(createLine(`\x1b[32m✅ Archivo actualizado:\x1b[0m \x1b[1m\x1b[37mdata.json\x1b[0m`));
-console.log('\x1b[1m\x1b[36m ║                                                                                      ║\x1b[0m');
-
-console.log(createLine(`\x1b[35m📁 Ubicación:\x1b[0m`));
-console.log(createLine(`  \x1b[2m\x1b[37m${truncateText(output, 70)}\x1b[0m`));
-console.log('\x1b[1m\x1b[36m ║                                                                                      ║\x1b[0m');
-
-console.log(createLine(`\x1b[33m📊 Total procesadas:\x1b[0m \x1b[1m\x1b[32m${items.length.toString().padStart(3, ' ')}\x1b[0m \x1b[33mpelículas\x1b[0m`));
-console.log('\x1b[1m\x1b[36m ║                                                                                      ║\x1b[0m');
-
-console.log(createLine(`\x1b[31m⚠️  Campos faltantes:\x1b[0m \x1b[1m\x1b[31m${missingFieldsTable.length.toString().padStart(3, ' ')}\x1b[0m \x1b[31mentradas con datos incompletos\x1b[0m`));
-console.log('\x1b[1m\x1b[36m ║                                                                                      ║\x1b[0m');
-
-console.log(createLine(`\x1b[35m⏱️  Tiempo ejecución:\x1b[0m \x1b[1m\x1b[36m${timeString.padStart(8, ' ')}\x1b[0m`));
-console.log('\x1b[1m\x1b[36m ║                                                                                      ║\x1b[0m');
-
-console.log(createLine(`\x1b[37m🕒 Completado:\x1b[0m \x1b[2m\x1b[37m${now()}\x1b[0m`));
-console.log('\x1b[1m\x1b[36m ║                                                                                      ║\x1b[0m');
-
-console.log(createLine(`\x1b[36m💡 Cache TMDB:\x1b[0m \x1b[1m\x1b[35m${tmdbCache.size.toString().padStart(3, ' ')}\x1b[0m \x1b[35mrequests guardados\x1b[0m`));
-console.log('\x1b[1m\x1b[36m ║                                                                                      ║\x1b[0m');
-
-console.log(createLine(`\x1b[33m🎯 PRIORIDAD NOTION:\x1b[0m \x1b[32mDatos de Notion primero\x1b[0m`));
-console.log('\x1b[1m\x1b[36m ║                                                                                      ║\x1b[0m');
-
-console.log(createLine(`\x1b[35m🚀 Procesamiento:\x1b[0m \x1b[32mParalelo (15 simultáneos)\x1b[0m`));
-console.log('\x1b[1m\x1b[36m ║                                                                                      ║\x1b[0m');
-
-console.log('\x1b[1m\x1b[36m ╚══════════════════════════════════════════════════════════════════════════════════════╝\x1b[0m');
-    console.log('\n');
+    log('success', '¡Proceso completado exitosamente!');
     
   } catch (error) {
-    console.error('\n\x1b[31m❌ Error durante la ejecución:\x1b[0m');
-    console.error(error.message);
+    log('error', `Error crítico: ${error.message}`);
     
     if (error.code === 'unauthorized') {
-      console.error('\n\x1b[33m💡 Posibles soluciones:\x1b[0m');
-      console.error('   1. Verifica tu NOTION_API_KEY en el archivo .env');
-      console.error('   2. Asegúrate de que la integración esté conectada a la base de datos');
-      console.error('   3. Verifica que el NOTION_DATABASE_ID sea correcto');
+      log('error', 'Problema de autorización - verifica tus credenciales');
+      log('info', 'Soluciones posibles:');
+      log('info', '1. Verifica NOTION_API_KEY en .env');
+      log('info', '2. Verifica NOTION_DATABASE_ID en .env');
+      log('info', '3. Asegúrate de que la integración tenga permisos');
     }
     
     process.exit(1);
   }
-})();
+}
+
+// Manejar señales de terminación
+process.on('SIGINT', () => {
+  log('warning', 'Proceso interrumpido por el usuario');
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  log('warning', 'Proceso terminado por el sistema');
+  process.exit(0);
+});
+
+// Ejecutar
+main();
