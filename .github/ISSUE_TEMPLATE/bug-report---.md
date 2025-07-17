@@ -5,18 +5,18 @@ labels: bug
 
 ---
 
-## Describe the bug
-A clear and concise description of what the bug is.
+## Describe el error
+Una descripción clara y concisa de cuál es el error.
 
-### Steps to reproduce
-Steps to reproduce the behavior.
+### Pasos para reproducir
+Pasos para reproducir el comportamiento.
 
-### Expected behavior
-A clear and concise description of what you expected to happen.
+### Comportamiento esperado
+Una descripción clara y concisa de lo que esperabas que sucediera.
 
-### Environment
- - OS: [e.g. Arch Linux]
- - Other details that you think may affect.
+### Entorno
+- Sistema operativo: [p. ej., Arch Linux]
+- Otros detalles que creas que puedan afectar.
 
-### Additional context
-Add any other context about the problem here.
+### Contexto adicional
+Agrega cualquier otro contexto sobre el problema.

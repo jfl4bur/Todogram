@@ -5,11 +5,11 @@ labels: enhancement
 
 ---
 
-## Summary
-Brief explanation of the feature.
+## Resumen
+Breve explicación de la función.
 
-### Basic example
-Include a basic example or links here.
+### Ejemplo básico
+Incluya un ejemplo básico o enlaces aquí.
 
-### Motivation
-Why are we doing this? What use cases does it support? What is the expected outcome?
+### Motivación
+¿Por qué hacemos esto? ¿Qué casos de uso admite? ¿Cuál es el resultado esperado?
