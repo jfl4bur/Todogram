@@ -285,6 +285,6 @@ Gracias a:
 [issues-shield]: https://img.shields.io/github/issues/jfl4bur/Todogram.svg?style=for-the-badge
 [issues-url]: https://github.com/jfl4bur/Todogram/issues
 [license-shield]: https://img.shields.io/github/license/jfl4bur/Todogram.svg?style=for-the-badge
-[license-url]: https://github.com/jfl4bur/Todogram/blob/main/LICENSE
+[license-url]: https://github.com/jfl4bur/Todogram/blob/main/LICENSE.txt
 [telegram-shield]: https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white
 [telegram-url]: https://t.me/Todogram
