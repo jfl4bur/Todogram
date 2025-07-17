@@ -4,18 +4,18 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
+  <a href="https://github.com/jfl4bur/Todogram">
     <img src="./images/logo.png" alt="Logo" width="180" height="180">
   </a>
 
-  <h1 align="center">🎬 Auto Push Todogram</h1>
+  <h1 align="center">🚀 Auto-Push System Todogram</h1>
 
   <p align="center">
-       <a href="https://github.com/othneildrew/Best-README-Template">Ver Demostración</a>
+       <a href="https://github.com/jfl4bur/Todogram">Ver Demostración</a>
     &middot;
-    <a href="https://github.com/othneildrew/Best-README-Template/issues/new?labels=bug&template=bug-report---.md">Reportar Errores</a>
+    <a href="https://github.com/jfl4bur/Todogram/issues/new?labels=bug&template=bug-report---.md">Reportar Errores</a>
     &middot;
-    <a href="https://github.com/othneildrew/Best-README-Template/issues/new?labels=enhancement&template=feature-request---.md">Solicitud de Funciones</a>
+    <a href="https://github.com/jfl4bur/Todogram/issues/new?labels=enhancement&template=feature-request---.md">Solicitud de Funciones</a>
   </p>
 
   <p align="center">
@@ -31,6 +31,8 @@
     <a href="./doc/auto-push.md">Auto Push</a>
   </p>
 </div>
+
+</br>
 
 
 # Todogram TV
