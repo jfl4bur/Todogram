@@ -4,411 +4,341 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-  <a href="https://github.com/othneildrew/Best-README-Template">
+  <a href="https://github.com/jfl4bur/Todogram">
     <img src="../images/logo.png" alt="Logo" width="180" height="180">
   </a>
 
-  <h1 align="center">🎬 Auto-Push Todogram</h1>
+  <h1 align="center">🚀 Auto-Push System Todogram</h1>
+
+  <p align="center">
+       <a href="https://github.com/jfl4bur/Todogram">Ver Demostración</a>
+    &middot;
+    <a href="https://github.com/jfl4bur/Todogram/issues/new?labels=bug&template=bug-report---.md">Reportar Errores</a>
+    &middot;
+    <a href="https://github.com/jfl4bur/Todogram/issues/new?labels=enhancement&template=feature-request---.md">Solicitud de Funciones</a>
+  </p>
 
   <p align="center">
     Extracción optimizada de datos de Notion !
     <br />
-    <a href="https://github.com/othneildrew/Best-README-Template"><strong>Explora la  documentación »</strong></a>
+    <a href="./README.md"><strong>Explora la  documentación »</strong></a>
     <br />
     <br />
-    <a href="https://github.com/othneildrew/Best-README-Template">Ver Demostración</a>
+    <a href="./doc/server.md">Server Web</a>
     &middot;
-    <a href="https://github.com/othneildrew/Best-README-Template/issues/new?labels=bug&template=bug-report---.md">Reportar Errores</a>
+    <a href="./doc/extractor.md">Extractor</a>
     &middot;
-    <a href="https://github.com/othneildrew/Best-README-Template/issues/new?labels=enhancement&template=feature-request---.md">Solicitud de Funciones</a>
+    <a href="./doc/auto-push.md">Auto Push</a>
   </p>
 </div>
 
-Sistema automatizado para gestionar películas sincronizando datos entre Notion y TMDB con interfaz visual avanzada.
+</br>
 
-<!-- TABLE OF CONTENTS -->
+# 🎬 Notion Movie Database API
+
+> Una API REST completa para gestionar una base de datos de películas, series, animes y documentales integrada con Notion y Cloudinary.
+
+[![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?style=flat-square&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Express.js](https://img.shields.io/badge/Express.js-4.x-000000?style=flat-square&logo=express&logoColor=white)](https://expressjs.com/)
+[![Notion API](https://img.shields.io/badge/Notion-API-000000?style=flat-square&logo=notion&logoColor=white)](https://developers.notion.com/)
+[![Cloudinary](https://img.shields.io/badge/Cloudinary-Cloud%20Storage-3448C5?style=flat-square&logo=cloudinary&logoColor=white)](https://cloudinary.com/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg?style=flat-square)](LICENSE)
+
+## 📋 Tabla de Contenido
+
 <details>
-  <summary>Tabla de Contenido</summary>
-  <ol>
-    <li>
-      <a href="#about-the-project">xxxxxxxxxxxxxxxx</a>
-      <ul>
-        <li><a href="#built-with">xx xx</a></li>
-      </ul>
-    </li>
-    <li>
-      <a href="#getting-started">xx x x x x xx x xxxxxxx</a>
-      <ul>
-        <li><a href="#prerequisites">xxxxxxxxxxxx</a></li>
-        <li><a href="#installation">xxxxxxxxxx</a></li>
-      </ul>
-    </li>
+<summary>🔽 Expandir menú</summary>
 
-  </ol>
+- [🎬 Notion Movie Database API](#-notion-movie-database-api)
+  - [📋 Tabla de Contenido](#-tabla-de-contenido)
+  - [✨ Características](#-características)
+  - [🛠️ Tecnologías Utilizadas](#️-tecnologías-utilizadas)
+  - [📋 Requisitos Previos](#-requisitos-previos)
+  - [🚀 Instalación](#-instalación)
+    - [1. Clonar el repositorio](#1-clonar-el-repositorio)
+    - [2. Instalar dependencias](#2-instalar-dependencias)
+    - [3. Crear directorio de uploads](#3-crear-directorio-de-uploads)
+  - [⚙️ Configuración](#️-configuración)
+    - [1. Configurar Notion](#1-configurar-notion)
+    - [2. Configurar Cloudinary](#2-configurar-cloudinary)
+    - [3. Configurar variables de entorno](#3-configurar-variables-de-entorno)
+  - [🔧 Uso](#-uso)
+    - [Iniciar el servidor](#iniciar-el-servidor)
+    - [Estructura de archivos estáticos](#estructura-de-archivos-estáticos)
+  - [📚 Documentación de la API](#-documentación-de-la-api)
+    - [Endpoints principales](#endpoints-principales)
+    - [Ejemplo de uso](#ejemplo-de-uso)
+      - [Crear una película](#crear-una-película)
+      - [Obtener estadísticas](#obtener-estadísticas)
+  - [🗂️ Estructura del Proyecto](#️-estructura-del-proyecto)
+  - [🎯 Características Avanzadas](#-características-avanzadas)
+    - [Sistema de Logging](#sistema-de-logging)
+    - [Gestión de Relaciones](#gestión-de-relaciones)
+    - [Subida de Archivos](#subida-de-archivos)
+  - [🤝 Contribución](#-contribución)
+    - [Guías de contribución](#guías-de-contribución)
+  - [📄 Licencia](#-licencia)
+  - [🆘 Soporte](#-soporte)
+    - [Problemas comunes](#problemas-comunes)
+    - [Contacto](#contacto)
+
 </details>
 
----
+## ✨ Características
 
-## 🚀 Características principales
+- **🎭 Gestión completa de contenido multimedia**: Películas, series, animes y documentales
+- **🖼️ Almacenamiento en la nube**: Integración con Cloudinary para imágenes
+- **🗄️ Base de datos Notion**: Aprovecha la flexibilidad de Notion como base de datos
+- **🌐 API RESTful**: Endpoints completos para CRUD operations
+- **📊 Estadísticas en tiempo real**: Dashboard con métricas de contenido
+- **🔍 Búsqueda avanzada**: Filtros por categoría, género, idioma y más
+- **📱 Responsive**: Interfaz web adaptable a diferentes dispositivos
+- **🎨 Logging colorido**: Sistema de logs con colores y timestamps
+- **📤 Subida de archivos**: Soporte para múltiples formatos de imagen
 
-- Extracción optimizada de datos de Notion
-- Integración inteligente con TMDB
-- Procesamiento paralelo (hasta 15 operaciones simultáneas)
-- Interfaz visual con progreso en tiempo real
-- Manejo de errores robusto con reintentos automáticos
-- Prioridad de datos de Notion sobre TMDB
-- Generación de archivo JSON estructurado
+## 🛠️ Tecnologías Utilizadas
 
-## ⚙️ Requisitos previos
-- Node.js 18 o superior
-- Cuenta en [Notion](https://www.notion.so/) con base de datos configurada
-- Clave API de [TMDB](https://www.themoviedb.org/)
+| Tecnología | Versión | Propósito |
+|------------|---------|-----------|
+| ![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?style=flat-square&logo=node.js&logoColor=white) | 18+ | Runtime de JavaScript |
+| ![Express.js](https://img.shields.io/badge/Express.js-4.x-000000?style=flat-square&logo=express&logoColor=white) | 4.x | Framework web |
+| ![Notion API](https://img.shields.io/badge/Notion-API-000000?style=flat-square&logo=notion&logoColor=white) | Latest | Base de datos |
+| ![Cloudinary](https://img.shields.io/badge/Cloudinary-Cloud%20Storage-3448C5?style=flat-square&logo=cloudinary&logoColor=white) | Latest | Almacenamiento de imágenes |
+| ![Multer](https://img.shields.io/badge/Multer-File%20Upload-FF6B6B?style=flat-square) | Latest | Subida de archivos |
+| ![CORS](https://img.shields.io/badge/CORS-Enabled-4ECDC4?style=flat-square) | Latest | Cross-Origin Resource Sharing |
 
-## 🛠️ Configuración
+## 📋 Requisitos Previos
 
-### 1. Clonar repositorio:
+- **Node.js** (v18 o superior)
+- **npm** o **yarn**
+- Cuenta en **Notion** con acceso a la API
+- Cuenta en **Cloudinary**
+
+## 🚀 Instalación
+
+### 1. Clonar el repositorio
+
 ```bash
-git clone https://github.com/tu-usuario/todogram-manager.git
-cd todogram-manager
+git clone https://github.com/tu-usuario/notion-movie-database.git
+cd notion-movie-database
+```
+
+### 2. Instalar dependencias
+
+```bash
 npm install
+# o
+yarn install
 ```
 
-### 2. Instalar dependencias:
-    
+### 3. Crear directorio de uploads
 
-bash
-
-```
-npm install
+```bash
+mkdir uploads
 ```
 
-1. Configurar variables de entorno:
-    - Renombrar **`src/.env.example`** a **`src/.env`**
-    - Editar con tus credenciales:
+## ⚙️ Configuración
 
-text
+### 1. Configurar Notion
 
+1. Crear una integración en [Notion Developers](https://developers.notion.com/)
+2. Obtener el token de integración
+3. Crear las siguientes bases de datos en Notion:
+   - **Películas** (principal)
+   - **Categorías**
+   - **Géneros**
+   - **Audios**
+   - **Subtítulos**
+
+### 2. Configurar Cloudinary
+
+1. Crear cuenta en [Cloudinary](https://cloudinary.com/)
+2. Obtener las credenciales del dashboard
+
+### 3. Configurar variables de entorno
+
+Editar las siguientes variables en el archivo `server.js`:
+
+```javascript
+// Configuración de Cloudinary
+cloudinary.v2.config({
+  cloud_name: 'tu-cloud-name',
+  api_key: 'tu-api-key',
+  api_secret: 'tu-api-secret'
+});
+
+// Configuración de Notion
+const notion = new Client({
+  auth: 'tu-notion-token'
+});
+
+// IDs de las bases de datos
+const databaseId = 'tu-database-id-principal';
+const RELATION_DATABASES = {
+  categoria: 'tu-categoria-database-id',
+  generos: 'tu-generos-database-id',
+  audios: 'tu-audios-database-id',
+  subtitulos: 'tu-subtitulos-database-id'
+};
 ```
-NOTION_API_KEY=tu_token_de_integracion_notion
-NOTION_DATABASE_ID=el_id_de_tu_base_de_datos
-TMDB_API_KEY=tu_clave_api_tmdb
-```
 
-1. Ejecutar el sistema:
+## 🔧 Uso
 
-bash
+### Iniciar el servidor
 
-```
+```bash
 npm start
+# o
+node server.js
 ```
 
-## **🗄️ Estructura de la base de datos de Notion**
+El servidor estará disponible en `http://localhost:3000`
 
-La base debe contener estas propiedades (los nombres deben coincidir):
-
-| **Propiedad** | **Tipo** |
-| --- | --- |
-| Título | Title |
-| Título episodio | Rich text |
-| Temporada | Rich text |
-| Episodios | Rich text |
-| TMDB | URL |
-| Synopsis | Rich text |
-| Portada | Files |
-| Carteles | Files |
-| Géneros txt | Rich text |
-| Categorías txt | Rich text |
-| Audios txt | Rich text |
-| Subtitulos txt | Rich text |
-| Año | Number/Date |
-| Duración | Rich text |
-| Puntuación 1-10 | Number |
-| Trailer | URL |
-| Ver Película | URL |
-| Título original | Rich text |
-| Productora(s) | Rich text |
-| Idioma(s) original(es) | Rich text |
-| País(es) | Rich text |
-| Director(es) | Rich text |
-| Escritor(es) | Rich text |
-| Reparto principal | Rich text |
-| Video iframe | URL |
-| Video iframe 1 | URL |
-
-## **📊 Salida**
-
-El sistema genera un archivo **`public/data.json`** con todos los datos procesados en formato estructurado.
-
-## **⚠️ Notas importantes**
-
-- Los datos de Notion tienen prioridad sobre TMDB
-- Campos vacíos en Notion se intentarán completar con datos de TMDB
-- El sistema muestra progreso en tiempo real y campos faltantes
-- Para bases grandes (>500 películas) el proceso puede tardar varios minutos
-- Los reintentos automáticos manejan límites de API
-
-## **🆘 Soporte**
-
-Si encuentras problemas:
-
-1. Verifica tus credenciales en **`.env`**
-2. Asegúrate que la integración de Notion tenga acceso a la base
-3. Comprueba que TMDB API key sea válida
-4. Revisa la consola para mensajes de error detallados
-<p align="right">(<a href="#readme-top"> Ir arriba </a>)</p>
-
----
-
-### 🖥️ Instrucciones para ejecutar:
-
-1. Crear la estructura de directorios como se muestra
-2. Colocar los archivos en sus respectivas ubicaciones
-3. Instalar dependencias: `npm install`
-4. Renombrar `src/.env.example` a `src/.env` y completar con tus credenciales
-5. Ejecutar: `npm start`
-
-⚡El sistema generará automáticamente:
-- Interfaz visual con progreso
-- Archivo `public/data.json` con los datos procesados
-- Reporte de campos faltantes
-- Estadísticas de ejecución
-
-🧩Las mejoras implementadas incluyen:
-- Optimización de rendimiento (15-20% más rápido)
-- Manejo robusto de errores y reintentos
-- Sistema de caché inteligente para TMDB
-- Validación de datos mejorada
-- Función de truncamiento unificada
-- Gestión de memoria optimizada
-- Código modularizado y mantenible
-- Prioridad absoluta a datos de Notion
-
----
-
-### **🔍 Diferencias entre tu archivo `start1.js` original y el script actualizado:**
-
-#### 🗄️**Estructura del proyecto:**
-
-text
+### Estructura de archivos estáticos
 
 ```
-📁 admin/
- ├── src/
- │    ├── index.js
- │    ├── utils.js
- │    └── .env
- ├── public/
- │    └── data.json (generado automáticamente)
- ├── package.json
- └── README.md
+public/
+├── index.html          # Página principal
+├── css/
+│   └── styles.css      # Estilos personalizados
+├── js/
+│   └── app.js          # Lógica del frontend
+└── assets/
+    └── images/         # Imágenes estáticas
 ```
 
----
+## 📚 Documentación de la API
 
-### **1. Modularización del código**
+### Endpoints principales
 
-- **Original:** Todo el código en un solo archivo
-- **Actualizado:** Separado en:
-    - **`index.js`** (lógica principal)
-    - **`utils.js`** (funciones auxiliares)
+| Método | Endpoint | Descripción |
+|--------|----------|-------------|
+| `GET` | `/api/notion` | Listar todas las películas |
+| `GET` | `/api/notion/:id` | Obtener película específica |
+| `POST` | `/api/notion` | Crear nueva película |
+| `PUT` | `/api/notion/:id` | Actualizar película |
+| `DELETE` | `/api/notion/:id` | Eliminar película |
+| `GET` | `/api/notion-stats` | Obtener estadísticas |
+| `GET` | `/api/selector-data` | Obtener datos para selectores |
 
----
+### Ejemplo de uso
 
-### **2. Manejo de errores mejorado**
+#### Crear una película
 
-- **Original:** Manejo básico de errores
-- **Actualizado:**
-    - Reintentos automáticos con **`withRetry()`**
-    - Detección de rate limits en TMDB
-    - Validación explícita de variables de entorno
-
-javascript
-
-```
-// Nuevo sistema de reintentos
-export async function withRetry(fn, retries = 3) {
-  try {
-    return await fn();
-  } catch (error) {
-    if (retries > 0) {
-      await delay(500);
-      return withRetry(fn, retries - 1);
-    }
-    throw error;
-  }
-}
+```bash
+curl -X POST http://localhost:3000/api/notion \
+  -H "Content-Type: application/json" \
+  -d '{
+    "titulo": "El Padrino",
+    "ano": 1972,
+    "categoria": "Películas",
+    "generos": ["Drama", "Crimen"],
+    "synopsis": "La historia de una familia de la mafia...",
+    "puntuacion": 9.2
+  }'
 ```
 
----
+#### Obtener estadísticas
 
-### **3. Sistema de caché para TMDB**
-
-- **Original:** Sin caché
-- **Actualizado:** Cacheo de resultados para evitar peticiones duplicadas
-
-javascript
-
-```
-// En processMoviesInBatches
-if (needsTMDB) {
-  const cacheKey = `${tmdbId || ''}-${notionData.titulo}`;
-  if (tmdbCache.has(cacheKey)) {
-    tmdbData = tmdbCache.get(cacheKey);
-  } else {
-    tmdbData = await utils.fetchTMDBDetails(tmdbId, notionData.titulo, tmdbApiKey);
-    tmdbCache.set(cacheKey, tmdbData);
-  }
-}
+```bash
+curl http://localhost:3000/api/notion-stats
 ```
 
----
-
-### **4. Procesamiento paralelo optimizado**
-
-- **Original:** Procesamiento en lotes básico
-- **Actualizado:**
-    - Manejo explícito de límites de API
-    - Control de concurrencia mejorado
-    - Pausas inteligentes entre lotes
-
-javascript
-
-```
-// Nueva implementación
-for (let i = 0; i < pages.length; i += batchSize) {
-  const batch = pages.slice(i, i + batchSize);
-  const batchPromises = batch.map(...);
-  await Promise.all(batchPromises);
-  if (i + batchSize < pages.length) await delay(100);
-}
-```
-
----
-
-### **5. Manejo de memoria**
-
-- **Original:** Sin liberación explícita de memoria
-- **Actualizado:** Liberación de recursos al finalizar
-
-javascript
-
-```
-// Al final del proceso
-pages.length = 0;
-tmdbCache.clear();
-```
-
----
-
-### **6. Validación de datos mejorada**
-
-- **Original:** Validación básica de campos
-- **Actualizado:** Función **`cleanFieldData`** mejorada
-
-javascript
-
-```
-// Versión mejorada
-export function cleanFieldData(notionValue, tmdbValue) {
-  const isValid = (val) =>
-    (typeof val === 'string' && val.trim() !== '') ||
-    (typeof val === 'number');
-
-  if (isValid(notionValue)) return notionValue.toString().trim();
-  if (isValid(tmdbValue)) return tmdbValue.toString().trim();
-  return '';
-}
-```
-
----
-
-### **7. Interfaz de usuario**
-
-- **Original:** UI estática
-- **Actualizado:**
-    - Barra de progreso rediseñada
-    - Tabla de campos faltantes con scroll
-    - Estadísticas de ejecución completas
-
-javascript
-
-```
-// Nuevo diseño de progreso
-const bar = `\x1b[34m${filledBar}\x1b[38;5;75m${emptyBar}\x1b[0m`;
-const percentText = `\x1b[1m\x1b[31m${percent}%\x1b[0m`;
-const countText = `\x1b[1m\x1b[33m${count}/${total}\x1b[0m`;
-```
-
----
-
-### **8. Manejo de dependencias**
-
-- **Original:** Sin gestión explícita de paquetes
-- **Actualizado:** Archivo **`package.json`** con dependencias definidas
-
-json
-
-```
+Respuesta:
+```json
 {
-  "dependencies": {
-    "@notionhq/client": "^2.2.3",
-    "axios": "^1.4.0",
-    "chalk": "^5.3.0",
-    "dotenv": "^16.3.1"
-  }
+  "movies": 150,
+  "series": 45,
+  "animes": 30,
+  "documentaries": 12
 }
 ```
 
----
-
-### **9. Documentación**
-
-- **Original:** Sin documentación
-- **Actualizado:** Archivo **`README.md`** completo con:
-    - Instrucciones de instalación
-    - Requisitos del sistema
-    - Configuración necesaria
-    - Solución de problemas
-
----
-
-### **10. Seguridad y estabilidad**
-
-- **Original:** Credenciales potencialmente en código
-- **Actualizado:**
-    - Sistema de variables de entorno (.env)
-    - Validación explícita de credenciales
-    - Manejo de errores con códigos de salida
-
-javascript
+## 🗂️ Estructura del Proyecto
 
 ```
-// Validación de variables
-export function validateEnvironment(env) {
-  const missingVars = [];
-  if (!env.NOTION_API_KEY) missingVars.push('NOTION_API_KEY');
-  // ... otras validaciones
-  if (missingVars.length > 0) {
-    console.error('\x1b[31m✖ Faltan variables de entorno:\x1b[0m');
-    process.exit(1);
-  }
-}
+notion-movie-database/
+├── server.js              # Servidor principal
+├── package.json           # Dependencias y scripts
+├── uploads/               # Directorio temporal para archivos
+├── public/                # Archivos estáticos
+│   ├── index.html
+│   ├── css/
+│   ├── js/
+│   └── assets/
+└── README.md             # Este archivo
 ```
+
+## 🎯 Características Avanzadas
+
+### Sistema de Logging
+
+El servidor incluye un sistema de logging avanzado con:
+- **Colores automáticos** según el tipo de mensaje
+- **Timestamps** precisos
+- **Detección de terminal** para compatibilidad
+- **Emojis** como alternativa visual
+
+### Gestión de Relaciones
+
+- **Búsqueda automática** de páginas relacionadas
+- **Creación automática** de nuevas relaciones
+- **Formateo de IDs** de Notion
+- **Caché de relaciones** para optimización
+
+### Subida de Archivos
+
+- **Límite de tamaño**: 10MB por archivo
+- **Formatos soportados**: JPG, PNG, WebP, GIF
+- **Almacenamiento en Cloudinary**
+- **Eliminación automática** de archivos temporales
+
+## 🤝 Contribución
+
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+### Guías de contribución
+
+- Mantén el estilo de código consistente
+- Incluye tests para nuevas funcionalidades
+- Actualiza la documentación si es necesario
+- Utiliza mensajes de commit descriptivos
+
+## 📄 Licencia
+
+Este proyecto está bajo la licencia MIT. Ver el archivo [LICENSE](LICENSE) para más detalles.
+
+## 🆘 Soporte
+
+### Problemas comunes
+
+**Error de conexión con Notion**
+```bash
+Error: Notion token inválido
+```
+- Verificar que el token de Notion sea correcto
+- Asegurarse de que la integración tenga permisos
+
+**Error de subida a Cloudinary**
+```bash
+Error: Cloudinary configuration error
+```
+- Verificar credenciales de Cloudinary
+- Comprobar límites de almacenamiento
+
+### Contacto
+
+- **Issues**: [GitHub Issues](https://github.com/tu-usuario/notion-movie-database/issues)
+- **Discusiones**: [GitHub Discussions](https://github.com/tu-usuario/notion-movie-database/discussions)
+- **Email**: tu-email@ejemplo.com
 
 ---
 
-### **Resumen de mejoras:**
-
-| **Aspecto** | **Original** | **Actualizado** |
-| --- | --- | --- |
-| Estructura código | Monolito | Modular |
-| Manejo errores | Básico | Robustez |
-| Rendimiento | Normal | Optimizado |
-| Interfaz usuario | Sencilla | Mejorada |
-| Documentación | Ausente | Completa |
-| Seguridad credenciales | Riesgo | Protegida |
-| Mantenibilidad | Difícil | Simplificada |
-
-Estas mejoras mantienen la funcionalidad central intacta mientras añaden robustez, rendimiento y facilidad de mantenimiento al sistema.
-
-¡El sistema está listo para usar con bases de datos grandes manteniendo su impresionante interfaz visual!
+<div align="center">
+  <p>Hecho con ❤️ por <a href="https://github.com/tu-usuario">Tu Nombre</a></p>
+  <p>⭐ ¡Dale una estrella si te fue útil!</p>
+</div>

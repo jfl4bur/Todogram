@@ -1,3 +1,38 @@
+<a id="readme-top"></a>
+
+
+<!-- PROJECT LOGO -->
+<br />
+<div align="center">
+  <a href="https://github.com/othneildrew/Best-README-Template">
+    <img src="./images/logo.png" alt="Logo" width="180" height="180">
+  </a>
+
+  <h1 align="center">🎬 Auto Push Todogram</h1>
+
+  <p align="center">
+       <a href="https://github.com/othneildrew/Best-README-Template">Ver Demostración</a>
+    &middot;
+    <a href="https://github.com/othneildrew/Best-README-Template/issues/new?labels=bug&template=bug-report---.md">Reportar Errores</a>
+    &middot;
+    <a href="https://github.com/othneildrew/Best-README-Template/issues/new?labels=enhancement&template=feature-request---.md">Solicitud de Funciones</a>
+  </p>
+
+  <p align="center">
+    Extracción optimizada de datos de Notion !
+    <br />
+    <a href="./README.md"><strong>Explora la  documentación »</strong></a>
+    <br />
+    <br />
+    <a href="./doc/server.md">Server Web</a>
+    &middot;
+    <a href="./doc/extractor.md">Extractor</a>
+    &middot;
+    <a href="./doc/auto-push.md">Auto Push</a>
+  </p>
+</div>
+
+
 # Todogram TV
 
   [![Contributors][contributors-shield]][contributors-url]
@@ -141,6 +176,7 @@ Desde GitHub > Actions > `Sync Notion y TMDB` > Run workflow
 2. **TMDb API** → completamos campos vacíos automáticamente
 3. **JSON** → se genera un archivo `data.json`
 4. **Softr Web** → la web visualiza el JSON actualizado
+<p align="right">(<a href="#-tabla-de-contenidos">volver al inicio</a>)</p>
 
 ---
 
