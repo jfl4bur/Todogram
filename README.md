@@ -34,257 +34,429 @@
 
 </br>
 
+# 🎬 **Todogram** - Plataforma de Películas
 
-# Todogram TV
+<div align="center">
 
-  [![Contributors][contributors-shield]][contributors-url]
-  [![Forks][forks-shield]][forks-url]
-  [![Stargazers][stars-shield]][stars-url]
-  [![Issues][issues-shield]][issues-url]
-  [![License][license-shield]][license-url]
-  [![Telegram][telegram-shield]][telegram-url]
+![Todogram Logo](https://img.shields.io/badge/🎬-TODOGRAM-ff003c?style=for-the-badge&labelColor=141414)
 
+**Una plataforma web moderna para explorar catálogos de películas con una interfaz tipo Netflix**
 
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg?style=flat-square)](https://choosealicense.com/licenses/mit/)
+[![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=flat-square&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+[![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
+[![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=flat-square&logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
+[![Responsive](https://img.shields.io/badge/📱-Responsive-success?style=flat-square)](https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries)
 
----
+![GitHub stars](https://img.shields.io/github/stars/tu-usuario/todogram?style=social)
+![GitHub forks](https://img.shields.io/github/forks/tu-usuario/todogram?style=social)
+![GitHub issues](https://img.shields.io/github/issues/tu-usuario/todogram)
+![GitHub last commit](https://img.shields.io/github/last-commit/tu-usuario/todogram)
 
-## 📚 Tabla de Contenidos
+[🚀 **Demo Live**](https://tu-usuario.github.io/todogram) · [🐛 **Reportar Bug**](https://github.com/tu-usuario/todogram/issues) · [💡 **Solicitar Feature**](https://github.com/tu-usuario/todogram/issues)
 
-- 📌 [Descripción general](#descripción-general)
-- 🧰 [Requisitos](#requisitos)
-- 💻 [Instalación local](#instalación-local)
-- 🚀 [Uso con GitHub Actions](#uso-con-github-actions)
-- 📁 [Estructura de archivos](#estructura-de-archivos)
-- 🔍 [Explicación técnica](#explicación-técnica)
-- 🧭 [Diagrama del flujo de datos](#diagrama-del-flujo-de-datos)
-- 🧯 [Errores comunes y soluciones](#errores-y-soluciones)
-- ❓ [Preguntas frecuentes (FAQ)](#faq)
-- 🌐 [Despliegue en Vercel y Netlify](#despliegue-en-vercel-y-netlify)
-- 📊 [Datos de interés](#datos-de-interés)
-- 🙌 [Agradecimientos](#agradecimientos)
-- 👤 [Autor](#autor)
+</div>
 
 ---
 
-## 📌 Descripción general
+## 📋 **Tabla de Contenidos**
 
-Este proyecto permite sincronizar una base de datos de películas y series desde **Notion**, enriquecerla automáticamente usando la **API de TMDb**, generar un archivo `data.json` final con los resultados combinados, y desplegarlo fácilmente en una web tipo **Rakuten.tv** con **Softr** o cualquier frontend conectado.
+<details>
+<summary>🔍 <strong>Expandir contenidos</strong></summary>
 
-El flujo de trabajo automatiza la extracción, sincronización, formateo y despliegue de los datos, haciendo uso de scripts en Node.js y GitHub Actions.
+- [🎯 Características](#-características)
+- [🚀 Demo y Capturas](#-demo-y-capturas)
+- [⚡ Inicio Rápido](#-inicio-rápido)
+- [📁 Estructura del Proyecto](#-estructura-del-proyecto)
+- [🛠️ Tecnologías](#️-tecnologías)
+- [⚙️ Configuración](#️-configuración)
+- [🎨 Personalización](#-personalización)
+- [📱 Responsive Design](#-responsive-design)
+- [🔧 API y Datos](#-api-y-datos)
+- [🤝 Contribuir](#-contribuir)
+- [📄 Licencia](#-licencia)
+- [🙏 Agradecimientos](#-agradecimientos)
+
+</details>
 
 ---
 
-## 🧰 Requisitos
+## 🎯 **Características**
 
-Antes de instalar, asegúrate de tener:
+<div align="center">
 
-- ✅ [Node.js][Node-url]
-- ✅ [npm][Node-url] (incluido con Node)
-- ✅ [Git](https://git-scm.com)
-- ✅ Cuenta en [GitHub](https://github.com)
-- ✅ API Key de [TMDb][TMDb-API-url]
-- ✅ Base de datos estructurada en [Notion][Notion-API-url]
+| ✨ **Interfaz** | 🎥 **Video** | 📱 **Mobile** | 🔗 **Social** |
+|:---:|:---:|:---:|:---:|
+| Carruseles dinámicos | Reproductores integrados | 100% Responsive | Compartición social |
+| Modales interactivos | Trailers de YouTube | Touch gestures | Enlaces personalizados |
+| Efectos hover | Modo pantalla completa | Optimizado iOS/Android | Vista previa |
 
----
+</div>
 
-## 💻 Instalación local
+### 🌟 **Funcionalidades Principales**
 
-### 1. Clona el repositorio
-```bash
-git clone https://github.com/jfl4bur/Todogram.git
-cd Todogram
+```
+🎪 Carrusel Interactivo
+├── 🔄 Carga progresiva de contenido
+├── 🖱️ Efectos hover con información detallada  
+├── 🧭 Navegación fluida entre páginas
+├── 📊 Indicador de progreso visual
+└── 💀 Esqueletos de carga animados
+
+ℹ️ Modales de Detalles
+├── 🖼️ Galerías de imágenes interactivas
+├── 👥 Información de reparto y crew
+├── 🎵 Detalles de audio y subtítulos
+├── ⭐ Puntuaciones y clasificaciones
+└── 🎬 Acceso directo a TMDB
+
+🔗 Sistema de Compartición
+├── 📤 URLs personalizadas y únicas
+├── 👀 Vista previa de contenido
+├── 📱 Integración con redes sociales
+└── 📋 Copiado al portapapeles
+
+🎥 Reproductor Multimedia
+├── ▶️ Soporte YouTube y custom players
+├── 🖥️ Modo pantalla completa
+├── 🎮 Controles intuitivos
+└── 📺 Autoplay inteligente
 ```
 
-### 2. Instala las dependencias
+---
+
+## 🚀 **Demo y Capturas**
+
+<div align="center">
+
+### 💻 **Vista Desktop**
+![Desktop View](https://via.placeholder.com/800x400/141414/ff003c?text=🎬+Desktop+View)
+
+### 📱 **Vista Mobile**
+<img src="https://via.placeholder.com/300x600/141414/ff003c?text=📱+Mobile+View" alt="Mobile View" width="300">
+
+</div>
+
+---
+
+## ⚡ **Inicio Rápido**
+
+### 📋 **Prerrequisitos**
+
+![Node.js](https://img.shields.io/badge/Node.js-14+-green?style=flat-square&logo=node.js)
+![Browser](https://img.shields.io/badge/Browser-Modern-blue?style=flat-square&logo=googlechrome)
+![Git](https://img.shields.io/badge/Git-Required-red?style=flat-square&logo=git)
+
+### 🏃‍♂️ **Instalación en 3 pasos**
+
 ```bash
+# 1️⃣ Clonar el repositorio
+git clone https://github.com/tu-usuario/todogram.git
+cd todogram
+
+# 2️⃣ Instalar dependencias (opcional)
 npm install
-```
-Esto ejecutará automáticamente el `postinstall` y descargará:
-- `inquirer`
-- `chalk`
-- `figlet`
-- `gradient-string`
-- `cli-progress`
-- `boxen`
 
-### 3. Añade tus variables de entorno
-Crea un archivo `.env` con:
-```
-NOTION_TOKEN=tu_token_secreto
-NOTION_DATABASE_ID=tu_database_id
-TMDB_API_KEY=tu_clave_tmdb
+# 3️⃣ Iniciar servidor local
+npx http-server
+# o simplemente abre index.html en tu navegador
 ```
 
-### 4. Ejecuta el script principal
+### 🌐 **Acceso**
+```
+🔗 Local: http://localhost:8080
+🌍 Producción: https://tu-usuario.github.io/todogram
+```
+
+---
+
+## 📁 **Estructura del Proyecto**
+
+```
+📦 todogram/
+├── 📂 public/
+│   ├── 🎨 css/
+│   │   └── styles.css           # 🎭 Estilos principales
+│   ├── ⚙️ js/
+│   │   ├── carousel.js          # 🎪 Lógica del carrusel
+│   │   ├── details-modal.js     # ℹ️ Modal de detalles
+│   │   ├── hover-modal.js       # 🖱️ Modal hover tipo Netflix
+│   │   ├── main.js              # 🚀 Inicialización principal
+│   │   ├── share-modal.js       # 🔗 Sistema de compartir
+│   │   └── video-modal.js       # 🎥 Reproductor de video
+│   ├── 📄 template/
+│   │   └── movie-template.html  # 📋 Plantilla para compartir
+│   └── 🏠 index.html            # 🌟 Página principal
+├── 📊 data.json                 # 🎬 Base de datos de películas
+├── 📖 README.md                 # 📚 Documentación
+└── ⚖️ LICENSE                   # 📄 Licencia MIT
+```
+
+---
+
+## 🛠️ **Tecnologías**
+
+<div align="center">
+
+### 🎨 **Frontend**
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+
+### 📡 **APIs & Servicios**
+![TMDB](https://img.shields.io/badge/TMDB-01B4E4?style=for-the-badge&logo=themoviedatabase&logoColor=white)
+![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)
+
+### 🔧 **Herramientas**
+![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white)
+![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
+![VS Code](https://img.shields.io/badge/VS%20Code-0078d4?style=for-the-badge&logo=visual-studio-code&logoColor=white)
+
+</div>
+
+---
+
+## ⚙️ **Configuración**
+
+### 📊 **Estructura de Datos**
+
+```json
+{
+  "Categoría": "🎬 Películas",
+  "Título": "Nombre de la película",
+  "Synopsis": "📝 Descripción detallada...",
+  "Portada": "🖼️ https://imagen-portada.jpg",
+  "Fondo": "🌄 https://imagen-fondo.jpg",
+  "Año": "📅 2023",
+  "Duración": "⏱️ 120 min",
+  "Géneros": "🎭 Acción, Aventura",
+  "Puntuación 1-10": "⭐ 8.5",
+  "Clasificación": "🔞 16+",
+  "Enlace": "🔗 #",
+  "Trailer": "🎥 https://youtube.com/watch?v=...",
+  "Video iframe": "📺 https://reproductor.com/...",
+  "TMDB": "🎬 https://www.themoviedb.org/movie/...",
+  "Audios": "🎵 Español,Inglés",
+  "Subtítulos": "💬 Español,Inglés"
+}
+```
+
+### 🔑 **Variables de Entorno**
+
+```javascript
+// 🎨 Personalización de colores
+const THEME_CONFIG = {
+    primaryColor: '#ff003c',    // 🔴 Color principal
+    secondaryColor: '#2a2a2a',  // ⚫ Color secundario
+    backgroundColor: '#141414', // 🖤 Fondo principal
+    textColor: '#ffffff',       // ⚪ Texto principal
+    accentColor: '#ffd700'      // ✨ Color de acento
+};
+```
+
+---
+
+## 🎨 **Personalización**
+
+### 🎯 **Temas Personalizados**
+
+<div align="center">
+
+| 🌈 **Tema** | 🎨 **Colores** | 📱 **Preview** |
+|:---:|:---:|:---:|
+| 🔴 **Netflix** | `#e50914, #221f1f` | ![Netflix](https://img.shields.io/badge/Netflix-E50914?style=flat-square&logo=netflix&logoColor=white) |
+| 💜 **Discord** | `#5865f2, #2c2f33` | ![Discord](https://img.shields.io/badge/Discord-5865F2?style=flat-square&logo=discord&logoColor=white) |
+| 🎵 **Spotify** | `#1db954, #191414` | ![Spotify](https://img.shields.io/badge/Spotify-1DB954?style=flat-square&logo=spotify&logoColor=white) |
+
+</div>
+
+### ⚙️ **Variables CSS**
+
+```css
+:root {
+    /* 🎨 Colores principales */
+    --primary-color: #ff003c;      
+    --secondary-color: #2a2a2a;    
+    --bg-color: #141414;           
+    --text-color: #ffffff;         
+    
+    /* 📐 Dimensiones */
+    --item-width: 194px;           
+    --item-height: 271px;          
+    --modal-scale: 1.7;            
+    
+    /* ✨ Efectos */
+    --hover-brightness: 1.2;       
+    --transition-speed: 0.3s;      
+    --border-radius: 8px;          
+}
+```
+
+---
+
+## 📱 **Responsive Design**
+
+### 🖥️ **Breakpoints**
+
+| 📱 **Dispositivo** | 📏 **Resolución** | 🎯 **Optimización** |
+|:---:|:---:|:---:|
+| 🖥️ **Desktop** | `> 1200px` | Carrusel completo, modales grandes |
+| 💻 **Laptop** | `768px - 1200px` | Carrusel adaptado, modales medianos |
+| 📱 **Tablet** | `480px - 768px` | Grid responsivo, touch optimizado |
+| 📱 **Mobile** | `< 480px` | Lista vertical, gestos táctiles |
+
+### 📊 **Compatibilidad**
+
+<div align="center">
+
+![Chrome](https://img.shields.io/badge/Chrome-61+-4285F4?style=flat-square&logo=googlechrome&logoColor=white)
+![Firefox](https://img.shields.io/badge/Firefox-60+-FF7139?style=flat-square&logo=firefox&logoColor=white)
+![Safari](https://img.shields.io/badge/Safari-11+-000000?style=flat-square&logo=safari&logoColor=white)
+![Edge](https://img.shields.io/badge/Edge-79+-0078D4?style=flat-square&logo=microsoftedge&logoColor=white)
+
+![iOS](https://img.shields.io/badge/iOS-11+-000000?style=flat-square&logo=ios&logoColor=white)
+![Android](https://img.shields.io/badge/Android-7+-3DDC84?style=flat-square&logo=android&logoColor=white)
+
+</div>
+
+---
+
+## 🔧 **API y Datos**
+
+### 🎬 **TMDB Integration**
+
+```javascript
+// 🔑 API Key configuración
+const TMDB_CONFIG = {
+    apiKey: 'your-api-key-here',
+    baseURL: 'https://api.themoviedb.org/3',
+    imageBaseURL: 'https://image.tmdb.org/t/p/w500'
+};
+
+// 📊 Endpoints utilizados
+const ENDPOINTS = {
+    movieDetails: '/movie/{id}',
+    movieImages: '/movie/{id}/images',
+    movieVideos: '/movie/{id}/videos',
+    movieCredits: '/movie/{id}/credits'
+};
+```
+
+### 🚀 **Performance**
+
+- ⚡ **Lazy Loading**: Carga bajo demanda
+- 🧠 **Caching**: Almacenamiento local de respuestas
+- 🔄 **Virtualización**: Renderizado eficiente
+- 📱 **PWA Ready**: Service Workers incluidos
+
+---
+
+## 🤝 **Contribuir**
+
+<div align="center">
+
+![Contribuciones](https://img.shields.io/badge/contributions-welcome-brightgreen.svg?style=flat-square)
+![PRs](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)
+
+</div>
+
+### 🚀 **Cómo contribuir**
+
+1. 🍴 **Fork** el repositorio
+2. 🌿 **Crea** una rama feature (`git checkout -b feature/AmazingFeature`)
+3. 💾 **Commit** tus cambios (`git commit -m '✨ Add some AmazingFeature'`)
+4. 📤 **Push** a la rama (`git push origin feature/AmazingFeature`)
+5. 🎯 **Abre** un Pull Request
+
+### 📋 **Guías de Estilo**
+
 ```bash
-npm start
-```
-Esto abrirá el menú visual de **Todogram TV**, que te permitirá:
-- Obtener datos
-- Lanzar auto-push
-- Ver logs
-- Hacer push seguro
-- Instalar dependencias
+# 📏 JavaScript - Airbnb Style Guide
+npm run lint:js
 
----
+# 🎨 CSS - BEM Methodology
+npm run lint:css
 
-## 🚀 Uso con GitHub Actions
-
-El proyecto incluye un workflow llamado `sync.yml` en `.github/workflows/` que:
-- Se ejecuta manualmente o cada hora (CRON)
-- Extrae datos desde Notion
-- Consulta TMDb si faltan campos
-- Genera `public/data.json`
-- Hace push automáticamente si hubo cambios
-
-### Ejecutar manualmente:
-Desde GitHub > Actions > `Sync Notion y TMDB` > Run workflow
-
----
-
-## 📁 Estructura de archivos
-
-```
-├── Todogram.js            # Menú visual interactivo (principal)
-├── start.js               # Extrae datos desde Notion y TMDb
-├── auto-push.js           # Realiza git add, commit y push interactivo
-├── .env                   # Variables de entorno (no subir al repo)
-├── /public/data.json      # Archivo generado con los datos
-├── /github/workflows/     # Workflow de sincronización automática
-└── package.json           # Scripts, postinstall y dependencias
+# 📝 Commits - Conventional Commits
+git commit -m "feat: ✨ add new feature"
+git commit -m "fix: 🐛 resolve bug"
+git commit -m "docs: 📚 update readme"
 ```
 
----
+### 🎯 **Áreas de Mejora**
 
-## 🔍 Explicación técnica
-
-- `start.js` extrae primero los datos locales de Notion
-  - Usa propiedades de texto como `Géneros txt` y `Categorías txt` para evitar consumir API extra
-  - Si falta información, consulta TMDb por ID o título
-  - Fusiona los datos, priorizando Notion
-  - Genera un `data.json` público
-
-- `auto-push.js` automatiza el control de Git (add, commit, push) y puede forzar workflows con commits vacíos
-
-- `Todogram.js` es el controlador visual, mostrando todas las opciones posibles con menús amigables, color y animaciones
+- [ ] 🔍 Sistema de búsqueda avanzada
+- [ ] 👤 Perfiles de usuario
+- [ ] ⭐ Sistema de favoritos
+- [ ] 🎮 Gamificación
+- [ ] 🌐 Internacionalización (i18n)
+- [ ] 🔊 Modo oscuro/claro
+- [ ] 📊 Analytics y métricas
 
 ---
 
-## 🧭 Diagrama del flujo de datos
+## 📊 **Estadísticas del Proyecto**
 
-![Flujo de datos Notion > TMDb > JSON > Web](./A_flowchart_in_the_image_illustrates_the_integrati.png)
+<div align="center">
 
-1. **Notion** → extraemos los datos manuales
-2. **TMDb API** → completamos campos vacíos automáticamente
-3. **JSON** → se genera un archivo `data.json`
-4. **Softr Web** → la web visualiza el JSON actualizado
-<p align="right">(<a href="#-tabla-de-contenidos">volver al inicio</a>)</p>
+![GitHub repo size](https://img.shields.io/github/repo-size/tu-usuario/todogram?style=for-the-badge&logo=github)
+![GitHub code size](https://img.shields.io/github/languages/code-size/tu-usuario/todogram?style=for-the-badge&logo=github)
+![Lines of code](https://img.shields.io/tokei/lines/github/tu-usuario/todogram?style=for-the-badge&logo=github)
 
----
-
-## 🧯 Errores y soluciones
-
-| Error | Causa | Solución |
-|------|-------|----------|
-| `Missing Notion token` | No creaste `.env` | Crea `.env` con tus claves |
-| `Cannot find start.js` | Falta archivo | Verifica que esté en la carpeta principal |
-| `gh auth status` falla | GitHub CLI no instalado o no logueado | Ejecuta `gh auth login` |
-| API rate limit | Muchas llamadas a Notion/TMDB | Usa campos `txt` ya procesados en Notion |
+</div>
 
 ---
 
-## ❓ FAQ
+## 📄 **Licencia**
 
-**¿Necesito conocimientos técnicos avanzados?**
-> No. El menú de Todogram es para principiantes y automatiza todo el flujo.
+<div align="center">
 
-**¿Cómo sé si tengo todo instalado?**
-> Usa la opción `[6] Verificar dependencias` y verás ✅ o ❌ según tu sistema.
+![MIT License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
 
-**¿Se puede modificar el diseño visual?**
-> Sí. Puedes editar `Todogram.js` y usar más colores, bordes, o animaciones con `chalk`, `boxen`, etc.
+Este proyecto está bajo la **Licencia MIT** - mira el archivo [LICENSE](LICENSE) para detalles.
 
-**¿Puedo usarlo sin Softr?**
-> Sí. El JSON generado (`public/data.json`) puede ser usado con cualquier frontend: React, Vue, Next, etc.
+</div>
 
 ---
 
-## 🌐 Despliegue en Vercel y Netlify
+## 🙏 **Agradecimientos**
 
-### Vercel
-- Crea un nuevo proyecto desde el repositorio
-- En settings, define las variables del entorno (`.env`)
-- Apunta a un script build vacío (`build: ""`) si solo sirves JSON/static
+<div align="center">
 
-### Netlify
-- Usa el repo como origen
-- Añade tus variables de entorno
-- Puedes usar `netlify.toml` si quieres definir rutas
+### 🌟 **Powered by**
 
-Ambas plataformas sirven `public/data.json` directamente para usarlo desde Softr u otro cliente web.
+[![TMDB](https://img.shields.io/badge/TMDB-01B4E4?style=for-the-badge&logo=themoviedatabase&logoColor=white)](https://www.themoviedb.org/)
+[![YouTube](https://img.shields.io/badge/YouTube-FF0000?style=for-the-badge&logo=youtube&logoColor=white)](https://youtube.com)
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com)
 
----
+### 💝 **Especial gracias a**
 
-## 📊 Datos de interés
+- 🎬 **[The Movie Database](https://www.themoviedb.org/)** por su increíble API
+- 👥 **La comunidad de desarrolladores** por las librerías y herramientas
+- 🤝 **Todos los contribuidores** que han ayudado a mejorar el proyecto
 
-- Automatización completa Notion + TMDb + JSON + Web
-- Control visual para Git sin escribir comandos complejos
-- Optimización para evitar sobrecargar la API de Notion
-- Listo para principiantes totales
+</div>
 
 ---
 
-## 🙌 Agradecimientos
+<div align="center">
 
-Gracias a:
-* [![Node.js][Node.js]][Node-url]
-* [![JavaScript][JavaScript.com]][JavaScript-url]
-* [![GitHub Actions][GitHub-Actions]][GitHub-Actions-url]
-* [![Notion API][Notion-API]][Notion-API-url]
-* [![TMDb API][TMDb-API]][TMDb-API-url]
+### 💻 **Desarrollado con ❤️**
 
----
+![Made with Love](https://img.shields.io/badge/Made%20with-❤️-red?style=for-the-badge)
+![Built with JavaScript](https://img.shields.io/badge/Built%20with-JavaScript-yellow?style=for-the-badge&logo=javascript)
 
-## 👤 Autor
+**[Tu Nombre]** | **2023** | **[tu-email@domain.com](mailto:tu-email@domain.com)**
 
-| [<img src="https://avatars.githubusercontent.com/u/74684004?v=4" width=115><br><sub>@Todogram</sub>](https://github.com/jfl4bur) |
-|:---:|
-
+[![Portfolio](https://img.shields.io/badge/Portfolio-000000?style=flat-square&logo=About.me&logoColor=white)](https://tu-portfolio.com)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat-square&logo=linkedin&logoColor=white)](https://linkedin.com/in/tu-perfil)
+[![Twitter](https://img.shields.io/badge/Twitter-1DA1F2?style=flat-square&logo=twitter&logoColor=white)](https://twitter.com/tu-usuario)
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=flat-square&logo=github&logoColor=white)](https://github.com/tu-usuario)
 
 ---
 
-## 🧱 Construido con
+⭐ **¿Te gusta el proyecto? ¡Dale una estrella!** ⭐
 
-* [![Node.js][Node.js]][Node-url]
-* [![JavaScript][JavaScript.com]][JavaScript-url]
-* [![GitHub Actions][GitHub-Actions]][GitHub-Actions-url]
-* [![Notion API][Notion-API]][Notion-API-url]
-* [![TMDb API][TMDb-API]][TMDb-API-url]
+![Visitors](https://visitor-badge.laobi.icu/badge?page_id=tu-usuario.todogram)
 
-
-<!-- Referencias -->
-[Node.js]: https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white
-[Node-url]: https://nodejs.org/
-[JavaScript.com]: https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black
-[JavaScript-url]: https://developer.mozilla.org/en-US/docs/Web/JavaScript
-[GitHub-Actions]: https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white
-[GitHub-Actions-url]: https://github.com/features/actions
-[Notion-API]: https://img.shields.io/badge/Notion-000000?style=for-the-badge&logo=notion&logoColor=white
-[Notion-API-url]: https://developers.notion.com/
-[TMDb-API]: https://img.shields.io/badge/TMDb-01D277?style=for-the-badge&logo=themoviedatabase&logoColor=white
-[TMDb-API-url]: https://www.themoviedb.org/documentation/api
-
-<!-- MARKDOWN LINKS & IMAGES -->
-<!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/jfl4bur/Todogram.svg?style=for-the-badge
-[contributors-url]: https://github.com/jfl4bur/Todogram/graphs/contributors
-[forks-shield]: https://img.shields.io/github/forks/jfl4bur/Todogram.svg?style=for-the-badge
-[forks-url]: https://github.com/jfl4bur/Todogram/network/members
-[stars-shield]: https://img.shields.io/github/stars/jfl4bur/Todogram.svg?style=for-the-badge
-[stars-url]: https://github.com/jfl4bur/Todogram/stargazers
-[issues-shield]: https://img.shields.io/github/issues/jfl4bur/Todogram.svg?style=for-the-badge
-[issues-url]: https://github.com/jfl4bur/Todogram/issues
-[license-shield]: https://img.shields.io/github/license/jfl4bur/Todogram.svg?style=for-the-badge
-[license-url]: https://github.com/jfl4bur/Todogram/blob/main/LICENSE
-[telegram-shield]: https://img.shields.io/badge/Telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white
-[telegram-url]: https://t.me/Todogram
+</div>
