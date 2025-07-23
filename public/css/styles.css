@@ -10,6 +10,35 @@
     --modal-scale: 1.7;
 }
 
+.genre-info {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.8);
+    margin-bottom: 12px;
+}
+
+.details-modal-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.primary-action-row {
+    display: flex;
+    justify-content: center;
+}
+
+.secondary-actions-row {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+}
+
+.details-modal-action-btn.big-btn {
+    padding: 12px 30px;
+    font-size: 1.1rem;
+}
+
 /* Estilos personalizados para los scrollbars */
 .details-modal-overlay::-webkit-scrollbar {
     width: 6px;
