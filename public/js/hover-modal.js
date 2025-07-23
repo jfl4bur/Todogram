@@ -4,38 +4,27 @@ class HoverModal {
         this.modalContent = document.getElementById('modal-content');
         this.modalBackdrop = document.getElementById('modal-backdrop');
         this.modalBody = document.getElementById('modal-body');
-        this.carouselContainer = document.querySelector('.carousel-container'); // Inicializar carouselContainer
+        this.carouselContainer = document.querySelector('.carousel-container');
         this.activeItem = null;
         this.hoverModalItem = null;
         this.hoverModalOrigin = { x: 0, y: 0 };
         this.hoverModalTimeout = null;
 
-        // Logs de depuración para verificar los elementos
-        console.log('modalOverlay:', this.modalOverlay);
-        console.log('modalContent:', this.modalContent);
-        console.log('modalBackdrop:', this.modalBackdrop);
-        console.log('modalBody:', this.modalBody);
-        console.log('carouselContainer:', this.carouselContainer);
-
         if (!this.modalOverlay || !this.modalContent || !this.carouselContainer) {
-            console.error("Elementos del hover modal no encontrados", {
-                modalOverlay: this.modalOverlay,
-                modalContent: this.modalContent,
-                carouselContainer: this.carouselContainer
-            });
+            console.error("Elementos del hover modal no encontrados");
             return;
         }
     }
 
     show(item, itemElement) {
         if (!itemElement || !(itemElement instanceof HTMLElement)) {
-            console.error('itemElement no está definido o no es un elemento DOM válido:', itemElement);
+            console.error('itemElement no es válido');
             return;
         }
 
         window.isModalOpen = true;
         
-        // Priorizar imágenes de data.json
+        // Priorizar imágenes de Notion (Carteles), luego TMDB
         const backdropUrl = item.backgroundUrl || item.posterUrl;
         
         this.modalBackdrop.src = backdropUrl;
@@ -46,45 +35,66 @@ class HoverModal {
         const trailerUrl = item.trailerUrl;
         
         let metaItems = [];
+        let genresItem = '';
         
         if (item.year) metaItems.push(`<span>${item.year}</span>`);
         if (item.duration) metaItems.push(`<span>${item.duration}</span>`);
-        if (item.genre) metaItems.push(`<span>${item.genre}</span>`);
         if (item.ageRating) metaItems.push(`<span class="age-rating">${item.ageRating}</span>`);
         if (item.rating) metaItems.push(`<div class="rating"><i class="fas fa-star"></i><span>${item.rating}</span></div>`);
+        if (item.genre) genresItem = `<div class="meta-genre">${item.genre}</div>`;
         
         let actionButtons = '';
+        let secondaryButtons = '';
         
         if (item.videoUrl) {
             actionButtons += `
-                <button class="modal-action-btn" data-video-url="${item.videoUrl}">
+                <button class="modal-action-btn primary" data-video-url="${item.videoUrl}">
                     <i class="fas fa-play"></i>
                     <span>Ver Película</span>
+                    <span class="tooltip">Reproducir</span>
                 </button>
-                <button class="modal-action-btn" onclick="window.open('${this.generateDownloadUrl(item.videoUrl)}', '_blank')">
+            `;
+            
+            secondaryButtons += `
+                <button class="modal-action-btn circular" onclick="window.open('${this.generateDownloadUrl(item.videoUrl)}', '_blank')">
                     <i class="fas fa-download"></i>
-                    <span>Descargar</span>
+                    <span class="tooltip">Descargar</span>
                 </button>
             `;
         }
         
         if (trailerUrl) {
-            actionButtons += `
-                <button class="modal-action-btn" data-video-url="${trailerUrl}">
+            secondaryButtons += `
+                <button class="modal-action-btn circular" data-video-url="${trailerUrl}">
                     <i class="fas fa-film"></i>
-                    <span>Ver Tráiler</span>
+                    <span class="tooltip">Ver Tráiler</span>
                 </button>
             `;
         }
+        
+        // Botón para compartir
+        secondaryButtons += `
+            <button class="modal-action-btn circular" id="share-button">
+                <i class="fas fa-share-alt"></i>
+                <span class="tooltip">Compartir</span>
+            </button>
+        `;
         
         this.modalBody.innerHTML = `
             <h2>${item.title}</h2>
             <div class="meta-info">
                 ${metaItems.join('')}
             </div>
+            ${genresItem}
             <p class="description">${item.description}</p>
-            ${actionButtons ? `<div class="modal-actions">${actionButtons}</div>` : ''}
-            <a href="${item.link}" style="display:inline-block;margin-top:15px;padding:8px 15px;background:var(--primary-color);color:white;text-decoration:none;border-radius:4px;">Más información</a>
+            <div class="modal-actions">
+                <div class="primary-action">
+                    ${actionButtons}
+                </div>
+                <div class="secondary-actions">
+                    ${secondaryButtons}
+                </div>
+            </div>
         `;
         
         const position = this.calculateModalPosition(itemElement);
@@ -143,13 +153,11 @@ class HoverModal {
 
     calculateModalPosition(itemElement) {
         if (!itemElement || !(itemElement instanceof HTMLElement)) {
-            console.error('itemElement no es un elemento DOM válido:', itemElement);
-            return { top: 0, left: 0 }; // Posición por defecto
+            return { top: 0, left: 0 };
         }
 
         if (!this.carouselContainer || !(this.carouselContainer instanceof HTMLElement)) {
-            console.error('carouselContainer no está definido o no es un elemento DOM válido:', this.carouselContainer);
-            return { top: 0, left: 0 }; // Posición por defecto
+            return { top: 0, left: 0 };
         }
 
         const rect = itemElement.getBoundingClientRect();

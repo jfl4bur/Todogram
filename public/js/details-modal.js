@@ -16,7 +16,6 @@ class DetailsModal {
 
         this.setupEventListeners();
 
-        // ================== GALERÍA MODAL ================== //
         // Crear elementos para la galería modal
         this.galleryModal = document.createElement('div');
         this.galleryModal.id = 'gallery-modal';
@@ -97,7 +96,7 @@ class DetailsModal {
             tmdbImages = await this.fetchTMDBImages(item.tmdbUrl);
         }
         
-        // Priorizar imágenes de data.json
+        // Priorizar imágenes de Notion (Carteles), luego TMDB
         const backdropUrl = item.backgroundUrl || (tmdbImages.backdrops[0]?.file_path || item.posterUrl);
         
         this.detailsModalBackdrop.src = backdropUrl;
@@ -125,20 +124,19 @@ class DetailsModal {
         
         const audioSubtitlesSection = this.createAudioSubtitlesSection(item.audiosCount, item.subtitlesCount, item.audioList, item.subtitleList);
         
-        let actionButtons = '';
+        let primaryButton = '';
+        let secondaryButtons = '';
         
         if (item.videoUrl) {
-            actionButtons += `
+            primaryButton = `
                 <button class="details-modal-action-btn primary" data-video-url="${item.videoUrl}">
                     <i class="fas fa-play"></i>
                     <span>Ver Película</span>
                     <span class="tooltip">Reproducir</span>
                 </button>
             `;
-        }
-        
-        if (item.videoUrl) {
-            actionButtons += `
+            
+            secondaryButtons += `
                 <button class="details-modal-action-btn circular" onclick="window.open('${this.generateDownloadUrl(item.videoUrl)}', '_blank')">
                     <i class="fas fa-download"></i>
                     <span class="tooltip">Descargar</span>
@@ -147,7 +145,7 @@ class DetailsModal {
         }
         
         if (trailerUrl) {
-            actionButtons += `
+            secondaryButtons += `
                 <button class="details-modal-action-btn circular" data-video-url="${trailerUrl}">
                     <i class="fas fa-film"></i>
                     <span class="tooltip">Ver Tráiler</span>
@@ -156,7 +154,7 @@ class DetailsModal {
         }
         
         // Botón para compartir
-        actionButtons += `
+        secondaryButtons += `
             <button class="details-modal-action-btn circular" id="share-button">
                 <i class="fas fa-share-alt"></i>
                 <span class="tooltip">Compartir</span>
@@ -278,11 +276,14 @@ class DetailsModal {
             
             ${audioSubtitlesSection}
             
-            ${actionButtons ? `
             <div class="details-modal-actions">
-                ${actionButtons}
+                <div class="details-modal-primary-action">
+                    ${primaryButton}
+                </div>
+                <div class="details-modal-secondary-actions">
+                    ${secondaryButtons}
+                </div>
             </div>
-            ` : ''}
             
             ${taglineSection}
             
@@ -300,11 +301,6 @@ class DetailsModal {
             
             ${postersGallery}
             ${backdropsGallery}
-            
-            ${item.link ? `<a href="${item.link}" class="details-modal-action-btn secondary" style="margin-top:20px;text-align:center;text-decoration:none;">
-                <i class="fas fa-info-circle"></i>
-                <span>Más información</span>
-            </a>` : ''}
         `;
         
         void this.detailsModalOverlay.offsetWidth;
