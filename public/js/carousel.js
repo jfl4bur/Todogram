@@ -192,8 +192,8 @@ class Carousel {
             if (item.genre) metaInfo.push(`<span>${item.genre}</span>`);
             if (item.rating) metaInfo.push(`<div class="carousel-rating"><i class="fas fa-star"></i><span>${item.rating}</span></div>`);
             
-            /* CORRECCIÓN PARA AGE-RATING EN ITEMS */
-            if (item.ageRating) {
+            // SOLUCIÓN ROBUSTA PARA AGE-RATING EN ITEMS
+            if (item.ageRating && item.ageRating.trim() !== '') {
                 metaInfo.push(`<span class="age-rating">${item.ageRating}</span>`);
             }
 
