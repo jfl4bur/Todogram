@@ -24,7 +24,7 @@ class HoverModal {
 
         window.isModalOpen = true;
         
-        // 1. CORRECCIÓN: Usar postersUrl si está disponible (campo "Carteles")
+        // Usar postersUrl si está disponible (campo "Carteles")
         const backdropUrl = item.postersUrl || item.backgroundUrl || item.posterUrl;
         
         this.modalBackdrop.src = backdropUrl;
@@ -39,7 +39,7 @@ class HoverModal {
         if (item.year) metaItems.push(`<span>${item.year}</span>`);
         if (item.duration) metaItems.push(`<span>${item.duration}</span>`);
         if (item.rating) metaItems.push(`<div class="rating"><i class="fas fa-star"></i><span>${item.rating}</span></div>`);
-        // 2. CORRECCIÓN: Mostrar age-rating (campo "Clasificación")
+        // Mostrar age-rating (campo "Clasificación")
         if (item.ageRating) metaItems.push(`<span class="age-rating">${item.ageRating}</span>`);
         
         let genreInfo = '';
@@ -137,7 +137,7 @@ class HoverModal {
             }
         });
         
-        // 3. CORRECCIÓN: Evento para el botón compartir
+        // Evento para el botón compartir
         this.modalContent.querySelector('#share-button').addEventListener('click', (e) => {
             e.stopPropagation();
             const item = window.activeItem;
@@ -147,6 +147,21 @@ class HoverModal {
                 window.shareModal.show({ ...item, shareUrl });
             }
         });
+        
+        // Comportamiento de tooltips en móviles
+        if (window.matchMedia("(max-width: 480px)").matches) {
+            this.modalContent.querySelectorAll('.details-modal-action-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    if (this.classList.contains('active')) {
+                        return;
+                    }
+                    this.classList.add('active');
+                    setTimeout(() => {
+                        this.classList.remove('active');
+                    }, 2000);
+                });
+            });
+        }
         
         window.activeItem = item;
     }

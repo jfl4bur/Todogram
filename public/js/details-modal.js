@@ -91,7 +91,7 @@ class DetailsModal {
             tmdbImages = await this.fetchTMDBImages(item.tmdbUrl);
         }
         
-        // 1. CORRECCIÓN: Usar postersUrl si está disponible (campo "Carteles")
+        // Usar postersUrl si está disponible (campo "Carteles")
         const backdropUrl = item.postersUrl || item.backgroundUrl || item.posterUrl || (tmdbImages.backdrops[0]?.file_path || item.posterUrl);
         
         this.detailsModalBackdrop.src = backdropUrl;
@@ -346,7 +346,7 @@ class DetailsModal {
                 });
             });
             
-            // 2. CORRECCIÓN: Evento para el botón compartir
+            // Evento para el botón compartir
             this.detailsModalBody.querySelector('#share-button').addEventListener('click', (e) => {
                 e.stopPropagation();
                 const item = window.activeItem;
@@ -357,7 +357,7 @@ class DetailsModal {
                 }
             });
             
-            // 3. CORRECCIÓN: Manejo de tooltips en móviles
+            // Manejo de tooltips en móviles
             if (window.matchMedia("(max-width: 480px)").matches) {
                 this.detailsModalBody.querySelectorAll('.details-modal-action-btn').forEach(btn => {
                     btn.addEventListener('click', function() {
@@ -595,206 +595,206 @@ class DetailsModal {
                 trailerUrl = `https://www.youtube.com/watch?v=${trailer.key}`;
             }
             
-            const directors = [];
-            const writers = [];
-            
-            if (data.credits?.crew) {
-                data.credits.crew.forEach(person => {
-                    if (person.job === 'Director') {
-                        directors.push({
-                            id: person.id,
-                            name: person.name,
-                            profile_path: person.profile_path
-                        });
-                    } else if (person.job === 'Writer' || person.job === 'Screenplay') {
-                        writers.push({
-                            id: person.id,
-                            name: person.name,
-                            profile_path: person.profile_path
-                        });
-                    }
-                });
-            }
-            
-            const cast = [];
-            if (data.credits?.cast) {
-                data.credits.cast.slice(0, 10).forEach(actor => {
-                    cast.push({
-                        id: actor.id,
-                        name: actor.name,
-                        character: actor.character,
-                        profile_path: actor.profile_path
+        const directors = [];
+        const writers = [];
+        
+        if (data.credits?.crew) {
+            data.credits.crew.forEach(person => {
+                if (person.job === 'Director') {
+                    directors.push({
+                        id: person.id,
+                        name: person.name,
+                        profile_path: person.profile_path
                     });
+                } else if (person.job === 'Writer' || person.job === 'Screenplay') {
+                    writers.push({
+                        id: person.id,
+                        name: person.name,
+                        profile_path: person.profile_path
+                    });
+                }
+            });
+        }
+        
+        const cast = [];
+        if (data.credits?.cast) {
+            data.credits.cast.slice(0, 10).forEach(actor => {
+                cast.push({
+                    id: actor.id,
+                    name: actor.name,
+                    character: actor.character,
+                    profile_path: actor.profile_path
                 });
-            }
-            
-            return {
-                original_title: data.original_title,
-                tagline: data.tagline,
-                release_date: data.release_date,
-                runtime: data.runtime,
-                genres: data.genres?.map(g => g.name).join(', '),
-                vote_average: data.vote_average?.toFixed(1),
-                certification: certification,
-                overview: data.overview,
-                production_companies: data.production_companies?.map(c => c.name).join(', '),
-                production_countries: data.production_countries?.map(c => c.name).join(', '),
-                spoken_languages: data.spoken_languages?.map(l => l.name).join(', '),
-                status: data.status,
-                trailer_url: trailerUrl,
-                directors: directors,
-                writers: writers,
-                cast: cast
-            };
-        } catch (error) {
-            console.error('Error fetching TMDB data:', error);
-            return null;
-        }
-    }
-
-    createGallerySkeleton(type, count) {
-        const skeletonItems = [];
-        for (let i = 0; i < count; i++) {
-            skeletonItems.push(`
-                <div class="gallery-skeleton-item ${type}">
-                    <div class="gallery-skeleton-spinner"></div>
-                </div>
-            `);
+            });
         }
         
-        return `
-            <div class="details-modal-gallery-section">
-                <h3 class="details-modal-gallery-title">${type === 'poster' ? 'Carteles' : 'Imágenes de fondo'}</h3>
-                <div class="gallery-skeleton">
-                    ${skeletonItems.join('')}
-                </div>
-            </div>
-        `;
+        return {
+            original_title: data.original_title,
+            tagline: data.tagline,
+            release_date: data.release_date,
+            runtime: data.runtime,
+            genres: data.genres?.map(g => g.name).join(', '),
+            vote_average: data.vote_average?.toFixed(1),
+            certification: certification,
+            overview: data.overview,
+            production_companies: data.production_companies?.map(c => c.name).join(', '),
+            production_countries: data.production_countries?.map(c => c.name).join(', '),
+            spoken_languages: data.spoken_languages?.map(l => l.name).join(', '),
+            status: data.status,
+            trailer_url: trailerUrl,
+            directors: directors,
+            writers: writers,
+            cast: cast
+        };
+    } catch (error) {
+        console.error('Error fetching TMDB data:', error);
+        return null;
     }
+}
 
-    createGallerySection(images, title, type) {
-        if (!images || images.length === 0) return '';
-        
-        const showCount = type === 'posters' ? 5 : 4;
-        const itemClass = type === 'posters' ? 'poster' : 'backdrop';
-        
-        return `
-            <div class="details-modal-gallery-section">
-                <h3 class="details-modal-gallery-title">${title}</h3>
-                <div class="details-modal-gallery-list">
-                    ${images.slice(0, showCount).map((image, index) => `
-                        <div class="details-modal-gallery-item ${itemClass}" data-gallery-type="${type}" data-index="${index}">
-                            <img class="details-modal-gallery-image" 
-                                 src="${image.file_path}" 
-                                 loading="lazy"
-                                 alt="${title} - ${type} ${index + 1}">
-                        </div>
-                    `).join('')}
-                    ${images.length > showCount ? `
-                        <div class="details-modal-gallery-item more" data-gallery-type="${type}" data-show-more="true">
-                            <i class="fas fa-images"></i>
-                            <span>Ver más (${images.length - showCount})</span>
-                        </div>
-                    ` : ''}
-                </div>
+createGallerySkeleton(type, count) {
+    const skeletonItems = [];
+    for (let i = 0; i < count; i++) {
+        skeletonItems.push(`
+            <div class="gallery-skeleton-item ${type}">
+                <div class="gallery-skeleton-spinner"></div>
             </div>
-        `;
+        `);
     }
-
-    createCastSection(cast) {
-        if (!cast || cast.length === 0) return '';
-        
-        return `
-            <div class="details-modal-cast">
-                <h3 class="details-modal-cast-title">Reparto principal</h3>
-                <div class="details-modal-cast-list">
-                    ${cast.map(person => `
-                        <div class="details-modal-cast-item">
-                            <img class="details-modal-cast-photo" 
-                                 src="${person.profile_path ? `https://image.tmdb.org/t/p/w185${person.profile_path}` : 'https://www.themoviedb.org/assets/2/v4/glyphicons/basic/glyphicons-basic-4-user-grey-d8fe957375e70239d6abdd549fd7568c89281b2179b5f4470e2e12895792dfa5.svg'}" 
-                                 alt="${person.name}"
-                                 loading="lazy">
-                            <div class="details-modal-cast-name">${person.name}</div>
-                            <div class="details-modal-cast-character">${person.character}</div>
-                        </div>
-                    `).join('')}
-                </div>
+    
+    return `
+        <div class="details-modal-gallery-section">
+            <h3 class="details-modal-gallery-title">${type === 'poster' ? 'Carteles' : 'Imágenes de fondo'}</h3>
+            <div class="gallery-skeleton">
+                ${skeletonItems.join('')}
             </div>
-        `;
-    }
+        </div>
+    `;
+}
 
-    createCrewSection(crew, title) {
-        if (!crew || crew.length === 0) return '';
-        
-        return `
-            <div class="details-modal-crew">
-                <h3 class="details-modal-crew-title">${title}</h3>
-                <div class="details-modal-crew-list">
-                    ${crew.slice(0, 6).map(person => `
-                        <div class="details-modal-crew-item">
-                            <img class="details-modal-crew-photo" 
-                                 src="${person.profile_path ? `https://image.tmdb.org/t/p/w185${person.profile_path}` : 'https://www.themoviedb.org/assets/2/v4/glyphicons/basic/glyphicons-basic-4-user-grey-d8fe957375e70239d6abdd549fd7568c89281b2179b5f4470e2e12895792dfa5.svg'}" 
-                                 alt="${person.name}"
-                                 loading="lazy">
-                            <div class="details-modal-crew-info">
-                                <div class="details-modal-crew-name">${person.name}</div>
-                                <div class="details-modal-crew-role">${title}</div>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-    }
-
-    createAudioSubtitlesSection(audiosCount, subtitlesCount, audioList, subtitleList) {
-        let audioContent = '';
-        let subtitleContent = '';
-        
-        if (audioList.length > 0) {
-            audioContent = `
-                <div class="audio-subtitles-item" onclick="this.classList.toggle('expanded')">
-                    <i class="fas fa-volume-up"></i>
-                    <span>Audios (${audiosCount})</span>
-                    <div class="expandable-content">
-                        ${audioList.map(audio => `<div>· ${audio}</div>`).join('')}
+createGallerySection(images, title, type) {
+    if (!images || images.length === 0) return '';
+    
+    const showCount = type === 'posters' ? 5 : 4;
+    const itemClass = type === 'posters' ? 'poster' : 'backdrop';
+    
+    return `
+        <div class="details-modal-gallery-section">
+            <h3 class="details-modal-gallery-title">${title}</h3>
+            <div class="details-modal-gallery-list">
+                ${images.slice(0, showCount).map((image, index) => `
+                    <div class="details-modal-gallery-item ${itemClass}" data-gallery-type="${type}" data-index="${index}">
+                        <img class="details-modal-gallery-image" 
+                             src="${image.file_path}" 
+                             loading="lazy"
+                             alt="${title} - ${type} ${index + 1}">
                     </div>
-                </div>
-            `;
-        }
-        
-        if (subtitleList.length > 0) {
-            subtitleContent = `
-                <div class="audio-subtitles-item" onclick="this.classList.toggle('expanded')">
-                    <i class="fas fa-closed-captioning"></i>
-                    <span>Subtítulos (${subtitlesCount})</span>
-                    <div class="expandable-content">
-                        ${subtitleList.map(sub => `<div>· ${sub}</div>`).join('')}
+                `).join('')}
+                ${images.length > showCount ? `
+                    <div class="details-modal-gallery-item more" data-gallery-type="${type}" data-show-more="true">
+                        <i class="fas fa-images"></i>
+                        <span>Ver más (${images.length - showCount})</span>
                     </div>
-                </div>
-            `;
-        }
-        
-        if (audioContent || subtitleContent) {
-            return `
-                <div class="audio-subtitles-info">
-                    ${audioContent}
-                    ${audioContent && subtitleContent ? '<span class="details-modal-meta-separator">•</span>' : ''}
-                    ${subtitleContent}
-                </div>
-            `;
-        }
-        
-        return '';
-    }
+                ` : ''}
+            </div>
+        </div>
+    `;
+}
 
-    generateDownloadUrl(videoUrl) {
-        if (!videoUrl) return '#';
-        
-        if (videoUrl.includes('?') || videoUrl.includes('#')) {
-            return videoUrl + '&dl=1';
-        }
-        
-        return videoUrl + '?dl=1';
+createCastSection(cast) {
+    if (!cast || cast.length === 0) return '';
+    
+    return `
+        <div class="details-modal-cast">
+            <h3 class="details-modal-cast-title">Reparto principal</h3>
+            <div class="details-modal-cast-list">
+                ${cast.map(person => `
+                    <div class="details-modal-cast-item">
+                        <img class="details-modal-cast-photo" 
+                             src="${person.profile_path ? `https://image.tmdb.org/t/p/w185${person.profile_path}` : 'https://www.themoviedb.org/assets/2/v4/glyphicons/basic/glyphicons-basic-4-user-grey-d8fe957375e70239d6abdd549fd7568c89281b2179b5f4470e2e12895792dfa5.svg'}" 
+                             alt="${person.name}"
+                             loading="lazy">
+                        <div class="details-modal-cast-name">${person.name}</div>
+                        <div class="details-modal-cast-character">${person.character}</div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+createCrewSection(crew, title) {
+    if (!crew || crew.length === 0) return '';
+    
+    return `
+        <div class="details-modal-crew">
+            <h3 class="details-modal-crew-title">${title}</h3>
+            <div class="details-modal-crew-list">
+                ${crew.slice(0, 6).map(person => `
+                    <div class="details-modal-crew-item">
+                        <img class="details-modal-crew-photo" 
+                             src="${person.profile_path ? `https://image.tmdb.org/t/p/w185${person.profile_path}` : 'https://www.themoviedb.org/assets/2/v4/glyphicons/basic/glyphicons-basic-4-user-grey-d8fe957375e70239d6abdd549fd7568c89281b2179b5f4470e2e12895792dfa5.svg'}" 
+                             alt="${person.name}"
+                             loading="lazy">
+                        <div class="details-modal-crew-info">
+                            <div class="details-modal-crew-name">${person.name}</div>
+                            <div class="details-modal-crew-role">${title}</div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+createAudioSubtitlesSection(audiosCount, subtitlesCount, audioList, subtitleList) {
+    let audioContent = '';
+    let subtitleContent = '';
+    
+    if (audioList.length > 0) {
+        audioContent = `
+            <div class="audio-subtitles-item" onclick="this.classList.toggle('expanded')">
+                <i class="fas fa-volume-up"></i>
+                <span>Audios (${audiosCount})</span>
+                <div class="expandable-content">
+                    ${audioList.map(audio => `<div>· ${audio}</div>`).join('')}
+                </div>
+            </div>
+        `;
     }
+    
+    if (subtitleList.length > 0) {
+        subtitleContent = `
+            <div class="audio-subtitles-item" onclick="this.classList.toggle('expanded')">
+                <i class="fas fa-closed-captioning"></i>
+                <span>Subtítulos (${subtitlesCount})</span>
+                <div class="expandable-content">
+                    ${subtitleList.map(sub => `<div>· ${sub}</div>`).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    if (audioContent || subtitleContent) {
+        return `
+            <div class="audio-subtitles-info">
+                ${audioContent}
+                ${audioContent && subtitleContent ? '<span class="details-modal-meta-separator">•</span>' : ''}
+                ${subtitleContent}
+            </div>
+        `;
+    }
+    
+    return '';
+}
+
+generateDownloadUrl(videoUrl) {
+    if (!videoUrl) return '#';
+    
+    if (videoUrl.includes('?') || videoUrl.includes('#')) {
+        return videoUrl + '&dl=1';
+    }
+    
+    return videoUrl + '?dl=1';
+}
 }
