@@ -39,8 +39,11 @@ class HoverModal {
         if (item.year) metaItems.push(`<span>${item.year}</span>`);
         if (item.duration) metaItems.push(`<span>${item.duration}</span>`);
         if (item.rating) metaItems.push(`<div class="rating"><i class="fas fa-star"></i><span>${item.rating}</span></div>`);
-        // Mostrar age-rating (campo "Clasificación") - CORREGIDO
-        if (item.ageRating) metaItems.push(`<span class="age-rating">${item.ageRating}</span>`);
+        
+        /* CORRECCIÓN PARA AGE-RATING */
+        if (item.ageRating) {
+            metaItems.push(`<span class="age-rating">${item.ageRating}</span>`);
+        }
         
         let genreInfo = '';
         if (item.genre) {
