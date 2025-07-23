@@ -40,8 +40,8 @@ class HoverModal {
         if (item.duration) metaItems.push(`<span>${item.duration}</span>`);
         if (item.rating) metaItems.push(`<div class="rating"><i class="fas fa-star"></i><span>${item.rating}</span></div>`);
         
-        /* CORRECCIÓN PARA AGE-RATING */
-        if (item.ageRating) {
+        // SOLUCIÓN ROBUSTA PARA AGE-RATING
+        if (item.ageRating && item.ageRating.trim() !== '') {
             metaItems.push(`<span class="age-rating">${item.ageRating}</span>`);
         }
         
@@ -164,6 +164,11 @@ class HoverModal {
                         firstClick = true;
                         btn.classList.add('active');
                         
+                        // Ocultar otros tooltips
+                        document.querySelectorAll('.details-modal-action-btn.active').forEach(otherBtn => {
+                            if (otherBtn !== btn) otherBtn.classList.remove('active');
+                        });
+                        
                         timeout = setTimeout(() => {
                             firstClick = false;
                             btn.classList.remove('active');
@@ -188,6 +193,15 @@ class HoverModal {
                         } else if (btn.onclick) {
                             btn.onclick(e);
                         }
+                    }
+                });
+                
+                // Cerrar tooltip al tocar fuera
+                document.addEventListener('click', (e) => {
+                    if (!btn.contains(e.target)) {
+                        btn.classList.remove('active');
+                        firstClick = false;
+                        clearTimeout(timeout);
                     }
                 });
             });
