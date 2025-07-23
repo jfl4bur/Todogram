@@ -38,13 +38,19 @@ document.addEventListener('DOMContentLoaded', function () {
         window.activeItem = null;
         window.hoverModalItem = null;
 
+        // Función para generar URL de compartir
+        window.generateShareUrl = function(item, originalUrl) {
+            const staticBaseUrl = 'https://jfl4bur.github.io/Todogram/public/template/movie-template.html';
+            return `${staticBaseUrl}?title=${encodeURIComponent(item.title)}&description=${encodeURIComponent(item.description || 'Explora esta película en Todogram.')}&image=${encodeURIComponent(item.posterUrl || 'https://via.placeholder.com/194x271')}&originalUrl=${encodeURIComponent(originalUrl)}&hash=${encodeURIComponent(window.location.hash)}`;
+        };
+
         // Evento para el botón "Share" dentro del modal de detalles
         document.addEventListener('click', function(e) {
             if (e.target.closest('#share-button')) {
                 const item = window.activeItem;
                 if (item && window.shareModal) {
                     const currentUrl = window.location.href;
-                    const shareUrl = generateShareUrl(item, currentUrl);
+                    const shareUrl = window.generateShareUrl(item, currentUrl);
                     window.shareModal.show({ ...item, shareUrl }); // Pasar shareUrl al modal
                 } else {
                     console.error('Item o shareModal no definidos:', { item, shareModal: window.shareModal });
@@ -84,12 +90,6 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 console.log('No se encontraron parámetros de URL');
             }
-        }
-
-        // Función para generar la URL de compartir
-        function generateShareUrl(item, originalUrl) {
-            const staticBaseUrl = 'https://jfl4bur.github.io/Todogram/public/template/movie-template.html';
-            return `${staticBaseUrl}?title=${encodeURIComponent(item.title)}&description=${encodeURIComponent(item.description || 'Explora esta película en Todogram.')}&image=${encodeURIComponent(item.posterUrl || 'https://via.placeholder.com/194x271')}&originalUrl=${encodeURIComponent(originalUrl)}&hash=${encodeURIComponent(window.location.hash)}`;
         }
 
         // Manejar parámetros de URL al cargar la página

@@ -24,7 +24,7 @@ class HoverModal {
 
         window.isModalOpen = true;
         
-        // Usar postersUrl si está disponible (campo "Carteles")
+        // Usar postersUrl como prioridad (campo "Carteles")
         const backdropUrl = item.postersUrl || item.backgroundUrl || item.posterUrl;
         
         this.modalBackdrop.src = backdropUrl;

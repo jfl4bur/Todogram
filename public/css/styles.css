@@ -10,35 +10,6 @@
     --modal-scale: 1.7;
 }
 
-.genre-info {
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.8);
-    margin-bottom: 12px;
-}
-
-.details-modal-actions {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-bottom: 24px;
-}
-
-.primary-action-row {
-    display: flex;
-    justify-content: center;
-}
-
-.secondary-actions-row {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
-}
-
-.details-modal-action-btn.big-btn {
-    padding: 12px 30px;
-    font-size: 1.1rem;
-}
-
 /* Estilos personalizados para los scrollbars */
 .details-modal-overlay::-webkit-scrollbar {
     width: 6px;
@@ -386,15 +357,13 @@
 }
 
 .modal-header::after {
+    content: "";
     position: absolute;
+    top: 0px;
+    left: 0px;
     width: 100%;
     height: 100%;
-    z-index: 1100;
-    position: absolute;
-    inset: 1px;
-    content: " ";
-    border-radius: inherit;
-    background: linear-gradient(transparent 40%, rgb(0, 0, 0) 100%);
+    background: linear-gradient(rgba(16, 16, 16, 0) 40%, rgb(16, 16, 16) 100%);
 }
 
 .modal-backdrop {
@@ -413,10 +382,6 @@
     color: white;
     height: calc(100% - 42.25%);
     overflow-y: auto;
-    
-    /* Ajustes para evitar scroll */
-    max-height: calc(100% - 42.25%);
-    overflow-y: hidden;
 }
 
 .modal-body h2 {
@@ -464,20 +429,8 @@
 
 .modal-actions {
     display: flex;
-    flex-direction: column;
     gap: 10px;
     margin-top: 15px;
-}
-
-.primary-action-row {
-    display: flex;
-    justify-content: center;
-}
-
-.secondary-actions-row {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
 }
 
 .modal-action-btn {
@@ -1681,27 +1634,6 @@
     .details-modal-action-btn.primary span {
         display: inline !important;
     }
-    
-    /* CORRECCIÓN: Tooltips en móviles - solo mostrar al hacer clic */
-    .details-modal-action-btn .tooltip {
-        display: none;
-        position: fixed;
-        bottom: 80px;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 10000;
-        background: rgba(0,0,0,0.8);
-        color: white;
-        padding: 6px 12px;
-        border-radius: 4px;
-        white-space: nowrap;
-        pointer-events: none;
-        font-size: 0.9rem;
-    }
-    
-    .details-modal-action-btn.active .tooltip {
-        display: block;
-    }
 }
 
 @media (max-width: 480px) {
@@ -1780,22 +1712,28 @@
         display: none;
     }
     
-    /* CORRECCIÓN: Tooltips en móviles - solo mostrar al hacer clic */
-    .details-modal-action-btn .tooltip {
+.details-modal-action-btn .tooltip {
         display: none !important;
-        position: static;
-        transform: none;
-        background: transparent;
-        color: white;
-        padding: 0;
-        margin: 0;
-        box-shadow: none;
-        font-size: 0.7rem;
-        font-weight: normal;
     }
     
     .details-modal-action-btn.active .tooltip {
         display: block !important;
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0,0,0,0.8);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 4px;
+        white-space: nowrap;
+        pointer-events: none;
+        font-size: 0.9rem;
+        z-index: 10000;
+    }
+    
+    .details-modal-action-btn .tooltip::after {
+        display: none;
     }
     
     /* Mostrar texto en botón primario en móvil */
@@ -1825,21 +1763,5 @@
     
     .share-link-button {
         padding: 8px 12px;
-    }
-}
-
-/* Desktop: buttons in one row */
-@media (min-width: 769px) {
-    .details-modal-actions {
-        flex-direction: row;
-        align-items: center;
-    }
-    .primary-action-row {
-        margin-right: 12px;
-        margin-bottom: 0 !important;
-    }
-    .secondary-actions-row {
-        display: flex;
-        gap: 12px;
     }
 }
