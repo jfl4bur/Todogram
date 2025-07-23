@@ -15,7 +15,7 @@ class DetailsModal {
         }
 
         this.setupEventListeners();
-
+        
         // Crear elementos para la galería modal
         this.galleryModal = document.createElement('div');
         this.galleryModal.id = 'gallery-modal';
@@ -96,7 +96,7 @@ class DetailsModal {
             tmdbImages = await this.fetchTMDBImages(item.tmdbUrl);
         }
         
-        // Priorizar imágenes de Notion (Carteles), luego TMDB
+        // Priorizar imágenes de data.json
         const backdropUrl = item.backgroundUrl || (tmdbImages.backdrops[0]?.file_path || item.posterUrl);
         
         this.detailsModalBackdrop.src = backdropUrl;
@@ -124,18 +124,20 @@ class DetailsModal {
         
         const audioSubtitlesSection = this.createAudioSubtitlesSection(item.audiosCount, item.subtitlesCount, item.audioList, item.subtitleList);
         
-        let primaryButton = '';
+        let actionButtons = '';
         let secondaryButtons = '';
         
         if (item.videoUrl) {
-            primaryButton = `
-                <button class="details-modal-action-btn primary" data-video-url="${item.videoUrl}">
+            actionButtons += `
+                <button class="details-modal-action-btn primary big-btn" data-video-url="${item.videoUrl}">
                     <i class="fas fa-play"></i>
                     <span>Ver Película</span>
                     <span class="tooltip">Reproducir</span>
                 </button>
             `;
-            
+        }
+        
+        if (item.videoUrl) {
             secondaryButtons += `
                 <button class="details-modal-action-btn circular" onclick="window.open('${this.generateDownloadUrl(item.videoUrl)}', '_blank')">
                     <i class="fas fa-download"></i>
@@ -277,10 +279,10 @@ class DetailsModal {
             ${audioSubtitlesSection}
             
             <div class="details-modal-actions">
-                <div class="details-modal-primary-action">
-                    ${primaryButton}
+                <div class="primary-action-row">
+                    ${actionButtons}
                 </div>
-                <div class="details-modal-secondary-actions">
+                <div class="secondary-actions-row">
                     ${secondaryButtons}
                 </div>
             </div>
@@ -335,7 +337,7 @@ class DetailsModal {
                 });
             });
             
-            // ===== EVENTOS PARA GALERÍA MODAL ===== //
+            // Eventos para galería
             this.detailsModalBody.querySelectorAll('.details-modal-gallery-item').forEach(item => {
                 item.addEventListener('click', (e) => {
                     const galleryType = item.getAttribute('data-gallery-type');
@@ -350,6 +352,18 @@ class DetailsModal {
                     }
                 });
             });
+            
+            // Evento para compartir
+            this.detailsModalBody.querySelector('#share-button').addEventListener('click', (e) => {
+                e.stopPropagation();
+                const item = window.activeItem;
+                if (item && window.shareModal) {
+                    const currentUrl = window.location.href;
+                    const shareUrl = window.generateShareUrl(item, currentUrl);
+                    window.shareModal.show({ ...item, shareUrl });
+                }
+            });
+            
         }, 100);
         
         if (this.isIOS()) {

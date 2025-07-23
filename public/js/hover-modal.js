@@ -18,13 +18,13 @@ class HoverModal {
 
     show(item, itemElement) {
         if (!itemElement || !(itemElement instanceof HTMLElement)) {
-            console.error('itemElement no es válido');
+            console.error('itemElement no válido');
             return;
         }
 
         window.isModalOpen = true;
         
-        // Priorizar imágenes de Notion (Carteles), luego TMDB
+        // Priorizar imágenes de Carteles de Notion, luego TMDB
         const backdropUrl = item.backgroundUrl || item.posterUrl;
         
         this.modalBackdrop.src = backdropUrl;
@@ -35,28 +35,33 @@ class HoverModal {
         const trailerUrl = item.trailerUrl;
         
         let metaItems = [];
-        let genresItem = '';
         
         if (item.year) metaItems.push(`<span>${item.year}</span>`);
         if (item.duration) metaItems.push(`<span>${item.duration}</span>`);
         if (item.ageRating) metaItems.push(`<span class="age-rating">${item.ageRating}</span>`);
         if (item.rating) metaItems.push(`<div class="rating"><i class="fas fa-star"></i><span>${item.rating}</span></div>`);
-        if (item.genre) genresItem = `<div class="meta-genre">${item.genre}</div>`;
+        
+        // Nueva línea para géneros
+        let genreInfo = '';
+        if (item.genre) {
+            genreInfo = `<div class="genre-info">${item.genre}</div>`;
+        }
         
         let actionButtons = '';
-        let secondaryButtons = '';
         
         if (item.videoUrl) {
             actionButtons += `
-                <button class="modal-action-btn primary" data-video-url="${item.videoUrl}">
+                <button class="details-modal-action-btn primary" data-video-url="${item.videoUrl}">
                     <i class="fas fa-play"></i>
                     <span>Ver Película</span>
                     <span class="tooltip">Reproducir</span>
                 </button>
             `;
-            
-            secondaryButtons += `
-                <button class="modal-action-btn circular" onclick="window.open('${this.generateDownloadUrl(item.videoUrl)}', '_blank')">
+        }
+        
+        if (item.videoUrl) {
+            actionButtons += `
+                <button class="details-modal-action-btn circular" onclick="window.open('${this.generateDownloadUrl(item.videoUrl)}', '_blank')">
                     <i class="fas fa-download"></i>
                     <span class="tooltip">Descargar</span>
                 </button>
@@ -64,8 +69,8 @@ class HoverModal {
         }
         
         if (trailerUrl) {
-            secondaryButtons += `
-                <button class="modal-action-btn circular" data-video-url="${trailerUrl}">
+            actionButtons += `
+                <button class="details-modal-action-btn circular" data-video-url="${trailerUrl}">
                     <i class="fas fa-film"></i>
                     <span class="tooltip">Ver Tráiler</span>
                 </button>
@@ -73,8 +78,8 @@ class HoverModal {
         }
         
         // Botón para compartir
-        secondaryButtons += `
-            <button class="modal-action-btn circular" id="share-button">
+        actionButtons += `
+            <button class="details-modal-action-btn circular" id="share-button">
                 <i class="fas fa-share-alt"></i>
                 <span class="tooltip">Compartir</span>
             </button>
@@ -85,16 +90,11 @@ class HoverModal {
             <div class="meta-info">
                 ${metaItems.join('')}
             </div>
-            ${genresItem}
-            <p class="description">${item.description}</p>
+            ${genreInfo}
             <div class="modal-actions">
-                <div class="primary-action">
-                    ${actionButtons}
-                </div>
-                <div class="secondary-actions">
-                    ${secondaryButtons}
-                </div>
+                ${actionButtons}
             </div>
+            <p class="description">${item.description}</p>
         `;
         
         const position = this.calculateModalPosition(itemElement);
@@ -116,7 +116,7 @@ class HoverModal {
             }
         });
         
-        this.modalContent.querySelectorAll('.modal-action-btn').forEach(btn => {
+        this.modalContent.querySelectorAll('[data-video-url]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const videoUrl = btn.getAttribute('data-video-url');
@@ -129,6 +129,17 @@ class HoverModal {
             if (!window.matchMedia("(max-width: 768px)").matches) {
                 this.close();
                 window.detailsModal.show(item, itemElement);
+            }
+        });
+        
+        // Evento para compartir
+        this.modalContent.querySelector('#share-button').addEventListener('click', (e) => {
+            e.stopPropagation();
+            const item = window.activeItem;
+            if (item && window.shareModal) {
+                const currentUrl = window.location.href;
+                const shareUrl = window.generateShareUrl(item, currentUrl);
+                window.shareModal.show({ ...item, shareUrl });
             }
         });
         
@@ -152,11 +163,7 @@ class HoverModal {
     }
 
     calculateModalPosition(itemElement) {
-        if (!itemElement || !(itemElement instanceof HTMLElement)) {
-            return { top: 0, left: 0 };
-        }
-
-        if (!this.carouselContainer || !(this.carouselContainer instanceof HTMLElement)) {
+        if (!itemElement || !this.carouselContainer) {
             return { top: 0, left: 0 };
         }
 
