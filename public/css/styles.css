@@ -1665,6 +1665,25 @@
     .details-modal-action-btn.primary span {
         display: inline !important;
     }
+    
+    /* Habilitar tooltips en móvil */
+    .details-modal-action-btn .tooltip {
+        display: block;
+        position: fixed;
+        bottom: 80px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 10000;
+        opacity: 1 !important;
+        visibility: visible !important;
+        pointer-events: none;
+        background: rgba(0,0,0,0.8);
+        color: white;
+    }
+    
+    .details-modal-action-btn .tooltip::after {
+        display: none;
+    }
 }
 
 @media (max-width: 480px) {
@@ -1789,5 +1808,21 @@
     
     .share-link-button {
         padding: 8px 12px;
+    }
+}
+
+/* Desktop: buttons in one row */
+@media (min-width: 769px) {
+    .details-modal-actions {
+        flex-direction: row;
+        align-items: center;
+    }
+    .primary-action-row {
+        margin-right: 12px;
+        margin-bottom: 0 !important;
+    }
+    .secondary-actions-row {
+        display: flex;
+        gap: 12px;
     }
 }
