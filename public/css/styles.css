@@ -460,8 +460,20 @@
 
 .modal-actions {
     display: flex;
+    flex-direction: column;
     gap: 10px;
     margin-top: 15px;
+}
+
+.primary-action-row {
+    display: flex;
+    justify-content: center;
+}
+
+.secondary-actions-row {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
 }
 
 .modal-action-btn {

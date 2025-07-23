@@ -24,8 +24,8 @@ class HoverModal {
 
         window.isModalOpen = true;
         
-        // Priorizar imágenes de Notion (backgroundUrl y posterUrl)
-        const backdropUrl = item.backgroundUrl || item.posterUrl;
+        // Usar postersUrl si está disponible, luego backgroundUrl, luego posterUrl
+        const backdropUrl = item.postersUrl || item.backgroundUrl || item.posterUrl;
         
         this.modalBackdrop.src = backdropUrl;
         this.modalBackdrop.onerror = function() {
@@ -41,7 +41,6 @@ class HoverModal {
         if (item.rating) metaItems.push(`<div class="rating"><i class="fas fa-star"></i><span>${item.rating}</span></div>`);
         if (item.ageRating) metaItems.push(`<span class="age-rating">${item.ageRating}</span>`);
         
-        // Nueva línea para géneros
         let genreInfo = '';
         if (item.genre) {
             genreInfo = `<div class="genre-info">${item.genre}</div>`;
@@ -51,16 +50,20 @@ class HoverModal {
         
         if (item.videoUrl) {
             actionButtons += `
-                <button class="details-modal-action-btn primary" data-video-url="${item.videoUrl}">
-                    <i class="fas fa-play"></i>
-                    <span>Ver Película</span>
-                    <span class="tooltip">Reproducir</span>
-                </button>
+                <div class="primary-action-row">
+                    <button class="details-modal-action-btn primary" data-video-url="${item.videoUrl}">
+                        <i class="fas fa-play"></i>
+                        <span>Ver Película</span>
+                        <span class="tooltip">Reproducir</span>
+                    </button>
+                </div>
             `;
         }
         
+        let secondaryButtons = '<div class="secondary-actions-row">';
+        
         if (item.videoUrl) {
-            actionButtons += `
+            secondaryButtons += `
                 <button class="details-modal-action-btn circular" onclick="window.open('${this.generateDownloadUrl(item.videoUrl)}', '_blank')">
                     <i class="fas fa-download"></i>
                     <span class="tooltip">Descargar</span>
@@ -69,7 +72,7 @@ class HoverModal {
         }
         
         if (trailerUrl) {
-            actionButtons += `
+            secondaryButtons += `
                 <button class="details-modal-action-btn circular" data-video-url="${trailerUrl}">
                     <i class="fas fa-film"></i>
                     <span class="tooltip">Ver Tráiler</span>
@@ -77,12 +80,12 @@ class HoverModal {
             `;
         }
         
-        // Botón para compartir
-        actionButtons += `
-            <button class="details-modal-action-btn circular" id="share-button">
-                <i class="fas fa-share-alt"></i>
-                <span class="tooltip">Compartir</span>
-            </button>
+        secondaryButtons += `
+                <button class="details-modal-action-btn circular" id="share-button">
+                    <i class="fas fa-share-alt"></i>
+                    <span class="tooltip">Compartir</span>
+                </button>
+            </div>
         `;
         
         this.modalBody.innerHTML = `
@@ -93,6 +96,7 @@ class HoverModal {
             ${genreInfo}
             <div class="modal-actions">
                 ${actionButtons}
+                ${secondaryButtons}
             </div>
             <p class="description">${item.description}</p>
         `;
@@ -132,7 +136,6 @@ class HoverModal {
             }
         });
         
-        // Evento para compartir
         this.modalContent.querySelector('#share-button').addEventListener('click', (e) => {
             e.stopPropagation();
             const item = window.activeItem;

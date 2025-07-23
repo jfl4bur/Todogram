@@ -16,7 +16,6 @@ class DetailsModal {
 
         this.setupEventListeners();
         
-        // Crear elementos para la galería modal
         this.galleryModal = document.createElement('div');
         this.galleryModal.id = 'gallery-modal';
         this.galleryModal.className = 'gallery-modal';
@@ -31,14 +30,12 @@ class DetailsModal {
         `;
         document.body.appendChild(this.galleryModal);
 
-        // Referencias a los nuevos elementos
         this.galleryImage = this.galleryModal.querySelector('.gallery-modal-image');
         this.galleryCounter = this.galleryModal.querySelector('.gallery-modal-counter');
         this.galleryClose = this.galleryModal.querySelector('.gallery-modal-close');
         this.galleryPrev = this.galleryModal.querySelector('.gallery-modal-prev');
         this.galleryNext = this.galleryModal.querySelector('.gallery-modal-next');
 
-        // Eventos para la galería
         this.galleryClose.addEventListener('click', () => this.closeGallery());
         this.galleryPrev.addEventListener('click', () => this.navigateGallery(-1));
         this.galleryNext.addEventListener('click', () => this.navigateGallery(1));
@@ -46,7 +43,6 @@ class DetailsModal {
             if (e.target === this.galleryModal) this.closeGallery();
         });
 
-        // Inicializar propiedades de la galería
         this.galleryImages = [];
         this.currentGalleryIndex = 0;
     }
@@ -90,14 +86,13 @@ class DetailsModal {
             tmdbData = await this.fetchTMDBData(item.tmdbUrl);
         }
         
-        // Obtener imágenes de TMDB para la galería
         let tmdbImages = { posters: [], backdrops: [] };
         if (item.tmdbUrl) {
             tmdbImages = await this.fetchTMDBImages(item.tmdbUrl);
         }
         
-        // Priorizar imágenes de data.json (Notion)
-        const backdropUrl = item.backgroundUrl || item.posterUrl || (tmdbImages.backdrops[0]?.file_path || item.posterUrl);
+        // Usar postersUrl si está disponible, luego backgroundUrl, luego posterUrl
+        const backdropUrl = item.postersUrl || item.backgroundUrl || item.posterUrl || (tmdbImages.backdrops[0]?.file_path || item.posterUrl);
         
         this.detailsModalBackdrop.src = backdropUrl;
         this.detailsModalBackdrop.onerror = function() {
@@ -155,7 +150,6 @@ class DetailsModal {
             `;
         }
         
-        // Botón para compartir
         secondaryButtons += `
             <button class="details-modal-action-btn circular" id="share-button">
                 <i class="fas fa-share-alt"></i>
@@ -337,7 +331,6 @@ class DetailsModal {
                 });
             });
             
-            // Eventos para galería
             this.detailsModalBody.querySelectorAll('.details-modal-gallery-item').forEach(item => {
                 item.addEventListener('click', (e) => {
                     const galleryType = item.getAttribute('data-gallery-type');
@@ -353,7 +346,6 @@ class DetailsModal {
                 });
             });
             
-            // Evento para compartir
             this.detailsModalBody.querySelector('#share-button').addEventListener('click', (e) => {
                 e.stopPropagation();
                 const item = window.activeItem;
@@ -390,7 +382,6 @@ class DetailsModal {
         }, 300);
     }
     
-    // ================== MÉTODOS DE GALERÍA ================== //
     showGallery(images, startIndex = 0) {
         if (!images || images.length === 0) return;
         
@@ -401,9 +392,7 @@ class DetailsModal {
         this.galleryModal.style.display = 'block';
         document.body.style.overflow = 'hidden';
         
-        // Eventos de teclado para navegación
         document.addEventListener('keydown', this.handleGalleryKeydown);
-        // Evento de rueda del ratón
         this.galleryModal.addEventListener('wheel', this.handleGalleryWheel);
     }
 
@@ -411,7 +400,6 @@ class DetailsModal {
         this.galleryModal.style.display = 'none';
         document.body.style.overflow = 'auto';
         
-        // Limpiar eventos
         document.removeEventListener('keydown', this.handleGalleryKeydown);
         this.galleryModal.removeEventListener('wheel', this.handleGalleryWheel);
     }
@@ -421,7 +409,6 @@ class DetailsModal {
         this.galleryImage.src = image.file_path;
         this.galleryCounter.textContent = `${this.currentGalleryIndex + 1} / ${this.galleryImages.length}`;
         
-        // Actualizar estado de botones
         this.galleryPrev.disabled = this.currentGalleryIndex === 0;
         this.galleryNext.disabled = this.currentGalleryIndex === this.galleryImages.length - 1;
     }
@@ -429,7 +416,6 @@ class DetailsModal {
     navigateGallery(direction) {
         this.currentGalleryIndex += direction;
         
-        // Asegurarse de que el índice esté dentro de los límites
         if (this.currentGalleryIndex < 0) {
             this.currentGalleryIndex = this.galleryImages.length - 1;
         } else if (this.currentGalleryIndex >= this.galleryImages.length) {
@@ -460,12 +446,11 @@ class DetailsModal {
         
         e.preventDefault();
         if (e.deltaY > 0) {
-            this.navigateGallery(1); // Scroll hacia abajo = siguiente imagen
+            this.navigateGallery(1);
         } else {
-            this.navigateGallery(-1); // Scroll hacia arriba = imagen anterior
+            this.navigateGallery(-1);
         }
     };
-    // ================== FIN MÉTODOS DE GALERÍA ================== //
 
     isIOS() {
         return /iPad|iPhone|iPod/.test(navigator.platform) || 
@@ -490,7 +475,6 @@ class DetailsModal {
             window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
         }
         
-        // Actualizar metatags cuando se abre un modal
         this.updateMetaTags(item);
     }
 
@@ -508,7 +492,6 @@ class DetailsModal {
         const imageUrl = item.posterUrl || 'https://via.placeholder.com/194x271';
         const url = `${window.location.origin}${window.location.pathname}#id=${item.id}&title=${this.normalizeText(item.title)}`;
         
-        // Actualizar metatags
         document.getElementById('og-title').content = title;
         document.getElementById('og-description').content = description;
         document.getElementById('og-image').content = imageUrl;
@@ -517,13 +500,11 @@ class DetailsModal {
         document.getElementById('twitter-description').content = description;
         document.getElementById('twitter-image').content = imageUrl;
         
-        // Actualizar también la URL canónica
         const canonicalLink = document.querySelector('link[rel="canonical"]') || document.createElement('link');
         canonicalLink.rel = 'canonical';
         canonicalLink.href = url;
         document.head.appendChild(canonicalLink);
         
-        // Forzar a Facebook a refrescar los metatags
         if (navigator.userAgent.includes('Facebook')) {
             fetch(`https://graph.facebook.com/?id=${encodeURIComponent(url)}&scrape=true&method=post`);
         }
