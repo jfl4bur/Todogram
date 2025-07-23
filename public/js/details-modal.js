@@ -96,8 +96,8 @@ class DetailsModal {
             tmdbImages = await this.fetchTMDBImages(item.tmdbUrl);
         }
         
-        // Priorizar imágenes de data.json
-        const backdropUrl = item.backgroundUrl || (tmdbImages.backdrops[0]?.file_path || item.posterUrl);
+        // Priorizar imágenes de data.json (Notion)
+        const backdropUrl = item.backgroundUrl || item.posterUrl || (tmdbImages.backdrops[0]?.file_path || item.posterUrl);
         
         this.detailsModalBackdrop.src = backdropUrl;
         this.detailsModalBackdrop.onerror = function() {
