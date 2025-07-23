@@ -10,7 +10,7 @@
     --modal-scale: 1.7;
 }
 
--secondary-actions-row {
+.secondary-actions-row {
     display: flex;
     justify-content: center;
     align-items: center;
