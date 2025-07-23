@@ -24,7 +24,7 @@ class HoverModal {
 
         window.isModalOpen = true;
         
-        // Priorizar imágenes de Carteles de Notion, luego TMDB
+        // Priorizar imágenes de Notion (backgroundUrl y posterUrl)
         const backdropUrl = item.backgroundUrl || item.posterUrl;
         
         this.modalBackdrop.src = backdropUrl;
@@ -38,8 +38,8 @@ class HoverModal {
         
         if (item.year) metaItems.push(`<span>${item.year}</span>`);
         if (item.duration) metaItems.push(`<span>${item.duration}</span>`);
-        if (item.ageRating) metaItems.push(`<span class="age-rating">${item.ageRating}</span>`);
         if (item.rating) metaItems.push(`<div class="rating"><i class="fas fa-star"></i><span>${item.rating}</span></div>`);
+        if (item.ageRating) metaItems.push(`<span class="age-rating">${item.ageRating}</span>`);
         
         // Nueva línea para géneros
         let genreInfo = '';
