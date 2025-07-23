@@ -137,7 +137,6 @@ class HoverModal {
             }
         });
         
-        // Evento para el botón compartir
         this.modalContent.querySelector('#share-button').addEventListener('click', (e) => {
             e.stopPropagation();
             const item = window.activeItem;
@@ -148,17 +147,45 @@ class HoverModal {
             }
         });
         
-        // Comportamiento de tooltips en móviles
+        // Comportamiento de tooltips en móviles con doble clic
         if (window.matchMedia("(max-width: 480px)").matches) {
             this.modalContent.querySelectorAll('.details-modal-action-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    if (this.classList.contains('active')) {
-                        return;
+                let firstClick = false;
+                let timeout;
+                
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    if (!firstClick) {
+                        // Primer clic: mostrar tooltip
+                        firstClick = true;
+                        btn.classList.add('active');
+                        
+                        timeout = setTimeout(() => {
+                            firstClick = false;
+                            btn.classList.remove('active');
+                        }, 2000);
+                    } else {
+                        // Segundo clic: ejecutar acción
+                        clearTimeout(timeout);
+                        firstClick = false;
+                        btn.classList.remove('active');
+                        
+                        // Ejecutar la acción original del botón
+                        if (btn.getAttribute('data-video-url')) {
+                            const videoUrl = btn.getAttribute('data-video-url');
+                            window.videoModal.play(videoUrl);
+                        } else if (btn.id === 'share-button') {
+                            const item = window.activeItem;
+                            if (item && window.shareModal) {
+                                const currentUrl = window.location.href;
+                                const shareUrl = window.generateShareUrl(item, currentUrl);
+                                window.shareModal.show({ ...item, shareUrl });
+                            }
+                        } else if (btn.onclick) {
+                            btn.onclick(e);
+                        }
                     }
-                    this.classList.add('active');
-                    setTimeout(() => {
-                        this.classList.remove('active');
-                    }, 2000);
                 });
             });
         }
@@ -211,11 +238,9 @@ class HoverModal {
 
     generateDownloadUrl(videoUrl) {
         if (!videoUrl) return '#';
-        
         if (videoUrl.includes('?') || videoUrl.includes('#')) {
             return videoUrl + '&dl=1';
         }
-        
         return videoUrl + '?dl=1';
     }
 }

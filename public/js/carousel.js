@@ -7,35 +7,24 @@ class Carousel {
         this.carouselPrev = document.getElementById('carousel-prev');
         this.carouselNext = document.getElementById('carousel-next');
         this.carouselContainer = document.querySelector('.carousel-container');
-        this.itemsPerPage = 5; // Valor por defecto
+        this.itemsPerPage = 5;
         this.index = 0;
         this.step = 12;
         this.moreAppended = false;
         this.moviesData = [];
         this.hoverTimeouts = {};
 
-        // Validar elementos necesarios
         if (!this.wrapper || !this.skeleton || !this.carouselContainer) {
-            console.error("Elementos del carrusel no encontrados", {
-                wrapper: this.wrapper,
-                skeleton: this.skeleton,
-                carouselContainer: this.carouselContainer
-            });
+            console.error("Elementos del carrusel no encontrados");
             return;
         }
         if (!this.carouselPrev || !this.carouselNext || !this.carouselNav) {
-            console.error("Elementos de navegación del carrusel no encontrados", {
-                carouselPrev: this.carouselPrev,
-                carouselNext: this.carouselNext,
-                carouselNav: this.carouselNav
-            });
-            // Observar cambios en el DOM para los botones
+            console.error("Elementos de navegación del carrusel no encontrados");
             const observer = new MutationObserver(() => {
                 this.carouselPrev = document.getElementById('carousel-prev');
                 this.carouselNext = document.getElementById('carousel-next');
                 this.carouselNav = document.getElementById('carousel-nav');
                 if (this.carouselPrev && this.carouselNext && this.carouselNav) {
-                    console.log('Botones de navegación encontrados, asignando eventos');
                     this.setupEventListeners();
                     observer.disconnect();
                 }
@@ -56,7 +45,7 @@ class Carousel {
     setupResizeObserver() {
         if (!this.wrapper) {
             console.error('wrapper no definido en setupResizeObserver');
-            this.itemsPerPage = 5; // Valor por defecto
+            this.itemsPerPage = 5;
             return;
         }
 
@@ -65,20 +54,14 @@ class Carousel {
 
         const calculate = () => {
             const containerWidth = this.wrapper.clientWidth;
-            console.log('Calculando items por página - containerWidth:', containerWidth);
             if (containerWidth > 0) {
                 this.itemsPerPage = Math.max(1, Math.floor(containerWidth / (itemWidth + gap)));
-                console.log('Items por página calculados:', this.itemsPerPage);
             } else {
-                this.itemsPerPage = 5; // Valor por defecto si no hay ancho
-                console.warn('containerWidth es 0, usando itemsPerPage por defecto:', this.itemsPerPage);
+                this.itemsPerPage = 5;
             }
         };
 
-        // Calcular inicialmente
         calculate();
-
-        // Observar cambios en el tamaño del contenedor
         const resizeObserver = new ResizeObserver(() => {
             calculate();
         });
@@ -87,19 +70,14 @@ class Carousel {
 
     setupEventListeners() {
         window.addEventListener('resize', () => this.calculateItemsPerPage());
-        
         this.carouselPrev.addEventListener('click', (e) => {
-            console.log('Clic en botón anterior');
             e.preventDefault();
             this.scrollToPrevPage();
         });
-        
         this.carouselNext.addEventListener('click', (e) => {
-            console.log('Clic en botón siguiente');
             e.preventDefault();
             this.scrollToNextPage();
         });
-        
         this.wrapper.addEventListener('scroll', () => this.handleScroll());
     }
 
@@ -109,7 +87,6 @@ class Carousel {
             if (!response.ok) throw new Error('No se pudo cargar data.json');
             const data = await response.json();
             
-            // Filtrar solo películas y mapear datos
             this.moviesData = data
                 .filter(item => item && typeof item === 'object' && item['Categoría'] === 'Películas')
                 .map((item, index) => ({
@@ -117,6 +94,7 @@ class Carousel {
                     title: item['Título'] || 'Sin título',
                     description: item['Synopsis'] || 'Descripción no disponible',
                     posterUrl: item['Portada'] || '',
+                    postersUrl: item['Carteles'] || '', // Añadido campo postersUrl
                     backgroundUrl: item['Fondo'] || '',
                     year: item['Año'] ? item['Año'].toString() : '',
                     duration: item['Duración'] || '',
@@ -134,13 +112,13 @@ class Carousel {
                 }));
 
             if (this.moviesData.length === 0) {
-                console.warn('No se encontraron películas válidas en data.json');
                 this.moviesData = [
                     {
                         id: "12345",
                         title: "Ejemplo de película",
                         description: "Esta es una película de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
                         posterUrl: "https://via.placeholder.com/194x271",
+                        postersUrl: "https://via.placeholder.com/194x271",
                         backgroundUrl: "https://via.placeholder.com/194x271",
                         year: "2023",
                         duration: "120 min",
@@ -169,6 +147,7 @@ class Carousel {
                     title: "Ejemplo de película",
                     description: "Esta es una película de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
                     posterUrl: "https://via.placeholder.com/194x271",
+                    postersUrl: "https://via.placeholder.com/194x271",
                     backgroundUrl: "https://via.placeholder.com/194x271",
                     year: "2023",
                     duration: "120 min",
@@ -258,12 +237,9 @@ class Carousel {
                             
                             this.hoverTimeouts[itemId].modal = setTimeout(() => {
                                 if (!window.isModalOpen && !window.isDetailsModalOpen) {
-                                    console.log('Intentando mostrar hoverModal para item:', itemId, 'div:', div);
                                     window.hoverModalItem = div;
                                     if (window.hoverModal && div) {
                                         window.hoverModal.show(item, div);
-                                    } else {
-                                        console.error('hoverModal o div no definidos:', { hoverModal: window.hoverModal, div });
                                     }
                                 }
                             }, 200);
@@ -316,8 +292,6 @@ class Carousel {
         const itemWidth = 194;
         const gap = 4;
         const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
-        
-        console.log('Desplazando a página anterior, cantidad:', scrollAmount, 'itemsPerPage:', this.itemsPerPage);
         this.wrapper.scrollBy({
             left: -scrollAmount,
             behavior: 'smooth'
@@ -328,8 +302,6 @@ class Carousel {
         const itemWidth = 194;
         const gap = 4;
         const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
-        
-        console.log('Desplazando a página siguiente, cantidad:', scrollAmount, 'itemsPerPage:', this.itemsPerPage);
         this.wrapper.scrollBy({
             left: scrollAmount,
             behavior: 'smooth'
@@ -347,7 +319,6 @@ class Carousel {
 
     handleScroll() {
         this.updateProgressBar();
-        
         if (this.wrapper.scrollLeft + this.wrapper.clientWidth >= this.wrapper.scrollWidth - 200) {
             this.renderItems();
         }
