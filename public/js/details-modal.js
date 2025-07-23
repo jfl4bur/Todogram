@@ -91,7 +91,7 @@ class DetailsModal {
             tmdbImages = await this.fetchTMDBImages(item.tmdbUrl);
         }
         
-        // Usar postersUrl si está disponible, luego backgroundUrl, luego posterUrl
+        // 1. CORRECCIÓN: Usar postersUrl si está disponible (campo "Carteles")
         const backdropUrl = item.postersUrl || item.backgroundUrl || item.posterUrl || (tmdbImages.backdrops[0]?.file_path || item.posterUrl);
         
         this.detailsModalBackdrop.src = backdropUrl;
@@ -346,6 +346,7 @@ class DetailsModal {
                 });
             });
             
+            // 2. CORRECCIÓN: Evento para el botón compartir
             this.detailsModalBody.querySelector('#share-button').addEventListener('click', (e) => {
                 e.stopPropagation();
                 const item = window.activeItem;
@@ -355,6 +356,21 @@ class DetailsModal {
                     window.shareModal.show({ ...item, shareUrl });
                 }
             });
+            
+            // 3. CORRECCIÓN: Manejo de tooltips en móviles
+            if (window.matchMedia("(max-width: 480px)").matches) {
+                this.detailsModalBody.querySelectorAll('.details-modal-action-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        if (this.classList.contains('active')) {
+                            return;
+                        }
+                        this.classList.add('active');
+                        setTimeout(() => {
+                            this.classList.remove('active');
+                        }, 2000);
+                    });
+                });
+            }
             
         }, 100);
         

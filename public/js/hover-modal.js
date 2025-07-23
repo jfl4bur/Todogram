@@ -24,7 +24,7 @@ class HoverModal {
 
         window.isModalOpen = true;
         
-        // Usar postersUrl si está disponible, luego backgroundUrl, luego posterUrl
+        // 1. CORRECCIÓN: Usar postersUrl si está disponible (campo "Carteles")
         const backdropUrl = item.postersUrl || item.backgroundUrl || item.posterUrl;
         
         this.modalBackdrop.src = backdropUrl;
@@ -39,6 +39,7 @@ class HoverModal {
         if (item.year) metaItems.push(`<span>${item.year}</span>`);
         if (item.duration) metaItems.push(`<span>${item.duration}</span>`);
         if (item.rating) metaItems.push(`<div class="rating"><i class="fas fa-star"></i><span>${item.rating}</span></div>`);
+        // 2. CORRECCIÓN: Mostrar age-rating (campo "Clasificación")
         if (item.ageRating) metaItems.push(`<span class="age-rating">${item.ageRating}</span>`);
         
         let genreInfo = '';
@@ -136,6 +137,7 @@ class HoverModal {
             }
         });
         
+        // 3. CORRECCIÓN: Evento para el botón compartir
         this.modalContent.querySelector('#share-button').addEventListener('click', (e) => {
             e.stopPropagation();
             const item = window.activeItem;

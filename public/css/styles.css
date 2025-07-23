@@ -1678,23 +1678,25 @@
         display: inline !important;
     }
     
-    /* Habilitar tooltips en móvil */
+    /* CORRECCIÓN: Tooltips en móviles - solo mostrar al hacer clic */
     .details-modal-action-btn .tooltip {
-        display: block;
+        display: none;
         position: fixed;
         bottom: 80px;
         left: 50%;
         transform: translateX(-50%);
         z-index: 10000;
-        opacity: 1 !important;
-        visibility: visible !important;
-        pointer-events: none;
         background: rgba(0,0,0,0.8);
         color: white;
+        padding: 6px 12px;
+        border-radius: 4px;
+        white-space: nowrap;
+        pointer-events: none;
+        font-size: 0.9rem;
     }
     
-    .details-modal-action-btn .tooltip::after {
-        display: none;
+    .details-modal-action-btn.active .tooltip {
+        display: block;
     }
 }
 
@@ -1774,10 +1776,9 @@
         display: none;
     }
     
+    /* CORRECCIÓN: Tooltips en móviles - solo mostrar al hacer clic */
     .details-modal-action-btn .tooltip {
-        display: block !important;
-        opacity: 1 !important;
-        visibility: visible !important;
+        display: none !important;
         position: static;
         transform: none;
         background: transparent;
@@ -1789,8 +1790,8 @@
         font-weight: normal;
     }
     
-    .details-modal-action-btn .tooltip::after {
-        display: none;
+    .details-modal-action-btn.active .tooltip {
+        display: block !important;
     }
     
     /* Mostrar texto en botón primario en móvil */
