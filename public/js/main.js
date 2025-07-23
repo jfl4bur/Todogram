@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (item && window.shareModal) {
                     const currentUrl = window.location.href;
                     const shareUrl = window.generateShareUrl(item, currentUrl);
-                    window.shareModal.show({ ...item, shareUrl }); // Pasar shareUrl al modal
+                    window.shareModal.show({ ...item, shareUrl });
                 } else {
                     console.error('Item o shareModal no definidos:', { item, shareModal: window.shareModal });
                 }
@@ -116,18 +116,12 @@ document.addEventListener('DOMContentLoaded', function () {
             const path = window.location.hash.substring(1);
             console.log('Hash procesado:', path);
             if (!path) return null;
-            
             const params = new URLSearchParams(path);
             const id = params.get('id');
             const title = params.get('title');
             console.log('Parámetros extraídos:', { id, title });
-            
             if (!id || !title) return null;
-            
-            return {
-                id: id,
-                normalizedTitle: title
-            };
+            return { id: id, normalizedTitle: title };
         };
     }
 });
