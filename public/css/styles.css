@@ -1721,28 +1721,36 @@
         display: none;
     }
     
-.details-modal-action-btn .tooltip {
-        display: none !important;
-    }
-    
-    .details-modal-action-btn.active .tooltip {
-        display: block !important;
-        position: fixed;
-        bottom: 80px;
+    /* Tooltips para móviles (doble clic) */
+    .details-modal-action-btn.active .tooltip,
+    .modal-actions .details-modal-action-btn.active .tooltip {
+        display: block;
+        opacity: 1;
+        visibility: visible;
+        transform: translateX(-50%) translateY(-10px);
+        bottom: 100%;
         left: 50%;
-        transform: translateX(-50%);
-        background: rgba(0,0,0,0.8);
-        color: white;
+        position: absolute;
+        white-space: nowrap;
+        background: white;
+        color: black;
         padding: 6px 12px;
         border-radius: 4px;
-        white-space: nowrap;
-        pointer-events: none;
         font-size: 0.9rem;
-        z-index: 10000;
+        z-index: 10;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.2);
     }
-    
-    .details-modal-action-btn .tooltip::after {
-        display: none;
+
+    .details-modal-action-btn.active .tooltip::after,
+    .modal-actions .details-modal-action-btn.active .tooltip::after {
+        content: '';
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 8px;
+        border-style: solid;
+        border-color: white transparent transparent transparent;
     }
     
     /* Mostrar texto en botón primario en móvil */
