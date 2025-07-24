@@ -39,8 +39,11 @@ class HoverModal {
         if (item.year) metaItems.push(`<span>${item.year}</span>`);
         if (item.duration) metaItems.push(`<span>${item.duration}</span>`);
         if (item.rating) metaItems.push(`<div class="rating"><i class="fas fa-star"></i><span>${item.rating}</span></div>`);
-        // Mostrar age-rating (campo "Clasificación")
-        if (item.ageRating) metaItems.push(`<span class="age-rating">${item.ageRating}</span>`);
+        
+        // CORRECCIÓN: Asegurar que se muestra age-rating si existe
+        if (item.ageRating && item.ageRating.trim() !== '') {
+            metaItems.push(`<span class="age-rating">${item.ageRating}</span>`);
+        }
         
         let genreInfo = '';
         if (item.genre) {
@@ -121,6 +124,7 @@ class HoverModal {
             }
         });
         
+        // CORRECCIÓN: Asegurar que el evento se adjunta correctamente
         this.modalContent.querySelectorAll('[data-video-url]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -146,49 +150,6 @@ class HoverModal {
                 window.shareModal.show({ ...item, shareUrl });
             }
         });
-        
-        // Comportamiento de tooltips en móviles con doble clic
-        if (window.matchMedia("(max-width: 480px)").matches) {
-            this.modalContent.querySelectorAll('.details-modal-action-btn').forEach(btn => {
-                let firstClick = false;
-                let timeout;
-                
-                btn.addEventListener('click', function(e) {
-                    e.stopPropagation();
-                    
-                    if (!firstClick) {
-                        // Primer clic: mostrar tooltip
-                        firstClick = true;
-                        btn.classList.add('active');
-                        
-                        timeout = setTimeout(() => {
-                            firstClick = false;
-                            btn.classList.remove('active');
-                        }, 2000);
-                    } else {
-                        // Segundo clic: ejecutar acción
-                        clearTimeout(timeout);
-                        firstClick = false;
-                        btn.classList.remove('active');
-                        
-                        // Ejecutar la acción original del botón
-                        if (btn.getAttribute('data-video-url')) {
-                            const videoUrl = btn.getAttribute('data-video-url');
-                            window.videoModal.play(videoUrl);
-                        } else if (btn.id === 'share-button') {
-                            const item = window.activeItem;
-                            if (item && window.shareModal) {
-                                const currentUrl = window.location.href;
-                                const shareUrl = window.generateShareUrl(item, currentUrl);
-                                window.shareModal.show({ ...item, shareUrl });
-                            }
-                        } else if (btn.onclick) {
-                            btn.onclick(e);
-                        }
-                    }
-                });
-            });
-        }
         
         window.activeItem = item;
     }
