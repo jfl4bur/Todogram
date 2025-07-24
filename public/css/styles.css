@@ -1161,7 +1161,7 @@
     right: 0;
     transform: translateY(-50%);
     pointer-events: none;
-    z-index: 5;
+    z-index: 1100;
 }
 
 .carousel-nav-btn {
