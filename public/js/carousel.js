@@ -191,11 +191,7 @@ class Carousel {
             if (item.duration) metaInfo.push(`<span>${item.duration}</span>`);
             if (item.genre) metaInfo.push(`<span>${item.genre}</span>`);
             if (item.rating) metaInfo.push(`<div class="carousel-rating"><i class="fas fa-star"></i><span>${item.rating}</span></div>`);
-            
-            // SOLUCIÓN ROBUSTA PARA AGE-RATING EN ITEMS
-            if (item.ageRating && item.ageRating.trim() !== '') {
-                metaInfo.push(`<span class="age-rating">${item.ageRating}</span>`);
-            }
+            if (item.ageRating) metaInfo.push(`<span class="age-rating">${item.ageRating}</span>`);
 
             let posterUrl = item.posterUrl;
             if (!posterUrl) {
