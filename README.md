@@ -460,3 +460,291 @@ Este proyecto está bajo la **Licencia MIT** - mira el archivo [LICENSE](LICENSE
 ![Visitors](https://visitor-badge.laobi.icu/badge?page_id=tu-usuario.todogram)
 
 </div>
+
+# Slider estilo RAKUTEN.tv
+
+Un slider de contenido multimedia altamente funcional y visualmente atractivo que replica el diseño y la experiencia de usuario de RAKUTEN.tv.
+
+## 🌟 Características
+
+- **Diseño fiel a RAKUTEN.tv**: Colores, tipografía y efectos visuales idénticos
+- **Totalmente responsive**: Se adapta perfectamente a todos los dispositivos
+- **Smooth animations**: Transiciones fluidas y naturales
+- **Touch support**: Navegación táctil para dispositivos móviles
+- **Navegación por teclado**: Control completo con teclas de dirección
+- **Hover effects**: Efectos interactivos al pasar el mouse
+- **Auto-hide header**: Header que se oculta automáticamente al hacer scroll
+- **Notificaciones**: Sistema de feedback visual para interacciones
+- **Múltiples sliders**: Soporte para varios sliders independientes
+- **Lazy loading**: Carga optimizada de imágenes
+
+## 🎯 Características Específicas de RAKUTEN.tv
+
+### Colores de Marca
+- **Rojo RAKUTEN**: `#dc143c` y `#bf0a30`
+- **Fondo oscuro**: Gradientes de negro y gris
+- **Acentos dorados**: Para ratings y elementos destacados
+
+### Tipografía
+- **Font principal**: Noto Sans JP (similar al usado por RAKUTEN)
+- **Pesos**: 300, 400, 500, 700
+
+### Efectos Visuales
+- **Backdrop filters**: Efectos de cristal esmerilado
+- **Box shadows**: Sombras profundas y profesionales  
+- **Gradients**: Gradientes sutiles en fondos y elementos
+- **Transform effects**: Animaciones de escala y translación
+
+## 🚀 Instalación y Uso
+
+### 1. Estructura de Archivos
+```
+/
+├── index.html      # Estructura HTML principal
+├── styles.css      # Estilos CSS completos
+├── script.js       # JavaScript funcional
+└── README.md       # Documentación
+```
+
+### 2. Uso Básico
+
+Simplemente abre `index.html` en tu navegador. El slider se inicializa automáticamente.
+
+### 3. Personalización
+
+#### Configurar un Slider Individual
+```javascript
+const mySlider = new RakutenSlider('slider1', {
+    cardsToShow: 5,           // Tarjetas visibles
+    cardsToScroll: 3,         // Tarjetas que se desplazan
+    autoPlay: true,           // Reproducción automática
+    autoPlayInterval: 4000,   // Intervalo en ms
+    loop: true,               // Bucle infinito
+    responsive: {
+        1200: { cardsToShow: 4, cardsToScroll: 2 },
+        768: { cardsToShow: 3, cardsToScroll: 2 },
+        480: { cardsToShow: 2, cardsToScroll: 1 }
+    }
+});
+```
+
+#### Controlar Sliders Globalmente
+```javascript
+// Acceder a la aplicación principal
+const app = window.RakutenApp;
+
+// Obtener un slider específico
+const slider = app.getSlider('slider1');
+
+// Activar autoplay global
+app.setGlobalAutoPlay(true);
+
+// Refrescar todos los sliders
+app.refreshAllSliders();
+```
+
+## 🎮 Controles y Navegación
+
+### Navegación con Mouse
+- **Click izquierdo/derecho**: Botones de navegación (aparecen al hover)
+- **Hover en tarjetas**: Muestra overlay con controles
+- **Click en botones de acción**: Agregar, like, dislike
+- **Click en botón play**: Simula reproducción
+
+### Navegación Táctil
+- **Swipe izquierda/derecha**: Navegar entre tarjetas
+- **Tap en tarjetas**: Seleccionar contenido
+- **Tap en controles**: Ejecutar acciones
+
+### Navegación por Teclado
+- **←/→**: Navegar anterior/siguiente
+- **Home/End**: Ir al inicio/final
+- **Ctrl+1/2/3**: Enfocar slider específico
+
+## 📱 Responsive Design
+
+### Breakpoints
+- **Desktop Large** (>1200px): 5 tarjetas visibles
+- **Desktop** (>768px): 4 tarjetas visibles  
+- **Tablet** (>480px): 3 tarjetas visibles
+- **Mobile** (<480px): 2 tarjetas visibles
+
+### Adaptaciones Móviles
+- Header simplificado (oculta navegación)
+- Hero banner apilado verticalmente
+- Tarjetas más pequeñas pero legibles
+- Botones de navegación adaptados
+- Touch gestures optimizados
+
+## 🎨 Personalización de Estilos
+
+### Variables CSS Principales
+```css
+:root {
+    --rakuten-red: #dc143c;
+    --rakuten-red-dark: #bf0a30;
+    --background-dark: #0f0f0f;
+    --background-secondary: #1a1a1a;
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    --border-radius: 12px;
+    --transition: 0.3s ease;
+}
+```
+
+### Modificar Colores de Marca
+Para usar tu propia paleta de colores, modifica las variables en `styles.css`:
+
+```css
+.logo-highlight {
+    background: linear-gradient(45deg, #tu-color-1, #tu-color-2);
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #tu-color-1, #tu-color-2);
+}
+```
+
+## 🔧 API JavaScript
+
+### Métodos del Slider
+
+#### Control de Navegación
+```javascript
+slider.next()           // Ir a siguiente
+slider.prev()           // Ir a anterior  
+slider.goToSlide(2)     // Ir a slide específico
+```
+
+#### Control de AutoPlay
+```javascript
+slider.startAutoPlay()  // Iniciar autoplay
+slider.pauseAutoPlay()  // Pausar autoplay
+slider.setAutoPlay(true, 3000) // Configurar autoplay
+```
+
+#### Utilidades
+```javascript
+slider.refresh()        // Recalcular dimensiones
+slider.destroy()        // Destruir slider
+```
+
+### Eventos Personalizados
+
+```javascript
+slider.slider.addEventListener('slideChange', (e) => {
+    console.log('Slide cambió:', e.detail.currentIndex);
+});
+```
+
+## 🎯 Características Avanzadas
+
+### Lazy Loading de Imágenes
+```html
+<img data-src="imagen-real.jpg" src="placeholder.jpg" alt="Contenido">
+```
+
+### Notificaciones del Sistema
+El slider incluye un sistema de notificaciones para feedback visual:
+
+```javascript
+slider.showNotification('Mensaje', 'success'); // success, error, info
+```
+
+### Preload de Imágenes Críticas
+Las imágenes importantes se precargan automáticamente para mejor rendimiento.
+
+### Optimizaciones de Rendimiento
+- `will-change` en elementos animados
+- `transform3d` para aceleración hardware
+- Throttled resize events
+- Passive event listeners
+
+## 🛠️ Personalización Avanzada
+
+### Agregar Nuevos Sliders
+1. Crea el HTML con la estructura requerida
+2. Asigna un ID único al slider
+3. Inicialízalo en el JavaScript:
+
+```javascript
+const nuevoSlider = new RakutenSlider('mi-slider-id', {
+    // configuración personalizada
+});
+```
+
+### Modificar Interacciones
+Personaliza las funciones de callback en la clase `RakutenSlider`:
+
+```javascript
+handleCardClick(card, index, event) {
+    // Tu lógica personalizada aquí
+    window.location.href = `/pelicula/${index}`;
+}
+```
+
+## 🎬 Ejemplos de Contenido
+
+### Estructura de Tarjeta
+```html
+<div class="card">
+    <div class="card-image">
+        <img src="poster.jpg" alt="Película">
+        <div class="card-badge">NUEVO</div>
+        <div class="card-overlay">
+            <button class="play-btn"><i class="fas fa-play"></i></button>
+            <div class="card-actions">
+                <button class="action-btn"><i class="fas fa-plus"></i></button>
+                <button class="action-btn"><i class="fas fa-thumbs-up"></i></button>
+                <button class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+            </div>
+        </div>
+    </div>
+    <div class="card-info">
+        <h4 class="card-title">Título de la Película</h4>
+        <div class="card-meta">
+            <span class="rating">★ 4.5</span>
+            <span class="year">2024</span>
+            <span class="duration">2h 15m</span>
+        </div>
+        <div class="card-genres">
+            <span class="genre">Acción</span>
+            <span class="genre">Aventura</span>
+        </div>
+    </div>
+</div>
+```
+
+## 🐛 Solución de Problemas
+
+### Problemas Comunes
+
+1. **Las imágenes no cargan**
+   - Verifica las URLs de las imágenes
+   - Comprueba los CORS si usas imágenes externas
+
+2. **Los sliders no se inicializan**
+   - Asegúrate de que los IDs sean únicos
+   - Verifica que el DOM esté cargado
+
+3. **Problemas de responsive**
+   - Comprueba los breakpoints en CSS
+   - Verifica que no haya CSS conflictivo
+
+### Debug Mode
+Abre la consola del navegador para ver logs detallados de inicialización y eventos.
+
+## 📄 Licencia
+
+Este proyecto es de código abierto. Puedes usarlo y modificarlo libremente.
+
+## 🙏 Créditos
+
+- Diseño inspirado en **RAKUTEN.tv**
+- Iconos de **Font Awesome**
+- Fuentes de **Google Fonts**
+- Imágenes de **Unsplash**
+
+---
+
+¡Disfruta creando experiencias de usuario increíbles con este slider estilo RAKUTEN.tv! 🎬✨

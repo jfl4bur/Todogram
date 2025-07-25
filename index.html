@@ -3,161 +3,589 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CinePlus - Carrusel de Películas</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://jfl4bur.github.io/Todogram/public/css/styles.css">
-    
-    <!-- Metatags dinámicos para compartir -->
-    <div id="dynamic-meta-tags" style="display:none;">
-        <meta property="og:title" id="og-title" content="">
-        <meta property="og:description" id="og-description" content="">
-        <meta property="og:image" id="og-image" content="">
-        <meta property="og:url" id="og-url" content="">
-        <meta property="og:type" content="website">
-        <meta name="twitter:card" content="summary_large_image">
-        <meta name="twitter:title" id="twitter-title" content="">
-        <meta name="twitter:description" id="twitter-description" content="">
-        <meta name="twitter:image" id="twitter-image" content="">
-    </div>
+    <title>Slider estilo RAKUTEN.tv</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <!-- Div helper para iOS -->
-    <div id="ios-helper" class="ios-helper" style="display:none;"></div>
-
-    <!-- Carrusel -->
-    <div class="carousel-section">
-        <h1 class="carousel-title">Películas</h1>
-        <div class="carousel-container">
-            <div class="carousel-skeleton" id="carousel-skeleton">
-                <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
-                <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
-                <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
-                <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
-                <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
-                <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
-                <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
-                <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
-                <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
-                <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
-                <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
-                <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
-            </div>
-            <div id="carousel-wrapper" style="display:none;"></div>
-            <div class="carousel-progress">
-                <div class="carousel-progress-bar"></div>
-            </div>
-            <div class="carousel-nav" id="carousel-nav">
-                <button class="carousel-nav-btn prev" id="carousel-prev"><i class="fas fa-chevron-left"></i></button>
-                <button class="carousel-nav-btn next" id="carousel-next"><i class="fas fa-chevron-right"></i></button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Modales -->
-    <div class="modal-overlay" id="modal-overlay">
-        <div class="modal-content" id="modal-content">
-            <div class="modal-header">
-                <img class="modal-backdrop" id="modal-backdrop" src="" alt="">
-            </div>
-            <div class="modal-body" id="modal-body"></div>
-        </div>
-    </div>
-
-    <div class="details-modal-overlay" id="details-modal-overlay">
-        <div class="details-modal-content" id="details-modal-content">
-            <button class="details-modal-close" id="details-modal-close">&times;</button>
-            <div class="details-modal-header">
-                <img class="details-modal-backdrop" id="details-modal-backdrop" src="" alt="">
-            </div>
-            <div class="details-modal-body" id="details-modal-body"></div>
-        </div>
-    </div>
-
-    <div class="video-modal-overlay" id="video-modal-overlay">
-        <div class="video-modal-content">
-            <button class="video-modal-close" id="video-modal-close">&times;</button>
-            <iframe class="video-iframe" id="video-iframe" allowfullscreen></iframe>
-        </div>
-    </div>
-
-    <div class="gallery-image-modal" id="gallery-image-modal">
-        <button class="gallery-image-modal-close" id="gallery-image-modal-close">&times;</button>
-        <div class="gallery-image-modal-nav">
-            <button class="gallery-image-modal-nav-btn" id="gallery-image-modal-prev"><i class="fas fa-chevron-left"></i></button>
-            <button class="gallery-image-modal-nav-btn" id="gallery-image-modal-next"><i class="fas fa-chevron-right"></i></button>
-        </div>
-        <div class="gallery-image-modal-content">
-            <img class="gallery-image-modal-img" id="gallery-image-modal-img" src="" alt="">
-        </div>
-    </div>
-
-    <!-- Modal para compartir -->
-    <div class="share-modal-overlay" id="share-modal-overlay">
-        <div class="share-modal-content" id="share-modal-content">
-            <button class="share-modal-close" id="share-modal-close">&times;</button>
-            <h3 class="share-modal-title">Compartir película</h3>
-            
-            <div class="share-preview" id="share-preview">
-                <img class="share-preview-image" id="share-preview-image" src="" alt="Portada">
-                <div class="share-preview-content">
-                    <h4 class="share-preview-title" id="share-preview-title"></h4>
-                    <p class="share-preview-description" id="share-preview-description"></p>
+    <div class="container">
+        <!-- Header simplificado estilo RAKUTEN -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <h1>RAKUTEN<span class="logo-highlight">TV</span></h1>
+                </div>
+                <nav class="nav">
+                    <a href="#" class="nav-item">Inicio</a>
+                    <a href="#" class="nav-item">Películas</a>
+                    <a href="#" class="nav-item">Series</a>
+                    <a href="#" class="nav-item">Anime</a>
+                    <a href="#" class="nav-item">Deportes</a>
+                </nav>
+                <div class="header-actions">
+                    <button class="search-btn"><i class="fas fa-search"></i></button>
+                    <button class="user-btn"><i class="fas fa-user"></i></button>
                 </div>
             </div>
-            
-            <div class="share-options">
-                <div class="share-option" id="share-facebook">
-                    <div class="share-icon facebook">
-                        <i class="fab fa-facebook-f"></i>
+        </header>
+
+        <!-- Hero Banner -->
+        <section class="hero-banner">
+            <div class="hero-content">
+                <h2 class="hero-title">Contenido Destacado</h2>
+                <p class="hero-subtitle">Disfruta de las mejores películas y series</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary">
+                        <i class="fas fa-play"></i>
+                        Reproducir
+                    </button>
+                    <button class="btn btn-secondary">
+                        <i class="fas fa-info-circle"></i>
+                        Más información
+                    </button>
+                </div>
+            </div>
+            <div class="hero-image">
+                <img src="https://images.unsplash.com/photo-1489599162026-3b3f12d9f5e2?w=800&h=450&fit=crop&auto=format&q=80" alt="Hero Banner">
+            </div>
+        </section>
+
+        <!-- Sliders de Contenido -->
+        <main class="content">
+            <!-- Slider 1: Populares -->
+            <section class="content-section">
+                <div class="section-header">
+                    <h3 class="section-title">Populares Ahora</h3>
+                    <a href="#" class="see-all">Ver todo <i class="fas fa-chevron-right"></i></a>
+                </div>
+                <div class="slider-container">
+                    <button class="slider-nav slider-nav-prev" data-slider="slider1">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="slider" id="slider1">
+                        <div class="slider-track">
+                            <div class="card">
+                                <div class="card-image">
+                                    <img src="https://images.unsplash.com/photo-1518929458119-e5bf444c30f4?w=300&h=400&fit=crop&auto=format&q=80" alt="Película 1">
+                                    <div class="card-overlay">
+                                        <button class="play-btn"><i class="fas fa-play"></i></button>
+                                        <div class="card-actions">
+                                            <button class="action-btn"><i class="fas fa-plus"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-up"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-info">
+                                    <h4 class="card-title">Acción Extrema</h4>
+                                    <div class="card-meta">
+                                        <span class="rating">★ 4.5</span>
+                                        <span class="year">2024</span>
+                                        <span class="duration">2h 15m</span>
+                                    </div>
+                                    <div class="card-genres">
+                                        <span class="genre">Acción</span>
+                                        <span class="genre">Aventura</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-image">
+                                    <img src="https://images.unsplash.com/photo-1489599162026-3b3f12d9f5e2?w=300&h=400&fit=crop&auto=format&q=80" alt="Película 2">
+                                    <div class="card-overlay">
+                                        <button class="play-btn"><i class="fas fa-play"></i></button>
+                                        <div class="card-actions">
+                                            <button class="action-btn"><i class="fas fa-plus"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-up"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-info">
+                                    <h4 class="card-title">Drama Romántico</h4>
+                                    <div class="card-meta">
+                                        <span class="rating">★ 4.2</span>
+                                        <span class="year">2024</span>
+                                        <span class="duration">1h 45m</span>
+                                    </div>
+                                    <div class="card-genres">
+                                        <span class="genre">Drama</span>
+                                        <span class="genre">Romance</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-image">
+                                    <img src="https://images.unsplash.com/photo-1485846234645-a62644f84728?w=300&h=400&fit=crop&auto=format&q=80" alt="Película 3">
+                                    <div class="card-overlay">
+                                        <button class="play-btn"><i class="fas fa-play"></i></button>
+                                        <div class="card-actions">
+                                            <button class="action-btn"><i class="fas fa-plus"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-up"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-info">
+                                    <h4 class="card-title">Ciencia Ficción</h4>
+                                    <div class="card-meta">
+                                        <span class="rating">★ 4.7</span>
+                                        <span class="year">2024</span>
+                                        <span class="duration">2h 30m</span>
+                                    </div>
+                                    <div class="card-genres">
+                                        <span class="genre">Sci-Fi</span>
+                                        <span class="genre">Aventura</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-image">
+                                    <img src="https://images.unsplash.com/photo-1574267432553-4b4628081c31?w=300&h=400&fit=crop&auto=format&q=80" alt="Película 4">
+                                    <div class="card-overlay">
+                                        <button class="play-btn"><i class="fas fa-play"></i></button>
+                                        <div class="card-actions">
+                                            <button class="action-btn"><i class="fas fa-plus"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-up"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-info">
+                                    <h4 class="card-title">Comedia Familiar</h4>
+                                    <div class="card-meta">
+                                        <span class="rating">★ 4.0</span>
+                                        <span class="year">2024</span>
+                                        <span class="duration">1h 30m</span>
+                                    </div>
+                                    <div class="card-genres">
+                                        <span class="genre">Comedia</span>
+                                        <span class="genre">Familiar</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-image">
+                                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop&auto=format&q=80" alt="Película 5">
+                                    <div class="card-overlay">
+                                        <button class="play-btn"><i class="fas fa-play"></i></button>
+                                        <div class="card-actions">
+                                            <button class="action-btn"><i class="fas fa-plus"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-up"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-info">
+                                    <h4 class="card-title">Thriller Psicológico</h4>
+                                    <div class="card-meta">
+                                        <span class="rating">★ 4.3</span>
+                                        <span class="year">2024</span>
+                                        <span class="duration">1h 55m</span>
+                                    </div>
+                                    <div class="card-genres">
+                                        <span class="genre">Thriller</span>
+                                        <span class="genre">Suspenso</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-image">
+                                    <img src="https://images.unsplash.com/photo-1497493292307-31c376b6e479?w=300&h=400&fit=crop&auto=format&q=80" alt="Película 6">
+                                    <div class="card-overlay">
+                                        <button class="play-btn"><i class="fas fa-play"></i></button>
+                                        <div class="card-actions">
+                                            <button class="action-btn"><i class="fas fa-plus"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-up"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-info">
+                                    <h4 class="card-title">Documental</h4>
+                                    <div class="card-meta">
+                                        <span class="rating">★ 4.6</span>
+                                        <span class="year">2024</span>
+                                        <span class="duration">1h 20m</span>
+                                    </div>
+                                    <div class="card-genres">
+                                        <span class="genre">Documental</span>
+                                        <span class="genre">Naturaleza</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <span class="share-option-text">Facebook</span>
+                    <button class="slider-nav slider-nav-next" data-slider="slider1">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
                 </div>
-                
-                <div class="share-option" id="share-twitter">
-                    <div class="share-icon twitter">
-                        <i class="fab fa-twitter"></i>
+            </section>
+
+            <!-- Slider 2: Series Recomendadas -->
+            <section class="content-section">
+                <div class="section-header">
+                    <h3 class="section-title">Series Recomendadas</h3>
+                    <a href="#" class="see-all">Ver todo <i class="fas fa-chevron-right"></i></a>
+                </div>
+                <div class="slider-container">
+                    <button class="slider-nav slider-nav-prev" data-slider="slider2">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="slider" id="slider2">
+                        <div class="slider-track">
+                            <div class="card">
+                                <div class="card-image">
+                                    <img src="https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=300&h=400&fit=crop&auto=format&q=80" alt="Serie 1">
+                                    <div class="card-overlay">
+                                        <button class="play-btn"><i class="fas fa-play"></i></button>
+                                        <div class="card-actions">
+                                            <button class="action-btn"><i class="fas fa-plus"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-up"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-info">
+                                    <h4 class="card-title">Drama Histórico</h4>
+                                    <div class="card-meta">
+                                        <span class="rating">★ 4.8</span>
+                                        <span class="year">2024</span>
+                                        <span class="episodes">3 temporadas</span>
+                                    </div>
+                                    <div class="card-genres">
+                                        <span class="genre">Drama</span>
+                                        <span class="genre">Historia</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-image">
+                                    <img src="https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=300&h=400&fit=crop&auto=format&q=80" alt="Serie 2">
+                                    <div class="card-overlay">
+                                        <button class="play-btn"><i class="fas fa-play"></i></button>
+                                        <div class="card-actions">
+                                            <button class="action-btn"><i class="fas fa-plus"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-up"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-info">
+                                    <h4 class="card-title">Anime Aventura</h4>
+                                    <div class="card-meta">
+                                        <span class="rating">★ 4.9</span>
+                                        <span class="year">2024</span>
+                                        <span class="episodes">2 temporadas</span>
+                                    </div>
+                                    <div class="card-genres">
+                                        <span class="genre">Anime</span>
+                                        <span class="genre">Aventura</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-image">
+                                    <img src="https://images.unsplash.com/photo-1560169897-fc0cdbdfa4d5?w=300&h=400&fit=crop&auto=format&q=80" alt="Serie 3">
+                                    <div class="card-overlay">
+                                        <button class="play-btn"><i class="fas fa-play"></i></button>
+                                        <div class="card-actions">
+                                            <button class="action-btn"><i class="fas fa-plus"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-up"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-info">
+                                    <h4 class="card-title">Comedia Moderna</h4>
+                                    <div class="card-meta">
+                                        <span class="rating">★ 4.4</span>
+                                        <span class="year">2024</span>
+                                        <span class="episodes">4 temporadas</span>
+                                    </div>
+                                    <div class="card-genres">
+                                        <span class="genre">Comedia</span>
+                                        <span class="genre">Sitcom</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-image">
+                                    <img src="https://images.unsplash.com/photo-1489599162026-3b3f12d9f5e2?w=300&h=400&fit=crop&auto=format&q=80" alt="Serie 4">
+                                    <div class="card-overlay">
+                                        <button class="play-btn"><i class="fas fa-play"></i></button>
+                                        <div class="card-actions">
+                                            <button class="action-btn"><i class="fas fa-plus"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-up"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-info">
+                                    <h4 class="card-title">Misterio Criminal</h4>
+                                    <div class="card-meta">
+                                        <span class="rating">★ 4.6</span>
+                                        <span class="year">2024</span>
+                                        <span class="episodes">2 temporadas</span>
+                                    </div>
+                                    <div class="card-genres">
+                                        <span class="genre">Misterio</span>
+                                        <span class="genre">Crimen</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-image">
+                                    <img src="https://images.unsplash.com/photo-1518929458119-e5bf444c30f4?w=300&h=400&fit=crop&auto=format&q=80" alt="Serie 5">
+                                    <div class="card-overlay">
+                                        <button class="play-btn"><i class="fas fa-play"></i></button>
+                                        <div class="card-actions">
+                                            <button class="action-btn"><i class="fas fa-plus"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-up"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-info">
+                                    <h4 class="card-title">Sci-Fi Épico</h4>
+                                    <div class="card-meta">
+                                        <span class="rating">★ 4.7</span>
+                                        <span class="year">2024</span>
+                                        <span class="episodes">1 temporada</span>
+                                    </div>
+                                    <div class="card-genres">
+                                        <span class="genre">Sci-Fi</span>
+                                        <span class="genre">Drama</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-image">
+                                    <img src="https://images.unsplash.com/photo-1485846234645-a62644f84728?w=300&h=400&fit=crop&auto=format&q=80" alt="Serie 6">
+                                    <div class="card-overlay">
+                                        <button class="play-btn"><i class="fas fa-play"></i></button>
+                                        <div class="card-actions">
+                                            <button class="action-btn"><i class="fas fa-plus"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-up"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-info">
+                                    <h4 class="card-title">Drama Romántico</h4>
+                                    <div class="card-meta">
+                                        <span class="rating">★ 4.1</span>
+                                        <span class="year">2024</span>
+                                        <span class="episodes">3 temporadas</span>
+                                    </div>
+                                    <div class="card-genres">
+                                        <span class="genre">Romance</span>
+                                        <span class="genre">Drama</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <span class="share-option-text">Twitter</span>
+                    <button class="slider-nav slider-nav-next" data-slider="slider2">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
                 </div>
-                
-                <div class="share-option" id="share-whatsapp">
-                    <div class="share-icon whatsapp">
-                        <i class="fab fa-whatsapp"></i>
+            </section>
+
+            <!-- Slider 3: Estrenos -->
+            <section class="content-section">
+                <div class="section-header">
+                    <h3 class="section-title">Nuevos Estrenos</h3>
+                    <a href="#" class="see-all">Ver todo <i class="fas fa-chevron-right"></i></a>
+                </div>
+                <div class="slider-container">
+                    <button class="slider-nav slider-nav-prev" data-slider="slider3">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="slider" id="slider3">
+                        <div class="slider-track">
+                            <div class="card">
+                                <div class="card-image">
+                                    <img src="https://images.unsplash.com/photo-1574267432553-4b4628081c31?w=300&h=400&fit=crop&auto=format&q=80" alt="Estreno 1">
+                                    <div class="card-badge">NUEVO</div>
+                                    <div class="card-overlay">
+                                        <button class="play-btn"><i class="fas fa-play"></i></button>
+                                        <div class="card-actions">
+                                            <button class="action-btn"><i class="fas fa-plus"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-up"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-info">
+                                    <h4 class="card-title">Blockbuster 2024</h4>
+                                    <div class="card-meta">
+                                        <span class="rating">★ 4.5</span>
+                                        <span class="year">2024</span>
+                                        <span class="duration">2h 45m</span>
+                                    </div>
+                                    <div class="card-genres">
+                                        <span class="genre">Acción</span>
+                                        <span class="genre">Aventura</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-image">
+                                    <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop&auto=format&q=80" alt="Estreno 2">
+                                    <div class="card-badge">NUEVO</div>
+                                    <div class="card-overlay">
+                                        <button class="play-btn"><i class="fas fa-play"></i></button>
+                                        <div class="card-actions">
+                                            <button class="action-btn"><i class="fas fa-plus"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-up"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-info">
+                                    <h4 class="card-title">Indie Premiado</h4>
+                                    <div class="card-meta">
+                                        <span class="rating">★ 4.8</span>
+                                        <span class="year">2024</span>
+                                        <span class="duration">1h 35m</span>
+                                    </div>
+                                    <div class="card-genres">
+                                        <span class="genre">Drama</span>
+                                        <span class="genre">Indie</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-image">
+                                    <img src="https://images.unsplash.com/photo-1497493292307-31c376b6e479?w=300&h=400&fit=crop&auto=format&q=80" alt="Estreno 3">
+                                    <div class="card-badge">NUEVO</div>
+                                    <div class="card-overlay">
+                                        <button class="play-btn"><i class="fas fa-play"></i></button>
+                                        <div class="card-actions">
+                                            <button class="action-btn"><i class="fas fa-plus"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-up"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-info">
+                                    <h4 class="card-title">Terror Moderno</h4>
+                                    <div class="card-meta">
+                                        <span class="rating">★ 4.3</span>
+                                        <span class="year">2024</span>
+                                        <span class="duration">1h 50m</span>
+                                    </div>
+                                    <div class="card-genres">
+                                        <span class="genre">Terror</span>
+                                        <span class="genre">Thriller</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-image">
+                                    <img src="https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=300&h=400&fit=crop&auto=format&q=80" alt="Estreno 4">
+                                    <div class="card-badge">NUEVO</div>
+                                    <div class="card-overlay">
+                                        <button class="play-btn"><i class="fas fa-play"></i></button>
+                                        <div class="card-actions">
+                                            <button class="action-btn"><i class="fas fa-plus"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-up"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-info">
+                                    <h4 class="card-title">Comedia Internacional</h4>
+                                    <div class="card-meta">
+                                        <span class="rating">★ 4.0</span>
+                                        <span class="year">2024</span>
+                                        <span class="duration">1h 25m</span>
+                                    </div>
+                                    <div class="card-genres">
+                                        <span class="genre">Comedia</span>
+                                        <span class="genre">Internacional</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-image">
+                                    <img src="https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=300&h=400&fit=crop&auto=format&q=80" alt="Estreno 5">
+                                    <div class="card-badge">NUEVO</div>
+                                    <div class="card-overlay">
+                                        <button class="play-btn"><i class="fas fa-play"></i></button>
+                                        <div class="card-actions">
+                                            <button class="action-btn"><i class="fas fa-plus"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-up"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-info">
+                                    <h4 class="card-title">Fantasía Épica</h4>
+                                    <div class="card-meta">
+                                        <span class="rating">★ 4.6</span>
+                                        <span class="year">2024</span>
+                                        <span class="duration">2h 20m</span>
+                                    </div>
+                                    <div class="card-genres">
+                                        <span class="genre">Fantasía</span>
+                                        <span class="genre">Aventura</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-image">
+                                    <img src="https://images.unsplash.com/photo-1560169897-fc0cdbdfa4d5?w=300&h=400&fit=crop&auto=format&q=80" alt="Estreno 6">
+                                    <div class="card-badge">NUEVO</div>
+                                    <div class="card-overlay">
+                                        <button class="play-btn"><i class="fas fa-play"></i></button>
+                                        <div class="card-actions">
+                                            <button class="action-btn"><i class="fas fa-plus"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-up"></i></button>
+                                            <button class="action-btn"><i class="fas fa-thumbs-down"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card-info">
+                                    <h4 class="card-title">Biografía Inspiradora</h4>
+                                    <div class="card-meta">
+                                        <span class="rating">★ 4.4</span>
+                                        <span class="year">2024</span>
+                                        <span class="duration">2h 10m</span>
+                                    </div>
+                                    <div class="card-genres">
+                                        <span class="genre">Biografía</span>
+                                        <span class="genre">Drama</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <span class="share-option-text">WhatsApp</span>
+                    <button class="slider-nav slider-nav-next" data-slider="slider3">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
                 </div>
-                
-                <div class="share-option" id="share-telegram">
-                    <div class="share-icon telegram">
-                        <i class="fab fa-telegram-plane"></i>
-                    </div>
-                    <span class="share-option-text">Telegram</span>
-                </div>
-                
-                <div class="share-option" id="share-link">
-                    <div class="share-icon link">
-                        <i class="fas fa-link"></i>
-                    </div>
-                    <span class="share-option-text">Copiar enlace</span>
-                </div>
-            </div>
-            
-            <div class="share-link-container">
-                <input type="text" class="share-link-input" id="share-link-input" readonly>
-                <button class="share-link-button" id="share-link-button">Copiar</button>
-            </div>
-        </div>
+            </section>
+        </main>
     </div>
-    <script>
-        // URL del archivo JSON en GitHub Pages
-        const DATA_URL = "https://jfl4bur.github.io/Todogram/public/data.json";
-        window.peliculas = []; // Se llenará con los datos cargados
-    </script>
-    <script src="https://jfl4bur.github.io/Todogram/public/js/carousel.js"></script>
-    <script src="https://jfl4bur.github.io/Todogram/public/js/hover-modal.js"></script>
-    <script src="https://jfl4bur.github.io/Todogram/public/js/details-modal.js"></script>
-    <script src="https://jfl4bur.github.io/Todogram/public/js/video-modal.js"></script>
-    <script src="https://jfl4bur.github.io/Todogram/public/js/share-modal.js"></script>
-    <script src="https://jfl4bur.github.io/Todogram/public/js/main.js"></script>
+
+    <script src="script.js"></script>
 </body>
 </html>
