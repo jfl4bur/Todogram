@@ -1845,7 +1845,7 @@
     scroll-behavior: smooth;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    padding: 0;
+    padding: 0 5%; /* Padding para centrar */
     gap: 32px; /* Espacio entre slides */
     width: 100%;
     box-sizing: border-box;
@@ -1856,12 +1856,7 @@
     display: none;
 }
 
-/* Centrar el primer slide */
-#slider-wrapper::before {
-    content: '';
-    flex: 0 0 5%; /* 5% de espacio a la izquierda (100% - 90%) / 2 */
-    min-width: 5%;
-}
+/* Eliminado el pseudo-elemento, usando padding en su lugar */
 
 /* Skeleton loader para el slider */
 .slider-skeleton {
@@ -1871,7 +1866,7 @@
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    padding: 0;
+    padding: 0 5%; /* Padding para centrar */
     box-sizing: border-box;
 }
 
@@ -1879,11 +1874,7 @@
     display: none;
 }
 
-.slider-skeleton::before {
-    content: '';
-    flex: 0 0 5%; /* 5% de espacio a la izquierda (100% - 90%) / 2 */
-    min-width: 5%;
-}
+/* Eliminado el pseudo-elemento del skeleton, usando padding en su lugar */
 
 .slider-skeleton-item {
     width: 90%;
@@ -1966,18 +1957,11 @@
     }
     #slider-wrapper { 
         gap: 16px; 
-        padding: 0;
-    }
-    #slider-wrapper::before {
-        flex: 0 0 2.5%; /* 2.5% de espacio a la izquierda (100% - 95%) / 2 */
-        min-width: 2.5%;
+        padding: 0 2.5%; /* Padding para centrar en tablet */
     }
     .slider-skeleton {
         gap: 16px;
-    }
-    .slider-skeleton::before {
-        flex: 0 0 2.5%; /* 2.5% de espacio a la izquierda (100% - 95%) / 2 */
-        min-width: 2.5%;
+        padding: 0 2.5%; /* Padding para centrar en tablet */
     }
     .slider-skeleton-item {
         width: 95%;
@@ -2001,18 +1985,11 @@
     }
     #slider-wrapper { 
         gap: 8px; 
-        padding: 0;
-    }
-    #slider-wrapper::before {
-        flex: 0 0 1%; /* 1% de espacio a la izquierda (100% - 98%) / 2 */
-        min-width: 1%;
+        padding: 0 1%; /* Padding para centrar en móvil */
     }
     .slider-skeleton {
         gap: 8px;
-    }
-    .slider-skeleton::before {
-        flex: 0 0 1%; /* 1% de espacio a la izquierda (100% - 98%) / 2 */
-        min-width: 1%;
+        padding: 0 1%; /* Padding para centrar en móvil */
     }
     .slider-skeleton-item {
         width: 98%;
