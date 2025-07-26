@@ -1845,7 +1845,7 @@
     scroll-behavior: smooth;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    padding: 0 5vw; /* Padding para centrar el primer slide */
+    padding: 0 calc((100vw - 90vw) / 2); /* Centra perfectamente el slide del 90% */
     gap: 32px; /* Espacio entre slides */
     width: 100vw;
     box-sizing: border-box;
@@ -1907,7 +1907,7 @@
     .slider-slide img { border-radius: 18px; }
     #slider-wrapper { 
         gap: 16px; 
-        padding: 0 2.5vw; /* Padding reducido para tablet */
+        padding: 0 calc((100vw - 95vw) / 2); /* Centra perfectamente el slide del 95% */
     }
 }
 @media (max-width: 600px) {
@@ -1920,7 +1920,7 @@
     .slider-slide img { border-radius: 10px; }
     #slider-wrapper { 
         gap: 8px; 
-        padding: 0 1vw; /* Padding mínimo para móvil */
+        padding: 0 calc((100vw - 98vw) / 2); /* Centra perfectamente el slide del 98% */
     }
 }
 

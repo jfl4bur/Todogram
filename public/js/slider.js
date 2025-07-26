@@ -1,12 +1,5 @@
 // Slider destacado tipo Rakuten.tv
-// Géneros a mostrar
-const GENEROS_SLIDER = [
-    'Terror',
-    'Acción', 
-    'Ciencia Ficción',
-    'Comedia',
-    'Romance'
-];
+// Se detectarán automáticamente todos los géneros disponibles
 
 // Las funciones del slider estarán disponibles globalmente para ser llamadas desde main.js
 console.log('Slider: Script cargado, esperando inicialización desde main.js');
@@ -50,19 +43,34 @@ function renderSliderDestacado() {
     const peliculas = window.carousel.moviesData;
     console.log('Slider: Total de películas disponibles:', peliculas.length);
 
+    // Detecta todos los géneros únicos disponibles
+    const todosLosGeneros = new Set();
+    peliculas.forEach(p => {
+        if (p.genre) {
+            const generos = p.genre.split(/\s*[·,]\s*/);
+            generos.forEach(g => {
+                const genero = g.trim();
+                if (genero && genero.length > 0) {
+                    todosLosGeneros.add(genero);
+                }
+            });
+        }
+    });
+    
+    const generosUnicos = Array.from(todosLosGeneros);
+    console.log('Slider: Géneros únicos encontrados:', generosUnicos);
+    
     // Selecciona la primera película de cada género, sin repeticiones
     const seleccionadas = [];
     const idsIncluidos = new Set();
     
-    for (const genero of GENEROS_SLIDER) {
+    for (const genero of generosUnicos) {
         console.log(`Slider: Buscando película de género: ${genero}`);
         const peli = peliculas.find(p => {
             if (!p.genre) {
-                console.log(`Slider: Película sin género:`, p.title);
                 return false;
             }
             const generos = p.genre.split(/\s*[·,]\s*/);
-            console.log(`Slider: Géneros de "${p.title}":`, generos);
             const match = generos.some(g => g.trim().toLowerCase() === genero.toLowerCase());
             if (match && !idsIncluidos.has(p.id)) {
                 console.log(`Slider: Encontrada película para ${genero}:`, p.title);
