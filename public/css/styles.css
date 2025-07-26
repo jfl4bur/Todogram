@@ -1863,7 +1863,7 @@
 .slider-skeleton {
     display: flex;
     gap: 32px;
-    width: 90%; /* Ancho del skeleton al 90% */
+    width: 100%; /* Ancho del skeleton al 90% */
     margin: 0 auto; /* Centrar el contenedor */
     overflow-x: auto;
     scrollbar-width: none;
@@ -2070,9 +2070,9 @@
 }
 
 .slider-slide:hover {
-    transform: scale(1.03);
+    transform: scale(1.01);
     z-index: 2;
-    box-shadow: 0 12px 40px 8px rgba(0,0,0,0.55);
+    /*box-shadow: 0 12px 40px 8px rgba(0,0,0,0.55);*/
 }
 
 .slider-nav {
