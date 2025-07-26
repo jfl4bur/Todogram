@@ -28,6 +28,14 @@ document.addEventListener('DOMContentLoaded', function () {
         const videoModal = new VideoModal();
         const shareModal = new ShareModal();
 
+        // Inicializar skeleton del slider
+        const sliderSkeleton = document.getElementById('slider-skeleton');
+        const sliderWrapper = document.getElementById('slider-wrapper');
+        if (sliderSkeleton && sliderWrapper) {
+            sliderSkeleton.style.display = 'flex';
+            sliderWrapper.style.display = 'none';
+        }
+
         window.carousel = carousel;
         window.hoverModal = hoverModal;
         window.detailsModal = detailsModal;

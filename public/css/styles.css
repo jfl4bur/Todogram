@@ -1865,6 +1865,55 @@
     min-width: 5vw;
 }
 
+/* Skeleton loader para el slider */
+.slider-skeleton {
+    display: flex;
+    gap: 32px;
+    width: 100vw;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 0;
+    box-sizing: border-box;
+    justify-content: center;
+}
+
+.slider-skeleton::-webkit-scrollbar {
+    display: none;
+}
+
+.slider-skeleton::before {
+    content: '';
+    flex: 0 0 5vw;
+    min-width: 5vw;
+}
+
+.slider-skeleton-item {
+    width: 90vw;
+    min-width: 90vw;
+    max-width: 900px;
+    height: 400px;
+    border-radius: 32px;
+    background-color: var(--secondary-color);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 32px 0;
+    flex-shrink: 0;
+}
+
+.slider-skeleton-spinner {
+    width: 60px;
+    height: 60px;
+    border: 6px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s linear infinite;
+}
+
 .slider-slide {
     width: 90vw;      /* Ocupa 90% del ancho de la pantalla */
     min-width: 90vw;
@@ -1926,6 +1975,20 @@
         flex: 0 0 2.5vw; /* 2.5vw de espacio a la izquierda (100vw - 95vw) / 2 */
         min-width: 2.5vw;
     }
+    .slider-skeleton {
+        gap: 16px;
+    }
+    .slider-skeleton::before {
+        flex: 0 0 2.5vw;
+        min-width: 2.5vw;
+    }
+    .slider-skeleton-item {
+        width: 95vw;
+        min-width: 95vw;
+        height: 220px;
+        border-radius: 18px;
+        margin: 32px 0;
+    }
 }
 @media (max-width: 600px) {
     .slider-slide { 
@@ -1946,6 +2009,20 @@
     #slider-wrapper::before {
         flex: 0 0 1vw; /* 1vw de espacio a la izquierda (100vw - 98vw) / 2 */
         min-width: 1vw;
+    }
+    .slider-skeleton {
+        gap: 8px;
+    }
+    .slider-skeleton::before {
+        flex: 0 0 1vw;
+        min-width: 1vw;
+    }
+    .slider-skeleton-item {
+        width: 98vw;
+        min-width: 98vw;
+        height: 140px;
+        border-radius: 10px;
+        margin: 32px 0;
     }
 }
 

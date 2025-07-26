@@ -31,12 +31,24 @@ function calculateSlideWidth() {
 
 function renderSliderDestacado() {
     const sliderWrapper = document.getElementById('slider-wrapper');
+    const sliderSkeleton = document.getElementById('slider-skeleton');
+    
     if (!sliderWrapper) {
         console.error('Slider: No se encontró slider-wrapper');
         return;
     }
     
+    if (!sliderSkeleton) {
+        console.error('Slider: No se encontró slider-skeleton');
+        return;
+    }
+    
     console.log('Slider: Renderizando slider...');
+    
+    // Ocultar skeleton y mostrar slider
+    sliderSkeleton.style.display = 'none';
+    sliderWrapper.style.display = 'flex';
+    
     sliderWrapper.innerHTML = '';
 
     // Usar los datos del carrusel
