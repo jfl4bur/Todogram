@@ -102,6 +102,9 @@ function renderSliderDestacado() {
 
     console.log('Slider: Películas seleccionadas:', seleccionadas.length);
 
+    // Crear paginación
+    createSliderPagination(seleccionadas.length);
+
     // Renderiza cada slide
     seleccionadas.forEach((item, idx) => {
         const div = document.createElement('div');
@@ -153,6 +156,66 @@ function renderSliderDestacado() {
     console.log('Slider: Renderizado completado. Slides creados:', seleccionadas.length);
 }
 
+// Crear paginación del slider
+function createSliderPagination(totalSlides) {
+    const pagination = document.getElementById('slider-pagination');
+    if (!pagination) {
+        console.error('Slider: No se encontró slider-pagination');
+        return;
+    }
+    
+    pagination.innerHTML = '';
+    
+    for (let i = 0; i < totalSlides; i++) {
+        const dot = document.createElement('button');
+        dot.className = 'slider-pagination-dot';
+        dot.setAttribute('data-slide', i);
+        dot.setAttribute('aria-label', `Ir al slide ${i + 1}`);
+        
+        if (i === 0) {
+            dot.classList.add('active');
+        }
+        
+        dot.addEventListener('click', () => {
+            goToSlide(i);
+        });
+        
+        pagination.appendChild(dot);
+    }
+}
+
+// Ir a un slide específico
+function goToSlide(slideIndex) {
+    const wrapper = document.getElementById('slider-wrapper');
+    const slides = wrapper.querySelectorAll('.slider-slide');
+    const dots = document.querySelectorAll('.slider-pagination-dot');
+    
+    if (slideIndex >= 0 && slideIndex < slides.length) {
+        const slide = slides[slideIndex];
+        const slideWidth = slide.offsetWidth;
+        const screenWidth = window.innerWidth;
+        let gap = 32;
+        
+        if (screenWidth <= 600) {
+            gap = 8;
+        } else if (screenWidth <= 900) {
+            gap = 16;
+        }
+        
+        const scrollPosition = slideWidth * slideIndex + gap * slideIndex;
+        
+        wrapper.scrollTo({
+            left: scrollPosition,
+            behavior: 'smooth'
+        });
+        
+        // Actualizar dots activos
+        dots.forEach((dot, index) => {
+            dot.classList.toggle('active', index === slideIndex);
+        });
+    }
+}
+
 // Navegación con flechas y scroll
 function setupSliderNav() {
     const wrapper = document.getElementById('slider-wrapper');
@@ -187,6 +250,11 @@ function setupSliderNav() {
             left: targetScroll,
             behavior: 'smooth'
         });
+        
+        // Actualizar paginación después del scroll
+        setTimeout(() => {
+            updatePaginationFromScroll();
+        }, 300);
     }
     
     prevBtn.addEventListener('click', e => {
@@ -212,10 +280,43 @@ function setupSliderNav() {
         }, 100);
     }
     
+    // Actualizar paginación cuando se hace scroll
+    wrapper.addEventListener('scroll', () => {
+        updatePaginationFromScroll();
+    });
+    
     // Actualizar navegación al cambiar el tamaño de la ventana
     window.addEventListener('resize', () => {
         updateNav();
     });
     
     updateNav();
+}
+
+// Actualizar paginación basándose en la posición del scroll
+function updatePaginationFromScroll() {
+    const wrapper = document.getElementById('slider-wrapper');
+    const slides = wrapper.querySelectorAll('.slider-slide');
+    const dots = document.querySelectorAll('.slider-pagination-dot');
+    
+    if (slides.length === 0 || dots.length === 0) return;
+    
+    const slideWidth = slides[0].offsetWidth;
+    const screenWidth = window.innerWidth;
+    let gap = 32;
+    
+    if (screenWidth <= 600) {
+        gap = 8;
+    } else if (screenWidth <= 900) {
+        gap = 16;
+    }
+    
+    const totalSlideWidth = slideWidth + gap;
+    const currentScroll = wrapper.scrollLeft;
+    const currentSlideIndex = Math.round(currentScroll / totalSlideWidth);
+    
+    // Actualizar dots activos
+    dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentSlideIndex);
+    });
 } 
