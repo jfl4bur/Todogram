@@ -11,6 +11,31 @@ const GENEROS_SLIDER = [
 // Las funciones del slider estarán disponibles globalmente para ser llamadas desde main.js
 console.log('Slider: Script cargado, esperando inicialización desde main.js');
 
+// Función para calcular el ancho de los slides basándose en el tamaño de pantalla
+function calculateSlideWidth() {
+    const screenWidth = window.innerWidth;
+    let slideWidth, gap;
+    
+    if (screenWidth > 1200) {
+        slideWidth = screenWidth - 48; // 24px padding en cada lado
+        gap = 24;
+    } else if (screenWidth > 900) {
+        slideWidth = screenWidth - 48;
+        gap = 24;
+    } else if (screenWidth > 600) {
+        slideWidth = screenWidth - 32; // 16px padding en cada lado
+        gap = 16;
+    } else if (screenWidth > 480) {
+        slideWidth = screenWidth - 16; // 8px padding en cada lado
+        gap = 12;
+    } else {
+        slideWidth = screenWidth - 16;
+        gap = 8;
+    }
+    
+    return { slideWidth, gap };
+}
+
 function renderSliderDestacado() {
     const sliderWrapper = document.getElementById('slider-wrapper');
     if (!sliderWrapper) {
@@ -117,11 +142,10 @@ function setupSliderNav() {
     }
 
     function scrollToSlide(dir) {
-        const slide = wrapper.querySelector('.slider-slide');
-        if (!slide) return;
-        const slideWidth = slide.offsetWidth + 24; // gap
+        const { slideWidth, gap } = calculateSlideWidth();
+        const totalSlideWidth = slideWidth + gap;
         wrapper.scrollBy({
-            left: dir * slideWidth,
+            left: dir * totalSlideWidth,
             behavior: 'smooth'
         });
     }
@@ -149,6 +173,10 @@ function setupSliderNav() {
         }, 100);
     }
     
-    window.addEventListener('resize', updateNav);
+    // Actualizar navegación al cambiar el tamaño de la ventana
+    window.addEventListener('resize', () => {
+        updateNav();
+    });
+    
     updateNav();
 } 
