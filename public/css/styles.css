@@ -1871,9 +1871,9 @@
     max-width: 900px; /* Limita el tamaño máximo en desktop */
     height: 400px;
     border-radius: 32px; /* Bordes redondeados visibles */
-    overflow: visible;
+    overflow: hidden; /* Cambiado a hidden para que el overlay respete los bordes */
     position: relative;
-    background: #222;
+    background: transparent; /* Quitado el fondo negro */
     box-shadow: 0 8px 32px rgba(0,0,0,0.45);
     transition: transform 0.3s cubic-bezier(.4,2,.6,1), box-shadow 0.3s;
     cursor: pointer;
@@ -1914,6 +1914,10 @@
         border-radius: 18px; 
     }
     .slider-slide img { border-radius: 18px; }
+    .slider-slide .slider-overlay {
+        border-bottom-left-radius: 18px; /* Bordes redondeados inferiores */
+        border-bottom-right-radius: 18px;
+    }
     #slider-wrapper { 
         gap: 16px; 
         padding: 0;
@@ -1931,6 +1935,10 @@
         border-radius: 10px; 
     }
     .slider-slide img { border-radius: 10px; }
+    .slider-slide .slider-overlay {
+        border-bottom-left-radius: 10px; /* Bordes redondeados inferiores */
+        border-bottom-right-radius: 10px;
+    }
     #slider-wrapper { 
         gap: 8px; 
         padding: 0;
@@ -2084,6 +2092,8 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
+    border-bottom-left-radius: 32px; /* Bordes redondeados inferiores */
+    border-bottom-right-radius: 32px;
 }
 
 @media (max-width: 600px) {
