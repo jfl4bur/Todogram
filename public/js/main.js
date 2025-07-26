@@ -22,12 +22,15 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function initializeComponents() {
+        // Inicializar hero slider primero
+        const heroSlider = new HeroSlider();
         const carousel = new Carousel();
         const hoverModal = new HoverModal();
         const detailsModal = new DetailsModal();
         const videoModal = new VideoModal();
         const shareModal = new ShareModal();
 
+        window.heroSlider = heroSlider;
         window.carousel = carousel;
         window.hoverModal = hoverModal;
         window.detailsModal = detailsModal;
