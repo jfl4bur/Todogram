@@ -142,10 +142,11 @@ function setupSliderNav() {
     }
 
     function scrollToSlide(dir) {
-        const { slideWidth, gap } = calculateSlideWidth();
-        const totalSlideWidth = slideWidth + gap;
+        const slide = wrapper.querySelector('.slider-slide');
+        if (!slide) return;
+        const slideWidth = slide.offsetWidth;
         wrapper.scrollBy({
-            left: dir * totalSlideWidth,
+            left: dir * slideWidth,
             behavior: 'smooth'
         });
     }
