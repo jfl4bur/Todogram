@@ -158,8 +158,13 @@ function setupSliderNav() {
         }
         
         const slideWidth = slide.offsetWidth + gap;
-        wrapper.scrollBy({
-            left: dir * slideWidth,
+        
+        // Usar scrollTo en lugar de scrollBy para evitar acumulación de errores
+        const currentScroll = wrapper.scrollLeft;
+        const targetScroll = currentScroll + (dir * slideWidth);
+        
+        wrapper.scrollTo({
+            left: targetScroll,
             behavior: 'smooth'
         });
     }

@@ -1845,12 +1845,11 @@
     scroll-behavior: smooth;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    padding: 0;
+    padding: 0 5vw; /* Padding para centrar el primer slide */
     gap: 32px; /* Espacio entre slides */
     width: 100vw;
     box-sizing: border-box;
     scroll-snap-type: x mandatory;
-    justify-content: center;
 }
 
 #slider-wrapper::-webkit-scrollbar {
@@ -1858,8 +1857,8 @@
 }
 
 .slider-slide {
-    width: 85vw;      /* Ocupa 85% del ancho de la pantalla */
-    min-width: 85vw;
+    width: 90vw;      /* Ocupa 90% del ancho de la pantalla */
+    min-width: 90vw;
     max-width: 900px; /* Limita el tamaño máximo en desktop */
     height: 400px;
     border-radius: 32px; /* Bordes redondeados visibles */
@@ -1901,12 +1900,15 @@
 @media (max-width: 900px) {
     .slider-slide { 
         height: 220px; 
-        width: 92vw; 
-        min-width: 92vw; 
+        width: 95vw; 
+        min-width: 95vw; 
         border-radius: 18px; 
     }
     .slider-slide img { border-radius: 18px; }
-    #slider-wrapper { gap: 16px; }
+    #slider-wrapper { 
+        gap: 16px; 
+        padding: 0 2.5vw; /* Padding reducido para tablet */
+    }
 }
 @media (max-width: 600px) {
     .slider-slide { 
@@ -1916,7 +1918,10 @@
         border-radius: 10px; 
     }
     .slider-slide img { border-radius: 10px; }
-    #slider-wrapper { gap: 8px; }
+    #slider-wrapper { 
+        gap: 8px; 
+        padding: 0 1vw; /* Padding mínimo para móvil */
+    }
 }
 
 @media (max-width: 1200px) {
