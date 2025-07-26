@@ -21,17 +21,15 @@
     </div>
 </head>
 <body>
-    <!-- SLIDER RAKUTEN -->
-    <div class="rakuten-slider-section">
-        <h1 class="rakuten-slider-title">Destacados por Género</h1>
-        <div class="rakuten-slider-container">
-            <div class="rakuten-slider-nav">
-                <button class="rakuten-slider-nav-btn rakuten-slider-prev"><i class="fas fa-chevron-left"></i></button>
-                <button class="rakuten-slider-nav-btn rakuten-slider-next"><i class="fas fa-chevron-right"></i></button>
+    <!-- SLIDER DESTACADO TIPO RAKUTEN.TV -->
+    <div class="slider-section">
+        <h2 class="slider-title">Destacados por Género</h2>
+        <div class="slider-container">
+            <div class="slider-nav" id="slider-nav">
+                <button class="slider-nav-btn prev" id="slider-prev"><i class="fas fa-chevron-left"></i></button>
+                <button class="slider-nav-btn next" id="slider-next"><i class="fas fa-chevron-right"></i></button>
             </div>
-            <div class="rakuten-slider-wrapper" id="rakuten-slider-wrapper">
-                <!-- Slides generados por JS -->
-            </div>
+            <div id="slider-wrapper"></div>
         </div>
     </div>
     <!-- Div helper para iOS -->
@@ -166,12 +164,12 @@
         const DATA_URL = "https://jfl4bur.github.io/Todogram/public/data.json";
         window.peliculas = []; // Se llenará con los datos cargados
     </script>
+    <script src="https://jfl4bur.github.io/Todogram/public/js/slider.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/carousel.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/hover-modal.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/details-modal.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/video-modal.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/share-modal.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/main.js"></script>
-    <script src="https://jfl4bur.github.io/Todogram/public/js/rakuten-slider.js"></script>
 </body>
 </html>
