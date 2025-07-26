@@ -1873,7 +1873,6 @@
     -ms-overflow-style: none;
     padding: 0;
     box-sizing: border-box;
-    justify-content: center;
 }
 
 .slider-skeleton::-webkit-scrollbar {
