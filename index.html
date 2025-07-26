@@ -21,21 +21,19 @@
     </div>
 </head>
 <body>
-    <!-- SLIDER DESTACADO INICIO -->
-    <div class="highlight-slider-section">
-        <div class="highlight-slider-wrapper" id="highlight-slider-wrapper">
-            <!-- Las slides se insertarán por JS -->
-        </div>
-        <div class="highlight-slider-nav">
-            <button class="highlight-slider-btn prev" id="highlight-slider-prev"><i class="fas fa-chevron-left"></i></button>
-            <button class="highlight-slider-btn next" id="highlight-slider-next"><i class="fas fa-chevron-right"></i></button>
-        </div>
-        <div class="highlight-slider-progress">
-            <div class="highlight-slider-progress-bar" id="highlight-slider-progress-bar"></div>
+    <!-- SLIDER RAKUTEN -->
+    <div class="rakuten-slider-section">
+        <h1 class="rakuten-slider-title">Destacados por Género</h1>
+        <div class="rakuten-slider-container">
+            <div class="rakuten-slider-nav">
+                <button class="rakuten-slider-nav-btn rakuten-slider-prev"><i class="fas fa-chevron-left"></i></button>
+                <button class="rakuten-slider-nav-btn rakuten-slider-next"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="rakuten-slider-wrapper" id="rakuten-slider-wrapper">
+                <!-- Slides generados por JS -->
+            </div>
         </div>
     </div>
-    <!-- SLIDER DESTACADO FIN -->
-
     <!-- Div helper para iOS -->
     <div id="ios-helper" class="ios-helper" style="display:none;"></div>
 
@@ -168,12 +166,12 @@
         const DATA_URL = "https://jfl4bur.github.io/Todogram/public/data.json";
         window.peliculas = []; // Se llenará con los datos cargados
     </script>
-    <script src="https://jfl4bur.github.io/Todogram/public/js/highlight-slider.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/carousel.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/hover-modal.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/details-modal.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/video-modal.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/share-modal.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/main.js"></script>
+    <script src="https://jfl4bur.github.io/Todogram/public/js/rakuten-slider.js"></script>
 </body>
 </html>
