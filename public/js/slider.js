@@ -146,7 +146,18 @@ function setupSliderNav() {
     function scrollToSlide(dir) {
         const slide = wrapper.querySelector('.slider-slide');
         if (!slide) return;
-        const slideWidth = slide.offsetWidth;
+        
+        // Calcular el ancho del slide + gap según el tamaño de pantalla
+        const screenWidth = window.innerWidth;
+        let gap = 32; // gap por defecto
+        
+        if (screenWidth <= 600) {
+            gap = 8;
+        } else if (screenWidth <= 900) {
+            gap = 16;
+        }
+        
+        const slideWidth = slide.offsetWidth + gap;
         wrapper.scrollBy({
             left: dir * slideWidth,
             behavior: 'smooth'
