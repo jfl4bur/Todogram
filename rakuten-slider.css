@@ -1,0 +1,349 @@
+/* Estilos para el Slider Rakuten TV */
+.rakuten-slider-section {
+    margin-top: 40px;
+    padding: 0 20px;
+}
+
+.genre-carousel-container {
+    margin-bottom: 50px;
+    position: relative;
+}
+
+.genre-carousel-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: var(--text-color);
+    background: linear-gradient(90deg, #ff003c, #ff6b3c);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+}
+
+.genre-carousel-title::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #ff003c, #ff6b3c);
+    border-radius: 2px;
+}
+
+.genre-carousel-wrapper {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+}
+
+.genre-carousel-skeleton {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    overflow-x: hidden;
+    padding: 10px 0;
+}
+
+.genre-carousel-content {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 10px 0;
+    scroll-snap-type: x mandatory;
+}
+
+.genre-carousel-content::-webkit-scrollbar {
+    display: none;
+}
+
+.rakuten-carousel-item {
+    flex: 0 0 auto;
+    width: 200px;
+    height: 280px;
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    scroll-snap-align: start;
+}
+
+.rakuten-carousel-item:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 12px 40px rgba(255, 0, 60, 0.4);
+    z-index: 10;
+}
+
+.rakuten-poster-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.rakuten-poster-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+}
+
+.rakuten-carousel-item:hover .rakuten-poster-image {
+    transform: scale(1.1);
+}
+
+.rakuten-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+    padding: 20px 15px 15px;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+.rakuten-carousel-item:hover .rakuten-overlay {
+    transform: translateY(0);
+}
+
+.rakuten-item-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 8px;
+    line-height: 1.3;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.rakuten-item-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.8rem;
+    color: #ccc;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.rakuten-item-meta span {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.rakuten-item-meta .rating {
+    color: #ffd700;
+    font-weight: 600;
+}
+
+.rakuten-item-meta .year {
+    color: #ff6b3c;
+    font-weight: 500;
+}
+
+.rakuten-item-genre {
+    font-size: 0.75rem;
+    color: #999;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 8px;
+    border-radius: 12px;
+    display: inline-block;
+    margin-bottom: 5px;
+}
+
+.rakuten-gradient-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+        45deg,
+        rgba(255, 0, 60, 0.1) 0%,
+        transparent 50%,
+        rgba(255, 107, 60, 0.1) 100%
+    );
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.rakuten-carousel-item:hover .rakuten-gradient-overlay {
+    opacity: 1;
+}
+
+.genre-carousel-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    pointer-events: none;
+    z-index: 20;
+}
+
+.genre-carousel-nav .carousel-nav-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.8);
+    border: 2px solid #ff003c;
+    color: #fff;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    pointer-events: auto;
+    backdrop-filter: blur(10px);
+    opacity: 0;
+    transform: translateY(-50%) scale(0.8);
+}
+
+.genre-carousel-container:hover .genre-carousel-nav .carousel-nav-btn {
+    opacity: 1;
+    transform: translateY(-50%) scale(1);
+}
+
+.genre-carousel-nav .carousel-nav-btn:hover {
+    background: #ff003c;
+    border-color: #ff6b3c;
+    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 4px 20px rgba(255, 0, 60, 0.5);
+}
+
+.genre-carousel-nav .carousel-nav-btn.prev {
+    left: -25px;
+}
+
+.genre-carousel-nav .carousel-nav-btn.next {
+    right: -25px;
+}
+
+.genre-carousel-nav .carousel-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    background: rgba(0, 0, 0, 0.4);
+    border-color: #666;
+}
+
+.genre-carousel-nav .carousel-nav-btn:disabled:hover {
+    transform: translateY(-50%) scale(0.8);
+    box-shadow: none;
+}
+
+/* Efectos de carga */
+.genre-loading {
+    position: relative;
+    overflow: hidden;
+}
+
+.genre-loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.1),
+        transparent
+    );
+    animation: loading-sweep 2s infinite;
+}
+
+@keyframes loading-sweep {
+    0% {
+        left: -100%;
+    }
+    50% {
+        left: 0%;
+    }
+    100% {
+        left: 100%;
+    }
+}
+
+/* Badge de nuevo */
+.rakuten-new-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, #ff003c, #ff6b3c);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    z-index: 5;
+    transform: rotate(10deg);
+    box-shadow: 0 2px 8px rgba(255, 0, 60, 0.3);
+}
+
+/* Animación de entrada */
+.rakuten-carousel-item {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+.rakuten-carousel-item:nth-child(1) { animation-delay: 0.1s; }
+.rakuten-carousel-item:nth-child(2) { animation-delay: 0.2s; }
+.rakuten-carousel-item:nth-child(3) { animation-delay: 0.3s; }
+.rakuten-carousel-item:nth-child(4) { animation-delay: 0.4s; }
+.rakuten-carousel-item:nth-child(5) { animation-delay: 0.5s; }
+.rakuten-carousel-item:nth-child(6) { animation-delay: 0.6s; }
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .rakuten-slider-section {
+        padding: 0 15px;
+    }
+    
+    .genre-carousel-title {
+        font-size: 1.5rem;
+        margin-bottom: 15px;
+    }
+    
+    .rakuten-carousel-item {
+        width: 150px;
+        height: 210px;
+    }
+    
+    .genre-carousel-nav .carousel-nav-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+    
+    .genre-carousel-nav .carousel-nav-btn.prev {
+        left: -20px;
+    }
+    
+    .genre-carousel-nav .carousel-nav-btn.next {
+        right: -20px;
+    }
+}
