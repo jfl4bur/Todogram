@@ -1836,8 +1836,6 @@
 .slider-container {
     position: relative;
     width: 100%;
-    display: flex;
-    justify-content: center;
     overflow: hidden;
 }
 
@@ -1849,7 +1847,7 @@
     -ms-overflow-style: none;
     padding: 0;
     gap: 32px; /* Espacio entre slides */
-    width: 100vw;
+    width: 100%;
     box-sizing: border-box;
     scroll-snap-type: x mandatory;
 }
@@ -1861,15 +1859,15 @@
 /* Centrar el primer slide */
 #slider-wrapper::before {
     content: '';
-    flex: 0 0 5vw; /* 5vw de espacio a la izquierda (100vw - 90vw) / 2 */
-    min-width: 5vw;
+    flex: 0 0 calc((100% - 90%) / 2); /* Centra perfectamente el slide del 90% */
+    min-width: calc((100% - 90%) / 2);
 }
 
 /* Skeleton loader para el slider */
 .slider-skeleton {
     display: flex;
     gap: 32px;
-    width: 100vw;
+    width: 100%;
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -1884,13 +1882,13 @@
 
 .slider-skeleton::before {
     content: '';
-    flex: 0 0 5vw;
-    min-width: 5vw;
+    flex: 0 0 calc((100% - 90%) / 2);
+    min-width: calc((100% - 90%) / 2);
 }
 
 .slider-skeleton-item {
-    width: 90vw;
-    min-width: 90vw;
+    width: 90%;
+    min-width: 90%;
     max-width: 900px;
     height: 400px;
     border-radius: 32px;
@@ -1915,8 +1913,8 @@
 }
 
 .slider-slide {
-    width: 90vw;      /* Ocupa 90% del ancho de la pantalla */
-    min-width: 90vw;
+    width: 90%;      /* Ocupa 90% del ancho del contenedor */
+    min-width: 90%;
     max-width: 900px; /* Limita el tamaño máximo en desktop */
     height: 400px;
     border-radius: 32px; /* Bordes redondeados visibles */
@@ -1958,8 +1956,8 @@
 @media (max-width: 900px) {
     .slider-slide { 
         height: 220px; 
-        width: 95vw; 
-        min-width: 95vw; 
+        width: 95%; 
+        min-width: 95%; 
         border-radius: 18px; 
     }
     .slider-slide img { border-radius: 18px; }
@@ -1972,19 +1970,19 @@
         padding: 0;
     }
     #slider-wrapper::before {
-        flex: 0 0 2.5vw; /* 2.5vw de espacio a la izquierda (100vw - 95vw) / 2 */
-        min-width: 2.5vw;
+        flex: 0 0 calc((100% - 95%) / 2); /* Centra perfectamente el slide del 95% */
+        min-width: calc((100% - 95%) / 2);
     }
     .slider-skeleton {
         gap: 16px;
     }
     .slider-skeleton::before {
-        flex: 0 0 2.5vw;
-        min-width: 2.5vw;
+        flex: 0 0 calc((100% - 95%) / 2);
+        min-width: calc((100% - 95%) / 2);
     }
     .slider-skeleton-item {
-        width: 95vw;
-        min-width: 95vw;
+        width: 95%;
+        min-width: 95%;
         height: 220px;
         border-radius: 18px;
         margin: 32px 0;
@@ -1993,8 +1991,8 @@
 @media (max-width: 600px) {
     .slider-slide { 
         height: 140px; 
-        width: 98vw; 
-        min-width: 98vw; 
+        width: 98%; 
+        min-width: 98%; 
         border-radius: 10px; 
     }
     .slider-slide img { border-radius: 10px; }
@@ -2007,19 +2005,19 @@
         padding: 0;
     }
     #slider-wrapper::before {
-        flex: 0 0 1vw; /* 1vw de espacio a la izquierda (100vw - 98vw) / 2 */
-        min-width: 1vw;
+        flex: 0 0 calc((100% - 98%) / 2); /* Centra perfectamente el slide del 98% */
+        min-width: calc((100% - 98%) / 2);
     }
     .slider-skeleton {
         gap: 8px;
     }
     .slider-skeleton::before {
-        flex: 0 0 1vw;
-        min-width: 1vw;
+        flex: 0 0 calc((100% - 98%) / 2);
+        min-width: calc((100% - 98%) / 2);
     }
     .slider-skeleton-item {
-        width: 98vw;
-        min-width: 98vw;
+        width: 98%;
+        min-width: 98%;
         height: 140px;
         border-radius: 10px;
         margin: 32px 0;
@@ -2107,6 +2105,7 @@
     pointer-events: none;
     z-index: 10;
     transform: translateY(-50%);
+    padding: 0 5%;
 }
 
 .slider-nav-btn {
