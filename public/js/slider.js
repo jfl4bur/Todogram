@@ -98,7 +98,9 @@ function renderSliderDestacado() {
         if (item.rating) meta.push(`<span><i class="fas fa-star"></i> ${item.rating}</span>`);
 
         div.innerHTML = `
-            <img src="${item.postersUrl || item.posterUrl || 'https://via.placeholder.com/1540x400'}" alt="${item.title}" loading="lazy">
+            <div class="slider-img-wrapper">
+                <img src="${item.postersUrl || item.posterUrl || 'https://via.placeholder.com/1540x400'}" alt="${item.title}" loading="lazy">
+            </div>
             <div class="slider-overlay">
                 <div class="slider-title-movie">${item.title}</div>
                 <div class="slider-meta">${meta.join('')}</div>
