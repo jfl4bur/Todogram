@@ -1847,7 +1847,7 @@
     -ms-overflow-style: none;
     padding: 0 5%; /* Padding para centrar */
     gap: 32px; /* Espacio entre slides */
-    width: 90%; /* Ancho del slider al 90% */
+    width: 100%; /* Ancho del slider al 90% */
     margin: 0 auto; /* Centrar el contenedor */
     box-sizing: border-box;
     scroll-snap-type: x mandatory;
