@@ -24,6 +24,28 @@
     <!-- Div helper para iOS -->
     <div id="ios-helper" class="ios-helper" style="display:none;"></div>
 
+    <!-- Slider de Géneros -->
+    <div class="genre-slider-section">
+        <h2 class="genre-slider-title">Por Géneros</h2>
+        <div class="genre-slider-container">
+            <div class="genre-slider-skeleton" id="genre-slider-skeleton">
+                <div class="genre-slider-skeleton-item"><div class="genre-slider-skeleton-spinner"></div></div>
+                <div class="genre-slider-skeleton-item"><div class="genre-slider-skeleton-spinner"></div></div>
+                <div class="genre-slider-skeleton-item"><div class="genre-slider-skeleton-spinner"></div></div>
+                <div class="genre-slider-skeleton-item"><div class="genre-slider-skeleton-spinner"></div></div>
+                <div class="genre-slider-skeleton-item"><div class="genre-slider-skeleton-spinner"></div></div>
+            </div>
+            <div id="genre-slider-wrapper" style="display:none;"></div>
+            <div class="genre-slider-progress">
+                <div class="genre-slider-progress-bar"></div>
+            </div>
+            <div class="genre-slider-nav" id="genre-slider-nav">
+                <button class="genre-slider-nav-btn prev" id="genre-slider-prev"><i class="fas fa-chevron-left"></i></button>
+                <button class="genre-slider-nav-btn next" id="genre-slider-next"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </div>    
+
     <!-- Carrusel -->
     <div class="carousel-section">
         <h1 class="carousel-title">Películas</h1>
@@ -138,7 +160,6 @@
                     <div class="share-icon link">
                         <i class="fas fa-link"></i>
                     </div>
-                    <span class="share-option-text">Copiar enlace</span>
                 </div>
             </div>
             
@@ -154,6 +175,7 @@
         window.peliculas = []; // Se llenará con los datos cargados
     </script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/carousel.js"></script>
+    <script src="https://jfl4bur.github.io/Todogram/public/js/genre-slider.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/hover-modal.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/details-modal.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/video-modal.js"></script>

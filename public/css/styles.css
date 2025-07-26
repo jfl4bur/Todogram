@@ -1813,3 +1813,171 @@
         padding: 8px 12px;
     }
 }
+
+/* Estilos para el slider de géneros */
+.genre-slider-section {
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.genre-slider-title {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 15px;
+    padding-left: 5px;
+    color: var(--text-color);
+}
+
+#genre-slider-wrapper {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 10px;
+    padding-top: 4px;
+    gap: 4px;
+}
+
+#genre-slider-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+.genre-slider-skeleton {
+    display: flex;
+    gap: 4px;
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.genre-slider-skeleton::-webkit-scrollbar {
+    display: none;
+}
+
+.genre-slider-skeleton-item {
+    flex: 0 0 auto;
+    width: var(--item-width);
+    height: var(--item-height);
+    background-color: var(--secondary-color);
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.genre-slider-skeleton-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s linear infinite;
+}
+
+.genre-slider-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.genre-slider-progress-bar {
+    height: 100%;
+    background-color: var(--primary-color);
+    width: 0;
+    transition: width 0.3s ease;
+}
+
+.genre-slider-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.genre-slider-nav-btn {
+    background: rgba(0, 0, 0, 0.7);
+    border: none;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    cursor: pointer;
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s ease;
+}
+
+.genre-slider-nav-btn:hover {
+    background: rgba(0, 0, 0, 0.9);
+}
+
+.genre-slider-nav-btn.prev {
+    margin-left: 10px;
+}
+
+.genre-slider-nav-btn.next {
+    margin-right: 10px;
+}
+
+.genre-slider-nav-btn i {
+    font-size: 14px;
+}
+
+.genre-slider-container {
+    position: relative;
+}
+
+.genre-slider-container:hover .genre-slider-nav-btn {
+    opacity: 1;
+}
+
+/* Responsive para el slider de géneros */
+@media (max-width: 768px) {
+    .genre-slider-section {
+        margin-bottom: 30px;
+    }
+    
+    .genre-slider-title {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+    }
+    
+    #genre-slider-wrapper {
+        gap: 3px;
+    }
+}
+
+@media (max-width: 480px) {
+    .genre-slider-section {
+        margin-bottom: 25px;
+    }
+    
+    .genre-slider-title {
+        font-size: 1.3rem;
+        margin-bottom: 8px;
+    }
+    
+    .genre-slider-nav-btn {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .genre-slider-nav-btn i {
+        font-size: 12px;
+    }
+}
