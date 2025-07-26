@@ -38,6 +38,25 @@ document.addEventListener('DOMContentLoaded', function () {
         window.activeItem = null;
         window.hoverModalItem = null;
 
+        // Inicializar el slider después de que el carrusel tenga datos
+        function initializeSlider() {
+            if (window.carousel && window.carousel.moviesData && window.carousel.moviesData.length > 0) {
+                console.log('Main: Inicializando slider con', window.carousel.moviesData.length, 'películas');
+                if (typeof renderSliderDestacado === 'function') {
+                    renderSliderDestacado();
+                    setupSliderNav();
+                } else {
+                    console.error('Main: Funciones del slider no disponibles');
+                }
+            } else {
+                console.log('Main: Esperando datos del carrusel para el slider...');
+                setTimeout(initializeSlider, 100);
+            }
+        }
+        
+        // Iniciar el slider después de un pequeño delay
+        setTimeout(initializeSlider, 500);
+
         // Función para generar URL de compartir
         window.generateShareUrl = function(item, originalUrl) {
             const staticBaseUrl = 'https://jfl4bur.github.io/Todogram/public/template/movie-template.html';
