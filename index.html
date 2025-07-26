@@ -24,7 +24,40 @@
     <!-- Div helper para iOS -->
     <div id="ios-helper" class="ios-helper" style="display:none;"></div>
 
-    <!-- Carrusel -->
+    <!-- Resumen de bienvenida -->
+    <div class="welcome-section">
+        <div class="welcome-content">
+            <h1 class="welcome-title">¡Bienvenido a CinePlus!</h1>
+            <p class="welcome-description">
+                Descubre las últimas películas de los géneros más populares: Terror, Acción, Ciencia Ficción, Comedia y Romance. 
+                Disfruta de una experiencia cinematográfica única con nuestra selección curada de las mejores producciones del momento.
+            </p>
+        </div>
+    </div>
+
+    <!-- Nuevo slider estilo Rakuten TV - Géneros destacados -->
+    <div class="featured-genres-section">
+        <h2 class="featured-genres-title">Géneros Destacados</h2>
+        <div class="featured-genres-container">
+            <div class="featured-genres-skeleton" id="featured-genres-skeleton">
+                <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
+                <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
+                <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
+                <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
+                <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
+            </div>
+            <div id="featured-genres-wrapper" style="display:none;"></div>
+            <div class="featured-genres-progress">
+                <div class="featured-genres-progress-bar"></div>
+            </div>
+            <div class="featured-genres-nav" id="featured-genres-nav">
+                <button class="featured-genres-nav-btn prev" id="featured-genres-prev"><i class="fas fa-chevron-left"></i></button>
+                <button class="featured-genres-nav-btn next" id="featured-genres-next"><i class="fas fa-chevron-right"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Carrusel original -->
     <div class="carousel-section">
         <h1 class="carousel-title">Películas</h1>
         <div class="carousel-container">
@@ -153,6 +186,7 @@
         const DATA_URL = "https://jfl4bur.github.io/Todogram/public/data.json";
         window.peliculas = []; // Se llenará con los datos cargados
     </script>
+    <script src="https://jfl4bur.github.io/Todogram/public/js/featured-genres.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/carousel.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/hover-modal.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/details-modal.js"></script>
