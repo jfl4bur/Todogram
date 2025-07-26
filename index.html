@@ -24,6 +24,46 @@
     <!-- Div helper para iOS -->
     <div id="ios-helper" class="ios-helper" style="display:none;"></div>
 
+    <!-- Hero Slider al estilo Rakuten TV -->
+    <div class="hero-slider-section">
+        <div class="hero-slider-container" id="hero-slider-container">
+            <!-- Skeleton loader para hero slider -->
+            <div class="hero-skeleton" id="hero-skeleton">
+                <div class="hero-skeleton-content">
+                    <div class="hero-skeleton-spinner"></div>
+                    <div class="hero-skeleton-text">
+                        <div class="hero-skeleton-line"></div>
+                        <div class="hero-skeleton-line short"></div>
+                        <div class="hero-skeleton-line"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contenedor del hero slider -->
+            <div class="hero-slider-wrapper" id="hero-slider-wrapper" style="display:none;">
+                <div class="hero-slides" id="hero-slides"></div>
+                
+                <!-- Navegación del hero slider -->
+                <div class="hero-nav">
+                    <button class="hero-nav-btn hero-prev" id="hero-prev">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="hero-nav-btn hero-next" id="hero-next">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                
+                <!-- Indicadores de puntos -->
+                <div class="hero-indicators" id="hero-indicators"></div>
+                
+                <!-- Progreso automático -->
+                <div class="hero-auto-progress" id="hero-auto-progress">
+                    <div class="hero-auto-progress-bar" id="hero-auto-progress-bar"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Carrusel -->
     <div class="carousel-section">
         <h1 class="carousel-title">Películas</h1>
@@ -153,6 +193,7 @@
         const DATA_URL = "https://jfl4bur.github.io/Todogram/public/data.json";
         window.peliculas = []; // Se llenará con los datos cargados
     </script>
+    <script src="https://jfl4bur.github.io/Todogram/public/js/hero-slider.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/carousel.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/hover-modal.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/details-modal.js"></script>
