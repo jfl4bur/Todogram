@@ -1,108 +1,159 @@
-// ===== MAIN.JS - INICIALIZACIÓN PRINCIPAL =====
-
-// Función para inicializar todos los componentes
-function initializeComponents() {
-    console.log('Inicializando componentes...');
+document.addEventListener('DOMContentLoaded', function () {
+    const carouselWrapper = document.getElementById('carousel-wrapper');
+    const skeleton = document.getElementById('carousel-skeleton');
+    const carouselContainer = document.querySelector('.carousel-container');
     
-    // Inicializar carousel
-    if (window.carousel && typeof window.carousel.init === 'function') {
-        window.carousel.init();
-        console.log('Carousel inicializado');
-    }
-    
-    // Inicializar modales
-    if (window.detailsModal && typeof window.detailsModal.init === 'function') {
-        window.detailsModal.init();
-        console.log('Details modal inicializado');
-    }
-    
-    if (window.shareModal && typeof window.shareModal.init === 'function') {
-        window.shareModal.init();
-        console.log('Share modal inicializado');
-    }
-    
-    if (window.videoModal && typeof window.videoModal.init === 'function') {
-        window.videoModal.init();
-        console.log('Video modal inicializado');
-    }
-    
-    if (window.hoverModal && typeof window.hoverModal.init === 'function') {
-        window.hoverModal.init();
-        console.log('Hover modal inicializado');
-    }
-    
-    // Inicializar slider después de que el carousel esté listo
-    if (window.slider && typeof window.slider.init === 'function') {
-        // Esperar a que los datos del carousel estén disponibles
-        const checkCarouselData = () => {
-            if (window.carousel && window.carousel.moviesData && window.carousel.moviesData.length > 0) {
-                window.slider.init();
-                console.log('Slider inicializado');
-            } else {
-                setTimeout(checkCarouselData, 100);
+    if (!carouselWrapper || !skeleton || !carouselContainer) {
+        const observer = new MutationObserver(() => {
+            if (document.getElementById('carousel-wrapper') && 
+                document.getElementById('carousel-skeleton') && 
+                document.querySelector('.carousel-container')) {
+                observer.disconnect();
+                initializeComponents();
             }
-        };
-        checkCarouselData();
-    }
-}
-
-// Función para manejar cambios en el hash de la URL
-function handleHashChange() {
-    const hash = window.location.hash;
-    if (hash && hash.startsWith('#movie-')) {
-        const movieId = hash.replace('#movie-', '');
+        });
         
-        // Buscar la película en los datos disponibles
-        let movie = null;
-        
-        if (window.carousel && window.carousel.moviesData) {
-            movie = window.carousel.moviesData.find(m => m.id.toString() === movieId);
-        }
-        
-        if (movie && window.detailsModal && typeof window.detailsModal.openModal === 'function') {
-            window.detailsModal.openModal(movie);
-        }
-    }
-}
-
-// Inicializar cuando el DOM esté listo
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log('DOM cargado, inicializando...');
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+    } else {
         initializeComponents();
-        
-        // Escuchar cambios en el hash
-        window.addEventListener('hashchange', handleHashChange);
-        
-        // Manejar hash inicial
-        handleHashChange();
-    });
-} else {
-    console.log('DOM ya cargado, inicializando...');
-    initializeComponents();
-    
-    // Escuchar cambios en el hash
-    window.addEventListener('hashchange', handleHashChange);
-    
-    // Manejar hash inicial
-    handleHashChange();
-}
-
-// Función para mostrar/ocultar skeletons
-function showSkeleton(selector) {
-    const skeleton = document.querySelector(selector);
-    if (skeleton) {
-        skeleton.style.display = 'flex';
     }
-}
 
-function hideSkeleton(selector) {
-    const skeleton = document.querySelector(selector);
-    if (skeleton) {
-        skeleton.style.display = 'none';
+    function initializeComponents() {
+        const carousel = new Carousel();
+        const hoverModal = new HoverModal();
+        const detailsModal = new DetailsModal();
+        const videoModal = new VideoModal();
+        const shareModal = new ShareModal();
+
+        // Inicializar skeleton del slider
+        const sliderSkeleton = document.getElementById('slider-skeleton');
+        const sliderWrapper = document.getElementById('slider-wrapper');
+        if (sliderSkeleton && sliderWrapper) {
+            sliderSkeleton.style.display = 'flex';
+            sliderWrapper.style.display = 'none';
+        }
+
+        window.carousel = carousel;
+        window.hoverModal = hoverModal;
+        window.detailsModal = detailsModal;
+        window.videoModal = videoModal;
+        window.shareModal = shareModal;
+        window.isModalOpen = false;
+        window.isDetailsModalOpen = false;
+        window.activeItem = null;
+        window.hoverModalItem = null;
+
+        // Inicializar el slider después de que el carrusel tenga datos
+        function initializeSlider() {
+            if (window.carousel && window.carousel.moviesData && window.carousel.moviesData.length > 0) {
+                console.log('Main: Inicializando slider Rakuten con', window.carousel.moviesData.length, 'películas');
+                if (typeof window.sliderRakuten !== 'undefined' && window.sliderRakuten.init) {
+                    window.sliderRakuten.init();
+                } else {
+                    console.error('Main: Slider Rakuten no disponible');
+                }
+            } else {
+                console.log('Main: Esperando datos del carrusel para el slider...');
+                setTimeout(initializeSlider, 100);
+            }
+        }
+        
+        // Iniciar el slider después de un pequeño delay
+        setTimeout(initializeSlider, 500);
+
+        // Función para generar URL de compartir
+        window.generateShareUrl = function(item, originalUrl) {
+            const staticBaseUrl = 'https://jfl4bur.github.io/Todogram/public/template/movie-template.html';
+            return `${staticBaseUrl}?title=${encodeURIComponent(item.title)}&description=${encodeURIComponent(item.description || 'Explora esta película en Todogram.')}&image=${encodeURIComponent(item.posterUrl || 'https://via.placeholder.com/194x271')}&originalUrl=${encodeURIComponent(originalUrl)}&hash=${encodeURIComponent(window.location.hash)}`;
+        };
+
+        // Evento para el botón "Share" dentro del modal de detalles
+        document.addEventListener('click', function(e) {
+            if (e.target.closest('#share-button')) {
+                const item = window.activeItem;
+                if (item && window.shareModal) {
+                    const currentUrl = window.location.href;
+                    const shareUrl = window.generateShareUrl(item, currentUrl);
+                    window.shareModal.show({ ...item, shareUrl }); // Pasar shareUrl al modal
+                } else {
+                    console.error('Item o shareModal no definidos:', { item, shareModal: window.shareModal });
+                }
+            }
+        });
+
+        window.addEventListener('popstate', function() {
+            if (window.detailsModal.isDetailsModalOpen) {
+                window.detailsModal.close();
+            }
+        });
+
+        // Función para procesar parámetros de URL
+        function processUrlParams(retryCount = 0, maxRetries = 5) {
+            console.log('Procesando URL:', window.location.hash);
+            const urlParams = detailsModal.getItemIdFromUrl();
+            if (urlParams) {
+                console.log('Parámetros de URL encontrados:', urlParams);
+                const item = carousel.moviesData.find(movie => movie.id === urlParams.id);
+                if (item) {
+                    console.log('Película encontrada:', item);
+                    const itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
+                    if (itemElement) {
+                        console.log('Elemento DOM encontrado:', itemElement);
+                        detailsModal.show(item, itemElement);
+                        window.activeItem = item;
+                    } else if (retryCount < maxRetries) {
+                        console.warn(`Elemento DOM no encontrado para itemId: ${urlParams.id}, reintentando (${retryCount + 1}/${maxRetries})`);
+                        setTimeout(() => processUrlParams(retryCount + 1, maxRetries), 200);
+                    } else {
+                        console.error('Elemento DOM no encontrado para itemId:', urlParams.id);
+                    }
+                } else {
+                    console.error('Película no encontrada para id:', urlParams.id);
+                }
+            } else {
+                console.log('No se encontraron parámetros de URL');
+            }
+        }
+
+        // Manejar parámetros de URL al cargar la página
+        window.addEventListener('load', function() {
+            setTimeout(() => {
+                processUrlParams();
+            }, 500);
+        });
+
+        // Manejar cambios en el hash de la URL
+        let lastHash = window.location.hash;
+        window.addEventListener('hashchange', function() {
+            const newHash = window.location.hash;
+            if (newHash !== lastHash) {
+                lastHash = newHash;
+                console.log('Hash cambió a:', newHash);
+                setTimeout(() => {
+                    processUrlParams();
+                }, 300);
+            }
+        });
+
+        DetailsModal.prototype.getItemIdFromUrl = function() {
+            const path = window.location.hash.substring(1);
+            console.log('Hash procesado:', path);
+            if (!path) return null;
+            
+            const params = new URLSearchParams(path);
+            const id = params.get('id');
+            const title = params.get('title');
+            console.log('Parámetros extraídos:', { id, title });
+            
+            if (!id || !title) return null;
+            
+            return {
+                id: id,
+                normalizedTitle: title
+            };
+        };
     }
-}
-
-// Exportar funciones para uso global
-window.showSkeleton = showSkeleton;
-window.hideSkeleton = hideSkeleton;
+});

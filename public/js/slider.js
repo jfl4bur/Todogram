@@ -1,333 +1,205 @@
-// ===== SLIDER HERO BANNER (RAKUTEN.TV STYLE) =====
+// Slider tipo Rakuten.tv - Carousel con items adyacentes, bordes redondeados y responsive
+(function () {
+    const SLIDER_SELECTOR = '#slider-wrapper';
+    const SKELETON_SELECTOR = '#slider-skeleton';
+    const PAGINATION_SELECTOR = '#slider-pagination';
+    const PREV_SELECTOR = '#slider-prev';
+    const NEXT_SELECTOR = '#slider-next';
+    const SLIDE_CLASS = 'slider-slide';
+    let currentIndex = 0;
+    let totalSlides = 0;
+    let isAnimating = false;
+    let lastHash = '';
 
-window.slider = {
-  currentSlide: 0,
-  slides: [],
-  autoplayInterval: null,
-  isHovered: false,
-  
-  init() {
-    this.renderSlider();
-    this.setupEventListeners();
-    this.startAutoplay();
-    this.syncHashModal();
-  },
-  
-  renderSlider() {
-    const sliderSection = document.querySelector('.slider-section');
-    if (!sliderSection) return;
-    
-    // Obtener datos de películas
-    const moviesData = window.carousel?.moviesData || window.peliculas || [];
-    if (!moviesData.length) {
-      console.log('Slider: No hay datos de películas disponibles');
-      return;
+    // Breakpoints y anchos en porcentaje
+    function getSlideWidthPercent() {
+        const w = window.innerWidth;
+        if (w <= 400) return 0.98;
+        if (w <= 600) return 0.95;
+        if (w <= 900) return 0.90;
+        return 0.80;
     }
-    
-    // Filtrar películas por géneros únicos
-    const uniqueGenres = this.getUniqueGenres(moviesData);
-    const selectedMovies = this.getMoviesByGenres(moviesData, uniqueGenres);
-    
-    if (selectedMovies.length === 0) {
-      console.log('Slider: No se encontraron películas para mostrar');
-      return;
+    function getGap() {
+        const w = window.innerWidth;
+        if (w <= 400) return 8;
+        if (w <= 600) return 12;
+        if (w <= 900) return 18;
+        return 24;
     }
-    
-    this.slides = selectedMovies;
-    
-    // Crear HTML del slider
-    const sliderHTML = `
-      <div class="slider-wrapper">
-        ${selectedMovies.map((movie, index) => `
-          <div class="slider-slide" data-index="${index}" data-movie-id="${movie.id}">
-            <img src="${movie.poster}" alt="${movie.title}" loading="lazy">
-            <div class="slider-overlay">
-              <h3>${movie.title}</h3>
-              <p>${movie.synopsis || 'Descripción no disponible'}</p>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-      
-      <div class="slider-nav">
-        <button class="slider-nav-btn prev" aria-label="Anterior">
-          <svg viewBox="0 0 24 24">
-            <path d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
-          </svg>
-        </button>
-        <button class="slider-nav-btn next" aria-label="Siguiente">
-          <svg viewBox="0 0 24 24">
-            <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
-          </svg>
-        </button>
-      </div>
-      
-      <div class="slider-pagination">
-        ${selectedMovies.map((_, index) => `
-          <button class="slider-dot ${index === 0 ? 'active' : ''}" data-index="${index}" aria-label="Ir al slide ${index + 1}"></button>
-        `).join('')}
-      </div>
-    `;
-    
-    sliderSection.innerHTML = sliderHTML;
-    
-    // Configurar eventos
-    this.setupSliderEvents();
-    this.updateNavButtons();
-  },
-  
-  getUniqueGenres(movies) {
-    const genres = new Set();
-    movies.forEach(movie => {
-      if (movie.genres && Array.isArray(movie.genres)) {
-        movie.genres.forEach(genre => genres.add(genre));
-      }
-    });
-    return Array.from(genres);
-  },
-  
-  getMoviesByGenres(movies, genres) {
-    const selectedMovies = [];
-    const usedGenres = new Set();
-    
-    // Intentar obtener una película de cada género
-    genres.forEach(genre => {
-      if (usedGenres.has(genre)) return;
-      
-      const movie = movies.find(m => 
-        m.genres && 
-        Array.isArray(m.genres) && 
-        m.genres.includes(genre) &&
-        !selectedMovies.some(selected => selected.id === m.id)
-      );
-      
-      if (movie) {
-        selectedMovies.push(movie);
-        usedGenres.add(genre);
-      }
-    });
-    
-    // Si no hay suficientes películas, añadir más hasta tener al menos 3
-    if (selectedMovies.length < 3) {
-      movies.forEach(movie => {
-        if (selectedMovies.length >= 5) return;
-        if (!selectedMovies.some(selected => selected.id === movie.id)) {
-          selectedMovies.push(movie);
+    // Renderiza el slider
+    function renderSlider() {
+        const sliderWrapper = document.querySelector(SLIDER_SELECTOR);
+        const sliderSkeleton = document.querySelector(SKELETON_SELECTOR);
+        if (!sliderWrapper || !sliderSkeleton) return;
+        sliderSkeleton.style.display = 'none';
+        sliderWrapper.style.display = 'flex';
+        sliderWrapper.innerHTML = '';
+        // Usar los datos del carrusel
+        const peliculas = window.carousel.moviesData;
+        // Detecta todos los géneros únicos disponibles
+        const generos = new Set();
+        peliculas.forEach(p => {
+            if (p.genre) p.genre.split(/\s*[·,]\s*/).forEach(g => generos.add(g.trim()));
+        });
+        // Selecciona la primera película de cada género, sin repeticiones
+        const seleccionadas = [];
+        const idsIncluidos = new Set();
+        for (const genero of generos) {
+            const peli = peliculas.find(p => p.genre && p.genre.split(/\s*[·,]\s*/).some(g => g.trim().toLowerCase() === genero.toLowerCase()) && !idsIncluidos.has(p.id));
+            if (peli) {
+                seleccionadas.push(peli);
+                idsIncluidos.add(peli.id);
+            }
         }
-      });
+        totalSlides = seleccionadas.length;
+        // Renderiza cada slide
+        seleccionadas.forEach((item, idx) => {
+            const div = document.createElement('div');
+            div.className = SLIDE_CLASS;
+            div.setAttribute('data-slide-index', idx);
+            div.tabIndex = 0;
+            div.setAttribute('role', 'button');
+            div.setAttribute('aria-label', item.title);
+            div.innerHTML = `
+                <div class="slider-img-wrapper">
+                    <img src="${item.postersUrl || item.posterUrl || 'https://via.placeholder.com/1540x464'}" alt="${item.title}" loading="lazy">
+                </div>
+                <div class="slider-overlay">
+                    <div class="slider-title-movie">${item.title}</div>
+                    <div class="slider-meta">${item.year ? `<span>${item.year}</span>` : ''}${item.duration ? `<span>${item.duration}</span>` : ''}${item.genre ? `<span>${item.genre.split(/[·,]/)[0]}</span>` : ''}${item.rating ? `<span><i class='fas fa-star'></i> ${item.rating}</span>` : ''}</div>
+                    <div class="slider-description">${item.description || ''}</div>
+                </div>
+            `;
+            div.addEventListener('click', () => openDetails(item, idx));
+            div.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    openDetails(item, idx);
+                }
+            });
+            sliderWrapper.appendChild(div);
+        });
+        createPagination(totalSlides);
+        setupNav();
+        setupSwipe();
+        goToSlide(0, true);
     }
-    
-    return selectedMovies.slice(0, 5); // Máximo 5 slides
-  },
-  
-  setupSliderEvents() {
-    const wrapper = document.querySelector('.slider-wrapper');
-    const slides = document.querySelectorAll('.slider-slide');
-    const prevBtn = document.querySelector('.slider-nav-btn.prev');
-    const nextBtn = document.querySelector('.slider-nav-btn.next');
-    const dots = document.querySelectorAll('.slider-dot');
-    
-    // Eventos de navegación
-    if (prevBtn) prevBtn.addEventListener('click', () => this.goToSlide(this.currentSlide - 1));
-    if (nextBtn) nextBtn.addEventListener('click', () => this.goToSlide(this.currentSlide + 1));
-    
-    // Eventos de paginación
-    dots.forEach((dot, index) => {
-      dot.addEventListener('click', () => this.goToSlide(index));
-    });
-    
-    // Eventos de slides
-    slides.forEach((slide, index) => {
-      slide.addEventListener('click', () => this.openDetails(this.slides[index]));
-    });
-    
-    // Swipe para móviles
-    this.setupSwipe(wrapper);
-    
-    // Hover para pausar autoplay
-    wrapper.addEventListener('mouseenter', () => {
-      this.isHovered = true;
-      this.pauseAutoplay();
-    });
-    
-    wrapper.addEventListener('mouseleave', () => {
-      this.isHovered = false;
-      this.startAutoplay();
-    });
-  },
-  
-  setupSwipe(wrapper) {
-    let startX = 0;
-    let startY = 0;
-    let isDragging = false;
-    
-    const handleStart = (e) => {
-      const touch = e.touches ? e.touches[0] : e;
-      startX = touch.clientX;
-      startY = touch.clientY;
-      isDragging = false;
-    };
-    
-    const handleMove = (e) => {
-      if (!startX) return;
-      
-      const touch = e.touches ? e.touches[0] : e;
-      const deltaX = touch.clientX - startX;
-      const deltaY = touch.clientY - startY;
-      
-      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 10) {
-        isDragging = true;
-        e.preventDefault();
-      }
-    };
-    
-    const handleEnd = (e) => {
-      if (!isDragging) return;
-      
-      const touch = e.changedTouches ? e.changedTouches[0] : e;
-      const deltaX = touch.clientX - startX;
-      const threshold = 50;
-      
-      if (Math.abs(deltaX) > threshold) {
-        if (deltaX > 0) {
-          this.goToSlide(this.currentSlide - 1);
+    // Abre el details-modal y sincroniza el hash
+    function openDetails(item, idx) {
+        if (window.detailsModal) window.detailsModal.show(item);
+        window.location.hash = `#movie-${item.id}`;
+        lastHash = window.location.hash;
+    }
+    // Sincroniza el modal con el hash
+    function syncHashModal() {
+        if (!window.carousel || !window.carousel.moviesData) return;
+        const hash = window.location.hash;
+        if (hash && hash.startsWith('#movie-')) {
+            const id = hash.replace('#movie-', '');
+            const item = window.carousel.moviesData.find(m => m.id == id);
+            if (item && window.detailsModal) {
+                window.detailsModal.show(item);
+                // Ir al slide correspondiente
+                const idx = Array.from(document.querySelectorAll('.slider-slide')).findIndex(slide => slide.innerHTML.includes(item.title));
+                if (idx >= 0) goToSlide(idx);
+            }
+        }
+    }
+    // Crea la paginación
+    function createPagination(n) {
+        const pagination = document.querySelector(PAGINATION_SELECTOR);
+        if (!pagination) return;
+        pagination.innerHTML = '';
+        for (let i = 0; i < n; i++) {
+            const dot = document.createElement('button');
+            dot.className = 'slider-pagination-dot';
+            dot.setAttribute('data-slide', i);
+            dot.setAttribute('aria-label', `Ir al slide ${i + 1}`);
+            if (i === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => goToSlide(i));
+            pagination.appendChild(dot);
+        }
+    }
+    // Navegación con flechas
+    function setupNav() {
+        const prevBtn = document.querySelector(PREV_SELECTOR);
+        const nextBtn = document.querySelector(NEXT_SELECTOR);
+        if (!prevBtn || !nextBtn) return;
+        prevBtn.onclick = () => goToSlide(currentIndex - 1);
+        nextBtn.onclick = () => goToSlide(currentIndex + 1);
+        updateNavButtons();
+    }
+    // Swipe/touch
+    function setupSwipe() {
+        const wrapper = document.querySelector(SLIDER_SELECTOR);
+        let startX = 0, scrollStart = 0, isDown = false;
+        wrapper.addEventListener('pointerdown', e => {
+            isDown = true;
+            startX = e.pageX;
+            scrollStart = wrapper.scrollLeft;
+            wrapper.setPointerCapture(e.pointerId);
+        });
+        wrapper.addEventListener('pointermove', e => {
+            if (!isDown) return;
+            const dx = e.pageX - startX;
+            wrapper.scrollLeft = scrollStart - dx;
+        });
+        wrapper.addEventListener('pointerup', e => {
+            isDown = false;
+            const slide = wrapper.querySelector('.slider-slide');
+            if (!slide) return;
+            const slidePx = slide.offsetWidth;
+            const gap = getGap();
+            const idx = Math.round(wrapper.scrollLeft / (slidePx + gap));
+            goToSlide(idx);
+        });
+        wrapper.addEventListener('pointerleave', () => { isDown = false; });
+    }
+    // Ir a un slide específico
+    function goToSlide(idx, instant) {
+        if (idx < 0) idx = 0;
+        if (idx >= totalSlides) idx = totalSlides - 1;
+        currentIndex = idx;
+        const wrapper = document.querySelector(SLIDER_SELECTOR);
+        const slide = wrapper.querySelector('.slider-slide');
+        if (!slide) return;
+        const slidePx = slide.offsetWidth;
+        const gap = getGap();
+        const scrollPosition = (slidePx + gap) * idx;
+        wrapper.scrollTo({ left: scrollPosition, behavior: instant ? 'auto' : 'smooth' });
+        updatePagination(idx);
+        updateNavButtons();
+    }
+    // Actualiza la paginación
+    function updatePagination(idx) {
+        document.querySelectorAll('.slider-pagination-dot').forEach((dot, i) => {
+            dot.classList.toggle('active', i === idx);
+        });
+    }
+    // Actualiza los botones de navegación
+    function updateNavButtons() {
+        const prevBtn = document.querySelector(PREV_SELECTOR);
+        const nextBtn = document.querySelector(NEXT_SELECTOR);
+        if (!prevBtn || !nextBtn) return;
+        prevBtn.style.display = currentIndex === 0 ? 'none' : 'flex';
+        nextBtn.style.display = currentIndex === totalSlides - 1 ? 'none' : 'flex';
+    }
+    // Recalcula todo en resize
+    function onResize() {
+        goToSlide(currentIndex, true);
+    }
+    // Inicialización automática cuando el carrusel esté listo
+    function waitForCarousel() {
+        if (window.carousel && window.carousel.moviesData && window.carousel.moviesData.length > 0) {
+            renderSlider();
+            syncHashModal();
         } else {
-          this.goToSlide(this.currentSlide + 1);
+            setTimeout(waitForCarousel, 100);
         }
-      }
-      
-      startX = 0;
-      startY = 0;
-      isDragging = false;
-    };
-    
-    // Touch events
-    wrapper.addEventListener('touchstart', handleStart, { passive: false });
-    wrapper.addEventListener('touchmove', handleMove, { passive: false });
-    wrapper.addEventListener('touchend', handleEnd);
-    
-    // Mouse events para desktop
-    wrapper.addEventListener('mousedown', handleStart);
-    wrapper.addEventListener('mousemove', handleMove);
-    wrapper.addEventListener('mouseup', handleEnd);
-    wrapper.addEventListener('mouseleave', handleEnd);
-  },
-  
-  goToSlide(index) {
-    const totalSlides = this.slides.length;
-    if (totalSlides === 0) return;
-    
-    // Circular navigation
-    if (index < 0) index = totalSlides - 1;
-    if (index >= totalSlides) index = 0;
-    
-    this.currentSlide = index;
-    
-    const wrapper = document.querySelector('.slider-wrapper');
-    const slideWidth = wrapper.querySelector('.slider-slide').offsetWidth;
-    const gap = 24; // Gap entre slides
-    
-    const translateX = -(index * (slideWidth + gap));
-    wrapper.style.transform = `translateX(${translateX}px)`;
-    
-    this.updatePagination();
-    this.updateNavButtons();
-  },
-  
-  updatePagination() {
-    const dots = document.querySelectorAll('.slider-dot');
-    dots.forEach((dot, index) => {
-      dot.classList.toggle('active', index === this.currentSlide);
-    });
-  },
-  
-  updateNavButtons() {
-    const prevBtn = document.querySelector('.slider-nav-btn.prev');
-    const nextBtn = document.querySelector('.slider-nav-btn.next');
-    
-    if (prevBtn) {
-      prevBtn.disabled = this.currentSlide === 0;
     }
-    
-    if (nextBtn) {
-      nextBtn.disabled = this.currentSlide === this.slides.length - 1;
-    }
-  },
-  
-  openDetails(movie) {
-    if (!movie) return;
-    
-    // Actualizar URL hash
-    const hash = `#movie-${movie.id}`;
-    window.history.replaceState(null, null, hash);
-    
-    // Abrir modal si existe
-    if (window.detailsModal && typeof window.detailsModal.openModal === 'function') {
-      window.detailsModal.openModal(movie);
-    } else {
-      // Fallback: buscar y abrir modal manualmente
-      const modal = document.querySelector('.details-modal');
-      if (modal) {
-        modal.style.display = 'block';
-        // Aquí podrías actualizar el contenido del modal con los datos de la película
-      }
-    }
-  },
-  
-  syncHashModal() {
-    const hash = window.location.hash;
-    if (hash && hash.startsWith('#movie-')) {
-      const movieId = hash.replace('#movie-', '');
-      const movie = this.slides.find(slide => slide.id.toString() === movieId);
-      if (movie) {
-        this.openDetails(movie);
-      }
-    }
-  },
-  
-  startAutoplay() {
-    if (this.autoplayInterval) return;
-    
-    this.autoplayInterval = setInterval(() => {
-      if (!this.isHovered) {
-        this.goToSlide(this.currentSlide + 1);
-      }
-    }, 5000); // 5 segundos
-  },
-  
-  pauseAutoplay() {
-    if (this.autoplayInterval) {
-      clearInterval(this.autoplayInterval);
-      this.autoplayInterval = null;
-    }
-  },
-  
-  setupEventListeners() {
-    // Escuchar cambios en el hash de la URL
-    window.addEventListener('hashchange', () => {
-      this.syncHashModal();
-    });
-    
-    // Re-renderizar en resize
-    let resizeTimeout;
-    window.addEventListener('resize', () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(() => {
-        this.goToSlide(this.currentSlide); // Re-posicionar
-      }, 250);
-    });
-  }
-};
-
-// Auto-inicializar cuando el DOM esté listo
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    if (window.carousel?.moviesData) {
-      window.slider.init();
-    }
-  });
-} else {
-  if (window.carousel?.moviesData) {
-    window.slider.init();
-  }
-} 
+    window.addEventListener('resize', onResize);
+    window.addEventListener('hashchange', syncHashModal);
+    waitForCarousel();
+    // Exponer para debug
+    window.slider = { goToSlide };
+})(); 
