@@ -2040,6 +2040,11 @@
         height: 138px;
         box-shadow: none; /* Eliminar box-shadow en skeleton */
     }
+    .slider-nav-btn {
+        width: 24px;
+        height: 139px; /* Misma altura que el slider en móvil pequeño */
+        font-size: 0.9rem;
+    }
 }
 
 /* iPhone y dispositivos muy pequeños */
@@ -2060,6 +2065,11 @@
         border-radius: 10px;
         height: 116px;
         box-shadow: none; /* Eliminar box-shadow en skeleton */
+    }
+    .slider-nav-btn {
+        width: 20px;
+        height: 116px; /* Misma altura que el slider en iPhone */
+        font-size: 0.8rem;
     }
 }
 
@@ -2095,7 +2105,7 @@
     border: none;
     color: #fff;
     width: 56px;
-    height: 100px;
+    height: 464px; /* Misma altura que el slider en escritorio */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2163,7 +2173,7 @@
 @media (max-width: 900px) {
     .slider-nav-btn {
         width: 36px;
-        height: 60px;
+        height: 255px; /* Misma altura que el slider en tablet */
         font-size: 1.3rem;
         margin: 0 4px;
     }
@@ -2175,7 +2185,9 @@
 
 @media (max-width: 768px) {
     .slider-nav-btn {
-        display: none !important; /* Ocultar flechas en móvil y tablet */
+        width: 32px;
+        height: 162px; /* Misma altura que el slider en móvil */
+        font-size: 1.1rem;
     }
     .slider-pagination-dot {
         width: 8px;
