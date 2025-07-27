@@ -43,7 +43,6 @@ const headerHTML = `
     <a href="#" class="slider-nav-link"><i class="fas fa-shopping-cart"></i><span>Tienda</span></a>
     <a href="#" class="slider-nav-link"><i class="fas fa-crown"></i><span>Suscripción</span></a>
     <a href="#" class="slider-nav-link"><i class="fas fa-question-circle"></i><span>Ayuda</span></a>
-    <a href="#" class="slider-nav-login"><i class="fas fa-user"></i><span>Iniciar sesión</span></a>
   </div>
 `;
 
