@@ -49,12 +49,11 @@ document.addEventListener('DOMContentLoaded', function () {
         // Inicializar el slider después de que el carrusel tenga datos
         function initializeSlider() {
             if (window.carousel && window.carousel.moviesData && window.carousel.moviesData.length > 0) {
-                console.log('Main: Inicializando slider con', window.carousel.moviesData.length, 'películas');
-                if (typeof renderSliderDestacado === 'function') {
-                    renderSliderDestacado();
-                    setupSliderNav();
+                console.log('Main: Inicializando slider Rakuten con', window.carousel.moviesData.length, 'películas');
+                if (typeof window.sliderRakuten !== 'undefined' && window.sliderRakuten.init) {
+                    window.sliderRakuten.init();
                 } else {
-                    console.error('Main: Funciones del slider no disponibles');
+                    console.error('Main: Slider Rakuten no disponible');
                 }
             } else {
                 console.log('Main: Esperando datos del carrusel para el slider...');
