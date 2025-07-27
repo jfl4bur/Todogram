@@ -2042,8 +2042,9 @@
     }
     .slider-nav-btn {
         width: 24px;
-        height: 139px; /* Misma altura que el slider en móvil pequeño */
+        height: 100%; /* Altura al 100% para coincidir exactamente con el slider */
         font-size: 0.9rem;
+        border-radius: 10px; /* Bordes redondeados igual que el slider en móvil pequeño */
     }
 }
 
@@ -2068,8 +2069,9 @@
     }
     .slider-nav-btn {
         width: 20px;
-        height: 116px; /* Misma altura que el slider en iPhone */
+        height: 100%; /* Altura al 100% para coincidir exactamente con el slider */
         font-size: 0.8rem;
+        border-radius: 6px; /* Bordes redondeados igual que el slider en iPhone */
     }
 }
 
@@ -2105,18 +2107,19 @@
     border: none;
     color: #fff;
     width: 56px;
-    height: 464px; /* Misma altura que el slider en escritorio */
+    height: 100%; /* Altura al 100% para coincidir exactamente con el slider */
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     font-size: 2.2rem;
-    border-radius: 8px;
+    border-radius: 32px; /* Bordes redondeados igual que el slider */
     transition: background 0.2s, transform 0.2s;
     opacity: 0.7;
     position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
+    top: 0;
+    bottom: 0;
+    margin: auto 0;
 }
 
 .slider-nav-btn.prev {
@@ -2173,9 +2176,10 @@
 @media (max-width: 900px) {
     .slider-nav-btn {
         width: 36px;
-        height: 255px; /* Misma altura que el slider en tablet */
+        height: 100%; /* Altura al 100% para coincidir exactamente con el slider */
         font-size: 1.3rem;
         margin: 0 4px;
+        border-radius: 18px; /* Bordes redondeados igual que el slider en tablet */
     }
     .slider-pagination-dot {
         width: 10px;
@@ -2186,8 +2190,9 @@
 @media (max-width: 768px) {
     .slider-nav-btn {
         width: 32px;
-        height: 162px; /* Misma altura que el slider en móvil */
+        height: 100%; /* Altura al 100% para coincidir exactamente con el slider */
         font-size: 1.1rem;
+        border-radius: 10px; /* Bordes redondeados igual que el slider en móvil */
     }
     .slider-pagination-dot {
         width: 8px;
