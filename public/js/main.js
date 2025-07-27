@@ -50,16 +50,8 @@ document.addEventListener('DOMContentLoaded', function () {
         function initializeSlider() {
             if (window.carousel && window.carousel.moviesData && window.carousel.moviesData.length > 0) {
                 console.log('Main: Inicializando slider con', window.carousel.moviesData.length, 'películas');
-                console.log('Main: detailsModal disponible:', !!window.detailsModal);
-                console.log('Main: typeof detailsModal.show:', typeof window.detailsModal?.show);
-                
-                // Forzar la inicialización del slider si no se ha hecho automáticamente
-                if (typeof window.slider !== 'undefined' && window.slider.goToSlide) {
-                    console.log('Main: Slider ya inicializado');
-                } else {
-                    console.log('Main: Forzando inicialización del slider...');
-                    // El slider debería inicializarse automáticamente
-                }
+                // El slider se inicializa automáticamente cuando carousel.moviesData está disponible
+                // No necesitamos hacer nada más aquí ya que slider.js maneja su propia inicialización
             } else {
                 console.log('Main: Esperando datos del carrusel para el slider...');
                 setTimeout(initializeSlider, 100);
@@ -90,8 +82,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         window.addEventListener('popstate', function() {
-            // Solo cerrar el modal si no se está abriendo desde el slider
-            if (window.detailsModal.isDetailsModalOpen && !window.isOpeningFromSlider) {
+            if (window.detailsModal.isDetailsModalOpen) {
                 window.detailsModal.close();
             }
         });
@@ -135,7 +126,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let lastHash = window.location.hash;
         window.addEventListener('hashchange', function() {
             const newHash = window.location.hash;
-            if (newHash !== lastHash && !window.isOpeningFromSlider) {
+            if (newHash !== lastHash) {
                 lastHash = newHash;
                 console.log('Hash cambió a:', newHash);
                 setTimeout(() => {
