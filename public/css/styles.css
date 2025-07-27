@@ -1847,10 +1847,9 @@
     scroll-behavior: smooth;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    width: 90%; /* Ancho fijo del 90% */
-    margin: 0 auto; /* Centrado automático */
+    width: 100%; /* Ancho completo para ver items adyacentes */
     gap: 24px; /* Gap fijo entre slides */
-    padding: 0; /* Sin padding interno */
+    padding: 0 5%; /* Padding para centrar y mostrar items adyacentes */
     box-sizing: border-box;
     scroll-snap-type: x mandatory;
 }
@@ -1862,10 +1861,9 @@
 /* Skeleton loader */
 .slider-skeleton {
     display: flex;
-    width: 90%; /* Mismo ancho que el wrapper */
-    margin: 0 auto; /* Centrado automático */
+    width: 100%; /* Mismo ancho que el wrapper */
     gap: 24px; /* Mismo gap que el wrapper */
-    padding: 0; /* Sin padding interno */
+    padding: 0 5%; /* Mismo padding que el wrapper */
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
@@ -1953,13 +1951,15 @@
     }
     
     #slider-wrapper {
-        width: 95%;
+        width: 100%;
         gap: 20px;
+        padding: 0 2.5%;
     }
     
     .slider-skeleton {
-        width: 95%;
+        width: 100%;
         gap: 20px;
+        padding: 0 2.5%;
     }
     
     .slider-slide,
@@ -1987,13 +1987,15 @@
     }
     
     #slider-wrapper {
-        width: 98%;
+        width: 100%;
         gap: 16px;
+        padding: 0 1%;
     }
     
     .slider-skeleton {
-        width: 98%;
+        width: 100%;
         gap: 16px;
+        padding: 0 1%;
     }
     
     .slider-slide,
@@ -2026,11 +2028,13 @@
     #slider-wrapper {
         width: 100%;
         gap: 12px;
+        padding: 0 0.5%;
     }
     
     .slider-skeleton {
         width: 100%;
         gap: 12px;
+        padding: 0 0.5%;
     }
     
     .slider-slide,
@@ -2061,11 +2065,13 @@
     #slider-wrapper {
         width: 100%;
         gap: 10px;
+        padding: 0 0.25%;
     }
     
     .slider-skeleton {
         width: 100%;
         gap: 10px;
+        padding: 0 0.25%;
     }
     
     .slider-slide,
