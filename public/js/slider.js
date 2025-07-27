@@ -151,8 +151,15 @@
         if (window.detailsModal) {
             console.log('Slider: Intentando abrir modal...');
             try {
+                // Marcar que el modal se está abriendo desde el slider
+                window.isOpeningFromSlider = true;
                 window.detailsModal.show(item);
                 console.log('Slider: Modal abierto correctamente');
+                
+                // Resetear la marca después de un momento
+                setTimeout(() => {
+                    window.isOpeningFromSlider = false;
+                }, 1000);
                 
                 // Verificar que el modal sigue abierto después de un momento
                 setTimeout(() => {
@@ -164,11 +171,15 @@
                     }
                 }, 500);
                 
-                // Actualizar el hash
+                // Actualizar el hash sin triggerear el evento hashchange
                 const hash = `#id=${item.id}&title=${encodeURIComponent(item.title)}`;
-                window.location.hash = hash;
-                lastHash = hash;
-                console.log('Slider: Hash actualizado a:', hash);
+                const currentHash = window.location.hash;
+                if (currentHash !== hash) {
+                    // Usar replaceState para no triggerear popstate
+                    window.history.replaceState(null, '', hash);
+                    lastHash = hash;
+                    console.log('Slider: Hash actualizado a:', hash);
+                }
             } catch (error) {
                 console.error('Slider: Error al abrir modal:', error);
             }

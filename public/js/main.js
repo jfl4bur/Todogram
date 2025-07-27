@@ -90,7 +90,8 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         window.addEventListener('popstate', function() {
-            if (window.detailsModal.isDetailsModalOpen) {
+            // Solo cerrar el modal si no se está abriendo desde el slider
+            if (window.detailsModal.isDetailsModalOpen && !window.isOpeningFromSlider) {
                 window.detailsModal.close();
             }
         });
@@ -134,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function () {
         let lastHash = window.location.hash;
         window.addEventListener('hashchange', function() {
             const newHash = window.location.hash;
-            if (newHash !== lastHash) {
+            if (newHash !== lastHash && !window.isOpeningFromSlider) {
                 lastHash = newHash;
                 console.log('Hash cambió a:', newHash);
                 setTimeout(() => {
