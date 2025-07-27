@@ -2090,17 +2090,17 @@ body {
   overflow-y: auto;
   transition: opacity 0.3s ease;
   padding-top: 80px;
-  padding-bottom: 40px;
+  padding-bottom: 0;
 }
 
 .details-modal-content {
-  width: 90%;
-  max-width: 900px;
+  width: 100%;
+  max-width: none;
   background: linear-gradient(rgb(16, 16, 16) 87.2%, rgb(28, 28, 28) 100%);
   box-shadow: rgba(0, 0, 0, 0.784) 0px 2px 15px 0;
-  border-radius: 8px;
+  border-radius: 0;
   overflow: hidden;
-  margin: 0 auto;
+  margin: 0;
   transform: translateY(20px);
   opacity: 0;
   transition: transform 0.3s ease, opacity 0.3s ease;
@@ -2144,7 +2144,7 @@ body {
   }
   .details-modal-overlay {
     padding-top: 70px;
-    padding-bottom: 30px;
+    padding-bottom: 0;
   }
   .video-modal-overlay,
   .share-modal-overlay {
@@ -2161,7 +2161,7 @@ body {
   }
   .details-modal-overlay {
     padding-top: 60px;
-    padding-bottom: 20px;
+    padding-bottom: 0;
   }
   .video-modal-overlay,
   .share-modal-overlay {
