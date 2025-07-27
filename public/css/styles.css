@@ -2041,18 +2041,10 @@
         box-shadow: none; /* Eliminar box-shadow en skeleton */
     }
     .slider-nav-btn {
-        width: 15%; /* Mantener ancho proporcional */
+        width: 35px; /* Ancho más pequeño para móvil pequeño */
         height: 100%;
         font-size: 0.9rem;
         border-radius: 10px;
-    }
-    .slider-nav-btn.prev {
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
-    }
-    .slider-nav-btn.next {
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
     }
 }
 
@@ -2076,18 +2068,10 @@
         box-shadow: none; /* Eliminar box-shadow en skeleton */
     }
     .slider-nav-btn {
-        width: 15%; /* Mantener ancho proporcional */
+        width: 30px; /* Ancho más pequeño para iPhone */
         height: 100%;
         font-size: 0.8rem;
         border-radius: 6px;
-    }
-    .slider-nav-btn.prev {
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
-    }
-    .slider-nav-btn.next {
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
     }
 }
 
@@ -2121,14 +2105,14 @@
     background: rgba(20,20,20,0.7);
     border: none;
     color: #fff;
-    width: 15%; /* Ancho proporcional para ocupar el área del item adyacente */
+    width: 60px; /* Ancho fijo más pequeño como Rakuten.tv */
     height: 100%; /* Altura al 100% para coincidir exactamente con el slider */
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     font-size: 2.2rem;
-    border-radius: 32px; /* Bordes redondeados igual que el slider */
+    border-radius: 32px; /* Bordes redondeados completos */
     transition: background 0.2s, transform 0.2s;
     opacity: 0.7;
     position: absolute;
@@ -2139,14 +2123,10 @@
 
 .slider-nav-btn.prev {
     left: 0;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
 }
 
 .slider-nav-btn.next {
     right: 0;
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
 }
 
 .slider-nav-btn:hover {
@@ -2194,18 +2174,10 @@
 
 @media (max-width: 900px) {
     .slider-nav-btn {
-        width: 15%; /* Mantener ancho proporcional */
+        width: 50px; /* Ancho más pequeño para tablet */
         height: 100%;
         font-size: 1.3rem;
         border-radius: 18px;
-    }
-    .slider-nav-btn.prev {
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
-    }
-    .slider-nav-btn.next {
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
     }
     .slider-pagination-dot {
         width: 10px;
@@ -2215,18 +2187,10 @@
 
 @media (max-width: 768px) {
     .slider-nav-btn {
-        width: 15%; /* Mantener ancho proporcional */
+        width: 40px; /* Ancho más pequeño para móvil */
         height: 100%;
         font-size: 1.1rem;
         border-radius: 10px;
-    }
-    .slider-nav-btn.prev {
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
-    }
-    .slider-nav-btn.next {
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 0;
     }
     .slider-pagination-dot {
         width: 8px;
