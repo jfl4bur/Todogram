@@ -142,22 +142,31 @@ document.addEventListener('DOMContentLoaded', function() {
       // Añadir nuevo listener
       detailsModal.addEventListener('scroll', onModalScroll);
       detailsModal.dataset.lastScroll = '0';
+      console.log('Modal scroll listener añadido');
     }
   }
   
-  // Observer para detectar cuando se abre el details modal
+  // Función para detectar cuando se abre el modal
+  function checkModalOpen() {
+    const detailsModal = document.querySelector('.details-modal-overlay');
+    if (detailsModal && detailsModal.style.display === 'block') {
+      // Modal está abierto
+      setTimeout(setupModalScroll, 200);
+    }
+  }
+  
+  // Observer para detectar cambios en el modal
   const observer = new MutationObserver(function(mutations) {
     mutations.forEach(function(mutation) {
-      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+      if (mutation.type === 'attributes') {
         const detailsModal = document.querySelector('.details-modal-overlay');
-        if (detailsModal && detailsModal.classList.contains('show')) {
-          // Modal abierto - configurar scroll
-          setTimeout(setupModalScroll, 100); // Pequeño delay para asegurar que el modal esté completamente abierto
-        } else {
-          // Modal cerrado - remover listener y resetear header
-          const modal = document.querySelector('.details-modal-overlay');
-          if (modal) {
-            modal.removeEventListener('scroll', onModalScroll);
+        if (detailsModal) {
+          if (detailsModal.style.display === 'block') {
+            // Modal abierto
+            setTimeout(setupModalScroll, 200);
+          } else if (detailsModal.style.display === 'none') {
+            // Modal cerrado
+            detailsModal.removeEventListener('scroll', onModalScroll);
             header.classList.remove('hidden', 'scrolled');
           }
         }
@@ -168,16 +177,22 @@ document.addEventListener('DOMContentLoaded', function() {
   // Observar cambios en el details modal
   const detailsModal = document.querySelector('.details-modal-overlay');
   if (detailsModal) {
-    observer.observe(detailsModal, { attributes: true });
+    observer.observe(detailsModal, { 
+      attributes: true,
+      attributeFilter: ['style', 'class']
+    });
   }
   
-  // También configurar cuando se carga la página por si el modal ya está abierto
+  // También verificar periódicamente si el modal se abre
+  setInterval(checkModalOpen, 1000);
+  
+  // Configuración inicial
   setTimeout(() => {
     const detailsModal = document.querySelector('.details-modal-overlay');
-    if (detailsModal && detailsModal.classList.contains('show')) {
+    if (detailsModal && detailsModal.style.display === 'block') {
       setupModalScroll();
     }
-  }, 500);
+  }, 1000);
   
   onScrollHeader(); // Ejecutar al cargar
 }); 
