@@ -2008,6 +2008,12 @@
         margin: 32px 0;
         box-shadow: none; /* Eliminar box-shadow en skeleton */
     }
+    .slider-nav-btn {
+        width: 40px; /* Ancho más pequeño para móvil */
+        height: 162px; /* Altura exacta del slide en móvil */
+        font-size: 1.1rem;
+        border-radius: 10px;
+    }
 }
 
 
@@ -2042,7 +2048,7 @@
     }
     .slider-nav-btn {
         width: 35px; /* Ancho más pequeño para móvil pequeño */
-        height: 100%;
+        height: 139px; /* Altura exacta del slide en móvil pequeño */
         font-size: 0.9rem;
         border-radius: 10px;
     }
@@ -2069,7 +2075,7 @@
     }
     .slider-nav-btn {
         width: 30px; /* Ancho más pequeño para iPhone */
-        height: 100%;
+        height: 116px; /* Altura exacta del slide en iPhone */
         font-size: 0.8rem;
         border-radius: 6px;
     }
@@ -2106,7 +2112,7 @@
     border: none;
     color: #fff;
     width: 60px; /* Ancho fijo más pequeño como Rakuten.tv */
-    height: 100%; /* Altura al 100% para coincidir exactamente con el slider */
+    height: 464px; /* Altura exacta del slide en escritorio */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2175,7 +2181,7 @@
 @media (max-width: 900px) {
     .slider-nav-btn {
         width: 50px; /* Ancho más pequeño para tablet */
-        height: 100%;
+        height: 255px; /* Altura exacta del slide en tablet */
         font-size: 1.3rem;
         border-radius: 18px;
     }
@@ -2188,7 +2194,7 @@
 @media (max-width: 768px) {
     .slider-nav-btn {
         width: 40px; /* Ancho más pequeño para móvil */
-        height: 100%;
+        height: 162px; /* Altura exacta del slide en móvil */
         font-size: 1.1rem;
         border-radius: 10px;
     }
