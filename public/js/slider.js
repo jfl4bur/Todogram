@@ -184,6 +184,44 @@ function createSliderPagination(totalSlides) {
     }
 }
 
+// Función global para actualizar la visibilidad de los botones según la posición
+function updateNavButtons() {
+    const wrapper = document.getElementById('slider-wrapper');
+    const slides = wrapper.querySelectorAll('.slider-slide');
+    const prevBtn = document.getElementById('slider-prev');
+    const nextBtn = document.getElementById('slider-next');
+    
+    if (slides.length === 0 || !prevBtn || !nextBtn) return;
+    
+    const slideWidth = slides[0].offsetWidth;
+    const screenWidth = window.innerWidth;
+    let gap = 32;
+    
+    if (screenWidth <= 600) {
+        gap = 8;
+    } else if (screenWidth <= 900) {
+        gap = 16;
+    }
+    
+    const totalSlideWidth = slideWidth + gap;
+    const currentScroll = wrapper.scrollLeft;
+    const currentSlideIndex = Math.round(currentScroll / totalSlideWidth);
+    
+    // Ocultar botón izquierdo si estamos en el primer slide
+    if (currentSlideIndex <= 0) {
+        prevBtn.style.display = 'none';
+    } else {
+        prevBtn.style.display = 'flex';
+    }
+    
+    // Ocultar botón derecho si estamos en el último slide
+    if (currentSlideIndex >= slides.length - 1) {
+        nextBtn.style.display = 'none';
+    } else {
+        nextBtn.style.display = 'flex';
+    }
+}
+
 // Ir a un slide específico
 function goToSlide(slideIndex) {
     const wrapper = document.getElementById('slider-wrapper');
@@ -213,6 +251,11 @@ function goToSlide(slideIndex) {
         dots.forEach((dot, index) => {
             dot.classList.toggle('active', index === slideIndex);
         });
+        
+        // Actualizar botones de navegación después del scroll
+        setTimeout(() => {
+            updateNavButtons();
+        }, 300);
     }
 }
 
@@ -251,9 +294,10 @@ function setupSliderNav() {
             behavior: 'smooth'
         });
         
-        // Actualizar paginación después del scroll
+        // Actualizar paginación y botones después del scroll
         setTimeout(() => {
             updatePaginationFromScroll();
+            updateNavButtons();
         }, 300);
     }
     
@@ -267,12 +311,16 @@ function setupSliderNav() {
         scrollToSlide(1);
     });
     
+
+    
     // Oculta flechas si no hay overflow
     function updateNav() {
         setTimeout(() => {
             if (wrapper.scrollWidth > wrapper.clientWidth + 10) {
+                // Mostrar botones inicialmente y luego actualizar según posición
                 prevBtn.style.display = 'flex';
                 nextBtn.style.display = 'flex';
+                updateNavButtons();
             } else {
                 prevBtn.style.display = 'none';
                 nextBtn.style.display = 'none';
@@ -280,9 +328,10 @@ function setupSliderNav() {
         }, 100);
     }
     
-    // Actualizar paginación cuando se hace scroll
+    // Actualizar paginación y botones cuando se hace scroll
     wrapper.addEventListener('scroll', () => {
         updatePaginationFromScroll();
+        updateNavButtons();
     });
     
     // Actualizar navegación al cambiar el tamaño de la ventana
