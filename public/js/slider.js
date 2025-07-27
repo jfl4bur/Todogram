@@ -61,6 +61,7 @@
             const div = document.createElement('div');
             div.className = SLIDE_CLASS;
             div.setAttribute('data-slide-index', idx);
+            div.setAttribute('data-item-id', item.id);
             div.tabIndex = 0;
             div.setAttribute('role', 'button');
             div.setAttribute('aria-label', item.title);
@@ -78,24 +79,19 @@
                 e.preventDefault();
                 e.stopPropagation();
                 console.log('Slider: Click en slide:', item.title, 'Item:', item);
-                openDetails(item, idx);
+                // Usar exactamente la misma lógica que el carrusel
+                window.detailsModal.show(item, div);
+                // Actualizar el hash
+                updateHash(item);
             });
-            
-            // También añadir click al overlay por si acaso
-            const overlay = div.querySelector('.slider-overlay');
-            if (overlay) {
-                overlay.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    console.log('Slider: Click en overlay de:', item.title);
-                    openDetails(item, idx);
-                });
-            }
             div.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     console.log('Slider: Enter/Space en slide:', item.title);
-                    openDetails(item, idx);
+                    // Usar exactamente la misma lógica que el carrusel
+                    window.detailsModal.show(item, div);
+                    // Actualizar el hash
+                    updateHash(item);
                 }
             });
             sliderWrapper.appendChild(div);
@@ -106,39 +102,13 @@
         setupAutoplay();
         goToSlide(0, true);
     }
-    // Abre el details-modal y sincroniza el hash
-    function openDetails(item, idx) {
-        console.log('Slider: Abriendo details-modal para:', item.title, 'ID:', item.id);
-        
-        // Verificar que tenemos todos los datos necesarios
-        if (!item || !item.id) {
-            console.error('Slider: Item inválido:', item);
-            return;
-        }
-        
-        // Verificar que detailsModal está disponible
-        if (!window.detailsModal) {
-            console.error('Slider: detailsModal no está disponible');
-            return;
-        }
-        
-        if (!window.detailsModal.show) {
-            console.error('Slider: detailsModal.show no está disponible');
-            return;
-        }
-        
-        try {
-            // Abrir el modal
-            window.detailsModal.show(item);
-            console.log('Slider: Modal abierto exitosamente');
-            
-            // Actualizar el hash con el formato correcto
+    // Función para sincronizar el hash (mantenemos esta para compatibilidad)
+    function updateHash(item) {
+        if (item && item.id) {
             const hash = `#id=${item.id}&title=${encodeURIComponent(item.title)}`;
             window.location.hash = hash;
             lastHash = hash;
             console.log('Slider: Hash actualizado a:', hash);
-        } catch (error) {
-            console.error('Slider: Error al abrir modal:', error);
         }
     }
     // Sincroniza el modal con el hash
@@ -156,7 +126,14 @@
                 const item = window.carousel.moviesData.find(m => m.id == id);
                 if (item && window.detailsModal && window.detailsModal.show) {
                     console.log('Slider: Encontrado item para hash:', item.title);
-                    window.detailsModal.show(item);
+                    
+                    // Usar exactamente la misma lógica que el carrusel
+                    const slideElement = document.querySelector(`.slider-slide[data-slide-index]`);
+                    if (slideElement) {
+                        window.detailsModal.show(item, slideElement);
+                    } else {
+                        window.detailsModal.show(item);
+                    }
                     
                     // Ir al slide correspondiente
                     const slides = document.querySelectorAll('.slider-slide');
