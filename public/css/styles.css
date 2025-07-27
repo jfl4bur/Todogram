@@ -2006,50 +2006,21 @@
     }
 }
 
-@media (max-width: 1200px) {
-    .slider-slide {
-        flex: 0 0 calc(100vw - 48px);
-        height: 350px;
-    }
-}
 
-@media (max-width: 900px) {
-    .slider-slide {
-        flex: 0 0 calc(100vw - 32px);
-        height: 220px;
-        min-width: 280px;
-    }
-    .slider-title {
-        font-size: 1.8rem;
-        margin-left: 16px;
-    }
-    #slider-wrapper {
-        padding: 0 16px;
-        gap: 16px;
-    }
-}
-
-@media (max-width: 600px) {
-    .slider-slide {
-        flex: 0 0 calc(100vw - 16px);
-        height: 180px;
-        min-width: 240px;
-    }
-    .slider-title {
-        font-size: 1.3rem;
-        margin-left: 8px;
-    }
-    #slider-wrapper {
-        padding: 0 8px;
-        gap: 12px;
-    }
-}
 
 @media (max-width: 480px) {
     .slider-slide {
-        flex: 0 0 calc(100vw - 16px);
-        height: 140px;
-        min-width: 200px;
+        height: 120px;
+        width: 100%;
+        min-width: 100%;
+        border-radius: 8px;
+    }
+    .slider-slide img {
+        border-radius: 8px;
+    }
+    .slider-slide .slider-overlay {
+        border-bottom-left-radius: 8px;
+        border-bottom-right-radius: 8px;
     }
     .slider-title {
         font-size: 1.1rem;
@@ -2058,6 +2029,27 @@
     #slider-wrapper {
         padding: 0 8px;
         gap: 8px;
+    }
+    .slider-skeleton-item {
+        border-radius: 8px;
+    }
+}
+
+/* iPhone y dispositivos muy pequeños */
+@media (max-width: 375px) {
+    .slider-slide {
+        height: 100px;
+        border-radius: 6px;
+    }
+    .slider-slide img {
+        border-radius: 6px;
+    }
+    .slider-slide .slider-overlay {
+        border-bottom-left-radius: 6px;
+        border-bottom-right-radius: 6px;
+    }
+    .slider-skeleton-item {
+        border-radius: 6px;
     }
 }
 
@@ -2171,9 +2163,9 @@
     }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 768px) {
     .slider-nav-btn {
-        display: none; /* Ocultar flechas en móvil */
+        display: none !important; /* Ocultar flechas en móvil y tablet */
     }
     .slider-pagination-dot {
         width: 8px;
