@@ -2056,10 +2056,13 @@
   }
 }
 @media (max-width: 900px) {
-  .slider-header-inner {
-    padding: 0 12px;
+.slider-header-inner {
+    padding: 0 16px;
     height: 56px;
-  }
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    }
   .slider-logo svg {
     height: 32px;
   }
