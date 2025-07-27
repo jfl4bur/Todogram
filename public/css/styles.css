@@ -1971,7 +1971,7 @@
     .slider-skeleton-item {
         width: 100%;
         min-width: 100%;
-        height: px;
+        height: 255px;
         border-radius: 18px;
         margin: 32px 0;
         box-shadow: none; /* Eliminar box-shadow en skeleton */
