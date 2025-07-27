@@ -2037,7 +2037,7 @@
     }
     .slider-skeleton-item {
         border-radius: 10px;
-        height: 138px;
+        height: 119px;
         box-shadow: none; /* Eliminar box-shadow en skeleton */
     }
 }
@@ -2045,7 +2045,7 @@
 /* iPhone y dispositivos muy pequeños */
 @media (max-width: 375px) {
     .slider-slide {
-        height: 138px; /* Proporcional a 464px (464 * 0.25) */
+        height: 116px; /* Proporcional a 464px (464 * 0.25) */
         border-radius: 6px;
         box-shadow: none; /* Eliminar box-shadow en iPhone */
     }
