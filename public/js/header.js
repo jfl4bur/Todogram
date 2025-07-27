@@ -64,15 +64,39 @@ document.addEventListener('DOMContentLoaded', function() {
     mobileMenuBg.addEventListener('click', toggleMobileMenu);
   }
 
-  // Efecto de fondo translúcido al hacer scroll
+  // Efecto de fondo translúcido y ocultar/mostrar header al hacer scroll
   const header = document.querySelector('.slider-header');
-  function onScrollHeaderBlur() {
-    if (window.scrollY > 10) {
-      header.classList.add('scrolled');
-    } else {
-      header.classList.remove('scrolled');
+  let lastScrollY = window.scrollY;
+  let isScrolling = false;
+  
+  function onScrollHeader() {
+    if (!isScrolling) {
+      isScrolling = true;
+      requestAnimationFrame(() => {
+        const currentScrollY = window.scrollY;
+        
+        // Efecto de fondo translúcido
+        if (currentScrollY > 10) {
+          header.classList.add('scrolled');
+        } else {
+          header.classList.remove('scrolled');
+        }
+        
+        // Ocultar/mostrar header basado en dirección del scroll
+        if (currentScrollY > lastScrollY && currentScrollY > 100) {
+          // Scroll hacia abajo - ocultar header
+          header.classList.add('hidden');
+        } else if (currentScrollY < lastScrollY) {
+          // Scroll hacia arriba - mostrar header
+          header.classList.remove('hidden');
+        }
+        
+        lastScrollY = currentScrollY;
+        isScrolling = false;
+      });
     }
   }
-  window.addEventListener('scroll', onScrollHeaderBlur);
-  onScrollHeaderBlur(); // Ejecutar al cargar
+  
+  window.addEventListener('scroll', onScrollHeader);
+  onScrollHeader(); // Ejecutar al cargar
 }); 
