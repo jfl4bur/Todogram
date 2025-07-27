@@ -2042,6 +2042,9 @@
   .slider-header-inner {
     padding: 0 16px;
     height: 56px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
   }
   .slider-logo svg {
     height: 32px;
@@ -2065,7 +2068,10 @@
 @media (max-width: 480px) {
   .slider-header-inner {
     height: 44px;
-    padding: 0 4px;
+    padding: 0 10px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
   }
   .slider-logo svg {
     height: 22px;
