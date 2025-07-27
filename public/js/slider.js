@@ -72,10 +72,16 @@
                     <div class="slider-description">${item.description || ''}</div>
                 </div>
             `;
-            div.addEventListener('click', () => openDetails(item, idx));
+            div.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                console.log('Slider: Click en slide:', item.title);
+                openDetails(item, idx);
+            });
             div.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
+                    console.log('Slider: Enter/Space en slide:', item.title);
                     openDetails(item, idx);
                 }
             });
@@ -89,27 +95,45 @@
     }
     // Abre el details-modal y sincroniza el hash
     function openDetails(item, idx) {
-        if (window.detailsModal) window.detailsModal.show(item);
-        window.location.hash = `#movie-${item.id}`;
-        lastHash = window.location.hash;
+        console.log('Slider: Abriendo details-modal para:', item.title);
+        if (window.detailsModal && window.detailsModal.show) {
+            window.detailsModal.show(item);
+            // Actualizar el hash con el formato correcto
+            const hash = `#id=${item.id}&title=${encodeURIComponent(item.title)}`;
+            window.location.hash = hash;
+            lastHash = hash;
+            console.log('Slider: Hash actualizado a:', hash);
+        } else {
+            console.error('Slider: detailsModal no disponible');
+        }
     }
     // Sincroniza el modal con el hash
     function syncHashModal() {
         if (!window.carousel || !window.carousel.moviesData) return;
         const hash = window.location.hash;
-        if (hash && hash.startsWith('#movie-')) {
-            const id = hash.replace('#movie-', '');
-            const item = window.carousel.moviesData.find(m => m.id == id);
-            if (item && window.detailsModal) {
-                window.detailsModal.show(item);
-                // Ir al slide correspondiente
-                const slides = document.querySelectorAll('.slider-slide');
-                const idx = Array.from(slides).findIndex(slide => {
-                    const titleElement = slide.querySelector('.slider-title-movie');
-                    return titleElement && titleElement.textContent.trim() === item.title.trim();
-                });
-                if (idx >= 0) {
-                    goToSlide(idx, true);
+        console.log('Slider: Sincronizando hash:', hash);
+        
+        if (hash && hash.includes('id=')) {
+            const params = new URLSearchParams(hash.substring(1));
+            const id = params.get('id');
+            const title = params.get('title');
+            
+            if (id) {
+                const item = window.carousel.moviesData.find(m => m.id == id);
+                if (item && window.detailsModal && window.detailsModal.show) {
+                    console.log('Slider: Encontrado item para hash:', item.title);
+                    window.detailsModal.show(item);
+                    
+                    // Ir al slide correspondiente
+                    const slides = document.querySelectorAll('.slider-slide');
+                    const idx = Array.from(slides).findIndex(slide => {
+                        const titleElement = slide.querySelector('.slider-title-movie');
+                        return titleElement && titleElement.textContent.trim() === item.title.trim();
+                    });
+                    if (idx >= 0) {
+                        console.log('Slider: Navegando al slide:', idx);
+                        goToSlide(idx, true);
+                    }
                 }
             }
         }
@@ -198,8 +222,22 @@
         const prevBtn = document.querySelector(PREV_SELECTOR);
         const nextBtn = document.querySelector(NEXT_SELECTOR);
         if (!prevBtn || !nextBtn) return;
-        prevBtn.style.display = currentIndex === 0 ? 'none' : 'flex';
-        nextBtn.style.display = currentIndex === totalSlides - 1 ? 'none' : 'flex';
+        
+        // Ocultar botón prev en el primer slide
+        if (currentIndex === 0) {
+            prevBtn.style.display = 'none';
+        } else {
+            prevBtn.style.display = 'flex';
+        }
+        
+        // Ocultar botón next en el último slide
+        if (currentIndex === totalSlides - 1) {
+            nextBtn.style.display = 'none';
+        } else {
+            nextBtn.style.display = 'flex';
+        }
+        
+        console.log('Slider: Botones actualizados - currentIndex:', currentIndex, 'totalSlides:', totalSlides);
     }
     // Autoplay como Rakuten.tv
     function setupAutoplay() {
@@ -245,9 +283,11 @@
     // Inicialización automática cuando el carrusel esté listo
     function waitForCarousel() {
         if (window.carousel && window.carousel.moviesData && window.carousel.moviesData.length > 0) {
+            console.log('Slider: Inicializando con', window.carousel.moviesData.length, 'películas');
             renderSlider();
             syncHashModal();
         } else {
+            console.log('Slider: Esperando datos del carrusel...');
             setTimeout(waitForCarousel, 100);
         }
     }
