@@ -74,6 +74,7 @@
                     <div class="slider-description">${item.description || ''}</div>
                 </div>
             `;
+            // Event listener principal para el slide completo
             div.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -81,13 +82,24 @@
                 openDetails(item, idx);
             });
             
-            // También añadir click al overlay específicamente
+            // Event listener específico para el overlay
             const overlay = div.querySelector('.slider-overlay');
             if (overlay) {
                 overlay.addEventListener('click', (e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     console.log('Slider: Click en overlay de:', item.title);
+                    openDetails(item, idx);
+                });
+            }
+            
+            // Event listener para la imagen también
+            const img = div.querySelector('img');
+            if (img) {
+                img.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Slider: Click en imagen de:', item.title);
                     openDetails(item, idx);
                 });
             }
@@ -105,23 +117,44 @@
         setupSwipe();
         setupAutoplay();
         goToSlide(0, true);
+        
+        // Test de funcionalidad después de renderizar
+        setTimeout(() => {
+            console.log('Slider: Test de funcionalidad después de renderizar');
+            console.log('Slider: detailsModal disponible:', !!window.detailsModal);
+            console.log('Slider: Primer slide disponible:', !!document.querySelector('.slider-slide'));
+            
+            // Simular click en el primer slide para test
+            const firstSlide = document.querySelector('.slider-slide');
+            if (firstSlide) {
+                console.log('Slider: Primer slide encontrado, simulando click...');
+                firstSlide.click();
+            }
+        }, 1000);
     }
     // Abre el details-modal y sincroniza el hash
     function openDetails(item, idx) {
-        console.log('Slider: Abriendo details-modal para:', item.title, 'ID:', item.id);
+        console.log('=== SLIDER DEBUG ===');
+        console.log('Slider: Función openDetails llamada');
+        console.log('Slider: Item:', item);
+        console.log('Slider: Index:', idx);
+        console.log('Slider: window.detailsModal:', window.detailsModal);
+        console.log('Slider: typeof window.detailsModal.show:', typeof window.detailsModal?.show);
         
-        // Verificar que tenemos el item y el modal
+        // Verificar que tenemos el item
         if (!item || !item.id) {
             console.error('Slider: Item inválido:', item);
             return;
         }
         
-        if (window.detailsModal && typeof window.detailsModal.show === 'function') {
+        // Intentar abrir el modal directamente
+        if (window.detailsModal) {
+            console.log('Slider: Intentando abrir modal...');
             try {
                 window.detailsModal.show(item);
                 console.log('Slider: Modal abierto correctamente');
                 
-                // Actualizar el hash con el formato correcto
+                // Actualizar el hash
                 const hash = `#id=${item.id}&title=${encodeURIComponent(item.title)}`;
                 window.location.hash = hash;
                 lastHash = hash;
@@ -130,10 +163,10 @@
                 console.error('Slider: Error al abrir modal:', error);
             }
         } else {
-            console.error('Slider: detailsModal no disponible o show no es una función');
-            console.log('Slider: detailsModal disponible:', !!window.detailsModal);
-            console.log('Slider: show disponible:', !!(window.detailsModal && window.detailsModal.show));
+            console.error('Slider: detailsModal no está disponible');
         }
+        
+        console.log('=== FIN DEBUG ===');
     }
     // Sincroniza el modal con el hash
     function syncHashModal() {
@@ -327,7 +360,45 @@
     window.addEventListener('resize', onResize);
     window.addEventListener('hashchange', syncHashModal);
     window.addEventListener('beforeunload', stopAutoplay);
+    
+    // Event listener global para debug
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('.slider-slide')) {
+            console.log('Slider: Click global detectado en slider');
+            console.log('Target:', e.target);
+            console.log('Closest slider-slide:', e.target.closest('.slider-slide'));
+        }
+    });
+    
     waitForCarousel();
     // Exponer para debug
-    window.slider = { goToSlide, startAutoplay, stopAutoplay };
+    window.slider = { 
+        goToSlide, 
+        startAutoplay, 
+        stopAutoplay,
+        testDetailsModal: function() {
+            console.log('=== TEST DETAILS MODAL ===');
+            console.log('detailsModal disponible:', !!window.detailsModal);
+            console.log('typeof show:', typeof window.detailsModal?.show);
+            
+            if (window.carousel && window.carousel.moviesData && window.carousel.moviesData.length > 0) {
+                const testItem = window.carousel.moviesData[0];
+                console.log('Test item:', testItem);
+                
+                if (window.detailsModal && window.detailsModal.show) {
+                    try {
+                        window.detailsModal.show(testItem);
+                        console.log('Modal abierto correctamente');
+                    } catch (error) {
+                        console.error('Error al abrir modal:', error);
+                    }
+                } else {
+                    console.error('detailsModal no disponible');
+                }
+            } else {
+                console.error('No hay datos del carrusel');
+            }
+            console.log('=== FIN TEST ===');
+        }
+    };
 })(); 
