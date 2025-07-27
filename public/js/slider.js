@@ -38,6 +38,7 @@
         sliderWrapper.innerHTML = '';
         // Usar los datos del carrusel
         const peliculas = window.carousel.moviesData;
+        console.log('Slider: Datos del carrusel disponibles:', peliculas ? peliculas.length : 0);
         // Detecta todos los géneros únicos disponibles
         const generos = new Set();
         peliculas.forEach(p => {
@@ -54,6 +55,7 @@
             }
         }
         totalSlides = seleccionadas.length;
+        console.log('Slider: Renderizando', seleccionadas.length, 'slides');
         // Renderiza cada slide
         seleccionadas.forEach((item, idx) => {
             const div = document.createElement('div');
@@ -75,9 +77,20 @@
             div.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Slider: Click en slide:', item.title);
+                console.log('Slider: Click en slide:', item.title, 'ID:', item.id);
                 openDetails(item, idx);
             });
+            
+            // También añadir click al overlay específicamente
+            const overlay = div.querySelector('.slider-overlay');
+            if (overlay) {
+                overlay.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('Slider: Click en overlay de:', item.title);
+                    openDetails(item, idx);
+                });
+            }
             div.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
@@ -95,16 +108,31 @@
     }
     // Abre el details-modal y sincroniza el hash
     function openDetails(item, idx) {
-        console.log('Slider: Abriendo details-modal para:', item.title);
-        if (window.detailsModal && window.detailsModal.show) {
-            window.detailsModal.show(item);
-            // Actualizar el hash con el formato correcto
-            const hash = `#id=${item.id}&title=${encodeURIComponent(item.title)}`;
-            window.location.hash = hash;
-            lastHash = hash;
-            console.log('Slider: Hash actualizado a:', hash);
+        console.log('Slider: Abriendo details-modal para:', item.title, 'ID:', item.id);
+        
+        // Verificar que tenemos el item y el modal
+        if (!item || !item.id) {
+            console.error('Slider: Item inválido:', item);
+            return;
+        }
+        
+        if (window.detailsModal && typeof window.detailsModal.show === 'function') {
+            try {
+                window.detailsModal.show(item);
+                console.log('Slider: Modal abierto correctamente');
+                
+                // Actualizar el hash con el formato correcto
+                const hash = `#id=${item.id}&title=${encodeURIComponent(item.title)}`;
+                window.location.hash = hash;
+                lastHash = hash;
+                console.log('Slider: Hash actualizado a:', hash);
+            } catch (error) {
+                console.error('Slider: Error al abrir modal:', error);
+            }
         } else {
-            console.error('Slider: detailsModal no disponible');
+            console.error('Slider: detailsModal no disponible o show no es una función');
+            console.log('Slider: detailsModal disponible:', !!window.detailsModal);
+            console.log('Slider: show disponible:', !!(window.detailsModal && window.detailsModal.show));
         }
     }
     // Sincroniza el modal con el hash
@@ -282,12 +310,17 @@
     }
     // Inicialización automática cuando el carrusel esté listo
     function waitForCarousel() {
-        if (window.carousel && window.carousel.moviesData && window.carousel.moviesData.length > 0) {
+        if (window.carousel && window.carousel.moviesData && window.carousel.moviesData.length > 0 && 
+            window.detailsModal && typeof window.detailsModal.show === 'function') {
             console.log('Slider: Inicializando con', window.carousel.moviesData.length, 'películas');
+            console.log('Slider: detailsModal disponible:', !!window.detailsModal);
             renderSlider();
             syncHashModal();
         } else {
-            console.log('Slider: Esperando datos del carrusel...');
+            console.log('Slider: Esperando datos del carrusel o detailsModal...');
+            console.log('Slider: carousel disponible:', !!window.carousel);
+            console.log('Slider: moviesData disponible:', !!(window.carousel && window.carousel.moviesData));
+            console.log('Slider: detailsModal disponible:', !!window.detailsModal);
             setTimeout(waitForCarousel, 100);
         }
     }

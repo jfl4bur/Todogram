@@ -1995,12 +1995,12 @@
 }
 .slider-nav-btn.prev { 
     position: absolute;
-    left: calc(50vw - 40vw - 12px);
+    left: calc(50vw - 40vw + 32px);
     transform: translateX(-50%);
 }
 .slider-nav-btn.next { 
     position: absolute;
-    right: calc(50vw - 40vw - 12px);
+    right: calc(50vw - 40vw + 32px);
     transform: translateX(50%);
 }
 .slider-nav-btn:hover { 
@@ -2040,10 +2040,10 @@
         border-radius: 18px; 
     }
     .slider-nav-btn.prev { 
-        left: calc(50vw - 45vw - 9px);
+        left: calc(50vw - 45vw + 24px);
     }
     .slider-nav-btn.next { 
-        right: calc(50vw - 45vw - 9px);
+        right: calc(50vw - 45vw + 24px);
     }
     .slider-title-movie {
         font-size: 1.8rem;
@@ -2079,10 +2079,10 @@
         color: transparent;
     }
     .slider-nav-btn.prev { 
-        left: calc(50vw - 47.5vw - 6px);
+        left: calc(50vw - 47.5vw + 16px);
     }
     .slider-nav-btn.next { 
-        right: calc(50vw - 47.5vw - 6px);
+        right: calc(50vw - 47.5vw + 16px);
     }
     .slider-slide .slider-overlay { 
         padding: 10px; 
@@ -2122,10 +2122,10 @@
         color: transparent;
     }
     .slider-nav-btn.prev { 
-        left: calc(50vw - 49vw - 4px);
+        left: calc(50vw - 49vw + 12px);
     }
     .slider-nav-btn.next { 
-        right: calc(50vw - 49vw - 4px);
+        right: calc(50vw - 49vw + 12px);
     }
     .slider-slide .slider-overlay { 
         padding: 6px; 
