@@ -1960,7 +1960,7 @@
     }
     #slider-wrapper { 
         gap: 16px; 
-        width: 95%; /* Ancho del slider al 95% en tablet */
+        width: 100%; /* Ancho del slider al 95% en tablet */
         padding: 0 2.5%; /* Padding para centrar en tablet */
     }
     .slider-skeleton {
@@ -1992,8 +1992,8 @@
     }
     #slider-wrapper { 
         gap: 8px; 
-        width: 98%; /* Ancho del slider al 98% en móvil */
-        padding: 0 1%; /* Padding para centrar en móvil */
+        width: 100%; /* Ancho del slider al 98% en móvil */
+        padding: 0 1.2%; /* Padding para centrar en móvil */
     }
     .slider-skeleton {
         gap: 8px;
@@ -2033,7 +2033,7 @@
     }
     #slider-wrapper {
         padding: 0 8px;
-        gap: 8px;
+        gap: 13px;
     }
     .slider-skeleton-item {
         border-radius: 10px;
