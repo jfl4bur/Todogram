@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const detailsModal = document.querySelector('.details-modal-overlay');
         if (detailsModal && detailsModal.classList.contains('show')) {
           const modalScrollTop = detailsModal.scrollTop;
-          const lastModalScroll = detailsModal.dataset.lastScroll || 0;
+          const lastModalScroll = parseInt(detailsModal.dataset.lastScroll) || 0;
           
           // Efecto de fondo translúcido
           if (modalScrollTop > 10) {
@@ -123,7 +123,7 @@ document.addEventListener('DOMContentLoaded', function() {
             header.classList.remove('hidden');
           }
           
-          detailsModal.dataset.lastScroll = modalScrollTop;
+          detailsModal.dataset.lastScroll = modalScrollTop.toString();
         }
         isScrolling = false;
       });
@@ -133,20 +133,32 @@ document.addEventListener('DOMContentLoaded', function() {
   // Event listeners para scroll
   window.addEventListener('scroll', onScrollHeader);
   
+  // Función para configurar el scroll del modal
+  function setupModalScroll() {
+    const detailsModal = document.querySelector('.details-modal-overlay');
+    if (detailsModal) {
+      // Remover listener anterior si existe
+      detailsModal.removeEventListener('scroll', onModalScroll);
+      // Añadir nuevo listener
+      detailsModal.addEventListener('scroll', onModalScroll);
+      detailsModal.dataset.lastScroll = '0';
+    }
+  }
+  
   // Observer para detectar cuando se abre el details modal
   const observer = new MutationObserver(function(mutations) {
     mutations.forEach(function(mutation) {
       if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
         const detailsModal = document.querySelector('.details-modal-overlay');
         if (detailsModal && detailsModal.classList.contains('show')) {
-          // Modal abierto - añadir listener de scroll al modal
-          detailsModal.addEventListener('scroll', onModalScroll);
-          detailsModal.dataset.lastScroll = '0';
+          // Modal abierto - configurar scroll
+          setTimeout(setupModalScroll, 100); // Pequeño delay para asegurar que el modal esté completamente abierto
         } else {
-          // Modal cerrado - remover listener
+          // Modal cerrado - remover listener y resetear header
           const modal = document.querySelector('.details-modal-overlay');
           if (modal) {
             modal.removeEventListener('scroll', onModalScroll);
+            header.classList.remove('hidden', 'scrolled');
           }
         }
       }
@@ -158,6 +170,14 @@ document.addEventListener('DOMContentLoaded', function() {
   if (detailsModal) {
     observer.observe(detailsModal, { attributes: true });
   }
+  
+  // También configurar cuando se carga la página por si el modal ya está abierto
+  setTimeout(() => {
+    const detailsModal = document.querySelector('.details-modal-overlay');
+    if (detailsModal && detailsModal.classList.contains('show')) {
+      setupModalScroll();
+    }
+  }, 500);
   
   onScrollHeader(); // Ejecutar al cargar
 }); 
