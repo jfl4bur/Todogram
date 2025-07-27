@@ -49,12 +49,9 @@ document.addEventListener('DOMContentLoaded', function () {
         // Inicializar el slider después de que el carrusel tenga datos
         function initializeSlider() {
             if (window.carousel && window.carousel.moviesData && window.carousel.moviesData.length > 0) {
-                console.log('Main: Inicializando slider Rakuten con', window.carousel.moviesData.length, 'películas');
-                if (typeof window.sliderRakuten !== 'undefined' && window.sliderRakuten.init) {
-                    window.sliderRakuten.init();
-                } else {
-                    console.error('Main: Slider Rakuten no disponible');
-                }
+                console.log('Main: Inicializando slider con', window.carousel.moviesData.length, 'películas');
+                // El slider se inicializa automáticamente cuando carousel.moviesData está disponible
+                // No necesitamos hacer nada más aquí ya que slider.js maneja su propia inicialización
             } else {
                 console.log('Main: Esperando datos del carrusel para el slider...');
                 setTimeout(initializeSlider, 100);

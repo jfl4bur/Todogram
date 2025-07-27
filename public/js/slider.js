@@ -10,6 +10,8 @@
     let totalSlides = 0;
     let isAnimating = false;
     let lastHash = '';
+    let autoplayInterval = null;
+    let isHovering = false;
 
     // Breakpoints y anchos en porcentaje
     function getSlideWidthPercent() {
@@ -82,6 +84,7 @@
         createPagination(totalSlides);
         setupNav();
         setupSwipe();
+        setupAutoplay();
         goToSlide(0, true);
     }
     // Abre el details-modal y sincroniza el hash
@@ -100,8 +103,14 @@
             if (item && window.detailsModal) {
                 window.detailsModal.show(item);
                 // Ir al slide correspondiente
-                const idx = Array.from(document.querySelectorAll('.slider-slide')).findIndex(slide => slide.innerHTML.includes(item.title));
-                if (idx >= 0) goToSlide(idx);
+                const slides = document.querySelectorAll('.slider-slide');
+                const idx = Array.from(slides).findIndex(slide => {
+                    const titleElement = slide.querySelector('.slider-title-movie');
+                    return titleElement && titleElement.textContent.trim() === item.title.trim();
+                });
+                if (idx >= 0) {
+                    goToSlide(idx, true);
+                }
             }
         }
     }
@@ -169,6 +178,14 @@
         wrapper.scrollTo({ left: scrollPosition, behavior: instant ? 'auto' : 'smooth' });
         updatePagination(idx);
         updateNavButtons();
+        
+        // Reiniciar autoplay después de navegación manual
+        if (!instant) {
+            stopAutoplay();
+            setTimeout(() => {
+                if (!isHovering) startAutoplay();
+            }, 1000);
+        }
     }
     // Actualiza la paginación
     function updatePagination(idx) {
@@ -184,6 +201,43 @@
         prevBtn.style.display = currentIndex === 0 ? 'none' : 'flex';
         nextBtn.style.display = currentIndex === totalSlides - 1 ? 'none' : 'flex';
     }
+    // Autoplay como Rakuten.tv
+    function setupAutoplay() {
+        const wrapper = document.querySelector(SLIDER_SELECTOR);
+        if (!wrapper) return;
+        
+        // Pausar autoplay al hacer hover
+        wrapper.addEventListener('mouseenter', () => {
+            isHovering = true;
+            stopAutoplay();
+        });
+        
+        wrapper.addEventListener('mouseleave', () => {
+            isHovering = false;
+            startAutoplay();
+        });
+        
+        // Iniciar autoplay
+        startAutoplay();
+    }
+    
+    function startAutoplay() {
+        if (autoplayInterval) return;
+        autoplayInterval = setInterval(() => {
+            if (!isHovering && totalSlides > 1) {
+                const nextIndex = (currentIndex + 1) % totalSlides;
+                goToSlide(nextIndex);
+            }
+        }, 5000); // 5 segundos como Rakuten.tv
+    }
+    
+    function stopAutoplay() {
+        if (autoplayInterval) {
+            clearInterval(autoplayInterval);
+            autoplayInterval = null;
+        }
+    }
+    
     // Recalcula todo en resize
     function onResize() {
         goToSlide(currentIndex, true);
@@ -199,7 +253,8 @@
     }
     window.addEventListener('resize', onResize);
     window.addEventListener('hashchange', syncHashModal);
+    window.addEventListener('beforeunload', stopAutoplay);
     waitForCarousel();
     // Exponer para debug
-    window.slider = { goToSlide };
+    window.slider = { goToSlide, startAutoplay, stopAutoplay };
 })(); 
