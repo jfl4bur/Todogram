@@ -2118,7 +2118,7 @@
 .slider-nav-btn:hover {
     background: var(--primary-color);
     opacity: 1;
-    transform: scale(1.08);
+    /*transform: scale(1.08);*/
 }
 
 .slider-nav-btn:disabled {
