@@ -1882,12 +1882,12 @@
     width: 100%;
     min-width: 100%;
     max-width: none;
-    height: 400px;
+    height: 464px; /* Altura aumentada para coincidir con el slider */
     border-radius: 32px;
     background-color: var(--secondary-color);
     position: relative;
     overflow: hidden;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.45); /* Box-shadow solo en escritorio */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1908,12 +1908,12 @@
     width: 100%;      /* Ocupa 100% del ancho del contenedor */
     min-width: 100%;
     max-width: none; /* Sin límite máximo */
-    height: 400px;
+    height: 464px; /* Altura aumentada para escritorio */
     border-radius: 32px; /* Bordes redondeados visibles */
     overflow: hidden; /* Cambiado a hidden para que el overlay respete los bordes */
     position: relative;
     background: transparent; /* Quitado el fondo negro */
-    box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.45); /* Box-shadow solo en escritorio */
     transition: transform 0.3s cubic-bezier(.4,2,.6,1), box-shadow 0.3s;
     cursor: pointer;
     flex-shrink: 0;
@@ -1947,10 +1947,11 @@
 
 @media (max-width: 900px) {
     .slider-slide { 
-        height: 220px; 
+        height: 255px; /* Proporcional a 464px (464 * 0.55) */
         width: 100%; 
         min-width: 100%; 
         border-radius: 18px; 
+        box-shadow: none; /* Eliminar box-shadow en tablet */
     }
     .slider-slide img { border-radius: 18px; }
     .slider-slide .slider-overlay {
@@ -1970,17 +1971,19 @@
     .slider-skeleton-item {
         width: 100%;
         min-width: 100%;
-        height: 220px;
+        height: 255px;
         border-radius: 18px;
         margin: 32px 0;
+        box-shadow: none; /* Eliminar box-shadow en skeleton */
     }
 }
 @media (max-width: 600px) {
     .slider-slide { 
-        height: 140px; 
+        height: 162px; /* Proporcional a 464px (464 * 0.35) */
         width: 100%; 
         min-width: 100%; 
         border-radius: 10px; 
+        box-shadow: none; /* Eliminar box-shadow en móvil */
     }
     .slider-slide img { border-radius: 10px; }
     .slider-slide .slider-overlay {
@@ -2000,9 +2003,10 @@
     .slider-skeleton-item {
         width: 100%;
         min-width: 100%;
-        height: 140px;
+        height: 162px;
         border-radius: 10px;
         margin: 32px 0;
+        box-shadow: none; /* Eliminar box-shadow en skeleton */
     }
 }
 
@@ -2010,10 +2014,11 @@
 
 @media (max-width: 480px) {
     .slider-slide {
-        height: 120px;
+        height: 139px; /* Proporcional a 464px (464 * 0.30) */
         width: 100%;
         min-width: 100%;
         border-radius: 8px;
+        box-shadow: none; /* Eliminar box-shadow en móvil pequeño */
     }
     .slider-slide img {
         border-radius: 8px;
@@ -2032,14 +2037,16 @@
     }
     .slider-skeleton-item {
         border-radius: 8px;
+        box-shadow: none; /* Eliminar box-shadow en skeleton */
     }
 }
 
 /* iPhone y dispositivos muy pequeños */
 @media (max-width: 375px) {
     .slider-slide {
-        height: 100px;
+        height: 116px; /* Proporcional a 464px (464 * 0.25) */
         border-radius: 6px;
+        box-shadow: none; /* Eliminar box-shadow en iPhone */
     }
     .slider-slide img {
         border-radius: 6px;
@@ -2050,6 +2057,7 @@
     }
     .slider-skeleton-item {
         border-radius: 6px;
+        box-shadow: none; /* Eliminar box-shadow en skeleton */
     }
 }
 
