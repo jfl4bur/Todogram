@@ -1851,8 +1851,8 @@
     box-sizing: border-box;
     scroll-snap-type: x mandatory;
     position: relative;
-    padding-left: 5vw;
-    padding-right: 5vw;
+    padding-left: calc(50vw - 40vw - 12px);
+    padding-right: calc(50vw - 40vw - 12px);
 }
 #slider-wrapper::-webkit-scrollbar { display: none; }
 .slider-skeleton {
@@ -1860,8 +1860,8 @@
     width: 100%;
     gap: 24px;
     box-sizing: border-box;
-    padding-left: 5vw;
-    padding-right: 5vw;
+    padding-left: calc(50vw - 40vw - 12px);
+    padding-right: calc(50vw - 40vw - 12px);
 }
 .slider-skeleton::-webkit-scrollbar { display: none; }
 .slider-skeleton-item {
@@ -1995,12 +1995,12 @@
 }
 .slider-nav-btn.prev { 
     position: absolute;
-    left: 5vw;
+    left: calc(50vw - 40vw - 12px);
     transform: translateX(-50%);
 }
 .slider-nav-btn.next { 
     position: absolute;
-    right: 5vw;
+    right: calc(50vw - 40vw - 12px);
     transform: translateX(50%);
 }
 .slider-nav-btn:hover { 
@@ -2021,8 +2021,8 @@
 @media (max-width: 900px) { 
     #slider-wrapper, .slider-skeleton { 
         gap: 18px; 
-        padding-left: 4vw; 
-        padding-right: 4vw; 
+        padding-left: calc(50vw - 45vw - 9px);
+        padding-right: calc(50vw - 45vw - 9px);
     } 
     .slider-skeleton-item, .slider-slide { 
         width: 90vw; 
@@ -2040,10 +2040,10 @@
         border-radius: 18px; 
     }
     .slider-nav-btn.prev { 
-        left: 4vw;
+        left: calc(50vw - 45vw - 9px);
     }
     .slider-nav-btn.next { 
-        right: 4vw;
+        right: calc(50vw - 45vw - 9px);
     }
     .slider-title-movie {
         font-size: 1.8rem;
@@ -2058,8 +2058,8 @@
 @media (max-width: 600px) { 
     #slider-wrapper, .slider-skeleton { 
         gap: 12px; 
-        padding-left: 2vw; 
-        padding-right: 2vw; 
+        padding-left: calc(50vw - 47.5vw - 6px);
+        padding-right: calc(50vw - 47.5vw - 6px);
     } 
     .slider-skeleton-item, .slider-slide { 
         width: 95vw; 
@@ -2079,10 +2079,10 @@
         color: transparent;
     }
     .slider-nav-btn.prev { 
-        left: 2vw;
+        left: calc(50vw - 47.5vw - 6px);
     }
     .slider-nav-btn.next { 
-        right: 2vw;
+        right: calc(50vw - 47.5vw - 6px);
     }
     .slider-slide .slider-overlay { 
         padding: 10px; 
@@ -2101,8 +2101,8 @@
 @media (max-width: 400px) { 
     #slider-wrapper, .slider-skeleton { 
         gap: 8px; 
-        padding-left: 1vw; 
-        padding-right: 1vw; 
+        padding-left: calc(50vw - 49vw - 4px);
+        padding-right: calc(50vw - 49vw - 4px);
     } 
     .slider-skeleton-item, .slider-slide { 
         width: 98vw; 
@@ -2122,10 +2122,10 @@
         color: transparent;
     }
     .slider-nav-btn.prev { 
-        left: 1vw;
+        left: calc(50vw - 49vw - 4px);
     }
     .slider-nav-btn.next { 
-        right: 1vw;
+        right: calc(50vw - 49vw - 4px);
     }
     .slider-slide .slider-overlay { 
         padding: 6px; 
