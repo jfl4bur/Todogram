@@ -1926,6 +1926,7 @@
   margin: 0;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0 24px;
   height: 64px;
   position: relative;
@@ -2200,6 +2201,7 @@ body {
   }
   .slider-header-burger {
     display: flex;
+    margin-left: 0;
   }
   .slider-nav-login {
     display: none;
