@@ -2064,7 +2064,7 @@ body {
 
 /* Márgenes para el slider y contenido principal */
 .slider-section {
-  margin-top: 40px;
+  margin-top: 80px;
   margin-bottom: 40px;
   position: relative;
   padding: 0 0 30px 0;
@@ -2140,7 +2140,7 @@ body {
     padding-top: 56px;
   }
   .slider-section {
-    margin-top: 32px;
+    margin-top: 60px;
   }
   .details-modal-overlay {
     padding-top: 70px;
@@ -2157,7 +2157,7 @@ body {
     padding-top: 44px;
   }
   .slider-section {
-    margin-top: 24px;
+    margin-top: 50px;
   }
   .details-modal-overlay {
     padding-top: 60px;
