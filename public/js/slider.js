@@ -1,371 +1,186 @@
-// Slider destacado tipo Rakuten.tv
-// Se detectarán automáticamente todos los géneros disponibles
+// Slider tipo Rakuten.tv - Carousel con items adyacentes, bordes redondeados y responsive
+// Autor: Optimizado para Todogram
 
-// Las funciones del slider estarán disponibles globalmente para ser llamadas desde main.js
-console.log('Slider: Script cargado, esperando inicialización desde main.js');
+(function () {
+    const SLIDER_SELECTOR = '#slider-wrapper';
+    const SKELETON_SELECTOR = '#slider-skeleton';
+    const PAGINATION_SELECTOR = '#slider-pagination';
+    const PREV_SELECTOR = '#slider-prev';
+    const NEXT_SELECTOR = '#slider-next';
 
-// Función para calcular el ancho de los slides basándose en el tamaño de pantalla
-function calculateSlideWidth() {
-    const screenWidth = window.innerWidth;
-    let slideWidth, gap;
-    
-    if (screenWidth > 1200) {
-        slideWidth = screenWidth - 48; // 24px padding en cada lado
-        gap = 24;
-    } else if (screenWidth > 900) {
-        slideWidth = screenWidth - 48;
-        gap = 24;
-    } else if (screenWidth > 600) {
-        slideWidth = screenWidth - 32; // 16px padding en cada lado
-        gap = 16;
-    } else if (screenWidth > 480) {
-        slideWidth = screenWidth - 16; // 8px padding en cada lado
-        gap = 12;
-    } else {
-        slideWidth = screenWidth - 16;
-        gap = 8;
+    let currentIndex = 0;
+    let totalSlides = 0;
+    let isAnimating = false;
+
+    // Utilidad para obtener el gap según el tamaño de pantalla
+    function getGap() {
+        const w = window.innerWidth;
+        if (w <= 375) return 10;
+        if (w <= 480) return 12;
+        if (w <= 768) return 16;
+        if (w <= 900) return 20;
+        return 24;
     }
-    
-    return { slideWidth, gap };
-}
 
-function renderSliderDestacado() {
-    const sliderWrapper = document.getElementById('slider-wrapper');
-    const sliderSkeleton = document.getElementById('slider-skeleton');
-    
-    if (!sliderWrapper) {
-        console.error('Slider: No se encontró slider-wrapper');
-        return;
-    }
-    
-    if (!sliderSkeleton) {
-        console.error('Slider: No se encontró slider-skeleton');
-        return;
-    }
-    
-    console.log('Slider: Renderizando slider...');
-    
-    // Ocultar skeleton y mostrar slider
-    sliderSkeleton.style.display = 'none';
-    sliderWrapper.style.display = 'flex';
-    
-    sliderWrapper.innerHTML = '';
+    // Renderiza el slider
+    function renderSlider() {
+        const sliderWrapper = document.querySelector(SLIDER_SELECTOR);
+        const sliderSkeleton = document.querySelector(SKELETON_SELECTOR);
+        if (!sliderWrapper || !sliderSkeleton) return;
 
-    // Usar los datos del carrusel
-    const peliculas = window.carousel.moviesData;
-    console.log('Slider: Total de películas disponibles:', peliculas.length);
+        // Oculta skeleton y muestra slider
+        sliderSkeleton.style.display = 'none';
+        sliderWrapper.style.display = 'flex';
+        sliderWrapper.innerHTML = '';
 
-    // Detecta todos los géneros únicos disponibles
-    const todosLosGeneros = new Set();
-    peliculas.forEach(p => {
-        if (p.genre) {
-            const generos = p.genre.split(/\s*[·,]\s*/);
-            generos.forEach(g => {
-                const genero = g.trim();
-                if (genero && genero.length > 0) {
-                    todosLosGeneros.add(genero);
+        // Usar los datos del carrusel
+        const peliculas = window.carousel.moviesData;
+        // Detecta todos los géneros únicos disponibles
+        const generos = new Set();
+        peliculas.forEach(p => {
+            if (p.genre) p.genre.split(/\s*[·,]\s*/).forEach(g => generos.add(g.trim()));
+        });
+        // Selecciona la primera película de cada género, sin repeticiones
+        const seleccionadas = [];
+        const idsIncluidos = new Set();
+        for (const genero of generos) {
+            const peli = peliculas.find(p => p.genre && p.genre.split(/\s*[·,]\s*/).some(g => g.trim().toLowerCase() === genero.toLowerCase()) && !idsIncluidos.has(p.id));
+            if (peli) {
+                seleccionadas.push(peli);
+                idsIncluidos.add(peli.id);
+            }
+        }
+        totalSlides = seleccionadas.length;
+        // Renderiza cada slide
+        seleccionadas.forEach((item, idx) => {
+            const div = document.createElement('div');
+            div.className = 'slider-slide';
+            div.setAttribute('data-slide-index', idx);
+            div.tabIndex = 0;
+            div.setAttribute('role', 'button');
+            div.setAttribute('aria-label', item.title);
+            div.innerHTML = `
+                <div class="slider-img-wrapper">
+                    <img src="${item.postersUrl || item.posterUrl || 'https://via.placeholder.com/1540x464'}" alt="${item.title}" loading="lazy">
+                </div>
+                <div class="slider-overlay">
+                    <div class="slider-title-movie">${item.title}</div>
+                    <div class="slider-meta">${item.year ? `<span>${item.year}</span>` : ''}${item.duration ? `<span>${item.duration}</span>` : ''}${item.genre ? `<span>${item.genre.split(/[·,]/)[0]}</span>` : ''}${item.rating ? `<span><i class='fas fa-star'></i> ${item.rating}</span>` : ''}</div>
+                    <div class="slider-description">${item.description || ''}</div>
+                </div>
+            `;
+            div.addEventListener('click', () => {
+                if (window.detailsModal) window.detailsModal.show(item, div);
+            });
+            div.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    if (window.detailsModal) window.detailsModal.show(item, div);
                 }
             });
-        }
-    });
-    
-    const generosUnicos = Array.from(todosLosGeneros);
-    console.log('Slider: Géneros únicos encontrados:', generosUnicos);
-    
-    // Selecciona la primera película de cada género, sin repeticiones
-    const seleccionadas = [];
-    const idsIncluidos = new Set();
-    
-    for (const genero of generosUnicos) {
-        console.log(`Slider: Buscando película de género: ${genero}`);
-        const peli = peliculas.find(p => {
-            if (!p.genre) {
-                return false;
-            }
-            const generos = p.genre.split(/\s*[·,]\s*/);
-            const match = generos.some(g => g.trim().toLowerCase() === genero.toLowerCase());
-            if (match && !idsIncluidos.has(p.id)) {
-                console.log(`Slider: Encontrada película para ${genero}:`, p.title);
-                return true;
-            }
-            return false;
+            sliderWrapper.appendChild(div);
         });
-        
-        if (peli) {
-            seleccionadas.push(peli);
-            idsIncluidos.add(peli.id);
-            console.log(`Slider: Añadida al slider:`, peli.title);
-        } else {
-            console.log(`Slider: No se encontró película para género: ${genero}`);
+        createPagination(totalSlides);
+        setupNav();
+        setupSwipe();
+        goToSlide(0, true);
+    }
+
+    // Crea la paginación
+    function createPagination(n) {
+        const pagination = document.querySelector(PAGINATION_SELECTOR);
+        if (!pagination) return;
+        pagination.innerHTML = '';
+        for (let i = 0; i < n; i++) {
+            const dot = document.createElement('button');
+            dot.className = 'slider-pagination-dot';
+            dot.setAttribute('data-slide', i);
+            dot.setAttribute('aria-label', `Ir al slide ${i + 1}`);
+            if (i === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => goToSlide(i));
+            pagination.appendChild(dot);
         }
     }
 
-    console.log('Slider: Películas seleccionadas:', seleccionadas.length);
+    // Navegación con flechas
+    function setupNav() {
+        const prevBtn = document.querySelector(PREV_SELECTOR);
+        const nextBtn = document.querySelector(NEXT_SELECTOR);
+        if (!prevBtn || !nextBtn) return;
+        prevBtn.onclick = () => goToSlide(currentIndex - 1);
+        nextBtn.onclick = () => goToSlide(currentIndex + 1);
+        updateNavButtons();
+    }
 
-    // Crear paginación
-    createSliderPagination(seleccionadas.length);
-
-    // Renderiza cada slide
-    seleccionadas.forEach((item, idx) => {
-        const div = document.createElement('div');
-        div.className = 'slider-slide';
-        div.tabIndex = 0;
-        div.setAttribute('role', 'button');
-        div.setAttribute('aria-label', item.title);
-
-        // Meta info
-        const meta = [];
-        if (item.year) meta.push(`<span>${item.year}</span>`);
-        if (item.duration) meta.push(`<span>${item.duration}</span>`);
-        if (item.genre) meta.push(`<span>${item.genre.split(/[·,]/)[0]}</span>`);
-        if (item.rating) meta.push(`<span><i class="fas fa-star"></i> ${item.rating}</span>`);
-
-        div.innerHTML = `
-            <div class="slider-img-wrapper">
-                <img src="${item.postersUrl || item.posterUrl || 'https://via.placeholder.com/1540x400'}" alt="${item.title}" loading="lazy">
-            </div>
-            <div class="slider-overlay">
-                <div class="slider-title-movie">${item.title}</div>
-                <div class="slider-meta">${meta.join('')}</div>
-                <div class="slider-description">${item.description || ''}</div>
-            </div>
-        `;
-        
-        // Al hacer clic, abre el details-modal
-        div.addEventListener('click', (e) => {
-            e.preventDefault();
-            console.log('Slider: Click en película:', item.title);
-            if (window.detailsModal) {
-                window.detailsModal.show(item, div);
-            }
+    // Swipe/touch
+    function setupSwipe() {
+        const wrapper = document.querySelector(SLIDER_SELECTOR);
+        let startX = 0, scrollStart = 0, isDown = false;
+        wrapper.addEventListener('pointerdown', e => {
+            isDown = true;
+            startX = e.pageX;
+            scrollStart = wrapper.scrollLeft;
+            wrapper.setPointerCapture(e.pointerId);
         });
-        
-        // Accesibilidad: enter/space
-        div.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                if (window.detailsModal) {
-                    window.detailsModal.show(item, div);
-                }
-            }
+        wrapper.addEventListener('pointermove', e => {
+            if (!isDown) return;
+            const dx = e.pageX - startX;
+            wrapper.scrollLeft = scrollStart - dx;
         });
-        
-        sliderWrapper.appendChild(div);
-    });
-
-    console.log('Slider: Renderizado completado. Slides creados:', seleccionadas.length);
-}
-
-// Crear paginación del slider
-function createSliderPagination(totalSlides) {
-    const pagination = document.getElementById('slider-pagination');
-    if (!pagination) {
-        console.error('Slider: No se encontró slider-pagination');
-        return;
-    }
-    
-    pagination.innerHTML = '';
-    
-    for (let i = 0; i < totalSlides; i++) {
-        const dot = document.createElement('button');
-        dot.className = 'slider-pagination-dot';
-        dot.setAttribute('data-slide', i);
-        dot.setAttribute('aria-label', `Ir al slide ${i + 1}`);
-        
-        if (i === 0) {
-            dot.classList.add('active');
-        }
-        
-        dot.addEventListener('click', () => {
-            goToSlide(i);
+        wrapper.addEventListener('pointerup', e => {
+            isDown = false;
+            const slide = wrapper.querySelector('.slider-slide');
+            if (!slide) return;
+            const slideWidth = slide.offsetWidth;
+            const gap = getGap();
+            const idx = Math.round(wrapper.scrollLeft / (slideWidth + gap));
+            goToSlide(idx);
         });
-        
-        pagination.appendChild(dot);
-    }
-}
-
-// Función global para actualizar la visibilidad de los botones según la posición
-function updateNavButtons() {
-    const wrapper = document.getElementById('slider-wrapper');
-    const slides = wrapper.querySelectorAll('.slider-slide');
-    const prevBtn = document.getElementById('slider-prev');
-    const nextBtn = document.getElementById('slider-next');
-    
-    if (slides.length === 0 || !prevBtn || !nextBtn) return;
-    
-    const slideWidth = slides[0].offsetWidth;
-    const screenWidth = window.innerWidth;
-    let gap = 32;
-    
-    if (screenWidth <= 600) {
-        gap = 8;
-    } else if (screenWidth <= 900) {
-        gap = 16;
-    }
-    
-    const totalSlideWidth = slideWidth + gap;
-    const currentScroll = wrapper.scrollLeft;
-    const currentSlideIndex = Math.round(currentScroll / totalSlideWidth);
-    
-    // Ocultar botón izquierdo si estamos en el primer slide
-    if (currentSlideIndex <= 0) {
-        prevBtn.style.display = 'none';
-    } else {
-        prevBtn.style.display = 'flex';
-    }
-    
-    // Ocultar botón derecho si estamos en el último slide
-    if (currentSlideIndex >= slides.length - 1) {
-        nextBtn.style.display = 'none';
-    } else {
-        nextBtn.style.display = 'flex';
-    }
-}
-
-// Ir a un slide específico
-function goToSlide(slideIndex) {
-    const wrapper = document.getElementById('slider-wrapper');
-    const slides = wrapper.querySelectorAll('.slider-slide');
-    const dots = document.querySelectorAll('.slider-pagination-dot');
-    
-    if (slideIndex >= 0 && slideIndex < slides.length) {
-        const slide = slides[slideIndex];
-        const slideWidth = slide.offsetWidth;
-        const screenWidth = window.innerWidth;
-        let gap = 32;
-        
-        if (screenWidth <= 600) {
-            gap = 8;
-        } else if (screenWidth <= 900) {
-            gap = 16;
-        }
-        
-        const scrollPosition = slideWidth * slideIndex + gap * slideIndex;
-        
-        wrapper.scrollTo({
-            left: scrollPosition,
-            behavior: 'smooth'
-        });
-        
-        // Actualizar dots activos
-        dots.forEach((dot, index) => {
-            dot.classList.toggle('active', index === slideIndex);
-        });
-        
-        // Actualizar botones de navegación después del scroll
-        setTimeout(() => {
-            updateNavButtons();
-        }, 300);
-    }
-}
-
-// Navegación con flechas y scroll
-function setupSliderNav() {
-    const wrapper = document.getElementById('slider-wrapper');
-    const prevBtn = document.getElementById('slider-prev');
-    const nextBtn = document.getElementById('slider-next');
-    if (!wrapper || !prevBtn || !nextBtn) {
-        console.error('Slider: Elementos de navegación no encontrados');
-        return;
+        wrapper.addEventListener('pointerleave', () => { isDown = false; });
     }
 
-    function scrollToSlide(dir) {
+    // Ir a un slide específico
+    function goToSlide(idx, instant) {
+        if (idx < 0) idx = 0;
+        if (idx >= totalSlides) idx = totalSlides - 1;
+        currentIndex = idx;
+        const wrapper = document.querySelector(SLIDER_SELECTOR);
         const slide = wrapper.querySelector('.slider-slide');
         if (!slide) return;
-        
-        // Calcular el ancho del slide + gap según el tamaño de pantalla
-        const screenWidth = window.innerWidth;
-        let gap = 32; // gap por defecto
-        
-        if (screenWidth <= 600) {
-            gap = 8;
-        } else if (screenWidth <= 900) {
-            gap = 16;
-        }
-        
-        const slideWidth = slide.offsetWidth + gap;
-        
-        // Usar scrollTo en lugar de scrollBy para evitar acumulación de errores
-        const currentScroll = wrapper.scrollLeft;
-        const targetScroll = currentScroll + (dir * slideWidth);
-        
-        wrapper.scrollTo({
-            left: targetScroll,
-            behavior: 'smooth'
-        });
-        
-        // Actualizar paginación y botones después del scroll
-        setTimeout(() => {
-            updatePaginationFromScroll();
-            updateNavButtons();
-        }, 300);
-    }
-    
-    prevBtn.addEventListener('click', e => {
-        e.preventDefault();
-        scrollToSlide(-1);
-    });
-    
-    nextBtn.addEventListener('click', e => {
-        e.preventDefault();
-        scrollToSlide(1);
-    });
-    
-
-    
-    // Oculta flechas si no hay overflow
-    function updateNav() {
-        setTimeout(() => {
-            if (wrapper.scrollWidth > wrapper.clientWidth + 10) {
-                // Mostrar botones inicialmente y luego actualizar según posición
-                prevBtn.style.display = 'flex';
-                nextBtn.style.display = 'flex';
-                updateNavButtons();
-            } else {
-                prevBtn.style.display = 'none';
-                nextBtn.style.display = 'none';
-            }
-        }, 100);
-    }
-    
-    // Actualizar paginación y botones cuando se hace scroll
-    wrapper.addEventListener('scroll', () => {
-        updatePaginationFromScroll();
+        const slideWidth = slide.offsetWidth;
+        const gap = getGap();
+        const scrollPosition = (slideWidth + gap) * idx;
+        wrapper.scrollTo({ left: scrollPosition, behavior: instant ? 'auto' : 'smooth' });
+        updatePagination(idx);
         updateNavButtons();
-    });
-    
-    // Actualizar navegación al cambiar el tamaño de la ventana
-    window.addEventListener('resize', () => {
-        updateNav();
-    });
-    
-    updateNav();
-}
-
-// Actualizar paginación basándose en la posición del scroll
-function updatePaginationFromScroll() {
-    const wrapper = document.getElementById('slider-wrapper');
-    const slides = wrapper.querySelectorAll('.slider-slide');
-    const dots = document.querySelectorAll('.slider-pagination-dot');
-    
-    if (slides.length === 0 || dots.length === 0) return;
-    
-    const slideWidth = slides[0].offsetWidth;
-    const screenWidth = window.innerWidth;
-    let gap = 32;
-    
-    if (screenWidth <= 600) {
-        gap = 8;
-    } else if (screenWidth <= 900) {
-        gap = 16;
     }
-    
-    const totalSlideWidth = slideWidth + gap;
-    const currentScroll = wrapper.scrollLeft;
-    const currentSlideIndex = Math.round(currentScroll / totalSlideWidth);
-    
-    // Actualizar dots activos
-    dots.forEach((dot, index) => {
-        dot.classList.toggle('active', index === currentSlideIndex);
-    });
-} 
+
+    // Actualiza la paginación
+    function updatePagination(idx) {
+        document.querySelectorAll('.slider-pagination-dot').forEach((dot, i) => {
+            dot.classList.toggle('active', i === idx);
+        });
+    }
+
+    // Actualiza los botones de navegación
+    function updateNavButtons() {
+        const prevBtn = document.querySelector(PREV_SELECTOR);
+        const nextBtn = document.querySelector(NEXT_SELECTOR);
+        if (!prevBtn || !nextBtn) return;
+        prevBtn.style.display = currentIndex === 0 ? 'none' : 'flex';
+        nextBtn.style.display = currentIndex === totalSlides - 1 ? 'none' : 'flex';
+    }
+
+    // Inicialización automática cuando el carrusel esté listo
+    function waitForCarousel() {
+        if (window.carousel && window.carousel.moviesData && window.carousel.moviesData.length > 0) {
+            renderSlider();
+        } else {
+            setTimeout(waitForCarousel, 100);
+        }
+    }
+    waitForCarousel();
+
+    // Exponer para debug
+    window.slider = { goToSlide };
+})(); 

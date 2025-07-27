@@ -1814,11 +1814,7 @@
     }
 }
 
-/* === SLIDER DESTACADO TIPO RAKUTEN.TV === */
-/* ===== SLIDER COMPLETAMENTE RECONSTRUIDO ===== */
-
-/* ===== SLIDER RAKUTEN.TV CAROUSEL RÉPLICA EXACTA 1:1 ===== */
-
+/* === SLIDER CAROUSEL TIPO RAKUTEN.TV === */
 .slider-section {
     margin-bottom: 40px;
     position: relative;
@@ -1826,7 +1822,6 @@
     overflow: hidden;
     width: 100%;
 }
-
 .slider-title {
     font-size: 2.2rem;
     font-weight: 700;
@@ -1835,14 +1830,11 @@
     letter-spacing: 0.5px;
     text-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
-
 .slider-container {
     position: relative;
     width: 100%;
     overflow: hidden;
 }
-
-/* Wrapper principal - Réplica exacta del carousel de Rakuten.tv */
 #slider-wrapper {
     display: flex;
     overflow-x: auto;
@@ -1856,12 +1848,7 @@
     scroll-snap-type: x mandatory;
     position: relative;
 }
-
-#slider-wrapper::-webkit-scrollbar {
-    display: none;
-}
-
-/* Skeleton loader - Réplica exacta del carousel */
+#slider-wrapper::-webkit-scrollbar { display: none; }
 .slider-skeleton {
     display: flex;
     width: 100%;
@@ -1872,504 +1859,35 @@
     -ms-overflow-style: none;
     box-sizing: border-box;
 }
-
-.slider-skeleton::-webkit-scrollbar {
-    display: none;
-}
-
+.slider-skeleton::-webkit-scrollbar { display: none; }
 .slider-skeleton-item {
-    width: 90%;
-    min-width: 90%;
-    max-width: 90%;
-    height: 464px;
-    border-radius: 20px;
-    background-color: #2a2a2a;
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    scroll-snap-align: center;
+    width: 90%; min-width: 90%; max-width: 90%; height: 464px;
+    border-radius: 20px; background-color: #2a2a2a;
+    position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; scroll-snap-align: center;
 }
-
 .slider-skeleton-spinner {
-    width: 60px;
-    height: 60px;
-    border: 6px solid rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    border-top-color: #e50914;
-    animation: spin 1s linear infinite;
+    width: 60px; height: 60px; border: 6px solid rgba(255,255,255,0.1); border-radius: 50%; border-top-color: #e50914; animation: spin 1s linear infinite;
 }
-
-/* Slide individual - Réplica exacta del carousel de Rakuten.tv */
 .slider-slide {
-    width: 90%;
-    min-width: 90%;
-    max-width: 90%;
-    height: 464px;
-    border-radius: 20px;
-    overflow: hidden;
-    position: relative;
-    background: transparent;
-    transition: transform 0.3s ease;
-    cursor: pointer;
-    scroll-snap-align: center;
-    flex-shrink: 0;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+    width: 90%; min-width: 90%; max-width: 90%; height: 464px;
+    border-radius: 20px; overflow: hidden; position: relative; background: transparent;
+    transition: transform 0.3s ease; cursor: pointer; scroll-snap-align: center; flex-shrink: 0; box-shadow: 0 8px 32px rgba(0,0,0,0.45);
 }
-
-.slider-slide .slider-img-wrapper {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: stretch;
-    justify-content: center;
-    position: relative;
-    z-index: 1;
-}
-
-.slider-slide img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 20px;
-    transition: filter 0.3s ease;
-    background: #000;
-    overflow: hidden;
-}
-
-/* ===== SISTEMA RESPONSIVE RAKUTEN.TV CAROUSEL EXACTO ===== */
-
-/* Tablet (≤900px) - Réplica exacta del carousel de Rakuten.tv */
-@media (max-width: 900px) {
-    .slider-title {
-        font-size: 1.8rem;
-        margin: 0 0 15px 20px;
-    }
-    
-    #slider-wrapper {
-        gap: 20px;
-        padding: 0 2.5%;
-    }
-    
-    .slider-skeleton {
-        gap: 20px;
-        padding: 0 2.5%;
-    }
-    
-    .slider-slide,
-    .slider-skeleton-item {
-        width: 95%;
-        min-width: 95%;
-        max-width: 95%;
-        height: 320px;
-        border-radius: 16px;
-    }
-    
-    .slider-slide img {
-        border-radius: 16px;
-    }
-    
-    .slider-nav-btn {
-        width: 60px;
-        height: 320px;
-        font-size: 1.4rem;
-        border-radius: 16px;
-    }
-}
-
-/* Móvil (≤768px) - Réplica exacta del carousel de Rakuten.tv */
-@media (max-width: 768px) {
-    .slider-title {
-        font-size: 1.5rem;
-        margin: 0 0 12px 16px;
-    }
-    
-    #slider-wrapper {
-        gap: 16px;
-        padding: 0 1%;
-    }
-    
-    .slider-skeleton {
-        gap: 16px;
-        padding: 0 1%;
-    }
-    
-    .slider-slide,
-    .slider-skeleton-item {
-        width: 98%;
-        min-width: 98%;
-        max-width: 98%;
-        height: 240px;
-        border-radius: 12px;
-    }
-    
-    .slider-slide img {
-        border-radius: 12px;
-    }
-    
-    .slider-nav-btn {
-        width: 50px;
-        height: 240px;
-        font-size: 1.2rem;
-        border-radius: 12px;
-    }
-}
-
-/* Móvil pequeño (≤480px) - Réplica exacta del carousel de Rakuten.tv */
-@media (max-width: 480px) {
-    .slider-title {
-        font-size: 1.3rem;
-        margin: 0 0 10px 12px;
-    }
-    
-    #slider-wrapper {
-        gap: 12px;
-        padding: 0 0.5%;
-    }
-    
-    .slider-skeleton {
-        gap: 12px;
-        padding: 0 0.5%;
-    }
-    
-    .slider-slide,
-    .slider-skeleton-item {
-        width: 99%;
-        min-width: 99%;
-        max-width: 99%;
-        height: 200px;
-        border-radius: 10px;
-    }
-    
-    .slider-slide img {
-        border-radius: 10px;
-    }
-    
-    .slider-nav-btn {
-        width: 40px;
-        height: 200px;
-        font-size: 1rem;
-        border-radius: 10px;
-    }
-}
-
-/* iPhone (≤375px) - Réplica exacta del carousel de Rakuten.tv */
-@media (max-width: 375px) {
-    .slider-title {
-        font-size: 1.1rem;
-        margin: 0 0 8px 10px;
-    }
-    
-    #slider-wrapper {
-        gap: 10px;
-        padding: 0 0.25%;
-    }
-    
-    .slider-skeleton {
-        gap: 10px;
-        padding: 0 0.25%;
-    }
-    
-    .slider-slide,
-    .slider-skeleton-item {
-        width: 99.5%;
-        min-width: 99.5%;
-        max-width: 99.5%;
-        height: 180px;
-        border-radius: 8px;
-    }
-    
-    .slider-slide img {
-        border-radius: 8px;
-    }
-    
-    .slider-nav-btn {
-        width: 35px;
-        height: 180px;
-        font-size: 0.9rem;
-        border-radius: 8px;
-    }
-}
-
-.slider-slide img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    transition: filter 0.3s;
-}
-
-.slider-slide:hover {
-    transform: scale(1.01);
-    z-index: 2;
-    /*box-shadow: 0 12px 40px 8px rgba(0,0,0,0.55);*/
-}
-
-/* Sistema de navegación - Réplica exacta del carousel de Rakuten.tv */
-.slider-nav {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 10;
-}
-
-.slider-nav-btn {
-    pointer-events: all;
-    background: rgba(0,0,0,0.7);
-    border: none;
-    color: #fff;
-    width: 80px;
-    height: 464px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 2.2rem;
-    border-radius: 20px;
-    transition: background 0.2s ease;
-    opacity: 0.8;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    margin: auto 0;
-}
-
-.slider-nav-btn.prev {
-    left: 0;
-}
-
-.slider-nav-btn.next {
-    right: 0;
-}
-
-.slider-nav-btn:hover {
-    background: var(--primary-color);
-    opacity: 1;
-    /*transform: scale(1.08);*/
-}
-
-.slider-nav-btn:disabled {
-    opacity: 0.2;
-    cursor: not-allowed;
-}
-
-/* Paginación del slider */
-.slider-pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    margin-top: 16px;
-    position: relative;
-    z-index: 10;
-}
-
-.slider-pagination-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.3);
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    flex-shrink: 0;
-}
-
-.slider-pagination-dot.active {
-    background-color: var(--primary-color);
-    transform: scale(1.2);
-}
-
-.slider-pagination-dot:hover {
-    background-color: rgba(255, 255, 255, 0.5);
-    transform: scale(1.1);
-}
-
-/* Paginación del slider */
-.slider-pagination {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    margin-top: 16px;
-    position: relative;
-    z-index: 10;
-}
-
-.slider-pagination-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background-color: rgba(255, 255, 255, 0.3);
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    flex-shrink: 0;
-}
-
-.slider-pagination-dot.active {
-    background-color: var(--primary-color);
-    transform: scale(1.2);
-}
-
-.slider-pagination-dot:hover {
-    background-color: rgba(255, 255, 255, 0.5);
-    transform: scale(1.1);
-}
-
-.slider-slide .slider-overlay {
-    position: absolute;
-    left: 0; right: 0; bottom: 0;
-    padding: 24px;
-    background: linear-gradient(0deg, rgba(0,0,0,0.9) 60%, rgba(0,0,0,0.0) 100%);
-    color: #fff;
-    z-index: 2;
-    width: 100%;
-    box-sizing: border-box;
-    min-height: 90px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
-}
-
-/* Responsive del overlay */
-@media (max-width: 900px) {
-    .slider-slide .slider-overlay {
-        padding: 20px;
-        min-height: 80px;
-        border-bottom-left-radius: 16px;
-        border-bottom-right-radius: 16px;
-    }
-}
-
-@media (max-width: 768px) {
-    .slider-slide .slider-overlay {
-        padding: 16px;
-        min-height: 70px;
-        border-bottom-left-radius: 12px;
-        border-bottom-right-radius: 12px;
-    }
-}
-
-@media (max-width: 480px) {
-    .slider-slide .slider-overlay {
-        padding: 12px;
-        min-height: 60px;
-        border-bottom-left-radius: 10px;
-        border-bottom-right-radius: 10px;
-    }
-}
-
-@media (max-width: 375px) {
-    .slider-slide .slider-overlay {
-        padding: 10px;
-        min-height: 50px;
-        border-bottom-left-radius: 8px;
-        border-bottom-right-radius: 8px;
-    }
-}
-
-.slider-slide .slider-title-movie {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 6px;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.7);
-    letter-spacing: 0.2px;
-}
-
-@media (max-width: 900px) {
-    .slider-slide .slider-title-movie {
-        font-size: 1.2rem;
-    }
-}
-
-@media (max-width: 600px) {
-    .slider-slide .slider-title-movie {
-        font-size: 1rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .slider-slide .slider-title-movie {
-        font-size: 0.9rem;
-    }
-}
-
-.slider-slide .slider-meta {
-    font-size: 1rem;
-    color: #e0e0e0;
-    margin-bottom: 4px;
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-    align-items: center;
-}
-
-@media (max-width: 600px) {
-    .slider-slide .slider-meta {
-        font-size: 0.8rem;
-        gap: 8px;
-    }
-}
-
-@media (max-width: 480px) {
-    .slider-slide .slider-meta {
-        font-size: 0.7rem;
-        gap: 6px;
-    }
-}
-
-.slider-slide .slider-meta span:not(:last-child)::after {
-    content: '\2022';
-    margin-left: 10px;
-    color: #e0e0e0;
-}
-
-@media (max-width: 600px) {
-    .slider-slide .slider-meta span:not(:last-child)::after {
-        margin-left: 6px;
-    }
-}
-
-.slider-slide .slider-description {
-    font-size: 1rem;
-    line-height: 1.3;
-    color: #e0e0e0;
-    margin-top: 2px;
-    max-width: 90%;
-    text-shadow: 0 2px 8px rgba(0,0,0,0.7);
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-@media (max-width: 900px) {
-    .slider-slide .slider-description {
-        font-size: 0.9rem;
-        -webkit-line-clamp: 1;
-    }
-}
-
-@media (max-width: 600px) {
-    .slider-slide .slider-description {
-        font-size: 0.8rem;
-        max-width: 95%;
-    }
-}
-
-@media (max-width: 480px) {
-    .slider-slide .slider-description {
-        font-size: 0.7rem;
-        display: none; /* Ocultar descripción en móviles muy pequeños */
-    }
-}
+.slider-slide .slider-img-wrapper { width: 100%; height: 100%; display: flex; align-items: stretch; justify-content: center; position: relative; z-index: 1; }
+.slider-slide img { width: 100%; height: 100%; object-fit: cover; border-radius: 20px; transition: filter 0.3s ease; background: #000; overflow: hidden; }
+.slider-slide .slider-overlay { position: absolute; left: 0; right: 0; bottom: 0; padding: 24px; background: linear-gradient(0deg, rgba(0,0,0,0.9) 60%, rgba(0,0,0,0.0) 100%); color: #fff; z-index: 2; width: 100%; box-sizing: border-box; min-height: 90px; display: flex; flex-direction: column; justify-content: flex-end; border-bottom-left-radius: 20px; border-bottom-right-radius: 20px; }
+.slider-nav { position: absolute; top: 0; left: 0; right: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+.slider-nav-btn { pointer-events: all; background: rgba(0,0,0,0.7); border: none; color: #fff; width: 80px; height: 464px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 2.2rem; border-radius: 20px; transition: background 0.2s ease; opacity: 0.8; position: absolute; top: 0; bottom: 0; margin: auto 0; }
+.slider-nav-btn.prev { left: 0; }
+.slider-nav-btn.next { right: 0; }
+.slider-nav-btn:hover { background: var(--primary-color); opacity: 1; }
+.slider-nav-btn:disabled { opacity: 0.2; cursor: not-allowed; }
+.slider-pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 16px; position: relative; z-index: 10; }
+.slider-pagination-dot { width: 12px; height: 12px; border-radius: 50%; background-color: rgba(255,255,255,0.3); border: none; cursor: pointer; transition: all 0.3s ease; flex-shrink: 0; }
+.slider-pagination-dot.active { background-color: var(--primary-color); transform: scale(1.2); }
+.slider-pagination-dot:hover { background-color: rgba(255,255,255,0.5); transform: scale(1.1); }
+@media (max-width: 900px) { #slider-wrapper, .slider-skeleton { gap: 20px; padding: 0 2.5%; } .slider-slide, .slider-skeleton-item { width: 95%; min-width: 95%; max-width: 95%; height: 320px; border-radius: 16px; } .slider-slide img, .slider-slide .slider-overlay { border-radius: 16px; } .slider-nav-btn { width: 60px; height: 320px; border-radius: 16px; } }
+@media (max-width: 768px) { #slider-wrapper, .slider-skeleton { gap: 16px; padding: 0 1%; } .slider-slide, .slider-skeleton-item { width: 98%; min-width: 98%; max-width: 98%; height: 240px; border-radius: 12px; } .slider-slide img, .slider-slide .slider-overlay { border-radius: 12px; } .slider-nav-btn { width: 50px; height: 240px; border-radius: 12px; } }
+@media (max-width: 480px) { #slider-wrapper, .slider-skeleton { gap: 12px; padding: 0 0.5%; } .slider-slide, .slider-skeleton-item { width: 99%; min-width: 99%; max-width: 99%; height: 200px; border-radius: 10px; } .slider-slide img, .slider-slide .slider-overlay { border-radius: 10px; } .slider-nav-btn { width: 40px; height: 200px; border-radius: 10px; } }
+@media (max-width: 375px) { #slider-wrapper, .slider-skeleton { gap: 10px; padding: 0 0.25%; } .slider-slide, .slider-skeleton-item { width: 99.5%; min-width: 99.5%; max-width: 99.5%; height: 180px; border-radius: 8px; } .slider-slide img, .slider-slide .slider-overlay { border-radius: 8px; } .slider-nav-btn { width: 35px; height: 180px; border-radius: 8px; } }
+@keyframes spin { to { transform: rotate(360deg); } }
