@@ -1814,7 +1814,7 @@
     }
 }
 
-/* === SLIDER CAROUSEL PROFESIONAL TIPO RAKUTEN.TV === */
+/* === SLIDER CAROUSEL RAKUTEN.TV REPLICA EXACTA === */
 .slider-section {
     margin-bottom: 40px;
     position: relative;
@@ -1846,8 +1846,8 @@
     box-sizing: border-box;
     scroll-snap-type: x mandatory;
     position: relative;
-    padding-left: var(--slider-side-padding, 0px);
-    padding-right: var(--slider-side-padding, 0px);
+    padding-left: 5vw;
+    padding-right: 5vw;
 }
 #slider-wrapper::-webkit-scrollbar { display: none; }
 .slider-skeleton {
@@ -1855,12 +1855,12 @@
     width: 100%;
     gap: 24px;
     box-sizing: border-box;
-    padding-left: var(--slider-side-padding, 0px);
-    padding-right: var(--slider-side-padding, 0px);
+    padding-left: 5vw;
+    padding-right: 5vw;
 }
 .slider-skeleton::-webkit-scrollbar { display: none; }
 .slider-skeleton-item {
-    width: 640px; min-width: 640px; max-width: 640px; height: 360px;
+    width: 80vw; min-width: 80vw; max-width: 80vw; height: 360px;
     border-radius: 24px; background-color: #2a2a2a;
     position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; scroll-snap-align: center;
 }
@@ -1868,7 +1868,7 @@
     width: 60px; height: 60px; border: 6px solid rgba(255,255,255,0.1); border-radius: 50%; border-top-color: #e50914; animation: spin 1s linear infinite;
 }
 .slider-slide {
-    width: 640px; min-width: 640px; max-width: 640px; height: 360px;
+    width: 80vw; min-width: 80vw; max-width: 80vw; height: 360px;
     border-radius: 24px; overflow: hidden; position: relative; background: transparent;
     transition: transform 0.3s ease; cursor: pointer; scroll-snap-align: center; flex-shrink: 0; box-shadow: 0 8px 32px rgba(0,0,0,0.45);
     display: flex; flex-direction: column;
@@ -1886,7 +1886,7 @@
 .slider-pagination-dot { width: 12px; height: 12px; border-radius: 50%; background-color: rgba(255,255,255,0.3); border: none; cursor: pointer; transition: all 0.3s ease; flex-shrink: 0; }
 .slider-pagination-dot.active { background-color: var(--primary-color); transform: scale(1.2); }
 .slider-pagination-dot:hover { background-color: rgba(255,255,255,0.5); transform: scale(1.1); }
-@media (max-width: 900px) { .slider-skeleton-item, .slider-slide { width: 480px; min-width: 480px; max-width: 480px; height: 270px; border-radius: 18px; } .slider-slide img, .slider-slide .slider-overlay { border-radius: 18px; } .slider-nav-btn { width: 48px; height: 270px; border-radius: 18px; } }
-@media (max-width: 600px) { .slider-skeleton-item, .slider-slide { width: 320px; min-width: 320px; max-width: 320px; height: 180px; border-radius: 12px; } .slider-slide img, .slider-slide .slider-overlay { border-radius: 12px; } .slider-nav-btn { width: 32px; height: 180px; border-radius: 12px; } .slider-slide .slider-overlay { padding: 10px; min-height: 40px; font-size: 0.9rem; } }
-@media (max-width: 400px) { .slider-skeleton-item, .slider-slide { width: 240px; min-width: 240px; max-width: 240px; height: 120px; border-radius: 8px; } .slider-slide img, .slider-slide .slider-overlay { border-radius: 8px; } .slider-nav-btn { width: 24px; height: 120px; border-radius: 8px; } .slider-slide .slider-overlay { padding: 6px; min-height: 20px; font-size: 0.8rem; } }
+@media (max-width: 900px) { #slider-wrapper, .slider-skeleton { gap: 18px; padding-left: 4vw; padding-right: 4vw; } .slider-skeleton-item, .slider-slide { width: 90vw; min-width: 90vw; max-width: 90vw; height: 270px; border-radius: 18px; } .slider-slide img, .slider-slide .slider-overlay { border-radius: 18px; } .slider-nav-btn { width: 48px; height: 270px; border-radius: 18px; } }
+@media (max-width: 600px) { #slider-wrapper, .slider-skeleton { gap: 12px; padding-left: 2vw; padding-right: 2vw; } .slider-skeleton-item, .slider-slide { width: 95vw; min-width: 95vw; max-width: 95vw; height: 180px; border-radius: 12px; } .slider-slide img, .slider-slide .slider-overlay { border-radius: 12px; } .slider-nav-btn { width: 32px; height: 180px; border-radius: 12px; } .slider-slide .slider-overlay { padding: 10px; min-height: 40px; font-size: 0.9rem; } }
+@media (max-width: 400px) { #slider-wrapper, .slider-skeleton { gap: 8px; padding-left: 1vw; padding-right: 1vw; } .slider-skeleton-item, .slider-slide { width: 98vw; min-width: 98vw; max-width: 98vw; height: 120px; border-radius: 8px; } .slider-slide img, .slider-slide .slider-overlay { border-radius: 8px; } .slider-nav-btn { width: 24px; height: 120px; border-radius: 8px; } .slider-slide .slider-overlay { padding: 6px; min-height: 20px; font-size: 0.8rem; } }
 @keyframes spin { to { transform: rotate(360deg); } }

@@ -1,4 +1,4 @@
-// Slider profesional tipo Rakuten.tv - Carousel con items adyacentes, bordes redondeados y responsive
+// Slider tipo Rakuten.tv - Carousel con items adyacentes, bordes redondeados y responsive
 (function () {
     const SLIDER_SELECTOR = '#slider-wrapper';
     const SKELETON_SELECTOR = '#slider-skeleton';
@@ -8,18 +8,16 @@
     const SLIDE_CLASS = 'slider-slide';
     let currentIndex = 0;
     let totalSlides = 0;
-    let slideWidth = 640;
-    let gap = 24;
     let isAnimating = false;
     let lastHash = '';
 
-    // Breakpoints y anchos
-    function getSlideWidth() {
+    // Breakpoints y anchos en porcentaje
+    function getSlideWidthPercent() {
         const w = window.innerWidth;
-        if (w <= 400) return 240;
-        if (w <= 600) return 320;
-        if (w <= 900) return 480;
-        return 640;
+        if (w <= 400) return 0.98;
+        if (w <= 600) return 0.95;
+        if (w <= 900) return 0.90;
+        return 0.80;
     }
     function getGap() {
         const w = window.innerWidth;
@@ -28,19 +26,8 @@
         if (w <= 900) return 18;
         return 24;
     }
-    // Calcula el padding lateral para centrar el slide activo
-    function setSidePadding() {
-        slideWidth = getSlideWidth();
-        gap = getGap();
-        const wrapper = document.querySelector(SLIDER_SELECTOR);
-        if (!wrapper) return;
-        const vw = window.innerWidth;
-        const padding = Math.max(0, (vw - slideWidth) / 2);
-        wrapper.style.setProperty('--slider-side-padding', padding + 'px');
-    }
     // Renderiza el slider
     function renderSlider() {
-        setSidePadding();
         const sliderWrapper = document.querySelector(SLIDER_SELECTOR);
         const sliderSkeleton = document.querySelector(SKELETON_SELECTOR);
         if (!sliderWrapper || !sliderSkeleton) return;
@@ -161,21 +148,24 @@
             isDown = false;
             const slide = wrapper.querySelector('.slider-slide');
             if (!slide) return;
-            const idx = Math.round(wrapper.scrollLeft / (slide.offsetWidth + gap));
+            const slidePx = slide.offsetWidth;
+            const gap = getGap();
+            const idx = Math.round(wrapper.scrollLeft / (slidePx + gap));
             goToSlide(idx);
         });
         wrapper.addEventListener('pointerleave', () => { isDown = false; });
     }
     // Ir a un slide específico
     function goToSlide(idx, instant) {
-        setSidePadding();
         if (idx < 0) idx = 0;
         if (idx >= totalSlides) idx = totalSlides - 1;
         currentIndex = idx;
         const wrapper = document.querySelector(SLIDER_SELECTOR);
         const slide = wrapper.querySelector('.slider-slide');
         if (!slide) return;
-        const scrollPosition = (slide.offsetWidth + gap) * idx;
+        const slidePx = slide.offsetWidth;
+        const gap = getGap();
+        const scrollPosition = (slidePx + gap) * idx;
         wrapper.scrollTo({ left: scrollPosition, behavior: instant ? 'auto' : 'smooth' });
         updatePagination(idx);
         updateNavButtons();
@@ -196,7 +186,6 @@
     }
     // Recalcula todo en resize
     function onResize() {
-        setSidePadding();
         goToSlide(currentIndex, true);
     }
     // Inicialización automática cuando el carrusel esté listo
