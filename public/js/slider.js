@@ -154,6 +154,16 @@
                 window.detailsModal.show(item);
                 console.log('Slider: Modal abierto correctamente');
                 
+                // Verificar que el modal sigue abierto después de un momento
+                setTimeout(() => {
+                    const modalOverlay = document.getElementById('details-modal-overlay');
+                    if (modalOverlay && modalOverlay.style.display === 'block') {
+                        console.log('Slider: Modal sigue abierto después de 500ms');
+                    } else {
+                        console.log('Slider: Modal se cerró automáticamente');
+                    }
+                }, 500);
+                
                 // Actualizar el hash
                 const hash = `#id=${item.id}&title=${encodeURIComponent(item.title)}`;
                 window.location.hash = hash;
@@ -368,7 +378,30 @@
             console.log('Target:', e.target);
             console.log('Closest slider-slide:', e.target.closest('.slider-slide'));
         }
+        
+        // Debug para modal
+        if (e.target.closest('#details-modal-overlay')) {
+            console.log('Slider: Click en modal detectado');
+        }
     });
+    
+    // Debug para cambios en el modal
+    const modalObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                const modalOverlay = document.getElementById('details-modal-overlay');
+                if (modalOverlay) {
+                    console.log('Slider: Modal display cambió a:', modalOverlay.style.display);
+                }
+            }
+        });
+    });
+    
+    // Observar cambios en el modal
+    const modalOverlay = document.getElementById('details-modal-overlay');
+    if (modalOverlay) {
+        modalObserver.observe(modalOverlay, { attributes: true });
+    }
     
     waitForCarousel();
     // Exponer para debug
@@ -389,6 +422,14 @@
                     try {
                         window.detailsModal.show(testItem);
                         console.log('Modal abierto correctamente');
+                        
+                        // Verificar estado del modal después de 1 segundo
+                        setTimeout(() => {
+                            const modalOverlay = document.getElementById('details-modal-overlay');
+                            console.log('Modal overlay:', modalOverlay);
+                            console.log('Modal display:', modalOverlay?.style.display);
+                            console.log('Modal classList:', modalOverlay?.classList);
+                        }, 1000);
                     } catch (error) {
                         console.error('Error al abrir modal:', error);
                     }
@@ -399,6 +440,27 @@
                 console.error('No hay datos del carrusel');
             }
             console.log('=== FIN TEST ===');
+        },
+        
+        testCarouselModal: function() {
+            console.log('=== TEST CARRUSEL MODAL ===');
+            // Simular exactamente lo que hace el carrusel
+            if (window.carousel && window.carousel.moviesData && window.carousel.moviesData.length > 0) {
+                const testItem = window.carousel.moviesData[0];
+                const testElement = document.querySelector('.custom-carousel-item');
+                
+                if (window.detailsModal && testElement) {
+                    try {
+                        window.detailsModal.show(testItem, testElement);
+                        console.log('Modal del carrusel abierto correctamente');
+                    } catch (error) {
+                        console.error('Error al abrir modal del carrusel:', error);
+                    }
+                } else {
+                    console.error('detailsModal o elemento del carrusel no disponible');
+                }
+            }
+            console.log('=== FIN TEST CARRUSEL ===');
         }
     };
 })(); 
