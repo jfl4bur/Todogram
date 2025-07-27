@@ -2037,7 +2037,7 @@
     }
     .slider-skeleton-item {
         border-radius: 10px;
-        height: 119px;
+        height: 138px;
         box-shadow: none; /* Eliminar box-shadow en skeleton */
     }
 }
