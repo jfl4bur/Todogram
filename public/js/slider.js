@@ -1,38 +1,52 @@
-// Slider tipo Rakuten.tv - Carousel con items adyacentes, bordes redondeados y responsive
-// Autor: Optimizado para Todogram
-
+// Slider profesional tipo Rakuten.tv - Carousel con items adyacentes, bordes redondeados y responsive
 (function () {
     const SLIDER_SELECTOR = '#slider-wrapper';
     const SKELETON_SELECTOR = '#slider-skeleton';
     const PAGINATION_SELECTOR = '#slider-pagination';
     const PREV_SELECTOR = '#slider-prev';
     const NEXT_SELECTOR = '#slider-next';
-
+    const SLIDE_CLASS = 'slider-slide';
     let currentIndex = 0;
     let totalSlides = 0;
+    let slideWidth = 640;
+    let gap = 24;
     let isAnimating = false;
+    let lastHash = '';
 
-    // Utilidad para obtener el gap según el tamaño de pantalla
+    // Breakpoints y anchos
+    function getSlideWidth() {
+        const w = window.innerWidth;
+        if (w <= 400) return 240;
+        if (w <= 600) return 320;
+        if (w <= 900) return 480;
+        return 640;
+    }
     function getGap() {
         const w = window.innerWidth;
-        if (w <= 375) return 10;
-        if (w <= 480) return 12;
-        if (w <= 768) return 16;
-        if (w <= 900) return 20;
+        if (w <= 400) return 8;
+        if (w <= 600) return 12;
+        if (w <= 900) return 18;
         return 24;
     }
-
+    // Calcula el padding lateral para centrar el slide activo
+    function setSidePadding() {
+        slideWidth = getSlideWidth();
+        gap = getGap();
+        const wrapper = document.querySelector(SLIDER_SELECTOR);
+        if (!wrapper) return;
+        const vw = window.innerWidth;
+        const padding = Math.max(0, (vw - slideWidth) / 2);
+        wrapper.style.setProperty('--slider-side-padding', padding + 'px');
+    }
     // Renderiza el slider
     function renderSlider() {
+        setSidePadding();
         const sliderWrapper = document.querySelector(SLIDER_SELECTOR);
         const sliderSkeleton = document.querySelector(SKELETON_SELECTOR);
         if (!sliderWrapper || !sliderSkeleton) return;
-
-        // Oculta skeleton y muestra slider
         sliderSkeleton.style.display = 'none';
         sliderWrapper.style.display = 'flex';
         sliderWrapper.innerHTML = '';
-
         // Usar los datos del carrusel
         const peliculas = window.carousel.moviesData;
         // Detecta todos los géneros únicos disponibles
@@ -54,7 +68,7 @@
         // Renderiza cada slide
         seleccionadas.forEach((item, idx) => {
             const div = document.createElement('div');
-            div.className = 'slider-slide';
+            div.className = SLIDE_CLASS;
             div.setAttribute('data-slide-index', idx);
             div.tabIndex = 0;
             div.setAttribute('role', 'button');
@@ -69,13 +83,11 @@
                     <div class="slider-description">${item.description || ''}</div>
                 </div>
             `;
-            div.addEventListener('click', () => {
-                if (window.detailsModal) window.detailsModal.show(item, div);
-            });
+            div.addEventListener('click', () => openDetails(item, idx));
             div.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
-                    if (window.detailsModal) window.detailsModal.show(item, div);
+                    openDetails(item, idx);
                 }
             });
             sliderWrapper.appendChild(div);
@@ -85,7 +97,27 @@
         setupSwipe();
         goToSlide(0, true);
     }
-
+    // Abre el details-modal y sincroniza el hash
+    function openDetails(item, idx) {
+        if (window.detailsModal) window.detailsModal.show(item);
+        window.location.hash = `#movie-${item.id}`;
+        lastHash = window.location.hash;
+    }
+    // Sincroniza el modal con el hash
+    function syncHashModal() {
+        if (!window.carousel || !window.carousel.moviesData) return;
+        const hash = window.location.hash;
+        if (hash && hash.startsWith('#movie-')) {
+            const id = hash.replace('#movie-', '');
+            const item = window.carousel.moviesData.find(m => m.id == id);
+            if (item && window.detailsModal) {
+                window.detailsModal.show(item);
+                // Ir al slide correspondiente
+                const idx = Array.from(document.querySelectorAll('.slider-slide')).findIndex(slide => slide.innerHTML.includes(item.title));
+                if (idx >= 0) goToSlide(idx);
+            }
+        }
+    }
     // Crea la paginación
     function createPagination(n) {
         const pagination = document.querySelector(PAGINATION_SELECTOR);
@@ -101,7 +133,6 @@
             pagination.appendChild(dot);
         }
     }
-
     // Navegación con flechas
     function setupNav() {
         const prevBtn = document.querySelector(PREV_SELECTOR);
@@ -111,7 +142,6 @@
         nextBtn.onclick = () => goToSlide(currentIndex + 1);
         updateNavButtons();
     }
-
     // Swipe/touch
     function setupSwipe() {
         const wrapper = document.querySelector(SLIDER_SELECTOR);
@@ -131,37 +161,31 @@
             isDown = false;
             const slide = wrapper.querySelector('.slider-slide');
             if (!slide) return;
-            const slideWidth = slide.offsetWidth;
-            const gap = getGap();
-            const idx = Math.round(wrapper.scrollLeft / (slideWidth + gap));
+            const idx = Math.round(wrapper.scrollLeft / (slide.offsetWidth + gap));
             goToSlide(idx);
         });
         wrapper.addEventListener('pointerleave', () => { isDown = false; });
     }
-
     // Ir a un slide específico
     function goToSlide(idx, instant) {
+        setSidePadding();
         if (idx < 0) idx = 0;
         if (idx >= totalSlides) idx = totalSlides - 1;
         currentIndex = idx;
         const wrapper = document.querySelector(SLIDER_SELECTOR);
         const slide = wrapper.querySelector('.slider-slide');
         if (!slide) return;
-        const slideWidth = slide.offsetWidth;
-        const gap = getGap();
-        const scrollPosition = (slideWidth + gap) * idx;
+        const scrollPosition = (slide.offsetWidth + gap) * idx;
         wrapper.scrollTo({ left: scrollPosition, behavior: instant ? 'auto' : 'smooth' });
         updatePagination(idx);
         updateNavButtons();
     }
-
     // Actualiza la paginación
     function updatePagination(idx) {
         document.querySelectorAll('.slider-pagination-dot').forEach((dot, i) => {
             dot.classList.toggle('active', i === idx);
         });
     }
-
     // Actualiza los botones de navegación
     function updateNavButtons() {
         const prevBtn = document.querySelector(PREV_SELECTOR);
@@ -170,17 +194,23 @@
         prevBtn.style.display = currentIndex === 0 ? 'none' : 'flex';
         nextBtn.style.display = currentIndex === totalSlides - 1 ? 'none' : 'flex';
     }
-
+    // Recalcula todo en resize
+    function onResize() {
+        setSidePadding();
+        goToSlide(currentIndex, true);
+    }
     // Inicialización automática cuando el carrusel esté listo
     function waitForCarousel() {
         if (window.carousel && window.carousel.moviesData && window.carousel.moviesData.length > 0) {
             renderSlider();
+            syncHashModal();
         } else {
             setTimeout(waitForCarousel, 100);
         }
     }
+    window.addEventListener('resize', onResize);
+    window.addEventListener('hashchange', syncHashModal);
     waitForCarousel();
-
     // Exponer para debug
     window.slider = { goToSlide };
 })(); 
