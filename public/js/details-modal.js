@@ -71,6 +71,7 @@ class DetailsModal {
         `;
         
         this.detailsModalOverlay.style.display = 'block';
+        this.detailsModalOverlay.classList.add('show');
         document.body.style.overflow = 'hidden';
         
         if (this.isIOS()) {
@@ -270,6 +271,7 @@ class DetailsModal {
         this.detailsModalContent.style.transform = 'translateY(20px)';
         this.detailsModalContent.style.opacity = '0';
         this.detailsModalOverlay.style.opacity = '0';
+        this.detailsModalOverlay.classList.remove('show');
         
         setTimeout(() => {
             this.detailsModalOverlay.style.display = 'none';
@@ -484,32 +486,4 @@ class DetailsModal {
 
     createCastSection(cast) {
         if (!cast || cast.length === 0) return '';
-        return `<div class="details-modal-cast"><h3 class="details-modal-cast-title">Reparto principal</h3><div class="details-modal-cast-list">${cast.map(person => `<div class="details-modal-cast-item"><img class="details-modal-cast-photo" src="${person.profile_path ? `https://image.tmdb.org/t/p/w185${person.profile_path}` : 'https://www.themoviedb.org/assets/2/v4/glyphicons/basic/glyphicons-basic-4-user-grey-d8fe957375e70239d6abdd549fd7568c89281b2179b5f4470e2e12895792dfa5.svg'}" alt="${person.name}" loading="lazy"><div class="details-modal-cast-name">${person.name}</div><div class="details-modal-cast-character">${person.character}</div></div>`).join('')}</div></div>`;
-    }
-
-    createCrewSection(crew, title) {
-        if (!crew || crew.length === 0) return '';
-        return `<div class="details-modal-crew"><h3 class="details-modal-crew-title">${title}</h3><div class="details-modal-crew-list">${crew.slice(0, 6).map(person => `<div class="details-modal-crew-item"><img class="details-modal-crew-photo" src="${person.profile_path ? `https://image.tmdb.org/t/p/w185${person.profile_path}` : 'https://www.themoviedb.org/assets/2/v4/glyphicons/basic/glyphicons-basic-4-user-grey-d8fe957375e70239d6abdd549fd7568c89281b2179b5f4470e2e12895792dfa5.svg'}" alt="${person.name}" loading="lazy"><div class="details-modal-crew-info"><div class="details-modal-crew-name">${person.name}</div><div class="details-modal-crew-role">${title}</div></div></div>`).join('')}</div></div>`;
-    }
-
-    createAudioSubtitlesSection(audiosCount, subtitlesCount, audioList, subtitleList) {
-        let audioContent = '';
-        let subtitleContent = '';
-        if (audioList.length > 0) {
-            audioContent = `<div class="audio-subtitles-item" onclick="this.classList.toggle('expanded')"><i class="fas fa-volume-up"></i><span>Audios (${audiosCount})</span><div class="expandable-content">${audioList.map(audio => `<div>· ${audio}</div>`).join('')}</div></div>`;
-        }
-        if (subtitleList.length > 0) {
-            subtitleContent = `<div class="audio-subtitles-item" onclick="this.classList.toggle('expanded')"><i class="fas fa-closed-captioning"></i><span>Subtítulos (${subtitlesCount})</span><div class="expandable-content">${subtitleList.map(sub => `<div>· ${sub}</div>`).join('')}</div></div>`;
-        }
-        if (audioContent || subtitleContent) {
-            return `<div class="audio-subtitles-info">${audioContent}${audioContent && subtitleContent ? '<span class="details-modal-meta-separator">•</span>' : ''}${subtitleContent}</div>`;
-        }
-        return '';
-    }
-
-    generateDownloadUrl(videoUrl) {
-        if (!videoUrl) return '#';
-        if (videoUrl.includes('?') || videoUrl.includes('#')) return videoUrl + '&dl=1';
-        return videoUrl + '?dl=1';
-    }
-}
+        return `<div class="details-modal-cast"><h3 class="details-modal-cast-title">Reparto principal</h3><div class="details-modal-cast-list">${cast.map(person => `<div class="details-modal-cast-item"><img class="details-modal-cast-photo" src="${person.profile_path ? `

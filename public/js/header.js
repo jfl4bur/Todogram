@@ -99,39 +99,61 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Función para manejar scroll en el details modal
   function onModalScroll() {
-    if (!isScrolling) {
-      isScrolling = true;
-      requestAnimationFrame(() => {
-        const detailsModal = document.querySelector('.details-modal-overlay');
-        if (detailsModal && detailsModal.classList.contains('show')) {
-          const modalScrollTop = detailsModal.scrollTop;
-          const lastModalScroll = parseInt(detailsModal.dataset.lastScroll) || 0;
-          
-          // Efecto de fondo translúcido
-          if (modalScrollTop > 10) {
-            header.classList.add('scrolled');
-          } else {
-            header.classList.remove('scrolled');
-          }
-          
-          // Ocultar/mostrar header basado en dirección del scroll del modal
-          if (modalScrollTop > lastModalScroll && modalScrollTop > 50) {
-            // Scroll hacia abajo en modal - ocultar header
-            header.classList.add('hidden');
-          } else if (modalScrollTop < lastModalScroll) {
-            // Scroll hacia arriba en modal - mostrar header
-            header.classList.remove('hidden');
-          }
-          
-          detailsModal.dataset.lastScroll = modalScrollTop.toString();
-        }
-        isScrolling = false;
-      });
+    const detailsModal = document.querySelector('.details-modal-overlay');
+    if (detailsModal && detailsModal.classList.contains('show')) {
+      const modalScrollTop = detailsModal.scrollTop;
+      const lastModalScroll = parseInt(detailsModal.dataset.lastScroll) || 0;
+      
+      // Efecto de fondo translúcido
+      if (modalScrollTop > 10) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+      
+      // Ocultar/mostrar header basado en dirección del scroll del modal
+      if (modalScrollTop > lastModalScroll && modalScrollTop > 50) {
+        // Scroll hacia abajo en modal - ocultar header
+        header.classList.add('hidden');
+      } else if (modalScrollTop < lastModalScroll) {
+        // Scroll hacia arriba en modal - mostrar header
+        header.classList.remove('hidden');
+      }
+      
+      detailsModal.dataset.lastScroll = modalScrollTop.toString();
+    }
+  }
+  
+  // Función para manejar scroll del body cuando el modal está abierto
+  function onBodyScroll() {
+    const detailsModal = document.querySelector('.details-modal-overlay');
+    if (detailsModal && detailsModal.classList.contains('show')) {
+      const bodyScrollTop = document.body.scrollTop || document.documentElement.scrollTop;
+      const lastBodyScroll = parseInt(detailsModal.dataset.lastBodyScroll) || 0;
+      
+      // Efecto de fondo translúcido
+      if (bodyScrollTop > 10) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+      
+      // Ocultar/mostrar header basado en dirección del scroll
+      if (bodyScrollTop > lastBodyScroll && bodyScrollTop > 50) {
+        // Scroll hacia abajo - ocultar header
+        header.classList.add('hidden');
+      } else if (bodyScrollTop < lastBodyScroll) {
+        // Scroll hacia arriba - mostrar header
+        header.classList.remove('hidden');
+      }
+      
+      detailsModal.dataset.lastBodyScroll = bodyScrollTop.toString();
     }
   }
   
   // Event listeners para scroll
   window.addEventListener('scroll', onScrollHeader);
+  document.addEventListener('scroll', onBodyScroll);
   
   // Función para configurar el scroll del modal
   function setupModalScroll() {
@@ -142,6 +164,8 @@ document.addEventListener('DOMContentLoaded', function() {
       // Añadir nuevo listener
       detailsModal.addEventListener('scroll', onModalScroll);
       detailsModal.dataset.lastScroll = '0';
+      detailsModal.dataset.lastBodyScroll = '0';
+      console.log('Modal scroll listener añadido');
     }
   }
   
@@ -152,13 +176,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const detailsModal = document.querySelector('.details-modal-overlay');
         if (detailsModal && detailsModal.classList.contains('show')) {
           // Modal abierto - configurar scroll
-          setTimeout(setupModalScroll, 100); // Pequeño delay para asegurar que el modal esté completamente abierto
+          setTimeout(setupModalScroll, 200);
+          console.log('Modal abierto, configurando scroll');
         } else {
           // Modal cerrado - remover listener y resetear header
           const modal = document.querySelector('.details-modal-overlay');
           if (modal) {
             modal.removeEventListener('scroll', onModalScroll);
             header.classList.remove('hidden', 'scrolled');
+            console.log('Modal cerrado, limpiando scroll');
           }
         }
       }
@@ -177,7 +203,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (detailsModal && detailsModal.classList.contains('show')) {
       setupModalScroll();
     }
-  }, 500);
+  }, 1000);
   
   onScrollHeader(); // Ejecutar al cargar
 }); 
