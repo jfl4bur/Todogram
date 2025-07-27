@@ -1891,7 +1891,7 @@
 @media (max-width: 400px) { #slider-wrapper, .slider-skeleton { gap: 8px; padding-left: 1vw; padding-right: 1vw; } .slider-skeleton-item, .slider-slide { width: 98vw; min-width: 98vw; max-width: 98vw; height: 120px; border-radius: 8px; } .slider-slide img, .slider-slide .slider-overlay { border-radius: 8px; } .slider-nav-btn { width: 24px; height: 120px; border-radius: 8px; } .slider-slide .slider-overlay { padding: 6px; min-height: 20px; font-size: 0.8rem; } }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* === HEADER RAKUTEN.TV REPLICA === */
+/* HEADER Y MENÚ RESPONSIVE RAKUTEN.TV */
 .slider-header {
   width: 100%;
   background: #141414;
@@ -1904,9 +1904,193 @@
   align-items: center;
   transition: background 0.3s, backdrop-filter 0.3s;
 }
-.slider-header.scrolled {
-  background: rgba(20, 20, 20, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+.slider-header-inner {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  height: 64px;
+  position: relative;
+}
+.slider-logo {
+  display: flex;
+  align-items: center;
+  margin-right: 32px;
+  text-decoration: none;
+}
+.slider-logo svg {
+  height: 38px;
+  width: auto;
+  display: block;
+}
+.slider-nav-menu {
+  display: flex;
+  gap: 24px;
+  align-items: center;
+  margin-left: 16px;
+}
+.slider-nav-link {
+  color: #fff;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: color 0.2s;
+  position: relative;
+  padding: 0 4px;
+  line-height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.slider-nav-link i {
+  font-size: 1.1em;
+}
+.slider-nav-link:hover,
+.slider-nav-link.active {
+  color: var(--primary-color);
+}
+.slider-nav-login {
+  background: var(--primary-color);
+  color: #fff !important;
+  border-radius: 20px;
+  padding: 6px 18px;
+  margin-left: 12px;
+  font-weight: 700;
+  transition: background 0.2s;
+  line-height: normal;
+}
+.slider-nav-login:hover {
+  background: #e00036;
+}
+.slider-header-burger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 40px;
+  height: 40px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  margin-left: 24px;
+  z-index: 3001;
+}
+.slider-header-burger span {
+  display: block;
+  width: 26px;
+  height: 3px;
+  background: #fff;
+  margin: 4px 0;
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+
+/* Menú móvil */
+.slider-mobile-menu-bg {
+  display: none;
+  position: fixed;
+  z-index: 3000;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  transition: opacity 0.3s;
+  opacity: 0;
+  pointer-events: none;
+}
+.slider-mobile-menu-bg.open {
+  display: block;
+  opacity: 1;
+  pointer-events: all;
+}
+.slider-mobile-menu {
+  display: none;
+  flex-direction: column;
+  position: fixed;
+  top: 0; left: 0;
+  width: 80vw;
+  max-width: 320px;
+  height: 100vh;
+  background: #181818;
+  z-index: 3001;
+  padding: 32px 0 0 0;
+  box-shadow: 2px 0 16px rgba(0,0,0,0.25);
+  transform: translateX(-100%);
+  transition: transform 0.3s;
+}
+.slider-mobile-menu.open {
+  display: flex;
+  transform: translateX(0);
+}
+.slider-mobile-menu .slider-nav-link {
+  font-size: 1.15rem;
+  padding: 18px 32px;
+  border-bottom: 1px solid #232323;
+  line-height: 1.2;
+  gap: 16px;
+}
+.slider-mobile-menu .slider-nav-login {
+  margin: 18px 0 8px 0;
+  align-self: flex-start;
+}
+.no-scroll {
+  overflow: hidden !important;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .slider-header-inner {
+    padding: 0 16px;
+    height: 56px;
+  }
+  .slider-logo svg {
+    height: 32px;
+  }
+  .slider-nav-menu {
+    gap: 16px;
+  }
+  .slider-nav-link {
+    font-size: 0.95rem;
+    line-height: 56px;
+  }
+}
+@media (max-width: 800px) {
+  .slider-nav-menu {
+    display: none;
+  }
+  .slider-header-burger {
+    display: flex;
+  }
+}
+@media (max-width: 480px) {
+  .slider-header-inner {
+    height: 44px;
+    padding: 0 4px;
+  }
+  .slider-logo svg {
+    height: 22px;
+  }
+  .slider-header-burger {
+    width: 32px;
+    height: 32px;
+  }
+  .slider-mobile-menu {
+    max-width: 90vw;
+    padding-top: 16px;
+  }
+  .slider-mobile-menu .slider-nav-link {
+    font-size: 1rem;
+    padding: 14px 18px;
+  }
+}
+
+/* Burger menu animación */
+.slider-header-burger.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+.slider-header-burger.open span:nth-child(2) {
+  opacity: 0;
+}
+.slider-header-burger.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
 }

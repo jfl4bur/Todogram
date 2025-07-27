@@ -13,19 +13,31 @@ const headerHTML = `
       </svg>
     </a>
     <nav class="slider-nav-menu">
-      <a href="#" class="slider-nav-link">Inicio</a>
-      <a href="#" class="slider-nav-link">Películas</a>
-      <a href="#" class="slider-nav-link">Series</a>
-      <a href="#" class="slider-nav-link">Infantil</a>
-      <a href="#" class="slider-nav-link">Canales</a>
-      <a href="#" class="slider-nav-link">Tienda</a>
-      <a href="#" class="slider-nav-link">Suscripción</a>
-      <a href="#" class="slider-nav-link">Ayuda</a>
-      <a href="#" class="slider-nav-link slider-nav-login">Iniciar sesión</a>
+      <a href="#" class="slider-nav-link"><i class="fas fa-home"></i><span>Inicio</span></a>
+      <a href="#" class="slider-nav-link"><i class="fas fa-film"></i><span>Películas</span></a>
+      <a href="#" class="slider-nav-link"><i class="fas fa-tv"></i><span>Series</span></a>
+      <a href="#" class="slider-nav-link"><i class="fas fa-child"></i><span>Infantil</span></a>
+      <a href="#" class="slider-nav-link"><i class="fas fa-th-large"></i><span>Canales</span></a>
+      <a href="#" class="slider-nav-link"><i class="fas fa-store"></i><span>Tienda</span></a>
+      <a href="#" class="slider-nav-link"><i class="fas fa-gem"></i><span>Suscripción</span></a>
+      <a href="#" class="slider-nav-link"><i class="fas fa-question-circle"></i><span>Ayuda</span></a>
+      <a href="#" class="slider-nav-link slider-nav-login"><i class="fas fa-user"></i><span>Iniciar sesión</span></a>
     </nav>
     <button class="slider-header-burger" aria-label="Menú">
       <span></span><span></span><span></span>
     </button>
+    <div class="slider-mobile-menu-bg"></div>
+    <nav class="slider-mobile-menu">
+      <a href="#" class="slider-nav-link"><i class="fas fa-home"></i><span>Inicio</span></a>
+      <a href="#" class="slider-nav-link"><i class="fas fa-film"></i><span>Películas</span></a>
+      <a href="#" class="slider-nav-link"><i class="fas fa-tv"></i><span>Series</span></a>
+      <a href="#" class="slider-nav-link"><i class="fas fa-child"></i><span>Infantil</span></a>
+      <a href="#" class="slider-nav-link"><i class="fas fa-th-large"></i><span>Canales</span></a>
+      <a href="#" class="slider-nav-link"><i class="fas fa-store"></i><span>Tienda</span></a>
+      <a href="#" class="slider-nav-link"><i class="fas fa-gem"></i><span>Suscripción</span></a>
+      <a href="#" class="slider-nav-link"><i class="fas fa-question-circle"></i><span>Ayuda</span></a>
+      <a href="#" class="slider-nav-link slider-nav-login"><i class="fas fa-user"></i><span>Iniciar sesión</span></a>
+    </nav>
   </div>
 </header>
 `;
@@ -37,14 +49,19 @@ document.addEventListener('DOMContentLoaded', function() {
     headerRoot.innerHTML = headerHTML;
   }
 
-  // Menú hamburguesa
+  // Menú hamburguesa y menú móvil
   const burger = document.querySelector('.slider-header-burger');
-  const nav = document.querySelector('.slider-nav-menu');
-  if (burger && nav) {
-    burger.addEventListener('click', function() {
-      burger.classList.toggle('open');
-      nav.classList.toggle('open');
-    });
+  const mobileMenu = document.querySelector('.slider-mobile-menu');
+  const mobileMenuBg = document.querySelector('.slider-mobile-menu-bg');
+  function toggleMobileMenu() {
+    burger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+    mobileMenuBg.classList.toggle('open');
+    document.body.classList.toggle('no-scroll', mobileMenu.classList.contains('open'));
+  }
+  if (burger && mobileMenu && mobileMenuBg) {
+    burger.addEventListener('click', toggleMobileMenu);
+    mobileMenuBg.addEventListener('click', toggleMobileMenu);
   }
 
   // Efecto de fondo translúcido al hacer scroll
