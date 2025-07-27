@@ -33,16 +33,21 @@
         const sliderWrapper = document.querySelector(SLIDER_SELECTOR);
         const sliderSkeleton = document.querySelector(SKELETON_SELECTOR);
         if (!sliderWrapper || !sliderSkeleton) return;
+        
         sliderSkeleton.style.display = 'none';
         sliderWrapper.style.display = 'flex';
         sliderWrapper.innerHTML = '';
+        
         // Usar los datos del carrusel
         const peliculas = window.carousel.moviesData;
+        console.log('Slider: Datos disponibles:', peliculas.length, 'películas');
+        
         // Detecta todos los géneros únicos disponibles
         const generos = new Set();
         peliculas.forEach(p => {
             if (p.genre) p.genre.split(/\s*[·,]\s*/).forEach(g => generos.add(g.trim()));
         });
+        
         // Selecciona la primera película de cada género, sin repeticiones
         const seleccionadas = [];
         const idsIncluidos = new Set();
@@ -53,11 +58,14 @@
                 idsIncluidos.add(peli.id);
             }
         }
+        
         totalSlides = seleccionadas.length;
         console.log('Slider: Renderizando', seleccionadas.length, 'slides');
+        
         // Renderiza cada slide
         seleccionadas.forEach((item, idx) => {
             console.log('Slider: Renderizando slide', idx, ':', item.title);
+            
             const div = document.createElement('div');
             div.className = SLIDE_CLASS;
             div.setAttribute('data-slide-index', idx);
@@ -65,6 +73,7 @@
             div.tabIndex = 0;
             div.setAttribute('role', 'button');
             div.setAttribute('aria-label', item.title);
+            
             div.innerHTML = `
                 <div class="slider-img-wrapper">
                     <img src="${item.postersUrl || item.posterUrl || 'https://via.placeholder.com/1540x464'}" alt="${item.title}" loading="lazy">
@@ -75,27 +84,35 @@
                     <div class="slider-description">${item.description || ''}</div>
                 </div>
             `;
+            
+            // EXACTAMENTE la misma lógica que el carrusel
             div.addEventListener('click', (e) => {
                 e.preventDefault();
-                e.stopPropagation();
-                console.log('Slider: Click en slide:', item.title, 'Item:', item);
-                // Usar exactamente la misma lógica que el carrusel
-                window.detailsModal.show(item, div);
-                // Actualizar el hash
-                updateHash(item);
+                console.log('Slider: Click en slide:', item.title, 'ID:', item.id);
+                console.log('Slider: detailsModal disponible:', !!window.detailsModal);
+                console.log('Slider: detailsModal.show disponible:', !!(window.detailsModal && window.detailsModal.show));
+                
+                if (window.detailsModal && window.detailsModal.show) {
+                    window.detailsModal.show(item, div);
+                    console.log('Slider: Modal abierto exitosamente');
+                } else {
+                    console.error('Slider: detailsModal no disponible');
+                }
             });
+            
             div.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                     e.preventDefault();
                     console.log('Slider: Enter/Space en slide:', item.title);
-                    // Usar exactamente la misma lógica que el carrusel
-                    window.detailsModal.show(item, div);
-                    // Actualizar el hash
-                    updateHash(item);
+                    if (window.detailsModal && window.detailsModal.show) {
+                        window.detailsModal.show(item, div);
+                    }
                 }
             });
+            
             sliderWrapper.appendChild(div);
         });
+        
         createPagination(totalSlides);
         setupNav();
         setupSwipe();
@@ -293,6 +310,10 @@
     }
     // Inicialización automática cuando el carrusel esté listo
     function waitForCarousel() {
+        console.log('Slider: Verificando carrusel...');
+        console.log('Slider: window.carousel:', !!window.carousel);
+        console.log('Slider: window.detailsModal:', !!window.detailsModal);
+        
         if (window.carousel && window.carousel.moviesData && window.carousel.moviesData.length > 0) {
             console.log('Slider: Inicializando con', window.carousel.moviesData.length, 'películas');
             console.log('Slider: Primeras 3 películas:', window.carousel.moviesData.slice(0, 3).map(p => p.title));
@@ -306,7 +327,12 @@
     window.addEventListener('resize', onResize);
     window.addEventListener('hashchange', syncHashModal);
     window.addEventListener('beforeunload', stopAutoplay);
-    waitForCarousel();
+    
+    // Esperar un poco más para asegurar que todo esté inicializado
+    setTimeout(() => {
+        waitForCarousel();
+    }, 1000);
+    
     // Exponer para debug
     window.slider = { goToSlide, startAutoplay, stopAutoplay };
 })(); 
