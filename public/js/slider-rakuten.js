@@ -153,6 +153,16 @@ function createSliderPaginationRakuten(totalSlides) {
     }
 }
 
+// Función para obtener el gap según el tamaño de pantalla
+function getCurrentGap() {
+    const screenWidth = window.innerWidth;
+    if (screenWidth <= 375) return 10;
+    if (screenWidth <= 480) return 12;
+    if (screenWidth <= 768) return 16;
+    if (screenWidth <= 900) return 20;
+    return 24; // Desktop
+}
+
 // Ir a un slide específico
 function goToSlideRakuten(slideIndex) {
     if (isAnimating || slideIndex < 0 || slideIndex >= totalSlides) return;
@@ -161,10 +171,15 @@ function goToSlideRakuten(slideIndex) {
     currentSlideIndex = slideIndex;
     
     const wrapper = document.getElementById('slider-wrapper');
-    const slideWidth = window.innerWidth; // 100vw
+    const slide = wrapper.querySelector('.slider-slide');
+    if (!slide) return;
+    
+    const slideWidth = slide.offsetWidth;
+    const gap = getCurrentGap();
+    const scrollPosition = (slideWidth + gap) * slideIndex;
     
     wrapper.scrollTo({
-        left: slideWidth * slideIndex,
+        left: scrollPosition,
         behavior: 'smooth'
     });
     
@@ -232,9 +247,14 @@ function setupScrollEvents() {
     wrapper.addEventListener('scroll', () => {
         if (isAnimating) return;
         
-        const slideWidth = window.innerWidth;
+        const slide = wrapper.querySelector('.slider-slide');
+        if (!slide) return;
+        
+        const slideWidth = slide.offsetWidth;
+        const gap = getCurrentGap();
+        const totalSlideWidth = slideWidth + gap;
         const currentScroll = wrapper.scrollLeft;
-        const newIndex = Math.round(currentScroll / slideWidth);
+        const newIndex = Math.round(currentScroll / totalSlideWidth);
         
         if (newIndex !== currentSlideIndex) {
             currentSlideIndex = newIndex;
