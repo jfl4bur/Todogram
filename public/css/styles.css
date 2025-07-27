@@ -1971,7 +1971,7 @@
     .slider-skeleton-item {
         width: 100%;
         min-width: 100%;
-        height: 255px;
+        height: px;
         border-radius: 18px;
         margin: 32px 0;
         box-shadow: none; /* Eliminar box-shadow en skeleton */
@@ -2037,6 +2037,7 @@
     }
     .slider-skeleton-item {
         border-radius: 10px;
+        height: 119px;
         box-shadow: none; /* Eliminar box-shadow en skeleton */
     }
 }
@@ -2057,6 +2058,7 @@
     }
     .slider-skeleton-item {
         border-radius: 10px;
+        height: 116px;
         box-shadow: none; /* Eliminar box-shadow en skeleton */
     }
 }
