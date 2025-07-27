@@ -2201,6 +2201,9 @@ body {
   .slider-header-burger {
     display: flex;
   }
+  .slider-nav-login {
+    display: none;
+  }
 }
 @media (max-width: 480px) {
   .slider-header-inner {
