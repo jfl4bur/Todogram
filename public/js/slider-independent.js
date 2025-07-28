@@ -169,33 +169,30 @@
                 const computedStyle = getComputedStyle(firstSlide);
                 console.log('Slider Independiente: Tamaño del primer slide - Width:', computedStyle.width, 'Flex-basis:', computedStyle.flexBasis);
                 
-                // Verificar si el tamaño es correcto
-                const viewportWidth = window.innerWidth;
-                const expectedWidth = Math.floor(viewportWidth * 0.87);
-                const currentWidth = parseInt(computedStyle.width);
-                
-                if (computedStyle.width === 'auto' || computedStyle.width === '0px' || currentWidth < expectedWidth * 0.8) {
+                // Forzar actualización de estilos si es necesario
+                if (computedStyle.width === 'auto' || computedStyle.width === '0px') {
                     console.log('Slider Independiente: Detectado tamaño incorrecto, forzando actualización...');
-                    console.log('Slider Independiente: Ancho esperado:', expectedWidth, 'Ancho actual:', currentWidth);
+                    updateSliderCSSVariables();
                     
-                    // Re-aplicar estilos a todos los slides con valores calculados
+                    // Re-aplicar estilos a todos los slides
                     slides.forEach((slide, index) => {
-                        const calculatedWidth = Math.floor(viewportWidth * 0.87);
-                        const calculatedGap = Math.floor(viewportWidth * 0.02);
+                        const slideWidth = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width');
+                        const slideGap = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-gap');
                         
-                        // Aplicar estilos directamente
-                        slide.style.flexBasis = `${calculatedWidth}px`;
-                        slide.style.width = `${calculatedWidth}px`;
-                        slide.style.minWidth = `${calculatedWidth}px`;
-                        slide.style.maxWidth = `${calculatedWidth}px`;
-                        slide.style.marginRight = index < slides.length - 1 ? `${calculatedGap}px` : '0';
+                        if (slideWidth && slideWidth !== '') {
+                            slide.style.flexBasis = slideWidth;
+                            slide.style.width = slideWidth;
+                        } else {
+                            const viewportWidth = window.innerWidth;
+                            const calculatedWidth = Math.floor(viewportWidth * 0.87);
+                            slide.style.flexBasis = `${calculatedWidth}px`;
+                            slide.style.width = `${calculatedWidth}px`;
+                        }
                         
-                        // Forzar que no use las variables del carousel
-                        slide.style.setProperty('--item-width', `${calculatedWidth}px`, 'important');
-                        slide.style.setProperty('--item-height', '100%', 'important');
+                        slide.style.marginRight = index < slides.length - 1 ? (slideGap || '16px') : '0';
                     });
                     
-                    console.log('Slider Independiente: Estilos forzados aplicados con valores calculados');
+                    console.log('Slider Independiente: Estilos forzados aplicados');
                 }
             }
         }, 100);
@@ -212,25 +209,19 @@
             const slideWidth = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width');
             const slideGap = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-gap');
             
-            // Calcular valores directamente como fallback
-            const viewportWidth = window.innerWidth;
-            const calculatedWidth = Math.floor(viewportWidth * 0.87);
-            const calculatedGap = Math.floor(viewportWidth * 0.02);
+            // Aplicar valores directamente si las variables CSS están disponibles
+            if (slideWidth && slideWidth !== '') {
+                slideDiv.style.flexBasis = slideWidth;
+                slideDiv.style.width = slideWidth;
+            } else {
+                // Fallback: calcular valores directamente
+                const viewportWidth = window.innerWidth;
+                const calculatedWidth = Math.floor(viewportWidth * 0.87);
+                slideDiv.style.flexBasis = `${calculatedWidth}px`;
+                slideDiv.style.width = `${calculatedWidth}px`;
+            }
             
-            // Aplicar valores con prioridad: variables CSS > valores calculados
-            const finalWidth = (slideWidth && slideWidth !== '') ? slideWidth : `${calculatedWidth}px`;
-            const finalGap = (slideGap && slideGap !== '') ? slideGap : `${calculatedGap}px`;
-            
-            // Aplicar estilos directamente
-            slideDiv.style.flexBasis = finalWidth;
-            slideDiv.style.width = finalWidth;
-            slideDiv.style.minWidth = finalWidth;
-            slideDiv.style.maxWidth = finalWidth;
-            slideDiv.style.marginRight = index < slidesData.length - 1 ? finalGap : '0';
-            
-            // Forzar que no use las variables del carousel
-            slideDiv.style.setProperty('--item-width', finalWidth, 'important');
-            slideDiv.style.setProperty('--item-height', '100%', 'important');
+            slideDiv.style.marginRight = index < slidesData.length - 1 ? (slideGap || '16px') : '0';
             
             // Usar la imagen correcta según los datos disponibles
             const imageUrl = movie.postersUrl || movie.posterUrl || movie.imageUrl || 
@@ -425,32 +416,16 @@
                     const computedStyle = getComputedStyle(firstSlide);
                     console.log('Slider Independiente: Verificación final - Width:', computedStyle.width, 'Flex-basis:', computedStyle.flexBasis);
                     
-                    // Verificar si el tamaño es correcto
-                    const viewportWidth = window.innerWidth;
-                    const expectedWidth = Math.floor(viewportWidth * 0.87);
-                    const currentWidth = parseInt(computedStyle.width);
-                    
-                    if (computedStyle.width === 'auto' || computedStyle.width === '0px' || currentWidth < expectedWidth * 0.8) {
-                        console.log('Slider Independiente: Tamaño incorrecto detectado, forzando corrección final...');
-                        console.log('Slider Independiente: Ancho esperado:', expectedWidth, 'Ancho actual:', currentWidth);
-                        
+                    // Si el tamaño sigue siendo incorrecto, forzar actualización
+                    if (computedStyle.width === 'auto' || computedStyle.width === '0px') {
+                        console.log('Slider Independiente: Tamaño incorrecto detectado, forzando corrección...');
                         slides.forEach((slide, index) => {
+                            const viewportWidth = window.innerWidth;
                             const calculatedWidth = Math.floor(viewportWidth * 0.87);
-                            const calculatedGap = Math.floor(viewportWidth * 0.02);
-                            
-                            // Aplicar estilos directamente
                             slide.style.flexBasis = `${calculatedWidth}px`;
                             slide.style.width = `${calculatedWidth}px`;
-                            slide.style.minWidth = `${calculatedWidth}px`;
-                            slide.style.maxWidth = `${calculatedWidth}px`;
-                            slide.style.marginRight = index < slides.length - 1 ? `${calculatedGap}px` : '0';
-                            
-                            // Forzar que no use las variables del carousel
-                            slide.style.setProperty('--item-width', `${calculatedWidth}px`, 'important');
-                            slide.style.setProperty('--item-height', '100%', 'important');
+                            slide.style.marginRight = index < slides.length - 1 ? '16px' : '0';
                         });
-                        
-                        console.log('Slider Independiente: Corrección final aplicada');
                     }
                 }
             }, 300);
