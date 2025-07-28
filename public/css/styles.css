@@ -2197,6 +2197,19 @@ html {
     margin-right: var(--slider-slide-gap) !important;
 }
 
+/* Regla más específica para forzar el tamaño correcto */
+.slider-section .slider-container .slider-wrapper .slider-slide {
+    width: 90vw !important;
+    flex: 0 0 90vw !important;
+    min-width: 90vw !important;
+    max-width: 90vw !important;
+    height: 100% !important;
+    margin-right: 2vw !important;
+    /* Sobrescribir cualquier variable del carousel */
+    --item-width: 90vw !important;
+    --item-height: 100% !important;
+}
+
 /* Resetear estilos base del slider */
 .slider-section {
     position: relative !important;
