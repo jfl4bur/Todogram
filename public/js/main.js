@@ -93,10 +93,23 @@ document.addEventListener('DOMContentLoaded', function () {
             const urlParams = detailsModal.getItemIdFromUrl();
             if (urlParams) {
                 console.log('Parámetros de URL encontrados:', urlParams);
-                const item = carousel.moviesData.find(movie => movie.id === urlParams.id);
+                
+                // Buscar en el carousel primero
+                let item = carousel.moviesData.find(movie => movie.id === urlParams.id);
+                let itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
+                
+                // Si no se encuentra en el carousel, buscar en el slider independiente
+                if (!item && window.sliderIndependent) {
+                    const sliderData = window.sliderIndependent.getSlidesData();
+                    item = sliderData.find(movie => movie.id === urlParams.id);
+                    if (item) {
+                        itemElement = document.querySelector(`.slider-slide[data-index]`);
+                        console.log('Película encontrada en slider independiente:', item);
+                    }
+                }
+                
                 if (item) {
                     console.log('Película encontrada:', item);
-                    const itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
                     if (itemElement) {
                         console.log('Elemento DOM encontrado:', itemElement);
                         detailsModal.show(item, itemElement);

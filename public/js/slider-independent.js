@@ -164,9 +164,7 @@
                 if (!isTransitioning) {
                     e.preventDefault();
                     console.log('Slider Independiente: Click en slide:', movie.title);
-                    if (window.detailsModal && typeof window.detailsModal.show === 'function') {
-                        window.detailsModal.show(movie, slideDiv);
-                    }
+                    openDetailsModal(movie, slideDiv);
                 }
             });
 
@@ -336,6 +334,40 @@
         init();
     }
 
+    // Función para abrir modal de detalles de forma segura
+    function openDetailsModal(movie, element) {
+        console.log('Slider Independiente: Intentando abrir modal para:', movie.title);
+        
+        // Función interna para intentar abrir el modal
+        function tryOpenModal() {
+            if (window.detailsModal && typeof window.detailsModal.show === 'function') {
+                window.detailsModal.show(movie, element);
+                window.activeItem = movie;
+                console.log('Slider Independiente: Modal abierto exitosamente');
+                return true;
+            }
+            return false;
+        }
+        
+        // Intentar abrir inmediatamente
+        if (!tryOpenModal()) {
+            console.warn('Slider Independiente: Modal no disponible, reintentando...');
+            
+            // Reintentar varias veces con intervalos crecientes
+            let attempts = 0;
+            const maxAttempts = 5;
+            const retryInterval = setInterval(() => {
+                attempts++;
+                if (tryOpenModal()) {
+                    clearInterval(retryInterval);
+                } else if (attempts >= maxAttempts) {
+                    console.error('Slider Independiente: No se pudo abrir el modal después de', maxAttempts, 'intentos');
+                    clearInterval(retryInterval);
+                }
+            }, 200 * attempts); // Intervalo creciente: 200ms, 400ms, 600ms, etc.
+        }
+    }
+
     // Exponer API
     window.sliderIndependent = {
         goToSlide,
@@ -346,7 +378,8 @@
         getSlidesData: () => slidesData,
         init,
         renderSlider,
-        updateSliderCSSVariables
+        updateSliderCSSVariables,
+        openDetailsModal
     };
 
 })(); 
