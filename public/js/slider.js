@@ -1,445 +1,429 @@
-// Slider tipo Rakuten.TV - Réplica exacta del comportamiento
+// Slider Rakuten.TV - Versión funcional completa
 (function () {
     let currentIndex = 0;
     let totalSlides = 0;
     let isTransitioning = false;
     let resizeTimeout = null;
+    let slidesData = [];
 
-    // Función para limpiar estilos existentes que puedan interferir
-    function clearExistingStyles() {
-        const existingStyle = document.getElementById('slider-dynamic-styles');
-        if (existingStyle) {
-            existingStyle.remove();
-        }
+    // Limpiar estilos conflictivos
+    function removeConflictingStyles() {
+        // Remover estilos existentes del slider
+        const existingStyles = document.querySelectorAll('style[id*="slider"], link[href*="slider"]');
+        existingStyles.forEach(style => {
+            if (style.id !== 'slider-rakuten-styles') {
+                style.remove();
+            }
+        });
     }
 
-    // Crear estilos CSS completos tipo Rakuten.TV
+    // Crear estilos CSS completos y sin conflictos
     function createRakutenStyles() {
-        clearExistingStyles();
+        removeConflictingStyles();
         
-        const styleElement = document.createElement('style');
-        styleElement.id = 'slider-dynamic-styles';
+        let styleElement = document.getElementById('slider-rakuten-styles');
+        if (styleElement) {
+            styleElement.remove();
+        }
+        
+        styleElement = document.createElement('style');
+        styleElement.id = 'slider-rakuten-styles';
         document.head.appendChild(styleElement);
 
+        const viewportWidth = window.innerWidth;
+        const slideWidth = Math.floor(viewportWidth * 0.87); // 87vw
+        const slideGap = Math.floor(viewportWidth * 0.02); // 2vw gap
+        const sideSpace = Math.floor((viewportWidth - slideWidth) / 2); // Espacio a los lados
+
         styleElement.textContent = `
-            /* Reset y base del slider */
+            /* Resetear estilos base del slider */
             .slider-section {
-                position: relative;
-                width: 100vw;
-                margin: 0;
-                padding: 0;
-                overflow: hidden;
-                background: #141414;
+                position: relative !important;
+                width: 100vw !important;
+                height: 60vh !important;
+                min-height: 400px !important;
+                max-height: 600px !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                overflow: hidden !important;
+                background: #141414 !important;
+                z-index: 1 !important;
             }
 
-            .slider-title {
-                display: none; /* Ocultar título como en Rakuten */
+            .slider-section .slider-title {
+                display: none !important;
             }
 
             .slider-container {
-                position: relative;
-                width: 100%;
-                height: 60vh;
-                min-height: 400px;
-                max-height: 600px;
-                overflow: hidden;
+                position: relative !important;
+                width: 100% !important;
+                height: 100% !important;
+                overflow: hidden !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
 
             .slider-wrapper {
-                display: flex;
-                width: 100%;
-                height: 100%;
-                transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-                will-change: transform;
+                position: relative !important;
+                display: flex !important;
+                height: 100% !important;
+                width: calc(100% + ${slideGap}px) !important;
+                transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+                will-change: transform !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                left: ${sideSpace}px !important;
             }
 
             .slider-slide {
-                flex: 0 0 87vw;
-                width: 87vw;
-                height: 100%;
-                position: relative;
-                margin-right: 1.5vw;
-                border-radius: 0;
-                overflow: hidden;
-                cursor: pointer;
-                background: #000;
+                position: relative !important;
+                flex: 0 0 ${slideWidth}px !important;
+                width: ${slideWidth}px !important;
+                height: 100% !important;
+                margin-right: ${slideGap}px !important;
+                border-radius: 8px !important;
+                overflow: hidden !important;
+                cursor: pointer !important;
+                background: #000 !important;
+                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
+                transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+            }
+
+            .slider-slide:hover {
+                transform: scale(1.02) !important;
+                box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5) !important;
+                z-index: 2 !important;
             }
 
             .slider-slide:last-child {
-                margin-right: 0;
+                margin-right: 0 !important;
             }
 
             .slider-img-wrapper {
-                width: 100%;
-                height: 100%;
-                position: relative;
-                overflow: hidden;
+                position: relative !important;
+                width: 100% !important;
+                height: 100% !important;
+                overflow: hidden !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
 
             .slider-img-wrapper img {
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-                object-position: center;
-                transition: transform 0.3s ease;
+                width: 100% !important;
+                height: 100% !important;
+                object-fit: cover !important;
+                object-position: center !important;
+                transition: transform 0.3s ease !important;
+                display: block !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
 
             .slider-slide:hover .slider-img-wrapper img {
-                transform: scale(1.02);
+                transform: scale(1.05) !important;
             }
 
             .slider-overlay {
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                right: 0;
+                position: absolute !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
                 background: linear-gradient(
                     to top,
                     rgba(0, 0, 0, 0.9) 0%,
                     rgba(0, 0, 0, 0.7) 30%,
                     rgba(0, 0, 0, 0.4) 60%,
                     transparent 100%
-                );
-                padding: 3rem;
-                color: white;
-                opacity: 0;
-                transform: translateY(20px);
-                transition: all 0.3s ease;
-                pointer-events: none;
+                ) !important;
+                padding: 2rem !important;
+                color: white !important;
+                opacity: 0 !important;
+                transform: translateY(20px) !important;
+                transition: all 0.4s ease !important;
+                pointer-events: none !important;
             }
 
             .slider-slide:hover .slider-overlay {
-                opacity: 1;
-                transform: translateY(0);
-                pointer-events: all;
+                opacity: 1 !important;
+                transform: translateY(0) !important;
+                pointer-events: all !important;
             }
 
             .slider-title-movie {
-                font-size: clamp(2rem, 4vw, 3.5rem);
-                font-weight: 700;
-                margin-bottom: 1rem;
-                line-height: 1.2;
-                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+                font-size: clamp(1.5rem, 3vw, 2.5rem) !important;
+                font-weight: 700 !important;
+                margin-bottom: 0.8rem !important;
+                line-height: 1.2 !important;
+                text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8) !important;
+                color: white !important;
             }
 
             .slider-meta {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 1.5rem;
-                margin-bottom: 1.5rem;
-                font-size: 1rem;
-                opacity: 0.9;
+                display: flex !important;
+                flex-wrap: wrap !important;
+                gap: 1rem !important;
+                margin-bottom: 1rem !important;
+                font-size: 0.9rem !important;
+                opacity: 0.9 !important;
             }
 
             .slider-meta span {
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                font-weight: 500;
+                display: flex !important;
+                align-items: center !important;
+                gap: 0.3rem !important;
+                font-weight: 500 !important;
+                color: white !important;
             }
 
             .slider-description {
-                font-size: 1rem;
-                line-height: 1.6;
-                opacity: 0.85;
-                max-width: 60%;
-                display: -webkit-box;
-                -webkit-line-clamp: 4;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
+                font-size: 0.95rem !important;
+                line-height: 1.5 !important;
+                opacity: 0.85 !important;
+                max-width: 70% !important;
+                display: -webkit-box !important;
+                -webkit-line-clamp: 3 !important;
+                -webkit-box-orient: vertical !important;
+                overflow: hidden !important;
+                color: white !important;
             }
 
-            /* Navegación tipo Rakuten.TV */
+            /* Navegación */
             .slider-nav {
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                pointer-events: none;
-                z-index: 20;
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                pointer-events: none !important;
+                z-index: 10 !important;
             }
 
             .slider-nav-btn {
-                width: 60px;
-                height: 60px;
-                border-radius: 50%;
-                background: rgba(255, 255, 255, 0.1);
-                backdrop-filter: blur(10px);
-                border: 2px solid rgba(255, 255, 255, 0.2);
-                color: white;
-                font-size: 1.5rem;
-                cursor: pointer;
-                pointer-events: all;
-                transition: all 0.3s ease;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-                opacity: 0;
-                transform: scale(0.8);
-            }
-
-            .slider-nav-btn:hover {
-                background: rgba(255, 255, 255, 0.2);
-                border-color: rgba(255, 255, 255, 0.4);
-                transform: scale(1.1);
-                box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
-            }
-
-            .slider-nav-btn:active {
-                transform: scale(0.95);
-            }
-
-            .slider-nav-btn.prev {
-                margin-left: 6.5vw;
-                animation: slideInLeft 0.5s ease forwards;
-            }
-
-            .slider-nav-btn.next {
-                margin-right: 6.5vw;
-                animation: slideInRight 0.5s ease forwards;
+                width: 60px !important;
+                height: 60px !important;
+                border-radius: 50% !important;
+                background: rgba(255, 255, 255, 0.15) !important;
+                backdrop-filter: blur(10px) !important;
+                border: 2px solid rgba(255, 255, 255, 0.2) !important;
+                color: white !important;
+                font-size: 1.4rem !important;
+                cursor: pointer !important;
+                pointer-events: all !important;
+                transition: all 0.3s ease !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+                opacity: 0 !important;
+                transform: scale(0.8) !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
 
             .slider-container:hover .slider-nav-btn {
-                opacity: 1;
-                transform: scale(1);
+                opacity: 1 !important;
+                transform: scale(1) !important;
             }
 
-            @keyframes slideInLeft {
-                to {
-                    opacity: 1;
-                    transform: scale(1);
-                }
+            .slider-nav-btn:hover {
+                background: rgba(255, 255, 255, 0.25) !important;
+                border-color: rgba(255, 255, 255, 0.4) !important;
+                transform: scale(1.1) !important;
+                box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5) !important;
             }
 
-            @keyframes slideInRight {
-                to {
-                    opacity: 1;
-                    transform: scale(1);
-                }
+            .slider-nav-btn:active {
+                transform: scale(0.95) !important;
             }
 
-            /* Paginación tipo Rakuten.TV */
+            .slider-nav-btn.prev {
+                margin-left: ${Math.floor(sideSpace / 2 - 30)}px !important;
+            }
+
+            .slider-nav-btn.next {
+                margin-right: ${Math.floor(sideSpace / 2 - 30)}px !important;
+            }
+
+            /* Paginación */
             .slider-pagination {
-                position: absolute;
-                bottom: 2rem;
-                left: 50%;
-                transform: translateX(-50%);
-                display: flex;
-                gap: 0.5rem;
-                z-index: 10;
+                position: absolute !important;
+                bottom: 2rem !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                display: flex !important;
+                gap: 0.5rem !important;
+                z-index: 10 !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
 
             .slider-pagination-dot {
-                width: 10px;
-                height: 10px;
-                border-radius: 50%;
-                background: rgba(255, 255, 255, 0.4);
-                border: none;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                opacity: 0.6;
+                width: 10px !important;
+                height: 10px !important;
+                border-radius: 50% !important;
+                background: rgba(255, 255, 255, 0.4) !important;
+                border: none !important;
+                cursor: pointer !important;
+                transition: all 0.3s ease !important;
+                opacity: 0.6 !important;
+                margin: 0 !important;
+                padding: 0 !important;
             }
 
             .slider-pagination-dot.active {
-                background: #ffffff;
-                opacity: 1;
-                transform: scale(1.2);
+                background: #ffffff !important;
+                opacity: 1 !important;
+                transform: scale(1.2) !important;
             }
 
             .slider-pagination-dot:hover {
-                background: rgba(255, 255, 255, 0.8);
-                opacity: 1;
-                transform: scale(1.1);
+                background: rgba(255, 255, 255, 0.8) !important;
+                opacity: 1 !important;
+                transform: scale(1.1) !important;
             }
 
-            /* Responsive Design */
-            @media (max-width: 1200px) {
-                .slider-slide {
-                    flex: 0 0 85vw;
-                    width: 85vw;
-                }
-                
-                .slider-nav-btn.prev {
-                    margin-left: 7.5vw;
-                }
-                
-                .slider-nav-btn.next {
-                    margin-right: 7.5vw;
-                }
-            }
-
+            /* Responsive */
             @media (max-width: 768px) {
-                .slider-container {
-                    height: 50vh;
-                    min-height: 300px;
-                }
-
-                .slider-slide {
-                    flex: 0 0 90vw;
-                    width: 90vw;
-                    margin-right: 2vw;
+                .slider-section {
+                    height: 50vh !important;
+                    min-height: 300px !important;
                 }
 
                 .slider-nav-btn {
-                    width: 50px;
-                    height: 50px;
-                    font-size: 1.2rem;
-                }
-
-                .slider-nav-btn.prev {
-                    margin-left: 5vw;
-                }
-                
-                .slider-nav-btn.next {
-                    margin-right: 5vw;
+                    width: 50px !important;
+                    height: 50px !important;
+                    font-size: 1.2rem !important;
                 }
 
                 .slider-overlay {
-                    padding: 2rem;
+                    padding: 1.5rem !important;
                 }
 
                 .slider-title-movie {
-                    font-size: clamp(1.5rem, 6vw, 2.5rem);
+                    font-size: clamp(1.2rem, 4vw, 2rem) !important;
                 }
 
                 .slider-description {
-                    max-width: 80%;
-                    font-size: 0.9rem;
-                    -webkit-line-clamp: 3;
+                    max-width: 85% !important;
+                    -webkit-line-clamp: 2 !important;
                 }
             }
 
             @media (max-width: 480px) {
-                .slider-slide {
-                    flex: 0 0 95vw;
-                    width: 95vw;
-                    margin-right: 2.5vw;
-                }
-
                 .slider-nav-btn {
-                    width: 45px;
-                    height: 45px;
-                    font-size: 1rem;
-                }
-
-                .slider-nav-btn.prev {
-                    margin-left: 2.5vw;
-                }
-                
-                .slider-nav-btn.next {
-                    margin-right: 2.5vw;
+                    width: 45px !important;
+                    height: 45px !important;
+                    font-size: 1rem !important;
                 }
 
                 .slider-overlay {
-                    padding: 1.5rem;
-                }
-
-                .slider-description {
-                    max-width: 90%;
-                    -webkit-line-clamp: 2;
+                    padding: 1rem !important;
                 }
             }
         `;
+
+        console.log('Slider: Estilos aplicados - Ancho slide:', slideWidth, 'Gap:', slideGap, 'Espacio lateral:', sideSpace);
     }
 
-    // Función para renderizar el slider
+    // Renderizar slider
     function renderSlider() {
-        console.log('Slider Rakuten: Iniciando renderizado...');
+        console.log('Slider: Iniciando renderizado...');
         
         const sliderWrapper = document.getElementById('slider-wrapper');
-        const sliderContainer = document.querySelector('.slider-container');
-        const sliderSection = document.querySelector('.slider-section');
-        
-        if (!sliderWrapper || !sliderContainer) {
-            console.error('Slider: Elementos no encontrados');
+        if (!sliderWrapper) {
+            console.error('Slider: slider-wrapper no encontrado');
             return;
         }
 
-        // Aplicar estilos tipo Rakuten.TV
-        createRakutenStyles();
-
-        // Limpiar contenido existente
-        sliderWrapper.innerHTML = '';
-        sliderWrapper.style.display = 'flex';
-
-        // Obtener datos del carrusel
+        // Obtener datos
         const movies = window.carousel?.moviesData;
         if (!movies || movies.length === 0) {
             console.error('Slider: No hay datos de películas');
+            setTimeout(renderSlider, 500);
             return;
         }
 
         console.log('Slider: Datos disponibles:', movies.length, 'películas');
 
-        // Seleccionar películas destacadas (diferentes géneros)
-        const selectedMovies = [];
+        // Aplicar estilos
+        createRakutenStyles();
+
+        // Seleccionar películas para el slider
+        slidesData = [];
         const usedGenres = new Set();
         
-        // Priorizar películas con mejor rating o más populares
+        // Ordenar por rating primero
         const sortedMovies = [...movies].sort((a, b) => {
             const ratingA = parseFloat(a.rating) || 0;
             const ratingB = parseFloat(b.rating) || 0;
             return ratingB - ratingA;
         });
 
+        // Seleccionar películas de diferentes géneros
         for (const movie of sortedMovies) {
-            if (movie.genre && !usedGenres.has(movie.genre.split(/[·,]/)[0].trim())) {
-                selectedMovies.push(movie);
-                usedGenres.add(movie.genre.split(/[·,]/)[0].trim());
-                if (selectedMovies.length >= 8) break; // Máximo 8 slides como Rakuten
-            }
-        }
-
-        // Si no hay suficientes por género, completar con las mejores
-        while (selectedMovies.length < Math.min(8, movies.length)) {
-            for (const movie of sortedMovies) {
-                if (!selectedMovies.find(m => m.id === movie.id)) {
-                    selectedMovies.push(movie);
-                    if (selectedMovies.length >= 8) break;
+            if (movie.genre) {
+                const mainGenre = movie.genre.split(/[·,]/)[0].trim();
+                if (!usedGenres.has(mainGenre)) {
+                    slidesData.push(movie);
+                    usedGenres.add(mainGenre);
+                    if (slidesData.length >= 8) break;
                 }
             }
-            break;
         }
 
-        totalSlides = selectedMovies.length;
-        console.log('Slider: Renderizando', totalSlides, 'slides destacados');
+        // Completar si hace falta
+        if (slidesData.length < 6) {
+            for (const movie of sortedMovies) {
+                if (!slidesData.find(m => m.id === movie.id)) {
+                    slidesData.push(movie);
+                    if (slidesData.length >= 8) break;
+                }
+                if (slidesData.length >= 8) break;
+            }
+        }
 
-        // Crear slides
-        selectedMovies.forEach((movie, index) => {
+        totalSlides = slidesData.length;
+        console.log('Slider: Renderizando', totalSlides, 'slides');
+
+        // Limpiar y crear slides
+        sliderWrapper.innerHTML = '';
+        
+        slidesData.forEach((movie, index) => {
             const slideDiv = document.createElement('div');
             slideDiv.className = 'slider-slide';
-            slideDiv.dataset.itemId = index;
+            slideDiv.dataset.index = index;
             
-            // Usar imagen de mejor calidad si está disponible
-            const imageUrl = movie.postersUrl || movie.posterUrl || movie.imageUrl || 'https://via.placeholder.com/1540x600/333/fff?text=No+Image';
+            const imageUrl = movie.postersUrl || movie.posterUrl || movie.imageUrl || 
+                           `https://via.placeholder.com/800x450/333/fff?text=${encodeURIComponent(movie.title)}`;
             
             slideDiv.innerHTML = `
                 <div class="slider-img-wrapper">
-                    <img src="${imageUrl}" alt="${movie.title}" loading="${index === 0 ? 'eager' : 'lazy'}">
+                    <img src="${imageUrl}" 
+                         alt="${movie.title}" 
+                         loading="${index === 0 ? 'eager' : 'lazy'}"
+                         onerror="this.src='https://via.placeholder.com/800x450/333/fff?text=No+Image'">
                 </div>
                 <div class="slider-overlay">
-                    <div class="slider-title-movie">${movie.title}</div>
+                    <div class="slider-title-movie">${movie.title || 'Sin título'}</div>
                     <div class="slider-meta">
                         ${movie.year ? `<span>${movie.year}</span>` : ''}
                         ${movie.duration ? `<span>${movie.duration}</span>` : ''}
                         ${movie.genre ? `<span>${movie.genre.split(/[·,]/)[0].trim()}</span>` : ''}
-                        ${movie.rating ? `<span><i class='fas fa-star'></i> ${movie.rating}</span>` : ''}
+                        ${movie.rating ? `<span><i class="fas fa-star"></i> ${movie.rating}</span>` : ''}
                     </div>
-                    <div class="slider-description">${movie.description || movie.synopsis || ''}</div>
+                    <div class="slider-description">${movie.description || movie.synopsis || 'Sin descripción disponible'}</div>
                 </div>
             `;
 
-            // Event listeners
+            // Click handler
             slideDiv.addEventListener('click', (e) => {
                 if (!isTransitioning) {
                     e.preventDefault();
                     console.log('Slider: Click en slide:', movie.title);
-                    if (window.detailsModal) {
+                    if (window.detailsModal && typeof window.detailsModal.show === 'function') {
                         window.detailsModal.show(movie, slideDiv);
                     }
                 }
@@ -448,32 +432,28 @@
             sliderWrapper.appendChild(slideDiv);
         });
 
-        // Crear controles
-        createControls();
+        // Configurar controles
+        setupControls();
         
-        // Posicionar en el primer slide
+        // Ir al primer slide
         currentIndex = 0;
         updateSliderPosition();
         
-        console.log('Slider Rakuten: Renderizado completado');
+        console.log('Slider: Renderizado completado con', totalSlides, 'slides');
     }
 
-    // Crear controles de navegación y paginación
-    function createControls() {
+    // Configurar controles
+    function setupControls() {
         // Navegación
-        setupNavigation();
-        
-        // Paginación
-        createPagination();
-    }
-
-    // Configurar navegación
-    function setupNavigation() {
         const prevBtn = document.getElementById('slider-prev');
         const nextBtn = document.getElementById('slider-next');
         
         if (prevBtn) {
-            prevBtn.addEventListener('click', () => {
+            prevBtn.replaceWith(prevBtn.cloneNode(true));
+            const newPrevBtn = document.getElementById('slider-prev');
+            newPrevBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 if (!isTransitioning) {
                     goToSlide(currentIndex - 1);
                 }
@@ -481,21 +461,19 @@
         }
         
         if (nextBtn) {
-            nextBtn.addEventListener('click', () => {
+            nextBtn.replaceWith(nextBtn.cloneNode(true));
+            const newNextBtn = document.getElementById('slider-next');
+            newNextBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 if (!isTransitioning) {
                     goToSlide(currentIndex + 1);
                 }
             });
         }
 
-        // Navegación con teclado
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'ArrowLeft' && !isTransitioning) {
-                goToSlide(currentIndex - 1);
-            } else if (e.key === 'ArrowRight' && !isTransitioning) {
-                goToSlide(currentIndex + 1);
-            }
-        });
+        // Paginación
+        createPagination();
     }
 
     // Crear paginación
@@ -508,11 +486,12 @@
         for (let i = 0; i < totalSlides; i++) {
             const dot = document.createElement('button');
             dot.className = 'slider-pagination-dot';
-            dot.setAttribute('data-slide', i);
-            dot.setAttribute('aria-label', `Ir al slide ${i + 1}`);
+            dot.dataset.slide = i;
             if (i === 0) dot.classList.add('active');
             
-            dot.addEventListener('click', () => {
+            dot.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 if (!isTransitioning) {
                     goToSlide(i);
                 }
@@ -522,9 +501,9 @@
         }
     }
 
-    // Ir a slide específico
+    // Ir a slide
     function goToSlide(index) {
-        if (isTransitioning) return;
+        if (isTransitioning || totalSlides === 0) return;
         
         // Navegación circular
         if (index < 0) index = totalSlides - 1;
@@ -532,26 +511,27 @@
         
         if (index === currentIndex) return;
         
+        console.log('Slider: Cambiando a slide', index);
+        
         currentIndex = index;
         updateSliderPosition();
         updatePagination();
     }
 
-    // Actualizar posición del slider
+    // Actualizar posición
     function updateSliderPosition() {
         const wrapper = document.getElementById('slider-wrapper');
         if (!wrapper) return;
         
         isTransitioning = true;
         
-        // Calcular desplazamiento
-        const slideWidth = wrapper.querySelector('.slider-slide')?.offsetWidth || 0;
-        const gap = window.innerWidth * 0.015; // 1.5vw gap
-        const translateX = -(slideWidth + gap) * currentIndex;
+        const viewportWidth = window.innerWidth;
+        const slideWidth = Math.floor(viewportWidth * 0.87);
+        const slideGap = Math.floor(viewportWidth * 0.02);
         
+        const translateX = -(slideWidth + slideGap) * currentIndex;
         wrapper.style.transform = `translateX(${translateX}px)`;
         
-        // Reset transitioning flag
         setTimeout(() => {
             isTransitioning = false;
         }, 600);
@@ -565,24 +545,27 @@
         });
     }
 
-    // Manejar redimensionamiento
+    // Manejar resize
     function handleResize() {
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
-            createRakutenStyles();
-            updateSliderPosition();
-        }, 150);
+            if (totalSlides > 0) {
+                createRakutenStyles();
+                updateSliderPosition();
+            }
+        }, 200);
     }
 
     // Inicializar
     function init() {
-        console.log('Slider Rakuten: Inicializando...');
+        console.log('Slider: Inicializando...');
         
         if (window.carousel?.moviesData?.length > 0) {
             renderSlider();
             window.addEventListener('resize', handleResize);
         } else {
-            setTimeout(init, 100);
+            console.log('Slider: Esperando datos del carousel...');
+            setTimeout(init, 200);
         }
     }
 
@@ -592,8 +575,12 @@
         clearTimeout(resizeTimeout);
     });
 
-    // Iniciar
-    init();
+    // Auto-init
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
 
     // Exponer API
     window.slider = {
@@ -602,8 +589,10 @@
         prev: () => goToSlide(currentIndex - 1),
         getCurrentIndex: () => currentIndex,
         getTotalSlides: () => totalSlides,
+        getSlidesData: () => slidesData,
         init,
-        renderSlider
+        renderSlider,
+        createRakutenStyles
     };
 
 })();
