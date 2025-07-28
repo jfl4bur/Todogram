@@ -1994,6 +1994,7 @@ body {
   padding-top: 64px;
 }
 
+
 .carousel-section {
   margin-bottom: 40px;
   position: relative;
@@ -2178,7 +2179,7 @@ body {
     height: 60vh !important;
     min-height: 400px !important;
     max-height: 600px !important;
-    margin: 90px !important;
+    margin: 0 !important;
     padding: 0 !important;
     overflow: hidden !important;
     background: #141414 !important;
