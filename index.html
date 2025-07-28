@@ -193,22 +193,35 @@
     
     <!-- Script para asegurar la inicialización del slider -->
     <script>
-        // Asegurar que el slider se inicialice correctamente
+        // Asegurar que el slider se inicialice correctamente con datos reales
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Index: DOM cargado, verificando slider...');
             
-            // Esperar un poco más para asegurar que todos los scripts se hayan cargado
-            setTimeout(() => {
-                if (window.slider) {
-                    console.log('Index: Slider principal disponible, inicializando...');
-                    window.slider.init();
-                } else if (window.sliderSimple) {
-                    console.log('Index: Usando slider simplificado como respaldo...');
-                    window.sliderSimple.init();
+            // Función para esperar a que los datos del carousel estén disponibles
+            function waitForCarouselData() {
+                if (window.carousel && window.carousel.moviesData && window.carousel.moviesData.length > 0) {
+                    console.log('Index: Datos del carousel disponibles, inicializando slider...');
+                    
+                    // Asegurar que el slider se inicialice después de que los datos estén listos
+                    setTimeout(() => {
+                        if (window.slider) {
+                            console.log('Index: Slider principal disponible, inicializando...');
+                            window.slider.init();
+                        } else if (window.sliderSimple) {
+                            console.log('Index: Usando slider simplificado como respaldo...');
+                            window.sliderSimple.init();
+                        } else {
+                            console.error('Index: Ningún slider disponible');
+                        }
+                    }, 500);
                 } else {
-                    console.error('Index: Ningún slider disponible');
+                    console.log('Index: Esperando datos del carousel...');
+                    setTimeout(waitForCarouselData, 200);
                 }
-            }, 1000);
+            }
+            
+            // Iniciar la espera de datos
+            waitForCarouselData();
         });
     </script>
 </body>
