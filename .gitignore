@@ -34,3 +34,4 @@ admin/
 .env
 
 # Ignorar los scripts de sincronización locales
+GEMINI.md
