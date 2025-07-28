@@ -326,16 +326,16 @@ function updateSliderPosition() {
         // Limpiar y crear slides
         sliderWrapper.innerHTML = '';
         
-        // Configurar el wrapper para mostrar todos los slides horizontalmente
-        const totalWidth = slidesData.length * slideWidth + (slidesData.length - 1) * slideGap;
-        sliderWrapper.style.width = `${totalWidth}px`;
+        // Configurar el wrapper de forma más simple
+        sliderWrapper.style.width = 'auto';
         sliderWrapper.style.display = 'flex';
         sliderWrapper.style.flexDirection = 'row';
         sliderWrapper.style.flexWrap = 'nowrap';
         sliderWrapper.style.transform = 'translateX(0)';
         sliderWrapper.style.transition = 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        sliderWrapper.style.overflow = 'visible';
         
-        console.log('Slider Independiente: Configurando wrapper con ancho total:', totalWidth, 'px');
+        console.log('Slider Independiente: Configurando wrapper con display flex');
         
         // Obtener valores de ancho antes de crear los slides
         const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
@@ -399,6 +399,18 @@ function updateSliderPosition() {
 
             sliderWrapper.appendChild(slideDiv);
         });
+
+        // Verificación inmediata después de crear los slides
+        console.log('Slider Independiente: Slides creados, verificando DOM...');
+        const createdSlides = document.querySelectorAll('.slider-slide');
+        console.log('Slider Independiente: Slides encontrados en DOM:', createdSlides.length);
+        
+        if (createdSlides.length > 0) {
+            createdSlides.forEach((slide, index) => {
+                const computedStyle = getComputedStyle(slide);
+                console.log(`Slider Independiente: Slide ${index} - Width:`, computedStyle.width, 'Display:', computedStyle.display, 'Visibility:', computedStyle.visibility);
+            });
+        }
 
         // Configurar controles
         setupControls();
@@ -589,6 +601,7 @@ async function init() {
         totalSlides = movies.length;
         console.log('Slider Independiente: Datos cargados, total slides:', totalSlides);
         
+        // Renderizar inmediatamente
         renderSlider(movies);
         
         // Agregar listener de resize mejorado
@@ -596,9 +609,6 @@ async function init() {
         
         // Verificación adicional después de renderizar
         setTimeout(() => {
-            updateSliderCSSVariables();
-            preventHorizontalScroll();
-            
             const slides = document.querySelectorAll('.slider-slide');
             if (slides.length > 0) {
                 console.log('Slider Independiente: Verificación final completada, slides encontrados:', slides.length);
@@ -631,7 +641,7 @@ async function init() {
             } else {
                 console.error('Slider Independiente: No se encontraron slides después del renderizado');
             }
-        }, 300);
+        }, 500); // Aumentado el tiempo de espera
     } else {
         console.error('Slider Independiente: No se pudieron cargar datos');
     }
