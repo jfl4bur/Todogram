@@ -311,8 +311,8 @@ function updateSliderPosition() {
                         const calculatedWidth = Math.floor(viewportWidth * 0.87);
                         const calculatedGap = Math.floor(viewportWidth * 0.02);
                         
-                        slide.style.flexBasis = `${calculatedWidth}px`;
-                        slide.style.width = `${calculatedWidth}px`;
+                            slide.style.flexBasis = `${calculatedWidth}px`;
+                            slide.style.width = `${calculatedWidth}px`;
                         slide.style.marginRight = index < slides.length - 1 ? `${calculatedGap}px` : '0';
                     });
                     
@@ -625,7 +625,7 @@ async function init() {
                 console.log('Slider Independiente: Verificación final completada, slides encontrados:', slides.length);
                 
                 // Verificar que todos los slides tengan el tamaño correcto
-                slides.forEach((slide, index) => {
+                    slides.forEach((slide, index) => {
                     const computedStyle = getComputedStyle(slide);
                     console.log(`Slider Independiente: Slide ${index} - Width:`, computedStyle.width, 'Flex-basis:', computedStyle.flexBasis);
                 });
