@@ -2292,8 +2292,6 @@ html, body {
     transform: scale(1.1) !important;
 }
 
-/* ===== CORRECCIONES PARA EL SLIDER ===== */
-
 /* 1. CORRECCIÓN PARA CENTRAR LOS BOTONES DE NAVEGACIÓN */
 .slider-nav {
     position: absolute !important;
@@ -2343,9 +2341,6 @@ html, body {
     height: 500px;
     margin-top: 100px;
     background: #141414;
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 .slider-container {
@@ -2364,11 +2359,8 @@ html, body {
     height: 100%;
     width: auto;
     transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    justify-content: flex-start;
-    align-items: center;
-    /* Centrar el wrapper inicialmente */
-    left: 50%;
-    transform: translateX(-50%);
+    /* Centrar el primer slide */
+    left: calc((100vw - 87vw) / 2);
 }
 
 .slider-slide {
@@ -2380,10 +2372,6 @@ html, body {
     border-radius: 8px;
     overflow: hidden;
     background: #000;
-    /* Centrar cada slide verticalmente */
-    display: flex;
-    align-items: center;
-    justify-content: center;
 }
 
 .slider-slide:last-child {
@@ -2406,7 +2394,7 @@ html, body {
     overflow: hidden;
 }
 
-/* Responsive para mantener el centrado */
+/* Responsive para mantener el centrado de un slide */
 @media (max-width: 768px) {
     .slider-nav {
         padding: 0 10px !important;
@@ -2426,6 +2414,10 @@ html, body {
         width: 90vw;
         margin-right: 1vw;
     }
+    
+    .slider-wrapper {
+        left: calc((100vw - 90vw) / 2);
+    }
 }
 
 @media (max-width: 480px) {
@@ -2442,5 +2434,9 @@ html, body {
     .slider-slide {
         width: 95vw;
         margin-right: 0.5vw;
+    }
+    
+    .slider-wrapper {
+        left: calc((100vw - 95vw) / 2);
     }
 }

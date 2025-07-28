@@ -73,7 +73,6 @@ function preventHorizontalScroll() {
 }
 
 // Función mejorada para actualizar posición del slider
-// Función actualizada para mantener el centrado
 function updateSliderPosition() {
     const wrapper = document.getElementById('slider-wrapper');
     if (!wrapper) return;
@@ -85,11 +84,11 @@ function updateSliderPosition() {
     const slideWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width')) || Math.floor(viewportWidth * 0.87);
     const slideGap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-gap')) || Math.floor(viewportWidth * 0.02);
     
-    // Calcular la posición basada en el ancho del slide + gap, manteniendo el centrado inicial
+    // Calcular la posición basada en el ancho del slide + gap
     const translateX = -(slideWidth + slideGap) * currentIndex;
     
-    // Combinar el centrado inicial (-50%) con el desplazamiento del slide
-    wrapper.style.transform = `translateX(calc(-50% + ${translateX}px))`;
+    // Aplicar solo el desplazamiento, el centrado ya está en el CSS con left
+    wrapper.style.transform = `translateX(${translateX}px)`;
     
     console.log('Slider Independiente: Posición actualizada - Index:', currentIndex, 'TranslateX:', translateX, 'Slide width:', slideWidth, 'Gap:', slideGap);
     
