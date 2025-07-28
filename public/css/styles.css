@@ -1992,9 +1992,11 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   color: #ffffff;
   line-height: 1.6;
+  overflow-x: hidden;
 }
 html {
     background-color: #141414;
+    overflow-x: hidden;
 }
 
 /* Márgenes para el slider y contenido principal */
@@ -2178,9 +2180,9 @@ html {
 
 /* Variables CSS para el slider */
 :root {
-    --slider-slide-width: 90vw;
-    --slider-slide-gap: 2vw;
-    --slider-side-space: calc((100vw - var(--slider-slide-width)) / 2);
+    --slider-slide-width: 90%;
+    --slider-slide-gap: 2%;
+    --slider-side-space: calc((100% - var(--slider-slide-width)) / 2);
     --slider-nav-btn-offset: calc(var(--slider-side-space) / 2 - 30px);
 }
 
@@ -2195,21 +2197,6 @@ html {
     /* Forzar que no use las variables del carousel */
     height: 100% !important;
     margin-right: var(--slider-slide-gap) !important;
-}
-
-/* Resetear estilos base del slider */
-.slider-section {
-    position: relative !important;
-    width: 100vw !important;
-    height: 60vh !important;
-    min-height: 400px !important;
-    max-height: 600px !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-    background: #141414 !important;
-    z-index: 1 !important;
-    margin-top: 100px !important;
 }
 
 .slider-section .slider-title {
@@ -2229,7 +2216,7 @@ html {
     position: relative !important;
     display: flex !important;
     height: 100% !important;
-    width: calc(100% + var(--slider-slide-gap)) !important;
+    width: 100% !important;
     transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
     will-change: transform !important;
     margin: 0 !important;
