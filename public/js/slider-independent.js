@@ -4,23 +4,107 @@
     let totalSlides = 0;
     let isTransitioning = false;
     let resizeTimeout = null;
+function handleResize() {
+    clearTimeout(resizeTimeout);
+    
+    // Actualización inmediata para mejor respuesta
+    if (totalSlides > 0) {
+        updateSliderCSSVariables();
+        updateSliderPosition();
+    }
+    
+    // Actualización adicional después de un breve delay
+    resizeTimeout = setTimeout(() => {
+        if (totalSlides > 0) {
+            updateSliderCSSVariables();
+            updateSliderPosition();
+            
+            // Verificar y corregir cualquier overflow horizontal
+            const sliderSection = document.querySelector('.slider-section');
+            if (sliderSection) {
+                const hasHorizontalScroll = document.body.scrollWidth > document.body.clientWidth;
+                if (hasHorizontalScroll) {
+                    console.warn('Detectado scroll horizontal, aplicando corrección...');
+                    // Reducir ligeramente el ancho del slide si hay scroll horizontal
+                    const currentWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width'));
+                    const correctedWidth = Math.floor(currentWidth * 0.98);
+                    document.documentElement.style.setProperty('--slider-slide-width', `${correctedWidth}px`);
+                }
+            }
+        }
+    }, 150);
+}
+
+// Función para verificar y prevenir scroll horizontal
+function preventHorizontalScroll() {
+    // Verificar si hay scroll horizontal
+    const hasHorizontalScroll = document.body.scrollWidth > document.body.clientWidth;
+    
+    if (hasHorizontalScroll) {
+        console.warn('Scroll horizontal detectado, aplicando correcciones...');
+        
+        // Aplicar estilos preventivos
+        document.body.style.overflowX = 'hidden';
+        document.documentElement.style.overflowX = 'hidden';
+        
+        // Reducir el ancho de los slides si es necesario
+        const currentWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width'));
+        if (currentWidth > 0) {
+            const correctedWidth = Math.floor(currentWidth * 0.95);
+            document.documentElement.style.setProperty('--slider-slide-width', `${correctedWidth}px`);
+            console.log('Ancho de slide corregido a:', correctedWidth + 'px');
+        }
+    }
+}
+
+// Función mejorada para actualizar posición del slider
+function updateSliderPosition() {
+    const wrapper = document.getElementById('slider-wrapper');
+    if (!wrapper) return;
+    
+    isTransitioning = true;
+    
+    // Obtener valores de las variables CSS de forma segura
+    const slideWidthStr = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width');
+    const slideGapStr = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-gap');
+    
+    const slideWidth = parseInt(slideWidthStr) || Math.floor(document.documentElement.clientWidth * 0.87);
+    const slideGap = parseInt(slideGapStr) || Math.floor(document.documentElement.clientWidth * 0.02);
+    
+    const translateX = -(slideWidth + slideGap) * currentIndex;
+    
+    // Aplicar transformación de forma segura
+    wrapper.style.transform = `translateX(${translateX}px)`;
+    
+    // Verificar que no se cause scroll horizontal
+    setTimeout(() => {
+        preventHorizontalScroll();
+        isTransitioning = false;
+    }, 100);
+}
+
+
+
     let slidesData = [];
 
-    // Función para actualizar las variables CSS dinámicamente
     function updateSliderCSSVariables() {
-        const viewportWidth = window.innerWidth;
-        const slideWidth = Math.floor(viewportWidth * 0.87); // 87vw
-        const slideGap = Math.floor(viewportWidth * 0.02); // 2vw gap
+        // Usar document.documentElement.clientWidth en lugar de window.innerWidth
+        // para evitar incluir la barra de scroll
+        const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+        
+        // Calcular anchos usando el viewport real (sin barra de scroll)
+        const slideWidth = Math.floor(viewportWidth * 0.87); // 87% del viewport real
+        const slideGap = Math.floor(viewportWidth * 0.02); // 2% gap
         const sideSpace = Math.floor((viewportWidth - slideWidth) / 2); // Espacio a los lados
-        const navBtnOffset = Math.floor(sideSpace / 2 - 30);
-
-        // Actualizar variables CSS
+        const navBtnOffset = Math.max(10, Math.floor(sideSpace / 2 - 30)); // Mínimo 10px
+    
+        // Actualizar variables CSS con valores seguros
         document.documentElement.style.setProperty('--slider-slide-width', `${slideWidth}px`);
         document.documentElement.style.setProperty('--slider-slide-gap', `${slideGap}px`);
         document.documentElement.style.setProperty('--slider-side-space', `${sideSpace}px`);
         document.documentElement.style.setProperty('--slider-nav-btn-offset', `${navBtnOffset}px`);
-
-        console.log('Slider Independiente: Variables CSS actualizadas - Ancho slide:', slideWidth, 'Gap:', slideGap, 'Espacio lateral:', sideSpace);
+    
+        console.log('Slider Independiente: Variables CSS actualizadas - Viewport:', viewportWidth, 'Ancho slide:', slideWidth, 'Gap:', slideGap, 'Espacio lateral:', sideSpace);
         
         // Verificar que las variables se aplicaron correctamente
         const appliedWidth = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width');
@@ -28,6 +112,10 @@
         
         // Forzar reflow para asegurar que los cambios se apliquen
         document.documentElement.offsetHeight;
+        
+        // Prevenir scroll horizontal
+        document.body.style.overflowX = 'hidden';
+        document.documentElement.style.overflowX = 'hidden';
     }
 
     // Cargar datos independientemente
@@ -394,51 +482,84 @@
     }
 
     // Inicializar
-    async function init() {
-        console.log('Slider Independiente: Inicializando...');
+    // Función de inicialización mejorada
+async function init() {
+    console.log('Slider Independiente: Inicializando...');
+    
+    // Prevenir scroll horizontal desde el inicio
+    document.body.style.overflowX = 'hidden';
+    document.documentElement.style.overflowX = 'hidden';
+    
+    // Inicializar variables CSS
+    updateSliderCSSVariables();
+    
+    // Cargar datos independientemente
+    const movies = await loadSliderData();
+    if (movies && movies.length > 0) {
+        slidesData = movies;
+        renderSlider(movies);
         
-        // Inicializar variables CSS
-        updateSliderCSSVariables();
+        // Agregar listener de resize mejorado
+        window.addEventListener('resize', handleResize, { passive: true });
         
-        // Cargar datos independientemente
-        const movies = await loadSliderData();
-        if (movies && movies.length > 0) {
-            slidesData = movies;
-            renderSlider(movies);
-            window.addEventListener('resize', handleResize);
+        // Verificación adicional después de renderizar
+        setTimeout(() => {
+            updateSliderCSSVariables();
+            preventHorizontalScroll();
             
-            // Verificación adicional después de renderizar
-            setTimeout(() => {
-                updateSliderCSSVariables();
-                const slides = document.querySelectorAll('.slider-slide');
-                if (slides.length > 0) {
-                    const firstSlide = slides[0];
-                    const computedStyle = getComputedStyle(firstSlide);
-                    console.log('Slider Independiente: Verificación final - Width:', computedStyle.width, 'Flex-basis:', computedStyle.flexBasis);
-                    
-                    // Si el tamaño sigue siendo incorrecto, forzar actualización
-                    if (computedStyle.width === 'auto' || computedStyle.width === '0px') {
-                        console.log('Slider Independiente: Tamaño incorrecto detectado, forzando corrección...');
-                        slides.forEach((slide, index) => {
-                            const viewportWidth = window.innerWidth;
-                            const calculatedWidth = Math.floor(viewportWidth * 0.87);
-                            slide.style.flexBasis = `${calculatedWidth}px`;
-                            slide.style.width = `${calculatedWidth}px`;
-                            slide.style.marginRight = index < slides.length - 1 ? '16px' : '0';
-                        });
-                    }
+            const slides = document.querySelectorAll('.slider-slide');
+            if (slides.length > 0) {
+                console.log('Slider Independiente: Verificación final completada');
+                
+                // Verificación final de scroll horizontal
+                const hasScroll = document.body.scrollWidth > document.body.clientWidth;
+                if (hasScroll) {
+                    console.warn('Scroll horizontal final detectado, aplicando corrección definitiva...');
+                    slides.forEach((slide, index) => {
+                        const viewportWidth = document.documentElement.clientWidth;
+                        const safeWidth = Math.floor(viewportWidth * 0.85); // Usar 85% como valor seguro
+                        slide.style.flexBasis = `${safeWidth}px`;
+                        slide.style.width = `${safeWidth}px`;
+                        slide.style.marginRight = index < slides.length - 1 ? '16px' : '0';
+                    });
                 }
-            }, 300);
-        } else {
-            console.error('Slider Independiente: No se pudieron cargar datos');
-        }
+            }
+        }, 300);
+    } else {
+        console.error('Slider Independiente: No se pudieron cargar datos');
     }
+}
 
-    // Cleanup
-    window.addEventListener('beforeunload', () => {
-        window.removeEventListener('resize', handleResize);
-        clearTimeout(resizeTimeout);
+   // Observer para detectar cambios en el DOM que puedan causar scroll horizontal
+const horizontalScrollObserver = new MutationObserver((mutations) => {
+    let shouldCheck = false;
+    mutations.forEach((mutation) => {
+        if (mutation.type === 'childList' || mutation.type === 'attributes') {
+            shouldCheck = true;
+        }
     });
+    
+    if (shouldCheck) {
+        setTimeout(preventHorizontalScroll, 100);
+    }
+});
+
+// Iniciar observación cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', () => {
+    horizontalScrollObserver.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['style', 'class']
+    });
+});
+
+// Cleanup mejorado
+window.addEventListener('beforeunload', () => {
+    window.removeEventListener('resize', handleResize);
+    horizontalScrollObserver.disconnect();
+    clearTimeout(resizeTimeout);
+});
 
     // Auto-init
     if (document.readyState === 'loading') {

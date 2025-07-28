@@ -2174,33 +2174,26 @@ html {
   transform: translateY(-7px) rotate(-45deg);
 }
 
-/* ===== ESTILOS DEL SLIDER RAKUTEN.TV ===== */
+/* ===== CORRECCIÓN DEL SCROLL HORIZONTAL DEL SLIDER ===== */
 
-/* Variables CSS para el slider */
+/* Variables CSS corregidas para el slider */
 :root {
-    --slider-slide-width: 90vw;
+    --slider-slide-width: 87vw;
     --slider-slide-gap: 2vw;
-    --slider-side-space: calc((100vw - var(--slider-slide-width)) / 2);
+    --slider-side-space: calc((100% - var(--slider-slide-width)) / 2);
     --slider-nav-btn-offset: calc(var(--slider-side-space) / 2 - 30px);
 }
 
-/* Asegurar que los elementos del slider no usen las variables del carousel */
-.slider-section .slider-slide,
-.slider-container .slider-slide,
-.slider-wrapper .slider-slide {
-    width: var(--slider-slide-width) !important;
-    flex: 0 0 var(--slider-slide-width) !important;
-    min-width: var(--slider-slide-width) !important;
-    max-width: var(--slider-slide-width) !important;
-    /* Forzar que no use las variables del carousel */
-    height: 100% !important;
-    margin-right: var(--slider-slide-gap) !important;
+/* Prevenir scroll horizontal global */
+html, body {
+    overflow-x: hidden !important;
+    max-width: 100% !important;
 }
 
-/* Resetear estilos base del slider */
+/* Resetear estilos base del slider - CORREGIDO */
 .slider-section {
     position: relative !important;
-    width: 100vw !important;
+    width: 100% !important; /* Cambiado de 100vw a 100% */
     height: 60vh !important;
     min-height: 400px !important;
     max-height: 600px !important;
@@ -2210,10 +2203,7 @@ html {
     background: #141414 !important;
     z-index: 1 !important;
     margin-top: 100px !important;
-}
-
-.slider-section .slider-title {
-    display: none !important;
+    box-sizing: border-box !important; /* Añadido */
 }
 
 .slider-container {
@@ -2223,6 +2213,7 @@ html {
     overflow: hidden !important;
     margin: 0 !important;
     padding: 0 !important;
+    box-sizing: border-box !important; /* Añadido */
 }
 
 .slider-wrapper {
@@ -2235,6 +2226,20 @@ html {
     margin: 0 !important;
     padding: 0 !important;
     left: var(--slider-side-space) !important;
+    box-sizing: border-box !important; /* Añadido */
+}
+
+/* Asegurar que los slides no se desborden */
+.slider-section .slider-slide,
+.slider-container .slider-slide,
+.slider-wrapper .slider-slide {
+    width: var(--slider-slide-width) !important;
+    flex: 0 0 var(--slider-slide-width) !important;
+    min-width: var(--slider-slide-width) !important;
+    max-width: var(--slider-slide-width) !important;
+    height: 100% !important;
+    margin-right: var(--slider-slide-gap) !important;
+    box-sizing: border-box !important; /* Añadido */
 }
 
 .slider-slide {
@@ -2249,9 +2254,9 @@ html {
     background: #000 !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
     transition: transform 0.3s ease, box-shadow 0.3s ease !important;
-    /* Forzar que no use las variables del carousel */
     min-width: var(--slider-slide-width) !important;
     max-width: var(--slider-slide-width) !important;
+    box-sizing: border-box !important; /* Añadido */
 }
 
 .slider-slide:hover {
@@ -2271,6 +2276,7 @@ html {
     overflow: hidden !important;
     margin: 0 !important;
     padding: 0 !important;
+    box-sizing: border-box !important; /* Añadido */
 }
 
 .slider-img-wrapper img {
@@ -2306,6 +2312,7 @@ html {
     transform: translateY(20px) !important;
     transition: all 0.4s ease !important;
     pointer-events: none !important;
+    box-sizing: border-box !important; /* Añadido */
 }
 
 .slider-slide:hover .slider-overlay {
@@ -2352,7 +2359,7 @@ html {
     color: white !important;
 }
 
-/* Navegación */
+/* Navegación corregida */
 .slider-nav {
     position: absolute !important;
     top: 0 !important;
@@ -2364,6 +2371,8 @@ html {
     align-items: center !important;
     pointer-events: none !important;
     z-index: 10 !important;
+    max-width: 100% !important; /* Añadido */
+    overflow: hidden !important; /* Añadido */
 }
 
 .slider-nav-btn {
@@ -2386,6 +2395,7 @@ html {
     transform: scale(0.8) !important;
     margin: 0 !important;
     padding: 0 !important;
+    box-sizing: border-box !important; /* Añadido */
 }
 
 .slider-container:hover .slider-nav-btn {
@@ -2404,12 +2414,13 @@ html {
     transform: scale(0.95) !important;
 }
 
+/* Botones de navegación con posicionamiento seguro */
 .slider-nav-btn.prev {
-    margin-left: var(--slider-nav-btn-offset) !important;
+    margin-left: calc(max(10px, var(--slider-nav-btn-offset))) !important; /* Posición mínima segura */
 }
 
 .slider-nav-btn.next {
-    margin-right: var(--slider-nav-btn-offset) !important;
+    margin-right: calc(max(10px, var(--slider-nav-btn-offset))) !important; /* Posición mínima segura */
 }
 
 /* Paginación */
@@ -2423,6 +2434,8 @@ html {
     right: unset !important;
     bottom: unset !important;
     transform: none !important;
+    max-width: 100% !important; /* Añadido */
+    overflow: hidden !important; /* Añadido */
 }
 
 .slider-pagination-dot {
@@ -2436,6 +2449,7 @@ html {
     opacity: 0.6 !important;
     margin: 0 !important;
     padding: 0 !important;
+    box-sizing: border-box !important; /* Añadido */
 }
 
 .slider-pagination-dot.active {
@@ -2450,8 +2464,20 @@ html {
     transform: scale(1.1) !important;
 }
 
-/* Responsive del slider */
+/* Ajuste adicional de variables CSS para pantallas más pequeñas */
+@media (max-width: 1200px) {
+    :root {
+        --slider-slide-width: 85vw;
+        --slider-slide-gap: 1.5vw;
+    }
+}
+
 @media (max-width: 768px) {
+    :root {
+        --slider-slide-width: 90vw;
+        --slider-slide-gap: 2vw;
+    }
+    
     .slider-section {
         height: 50vh !important;
         min-height: 300px !important;
@@ -2475,9 +2501,21 @@ html {
         max-width: 85% !important;
         -webkit-line-clamp: 2 !important;
     }
+    
+    /* Asegurar que los botones no se salgan en móvil */
+    .slider-nav-btn.prev,
+    .slider-nav-btn.next {
+        margin-left: 10px !important;
+        margin-right: 10px !important;
+    }
 }
 
 @media (max-width: 480px) {
+    :root {
+        --slider-slide-width: 95vw;
+        --slider-slide-gap: 3vw;
+    }
+    
     .slider-nav-btn {
         width: 45px !important;
         height: 45px !important;
@@ -2487,4 +2525,30 @@ html {
     .slider-overlay {
         padding: 1rem !important;
     }
+    
+    /* En pantallas muy pequeñas, posicionar los botones de forma más conservadora */
+    .slider-nav-btn.prev,
+    .slider-nav-btn.next {
+        margin-left: 5px !important;
+        margin-right: 5px !important;
+    }
+}
+
+/* Corrección adicional para contenedores padre */
+.slider-section .slider-title {
+    display: none !important;
+}
+
+/* Asegurar que el cuerpo no tenga scroll horizontal */
+body {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+}
+
+/* Contenedor principal del slider con límites estrictos */
+#slider-container,
+#slider-wrapper {
+    max-width: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
 }
