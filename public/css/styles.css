@@ -2388,15 +2388,15 @@ body {
 
 /* Paginación */
 .slider-pagination {
-    position: absolute !important;
-    bottom: 2rem !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
+    position: static !important;
+    margin: 24px auto 0 auto !important;
     display: flex !important;
+    justify-content: center !important;
     gap: 0.5rem !important;
-    z-index: 10 !important;
-    margin: 0 !important;
-    padding: 0 !important;
+    left: unset !important;
+    right: unset !important;
+    bottom: unset !important;
+    transform: none !important;
 }
 
 .slider-pagination-dot {
