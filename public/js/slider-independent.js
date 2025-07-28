@@ -489,7 +489,7 @@
         getCurrentIndex: () => currentIndex,
         getTotalSlides: () => totalSlides,
         getSlidesData: () => slidesData,
-        init,
+        init,image.png
         renderSlider,
         updateSliderCSSVariables,
         openDetailsModal

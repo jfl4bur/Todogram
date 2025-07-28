@@ -2183,7 +2183,7 @@ html {
 
 /* Variables CSS para el slider */
 :root {
-    --slider-slide-width: 85%;
+    --slider-slide-width: 90%;
     --slider-slide-gap: 2%;
     --slider-side-space: calc((100% - var(--slider-slide-width)) / 2);
     --slider-nav-btn-offset: calc(var(--slider-side-space) / 2 - 30px);
@@ -2224,6 +2224,7 @@ html {
     will-change: transform !important;
     margin: 0 !important;
     padding: 0 !important;
+    left: var(--slider-side-space) !important;
 }
 
 .slider-slide {
