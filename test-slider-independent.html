@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Slider Independiente - Todogram</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://jfl4bur.github.io/Todogram/public/css/styles.css">
+</head>
+<body>
+    <!-- SLIDER CAROUSEL TIPO RAKUTEN.TV -->
+    <div class="slider-section">
+        <h2 class="slider-title"></h2>
+        <div class="slider-container">
+            <div class="slider-wrapper" id="slider-wrapper">
+                <!-- Slides se insertarán aquí -->
+            </div>
+        </div>
+        <div class="slider-nav">
+            <button class="slider-nav-btn prev" id="slider-prev"><i class="fas fa-chevron-left"></i></button>
+            <button class="slider-nav-btn next" id="slider-next"><i class="fas fa-chevron-right"></i></button>
+        </div>
+    </div>
+    <div class="slider-pagination" id="slider-pagination"></div>
+
+    <script>
+        // URL del archivo JSON en GitHub Pages
+        const DATA_URL = "https://jfl4bur.github.io/Todogram/public/data.json";
+    </script>
+    <script src="https://jfl4bur.github.io/Todogram/public/js/slider-independent.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Test: DOM cargado, verificando slider independiente...');
+            
+            setTimeout(() => {
+                if (window.sliderIndependent) {
+                    console.log('Test: Slider independiente disponible');
+                    console.log('Test: Total slides:', window.sliderIndependent.getTotalSlides());
+                    console.log('Test: Slides data:', window.sliderIndependent.getSlidesData());
+                } else {
+                    console.error('Test: Slider independiente no disponible');
+                }
+            }, 2000);
+        });
+    </script>
+</body>
+</html> 

@@ -169,7 +169,7 @@
         const DATA_URL = "https://jfl4bur.github.io/Todogram/public/data.json";
         window.peliculas = []; // Se llenará con los datos cargados
     </script>
-    <script src="https://jfl4bur.github.io/Todogram/public/js/slider.js"></script>
+    <script src="https://jfl4bur.github.io/Todogram/public/js/slider-independent.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/carousel.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/hover-modal.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/details-modal.js"></script>
@@ -178,37 +178,20 @@
     <script src="https://jfl4bur.github.io/Todogram/public/js/header.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/main.js"></script>
     
-    <!-- Script para asegurar la inicialización del slider -->
+    <!-- Script para asegurar la inicialización del slider independiente -->
     <script>
-        // Asegurar que el slider se inicialice correctamente con datos reales
+        // El slider independiente se inicializa automáticamente sin depender del carousel
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Index: DOM cargado, verificando slider...');
+            console.log('Index: DOM cargado, slider independiente se inicializará automáticamente...');
             
-            // Función para esperar a que los datos del carousel estén disponibles
-            function waitForCarouselData() {
-                if (window.carousel && window.carousel.moviesData && window.carousel.moviesData.length > 0) {
-                    console.log('Index: Datos del carousel disponibles, inicializando slider...');
-                    
-                    // Asegurar que el slider se inicialice después de que los datos estén listos
-                    setTimeout(() => {
-                        if (window.slider) {
-                            console.log('Index: Slider principal disponible, inicializando...');
-                            window.slider.init();
-                        } else if (window.sliderSimple) {
-                            console.log('Index: Usando slider simplificado como respaldo...');
-                            window.sliderSimple.init();
-                        } else {
-                            console.error('Index: Ningún slider disponible');
-                        }
-                    }, 500);
+            // Verificar que el slider independiente esté disponible
+            setTimeout(() => {
+                if (window.sliderIndependent) {
+                    console.log('Index: Slider independiente disponible');
                 } else {
-                    console.log('Index: Esperando datos del carousel...');
-                    setTimeout(waitForCarouselData, 200);
+                    console.error('Index: Slider independiente no disponible');
                 }
-            }
-            
-            // Iniciar la espera de datos
-            waitForCarouselData();
+            }, 1000);
         });
     </script>
 </body>
