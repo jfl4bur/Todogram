@@ -367,13 +367,24 @@ class DetailsModal {
         const description = item.description || 'Una gran película que no te puedes perder';
         const imageUrl = item.posterUrl || 'https://via.placeholder.com/194x271';
         const url = `${window.location.origin}${window.location.pathname}#id=${item.id}&title=${this.normalizeText(item.title)}`;
-        document.getElementById('og-title').content = title;
-        document.getElementById('og-description').content = description;
-        document.getElementById('og-image').content = imageUrl;
-        document.getElementById('og-url').content = url;
-        document.getElementById('twitter-title').content = title;
-        document.getElementById('twitter-description').content = description;
-        document.getElementById('twitter-image').content = imageUrl;
+        
+        // Verificar que los elementos meta existan antes de intentar actualizarlos
+        const ogTitle = document.getElementById('og-title');
+        const ogDescription = document.getElementById('og-description');
+        const ogImage = document.getElementById('og-image');
+        const ogUrl = document.getElementById('og-url');
+        const twitterTitle = document.getElementById('twitter-title');
+        const twitterDescription = document.getElementById('twitter-description');
+        const twitterImage = document.getElementById('twitter-image');
+        
+        if (ogTitle) ogTitle.content = title;
+        if (ogDescription) ogDescription.content = description;
+        if (ogImage) ogImage.content = imageUrl;
+        if (ogUrl) ogUrl.content = url;
+        if (twitterTitle) twitterTitle.content = title;
+        if (twitterDescription) twitterDescription.content = description;
+        if (twitterImage) twitterImage.content = imageUrl;
+        
         const canonicalLink = document.querySelector('link[rel="canonical"]') || document.createElement('link');
         canonicalLink.rel = 'canonical';
         canonicalLink.href = url;
@@ -495,11 +506,16 @@ class DetailsModal {
     createAudioSubtitlesSection(audiosCount, subtitlesCount, audioList, subtitleList) {
         let audioContent = '';
         let subtitleContent = '';
-        if (audioList.length > 0) {
-            audioContent = `<div class="audio-subtitles-item" onclick="this.classList.toggle('expanded')"><i class="fas fa-volume-up"></i><span>Audios (${audiosCount})</span><div class="expandable-content">${audioList.map(audio => `<div>· ${audio}</div>`).join('')}</div></div>`;
+        
+        // Verificar que audioList y subtitleList existan y sean arrays
+        const safeAudioList = Array.isArray(audioList) ? audioList : [];
+        const safeSubtitleList = Array.isArray(subtitleList) ? subtitleList : [];
+        
+        if (safeAudioList.length > 0) {
+            audioContent = `<div class="audio-subtitles-item" onclick="this.classList.toggle('expanded')"><i class="fas fa-volume-up"></i><span>Audios (${audiosCount || 0})</span><div class="expandable-content">${safeAudioList.map(audio => `<div>· ${audio}</div>`).join('')}</div></div>`;
         }
-        if (subtitleList.length > 0) {
-            subtitleContent = `<div class="audio-subtitles-item" onclick="this.classList.toggle('expanded')"><i class="fas fa-closed-captioning"></i><span>Subtítulos (${subtitlesCount})</span><div class="expandable-content">${subtitleList.map(sub => `<div>· ${sub}</div>`).join('')}</div></div>`;
+        if (safeSubtitleList.length > 0) {
+            subtitleContent = `<div class="audio-subtitles-item" onclick="this.classList.toggle('expanded')"><i class="fas fa-closed-captioning"></i><span>Subtítulos (${subtitlesCount || 0})</span><div class="expandable-content">${safeSubtitleList.map(sub => `<div>· ${sub}</div>`).join('')}</div></div>`;
         }
         if (audioContent || subtitleContent) {
             return `<div class="audio-subtitles-info">${audioContent}${audioContent && subtitleContent ? '<span class="details-modal-meta-separator">•</span>' : ''}${subtitleContent}</div>`;
