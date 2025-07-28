@@ -139,15 +139,6 @@ class Carousel {
 
             this.showCarousel();
             this.renderItems();
-
-            // Lanzar evento personalizado cuando los datos estén listos
-            const event = new CustomEvent('carouselDataReady', { detail: { moviesData: this.moviesData } });
-            window.dispatchEvent(event);
-
-            // Inicializar el slider si está disponible
-            if (window.slider && typeof window.slider.init === 'function') {
-                window.slider.init();
-            }
         } catch (error) {
             console.error('Error cargando datos:', error);
             this.moviesData = [
@@ -175,15 +166,6 @@ class Carousel {
             ];
             this.showCarousel();
             this.renderItems();
-
-            // Lanzar evento personalizado cuando los datos estén listos
-            const event = new CustomEvent('carouselDataReady', { detail: { moviesData: this.moviesData } });
-            window.dispatchEvent(event);
-
-            // Inicializar el slider si está disponible
-            if (window.slider && typeof window.slider.init === 'function') {
-                window.slider.init();
-            }
         }
     }
 

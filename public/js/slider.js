@@ -315,11 +315,4 @@
         updateSliderCSSVariables
     };
 
-    // Escuchar evento personalizado para inicializar el slider de forma robusta
-    window.addEventListener('carouselDataReady', function() {
-        if (window.slider && typeof window.slider.init === 'function') {
-            window.slider.init();
-        }
-    });
-
 })();
