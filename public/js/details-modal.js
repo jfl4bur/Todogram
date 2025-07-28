@@ -61,6 +61,7 @@ class DetailsModal {
     }
 
     async show(item, itemElement) {
+        console.log('DetailsModal: Abriendo modal para:', item.title);
         this.isDetailsModalOpen = true;
         this.updateUrlForModal(item);
         
@@ -71,7 +72,9 @@ class DetailsModal {
         `;
         
         this.detailsModalOverlay.style.display = 'block';
+        this.detailsModalOverlay.classList.add('show');
         document.body.style.overflow = 'hidden';
+        console.log('DetailsModal: Modal overlay mostrado con clase show');
         
         if (this.isIOS()) {
             document.getElementById('ios-helper').offsetHeight;
@@ -112,7 +115,12 @@ class DetailsModal {
         
         if (item.rating) metaItems.push(`<span class="details-modal-meta-item rating"><i class="fas fa-star"></i> ${item.rating}${item.tmdbUrl ? `<img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg" class="details-modal-tmdb-logo" alt="TMDB" onclick="window.open('${item.tmdbUrl}', '_blank')">` : ''}</span>`);
         
-        const audioSubtitlesSection = this.createAudioSubtitlesSection(item.audiosCount, item.subtitlesCount, item.audioList, item.subtitleList);
+        const audioSubtitlesSection = this.createAudioSubtitlesSection(
+            item.audiosCount || 0, 
+            item.subtitlesCount || 0, 
+            item.audioList || [], 
+            item.subtitleList || []
+        );
         
         let actionButtons = '';
         let secondaryButtons = '';
@@ -264,6 +272,7 @@ class DetailsModal {
         }
         
         window.activeItem = item;
+        console.log('DetailsModal: Modal completado para:', item.title);
     }
 
     close() {
@@ -273,6 +282,7 @@ class DetailsModal {
         
         setTimeout(() => {
             this.detailsModalOverlay.style.display = 'none';
+            this.detailsModalOverlay.classList.remove('show');
             document.body.style.overflow = 'auto';
             this.isDetailsModalOpen = false;
             window.activeItem = null;
