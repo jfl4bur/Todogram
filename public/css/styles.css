@@ -1173,32 +1173,25 @@
     border: none;
     color: white;
     width: 40px;
-    height: var(--item-height);
+    height: 80px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    opacity: 1;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    z-index: 2;
+    opacity: 0;
+}
+
+.carousel-nav-btn:hover {
+    background-color: rgba(0, 0, 0, 0.9);
 }
 
 .carousel-nav-btn.prev {
-    left: 0;
     border-radius: 0 4px 4px 0;
 }
 
 .carousel-nav-btn.next {
-    right: 0;
     border-radius: 4px 0 0 4px;
-}
-
-/* Elimina la dependencia del hover para la visibilidad */
-.carousel-container:hover .carousel-nav-btn {
-    opacity: 1;
 }
 
 .carousel-nav-btn i {
@@ -1207,6 +1200,10 @@
 
 .carousel-container {
     position: relative;
+}
+
+.carousel-container:hover .carousel-nav-btn {
+    opacity: 1;
 }
 
 /* Estilo para la edad recomendada */
@@ -2345,7 +2342,7 @@ body {
 
 .slider-nav-btn {
     width: 60px !important;
-    height: 60px !important;
+    height: 100% !important;
     border-radius: 50% !important;
     background: rgba(255, 255, 255, 0.15) !important;
     backdrop-filter: blur(10px) !important;
@@ -2359,8 +2356,8 @@ body {
     align-items: center !important;
     justify-content: center !important;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
-    opacity: 0 !important;
-    transform: scale(0.8) !important;
+    opacity: 1 !important;
+    transform: scale(1) !important;
     margin: 0 !important;
     padding: 0 !important;
 }
