@@ -59,7 +59,7 @@
                     tmdbUrl: item['TMDB'] || '',
                     tmdbId: item['ID TMDB'] || '',
                     trailerUrl: item['Trailer'] || '',
-                    videoUrl: item['Ver Película'] || item['Video iframe'] || item['Video iframe 1'] || '',
+                    videoUrl: item['Video iframe'] || item['Video iframe 1'] || item['Ver Película'] || '',
                     originalTitle: item['Título original'] || '',
                     productionCompanies: item['Productora(s)'] || '',
                     productionCountries: item['País(es)'] || '',
@@ -76,6 +76,17 @@
                 }));
 
             console.log('Slider Independiente: Datos cargados:', movies.length, 'películas');
+            
+            // Verificar algunos datos de ejemplo
+            if (movies.length > 0) {
+                const sampleMovie = movies[0];
+                console.log('Slider Independiente: Película de ejemplo:', {
+                    title: sampleMovie.title,
+                    videoUrl: sampleMovie.videoUrl,
+                    trailerUrl: sampleMovie.trailerUrl
+                });
+            }
+            
             return movies;
         } catch (error) {
             console.error('Slider Independiente: Error cargando datos:', error);

@@ -62,6 +62,11 @@ class DetailsModal {
 
     async show(item, itemElement) {
         console.log('DetailsModal: Abriendo modal para:', item.title);
+        console.log('DetailsModal: Datos del item:', {
+            videoUrl: item.videoUrl,
+            trailerUrl: item.trailerUrl,
+            tmdbUrl: item.tmdbUrl
+        });
         this.isDetailsModalOpen = true;
         this.updateUrlForModal(item);
         
@@ -127,10 +132,14 @@ class DetailsModal {
         let secondaryButtons = '';
         
         if (item.videoUrl) {
+            console.log('DetailsModal: Agregando botón de reproducir con URL:', item.videoUrl);
             actionButtons += `<button class="details-modal-action-btn primary big-btn" data-video-url="${item.videoUrl}"><i class="fas fa-play"></i><span>Ver Película</span><span class="tooltip">Reproducir</span></button>`;
+        } else {
+            console.log('DetailsModal: No hay videoUrl disponible para:', item.title);
         }
         
         if (item.videoUrl) {
+            console.log('DetailsModal: Agregando botón de descargar con URL:', item.videoUrl);
             secondaryButtons += `<button class="details-modal-action-btn circular" onclick="window.open('${this.generateDownloadUrl(item.videoUrl)}', '_blank')"><i class="fas fa-download"></i><span class="tooltip">Descargar</span></button>`;
         }
         
