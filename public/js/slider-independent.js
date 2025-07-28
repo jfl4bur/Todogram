@@ -21,6 +21,13 @@
         document.documentElement.style.setProperty('--slider-nav-btn-offset', `${navBtnOffset}px`);
 
         console.log('Slider Independiente: Variables CSS actualizadas - Ancho slide:', slideWidth, 'Gap:', slideGap, 'Espacio lateral:', sideSpace);
+        
+        // Verificar que las variables se aplicaron correctamente
+        const appliedWidth = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width');
+        console.log('Slider Independiente: Variable aplicada:', appliedWidth);
+        
+        // Forzar reflow para asegurar que los cambios se apliquen
+        document.documentElement.offsetHeight;
     }
 
     // Cargar datos independientemente
@@ -142,6 +149,16 @@
         slidesData = selectedMovies;
         totalSlides = slidesData.length;
         console.log('Slider Independiente: Renderizando', totalSlides, 'slides');
+        
+        // Verificar el tamaño de los slides después del renderizado
+        setTimeout(() => {
+            const slides = document.querySelectorAll('.slider-slide');
+            if (slides.length > 0) {
+                const firstSlide = slides[0];
+                const computedStyle = getComputedStyle(firstSlide);
+                console.log('Slider Independiente: Tamaño del primer slide - Width:', computedStyle.width, 'Flex-basis:', computedStyle.flexBasis);
+            }
+        }, 100);
 
         // Limpiar y crear slides
         sliderWrapper.innerHTML = '';
@@ -150,6 +167,11 @@
             const slideDiv = document.createElement('div');
             slideDiv.className = 'slider-slide';
             slideDiv.dataset.index = index;
+            
+            // Asegurar que el slide use las variables CSS correctas
+            slideDiv.style.flexBasis = 'var(--slider-slide-width)';
+            slideDiv.style.width = 'var(--slider-slide-width)';
+            slideDiv.style.marginRight = index < slidesData.length - 1 ? 'var(--slider-slide-gap)' : '0';
             
             // Usar la imagen correcta según los datos disponibles
             const imageUrl = movie.postersUrl || movie.posterUrl || movie.imageUrl || 
