@@ -1,10 +1,19 @@
-// Slider Rakuten.TV - Versión simplificada
+// Slider Rakuten.TV - Versión responsive real
 (function () {
     let currentIndex = 0;
     let totalSlides = 0;
     let isTransitioning = false;
     let resizeTimeout = null;
     let slidesData = [];
+    let slideWidth = 0;
+    let slideGap = 0;
+
+    // Calcular dimensiones del slide y gap
+    function calculateDimensions() {
+        const viewportWidth = window.innerWidth;
+        slideWidth = Math.floor(viewportWidth * 0.87); // 87vw
+        slideGap = Math.floor(viewportWidth * 0.02);   // 2vw
+    }
 
     // Renderizar slider
     function renderSlider() {
@@ -15,6 +24,9 @@
             console.error('Slider: slider-wrapper no encontrado');
             return;
         }
+
+        // Calcular dimensiones iniciales
+        calculateDimensions();
 
         // Obtener datos
         const movies = window.carousel?.moviesData;
@@ -209,9 +221,8 @@
         
         isTransitioning = true;
         
-        const viewportWidth = window.innerWidth;
-        const slideWidth = Math.floor(viewportWidth * 0.87);
-        const slideGap = Math.floor(viewportWidth * 0.02);
+        // Recalcular dimensiones en cada movimiento
+        calculateDimensions();
         
         const translateX = -(slideWidth + slideGap) * currentIndex;
         wrapper.style.transform = `translateX(${translateX}px)`;
