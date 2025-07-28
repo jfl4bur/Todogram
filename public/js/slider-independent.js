@@ -421,6 +421,11 @@ function updateSliderPosition() {
                 slide.style.right = 'auto';
                 slide.style.zIndex = '1';
             });
+            
+            // Verificar el ancho total del wrapper
+            const totalWidth = createdSlides.length * slideWidth + (createdSlides.length - 1) * slideGap;
+            console.log('Slider Independiente: Ancho total del wrapper:', totalWidth, 'px');
+            console.log('Slider Independiente: Ancho del contenedor:', sliderWrapper.parentElement?.clientWidth, 'px');
         }
 
         // Configurar controles
