@@ -2184,6 +2184,19 @@ html {
     --slider-nav-btn-offset: calc(var(--slider-side-space) / 2 - 30px);
 }
 
+/* Asegurar que los elementos del slider no usen las variables del carousel */
+.slider-section .slider-slide,
+.slider-container .slider-slide,
+.slider-wrapper .slider-slide {
+    width: var(--slider-slide-width) !important;
+    flex: 0 0 var(--slider-slide-width) !important;
+    min-width: var(--slider-slide-width) !important;
+    max-width: var(--slider-slide-width) !important;
+    /* Forzar que no use las variables del carousel */
+    height: 100% !important;
+    margin-right: var(--slider-slide-gap) !important;
+}
+
 /* Resetear estilos base del slider */
 .slider-section {
     position: relative !important;
@@ -2236,6 +2249,9 @@ html {
     background: #000 !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3) !important;
     transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+    /* Forzar que no use las variables del carousel */
+    min-width: var(--slider-slide-width) !important;
+    max-width: var(--slider-slide-width) !important;
 }
 
 .slider-slide:hover {

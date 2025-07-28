@@ -46,14 +46,13 @@ document.addEventListener('DOMContentLoaded', function () {
         window.activeItem = null;
         window.hoverModalItem = null;
 
-        // Inicializar el slider después de que el carrusel tenga datos
+        // Inicializar el slider independiente
         function initializeSlider() {
-            if (window.carousel && window.carousel.moviesData && window.carousel.moviesData.length > 0) {
-                console.log('Main: Inicializando slider con', window.carousel.moviesData.length, 'películas');
-                // El slider se inicializa automáticamente cuando carousel.moviesData está disponible
-                // No necesitamos hacer nada más aquí ya que slider.js maneja su propia inicialización
+            if (window.sliderIndependent) {
+                console.log('Main: Slider independiente disponible');
+                // El slider independiente se inicializa automáticamente
             } else {
-                console.log('Main: Esperando datos del carrusel para el slider...');
+                console.log('Main: Esperando slider independiente...');
                 setTimeout(initializeSlider, 100);
             }
         }
