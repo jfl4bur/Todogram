@@ -1173,13 +1173,17 @@
     border: none;
     color: white;
     width: 40px;
-    height: 80px;
+    height: var(--item-height);
+    min-height: var(--item-height);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    opacity: 0;
+    opacity: 1;
+    position: absolute;
+    top: 0;
+    z-index: 2;
 }
 
 .carousel-nav-btn:hover {
@@ -1187,10 +1191,12 @@
 }
 
 .carousel-nav-btn.prev {
+    left: 0;
     border-radius: 0 4px 4px 0;
 }
 
 .carousel-nav-btn.next {
+    right: 0;
     border-radius: 4px 0 0 4px;
 }
 
@@ -2169,7 +2175,7 @@ body {
 
 /* Variables CSS para el slider */
 :root {
-    --slider-slide-width: 87vw;
+    --slider-slide-width: 90vw;
     --slider-slide-gap: 2vw;
     --slider-side-space: calc((100vw - var(--slider-slide-width)) / 2);
     --slider-nav-btn-offset: calc(var(--slider-side-space) / 2 - 30px);
@@ -2342,22 +2348,22 @@ body {
 
 .slider-nav-btn {
     width: 60px !important;
-    height: 100% !important;
-    border-radius: 8px !important;
-    background: rgb(0 0 0 / 6%);
-    backdrop-filter: blur(1px) !important;
-    /* border: 2px solid rgba(255, 255, 255, 0.2) !important; */
-    color: transparent;
+    height: 60px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.15) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
     font-size: 1.4rem !important;
     cursor: pointer !important;
     pointer-events: all !important;
-    /* transition: all 0.3s ease !important; */
+    transition: all 0.3s ease !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    /* box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important; */
-    opacity: 1 !important;
-    /* transform: scale(1) !important; */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    opacity: 0 !important;
+    transform: scale(0.8) !important;
     margin: 0 !important;
     padding: 0 !important;
 }
@@ -2433,7 +2439,7 @@ body {
 
     .slider-nav-btn {
         width: 50px !important;
-        height: 100% !important;
+        height: 50px !important;
         font-size: 1.2rem !important;
     }
 
@@ -2454,7 +2460,7 @@ body {
 @media (max-width: 480px) {
     .slider-nav-btn {
         width: 45px !important;
-        height: 100% !important;
+        height: 45px !important;
         font-size: 1rem !important;
     }
 
