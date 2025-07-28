@@ -2249,22 +2249,6 @@ html, body {
     color: white !important;
 }
 
-/* Navegación corregida */
-.slider-nav {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    pointer-events: none !important;
-    z-index: 10 !important;
-    max-width: 100% !important; /* Añadido */
-    overflow: hidden !important; /* Añadido */
-}
-
 
 
 /* Paginación */
@@ -2308,21 +2292,60 @@ html, body {
     transform: scale(1.1) !important;
 }
 
+/* ===== CORRECCIONES PARA EL SLIDER ===== */
 
+/* 1. CORRECCIÓN PARA CENTRAR LOS BOTONES DE NAVEGACIÓN */
+.slider-nav {
+    position: absolute !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    pointer-events: none !important;
+    z-index: 10 !important;
+    padding: 0 20px !important;
+    box-sizing: border-box !important;
+}
 
+.slider-nav-btn {
+    pointer-events: all !important;
+    background: rgba(0,0,0,0.8) !important;
+    border: none !important;
+    color: white !important;
+    width: 60px !important;
+    height: 60px !important;
+    border-radius: 50% !important;
+    cursor: pointer !important;
+    font-size: 24px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.3s ease !important;
+}
 
+.slider-nav-btn:hover {
+    background: rgba(0,0,0,0.9) !important;
+    transform: scale(1.1) !important;
+}
 
+.slider-nav-btn i {
+    font-size: 20px !important;
+}
 
-
-
-
-/* ===== SLIDER NUEVO Y SIMPLE ===== */
-    .slider-section {
+/* 2. CORRECCIÓN PARA CENTRAR LOS ITEMS DEL SLIDER */
+.slider-section {
     position: relative;
     width: 100%;
     height: 500px;
     margin-top: 100px;
     background: #141414;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .slider-container {
@@ -2330,6 +2353,9 @@ html, body {
     width: 100%;
     height: 100%;
     overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .slider-wrapper {
@@ -2337,7 +2363,12 @@ html, body {
     display: flex;
     height: 100%;
     width: auto;
-    transition: transform 0.6s ease;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    justify-content: flex-start;
+    align-items: center;
+    /* Centrar el wrapper inicialmente */
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .slider-slide {
@@ -2349,6 +2380,10 @@ html, body {
     border-radius: 8px;
     overflow: hidden;
     background: #000;
+    /* Centrar cada slide verticalmente */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .slider-slide:last-child {
@@ -2361,69 +2396,51 @@ html, body {
     object-fit: cover;
 }
 
-/* Botones de navegación */
-.slider-nav {
-    position: absolute;
-    top: 50%;
-    left: 0;
-    right: 0;
-    transform: translateY(-50%);
-    display: flex;
-    justify-content: space-between;
-    pointer-events: none;
-    z-index: 10;
-    padding: 0 20px;
-    }
-    
-    .slider-nav-btn {
-    pointer-events: all;
-    background: rgba(0,0,0,0.8);
-    border: none;
-    color: white;
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 24px;
+/* Ajuste para la imagen dentro del slide */
+.slider-img-wrapper {
+    width: 100%;
+    height: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    overflow: hidden;
 }
 
-.slider-nav-btn:hover {
-    background: rgba(0,0,0,0.9);
-    transform: scale(1.1);
+/* Responsive para mantener el centrado */
+@media (max-width: 768px) {
+    .slider-nav {
+        padding: 0 10px !important;
+    }
+    
+    .slider-nav-btn {
+        width: 50px !important;
+        height: 50px !important;
+        font-size: 20px !important;
+    }
+    
+    .slider-nav-btn i {
+        font-size: 16px !important;
+    }
+    
+    .slider-slide {
+        width: 90vw;
+        margin-right: 1vw;
+    }
 }
 
-.slider-nav-btn i {
-    font-size: 20px;
+@media (max-width: 480px) {
+    .slider-nav-btn {
+        width: 40px !important;
+        height: 40px !important;
+        font-size: 18px !important;
+    }
+    
+    .slider-nav-btn i {
+        font-size: 14px !important;
+    }
+    
+    .slider-slide {
+        width: 95vw;
+        margin-right: 0.5vw;
+    }
 }
-
-/* Paginación */
-.slider-pagination {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-.slider-pagination-dot {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.4);
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.slider-pagination-dot.active {
-    background: white;
-    transform: scale(1.2);
-}
-
-.slider-pagination-dot:hover {
-    background: rgba(255,255,255,0.8);
-}
-/* ===== FIN SLIDER NUEVO ===== */

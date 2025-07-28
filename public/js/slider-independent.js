@@ -73,32 +73,29 @@ function preventHorizontalScroll() {
 }
 
 // Función mejorada para actualizar posición del slider
+// Función actualizada para mantener el centrado
 function updateSliderPosition() {
     const wrapper = document.getElementById('slider-wrapper');
     if (!wrapper) return;
     
     isTransitioning = true;
     
-    // Obtener valores de las variables CSS de forma segura
-    const slideWidthStr = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width');
-    const slideGapStr = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-gap');
-    
-    // Usar valores por defecto si las variables CSS no están disponibles
+    // Obtener valores de las variables CSS o calcular directamente
     const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
-    const slideWidth = parseInt(slideWidthStr) || Math.floor(viewportWidth * 0.87);
-    const slideGap = parseInt(slideGapStr) || Math.floor(viewportWidth * 0.02);
+    const slideWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width')) || Math.floor(viewportWidth * 0.87);
+    const slideGap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-gap')) || Math.floor(viewportWidth * 0.02);
     
-    console.log('Slider Independiente: Actualizando posición - Index:', currentIndex, 'Width:', slideWidth, 'Gap:', slideGap);
-    
+    // Calcular la posición basada en el ancho del slide + gap, manteniendo el centrado inicial
     const translateX = -(slideWidth + slideGap) * currentIndex;
     
-    // Aplicar transformación de forma segura
-    wrapper.style.transform = `translateX(${translateX}px)`;
+    // Combinar el centrado inicial (-50%) con el desplazamiento del slide
+    wrapper.style.transform = `translateX(calc(-50% + ${translateX}px))`;
     
-    // Solo marcar como no transicionando sin llamar a preventHorizontalScroll
+    console.log('Slider Independiente: Posición actualizada - Index:', currentIndex, 'TranslateX:', translateX, 'Slide width:', slideWidth, 'Gap:', slideGap);
+    
     setTimeout(() => {
         isTransitioning = false;
-    }, 100);
+    }, 600);
 }
 
 
