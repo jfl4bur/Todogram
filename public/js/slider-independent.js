@@ -354,16 +354,11 @@ function updateSliderPosition() {
             slideDiv.className = 'slider-slide';
             slideDiv.dataset.index = index;
             
-            // Aplicar estilos directamente para asegurar que funcionen
-            slideDiv.style.flexBasis = `${slideWidth}px`;
+            // Aplicar estilos directamente y de forma simple
             slideDiv.style.width = `${slideWidth}px`;
             slideDiv.style.marginRight = index < slidesData.length - 1 ? `${slideGap}px` : '0';
             slideDiv.style.flexShrink = '0';
             slideDiv.style.flexGrow = '0';
-            slideDiv.style.display = 'block';
-            slideDiv.style.position = 'relative';
-            slideDiv.style.visibility = 'visible';
-            slideDiv.style.opacity = '1';
             
             console.log(`Slider Independiente: Creando slide ${index} con ancho ${slideWidth}px`);
             

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Slider</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #141414;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        
+        .slider-section {
+            position: relative;
+            min-height: 400px;
+            width: 100%;
+            margin-top: 100px;
+        }
+        
+        .slider-container {
+            position: relative;
+            width: 100%;
+            height: 400px;
+            overflow: hidden;
+            max-width: 100%;
+        }
+        
+        .slider-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+            height: 100%;
+            width: auto;
+            transition: transform 0.6s ease;
+        }
+        
+        .slider-slide {
+            flex: 0 0 auto;
+            width: 87vw;
+            max-width: 87vw;
+            height: 100%;
+            margin-right: 2vw;
+            position: relative;
+            display: block;
+            background: #333;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .slider-slide:last-child {
+            margin-right: 0;
+        }
+        
+        .slider-slide img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .slider-nav {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            transform: translateY(-50%);
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+            z-index: 10;
+        }
+        
+        .slider-nav-btn {
+            pointer-events: all;
+            background: rgba(0,0,0,0.7);
+            border: none;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        
+        .slider-pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .slider-pagination-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.4);
+            border: none;
+            cursor: pointer;
+        }
+        
+        .slider-pagination-dot.active {
+            background: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="slider-section">
+        <div class="slider-container">
+            <div class="slider-wrapper" id="slider-wrapper">
+                <div class="slider-slide">
+                    <img src="https://via.placeholder.com/800x400/ff0000/ffffff?text=Slide+1" alt="Slide 1">
+                </div>
+                <div class="slider-slide">
+                    <img src="https://via.placeholder.com/800x400/00ff00/ffffff?text=Slide+2" alt="Slide 2">
+                </div>
+                <div class="slider-slide">
+                    <img src="https://via.placeholder.com/800x400/0000ff/ffffff?text=Slide+3" alt="Slide 3">
+                </div>
+                <div class="slider-slide">
+                    <img src="https://via.placeholder.com/800x400/ffff00/000000?text=Slide+4" alt="Slide 4">
+                </div>
+            </div>
+            <div class="slider-nav">
+                <button class="slider-nav-btn" id="slider-prev">‹</button>
+                <button class="slider-nav-btn" id="slider-next">›</button>
+            </div>
+        </div>
+        <div class="slider-pagination" id="slider-pagination"></div>
+    </div>
+
+    <script>
+        let currentIndex = 0;
+        const totalSlides = 4;
+        
+        function updateSliderPosition() {
+            const wrapper = document.getElementById('slider-wrapper');
+            const slideWidth = window.innerWidth * 0.87;
+            const slideGap = window.innerWidth * 0.02;
+            const translateX = -(slideWidth + slideGap) * currentIndex;
+            wrapper.style.transform = `translateX(${translateX}px)`;
+            console.log('Moving to slide', currentIndex, 'translateX:', translateX);
+        }
+        
+        function updatePagination() {
+            const dots = document.querySelectorAll('.slider-pagination-dot');
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentIndex);
+            });
+        }
+        
+        function goToSlide(index) {
+            if (index < 0) index = totalSlides - 1;
+            if (index >= totalSlides) index = 0;
+            currentIndex = index;
+            updateSliderPosition();
+            updatePagination();
+        }
+        
+        // Setup controls
+        document.getElementById('slider-prev').addEventListener('click', () => goToSlide(currentIndex - 1));
+        document.getElementById('slider-next').addEventListener('click', () => goToSlide(currentIndex + 1));
+        
+        // Setup pagination
+        const pagination = document.getElementById('slider-pagination');
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('button');
+            dot.className = 'slider-pagination-dot';
+            dot.addEventListener('click', () => goToSlide(i));
+            pagination.appendChild(dot);
+        }
+        
+        // Initialize
+        updateSliderPosition();
+        updatePagination();
+    </script>
+</body>
+</html> 
