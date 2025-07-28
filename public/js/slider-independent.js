@@ -168,6 +168,32 @@
                 const firstSlide = slides[0];
                 const computedStyle = getComputedStyle(firstSlide);
                 console.log('Slider Independiente: Tamaño del primer slide - Width:', computedStyle.width, 'Flex-basis:', computedStyle.flexBasis);
+                
+                // Forzar actualización de estilos si es necesario
+                if (computedStyle.width === 'auto' || computedStyle.width === '0px') {
+                    console.log('Slider Independiente: Detectado tamaño incorrecto, forzando actualización...');
+                    updateSliderCSSVariables();
+                    
+                    // Re-aplicar estilos a todos los slides
+                    slides.forEach((slide, index) => {
+                        const slideWidth = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width');
+                        const slideGap = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-gap');
+                        
+                        if (slideWidth && slideWidth !== '') {
+                            slide.style.flexBasis = slideWidth;
+                            slide.style.width = slideWidth;
+                        } else {
+                            const viewportWidth = window.innerWidth;
+                            const calculatedWidth = Math.floor(viewportWidth * 0.87);
+                            slide.style.flexBasis = `${calculatedWidth}px`;
+                            slide.style.width = `${calculatedWidth}px`;
+                        }
+                        
+                        slide.style.marginRight = index < slides.length - 1 ? (slideGap || '16px') : '0';
+                    });
+                    
+                    console.log('Slider Independiente: Estilos forzados aplicados');
+                }
             }
         }, 100);
 
@@ -180,9 +206,22 @@
             slideDiv.dataset.index = index;
             
             // Asegurar que el slide use las variables CSS correctas
-            slideDiv.style.flexBasis = 'var(--slider-slide-width)';
-            slideDiv.style.width = 'var(--slider-slide-width)';
-            slideDiv.style.marginRight = index < slidesData.length - 1 ? 'var(--slider-slide-gap)' : '0';
+            const slideWidth = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width');
+            const slideGap = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-gap');
+            
+            // Aplicar valores directamente si las variables CSS están disponibles
+            if (slideWidth && slideWidth !== '') {
+                slideDiv.style.flexBasis = slideWidth;
+                slideDiv.style.width = slideWidth;
+            } else {
+                // Fallback: calcular valores directamente
+                const viewportWidth = window.innerWidth;
+                const calculatedWidth = Math.floor(viewportWidth * 0.87);
+                slideDiv.style.flexBasis = `${calculatedWidth}px`;
+                slideDiv.style.width = `${calculatedWidth}px`;
+            }
+            
+            slideDiv.style.marginRight = index < slidesData.length - 1 ? (slideGap || '16px') : '0';
             
             // Usar la imagen correcta según los datos disponibles
             const imageUrl = movie.postersUrl || movie.posterUrl || movie.imageUrl || 
@@ -367,6 +406,29 @@
             slidesData = movies;
             renderSlider(movies);
             window.addEventListener('resize', handleResize);
+            
+            // Verificación adicional después de renderizar
+            setTimeout(() => {
+                updateSliderCSSVariables();
+                const slides = document.querySelectorAll('.slider-slide');
+                if (slides.length > 0) {
+                    const firstSlide = slides[0];
+                    const computedStyle = getComputedStyle(firstSlide);
+                    console.log('Slider Independiente: Verificación final - Width:', computedStyle.width, 'Flex-basis:', computedStyle.flexBasis);
+                    
+                    // Si el tamaño sigue siendo incorrecto, forzar actualización
+                    if (computedStyle.width === 'auto' || computedStyle.width === '0px') {
+                        console.log('Slider Independiente: Tamaño incorrecto detectado, forzando corrección...');
+                        slides.forEach((slide, index) => {
+                            const viewportWidth = window.innerWidth;
+                            const calculatedWidth = Math.floor(viewportWidth * 0.87);
+                            slide.style.flexBasis = `${calculatedWidth}px`;
+                            slide.style.width = `${calculatedWidth}px`;
+                            slide.style.marginRight = index < slides.length - 1 ? '16px' : '0';
+                        });
+                    }
+                }
+            }, 300);
         } else {
             console.error('Slider Independiente: No se pudieron cargar datos');
         }
