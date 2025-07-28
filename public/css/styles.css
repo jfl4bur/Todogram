@@ -2169,7 +2169,7 @@ body {
 
 /* Variables CSS para el slider */
 :root {
-    --slider-slide-width: 87vw;
+    --slider-slide-width: 90vw;
     --slider-slide-gap: 2vw;
     --slider-side-space: calc((100vw - var(--slider-slide-width)) / 2);
     --slider-nav-btn-offset: calc(var(--slider-side-space) / 2 - 30px);
