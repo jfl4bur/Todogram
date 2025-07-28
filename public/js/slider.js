@@ -9,15 +9,13 @@
         console.log('Slider: Iniciando renderizado...');
         
         const sliderWrapper = document.getElementById('slider-wrapper');
-        const sliderSkeleton = document.getElementById('slider-skeleton');
         
-        if (!sliderWrapper || !sliderSkeleton) {
+        if (!sliderWrapper) {
             console.error('Slider: Elementos no encontrados');
             return;
         }
 
         // Ocultar skeleton y mostrar wrapper
-        sliderSkeleton.style.display = 'none';
         sliderWrapper.style.display = 'flex';
         sliderWrapper.innerHTML = '';
 
@@ -122,14 +120,12 @@
         if (nextBtn) {
             nextBtn.addEventListener('click', () => goToSlide(currentIndex + 1));
         }
-        
-        updateNavButtons();
     }
 
     // Ir a slide específico
     function goToSlide(index) {
-        if (index < 0) index = 0;
-        if (index >= totalSlides) index = totalSlides - 1;
+        if (index < 0) index = totalSlides - 1;
+        if (index >= totalSlides) index = 0;
         
         currentIndex = index;
         
@@ -147,7 +143,6 @@
         });
         
         updatePagination();
-        updateNavButtons();
     }
 
     // Actualizar paginación
@@ -156,20 +151,6 @@
         dots.forEach((dot, index) => {
             dot.classList.toggle('active', index === currentIndex);
         });
-    }
-
-    // Actualizar botones de navegación
-    function updateNavButtons() {
-        const prevBtn = document.getElementById('slider-prev');
-        const nextBtn = document.getElementById('slider-next');
-        
-        if (prevBtn) {
-            prevBtn.style.display = currentIndex === 0 ? 'none' : 'flex';
-        }
-        
-        if (nextBtn) {
-            nextBtn.style.display = currentIndex === totalSlides - 1 ? 'none' : 'flex';
-        }
     }
 
     // Inicializar cuando el carrusel esté listo
