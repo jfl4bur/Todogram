@@ -2452,3 +2452,25 @@ body {
         padding: 1rem !important;
     }
 }
+
+/* --- SLIDER RAKUTEN.TV: Altura y margen superior exactos --- */
+.slider-section {
+  margin-top: 24px !important;
+  height: 420px !important;
+  min-height: 420px !important;
+  max-height: 420px !important;
+}
+@media (max-width: 1199px) {
+  .slider-section {
+    height: 340px !important;
+    min-height: 340px !important;
+    max-height: 340px !important;
+  }
+}
+@media (max-width: 899px) {
+  .slider-section {
+    height: 220px !important;
+    min-height: 220px !important;
+    max-height: 220px !important;
+  }
+}
