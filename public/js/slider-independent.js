@@ -314,43 +314,54 @@
         // Marcar como inicializado
         isInitialized = true;
 
-        // Verificación post-renderizado
+        // Verificación y corrección post-renderizado mejorada
         setTimeout(() => {
-            verifySliderDimensions();
+            verifyAndFixSliderDimensions();
         }, 100);
+        
+        // Verificación adicional después de que otros scripts se hayan cargado
+        setTimeout(() => {
+            verifyAndFixSliderDimensions();
+        }, 500);
+        
+        // Verificación final
+        setTimeout(() => {
+            verifyAndFixSliderDimensions();
+        }, 1000);
 
         console.log('Slider Independiente: Renderizado completado exitosamente');
         return true;
     }
 
-    // Función para verificar que las dimensiones se aplicaron correctamente
-    function verifySliderDimensions() {
+    // Función para forzar actualización completa del slider
+    function forceSliderUpdate() {
+        if (!isInitialized) return;
+        
+        console.log('Slider Independiente: Forzando actualización completa...');
+        
+        const dimensions = calculateSliderDimensions();
         const slides = document.querySelectorAll('.slider-slide');
+        
         if (slides.length === 0) return;
-
-        const firstSlide = slides[0];
-        const computedStyle = getComputedStyle(firstSlide);
-        const actualWidth = parseFloat(computedStyle.width);
-        const expectedWidth = Math.floor(getViewportDimensions().width * SLIDER_CONFIG.slideWidthPercent);
-
-        console.log('Slider Independiente: Verificación de dimensiones:', {
-            actualWidth,
-            expectedWidth,
-            difference: Math.abs(actualWidth - expectedWidth)
-        });
-
-        // Si la diferencia es significativa, forzar corrección
-        if (Math.abs(actualWidth - expectedWidth) > 10) {
-            console.warn('Slider Independiente: Dimensiones incorrectas detectadas, aplicando corrección...');
-            const dimensions = calculateSliderDimensions();
-            applySliderDimensions(dimensions, true);
+        
+        // Aplicar dimensiones directamente con !important si es necesario
+        slides.forEach((slide, index) => {
+            const { slideWidth, slideGap } = dimensions;
             
-            // Segunda verificación
-            setTimeout(() => {
-                const newActualWidth = parseFloat(getComputedStyle(firstSlide).width);
-                console.log('Slider Independiente: Dimensiones después de corrección:', newActualWidth);
-            }, 50);
-        }
+            // Forzar estilos directamente
+            slide.style.setProperty('width', `${slideWidth}px`, 'important');
+            slide.style.setProperty('flex-basis', `${slideWidth}px`, 'important');
+            slide.style.setProperty('min-width', `${slideWidth}px`, 'important');
+            slide.style.setProperty('max-width', `${slideWidth}px`, 'important');
+            slide.style.setProperty('margin-right', index < slides.length - 1 ? `${slideGap}px` : '0', 'important');
+            slide.style.setProperty('flex-shrink', '0', 'important');
+            slide.style.setProperty('flex-grow', '0', 'important');
+        });
+        
+        // Actualizar posición
+        updateSliderPosition(dimensions);
+        
+        console.log('Slider Independiente: Actualización forzada completada');
     }
 
     // Configurar controles de navegación
@@ -549,6 +560,10 @@
             // Configurar event listeners
             window.addEventListener('resize', handleResize);
             
+            // Configurar observadores para detectar problemas
+            setupVisibilityObserver();
+            setupModalEventListeners();
+            
             console.log('Slider Independiente: Inicialización completada exitosamente');
             retryCount = 0; // Reset retry count on success
             
@@ -565,10 +580,22 @@
         }
     }
 
-    // Función de limpieza
+    // Función de limpieza mejorada
     function cleanup() {
         window.removeEventListener('resize', handleResize);
         clearTimeout(resizeTimeout);
+        
+        // Limpiar observadores
+        if (window.sliderVisibilityObserver) {
+            window.sliderVisibilityObserver.disconnect();
+            delete window.sliderVisibilityObserver;
+        }
+        
+        if (window.sliderModalObserver) {
+            window.sliderModalObserver.disconnect();
+            delete window.sliderModalObserver;
+        }
+        
         isInitialized = false;
         currentIndex = 0;
         totalSlides = 0;
@@ -578,12 +605,30 @@
     // Event listener para cleanup
     window.addEventListener('beforeunload', cleanup);
 
-    // Auto-inicialización
+    // Auto-inicialización mejorada
+    function autoInit() {
+        // Verificar que los elementos necesarios existan
+        const sliderWrapper = document.getElementById('slider-wrapper');
+        if (!sliderWrapper) {
+            console.log('Slider Independiente: Elementos no disponibles, reintentando...');
+            setTimeout(autoInit, 100);
+            return;
+        }
+        
+        // Verificar que no haya una inicialización en curso
+        if (isInitialized) {
+            console.log('Slider Independiente: Ya está inicializado');
+            return;
+        }
+        
+        init();
+    }
+
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
+        document.addEventListener('DOMContentLoaded', autoInit);
     } else {
-        // Si el DOM ya está cargado, inicializar con un pequeño delay
-        setTimeout(init, 50);
+        // Si el DOM ya está cargado, inicializar inmediatamente
+        autoInit();
     }
 
     // API pública
@@ -610,7 +655,11 @@
         openDetailsModal,
         
         // Configuración
-        config: SLIDER_CONFIG
+        config: SLIDER_CONFIG,
+        
+        // Debug y corrección
+        forceSliderUpdate,
+        verifyAndFixSliderDimensions
     };
 
     console.log('Slider Independiente: Módulo cargado');
