@@ -21,23 +21,15 @@ function handleResize() {
             updateSliderCSSVariables();
             updateSliderPosition();
             
-            // Verificar y corregir cualquier overflow horizontal
+            // Verificar y corregir cualquier overflow horizontal (sin llamar a preventHorizontalScroll)
             const sliderSection = document.querySelector('.slider-section');
             if (sliderSection) {
                 const hasHorizontalScroll = document.body.scrollWidth > document.body.clientWidth;
                 if (hasHorizontalScroll) {
-                    console.warn('Detectado scroll horizontal, aplicando corrección...');
-                    // Reducir ligeramente el ancho del slide si hay scroll horizontal
-                    const currentWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width'));
-                    const correctedWidth = Math.floor(currentWidth * 0.98);
-                    document.documentElement.style.setProperty('--slider-slide-width', `${correctedWidth}px`);
-                    
-                    // Aplicar también a los slides existentes
-                    const slides = document.querySelectorAll('.slider-slide');
-                    slides.forEach((slide, index) => {
-                        slide.style.flexBasis = `${correctedWidth}px`;
-                        slide.style.width = `${correctedWidth}px`;
-                    });
+                    console.warn('Detectado scroll horizontal, aplicando corrección básica...');
+                    // Solo aplicar estilos preventivos básicos
+                    document.body.style.overflowX = 'hidden';
+                    document.documentElement.style.overflowX = 'hidden';
                 }
             }
         }
@@ -46,6 +38,9 @@ function handleResize() {
 
 // Función para verificar y prevenir scroll horizontal
 function preventHorizontalScroll() {
+    // DESHABILITADO TEMPORALMENTE para evitar bucle infinito
+    return;
+    
     // Verificar si hay scroll horizontal
     const hasHorizontalScroll = document.body.scrollWidth > document.body.clientWidth;
     
@@ -56,12 +51,16 @@ function preventHorizontalScroll() {
         document.body.style.overflowX = 'hidden';
         document.documentElement.style.overflowX = 'hidden';
         
-        // Reducir el ancho de los slides si es necesario
+        // Reducir el ancho de los slides si es necesario, pero con un límite mínimo
         const currentWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width'));
         if (currentWidth > 0) {
-            const correctedWidth = Math.floor(currentWidth * 0.95);
+            // Establecer un límite mínimo del 50% del viewport
+            const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+            const minWidth = Math.floor(viewportWidth * 0.5);
+            const correctedWidth = Math.max(minWidth, Math.floor(currentWidth * 0.95));
+            
             document.documentElement.style.setProperty('--slider-slide-width', `${correctedWidth}px`);
-            console.log('Ancho de slide corregido a:', correctedWidth + 'px');
+            console.log('Ancho de slide corregido a:', correctedWidth + 'px (mínimo:', minWidth + 'px)');
             
             // Aplicar también a los slides existentes
             const slides = document.querySelectorAll('.slider-slide');
@@ -96,9 +95,8 @@ function updateSliderPosition() {
     // Aplicar transformación de forma segura
     wrapper.style.transform = `translateX(${translateX}px)`;
     
-    // Verificar que no se cause scroll horizontal
+    // Solo marcar como no transicionando sin llamar a preventHorizontalScroll
     setTimeout(() => {
-        preventHorizontalScroll();
         isTransitioning = false;
     }, 100);
 }
@@ -342,7 +340,11 @@ function updateSliderPosition() {
         const slideWidth = Math.floor(viewportWidth * 0.87);
         const slideGap = Math.floor(viewportWidth * 0.02);
         
-        console.log('Slider Independiente: Creando slides con ancho:', slideWidth, 'gap:', slideGap);
+        // Establecer variables CSS con valores fijos
+        document.documentElement.style.setProperty('--slider-slide-width', `${slideWidth}px`);
+        document.documentElement.style.setProperty('--slider-slide-gap', `${slideGap}px`);
+        
+        console.log('Slider Independiente: Creando slides con ancho fijo:', slideWidth, 'gap:', slideGap);
         
         slidesData.forEach((movie, index) => {
             const slideDiv = document.createElement('div');
@@ -619,19 +621,6 @@ async function init() {
                     console.log(`Slider Independiente: Slide ${index} - Width:`, computedStyle.width, 'Flex-basis:', computedStyle.flexBasis);
                 });
                 
-                // Verificación final de scroll horizontal
-                const hasScroll = document.body.scrollWidth > document.body.clientWidth;
-                if (hasScroll) {
-                    console.warn('Scroll horizontal final detectado, aplicando corrección definitiva...');
-                    slides.forEach((slide, index) => {
-                        const viewportWidth = document.documentElement.clientWidth;
-                        const safeWidth = Math.floor(viewportWidth * 0.85); // Usar 85% como valor seguro
-                        slide.style.flexBasis = `${safeWidth}px`;
-                        slide.style.width = `${safeWidth}px`;
-                        slide.style.marginRight = index < slides.length - 1 ? '16px' : '0';
-                    });
-                }
-                
                 // Ir al primer slide y actualizar posición
                 currentIndex = 0;
                 updateSliderPosition();
@@ -649,6 +638,9 @@ async function init() {
 
    // Observer para detectar cambios en el DOM que puedan causar scroll horizontal
 const horizontalScrollObserver = new MutationObserver((mutations) => {
+    // DESHABILITADO TEMPORALMENTE para evitar bucle infinito
+    return;
+    
     let shouldCheck = false;
     mutations.forEach((mutation) => {
         if (mutation.type === 'childList' || mutation.type === 'attributes') {
