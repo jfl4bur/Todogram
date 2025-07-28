@@ -332,6 +332,9 @@ function updateSliderPosition() {
         sliderWrapper.style.transform = 'translateX(0)';
         sliderWrapper.style.transition = 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
         sliderWrapper.style.overflow = 'visible';
+        sliderWrapper.style.position = 'relative';
+        sliderWrapper.style.left = '0';
+        sliderWrapper.style.right = 'auto';
         
         console.log('Slider Independiente: Configurando wrapper con display flex');
         
@@ -411,6 +414,12 @@ function updateSliderPosition() {
             createdSlides.forEach((slide, index) => {
                 const computedStyle = getComputedStyle(slide);
                 console.log(`Slider Independiente: Slide ${index} - Width:`, computedStyle.width, 'Display:', computedStyle.display, 'Visibility:', computedStyle.visibility);
+                
+                // Asegurar que cada slide sea visible
+                slide.style.position = 'relative';
+                slide.style.left = '0';
+                slide.style.right = 'auto';
+                slide.style.zIndex = '1';
             });
         }
 

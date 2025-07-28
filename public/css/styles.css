@@ -2577,6 +2577,7 @@ body {
   flex-direction: row !important;
   flex-wrap: nowrap !important;
   min-height: 400px !important;
+  position: relative !important;
 }
 
 .slider-slide {
@@ -2587,5 +2588,31 @@ body {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
+  position: relative !important;
+}
+
+/* Asegurar que el contenedor padre no oculte los slides */
+.slider-section,
+.slider-container,
+.slider-wrapper {
+  overflow: visible !important;
+  clip: auto !important;
+  clip-path: none !important;
+}
+
+/* Forzar que el contenedor permita overflow horizontal */
+.slider-container {
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+  max-width: none !important;
+  width: auto !important;
+}
+
+/* Asegurar que el wrapper tenga el espacio necesario */
+.slider-wrapper {
+  width: auto !important;
+  max-width: none !important;
+  overflow: visible !important;
+  transform: none !important;
 }
 /* --- FIN AJUSTES ESPECÍFICOS --- */
