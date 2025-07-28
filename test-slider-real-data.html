@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Slider con Datos Reales</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="public/css/styles.css">
+    <style>
+        body {
+            background-color: #141414;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: #ffffff;
+        }
+        
+        .test-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 9999;
+            max-width: 300px;
+        }
+        
+        .data-info {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .resize-handle {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: var(--primary-color);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info" id="test-info">
+        <div><strong>Slider con Datos Reales</strong></div>
+        <div>Viewport: <span id="viewport-size"></span></div>
+        <div>Slide Width: <span id="slide-width"></span></div>
+        <div>Slide Gap: <span id="slide-gap"></span></div>
+        <div>Side Space: <span id="side-space"></span></div>
+        <div class="data-info">
+            <div>Películas cargadas: <span id="movies-count">0</span></div>
+            <div>Slides renderizados: <span id="slides-count">0</span></div>
+            <div>Géneros únicos: <span id="genres-count">0</span></div>
+        </div>
+    </div>
+    
+    <div class="resize-handle" onclick="toggleResize()">
+        Toggle Resize Test
+    </div>
+
+    <div id="header-root"></div>
+    
+    <!-- SLIDER CAROUSEL TIPO RAKUTEN.TV -->
+    <div class="slider-section">
+        <h2 class="slider-title"></h2>
+        <div class="slider-container">
+            <div class="slider-wrapper" id="slider-wrapper">
+                <!-- Slides se insertarán aquí -->
+            </div>
+        </div>
+        <div class="slider-nav">
+            <button class="slider-nav-btn prev" id="slider-prev"><i class="fas fa-chevron-left"></i></button>
+            <button class="slider-nav-btn next" id="slider-next"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div class="slider-pagination" id="slider-pagination"></div>
+    </div>
+
+    <script>
+        // URL del archivo JSON en GitHub Pages
+        const DATA_URL = "https://jfl4bur.github.io/Todogram/public/data.json";
+        
+        // Función para cargar datos reales
+        async function loadRealData() {
+            try {
+                const response = await fetch(DATA_URL);
+                if (!response.ok) throw new Error('No se pudo cargar data.json');
+                const data = await response.json();
+                
+                // Mapear datos como lo hace el carousel
+                const moviesData = data
+                    .filter(item => item && typeof item === 'object' && item['Categoría'] === 'Películas')
+                    .map((item, index) => ({
+                        id: index.toString(),
+                        title: item['Título'] || 'Sin título',
+                        description: item['Synopsis'] || 'Descripción no disponible',
+                        posterUrl: item['Portada'] || '',
+                        postersUrl: item['Carteles'] || '',
+                        backgroundUrl: item['Fondo'] || '',
+                        year: item['Año'] ? item['Año'].toString() : '',
+                        duration: item['Duración'] || '',
+                        genre: item['Géneros'] || '',
+                        rating: item['Puntuación 1-10'] ? item['Puntuación 1-10'].toString() : '',
+                        ageRating: item['Clasificación'] || '',
+                        link: item['Enlace'] || '#',
+                        trailerUrl: item['Trailer'] || '',
+                        videoUrl: item['Video iframe'] || '',
+                        tmdbUrl: item['TMDB'] || '',
+                        audiosCount: item['Audios'] ? item['Audios'].split(',').length : 0,
+                        subtitlesCount: item['Subtítulos'] ? item['Subtítulos'].split(',').length : 0,
+                        audioList: item['Audios'] ? item['Audios'].split(',') : [],
+                        subtitleList: item['Subtítulos'] ? item['Subtítulos'].split(',') : []
+                    }));
+
+                console.log('Datos reales cargados:', moviesData.length, 'películas');
+                
+                // Actualizar información de prueba
+                document.getElementById('movies-count').textContent = moviesData.length;
+                
+                // Simular carousel data
+                window.carousel = {
+                    moviesData: moviesData
+                };
+                
+                return moviesData;
+            } catch (error) {
+                console.error('Error cargando datos reales:', error);
+                return [];
+            }
+        }
+
+        // Función para actualizar información de prueba
+        function updateTestInfo() {
+            const viewportSize = document.getElementById('viewport-size');
+            const slideWidth = document.getElementById('slide-width');
+            const slideGap = document.getElementById('slide-gap');
+            const sideSpace = document.getElementById('side-space');
+            const slidesCount = document.getElementById('slides-count');
+            const genresCount = document.getElementById('genres-count');
+            
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            const slideW = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width')) || Math.floor(vw * 0.87);
+            const slideG = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-gap')) || Math.floor(vw * 0.02);
+            const sideS = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-side-space')) || Math.floor((vw - slideW) / 2);
+            
+            viewportSize.textContent = `${vw}px × ${vh}px`;
+            slideWidth.textContent = `${slideW}px`;
+            slideGap.textContent = `${slideG}px`;
+            sideSpace.textContent = `${sideS}px`;
+            
+            // Contar slides y géneros únicos
+            const slides = document.querySelectorAll('.slider-slide');
+            const genres = new Set();
+            slides.forEach(slide => {
+                const genreElement = slide.querySelector('.slider-meta span:last-child');
+                if (genreElement) {
+                    genres.add(genreElement.textContent);
+                }
+            });
+            
+            slidesCount.textContent = slides.length;
+            genresCount.textContent = genres.size;
+        }
+
+        // Función para alternar resize test
+        function toggleResize() {
+            const body = document.body;
+            if (body.style.width === '800px') {
+                body.style.width = '';
+                body.style.height = '';
+            } else {
+                body.style.width = '800px';
+                body.style.height = '600px';
+            }
+        }
+
+        // Cargar datos y inicializar
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('Test: Cargando datos reales...');
+            
+            const moviesData = await loadRealData();
+            
+            if (moviesData.length > 0) {
+                console.log('Test: Datos cargados, inicializando slider...');
+                
+                setTimeout(() => {
+                    if (window.slider) {
+                        window.slider.init();
+                        updateTestInfo();
+                        
+                        // Actualizar información cada 100ms para ver cambios en tiempo real
+                        setInterval(updateTestInfo, 100);
+                        
+                        // Actualizar en resize
+                        window.addEventListener('resize', updateTestInfo);
+                    }
+                }, 500);
+            } else {
+                console.error('Test: No se pudieron cargar datos reales');
+            }
+        });
+    </script>
+    
+    <script src="public/js/slider.js"></script>
+</body>
+</html> 

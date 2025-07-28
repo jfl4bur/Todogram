@@ -80,6 +80,16 @@
             }
         }
 
+        // Si aún no hay suficientes, tomar las primeras películas
+        if (slidesData.length < 6) {
+            for (const movie of sortedMovies) {
+                if (!slidesData.find(m => m.id === movie.id)) {
+                    slidesData.push(movie);
+                    if (slidesData.length >= 8) break;
+                }
+            }
+        }
+
         totalSlides = slidesData.length;
         console.log('Slider: Renderizando', totalSlides, 'slides');
 
@@ -91,8 +101,12 @@
             slideDiv.className = 'slider-slide';
             slideDiv.dataset.index = index;
             
+            // Usar la imagen correcta según los datos disponibles
             const imageUrl = movie.postersUrl || movie.posterUrl || movie.imageUrl || 
                            `https://via.placeholder.com/800x450/333/fff?text=${encodeURIComponent(movie.title)}`;
+            
+            // Obtener el género principal
+            const mainGenre = movie.genre ? movie.genre.split(/[·,]/)[0].trim() : '';
             
             slideDiv.innerHTML = `
                 <div class="slider-img-wrapper">
@@ -106,7 +120,7 @@
                     <div class="slider-meta">
                         ${movie.year ? `<span>${movie.year}</span>` : ''}
                         ${movie.duration ? `<span>${movie.duration}</span>` : ''}
-                        ${movie.genre ? `<span>${movie.genre.split(/[·,]/)[0].trim()}</span>` : ''}
+                        ${mainGenre ? `<span>${mainGenre}</span>` : ''}
                         ${movie.rating ? `<span><i class="fas fa-star"></i> ${movie.rating}</span>` : ''}
                     </div>
                     <div class="slider-description">${movie.description || movie.synopsis || 'Sin descripción disponible'}</div>
