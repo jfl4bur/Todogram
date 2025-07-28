@@ -1,136 +1,48 @@
-// Slider Independiente Mejorado - Completamente independiente del carousel
+// Slider Independiente - No depende del carousel
 (function () {
     let currentIndex = 0;
     let totalSlides = 0;
     let isTransitioning = false;
     let resizeTimeout = null;
     let slidesData = [];
-    let isInitialized = false;
-    let retryCount = 0;
-    const MAX_RETRIES = 5;
 
-    // Configuración del slider
-    const SLIDER_CONFIG = {
-        slideWidthPercent: 0.87, // 87vw
-        slideGapPercent: 0.02,   // 2vw
-        transitionDuration: 600, // ms
-        retryDelay: 100         // ms
-    };
-
-    // Función para forzar reflow y asegurar que los estilos se apliquen
-    function forceReflow() {
-        document.documentElement.offsetHeight;
-        return true;
-    }
-
-    // Función para obtener dimensiones reales del viewport
-    function getViewportDimensions() {
-        return {
-            width: window.innerWidth || document.documentElement.clientWidth,
-            height: window.innerHeight || document.documentElement.clientHeight
-        };
-    }
-
-    // Función para calcular dimensiones del slider de forma más robusta
-    function calculateSliderDimensions() {
-        const viewport = getViewportDimensions();
-        const slideWidth = Math.floor(viewport.width * SLIDER_CONFIG.slideWidthPercent);
-        const slideGap = Math.floor(viewport.width * SLIDER_CONFIG.slideGapPercent);
-        const sideSpace = Math.floor((viewport.width - slideWidth) / 2);
-        const navBtnOffset = Math.max(Math.floor(sideSpace / 2 - 30), 10); // Mínimo 10px
-
-        return {
-            slideWidth,
-            slideGap,
-            sideSpace,
-            navBtnOffset,
-            viewportWidth: viewport.width
-        };
-    }
-
-    // Función para aplicar dimensiones directamente a los elementos
-    function applySliderDimensions(dimensions, forceUpdate = false) {
-        const { slideWidth, slideGap, sideSpace, navBtnOffset } = dimensions;
-        
-        console.log('Slider Independiente: Aplicando dimensiones:', {
-            slideWidth,
-            slideGap,
-            sideSpace,
-            navBtnOffset
-        });
+    // Función para actualizar las variables CSS dinámicamente
+    function updateSliderCSSVariables() {
+        const viewportWidth = window.innerWidth;
+        const slideWidth = Math.floor(viewportWidth * 0.87); // 87vw
+        const slideGap = Math.floor(viewportWidth * 0.02); // 2vw gap
+        const sideSpace = Math.floor((viewportWidth - slideWidth) / 2); // Espacio a los lados
+        const navBtnOffset = Math.floor(sideSpace / 2 - 30);
 
         // Actualizar variables CSS
-        const root = document.documentElement;
-        root.style.setProperty('--slider-slide-width', `${slideWidth}px`);
-        root.style.setProperty('--slider-slide-gap', `${slideGap}px`);
-        root.style.setProperty('--slider-side-space', `${sideSpace}px`);
-        root.style.setProperty('--slider-nav-btn-offset', `${navBtnOffset}px`);
+        document.documentElement.style.setProperty('--slider-slide-width', `${slideWidth}px`);
+        document.documentElement.style.setProperty('--slider-slide-gap', `${slideGap}px`);
+        document.documentElement.style.setProperty('--slider-side-space', `${sideSpace}px`);
+        document.documentElement.style.setProperty('--slider-nav-btn-offset', `${navBtnOffset}px`);
 
-        // Forzar reflow
-        forceReflow();
-
-        // Aplicar dimensiones directamente a los slides existentes
-        const slides = document.querySelectorAll('.slider-slide');
-        slides.forEach((slide, index) => {
-            // Aplicar tanto CSS custom properties como estilos inline para mayor compatibilidad
-            slide.style.width = `${slideWidth}px`;
-            slide.style.flexBasis = `${slideWidth}px`;
-            slide.style.minWidth = `${slideWidth}px`;
-            slide.style.maxWidth = `${slideWidth}px`;
-            slide.style.marginRight = index < slides.length - 1 ? `${slideGap}px` : '0';
-            
-            // Asegurar que los estilos se apliquen
-            slide.style.flexShrink = '0';
-            slide.style.flexGrow = '0';
-        });
-
-        // Actualizar posición del slider si está inicializado
-        if (isInitialized && slides.length > 0) {
-            updateSliderPosition(dimensions);
-        }
-
-        return true;
+        console.log('Slider Independiente: Variables CSS actualizadas - Ancho slide:', slideWidth, 'Gap:', slideGap, 'Espacio lateral:', sideSpace);
+        
+        // Verificar que las variables se aplicaron correctamente
+        const appliedWidth = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width');
+        console.log('Slider Independiente: Variable aplicada:', appliedWidth);
+        
+        // Forzar reflow para asegurar que los cambios se apliquen
+        document.documentElement.offsetHeight;
     }
 
-    // Función mejorada para actualizar variables CSS
-    function updateSliderCSSVariables(forceUpdate = false) {
-        const dimensions = calculateSliderDimensions();
-        return applySliderDimensions(dimensions, forceUpdate);
-    }
-
-    // Cargar datos de forma más robusta
+    // Cargar datos independientemente
     async function loadSliderData() {
         try {
             console.log('Slider Independiente: Cargando datos...');
-            
-            // Verificar que DATA_URL esté disponible
-            if (typeof DATA_URL === 'undefined') {
-                console.error('Slider Independiente: DATA_URL no está definida');
-                return [];
-            }
-
             const response = await fetch(DATA_URL);
-            if (!response.ok) {
-                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-            }
-            
+            if (!response.ok) throw new Error('No se pudo cargar data.json');
             const data = await response.json();
             
-            if (!Array.isArray(data)) {
-                console.error('Slider Independiente: Los datos no son un array válido');
-                return [];
-            }
-
-            // Filtrar y procesar películas
+            // Filtrar solo películas
             const movies = data
-                .filter(item => {
-                    return item && 
-                           typeof item === 'object' && 
-                           item['Categoría'] === 'Películas' &&
-                           item['Título']; // Asegurar que tenga título
-                })
+                .filter(item => item && typeof item === 'object' && item['Categoría'] === 'Películas')
                 .map((item, index) => ({
-                    id: `movie-${index}`,
+                    id: index.toString(),
                     title: item['Título'] || 'Sin título',
                     description: item['Synopsis'] || 'Descripción no disponible',
                     posterUrl: item['Portada'] || '',
@@ -143,6 +55,7 @@
                     director: item['Director(es)'] || '',
                     cast: item['Reparto principal'] || '',
                     synopsis: item['Synopsis'] || '',
+                    // Campos adicionales para el modal
                     tmdbUrl: item['TMDB'] || '',
                     tmdbId: item['ID TMDB'] || '',
                     trailerUrl: item['Trailer'] || '',
@@ -152,226 +65,219 @@
                     productionCountries: item['País(es)'] || '',
                     spokenLanguages: item['Idioma(s) original(es)'] || '',
                     writers: item['Escritor(es)'] || '',
+                    // Campos de audio y subtítulos
                     audios: item['Audios'] || '',
                     subtitles: item['Subtítulos'] || '',
+                    // Procesar audios y subtítulos como arrays
                     audioList: item['Audios'] ? item['Audios'].split(',').map(audio => audio.trim()) : [],
                     subtitleList: item['Subtítulos'] ? item['Subtítulos'].split(',').map(sub => sub.trim()) : [],
                     audiosCount: item['Audios'] ? item['Audios'].split(',').length : 0,
                     subtitlesCount: item['Subtítulos'] ? item['Subtítulos'].split(',').length : 0
                 }));
 
-            console.log('Slider Independiente: Datos procesados:', movies.length, 'películas válidas');
-            return movies;
+            console.log('Slider Independiente: Datos cargados:', movies.length, 'películas');
             
+            // Verificar algunos datos de ejemplo
+            if (movies.length > 0) {
+                const sampleMovie = movies[0];
+                console.log('Slider Independiente: Película de ejemplo:', {
+                    title: sampleMovie.title,
+                    videoUrl: sampleMovie.videoUrl,
+                    trailerUrl: sampleMovie.trailerUrl
+                });
+            }
+            
+            return movies;
         } catch (error) {
             console.error('Slider Independiente: Error cargando datos:', error);
             return [];
         }
     }
 
-    // Función para seleccionar películas para el slider
-    function selectMoviesForSlider(movies) {
-        if (!movies || movies.length === 0) return [];
-
-        const usedGenres = new Set();
-        const selectedMovies = [];
-        const targetCount = Math.min(8, movies.length);
-
-        // Ordenar por rating
-        const sortedMovies = [...movies].sort((a, b) => {
-            const ratingA = parseFloat(a.rating) || 0;
-            const ratingB = parseFloat(b.rating) || 0;
-            return ratingB - ratingA;
-        });
-
-        // Seleccionar películas de diferentes géneros
-        for (const movie of sortedMovies) {
-            if (selectedMovies.length >= targetCount) break;
-            
-            if (movie.genre) {
-                const mainGenre = movie.genre.split(/[·,]/)[0].trim();
-                if (!usedGenres.has(mainGenre)) {
-                    selectedMovies.push(movie);
-                    usedGenres.add(mainGenre);
-                }
-            }
-        }
-
-        // Completar con películas restantes si es necesario
-        for (const movie of sortedMovies) {
-            if (selectedMovies.length >= targetCount) break;
-            if (!selectedMovies.find(m => m.id === movie.id)) {
-                selectedMovies.push(movie);
-            }
-        }
-
-        return selectedMovies.slice(0, targetCount);
-    }
-
-    // Función para crear un slide
-    function createSlide(movie, index, dimensions) {
-        const slideDiv = document.createElement('div');
-        slideDiv.className = 'slider-slide';
-        slideDiv.dataset.index = index;
-        slideDiv.dataset.movieId = movie.id;
-
-        // Aplicar dimensiones directamente
-        const { slideWidth, slideGap } = dimensions;
-        slideDiv.style.width = `${slideWidth}px`;
-        slideDiv.style.flexBasis = `${slideWidth}px`;
-        slideDiv.style.minWidth = `${slideWidth}px`;
-        slideDiv.style.maxWidth = `${slideWidth}px`;
-        slideDiv.style.marginRight = index < totalSlides - 1 ? `${slideGap}px` : '0';
-        slideDiv.style.flexShrink = '0';
-        slideDiv.style.flexGrow = '0';
-
-        // Determinar la imagen a usar
-        const imageUrl = movie.postersUrl || movie.posterUrl || movie.backgroundUrl ||
-                        `https://via.placeholder.com/800x450/333/fff?text=${encodeURIComponent(movie.title)}`;
-
-        // Obtener género principal
-        const mainGenre = movie.genre ? movie.genre.split(/[·,]/)[0].trim() : '';
-
-        // Crear contenido del slide
-        slideDiv.innerHTML = `
-            <div class="slider-img-wrapper">
-                <img src="${imageUrl}" 
-                     alt="${movie.title}" 
-                     loading="${index === 0 ? 'eager' : 'lazy'}"
-                     onerror="this.src='https://via.placeholder.com/800x450/333/fff?text=Error+de+Imagen'">
-            </div>
-            <div class="slider-overlay">
-                <div class="slider-title-movie">${movie.title}</div>
-                <div class="slider-meta">
-                    ${movie.year ? `<span>${movie.year}</span>` : ''}
-                    ${movie.duration ? `<span>${movie.duration}</span>` : ''}
-                    ${mainGenre ? `<span>${mainGenre}</span>` : ''}
-                    ${movie.rating ? `<span><i class="fas fa-star"></i> ${movie.rating}</span>` : ''}
-                </div>
-                <div class="slider-description">${(movie.description || movie.synopsis || 'Sin descripción disponible').substring(0, 200)}${(movie.description || movie.synopsis || '').length > 200 ? '...' : ''}</div>
-            </div>
-        `;
-
-        // Event listener para click
-        slideDiv.addEventListener('click', (e) => {
-            if (!isTransitioning) {
-                e.preventDefault();
-                e.stopPropagation();
-                console.log('Slider Independiente: Click en slide:', movie.title);
-                openDetailsModal(movie, slideDiv);
-            }
-        });
-
-        return slideDiv;
-    }
-
-    // Renderizar slider de forma más robusta
+    // Renderizar slider
     function renderSlider(moviesData = []) {
         console.log('Slider Independiente: Iniciando renderizado...');
         
         const sliderWrapper = document.getElementById('slider-wrapper');
         if (!sliderWrapper) {
             console.error('Slider Independiente: slider-wrapper no encontrado');
-            return false;
+            return;
         }
 
-        // Usar datos proporcionados o datos cargados
+        // Aplicar variables CSS
+        updateSliderCSSVariables();
+        
+        // Usar los datos proporcionados o los datos cargados
         const movies = moviesData.length > 0 ? moviesData : slidesData;
-        if (movies.length === 0) {
-            console.warn('Slider Independiente: No hay películas para mostrar');
-            return false;
-        }
 
         // Seleccionar películas para el slider
-        const selectedMovies = selectMoviesForSlider(movies);
-        slidesData = selectedMovies;
-        totalSlides = slidesData.length;
-
-        console.log('Slider Independiente: Renderizando', totalSlides, 'slides');
-
-        // Calcular dimensiones
-        const dimensions = calculateSliderDimensions();
+        const usedGenres = new Set();
         
-        // Limpiar contenido anterior
-        sliderWrapper.innerHTML = '';
-
-        // Crear slides
-        slidesData.forEach((movie, index) => {
-            const slide = createSlide(movie, index, dimensions);
-            sliderWrapper.appendChild(slide);
+        // Ordenar por rating primero
+        const sortedMovies = [...movies].sort((a, b) => {
+            const ratingA = parseFloat(a.rating) || 0;
+            const ratingB = parseFloat(b.rating) || 0;
+            return ratingB - ratingA;
         });
 
-        // Aplicar dimensiones y estilos
-        applySliderDimensions(dimensions, true);
+        // Crear array temporal para las películas seleccionadas
+        const selectedMovies = [];
+
+        // Seleccionar películas de diferentes géneros
+        for (const movie of sortedMovies) {
+            if (movie.genre) {
+                const mainGenre = movie.genre.split(/[·,]/)[0].trim();
+                if (!usedGenres.has(mainGenre)) {
+                    selectedMovies.push(movie);
+                    usedGenres.add(mainGenre);
+                    if (selectedMovies.length >= 8) break;
+                }
+            }
+        }
+
+        // Completar si hace falta
+        if (selectedMovies.length < 6) {
+            for (const movie of sortedMovies) {
+                if (!selectedMovies.find(m => m.id === movie.id)) {
+                    selectedMovies.push(movie);
+                    if (selectedMovies.length >= 8) break;
+                }
+                if (selectedMovies.length >= 8) break;
+            }
+        }
+
+        // Si aún no hay suficientes, tomar las primeras películas
+        if (selectedMovies.length < 6) {
+            for (const movie of sortedMovies) {
+                if (!selectedMovies.find(m => m.id === movie.id)) {
+                    selectedMovies.push(movie);
+                    if (selectedMovies.length >= 8) break;
+                }
+            }
+        }
+
+        // Asignar las películas seleccionadas al array global
+        slidesData = selectedMovies;
+        totalSlides = slidesData.length;
+        console.log('Slider Independiente: Renderizando', totalSlides, 'slides');
+        
+        // Verificar el tamaño de los slides después del renderizado
+        setTimeout(() => {
+            const slides = document.querySelectorAll('.slider-slide');
+            if (slides.length > 0) {
+                const firstSlide = slides[0];
+                const computedStyle = getComputedStyle(firstSlide);
+                console.log('Slider Independiente: Tamaño del primer slide - Width:', computedStyle.width, 'Flex-basis:', computedStyle.flexBasis);
+                
+                // Forzar actualización de estilos si es necesario
+                if (computedStyle.width === 'auto' || computedStyle.width === '0px') {
+                    console.log('Slider Independiente: Detectado tamaño incorrecto, forzando actualización...');
+                    updateSliderCSSVariables();
+                    
+                    // Re-aplicar estilos a todos los slides
+                    slides.forEach((slide, index) => {
+                        const slideWidth = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width');
+                        const slideGap = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-gap');
+                        
+                        if (slideWidth && slideWidth !== '') {
+                            slide.style.flexBasis = slideWidth;
+                            slide.style.width = slideWidth;
+                        } else {
+                            const viewportWidth = window.innerWidth;
+                            const calculatedWidth = Math.floor(viewportWidth * 0.87);
+                            slide.style.flexBasis = `${calculatedWidth}px`;
+                            slide.style.width = `${calculatedWidth}px`;
+                        }
+                        
+                        slide.style.marginRight = index < slides.length - 1 ? (slideGap || '16px') : '0';
+                    });
+                    
+                    console.log('Slider Independiente: Estilos forzados aplicados');
+                }
+            }
+        }, 100);
+
+        // Limpiar y crear slides
+        sliderWrapper.innerHTML = '';
+        
+        slidesData.forEach((movie, index) => {
+            const slideDiv = document.createElement('div');
+            slideDiv.className = 'slider-slide';
+            slideDiv.dataset.index = index;
+            
+            // Asegurar que el slide use las variables CSS correctas
+            const slideWidth = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width');
+            const slideGap = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-gap');
+            
+            // Aplicar valores directamente si las variables CSS están disponibles
+            if (slideWidth && slideWidth !== '') {
+                slideDiv.style.flexBasis = slideWidth;
+                slideDiv.style.width = slideWidth;
+            } else {
+                // Fallback: calcular valores directamente
+                const viewportWidth = window.innerWidth;
+                const calculatedWidth = Math.floor(viewportWidth * 0.87);
+                slideDiv.style.flexBasis = `${calculatedWidth}px`;
+                slideDiv.style.width = `${calculatedWidth}px`;
+            }
+            
+            slideDiv.style.marginRight = index < slidesData.length - 1 ? (slideGap || '16px') : '0';
+            
+            // Usar la imagen correcta según los datos disponibles
+            const imageUrl = movie.postersUrl || movie.posterUrl || movie.imageUrl || 
+                           `https://via.placeholder.com/800x450/333/fff?text=${encodeURIComponent(movie.title)}`;
+            
+            // Obtener el género principal
+            const mainGenre = movie.genre ? movie.genre.split(/[·,]/)[0].trim() : '';
+            
+            slideDiv.innerHTML = `
+                <div class="slider-img-wrapper">
+                    <img src="${imageUrl}" 
+                         alt="${movie.title}" 
+                         loading="${index === 0 ? 'eager' : 'lazy'}"
+                         onerror="this.src='https://via.placeholder.com/800x450/333/fff?text=No+Image'">
+                </div>
+                <div class="slider-overlay">
+                    <div class="slider-title-movie">${movie.title || 'Sin título'}</div>
+                    <div class="slider-meta">
+                        ${movie.year ? `<span>${movie.year}</span>` : ''}
+                        ${movie.duration ? `<span>${movie.duration}</span>` : ''}
+                        ${mainGenre ? `<span>${mainGenre}</span>` : ''}
+                        ${movie.rating ? `<span><i class="fas fa-star"></i> ${movie.rating}</span>` : ''}
+                    </div>
+                    <div class="slider-description">${movie.description || movie.synopsis || 'Sin descripción disponible'}</div>
+                </div>
+            `;
+
+            // Click handler
+            slideDiv.addEventListener('click', (e) => {
+                if (!isTransitioning) {
+                    e.preventDefault();
+                    console.log('Slider Independiente: Click en slide:', movie.title);
+                    openDetailsModal(movie, slideDiv);
+                }
+            });
+
+            sliderWrapper.appendChild(slideDiv);
+        });
 
         // Configurar controles
         setupControls();
         
         // Ir al primer slide
         currentIndex = 0;
-        updateSliderPosition(dimensions);
+        updateSliderPosition();
         
-        // Marcar como inicializado
-        isInitialized = true;
-
-        // Verificación y corrección post-renderizado mejorada
-        setTimeout(() => {
-            verifyAndFixSliderDimensions();
-        }, 100);
-        
-        // Verificación adicional después de que otros scripts se hayan cargado
-        setTimeout(() => {
-            verifyAndFixSliderDimensions();
-        }, 500);
-        
-        // Verificación final
-        setTimeout(() => {
-            verifyAndFixSliderDimensions();
-        }, 1000);
-
-        console.log('Slider Independiente: Renderizado completado exitosamente');
-        return true;
+        console.log('Slider Independiente: Renderizado completado con', totalSlides, 'slides');
     }
 
-    // Función para forzar actualización completa del slider
-    function forceSliderUpdate() {
-        if (!isInitialized) return;
-        
-        console.log('Slider Independiente: Forzando actualización completa...');
-        
-        const dimensions = calculateSliderDimensions();
-        const slides = document.querySelectorAll('.slider-slide');
-        
-        if (slides.length === 0) return;
-        
-        // Aplicar dimensiones directamente con !important si es necesario
-        slides.forEach((slide, index) => {
-            const { slideWidth, slideGap } = dimensions;
-            
-            // Forzar estilos directamente
-            slide.style.setProperty('width', `${slideWidth}px`, 'important');
-            slide.style.setProperty('flex-basis', `${slideWidth}px`, 'important');
-            slide.style.setProperty('min-width', `${slideWidth}px`, 'important');
-            slide.style.setProperty('max-width', `${slideWidth}px`, 'important');
-            slide.style.setProperty('margin-right', index < slides.length - 1 ? `${slideGap}px` : '0', 'important');
-            slide.style.setProperty('flex-shrink', '0', 'important');
-            slide.style.setProperty('flex-grow', '0', 'important');
-        });
-        
-        // Actualizar posición
-        updateSliderPosition(dimensions);
-        
-        console.log('Slider Independiente: Actualización forzada completada');
-    }
-
-    // Configurar controles de navegación
+    // Configurar controles
     function setupControls() {
-        // Botones de navegación
+        // Navegación
         const prevBtn = document.getElementById('slider-prev');
         const nextBtn = document.getElementById('slider-next');
         
         if (prevBtn) {
-            // Remover eventos anteriores
             prevBtn.replaceWith(prevBtn.cloneNode(true));
             const newPrevBtn = document.getElementById('slider-prev');
             newPrevBtn.addEventListener('click', (e) => {
@@ -384,7 +290,6 @@
         }
         
         if (nextBtn) {
-            // Remover eventos anteriores
             nextBtn.replaceWith(nextBtn.cloneNode(true));
             const newNextBtn = document.getElementById('slider-next');
             newNextBtn.addEventListener('click', (e) => {
@@ -396,7 +301,7 @@
             });
         }
 
-        // Crear paginación
+        // Paginación
         createPagination();
     }
 
@@ -416,7 +321,7 @@
             dot.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (!isTransitioning && i !== currentIndex) {
+                if (!isTransitioning) {
                     goToSlide(i);
                 }
             });
@@ -425,7 +330,7 @@
         }
     }
 
-    // Ir a un slide específico
+    // Ir a slide
     function goToSlide(index) {
         if (isTransitioning || totalSlides === 0) return;
         
@@ -438,31 +343,27 @@
         console.log('Slider Independiente: Cambiando a slide', index);
         
         currentIndex = index;
-        const dimensions = calculateSliderDimensions();
-        updateSliderPosition(dimensions);
+        updateSliderPosition();
         updatePagination();
     }
 
-    // Actualizar posición del slider
-    function updateSliderPosition(dimensions = null) {
+    // Actualizar posición usando variables CSS
+    function updateSliderPosition() {
         const wrapper = document.getElementById('slider-wrapper');
         if (!wrapper) return;
         
-        if (!dimensions) {
-            dimensions = calculateSliderDimensions();
-        }
-        
         isTransitioning = true;
         
-        const { slideWidth, slideGap } = dimensions;
-        const translateX = -(slideWidth + slideGap) * currentIndex;
+        // Obtener valores de las variables CSS
+        const slideWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width')) || Math.floor(window.innerWidth * 0.87);
+        const slideGap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-gap')) || Math.floor(window.innerWidth * 0.02);
         
+        const translateX = -(slideWidth + slideGap) * currentIndex;
         wrapper.style.transform = `translateX(${translateX}px)`;
-        wrapper.style.transition = `transform ${SLIDER_CONFIG.transitionDuration}ms cubic-bezier(0.4, 0, 0.2, 1)`;
         
         setTimeout(() => {
             isTransitioning = false;
-        }, SLIDER_CONFIG.transitionDuration);
+        }, 600);
     }
 
     // Actualizar paginación
@@ -473,35 +374,88 @@
         });
     }
 
-    // Manejar resize de ventana
+    // Manejar resize con actualización en tiempo real
     function handleResize() {
         clearTimeout(resizeTimeout);
         
-        if (!isInitialized) return;
-        
         // Actualización inmediata para mejor respuesta
-        const dimensions = calculateSliderDimensions();
-        applySliderDimensions(dimensions, true);
-        updateSliderPosition(dimensions);
+        if (totalSlides > 0) {
+            updateSliderCSSVariables();
+            updateSliderPosition();
+        }
         
-        // Verificación adicional
+        // Actualización adicional después de un breve delay para asegurar estabilidad
         resizeTimeout = setTimeout(() => {
-            if (isInitialized) {
-                verifySliderDimensions();
+            if (totalSlides > 0) {
+                updateSliderCSSVariables();
+                updateSliderPosition();
             }
-        }, 150);
+        }, 100);
     }
 
-    // Función para abrir modal de detalles
+    // Inicializar
+    async function init() {
+        console.log('Slider Independiente: Inicializando...');
+        
+        // Inicializar variables CSS
+        updateSliderCSSVariables();
+        
+        // Cargar datos independientemente
+        const movies = await loadSliderData();
+        if (movies && movies.length > 0) {
+            slidesData = movies;
+            renderSlider(movies);
+            window.addEventListener('resize', handleResize);
+            
+            // Verificación adicional después de renderizar
+            setTimeout(() => {
+                updateSliderCSSVariables();
+                const slides = document.querySelectorAll('.slider-slide');
+                if (slides.length > 0) {
+                    const firstSlide = slides[0];
+                    const computedStyle = getComputedStyle(firstSlide);
+                    console.log('Slider Independiente: Verificación final - Width:', computedStyle.width, 'Flex-basis:', computedStyle.flexBasis);
+                    
+                    // Si el tamaño sigue siendo incorrecto, forzar actualización
+                    if (computedStyle.width === 'auto' || computedStyle.width === '0px') {
+                        console.log('Slider Independiente: Tamaño incorrecto detectado, forzando corrección...');
+                        slides.forEach((slide, index) => {
+                            const viewportWidth = window.innerWidth;
+                            const calculatedWidth = Math.floor(viewportWidth * 0.87);
+                            slide.style.flexBasis = `${calculatedWidth}px`;
+                            slide.style.width = `${calculatedWidth}px`;
+                            slide.style.marginRight = index < slides.length - 1 ? '16px' : '0';
+                        });
+                    }
+                }
+            }, 300);
+        } else {
+            console.error('Slider Independiente: No se pudieron cargar datos');
+        }
+    }
+
+    // Cleanup
+    window.addEventListener('beforeunload', () => {
+        window.removeEventListener('resize', handleResize);
+        clearTimeout(resizeTimeout);
+    });
+
+    // Auto-init
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+
+    // Función para abrir modal de detalles de forma segura
     function openDetailsModal(movie, element) {
         console.log('Slider Independiente: Intentando abrir modal para:', movie.title);
         
+        // Función interna para intentar abrir el modal
         function tryOpenModal() {
             if (window.detailsModal && typeof window.detailsModal.show === 'function') {
                 window.detailsModal.show(movie, element);
-                if (window.activeItem !== undefined) {
-                    window.activeItem = movie;
-                }
+                window.activeItem = movie;
                 console.log('Slider Independiente: Modal abierto exitosamente');
                 return true;
             }
@@ -512,8 +466,9 @@
         if (!tryOpenModal()) {
             console.warn('Slider Independiente: Modal no disponible, reintentando...');
             
+            // Reintentar varias veces con intervalos crecientes
             let attempts = 0;
-            const maxAttempts = 10;
+            const maxAttempts = 5;
             const retryInterval = setInterval(() => {
                 attempts++;
                 if (tryOpenModal()) {
@@ -521,147 +476,23 @@
                 } else if (attempts >= maxAttempts) {
                     console.error('Slider Independiente: No se pudo abrir el modal después de', maxAttempts, 'intentos');
                     clearInterval(retryInterval);
-                    
-                    // Fallback: mostrar alerta con información básica
-                    alert(`${movie.title}\n${movie.year ? movie.year + ' • ' : ''}${movie.duration || ''}\n\n${movie.description || movie.synopsis || 'Sin descripción disponible'}`);
                 }
-            }, 100);
+            }, 200 * attempts); // Intervalo creciente: 200ms, 400ms, 600ms, etc.
         }
     }
 
-    // Función de inicialización mejorada con reintentos
-    async function init() {
-        console.log('Slider Independiente: Inicializando... (Intento', retryCount + 1, ')');
-        
-        try {
-            // Verificar elementos requeridos
-            const sliderWrapper = document.getElementById('slider-wrapper');
-            if (!sliderWrapper) {
-                throw new Error('slider-wrapper no encontrado');
-            }
-
-            // Inicializar dimensiones
-            updateSliderCSSVariables(true);
-            
-            // Cargar datos
-            const movies = await loadSliderData();
-            
-            if (!movies || movies.length === 0) {
-                throw new Error('No se pudieron cargar las películas');
-            }
-
-            // Renderizar slider
-            const renderSuccess = renderSlider(movies);
-            
-            if (!renderSuccess) {
-                throw new Error('Error en el renderizado del slider');
-            }
-
-            // Configurar event listeners
-            window.addEventListener('resize', handleResize);
-            
-            // Configurar observadores para detectar problemas
-            setupVisibilityObserver();
-            setupModalEventListeners();
-            
-            console.log('Slider Independiente: Inicialización completada exitosamente');
-            retryCount = 0; // Reset retry count on success
-            
-        } catch (error) {
-            console.error('Slider Independiente: Error en inicialización:', error);
-            
-            retryCount++;
-            if (retryCount < MAX_RETRIES) {
-                console.log('Slider Independiente: Reintentando inicialización en', SLIDER_CONFIG.retryDelay * retryCount, 'ms');
-                setTimeout(init, SLIDER_CONFIG.retryDelay * retryCount);
-            } else {
-                console.error('Slider Independiente: Máximo número de reintentos alcanzado');
-            }
-        }
-    }
-
-    // Función de limpieza mejorada
-    function cleanup() {
-        window.removeEventListener('resize', handleResize);
-        clearTimeout(resizeTimeout);
-        
-        // Limpiar observadores
-        if (window.sliderVisibilityObserver) {
-            window.sliderVisibilityObserver.disconnect();
-            delete window.sliderVisibilityObserver;
-        }
-        
-        if (window.sliderModalObserver) {
-            window.sliderModalObserver.disconnect();
-            delete window.sliderModalObserver;
-        }
-        
-        isInitialized = false;
-        currentIndex = 0;
-        totalSlides = 0;
-        slidesData = [];
-    }
-
-    // Event listener para cleanup
-    window.addEventListener('beforeunload', cleanup);
-
-    // Auto-inicialización mejorada
-    function autoInit() {
-        // Verificar que los elementos necesarios existan
-        const sliderWrapper = document.getElementById('slider-wrapper');
-        if (!sliderWrapper) {
-            console.log('Slider Independiente: Elementos no disponibles, reintentando...');
-            setTimeout(autoInit, 100);
-            return;
-        }
-        
-        // Verificar que no haya una inicialización en curso
-        if (isInitialized) {
-            console.log('Slider Independiente: Ya está inicializado');
-            return;
-        }
-        
-        init();
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', autoInit);
-    } else {
-        // Si el DOM ya está cargado, inicializar inmediatamente
-        autoInit();
-    }
-
-    // API pública
+    // Exponer API
     window.sliderIndependent = {
-        // Navegación
         goToSlide,
         next: () => goToSlide(currentIndex + 1),
         prev: () => goToSlide(currentIndex - 1),
-        
-        // Estado
         getCurrentIndex: () => currentIndex,
         getTotalSlides: () => totalSlides,
-        getSlidesData: () => [...slidesData], // Copia para evitar mutaciones
-        isInitialized: () => isInitialized,
-        
-        // Control
+        getSlidesData: () => slidesData,
         init,
-        cleanup,
         renderSlider,
-        
-        // Utilidades
         updateSliderCSSVariables,
-        verifySliderDimensions,
-        openDetailsModal,
-        
-        // Configuración
-        config: SLIDER_CONFIG,
-        
-        // Debug y corrección
-        forceSliderUpdate,
-        verifyAndFixSliderDimensions
+        openDetailsModal
     };
 
-    console.log('Slider Independiente: Módulo cargado');
-
-})();
+})(); 
