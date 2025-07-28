@@ -2554,3 +2554,31 @@ body {
     overflow: hidden !important;
     box-sizing: border-box !important;
 }
+
+/* --- AJUSTES ESPECÍFICOS PARA EL SLIDER --- */
+.slider-section {
+  overflow: visible !important;
+  position: relative !important;
+}
+
+.slider-container {
+  overflow: hidden !important;
+  width: 100% !important;
+  position: relative !important;
+}
+
+.slider-wrapper {
+  width: 100% !important;
+  min-width: 0 !important;
+  overflow: visible !important;
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+}
+
+.slider-slide {
+  max-width: 100vw !important;
+  flex-shrink: 0 !important;
+  flex-grow: 0 !important;
+}
+/* --- FIN AJUSTES ESPECÍFICOS --- */

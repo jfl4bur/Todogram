@@ -137,15 +137,18 @@ function updateSliderPosition() {
         document.body.style.overflowX = 'hidden';
         document.documentElement.style.overflowX = 'hidden';
         
-        // Aplicar estilos directamente a los slides existentes si los hay
-        const slides = document.querySelectorAll('.slider-slide');
-        if (slides.length > 0) {
-            slides.forEach((slide, index) => {
-                slide.style.flexBasis = `${slideWidth}px`;
-                slide.style.width = `${slideWidth}px`;
-                slide.style.marginRight = index < slides.length - 1 ? `${slideGap}px` : '0';
-            });
-            console.log('Slider Independiente: Estilos aplicados directamente a', slides.length, 'slides');
+        // Solo aplicar estilos a los slides si el wrapper no está configurado
+        const wrapper = document.getElementById('slider-wrapper');
+        if (wrapper && !wrapper.style.width) {
+            const slides = document.querySelectorAll('.slider-slide');
+            if (slides.length > 0) {
+                slides.forEach((slide, index) => {
+                    slide.style.flexBasis = `${slideWidth}px`;
+                    slide.style.width = `${slideWidth}px`;
+                    slide.style.marginRight = index < slides.length - 1 ? `${slideGap}px` : '0';
+                });
+                console.log('Slider Independiente: Estilos aplicados directamente a', slides.length, 'slides');
+            }
         }
     }
 
@@ -323,6 +326,17 @@ function updateSliderPosition() {
         // Limpiar y crear slides
         sliderWrapper.innerHTML = '';
         
+        // Configurar el wrapper para mostrar todos los slides horizontalmente
+        const totalWidth = slidesData.length * slideWidth + (slidesData.length - 1) * slideGap;
+        sliderWrapper.style.width = `${totalWidth}px`;
+        sliderWrapper.style.display = 'flex';
+        sliderWrapper.style.flexDirection = 'row';
+        sliderWrapper.style.flexWrap = 'nowrap';
+        sliderWrapper.style.transform = 'translateX(0)';
+        sliderWrapper.style.transition = 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        
+        console.log('Slider Independiente: Configurando wrapper con ancho total:', totalWidth, 'px');
+        
         // Obtener valores de ancho antes de crear los slides
         const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
         const slideWidth = Math.floor(viewportWidth * 0.87);
@@ -341,6 +355,12 @@ function updateSliderPosition() {
             slideDiv.style.marginRight = index < slidesData.length - 1 ? `${slideGap}px` : '0';
             slideDiv.style.flexShrink = '0';
             slideDiv.style.flexGrow = '0';
+            slideDiv.style.display = 'block';
+            slideDiv.style.position = 'relative';
+            slideDiv.style.visibility = 'visible';
+            slideDiv.style.opacity = '1';
+            
+            console.log(`Slider Independiente: Creando slide ${index} con ancho ${slideWidth}px`);
             
             // Usar la imagen correcta según los datos disponibles
             const imageUrl = movie.postersUrl || movie.posterUrl || movie.imageUrl || 
@@ -400,6 +420,14 @@ function updateSliderPosition() {
             if (wrapper && slides.length > 0) {
                 console.log('Slider Independiente: Wrapper tiene', wrapper.children.length, 'hijos');
                 console.log('Slider Independiente: Primer slide:', wrapper.firstElementChild?.className);
+                console.log('Slider Independiente: Wrapper width:', wrapper.style.width);
+                console.log('Slider Independiente: Wrapper display:', wrapper.style.display);
+                
+                // Verificar que todos los slides sean visibles
+                slides.forEach((slide, index) => {
+                    const computedStyle = getComputedStyle(slide);
+                    console.log(`Slider Independiente: Slide ${index} - Width:`, computedStyle.width, 'Display:', computedStyle.display, 'Visibility:', computedStyle.visibility);
+                });
             }
         }, 100);
     }
@@ -515,10 +543,11 @@ function updateSliderPosition() {
         const slideWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width')) || Math.floor(viewportWidth * 0.87);
         const slideGap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-gap')) || Math.floor(viewportWidth * 0.02);
         
+        // Calcular la posición basada en el ancho del slide + gap
         const translateX = -(slideWidth + slideGap) * currentIndex;
         wrapper.style.transform = `translateX(${translateX}px)`;
         
-        console.log('Slider Independiente: Posición actualizada - Index:', currentIndex, 'TranslateX:', translateX);
+        console.log('Slider Independiente: Posición actualizada - Index:', currentIndex, 'TranslateX:', translateX, 'Slide width:', slideWidth, 'Gap:', slideGap);
         
         setTimeout(() => {
             isTransitioning = false;
