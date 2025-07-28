@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Slider Responsive</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="public/css/styles.css">
+    <style>
+        body {
+            background-color: #141414;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            color: #ffffff;
+        }
+        
+        .test-info {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 9999;
+        }
+        
+        .resize-handle {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: var(--primary-color);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-info" id="test-info">
+        <div>Viewport: <span id="viewport-size"></span></div>
+        <div>Slide Width: <span id="slide-width"></span></div>
+        <div>Slide Gap: <span id="slide-gap"></span></div>
+        <div>Side Space: <span id="side-space"></span></div>
+    </div>
+    
+    <div class="resize-handle" onclick="toggleResize()">
+        Toggle Resize Test
+    </div>
+
+    <div id="header-root"></div>
+    
+    <!-- SLIDER CAROUSEL TIPO RAKUTEN.TV -->
+    <div class="slider-section">
+        <h2 class="slider-title"></h2>
+        <div class="slider-container">
+            <div class="slider-wrapper" id="slider-wrapper">
+                <!-- Slides se insertarán aquí -->
+            </div>
+        </div>
+        <div class="slider-nav">
+            <button class="slider-nav-btn prev" id="slider-prev"><i class="fas fa-chevron-left"></i></button>
+            <button class="slider-nav-btn next" id="slider-next"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div class="slider-pagination" id="slider-pagination"></div>
+    </div>
+
+    <script>
+        // Datos de prueba
+        const testMovies = [
+            {
+                id: 1,
+                title: "Película de Prueba 1",
+                year: "2024",
+                duration: "120 min",
+                genre: "Acción",
+                rating: "8.5",
+                description: "Una película de acción emocionante con efectos especiales increíbles.",
+                postersUrl: "https://via.placeholder.com/800x450/ff003c/fff?text=Película+1"
+            },
+            {
+                id: 2,
+                title: "Película de Prueba 2",
+                year: "2023",
+                duration: "95 min",
+                genre: "Comedia",
+                rating: "7.8",
+                description: "Una comedia divertida que te hará reír de principio a fin.",
+                postersUrl: "https://via.placeholder.com/800x450/00ff88/000?text=Película+2"
+            },
+            {
+                id: 3,
+                title: "Película de Prueba 3",
+                year: "2024",
+                duration: "150 min",
+                genre: "Drama",
+                rating: "9.1",
+                description: "Un drama intenso que explora las profundidades del alma humana.",
+                postersUrl: "https://via.placeholder.com/800x450/0088ff/fff?text=Película+3"
+            },
+            {
+                id: 4,
+                title: "Película de Prueba 4",
+                year: "2023",
+                duration: "110 min",
+                genre: "Ciencia Ficción",
+                rating: "8.2",
+                description: "Una aventura de ciencia ficción que te llevará a otros mundos.",
+                postersUrl: "https://via.placeholder.com/800x450/ff8800/000?text=Película+4"
+            },
+            {
+                id: 5,
+                title: "Película de Prueba 5",
+                year: "2024",
+                duration: "130 min",
+                genre: "Terror",
+                rating: "7.5",
+                description: "Una película de terror que te mantendrá al borde del asiento.",
+                postersUrl: "https://via.placeholder.com/800x450/8800ff/fff?text=Película+5"
+            },
+            {
+                id: 6,
+                title: "Película de Prueba 6",
+                year: "2023",
+                duration: "100 min",
+                genre: "Romance",
+                rating: "8.0",
+                description: "Una historia de amor que tocará tu corazón.",
+                postersUrl: "https://via.placeholder.com/800x450/ff0088/fff?text=Película+6"
+            }
+        ];
+
+        // Simular carousel data
+        window.carousel = {
+            moviesData: testMovies
+        };
+
+        // Función para actualizar información de prueba
+        function updateTestInfo() {
+            const viewportSize = document.getElementById('viewport-size');
+            const slideWidth = document.getElementById('slide-width');
+            const slideGap = document.getElementById('slide-gap');
+            const sideSpace = document.getElementById('side-space');
+            
+            const vw = window.innerWidth;
+            const vh = window.innerHeight;
+            const slideW = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width')) || Math.floor(vw * 0.87);
+            const slideG = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-gap')) || Math.floor(vw * 0.02);
+            const sideS = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-side-space')) || Math.floor((vw - slideW) / 2);
+            
+            viewportSize.textContent = `${vw}px × ${vh}px`;
+            slideWidth.textContent = `${slideW}px`;
+            slideGap.textContent = `${slideG}px`;
+            sideSpace.textContent = `${sideS}px`;
+        }
+
+        // Función para alternar resize test
+        function toggleResize() {
+            const body = document.body;
+            if (body.style.width === '800px') {
+                body.style.width = '';
+                body.style.height = '';
+            } else {
+                body.style.width = '800px';
+                body.style.height = '600px';
+            }
+        }
+
+        // Actualizar información cada 100ms para ver cambios en tiempo real
+        setInterval(updateTestInfo, 100);
+
+        // Actualizar en resize
+        window.addEventListener('resize', updateTestInfo);
+    </script>
+    
+    <script src="public/js/slider.js"></script>
+    
+    <script>
+        // Inicializar después de cargar todo
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Test: Inicializando slider de prueba...');
+            
+            setTimeout(() => {
+                if (window.slider) {
+                    window.slider.init();
+                    updateTestInfo();
+                }
+            }, 500);
+        });
+    </script>
+</body>
+</html> 
