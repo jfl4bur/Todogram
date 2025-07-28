@@ -1878,8 +1878,6 @@
     box-sizing: border-box;
     scroll-snap-type: x mandatory;
     position: relative;
-    padding-left: calc(50vw - 40vw - 12px);
-    padding-right: calc(50vw - 40vw - 12px);
 }
 #slider-wrapper::-webkit-scrollbar { display: none; }
 

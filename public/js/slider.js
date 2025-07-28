@@ -134,7 +134,7 @@
         if (!slide) return;
         
         const slideWidth = slide.offsetWidth;
-        const gap = 24; // gap del CSS
+        const gap = parseInt(getComputedStyle(wrapper).gap) || 24; // Get gap from CSS
         const scrollPosition = (slideWidth + gap) * index;
         
         wrapper.scrollTo({
@@ -160,7 +160,8 @@
         if (window.carousel && window.carousel.moviesData && window.carousel.moviesData.length > 0) {
             console.log('Slider: Datos disponibles, renderizando...');
             renderSlider();
-        } else {
+        }
+        else {
             console.log('Slider: Esperando datos...');
             setTimeout(init, 100);
         }
@@ -176,4 +177,4 @@
         init
     };
 
-})(); 
+})();
