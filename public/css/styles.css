@@ -1174,7 +1174,6 @@
     color: white;
     width: 40px;
     height: var(--item-height);
-    min-height: var(--item-height);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1182,12 +1181,9 @@
     transition: all 0.3s ease;
     opacity: 1;
     position: absolute;
-    top: 0;
+    top: 50%;
+    transform: translateY(-50%);
     z-index: 2;
-}
-
-.carousel-nav-btn:hover {
-    background-color: rgba(0, 0, 0, 0.9);
 }
 
 .carousel-nav-btn.prev {
@@ -1200,16 +1196,17 @@
     border-radius: 4px 0 0 4px;
 }
 
+/* Elimina la dependencia del hover para la visibilidad */
+.carousel-container:hover .carousel-nav-btn {
+    opacity: 1;
+}
+
 .carousel-nav-btn i {
     font-size: 1.5rem;
 }
 
 .carousel-container {
     position: relative;
-}
-
-.carousel-container:hover .carousel-nav-btn {
-    opacity: 1;
 }
 
 /* Estilo para la edad recomendada */
