@@ -189,5 +189,27 @@
     <script src="https://jfl4bur.github.io/Todogram/public/js/header.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/main.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/slider.js"></script>
+    <script src="https://jfl4bur.github.io/Todogram/public/js/slider-simple.js"></script>
+    
+    <!-- Script para asegurar la inicialización del slider -->
+    <script>
+        // Asegurar que el slider se inicialice correctamente
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Index: DOM cargado, verificando slider...');
+            
+            // Esperar un poco más para asegurar que todos los scripts se hayan cargado
+            setTimeout(() => {
+                if (window.slider) {
+                    console.log('Index: Slider principal disponible, inicializando...');
+                    window.slider.init();
+                } else if (window.sliderSimple) {
+                    console.log('Index: Usando slider simplificado como respaldo...');
+                    window.sliderSimple.init();
+                } else {
+                    console.error('Index: Ningún slider disponible');
+                }
+            }, 1000);
+        });
+    </script>
 </body>
 </html>

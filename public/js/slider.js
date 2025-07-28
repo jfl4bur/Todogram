@@ -15,6 +15,321 @@
                 style.remove();
             }
         });
+
+        // Agregar estilos para sobrescribir los conflictivos de styles.css
+        let overrideStyles = document.getElementById('slider-override-styles');
+        if (overrideStyles) {
+            overrideStyles.remove();
+        }
+        
+        overrideStyles = document.createElement('style');
+        overrideStyles.id = 'slider-override-styles';
+        overrideStyles.textContent = `
+            /* Override de estilos conflictivos de styles.css */
+            .slider-section {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100vw !important;
+                height: 60vh !important;
+                min-height: 400px !important;
+                max-height: 600px !important;
+                overflow: hidden !important;
+                background: #141414 !important;
+                position: relative !important;
+                z-index: 1 !important;
+            }
+
+            .slider-section .slider-title {
+                display: none !important;
+            }
+
+            .slider-container {
+                position: relative !important;
+                width: 100% !important;
+                height: 100% !important;
+                overflow: hidden !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            #slider-wrapper {
+                display: flex !important;
+                overflow: visible !important;
+                scroll-behavior: auto !important;
+                scrollbar-width: none !important;
+                -ms-overflow-style: none !important;
+                width: 100% !important;
+                gap: 0 !important;
+                box-sizing: border-box !important;
+                scroll-snap-type: none !important;
+                position: relative !important;
+                height: 100% !important;
+            }
+
+            #slider-wrapper::-webkit-scrollbar { 
+                display: none !important; 
+            }
+
+            .slider-slide {
+                width: auto !important;
+                min-width: auto !important;
+                max-width: none !important;
+                height: 100% !important;
+                border-radius: 8px !important;
+                overflow: hidden !important;
+                position: relative !important;
+                background: #000 !important;
+                transition: all 0.3s ease !important;
+                cursor: pointer !important;
+                scroll-snap-align: none !important;
+                flex-shrink: 0 !important;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+                display: block !important;
+                flex-direction: unset !important;
+            }
+
+            .slider-slide:hover {
+                transform: scale(1.02) !important;
+                box-shadow: 0 8px 40px rgba(0,0,0,0.5) !important;
+            }
+
+            .slider-slide:hover img {
+                filter: brightness(1.05) !important;
+            }
+
+            .slider-slide .slider-img-wrapper { 
+                width: 100% !important; 
+                height: 100% !important; 
+                display: block !important; 
+                align-items: unset !important; 
+                justify-content: unset !important; 
+                position: relative !important; 
+                z-index: 1 !important; 
+            }
+
+            .slider-slide img { 
+                width: 100% !important; 
+                height: 100% !important; 
+                object-fit: cover !important; 
+                border-radius: 8px !important; 
+                transition: filter 0.3s ease !important; 
+                background: #000 !important; 
+                overflow: hidden !important; 
+            }
+
+            .slider-slide .slider-overlay { 
+                position: absolute !important; 
+                left: 0 !important; 
+                right: 0 !important; 
+                bottom: 0 !important; 
+                padding: 2rem !important; 
+                background: linear-gradient(0deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.7) 30%, rgba(0,0,0,0.4) 60%, transparent 100%) !important; 
+                color: #fff !important; 
+                z-index: 2 !important; 
+                width: 100% !important; 
+                box-sizing: border-box !important; 
+                min-height: auto !important; 
+                display: flex !important; 
+                flex-direction: column !important; 
+                justify-content: flex-end !important; 
+                border-bottom-left-radius: 8px !important; 
+                border-bottom-right-radius: 8px !important; 
+                opacity: 0 !important;
+                transform: translateY(20px) !important;
+                transition: all 0.4s ease !important;
+                pointer-events: none !important;
+            }
+
+            .slider-slide:hover .slider-overlay {
+                opacity: 1 !important;
+                transform: translateY(0) !important;
+                pointer-events: all !important;
+            }
+
+            .slider-title-movie {
+                font-size: clamp(1.5rem, 3vw, 2.5rem) !important;
+                font-weight: 700 !important;
+                margin-bottom: 0.8rem !important;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.8) !important;
+                line-height: 1.2 !important;
+                color: white !important;
+            }
+
+            .slider-meta {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                gap: 1rem !important;
+                margin-bottom: 1rem !important;
+                font-size: 0.9rem !important;
+                opacity: 0.9 !important;
+                align-items: center !important;
+            }
+
+            .slider-meta span {
+                display: flex !important;
+                align-items: center !important;
+                gap: 0.3rem !important;
+                font-weight: 500 !important;
+                color: white !important;
+            }
+
+            .slider-meta span:not(:last-child)::after {
+                content: "•" !important;
+                margin-left: 0.5rem !important;
+                color: rgba(255,255,255,0.6) !important;
+            }
+
+            .slider-description {
+                font-size: 0.95rem !important;
+                line-height: 1.5 !important;
+                opacity: 0.85 !important;
+                max-width: 70% !important;
+                display: -webkit-box !important;
+                -webkit-line-clamp: 3 !important;
+                -webkit-box-orient: vertical !important;
+                overflow: hidden !important;
+                color: white !important;
+            }
+
+            /* Navegación */
+            .slider-nav {
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                pointer-events: none !important;
+                z-index: 10 !important;
+            }
+
+            .slider-nav-btn {
+                width: 60px !important;
+                height: 60px !important;
+                border-radius: 50% !important;
+                background: rgba(255, 255, 255, 0.15) !important;
+                backdrop-filter: blur(10px) !important;
+                border: 2px solid rgba(255, 255, 255, 0.2) !important;
+                color: white !important;
+                font-size: 1.4rem !important;
+                cursor: pointer !important;
+                pointer-events: all !important;
+                transition: all 0.3s ease !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+                opacity: 0 !important;
+                transform: scale(0.8) !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .slider-container:hover .slider-nav-btn {
+                opacity: 1 !important;
+                transform: scale(1) !important;
+            }
+
+            .slider-nav-btn:hover {
+                background: rgba(255, 255, 255, 0.25) !important;
+                border-color: rgba(255, 255, 255, 0.4) !important;
+                transform: scale(1.1) !important;
+                box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5) !important;
+            }
+
+            .slider-nav-btn:active {
+                transform: scale(0.95) !important;
+            }
+
+            .slider-nav-btn.prev {
+                margin-left: 20px !important;
+            }
+
+            .slider-nav-btn.next {
+                margin-right: 20px !important;
+            }
+
+            /* Paginación */
+            .slider-pagination {
+                position: absolute !important;
+                bottom: 2rem !important;
+                left: 50% !important;
+                transform: translateX(-50%) !important;
+                display: flex !important;
+                gap: 0.5rem !important;
+                z-index: 10 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .slider-pagination-dot {
+                width: 10px !important;
+                height: 10px !important;
+                border-radius: 50% !important;
+                background: rgba(255, 255, 255, 0.4) !important;
+                border: none !important;
+                cursor: pointer !important;
+                transition: all 0.3s ease !important;
+                opacity: 0.6 !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+
+            .slider-pagination-dot.active {
+                background: #ffffff !important;
+                opacity: 1 !important;
+                transform: scale(1.2) !important;
+            }
+
+            .slider-pagination-dot:hover {
+                background: rgba(255, 255, 255, 0.8) !important;
+                opacity: 1 !important;
+                transform: scale(1.1) !important;
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                .slider-section {
+                    height: 50vh !important;
+                    min-height: 300px !important;
+                }
+
+                .slider-nav-btn {
+                    width: 50px !important;
+                    height: 50px !important;
+                    font-size: 1.2rem !important;
+                }
+
+                .slider-overlay {
+                    padding: 1.5rem !important;
+                }
+
+                .slider-title-movie {
+                    font-size: clamp(1.2rem, 4vw, 2rem) !important;
+                }
+
+                .slider-description {
+                    max-width: 85% !important;
+                    -webkit-line-clamp: 2 !important;
+                }
+            }
+
+            @media (max-width: 480px) {
+                .slider-nav-btn {
+                    width: 45px !important;
+                    height: 45px !important;
+                    font-size: 1rem !important;
+                }
+
+                .slider-overlay {
+                    padding: 1rem !important;
+                }
+            }
+        `;
+        
+        document.head.appendChild(overrideStyles);
     }
 
     // Crear estilos CSS completos y sin conflictos
@@ -341,8 +656,7 @@
         // Obtener datos
         const movies = window.carousel?.moviesData;
         if (!movies || movies.length === 0) {
-            console.error('Slider: No hay datos de películas');
-            setTimeout(renderSlider, 500);
+            console.error('Slider: No hay datos de películas disponibles');
             return;
         }
 
@@ -385,8 +699,18 @@
             }
         }
 
+        // Si aún no hay suficientes slides, usar todas las películas disponibles
+        if (slidesData.length === 0) {
+            slidesData = sortedMovies.slice(0, 8);
+        }
+
         totalSlides = slidesData.length;
         console.log('Slider: Renderizando', totalSlides, 'slides');
+
+        if (totalSlides === 0) {
+            console.error('Slider: No hay slides para renderizar');
+            return;
+        }
 
         // Limpiar y crear slides
         sliderWrapper.innerHTML = '';
@@ -560,13 +884,95 @@
     function init() {
         console.log('Slider: Inicializando...');
         
+        // Verificar que los elementos del DOM existan
+        const sliderWrapper = document.getElementById('slider-wrapper');
+        if (!sliderWrapper) {
+            console.error('Slider: slider-wrapper no encontrado en el DOM');
+            setTimeout(init, 500);
+            return;
+        }
+
+        // Verificar si ya hay datos disponibles
         if (window.carousel?.moviesData?.length > 0) {
+            console.log('Slider: Datos disponibles inmediatamente:', window.carousel.moviesData.length, 'películas');
             renderSlider();
             window.addEventListener('resize', handleResize);
         } else {
             console.log('Slider: Esperando datos del carousel...');
-            setTimeout(init, 200);
+            
+            // Crear un observador para detectar cuando los datos estén disponibles
+            let attempts = 0;
+            const maxAttempts = 50; // 5 segundos máximo
+            
+            const checkForData = () => {
+                attempts++;
+                
+                if (window.carousel?.moviesData?.length > 0) {
+                    console.log('Slider: Datos encontrados después de', attempts * 100, 'ms:', window.carousel.moviesData.length, 'películas');
+                    renderSlider();
+                    window.addEventListener('resize', handleResize);
+                } else if (attempts < maxAttempts) {
+                    setTimeout(checkForData, 100);
+                } else {
+                    console.error('Slider: No se pudieron obtener datos después de', maxAttempts * 100, 'ms');
+                    // Crear datos de ejemplo si no hay datos disponibles
+                    createFallbackData();
+                }
+            };
+            
+            checkForData();
         }
+    }
+
+    // Crear datos de fallback si no hay datos disponibles
+    function createFallbackData() {
+        console.log('Slider: Creando datos de fallback...');
+        
+        const fallbackMovies = [
+            {
+                id: "1",
+                title: "Película de ejemplo 1",
+                description: "Esta es una película de ejemplo para el slider.",
+                posterUrl: "https://via.placeholder.com/800x450/333/fff?text=Película+1",
+                postersUrl: "https://via.placeholder.com/800x450/333/fff?text=Película+1",
+                year: "2024",
+                duration: "120 min",
+                genre: "Acción",
+                rating: "8.5"
+            },
+            {
+                id: "2", 
+                title: "Película de ejemplo 2",
+                description: "Otra película de ejemplo para mostrar en el slider.",
+                posterUrl: "https://via.placeholder.com/800x450/444/fff?text=Película+2",
+                postersUrl: "https://via.placeholder.com/800x450/444/fff?text=Película+2",
+                year: "2024",
+                duration: "95 min",
+                genre: "Comedia",
+                rating: "7.8"
+            },
+            {
+                id: "3",
+                title: "Película de ejemplo 3", 
+                description: "Una tercera película de ejemplo para completar el slider.",
+                posterUrl: "https://via.placeholder.com/800x450/555/fff?text=Película+3",
+                postersUrl: "https://via.placeholder.com/800x450/555/fff?text=Película+3",
+                year: "2024",
+                duration: "110 min",
+                genre: "Drama",
+                rating: "8.2"
+            }
+        ];
+
+        // Asignar los datos de fallback
+        if (!window.carousel) {
+            window.carousel = {};
+        }
+        window.carousel.moviesData = fallbackMovies;
+        
+        console.log('Slider: Datos de fallback creados:', fallbackMovies.length, 'películas');
+        renderSlider();
+        window.addEventListener('resize', handleResize);
     }
 
     // Cleanup
@@ -592,7 +998,8 @@
         getSlidesData: () => slidesData,
         init,
         renderSlider,
-        createRakutenStyles
+        createRakutenStyles,
+        createFallbackData
     };
 
 })();
