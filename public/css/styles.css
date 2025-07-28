@@ -1173,13 +1173,17 @@
     border: none;
     color: white;
     width: 40px;
-    height: 80px;
+    height: var(--item-height);
+    min-height: var(--item-height);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     transition: all 0.3s ease;
-    opacity: 0;
+    opacity: 1;
+    position: absolute;
+    top: 0;
+    z-index: 2;
 }
 
 .carousel-nav-btn:hover {
@@ -1187,10 +1191,12 @@
 }
 
 .carousel-nav-btn.prev {
+    left: 0;
     border-radius: 0 4px 4px 0;
 }
 
 .carousel-nav-btn.next {
+    right: 0;
     border-radius: 4px 0 0 4px;
 }
 
