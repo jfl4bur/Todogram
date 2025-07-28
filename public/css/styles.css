@@ -2169,7 +2169,7 @@ body {
 
 /* Variables CSS para el slider */
 :root {
-    --slider-slide-width: 90vw;
+    --slider-slide-width: 100vw;
     --slider-slide-gap: 2vw;
     --slider-side-space: calc((100vw - var(--slider-slide-width)) / 2);
     --slider-nav-btn-offset: calc(var(--slider-side-space) / 2 - 30px);
@@ -2343,21 +2343,21 @@ body {
 .slider-nav-btn {
     width: 60px !important;
     height: 100% !important;
-    border-radius: 50% !important;
-    background: rgba(255, 255, 255, 0.15) !important;
-    backdrop-filter: blur(10px) !important;
-    border: 2px solid rgba(255, 255, 255, 0.2) !important;
-    color: white !important;
+    border-radius: 8px !important;
+    background: rgb(0 0 0 / 6%);
+    backdrop-filter: blur(1px) !important;
+    /* border: 2px solid rgba(255, 255, 255, 0.2) !important; */
+    color: transparent;
     font-size: 1.4rem !important;
     cursor: pointer !important;
     pointer-events: all !important;
-    transition: all 0.3s ease !important;
+    /* transition: all 0.3s ease !important; */
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important;
+    /* box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3) !important; */
     opacity: 1 !important;
-    transform: scale(1) !important;
+    /* transform: scale(1) !important; */
     margin: 0 !important;
     padding: 0 !important;
 }
@@ -2433,7 +2433,7 @@ body {
 
     .slider-nav-btn {
         width: 50px !important;
-        height: 50px !important;
+        height: 100% !important;
         font-size: 1.2rem !important;
     }
 
@@ -2454,7 +2454,7 @@ body {
 @media (max-width: 480px) {
     .slider-nav-btn {
         width: 45px !important;
-        height: 45px !important;
+        height: 100% !important;
         font-size: 1rem !important;
     }
 
