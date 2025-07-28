@@ -43,11 +43,29 @@
                     backgroundUrl: item['Fondo'] || '',
                     year: item['Año'] ? item['Año'].toString() : '',
                     duration: item['Duración'] || '',
-                    genre: item['Género'] || '',
-                    rating: item['Rating'] || '',
-                    director: item['Director'] || '',
-                    cast: item['Reparto'] || '',
-                    synopsis: item['Synopsis'] || ''
+                    genre: item['Géneros'] || '',
+                    rating: item['Puntuación 1-10'] || '',
+                    director: item['Director(es)'] || '',
+                    cast: item['Reparto principal'] || '',
+                    synopsis: item['Synopsis'] || '',
+                    // Campos adicionales para el modal
+                    tmdbUrl: item['TMDB'] || '',
+                    tmdbId: item['ID TMDB'] || '',
+                    trailerUrl: item['Trailer'] || '',
+                    videoUrl: item['Ver Película'] || item['Video iframe'] || item['Video iframe 1'] || '',
+                    originalTitle: item['Título original'] || '',
+                    productionCompanies: item['Productora(s)'] || '',
+                    productionCountries: item['País(es)'] || '',
+                    spokenLanguages: item['Idioma(s) original(es)'] || '',
+                    writers: item['Escritor(es)'] || '',
+                    // Campos de audio y subtítulos
+                    audios: item['Audios'] || '',
+                    subtitles: item['Subtítulos'] || '',
+                    // Procesar audios y subtítulos como arrays
+                    audioList: item['Audios'] ? item['Audios'].split(',').map(audio => audio.trim()) : [],
+                    subtitleList: item['Subtítulos'] ? item['Subtítulos'].split(',').map(sub => sub.trim()) : [],
+                    audiosCount: item['Audios'] ? item['Audios'].split(',').length : 0,
+                    subtitlesCount: item['Subtítulos'] ? item['Subtítulos'].split(',').length : 0
                 }));
 
             console.log('Slider Independiente: Datos cargados:', movies.length, 'películas');

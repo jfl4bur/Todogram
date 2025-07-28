@@ -115,6 +115,7 @@ class DetailsModal {
         
         if (item.rating) metaItems.push(`<span class="details-modal-meta-item rating"><i class="fas fa-star"></i> ${item.rating}${item.tmdbUrl ? `<img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg" class="details-modal-tmdb-logo" alt="TMDB" onclick="window.open('${item.tmdbUrl}', '_blank')">` : ''}</span>`);
         
+        // Usar datos locales para audio y subtítulos
         const audioSubtitlesSection = this.createAudioSubtitlesSection(
             item.audiosCount || 0, 
             item.subtitlesCount || 0, 
@@ -141,8 +142,10 @@ class DetailsModal {
         
         let infoItems = '';
         
-        if (tmdbData?.original_title && tmdbData.original_title.toLowerCase() !== item.title.toLowerCase()) {
-            infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Título original</div><div class="details-modal-info-value">${tmdbData.original_title}</div></div>`;
+        // Título original (usar datos locales si no hay TMDB)
+        const originalTitle = tmdbData?.original_title || item.originalTitle;
+        if (originalTitle && originalTitle.toLowerCase() !== item.title.toLowerCase()) {
+            infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Título original</div><div class="details-modal-info-value">${originalTitle}</div></div>`;
         }
         
         if (item.year) {
@@ -161,20 +164,26 @@ class DetailsModal {
             infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Clasificación</div><div class="details-modal-info-value"> <span class="age-rating">${ageRating}</span></div></div>`;
         }
         
-        if (tmdbData?.production_companies) {
-            infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Productora(s)</div><div class="details-modal-info-value">${tmdbData.production_companies}</div></div>`;
+        // Productora(s) (usar datos locales si no hay TMDB)
+        const productionCompanies = tmdbData?.production_companies || item.productionCompanies;
+        if (productionCompanies) {
+            infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Productora(s)</div><div class="details-modal-info-value">${productionCompanies}</div></div>`;
         }
         
-        if (tmdbData?.production_countries) {
-            infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">País(es)</div><div class="details-modal-info-value">${tmdbData.production_countries}</div></div>`;
+        // País(es) (usar datos locales si no hay TMDB)
+        const productionCountries = tmdbData?.production_countries || item.productionCountries;
+        if (productionCountries) {
+            infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">País(es)</div><div class="details-modal-info-value">${productionCountries}</div></div>`;
         }
         
         if (tmdbData?.status) {
             infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Estado</div><div class="details-modal-info-value">${tmdbData.status}</div></div>`;
         }
         
-        if (tmdbData?.spoken_languages) {
-            infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Idioma(s) original(es)</div><div class="details-modal-info-value">${tmdbData.spoken_languages}</div></div>`;
+        // Idioma(s) original(es) (usar datos locales si no hay TMDB)
+        const spokenLanguages = tmdbData?.spoken_languages || item.spokenLanguages;
+        if (spokenLanguages) {
+            infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Idioma(s) original(es)</div><div class="details-modal-info-value">${spokenLanguages}</div></div>`;
         }
         
         let taglineSection = '';
@@ -184,9 +193,44 @@ class DetailsModal {
         
         const description = item.description || (tmdbData?.overview || 'Descripción no disponible');
         
-        const directorsSection = tmdbData?.directors?.length > 0 ? this.createCrewSection(tmdbData.directors, 'Director(es)') : '';
-        const writersSection = tmdbData?.writers?.length > 0 ? this.createCrewSection(tmdbData.writers, 'Escritor(es)') : '';
-        const castSection = tmdbData?.cast?.length > 0 ? this.createCastSection(tmdbData.cast) : '';
+        // Crear secciones de crew y cast usando datos locales si no hay TMDB
+        let directorsSection = '';
+        let writersSection = '';
+        let castSection = '';
+        
+        if (tmdbData?.directors?.length > 0) {
+            directorsSection = this.createCrewSection(tmdbData.directors, 'Director(es)');
+        } else if (item.director) {
+            // Crear sección de director usando datos locales
+            const directors = item.director.split(',').map(director => ({
+                name: director.trim(),
+                profile_path: null
+            }));
+            directorsSection = this.createCrewSection(directors, 'Director(es)');
+        }
+        
+        if (tmdbData?.writers?.length > 0) {
+            writersSection = this.createCrewSection(tmdbData.writers, 'Escritor(es)');
+        } else if (item.writers) {
+            // Crear sección de escritores usando datos locales
+            const writers = item.writers.split(',').map(writer => ({
+                name: writer.trim(),
+                profile_path: null
+            }));
+            writersSection = this.createCrewSection(writers, 'Escritor(es)');
+        }
+        
+        if (tmdbData?.cast?.length > 0) {
+            castSection = this.createCastSection(tmdbData.cast);
+        } else if (item.cast) {
+            // Crear sección de reparto usando datos locales
+            const cast = item.cast.split(',').map(actor => ({
+                name: actor.trim(),
+                character: '',
+                profile_path: null
+            }));
+            castSection = this.createCastSection(cast);
+        }
         
         const posters = tmdbImages.posters;
         const backdrops = tmdbImages.backdrops;
