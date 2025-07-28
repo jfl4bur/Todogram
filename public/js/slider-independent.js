@@ -7,6 +7,8 @@
 function handleResize() {
     clearTimeout(resizeTimeout);
     
+    console.log('Slider Independiente: Resize detectado (función principal)');
+    
     // Actualización inmediata para mejor respuesta
     if (totalSlides > 0) {
         updateSliderCSSVariables();
@@ -29,6 +31,13 @@ function handleResize() {
                     const currentWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width'));
                     const correctedWidth = Math.floor(currentWidth * 0.98);
                     document.documentElement.style.setProperty('--slider-slide-width', `${correctedWidth}px`);
+                    
+                    // Aplicar también a los slides existentes
+                    const slides = document.querySelectorAll('.slider-slide');
+                    slides.forEach((slide, index) => {
+                        slide.style.flexBasis = `${correctedWidth}px`;
+                        slide.style.width = `${correctedWidth}px`;
+                    });
                 }
             }
         }
@@ -53,6 +62,13 @@ function preventHorizontalScroll() {
             const correctedWidth = Math.floor(currentWidth * 0.95);
             document.documentElement.style.setProperty('--slider-slide-width', `${correctedWidth}px`);
             console.log('Ancho de slide corregido a:', correctedWidth + 'px');
+            
+            // Aplicar también a los slides existentes
+            const slides = document.querySelectorAll('.slider-slide');
+            slides.forEach((slide, index) => {
+                slide.style.flexBasis = `${correctedWidth}px`;
+                slide.style.width = `${correctedWidth}px`;
+            });
         }
     }
 }
@@ -68,8 +84,12 @@ function updateSliderPosition() {
     const slideWidthStr = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width');
     const slideGapStr = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-gap');
     
-    const slideWidth = parseInt(slideWidthStr) || Math.floor(document.documentElement.clientWidth * 0.87);
-    const slideGap = parseInt(slideGapStr) || Math.floor(document.documentElement.clientWidth * 0.02);
+    // Usar valores por defecto si las variables CSS no están disponibles
+    const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+    const slideWidth = parseInt(slideWidthStr) || Math.floor(viewportWidth * 0.87);
+    const slideGap = parseInt(slideGapStr) || Math.floor(viewportWidth * 0.02);
+    
+    console.log('Slider Independiente: Actualizando posición - Index:', currentIndex, 'Width:', slideWidth, 'Gap:', slideGap);
     
     const translateX = -(slideWidth + slideGap) * currentIndex;
     
@@ -116,6 +136,17 @@ function updateSliderPosition() {
         // Prevenir scroll horizontal
         document.body.style.overflowX = 'hidden';
         document.documentElement.style.overflowX = 'hidden';
+        
+        // Aplicar estilos directamente a los slides existentes si los hay
+        const slides = document.querySelectorAll('.slider-slide');
+        if (slides.length > 0) {
+            slides.forEach((slide, index) => {
+                slide.style.flexBasis = `${slideWidth}px`;
+                slide.style.width = `${slideWidth}px`;
+                slide.style.marginRight = index < slides.length - 1 ? `${slideGap}px` : '0';
+            });
+            console.log('Slider Independiente: Estilos aplicados directamente a', slides.length, 'slides');
+        }
     }
 
     // Cargar datos independientemente
@@ -173,6 +204,10 @@ function updateSliderPosition() {
                     videoUrl: sampleMovie.videoUrl,
                     trailerUrl: sampleMovie.trailerUrl
                 });
+                
+                // Verificar que las películas tengan imágenes
+                const moviesWithImages = movies.filter(movie => movie.postersUrl || movie.posterUrl);
+                console.log('Slider Independiente: Películas con imágenes:', moviesWithImages.length);
             }
             
             return movies;
@@ -230,7 +265,6 @@ function updateSliderPosition() {
                     selectedMovies.push(movie);
                     if (selectedMovies.length >= 8) break;
                 }
-                if (selectedMovies.length >= 8) break;
             }
         }
 
@@ -243,11 +277,19 @@ function updateSliderPosition() {
                 }
             }
         }
+        
+        console.log('Slider Independiente: Películas seleccionadas:', selectedMovies.length);
 
         // Asignar las películas seleccionadas al array global
         slidesData = selectedMovies;
         totalSlides = slidesData.length;
         console.log('Slider Independiente: Renderizando', totalSlides, 'slides');
+        
+        // Verificar que tenemos datos válidos
+        if (totalSlides === 0) {
+            console.error('Slider Independiente: No hay slides para renderizar');
+            return;
+        }
         
         // Verificar el tamaño de los slides después del renderizado
         setTimeout(() => {
@@ -264,20 +306,13 @@ function updateSliderPosition() {
                     
                     // Re-aplicar estilos a todos los slides
                     slides.forEach((slide, index) => {
-                        const slideWidth = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width');
-                        const slideGap = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-gap');
+                        const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+                        const calculatedWidth = Math.floor(viewportWidth * 0.87);
+                        const calculatedGap = Math.floor(viewportWidth * 0.02);
                         
-                        if (slideWidth && slideWidth !== '') {
-                            slide.style.flexBasis = slideWidth;
-                            slide.style.width = slideWidth;
-                        } else {
-                            const viewportWidth = window.innerWidth;
-                            const calculatedWidth = Math.floor(viewportWidth * 0.87);
-                            slide.style.flexBasis = `${calculatedWidth}px`;
-                            slide.style.width = `${calculatedWidth}px`;
-                        }
-                        
-                        slide.style.marginRight = index < slides.length - 1 ? (slideGap || '16px') : '0';
+                        slide.style.flexBasis = `${calculatedWidth}px`;
+                        slide.style.width = `${calculatedWidth}px`;
+                        slide.style.marginRight = index < slides.length - 1 ? `${calculatedGap}px` : '0';
                     });
                     
                     console.log('Slider Independiente: Estilos forzados aplicados');
@@ -288,28 +323,24 @@ function updateSliderPosition() {
         // Limpiar y crear slides
         sliderWrapper.innerHTML = '';
         
+        // Obtener valores de ancho antes de crear los slides
+        const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+        const slideWidth = Math.floor(viewportWidth * 0.87);
+        const slideGap = Math.floor(viewportWidth * 0.02);
+        
+        console.log('Slider Independiente: Creando slides con ancho:', slideWidth, 'gap:', slideGap);
+        
         slidesData.forEach((movie, index) => {
             const slideDiv = document.createElement('div');
             slideDiv.className = 'slider-slide';
             slideDiv.dataset.index = index;
             
-            // Asegurar que el slide use las variables CSS correctas
-            const slideWidth = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width');
-            const slideGap = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-gap');
-            
-            // Aplicar valores directamente si las variables CSS están disponibles
-            if (slideWidth && slideWidth !== '') {
-                slideDiv.style.flexBasis = slideWidth;
-                slideDiv.style.width = slideWidth;
-            } else {
-                // Fallback: calcular valores directamente
-                const viewportWidth = window.innerWidth;
-                const calculatedWidth = Math.floor(viewportWidth * 0.87);
-                slideDiv.style.flexBasis = `${calculatedWidth}px`;
-                slideDiv.style.width = `${calculatedWidth}px`;
-            }
-            
-            slideDiv.style.marginRight = index < slidesData.length - 1 ? (slideGap || '16px') : '0';
+            // Aplicar estilos directamente para asegurar que funcionen
+            slideDiv.style.flexBasis = `${slideWidth}px`;
+            slideDiv.style.width = `${slideWidth}px`;
+            slideDiv.style.marginRight = index < slidesData.length - 1 ? `${slideGap}px` : '0';
+            slideDiv.style.flexShrink = '0';
+            slideDiv.style.flexGrow = '0';
             
             // Usar la imagen correcta según los datos disponibles
             const imageUrl = movie.postersUrl || movie.posterUrl || movie.imageUrl || 
@@ -355,8 +386,22 @@ function updateSliderPosition() {
         // Ir al primer slide
         currentIndex = 0;
         updateSliderPosition();
+        updatePagination();
         
         console.log('Slider Independiente: Renderizado completado con', totalSlides, 'slides');
+        
+        // Verificación final de que todo esté correcto
+        setTimeout(() => {
+            const slides = document.querySelectorAll('.slider-slide');
+            const wrapper = document.getElementById('slider-wrapper');
+            console.log('Slider Independiente: Verificación final - Slides:', slides.length, 'Wrapper transform:', wrapper?.style.transform);
+            
+            // Verificar que el wrapper tenga el contenido correcto
+            if (wrapper && slides.length > 0) {
+                console.log('Slider Independiente: Wrapper tiene', wrapper.children.length, 'hijos');
+                console.log('Slider Independiente: Primer slide:', wrapper.firstElementChild?.className);
+            }
+        }, 100);
     }
 
     // Configurar controles
@@ -366,24 +411,28 @@ function updateSliderPosition() {
         const nextBtn = document.getElementById('slider-next');
         
         if (prevBtn) {
-            prevBtn.replaceWith(prevBtn.cloneNode(true));
-            const newPrevBtn = document.getElementById('slider-prev');
-            newPrevBtn.addEventListener('click', (e) => {
+            // Limpiar event listeners existentes
+            const newPrevBtn = prevBtn.cloneNode(true);
+            prevBtn.replaceWith(newPrevBtn);
+            document.getElementById('slider-prev').addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (!isTransitioning) {
+                if (!isTransitioning && totalSlides > 0) {
+                    console.log('Slider Independiente: Botón prev clickeado');
                     goToSlide(currentIndex - 1);
                 }
             });
         }
         
         if (nextBtn) {
-            nextBtn.replaceWith(nextBtn.cloneNode(true));
-            const newNextBtn = document.getElementById('slider-next');
-            newNextBtn.addEventListener('click', (e) => {
+            // Limpiar event listeners existentes
+            const newNextBtn = nextBtn.cloneNode(true);
+            nextBtn.replaceWith(newNextBtn);
+            document.getElementById('slider-next').addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (!isTransitioning) {
+                if (!isTransitioning && totalSlides > 0) {
+                    console.log('Slider Independiente: Botón next clickeado');
                     goToSlide(currentIndex + 1);
                 }
             });
@@ -391,14 +440,21 @@ function updateSliderPosition() {
 
         // Paginación
         createPagination();
+        
+        console.log('Slider Independiente: Controles configurados');
     }
 
     // Crear paginación
     function createPagination() {
         const pagination = document.getElementById('slider-pagination');
-        if (!pagination) return;
+        if (!pagination) {
+            console.error('Slider Independiente: Elemento pagination no encontrado');
+            return;
+        }
         
         pagination.innerHTML = '';
+        
+        console.log('Slider Independiente: Creando paginación para', totalSlides, 'slides');
         
         for (let i = 0; i < totalSlides; i++) {
             const dot = document.createElement('button');
@@ -410,12 +466,15 @@ function updateSliderPosition() {
                 e.preventDefault();
                 e.stopPropagation();
                 if (!isTransitioning) {
+                    console.log('Slider Independiente: Dot clickeado, slide:', i);
                     goToSlide(i);
                 }
             });
             
             pagination.appendChild(dot);
         }
+        
+        console.log('Slider Independiente: Paginación creada con', totalSlides, 'dots');
     }
 
     // Ir a slide
@@ -428,11 +487,20 @@ function updateSliderPosition() {
         
         if (index === currentIndex) return;
         
-        console.log('Slider Independiente: Cambiando a slide', index);
+        console.log('Slider Independiente: Cambiando a slide', index, 'de', totalSlides, 'total');
         
         currentIndex = index;
         updateSliderPosition();
         updatePagination();
+        
+        // Verificar que la posición se aplicó correctamente
+        setTimeout(() => {
+            const wrapper = document.getElementById('slider-wrapper');
+            if (wrapper) {
+                const transform = wrapper.style.transform;
+                console.log('Slider Independiente: Transformación aplicada:', transform);
+            }
+        }, 100);
     }
 
     // Actualizar posición usando variables CSS
@@ -442,12 +510,15 @@ function updateSliderPosition() {
         
         isTransitioning = true;
         
-        // Obtener valores de las variables CSS
-        const slideWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width')) || Math.floor(window.innerWidth * 0.87);
-        const slideGap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-gap')) || Math.floor(window.innerWidth * 0.02);
+        // Obtener valores de las variables CSS o calcular directamente
+        const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+        const slideWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width')) || Math.floor(viewportWidth * 0.87);
+        const slideGap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-gap')) || Math.floor(viewportWidth * 0.02);
         
         const translateX = -(slideWidth + slideGap) * currentIndex;
         wrapper.style.transform = `translateX(${translateX}px)`;
+        
+        console.log('Slider Independiente: Posición actualizada - Index:', currentIndex, 'TranslateX:', translateX);
         
         setTimeout(() => {
             isTransitioning = false;
@@ -457,29 +528,18 @@ function updateSliderPosition() {
     // Actualizar paginación
     function updatePagination() {
         const dots = document.querySelectorAll('.slider-pagination-dot');
+        console.log('Slider Independiente: Actualizando paginación - Dots encontrados:', dots.length, 'Current index:', currentIndex);
+        
         dots.forEach((dot, index) => {
-            dot.classList.toggle('active', index === currentIndex);
+            const isActive = index === currentIndex;
+            dot.classList.toggle('active', isActive);
+            if (isActive) {
+                console.log('Slider Independiente: Dot activo:', index);
+            }
         });
     }
 
-    // Manejar resize con actualización en tiempo real
-    function handleResize() {
-        clearTimeout(resizeTimeout);
-        
-        // Actualización inmediata para mejor respuesta
-        if (totalSlides > 0) {
-            updateSliderCSSVariables();
-            updateSliderPosition();
-        }
-        
-        // Actualización adicional después de un breve delay para asegurar estabilidad
-        resizeTimeout = setTimeout(() => {
-            if (totalSlides > 0) {
-                updateSliderCSSVariables();
-                updateSliderPosition();
-            }
-        }, 100);
-    }
+
 
     // Inicializar
     // Función de inicialización mejorada
@@ -497,6 +557,9 @@ async function init() {
     const movies = await loadSliderData();
     if (movies && movies.length > 0) {
         slidesData = movies;
+        totalSlides = movies.length;
+        console.log('Slider Independiente: Datos cargados, total slides:', totalSlides);
+        
         renderSlider(movies);
         
         // Agregar listener de resize mejorado
@@ -509,7 +572,13 @@ async function init() {
             
             const slides = document.querySelectorAll('.slider-slide');
             if (slides.length > 0) {
-                console.log('Slider Independiente: Verificación final completada');
+                console.log('Slider Independiente: Verificación final completada, slides encontrados:', slides.length);
+                
+                // Verificar que todos los slides tengan el tamaño correcto
+                slides.forEach((slide, index) => {
+                    const computedStyle = getComputedStyle(slide);
+                    console.log(`Slider Independiente: Slide ${index} - Width:`, computedStyle.width, 'Flex-basis:', computedStyle.flexBasis);
+                });
                 
                 // Verificación final de scroll horizontal
                 const hasScroll = document.body.scrollWidth > document.body.clientWidth;
@@ -523,6 +592,15 @@ async function init() {
                         slide.style.marginRight = index < slides.length - 1 ? '16px' : '0';
                     });
                 }
+                
+                // Ir al primer slide y actualizar posición
+                currentIndex = 0;
+                updateSliderPosition();
+                updatePagination();
+                
+                console.log('Slider Independiente: Inicialización completada exitosamente');
+            } else {
+                console.error('Slider Independiente: No se encontraron slides después del renderizado');
             }
         }, 300);
     } else {
