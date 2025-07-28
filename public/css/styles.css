@@ -1819,6 +1819,32 @@
 }
 
 /* === SLIDER CAROUSEL RAKUTEN.TV REPLICA EXACTA === */
+
+.slider-pagination {
+    position: absolute;
+    bottom: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+}
+
+.slider-pagination-dot {
+    width: 12px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255, 255, 255, 0.4);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0;
+}
+
+.slider-pagination-dot.active {
+    width: 24px;
+    background: #fff;
+}
+
 .slider-section {
     margin-top: 20px;
     margin-bottom: 40px;
