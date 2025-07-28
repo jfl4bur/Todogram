@@ -2056,7 +2056,7 @@ body {
     padding-top: 56px;
   }
   .slider-section {
-    margin-top: 72px; /* 56px header + 16px separación visual */
+    margin-top: 100px; /* Ajustado para tablets */
   }
   .details-modal-overlay {
     padding-top: 70px;
@@ -2073,7 +2073,7 @@ body {
     padding-top: 44px;
   }
   .slider-section {
-    margin-top: 60px; /* 44px header + 16px separación visual */
+    margin-top: 80px; /* Ajustado para móviles */
   }
   .details-modal-overlay {
     padding-top: 60px;
