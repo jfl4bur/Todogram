@@ -2452,6 +2452,8 @@ html, body {
     width: 100%;
     height: 100%;
     overflow: hidden;
+    display: flex;
+    justify-content: center;
 }
 
 .slider-wrapper {
@@ -2460,6 +2462,7 @@ html, body {
     height: 100%;
     width: auto;
     transition: transform 0.6s ease;
+    margin-left: calc((100% - 87vw) / 2);
 }
 
 .slider-slide {
@@ -2483,6 +2486,7 @@ html, body {
     object-fit: cover;
 }
 
+/* Botones de navegación */
 .slider-nav {
     position: absolute;
     top: 50%;
@@ -2493,6 +2497,7 @@ html, body {
     justify-content: space-between;
     pointer-events: none;
     z-index: 10;
+    padding: 0 20px;
 }
 
 .slider-nav-btn {
@@ -2505,8 +2510,22 @@ html, body {
     border-radius: 50%;
     cursor: pointer;
     font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
 }
 
+.slider-nav-btn:hover {
+    background: rgba(0,0,0,0.9);
+    transform: scale(1);
+}
+
+.slider-nav-btn i {
+    font-size: 18px;
+}
+
+/* Paginación */
 .slider-pagination {
     display: flex;
     justify-content: center;
@@ -2521,9 +2540,15 @@ html, body {
     background: rgba(255,255,255,0.4);
     border: none;
     cursor: pointer;
+    transition: all 0.3s ease;
 }
 
 .slider-pagination-dot.active {
     background: white;
+    transform: scale(1.2);
+}
+
+.slider-pagination-dot:hover {
+    background: rgba(255,255,255,0.8);
 }
 /* ===== FIN SLIDER SIMPLE ===== */
