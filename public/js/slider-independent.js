@@ -12,25 +12,42 @@
     function calculateResponsiveDimensions() {
         const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
         
-        // Usar 90% del viewport para el slide principal, dejando 10% para items adyacentes y botones
-        const slideWidth = Math.floor(viewportWidth * 0.90);
-        const slideHeight = Math.floor(slideWidth * 0.56); // Ratio 16:9
-        const slideGap = Math.floor(viewportWidth * 0.02);
-        const sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
+        let slideWidth, slideHeight, slideGap, sideSpace;
         
-        // Límites mínimos y máximos para mantener proporciones
-        const minWidth = Math.max(280, Math.floor(viewportWidth * 0.85));
-        const maxWidth = Math.min(slideWidth, 1200);
-        const finalWidth = Math.max(minWidth, Math.min(slideWidth, maxWidth));
-        const finalHeight = Math.floor(finalWidth * 0.56);
+        if (viewportWidth <= 395) {
+            // Mobile
+            slideWidth = Math.floor(viewportWidth * 0.10);
+            slideHeight = Math.floor(slideWidth * 0.4); // Ratio 16:9
+            slideGap = Math.floor(viewportWidth * 0.03);
+        } else if (viewportWidth <= 480) {
+            // Mobile
+            slideWidth = Math.floor(viewportWidth * 0.20);
+            slideHeight = Math.floor(slideWidth * 0.8); // Ratio 16:9
+            slideGap = Math.floor(viewportWidth * 0.03);
+        } else if (viewportWidth <= 768) {
+            // Tablet
+            slideWidth = Math.floor(viewportWidth * 0.80);
+            slideHeight = Math.floor(slideWidth * 0.35); // Ratio 16:9
+            slideGap = Math.floor(viewportWidth * 0.025);
+        } else if (viewportWidth <= 1024) {
+            // Desktop pequeño
+            slideWidth = Math.floor(viewportWidth * 0.90);
+            slideHeight = Math.floor(slideWidth * 0.43);
+            slideGap = Math.floor(viewportWidth * 0.02);
+        } else {
+            // Desktop grande
+            slideWidth = Math.floor(viewportWidth * 0.99);
+            slideHeight = Math.floor(slideWidth * 0.49);
+            slideGap = Math.floor(viewportWidth * 0.02);
+        }
         
-        return { 
-            slideWidth: finalWidth, 
-            slideHeight: finalHeight, 
-            slideGap, 
-            sideSpace, 
-            viewportWidth 
-        };
+        // Límites mínimos y máximos
+        slideWidth = Math.max(280, Math.min(slideWidth, 1295));
+        slideHeight = Math.max(157, Math.min(slideHeight, 400));
+        slideGap = Math.max(8, slideGap);
+        sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
+        
+        return { slideWidth, slideHeight, slideGap, sideSpace, viewportWidth };
     }
 
     // Función mejorada para manejar el resize
