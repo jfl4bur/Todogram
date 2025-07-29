@@ -26,18 +26,18 @@
             slideGap = Math.floor(viewportWidth * 0.025);
         } else if (viewportWidth <= 1024) {
             // Desktop pequeño
-            slideWidth = Math.floor(viewportWidth * 0.90);
+            slideWidth = Math.floor(viewportWidth * 0.75);
             slideHeight = Math.floor(slideWidth * 0.56);
             slideGap = Math.floor(viewportWidth * 0.02);
         } else {
             // Desktop grande
-            slideWidth = Math.floor(viewportWidth * 0.90);
+            slideWidth = Math.floor(viewportWidth * 0.70);
             slideHeight = Math.floor(slideWidth * 0.56);
             slideGap = Math.floor(viewportWidth * 0.02);
         }
         
         // Límites mínimos y máximos
-        slideWidth = Math.max(280, Math.min(slideWidth, 1250));
+        slideWidth = Math.max(280, Math.min(slideWidth, 800));
         slideHeight = Math.max(157, Math.min(slideHeight, 450));
         slideGap = Math.max(8, slideGap);
         sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
