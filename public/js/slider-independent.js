@@ -144,7 +144,7 @@
             if (img) {
                 img.style.width = '100%';
                 img.style.height = '100%';
-                img.style.objectFit = 'cover';
+                img.style.objectFit = 'fill';
                 img.style.objectPosition = 'center';
             }
             
@@ -207,7 +207,7 @@
                 if (img) {
                     img.style.width = '100%';
                     img.style.height = '100%';
-                    img.style.objectFit = 'cover';
+                    img.style.objectFit = 'fill';
                     img.style.objectPosition = 'center';
                     img.style.transition = 'transform 0.3s ease';
                 }
@@ -462,7 +462,7 @@
                     <img src="${imageUrl}" 
                          alt="${movie.title}" 
                          loading="${index === 0 ? 'eager' : 'lazy'}"
-                         style="width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.3s ease;"
+                         style="width: 100%; height: 100%; object-fit: fill; object-position: center; transition: transform 0.3s ease;"
                          onerror="this.src='https://via.placeholder.com/${dimensions.slideWidth}x${dimensions.slideHeight}/333/fff?text=No+Image'">
                 </div>
                 <div class="slider-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 20px; color: white; border-radius: 0 0 12px 12px;">
