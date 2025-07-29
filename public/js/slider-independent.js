@@ -16,7 +16,7 @@
         
         if (viewportWidth <= 480) {
             // Mobile
-            slideWidth = Math.floor(viewportWidth * 0.80);
+            slideWidth = Math.floor(viewportWidth * 0.70);
             slideHeight = Math.floor(slideWidth * 0.56); // Ratio 16:9
             slideGap = Math.floor(viewportWidth * 0.03);
         } else if (viewportWidth <= 768) {
@@ -37,8 +37,8 @@
         }
         
         // Límites mínimos y máximos
-        slideWidth = Math.max(280, Math.min(slideWidth, 800));
-        slideHeight = Math.max(157, Math.min(slideHeight, 450));
+        slideWidth = Math.max(280, Math.min(slideWidth, 1280));
+        slideHeight = Math.max(157, Math.min(slideHeight, 400));
         slideGap = Math.max(8, slideGap);
         sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         
