@@ -17,8 +17,8 @@
         if (viewportWidth <= 480) {
             // Mobile
             slideWidth = Math.floor(viewportWidth * 0.60);
-            slideHeight = Math.floor(slideWidth * 0.56); // Ratio 16:9
-            slideGap = Math.floor(viewportWidth * 0.03);
+            slideHeight = Math.floor(slideWidth * 0.42); // Ratio 16:9
+            slideGap = Math.floor(viewportWidth * 0.025);
         } else if (viewportWidth <= 768) {
             // Tablet
             slideWidth = Math.floor(viewportWidth * 0.80);
@@ -27,12 +27,12 @@
         } else if (viewportWidth <= 1024) {
             // Desktop pequeño
             slideWidth = Math.floor(viewportWidth * 0.90);
-            slideHeight = Math.floor(slideWidth * 0.56);
+            slideHeight = Math.floor(slideWidth * 0.63);
             slideGap = Math.floor(viewportWidth * 0.02);
         } else {
             // Desktop grande
             slideWidth = Math.floor(viewportWidth * 0.99);
-            slideHeight = Math.floor(slideWidth * 0.56);
+            slideHeight = Math.floor(slideWidth * 0.69);
             slideGap = Math.floor(viewportWidth * 0.02);
         }
         
