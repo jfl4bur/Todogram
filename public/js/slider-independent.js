@@ -112,8 +112,9 @@
             console.log(`Slider Independiente: Slide ${index} redimensionado a ${slideWidth}px`);
         });
         
-        // Reposicionar el wrapper
-        wrapper.style.left = `${sideSpace}px`;
+        // CORRECCIÓN: Reposicionar el wrapper correctamente
+        wrapper.style.marginLeft = `${sideSpace}px`;
+        wrapper.style.left = '0px'; // Reset left
         
         // Actualizar posición del slider
         updateSliderPosition(true); // Force update
@@ -159,8 +160,9 @@
                 slide.style.flexGrow = '0';
             });
             
-            // Actualizar posición del wrapper
-            wrapper.style.left = `${sideSpace}px`;
+            // CORRECCIÓN: Actualizar posición del wrapper
+            wrapper.style.marginLeft = `${sideSpace}px`;
+            wrapper.style.left = '0px'; // Reset left
             
             console.log('Slider Independiente: Layout actualizado para', slides.length, 'slides');
         }
@@ -375,13 +377,15 @@
         // Limpiar wrapper
         sliderWrapper.innerHTML = '';
         
-        // Configurar wrapper
+        // CORRECCIÓN: Configurar wrapper con centrado correcto
         sliderWrapper.style.display = 'flex';
         sliderWrapper.style.flexDirection = 'row';
         sliderWrapper.style.flexWrap = 'nowrap';
         sliderWrapper.style.transform = 'translateX(0)';
         sliderWrapper.style.transition = 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
         sliderWrapper.style.position = 'relative';
+        sliderWrapper.style.left = '0px'; // Reset left
+        sliderWrapper.style.marginLeft = `${sideSpace}px`; // Usar marginLeft para centrar
         
         // Obtener valores actuales para crear slides
         const viewportWidth = lastViewportWidth;
@@ -389,8 +393,8 @@
         const slideGap = Math.max(10, Math.floor(viewportWidth * 0.02));
         const sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         
-        // Posicionar wrapper
-        sliderWrapper.style.left = `${sideSpace}px`;
+        // CORRECCIÓN: No posicionar wrapper aquí, se hace en la configuración inicial
+        // sliderWrapper.style.left = `${sideSpace}px`;
         
         console.log('Slider Independiente: Creando slides con dimensiones:', { 
             viewport: viewportWidth,
