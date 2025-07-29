@@ -14,14 +14,19 @@
         
         let slideWidth, slideHeight, slideGap, sideSpace;
         
-        if (viewportWidth <= 480) {
+        if (viewportWidth <= 395) {
+            // Mobile
+            slideWidth = Math.floor(viewportWidth * 0.10);
+            slideHeight = Math.floor(slideWidth * 0.4); // Ratio 16:9
+            slideGap = Math.floor(viewportWidth * 0.03);
+        } else if (viewportWidth <= 480) {
             // Mobile
             slideWidth = Math.floor(viewportWidth * 0.20);
             slideHeight = Math.floor(slideWidth * 0.8); // Ratio 16:9
             slideGap = Math.floor(viewportWidth * 0.03);
         } else if (viewportWidth <= 768) {
             // Tablet
-            slideWidth = Math.floor(viewportWidth * 0.75);
+            slideWidth = Math.floor(viewportWidth * 0.80);
             slideHeight = Math.floor(slideWidth * 0.35); // Ratio 16:9
             slideGap = Math.floor(viewportWidth * 0.025);
         } else if (viewportWidth <= 1024) {
