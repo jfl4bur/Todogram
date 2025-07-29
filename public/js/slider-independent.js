@@ -295,9 +295,9 @@
             if (!response.ok) throw new Error('No se pudo cargar data.json');
             const data = await response.json();
             
-            // Filtrar solo películas
+            // Filtrar solo películas que tengan imagen en 'Slider'
             const movies = data
-                .filter(item => item && typeof item === 'object' && item['Categoría'] === 'Películas')
+                .filter(item => item && typeof item === 'object' && item['Categoría'] === 'Películas' && typeof item['Slider'] === 'string' && item['Slider'].trim() !== '')
                 .map((item, index) => ({
                     id: index.toString(),
                     title: item['Título'] || 'Sin título',
