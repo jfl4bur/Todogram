@@ -37,7 +37,7 @@
         }
         
         // Límites mínimos y máximos
-        slideWidth = Math.max(280, Math.min(slideWidth, 1350));
+        slideWidth = Math.max(280, Math.min(slideWidth, 1300));
         slideHeight = Math.max(157, Math.min(slideHeight, 450));
         slideGap = Math.max(8, slideGap);
         sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
@@ -207,7 +207,7 @@
                 if (img) {
                     img.style.width = '100%';
                     img.style.height = '100%';
-                    img.style.objectFit = 'fill';
+                    img.style.objectFit = 'cover';
                     img.style.objectPosition = 'center';
                     img.style.transition = 'transform 0.3s ease';
                 }
