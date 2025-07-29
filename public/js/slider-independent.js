@@ -373,11 +373,17 @@
         
         // Aplicar variables CSS antes de crear slides
         updateSliderCSSVariables();
+
+        // Obtener valores actuales para crear slides (MOVIDO ANTES DEL USO)
+        const viewportWidth = lastViewportWidth;
+        const slideWidth = Math.max(300, Math.floor(viewportWidth * 0.87));
+        const slideGap = Math.max(10, Math.floor(viewportWidth * 0.02));
+        const sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         
         // Limpiar wrapper
         sliderWrapper.innerHTML = '';
         
-        // CORRECCIÓN: Configurar wrapper con centrado correcto
+        // CORRECCIÓN: Configurar wrapper con centrado correcto (AHORA CON sideSpace DEFINIDO)
         sliderWrapper.style.display = 'flex';
         sliderWrapper.style.flexDirection = 'row';
         sliderWrapper.style.flexWrap = 'nowrap';
@@ -386,15 +392,6 @@
         sliderWrapper.style.position = 'relative';
         sliderWrapper.style.left = '0px'; // Reset left
         sliderWrapper.style.marginLeft = `${sideSpace}px`; // Usar marginLeft para centrar
-        
-        // Obtener valores actuales para crear slides
-        const viewportWidth = lastViewportWidth;
-        const slideWidth = Math.max(300, Math.floor(viewportWidth * 0.87));
-        const slideGap = Math.max(10, Math.floor(viewportWidth * 0.02));
-        const sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
-        
-        // CORRECCIÓN: No posicionar wrapper aquí, se hace en la configuración inicial
-        // sliderWrapper.style.left = `${sideSpace}px`;
         
         console.log('Slider Independiente: Creando slides con dimensiones:', { 
             viewport: viewportWidth,
