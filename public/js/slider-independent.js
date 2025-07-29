@@ -1,4 +1,4 @@
-// Slider Independiente - Con resize completamente corregido
+// Slider Independiente - Con altura responsive corregida
 (function () {
     let currentIndex = 0;
     let totalSlides = 0;
@@ -7,6 +7,43 @@
     let slidesData = [];
     let isDestroyed = false;
     let lastViewportWidth = 0;
+
+    // Función para calcular dimensiones responsivas
+    function calculateResponsiveDimensions() {
+        const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+        
+        let slideWidth, slideHeight, slideGap, sideSpace;
+        
+        if (viewportWidth <= 480) {
+            // Mobile
+            slideWidth = Math.floor(viewportWidth * 0.85);
+            slideHeight = Math.floor(slideWidth * 0.56); // Ratio 16:9
+            slideGap = Math.floor(viewportWidth * 0.03);
+        } else if (viewportWidth <= 768) {
+            // Tablet
+            slideWidth = Math.floor(viewportWidth * 0.80);
+            slideHeight = Math.floor(slideWidth * 0.56);
+            slideGap = Math.floor(viewportWidth * 0.025);
+        } else if (viewportWidth <= 1024) {
+            // Desktop pequeño
+            slideWidth = Math.floor(viewportWidth * 0.75);
+            slideHeight = Math.floor(slideWidth * 0.56);
+            slideGap = Math.floor(viewportWidth * 0.02);
+        } else {
+            // Desktop grande
+            slideWidth = Math.floor(viewportWidth * 0.70);
+            slideHeight = Math.floor(slideWidth * 0.56);
+            slideGap = Math.floor(viewportWidth * 0.02);
+        }
+        
+        // Límites mínimos y máximos
+        slideWidth = Math.max(280, Math.min(slideWidth, 800));
+        slideHeight = Math.max(157, Math.min(slideHeight, 450));
+        slideGap = Math.max(8, slideGap);
+        sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
+        
+        return { slideWidth, slideHeight, slideGap, sideSpace, viewportWidth };
+    }
 
     // Función mejorada para manejar el resize
     function handleResize() {
@@ -21,10 +58,9 @@
         
         clearTimeout(resizeTimeout);
         
-        console.log('Slider Independiente: Resize detectado -', {
+        console.log('Slider: Resize detectado -', {
             anterior: lastViewportWidth,
-            actual: currentViewportWidth,
-            diferencia: currentViewportWidth - lastViewportWidth
+            actual: currentViewportWidth
         });
         
         // Deshabilitar transiciones durante el resize
@@ -35,15 +71,13 @@
         
         // Aplicar cambios inmediatamente
         updateSliderCSSVariables();
-        updateSliderLayout(true); // Force update
+        updateSliderLayout(true);
         
         // Actualización con debounce
         resizeTimeout = setTimeout(() => {
             if (isDestroyed || totalSlides === 0) return;
             
-            console.log('Slider Independiente: Aplicando resize definitivo');
-            
-            // Forzar recálculo completo
+            console.log('Slider: Aplicando resize definitivo');
             forceCompleteRecalculation();
             
             // Verificar integridad después de un momento
@@ -57,45 +91,40 @@
                 }
             }, 100);
             
-        }, 150); // Reducido el debounce para mejor respuesta
+        }, 150);
         
         lastViewportWidth = currentViewportWidth;
     }
 
     // Nueva función para forzar recálculo completo
     function forceCompleteRecalculation() {
-        console.log('Slider Independiente: Forzando recálculo completo');
+        console.log('Slider: Forzando recálculo completo');
         
         const wrapper = document.getElementById('slider-wrapper');
         const slides = document.querySelectorAll('.slider-slide');
         
         if (!wrapper || slides.length === 0) {
-            console.warn('Slider Independiente: No se encontraron elementos para recalcular');
+            console.warn('Slider: No se encontraron elementos para recalcular');
             return;
         }
         
-        // Obtener nuevas dimensiones
-        const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
-        const slideWidth = Math.max(300, Math.floor(viewportWidth * 0.87));
-        const slideGap = Math.max(10, Math.floor(viewportWidth * 0.02));
-        const sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
+        // Obtener nuevas dimensiones responsivas
+        const dimensions = calculateResponsiveDimensions();
         
-        console.log('Slider Independiente: Nuevas dimensiones calculadas -', {
-            viewport: viewportWidth,
-            slideWidth,
-            slideGap,
-            sideSpace
-        });
+        console.log('Slider: Nuevas dimensiones calculadas -', dimensions);
         
         // Forzar actualización de variables CSS
-        document.documentElement.style.setProperty('--slider-slide-width', `${slideWidth}px`);
-        document.documentElement.style.setProperty('--slider-slide-gap', `${slideGap}px`);
-        document.documentElement.style.setProperty('--slider-side-space', `${sideSpace}px`);
+        const root = document.documentElement;
+        root.style.setProperty('--slider-slide-width', `${dimensions.slideWidth}px`);
+        root.style.setProperty('--slider-slide-height', `${dimensions.slideHeight}px`);
+        root.style.setProperty('--slider-slide-gap', `${dimensions.slideGap}px`);
+        root.style.setProperty('--slider-side-space', `${dimensions.sideSpace}px`);
         
-        // Aplicar nuevas dimensiones a todos los slides de forma forzada
+        // Aplicar nuevas dimensiones a todos los slides
         slides.forEach((slide, index) => {
             // Limpiar estilos previos
             slide.style.width = '';
+            slide.style.height = '';
             slide.style.flexBasis = '';
             slide.style.marginRight = '';
             
@@ -103,23 +132,33 @@
             slide.offsetHeight;
             
             // Aplicar nuevas dimensiones
-            slide.style.width = `${slideWidth}px`;
-            slide.style.flexBasis = `${slideWidth}px`;
-            slide.style.marginRight = index < slides.length - 1 ? `${slideGap}px` : '0';
+            slide.style.width = `${dimensions.slideWidth}px`;
+            slide.style.height = `${dimensions.slideHeight}px`;
+            slide.style.flexBasis = `${dimensions.slideWidth}px`;
+            slide.style.marginRight = index < slides.length - 1 ? `${dimensions.slideGap}px` : '0';
             slide.style.flexShrink = '0';
             slide.style.flexGrow = '0';
             
-            console.log(`Slider Independiente: Slide ${index} redimensionado a ${slideWidth}px`);
+            // Ajustar imagen dentro del slide con object-fit
+            const img = slide.querySelector('.slider-img-wrapper img');
+            if (img) {
+                img.style.width = '100%';
+                img.style.height = '100%';
+                img.style.objectFit = 'cover';
+                img.style.objectPosition = 'center';
+            }
+            
+            console.log(`Slider: Slide ${index} redimensionado a ${dimensions.slideWidth}x${dimensions.slideHeight}px`);
         });
         
-        // CORRECCIÓN: Reposicionar el wrapper correctamente
-        wrapper.style.marginLeft = `${sideSpace}px`;
-        wrapper.style.left = '0px'; // Reset left
+        // Reposicionar el wrapper correctamente
+        wrapper.style.marginLeft = `${dimensions.sideSpace}px`;
+        wrapper.style.left = '0px';
         
         // Actualizar posición del slider
-        updateSliderPosition(true); // Force update
+        updateSliderPosition(true);
         
-        console.log('Slider Independiente: Recálculo completo finalizado');
+        console.log('Slider: Recálculo completo finalizado');
     }
 
     // Función mejorada para actualizar layout
@@ -128,43 +167,57 @@
         const slides = document.querySelectorAll('.slider-slide');
         
         if (!wrapper || slides.length === 0) {
-            console.warn('Slider Independiente: No se encontró wrapper o slides');
+            console.warn('Slider: No se encontró wrapper o slides');
             return;
         }
         
-        // Obtener valores actualizados
-        const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
-        const slideWidth = Math.max(300, Math.floor(viewportWidth * 0.87));
-        const slideGap = Math.max(10, Math.floor(viewportWidth * 0.02));
-        const sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
+        const dimensions = calculateResponsiveDimensions();
         
-        console.log('Slider Independiente: Actualizando layout -', {
+        console.log('Slider: Actualizando layout -', {
             forceUpdate,
-            slideWidth,
-            slideGap,
-            sideSpace,
+            ...dimensions,
             slidesCount: slides.length
         });
         
         // Si es una actualización forzada o hay diferencias significativas
         const currentSlideWidth = parseInt(slides[0]?.style.width) || 0;
-        const needsUpdate = forceUpdate || Math.abs(currentSlideWidth - slideWidth) > 5;
+        const needsUpdate = forceUpdate || Math.abs(currentSlideWidth - dimensions.slideWidth) > 5;
         
         if (needsUpdate) {
             // Aplicar nuevos estilos a todos los slides
             slides.forEach((slide, index) => {
-                slide.style.width = `${slideWidth}px`;
-                slide.style.flexBasis = `${slideWidth}px`;
-                slide.style.marginRight = index < slides.length - 1 ? `${slideGap}px` : '0';
+                slide.style.width = `${dimensions.slideWidth}px`;
+                slide.style.height = `${dimensions.slideHeight}px`;
+                slide.style.flexBasis = `${dimensions.slideWidth}px`;
+                slide.style.marginRight = index < slides.length - 1 ? `${dimensions.slideGap}px` : '0';
                 slide.style.flexShrink = '0';
                 slide.style.flexGrow = '0';
+                
+                // Asegurar que la imagen llene el contenedor correctamente
+                const imgWrapper = slide.querySelector('.slider-img-wrapper');
+                const img = slide.querySelector('.slider-img-wrapper img');
+                
+                if (imgWrapper) {
+                    imgWrapper.style.width = '100%';
+                    imgWrapper.style.height = '100%';
+                    imgWrapper.style.overflow = 'hidden';
+                    imgWrapper.style.borderRadius = '12px';
+                }
+                
+                if (img) {
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                    img.style.objectPosition = 'center';
+                    img.style.transition = 'transform 0.3s ease';
+                }
             });
             
-            // CORRECCIÓN: Actualizar posición del wrapper
-            wrapper.style.marginLeft = `${sideSpace}px`;
-            wrapper.style.left = '0px'; // Reset left
+            // Actualizar posición del wrapper
+            wrapper.style.marginLeft = `${dimensions.sideSpace}px`;
+            wrapper.style.left = '0px';
             
-            console.log('Slider Independiente: Layout actualizado para', slides.length, 'slides');
+            console.log('Slider: Layout actualizado para', slides.length, 'slides');
         }
     }
 
@@ -172,31 +225,22 @@
     function updateSliderCSSVariables() {
         if (isDestroyed) return;
         
-        const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
-        
-        // Calcular dimensiones con validación
-        const slideWidth = Math.max(300, Math.floor(viewportWidth * 0.87));
-        const slideGap = Math.max(10, Math.floor(viewportWidth * 0.02));
-        const sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
-        const navBtnOffset = Math.max(10, Math.floor(sideSpace / 2 - 30));
+        const dimensions = calculateResponsiveDimensions();
+        const navBtnOffset = Math.max(10, Math.floor(dimensions.sideSpace / 2 - 30));
 
         // Actualizar variables CSS de forma forzada
         const root = document.documentElement;
-        root.style.setProperty('--slider-slide-width', `${slideWidth}px`);
-        root.style.setProperty('--slider-slide-gap', `${slideGap}px`);
-        root.style.setProperty('--slider-side-space', `${sideSpace}px`);
+        root.style.setProperty('--slider-slide-width', `${dimensions.slideWidth}px`);
+        root.style.setProperty('--slider-slide-height', `${dimensions.slideHeight}px`);
+        root.style.setProperty('--slider-slide-gap', `${dimensions.slideGap}px`);
+        root.style.setProperty('--slider-side-space', `${dimensions.sideSpace}px`);
         root.style.setProperty('--slider-nav-btn-offset', `${navBtnOffset}px`);
 
         // Prevenir scroll horizontal
         document.body.style.overflowX = 'hidden';
         document.documentElement.style.overflowX = 'hidden';
         
-        console.log('Slider Independiente: Variables CSS actualizadas -', {
-            viewport: viewportWidth,
-            slideWidth,
-            slideGap,
-            sideSpace
-        });
+        console.log('Slider: Variables CSS actualizadas -', dimensions);
     }
 
     // Función mejorada para verificar integridad
@@ -207,43 +251,42 @@
         const slides = document.querySelectorAll('.slider-slide');
         
         if (!wrapper || slides.length === 0) {
-            console.warn('Slider Independiente: Verificación falló - elementos no encontrados');
+            console.warn('Slider: Verificación falló - elementos no encontrados');
             return;
         }
         
-        // Obtener dimensiones esperadas
-        const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
-        const expectedWidth = Math.max(300, Math.floor(viewportWidth * 0.87));
+        const dimensions = calculateResponsiveDimensions();
         let needsCorrection = false;
         let issues = [];
         
         // Verificar cada slide
         slides.forEach((slide, index) => {
             const currentWidth = parseInt(slide.style.width) || 0;
-            const widthDifference = Math.abs(currentWidth - expectedWidth);
+            const currentHeight = parseInt(slide.style.height) || 0;
+            const widthDifference = Math.abs(currentWidth - dimensions.slideWidth);
+            const heightDifference = Math.abs(currentHeight - dimensions.slideHeight);
             
-            if (widthDifference > 5) { // Tolerancia de 5px
+            if (widthDifference > 5 || heightDifference > 5) {
                 needsCorrection = true;
-                issues.push(`Slide ${index}: actual ${currentWidth}px, esperado ${expectedWidth}px`);
+                issues.push(`Slide ${index}: actual ${currentWidth}x${currentHeight}px, esperado ${dimensions.slideWidth}x${dimensions.slideHeight}px`);
             }
         });
         
         // Verificar posición del wrapper
-        const currentLeft = parseInt(wrapper.style.left) || 0;
-        const expectedLeft = Math.floor((viewportWidth - expectedWidth) / 2);
-        const leftDifference = Math.abs(currentLeft - expectedLeft);
+        const currentMarginLeft = parseInt(wrapper.style.marginLeft) || 0;
+        const marginDifference = Math.abs(currentMarginLeft - dimensions.sideSpace);
         
-        if (leftDifference > 5) {
+        if (marginDifference > 5) {
             needsCorrection = true;
-            issues.push(`Wrapper left: actual ${currentLeft}px, esperado ${expectedLeft}px`);
+            issues.push(`Wrapper marginLeft: actual ${currentMarginLeft}px, esperado ${dimensions.sideSpace}px`);
         }
         
         if (needsCorrection) {
-            console.warn('Slider Independiente: Problemas de integridad detectados:', issues);
-            console.log('Slider Independiente: Aplicando corrección automática');
+            console.warn('Slider: Problemas de integridad detectados:', issues);
+            console.log('Slider: Aplicando corrección automática');
             forceCompleteRecalculation();
         } else {
-            console.log('Slider Independiente: Verificación de integridad OK');
+            console.log('Slider: Verificación de integridad OK');
         }
     }
 
@@ -253,7 +296,7 @@
         
         const wrapper = document.getElementById('slider-wrapper');
         if (!wrapper) {
-            console.warn('Slider Independiente: Wrapper no encontrado para actualizar posición');
+            console.warn('Slider: Wrapper no encontrado para actualizar posición');
             return;
         }
         
@@ -261,22 +304,18 @@
             isTransitioning = true;
         }
         
-        // Obtener valores actuales de las variables CSS
-        const slideWidthStr = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width');
-        const slideGapStr = getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-gap');
-        
-        const slideWidth = parseInt(slideWidthStr) || Math.floor((document.documentElement.clientWidth || window.innerWidth) * 0.87);
-        const slideGap = parseInt(slideGapStr) || Math.floor((document.documentElement.clientWidth || window.innerWidth) * 0.02);
+        // Obtener dimensiones actuales
+        const dimensions = calculateResponsiveDimensions();
         
         // Calcular posición
-        const translateX = -(slideWidth + slideGap) * currentIndex;
+        const translateX = -(dimensions.slideWidth + dimensions.slideGap) * currentIndex;
         wrapper.style.transform = `translateX(${translateX}px)`;
         
-        console.log('Slider Independiente: Posición actualizada -', {
+        console.log('Slider: Posición actualizada -', {
             index: currentIndex,
             translateX,
-            slideWidth,
-            slideGap,
+            slideWidth: dimensions.slideWidth,
+            slideGap: dimensions.slideGap,
             forceUpdate
         });
         
@@ -290,7 +329,7 @@
     // Cargar datos
     async function loadSliderData() {
         try {
-            console.log('Slider Independiente: Cargando datos...');
+            console.log('Slider: Cargando datos...');
             const response = await fetch(DATA_URL);
             if (!response.ok) throw new Error('No se pudo cargar data.json');
             const data = await response.json();
@@ -330,10 +369,10 @@
                     sliderUrl: item['Slider'] || ''
                 }));
 
-            console.log('Slider Independiente: Datos cargados:', movies.length, 'películas');
+            console.log('Slider: Datos cargados:', movies.length, 'películas');
             return movies;
         } catch (error) {
-            console.error('Slider Independiente: Error cargando datos:', error);
+            console.error('Slider: Error cargando datos:', error);
             return [];
         }
     }
@@ -342,11 +381,11 @@
     function renderSlider(moviesData = []) {
         if (isDestroyed) return;
         
-        console.log('Slider Independiente: Iniciando renderizado...');
+        console.log('Slider: Iniciando renderizado...');
         
         const sliderWrapper = document.getElementById('slider-wrapper');
         if (!sliderWrapper) {
-            console.error('Slider Independiente: slider-wrapper no encontrado');
+            console.error('Slider: slider-wrapper no encontrado');
             return;
         }
 
@@ -358,14 +397,14 @@
             .sort((a, b) => (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0))
             .slice(0, 8);
         
-        console.log('Slider Independiente: Películas seleccionadas:', selectedMovies.length);
+        console.log('Slider: Películas seleccionadas:', selectedMovies.length);
 
         // Asignar datos globales
         slidesData = selectedMovies;
         totalSlides = slidesData.length;
         
         if (totalSlides === 0) {
-            console.error('Slider Independiente: No hay slides para renderizar');
+            console.error('Slider: No hay slides para renderizar');
             return;
         }
 
@@ -375,31 +414,23 @@
         // Aplicar variables CSS antes de crear slides
         updateSliderCSSVariables();
 
-        // Obtener valores actuales para crear slides (MOVIDO ANTES DEL USO)
-        const viewportWidth = lastViewportWidth;
-        const slideWidth = Math.max(300, Math.floor(viewportWidth * 0.87));
-        const slideGap = Math.max(10, Math.floor(viewportWidth * 0.02));
-        const sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
+        // Obtener dimensiones responsivas
+        const dimensions = calculateResponsiveDimensions();
         
         // Limpiar wrapper
         sliderWrapper.innerHTML = '';
         
-        // CORRECCIÓN: Configurar wrapper con centrado correcto (AHORA CON sideSpace DEFINIDO)
+        // Configurar wrapper con centrado correcto
         sliderWrapper.style.display = 'flex';
         sliderWrapper.style.flexDirection = 'row';
         sliderWrapper.style.flexWrap = 'nowrap';
         sliderWrapper.style.transform = 'translateX(0)';
         sliderWrapper.style.transition = 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
         sliderWrapper.style.position = 'relative';
-        sliderWrapper.style.left = '0px'; // Reset left
-        sliderWrapper.style.marginLeft = `${sideSpace}px`; // Usar marginLeft para centrar
+        sliderWrapper.style.left = '0px';
+        sliderWrapper.style.marginLeft = `${dimensions.sideSpace}px`;
         
-        console.log('Slider Independiente: Creando slides con dimensiones:', { 
-            viewport: viewportWidth,
-            slideWidth, 
-            slideGap,
-            sideSpace 
-        });
+        console.log('Slider: Creando slides con dimensiones:', dimensions);
         
         // Crear slides
         slidesData.forEach((movie, index) => {
@@ -408,42 +439,68 @@
             slideDiv.dataset.index = index;
             
             // Aplicar estilos directamente con valores calculados
-            slideDiv.style.width = `${slideWidth}px`;
-            slideDiv.style.flexBasis = `${slideWidth}px`;
-            slideDiv.style.marginRight = index < slidesData.length - 1 ? `${slideGap}px` : '0';
+            slideDiv.style.width = `${dimensions.slideWidth}px`;
+            slideDiv.style.height = `${dimensions.slideHeight}px`;
+            slideDiv.style.flexBasis = `${dimensions.slideWidth}px`;
+            slideDiv.style.marginRight = index < slidesData.length - 1 ? `${dimensions.slideGap}px` : '0';
             slideDiv.style.flexShrink = '0';
             slideDiv.style.flexGrow = '0';
             slideDiv.style.position = 'relative';
+            slideDiv.style.borderRadius = '12px';
+            slideDiv.style.overflow = 'hidden';
+            slideDiv.style.cursor = 'pointer';
+            slideDiv.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
+            slideDiv.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
             
             // Usar solo la imagen del campo 'Slider' como principal
-            const imageUrl = movie.sliderUrl || `https://via.placeholder.com/800x450/333/fff?text=${encodeURIComponent(movie.title)}`;
+            const imageUrl = movie.sliderUrl || `https://via.placeholder.com/${dimensions.slideWidth}x${dimensions.slideHeight}/333/fff?text=${encodeURIComponent(movie.title)}`;
             
             const mainGenre = movie.genre ? movie.genre.split(/[·,]/)[0].trim() : '';
             
             slideDiv.innerHTML = `
-                <div class="slider-img-wrapper">
+                <div class="slider-img-wrapper" style="width: 100%; height: 100%; overflow: hidden; border-radius: 12px;">
                     <img src="${imageUrl}" 
                          alt="${movie.title}" 
                          loading="${index === 0 ? 'eager' : 'lazy'}"
-                         onerror="this.src='https://via.placeholder.com/800x450/333/fff?text=No+Image'">
+                         style="width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.3s ease;"
+                         onerror="this.src='https://via.placeholder.com/${dimensions.slideWidth}x${dimensions.slideHeight}/333/fff?text=No+Image'">
                 </div>
-                <div class="slider-overlay">
-                    <div class="slider-title-movie">${movie.title || 'Sin título'}</div>
-                    <div class="slider-meta">
+                <div class="slider-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 20px; color: white; border-radius: 0 0 12px 12px;">
+                    <div class="slider-title-movie" style="font-size: clamp(1rem, 2.5vw, 1.5rem); font-weight: bold; margin-bottom: 8px; line-height: 1.2;">${movie.title || 'Sin título'}</div>
+                    <div class="slider-meta" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; font-size: clamp(0.75rem, 2vw, 0.9rem); opacity: 0.9;">
                         ${movie.year ? `<span>${movie.year}</span>` : ''}
                         ${movie.duration ? `<span>${movie.duration}</span>` : ''}
                         ${mainGenre ? `<span>${mainGenre}</span>` : ''}
-                        ${movie.rating ? `<span><i class="fas fa-star"></i> ${movie.rating}</span>` : ''}
+                        ${movie.rating ? `<span><i class="fas fa-star" style="color: #ffd700; margin-right: 4px;"></i>${movie.rating}</span>` : ''}
                     </div>
-                    <div class="slider-description">${movie.description || movie.synopsis || 'Sin descripción disponible'}</div>
+                    <div class="slider-description" style="font-size: clamp(0.7rem, 1.8vw, 0.85rem); line-height: 1.4; opacity: 0.85; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${movie.description || movie.synopsis || 'Sin descripción disponible'}</div>
                 </div>
             `;
+
+            // Efectos hover
+            slideDiv.addEventListener('mouseenter', () => {
+                if (!isTransitioning) {
+                    slideDiv.style.transform = 'scale(1.05)';
+                    slideDiv.style.boxShadow = '0 8px 30px rgba(0,0,0,0.4)';
+                    const img = slideDiv.querySelector('img');
+                    if (img) img.style.transform = 'scale(1.1)';
+                }
+            });
+
+            slideDiv.addEventListener('mouseleave', () => {
+                if (!isTransitioning) {
+                    slideDiv.style.transform = 'scale(1)';
+                    slideDiv.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
+                    const img = slideDiv.querySelector('img');
+                    if (img) img.style.transform = 'scale(1)';
+                }
+            });
 
             // Click handler
             slideDiv.addEventListener('click', (e) => {
                 if (!isTransitioning) {
                     e.preventDefault();
-                    console.log('Slider Independiente: Click en slide:', movie.title);
+                    console.log('Slider: Click en slide:', movie.title);
                     openDetailsModal(movie, slideDiv);
                 }
             });
@@ -456,10 +513,10 @@
         
         // Posicionar slider
         currentIndex = 0;
-        updateSliderPosition(true); // Force update inicial
+        updateSliderPosition(true);
         updatePagination();
         
-        console.log('Slider Independiente: Renderizado completado');
+        console.log('Slider: Renderizado completado');
         
         // Verificación final
         setTimeout(() => {
@@ -538,7 +595,7 @@
         
         if (index === currentIndex) return;
         
-        console.log('Slider Independiente: Cambiando a slide', index);
+        console.log('Slider: Cambiando a slide', index);
         
         currentIndex = index;
         updateSliderPosition();
@@ -555,7 +612,7 @@
 
     // Función para abrir modal
     function openDetailsModal(movie, element) {
-        console.log('Slider Independiente: Abriendo modal para:', movie.title);
+        console.log('Slider: Abriendo modal para:', movie.title);
         
         function tryOpenModal() {
             if (window.detailsModal && typeof window.detailsModal.show === 'function') {
@@ -574,7 +631,7 @@
                 if (tryOpenModal()) {
                     clearInterval(retryInterval);
                 } else if (attempts >= maxAttempts) {
-                    console.error('Slider Independiente: No se pudo abrir el modal');
+                    console.error('Slider: No se pudo abrir el modal');
                     clearInterval(retryInterval);
                 }
             }, 200 * attempts);
@@ -583,7 +640,7 @@
 
     // Función de limpieza
     function destroy() {
-        console.log('Slider Independiente: Destruyendo...');
+        console.log('Slider: Destruyendo...');
         isDestroyed = true;
         
         clearTimeout(resizeTimeout);
@@ -609,7 +666,7 @@
     async function init() {
         if (isDestroyed) return;
         
-        console.log('Slider Independiente: Inicializando...');
+        console.log('Slider: Inicializando...');
         
         // Prevenir scroll horizontal
         document.body.style.overflowX = 'hidden';
@@ -633,9 +690,9 @@
             // Agregar listener de resize mejorado
             window.addEventListener('resize', handleResize, { passive: true });
             
-            console.log('Slider Independiente: Inicialización completada');
+            console.log('Slider: Inicialización completada');
         } else {
-            console.error('Slider Independiente: No se pudieron cargar datos');
+            console.error('Slider: No se pudieron cargar datos');
         }
     }
 
@@ -658,6 +715,7 @@
         getTotalSlides: () => totalSlides,
         getSlidesData: () => slidesData,
         getLastViewportWidth: () => lastViewportWidth,
+        calculateResponsiveDimensions,
         init,
         renderSlider,
         updateSliderCSSVariables,
