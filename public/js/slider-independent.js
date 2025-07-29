@@ -1,4 +1,4 @@
-// Slider Independiente - Con detección automática de viewport mejorada
+// Slider Independiente - Con detección automática de viewport mejorada (estilo Rakuten.tv)
 (function () {
     let currentIndex = 0;
     let totalSlides = 0;
@@ -8,54 +8,59 @@
     let isDestroyed = false;
     let lastViewportWidth = 0;
 
-    // Función mejorada para calcular dimensiones responsivas (similar al carousel.js)
+    // Función mejorada para calcular dimensiones responsivas (estilo Rakuten.tv)
     function calculateResponsiveDimensions() {
         const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
         
-        // Usar 90% del viewport para el contenido del slider, dejando 10% para botones y espacios
-        const availableWidth = Math.floor(viewportWidth * 0.9);
+        // Calcular el ancho del slide para ocupar la mayor parte de la pantalla
+        // dejando espacio para ver elementos adyacentes
+        let slideWidth, slideHeight, slideGap, sideSpace;
         
-        // Calcular el ancho del slide basado en el viewport disponible
-        // Mantenemos un ratio aproximado de 16:9
-        let slideWidth = availableWidth;
-        let slideHeight = Math.floor(slideWidth * 0.4); // Ratio ajustado para mejor visualización
-        
-        // Ajustes específicos por tamaño de pantalla para optimizar la visualización
         if (viewportWidth <= 480) {
-            // Mobile: usar más del ancho disponible
-            slideWidth = Math.floor(availableWidth * 0.95);
-            slideHeight = Math.floor(slideWidth * 0.45);
+            // Mobile: ocupa casi toda la pantalla con poco espacio lateral
+            slideWidth = Math.floor(viewportWidth * 0.85);
+            slideHeight = Math.floor(slideWidth * 0.5);
+            slideGap = 12;
+            sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 768) {
-            // Tablet: usar un poco menos para mostrar más contenido adyacente
-            slideWidth = Math.floor(availableWidth * 0.85);
-            slideHeight = Math.floor(slideWidth * 0.4);
+            // Tablet: ocupa la mayor parte con elementos adyacentes visibles
+            slideWidth = Math.floor(viewportWidth * 0.82);
+            slideHeight = Math.floor(slideWidth * 0.45);
+            slideGap = 16;
+            sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1024) {
-            // Desktop pequeño
-            slideWidth = Math.floor(availableWidth * 0.8);
+            // Desktop pequeño: mayor visibilidad de elementos adyacentes
+            slideWidth = Math.floor(viewportWidth * 0.78);
+            slideHeight = Math.floor(slideWidth * 0.4);
+            slideGap = 20;
+            sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
+        } else if (viewportWidth <= 1400) {
+            // Desktop mediano
+            slideWidth = Math.floor(viewportWidth * 0.75);
             slideHeight = Math.floor(slideWidth * 0.35);
+            slideGap = 24;
+            sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else {
-            // Desktop grande
-            slideWidth = Math.floor(availableWidth * 0.75);
+            // Desktop grande: máxima visibilidad de elementos adyacentes
+            slideWidth = Math.floor(viewportWidth * 0.72);
             slideHeight = Math.floor(slideWidth * 0.32);
+            slideGap = 28;
+            sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         }
         
-        // Límites mínimos y máximos para asegurar usabilidad
-        slideWidth = Math.max(280, Math.min(slideWidth, 1200));
-        slideHeight = Math.max(157, Math.min(slideHeight, 400));
-        
-        // Gap entre slides (similar al carousel)
-        const slideGap = Math.max(8, Math.floor(viewportWidth * 0.015));
-        
-        // Espacio lateral para centrar el slider
-        const sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
+        // Límites mínimos y máximos
+        slideWidth = Math.max(280, Math.min(slideWidth, 1400));
+        slideHeight = Math.max(157, Math.min(slideHeight, 450));
+        slideGap = Math.max(8, slideGap);
+        sideSpace = Math.max(20, sideSpace);
         
         console.log('Slider: Dimensiones calculadas -', {
             viewportWidth,
-            availableWidth,
             slideWidth,
             slideHeight,
             slideGap,
-            sideSpace
+            sideSpace,
+            percentage: Math.round((slideWidth / viewportWidth) * 100) + '%'
         });
         
         return { slideWidth, slideHeight, slideGap, sideSpace, viewportWidth };
@@ -243,8 +248,8 @@
         
         const dimensions = calculateResponsiveDimensions();
         
-        // Calcular offset de botones de navegación (posicionados en los espacios laterales)
-        const navBtnOffset = Math.max(15, Math.floor(dimensions.sideSpace / 3));
+        // Calcular offset de botones de navegación (fuera del área de contenido)
+        const navBtnOffset = Math.max(10, Math.floor(dimensions.sideSpace * 0.3));
 
         // Actualizar variables CSS de forma forzada
         const root = document.documentElement;
@@ -705,46 +710,46 @@
             slidesData = movies;
             totalSlides = movies.length;
             
-   // Renderizar
-           renderSlider(movies);
-           
-           // Agregar listener de resize mejorado
-           window.addEventListener('resize', handleResize, { passive: true });
-           
-           console.log('Slider: Inicialización completada');
-       } else {
-           console.error('Slider: No se pudieron cargar datos');
-       }
-   }
+            // Renderizar
+            renderSlider(movies);
+            
+            // Agregar listener de resize mejorado
+            window.addEventListener('resize', handleResize, { passive: true });
+            
+            console.log('Slider: Inicialización completada');
+        } else {
+            console.error('Slider: No se pudieron cargar datos');
+        }
+    }
 
-   // Cleanup al cerrar
-   window.addEventListener('beforeunload', destroy);
-   
-   // Auto-init
-   if (document.readyState === 'loading') {
-       document.addEventListener('DOMContentLoaded', init);
-   } else {
-       init();
-   }
+    // Cleanup al cerrar
+    window.addEventListener('beforeunload', destroy);
+    
+    // Auto-init
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
 
-   // Exponer API pública
-   window.sliderIndependent = {
-       goToSlide,
-       next: () => goToSlide(currentIndex + 1),
-       prev: () => goToSlide(currentIndex - 1),
-       getCurrentIndex: () => currentIndex,
-       getTotalSlides: () => totalSlides,
-       getSlidesData: () => slidesData,
-       getLastViewportWidth: () => lastViewportWidth,
-       calculateResponsiveDimensions,
-       init,
-       renderSlider,
-       updateSliderCSSVariables,
-       updateSliderLayout,
-       forceCompleteRecalculation,
-       verifySliderIntegrity,
-       openDetailsModal,
-       destroy
-   };
+    // Exponer API pública
+    window.sliderIndependent = {
+        goToSlide,
+        next: () => goToSlide(currentIndex + 1),
+        prev: () => goToSlide(currentIndex - 1),
+        getCurrentIndex: () => currentIndex,
+        getTotalSlides: () => totalSlides,
+        getSlidesData: () => slidesData,
+        getLastViewportWidth: () => lastViewportWidth,
+        calculateResponsiveDimensions,
+        init,
+        renderSlider,
+        updateSliderCSSVariables,
+        updateSliderLayout,
+        forceCompleteRecalculation,
+        verifySliderIntegrity,
+        openDetailsModal,
+        destroy
+    };
 
 })();
