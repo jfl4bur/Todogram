@@ -326,7 +326,8 @@
                     audioList: item['Audios'] ? item['Audios'].split(',').map(audio => audio.trim()) : [],
                     subtitleList: item['Subtítulos'] ? item['Subtítulos'].split(',').map(sub => sub.trim()) : [],
                     audiosCount: item['Audios'] ? item['Audios'].split(',').length : 0,
-                    subtitlesCount: item['Subtítulos'] ? item['Subtítulos'].split(',').length : 0
+                    subtitlesCount: item['Subtítulos'] ? item['Subtítulos'].split(',').length : 0,
+                    sliderUrl: item['Slider'] || ''
                 }));
 
             console.log('Slider Independiente: Datos cargados:', movies.length, 'películas');
@@ -414,9 +415,8 @@
             slideDiv.style.flexGrow = '0';
             slideDiv.style.position = 'relative';
             
-            // Usar la imagen correcta
-            const imageUrl = movie.postersUrl || movie.posterUrl || 
-                           `https://via.placeholder.com/800x450/333/fff?text=${encodeURIComponent(movie.title)}`;
+            // Usar solo la imagen del campo 'Slider' como principal
+            const imageUrl = movie.sliderUrl || `https://via.placeholder.com/800x450/333/fff?text=${encodeURIComponent(movie.title)}`;
             
             const mainGenre = movie.genre ? movie.genre.split(/[·,]/)[0].trim() : '';
             
