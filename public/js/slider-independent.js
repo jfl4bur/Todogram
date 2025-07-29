@@ -1,4 +1,4 @@
-// Slider Independiente - Con altura responsive corregida
+// Slider Independiente - Con detección automática de viewport mejorada
 (function () {
     let currentIndex = 0;
     let totalSlides = 0;
@@ -8,56 +8,67 @@
     let isDestroyed = false;
     let lastViewportWidth = 0;
 
-    // Función para calcular dimensiones responsivas
+    // Función mejorada para calcular dimensiones responsivas (similar al carousel.js)
     function calculateResponsiveDimensions() {
         const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
         
-        let slideWidth, slideHeight, slideGap, sideSpace;
+        // Usar 90% del viewport para el contenido del slider, dejando 10% para botones y espacios
+        const availableWidth = Math.floor(viewportWidth * 0.9);
         
-        if (viewportWidth <= 395) {
-            // Mobile
-            slideWidth = Math.floor(viewportWidth * 0.10);
-            slideHeight = Math.floor(slideWidth * 0.4); // Ratio 16:9
-            slideGap = Math.floor(viewportWidth * 0.03);
-        } else if (viewportWidth <= 480) {
-            // Mobile
-            slideWidth = Math.floor(viewportWidth * 0.20);
-            slideHeight = Math.floor(slideWidth * 0.8); // Ratio 16:9
-            slideGap = Math.floor(viewportWidth * 0.03);
+        // Calcular el ancho del slide basado en el viewport disponible
+        // Mantenemos un ratio aproximado de 16:9
+        let slideWidth = availableWidth;
+        let slideHeight = Math.floor(slideWidth * 0.4); // Ratio ajustado para mejor visualización
+        
+        // Ajustes específicos por tamaño de pantalla para optimizar la visualización
+        if (viewportWidth <= 480) {
+            // Mobile: usar más del ancho disponible
+            slideWidth = Math.floor(availableWidth * 0.95);
+            slideHeight = Math.floor(slideWidth * 0.45);
         } else if (viewportWidth <= 768) {
-            // Tablet
-            slideWidth = Math.floor(viewportWidth * 0.80);
-            slideHeight = Math.floor(slideWidth * 0.35); // Ratio 16:9
-            slideGap = Math.floor(viewportWidth * 0.025);
+            // Tablet: usar un poco menos para mostrar más contenido adyacente
+            slideWidth = Math.floor(availableWidth * 0.85);
+            slideHeight = Math.floor(slideWidth * 0.4);
         } else if (viewportWidth <= 1024) {
             // Desktop pequeño
-            slideWidth = Math.floor(viewportWidth * 0.90);
-            slideHeight = Math.floor(slideWidth * 0.43);
-            slideGap = Math.floor(viewportWidth * 0.02);
+            slideWidth = Math.floor(availableWidth * 0.8);
+            slideHeight = Math.floor(slideWidth * 0.35);
         } else {
             // Desktop grande
-            slideWidth = Math.floor(viewportWidth * 0.99);
-            slideHeight = Math.floor(slideWidth * 0.49);
-            slideGap = Math.floor(viewportWidth * 0.02);
+            slideWidth = Math.floor(availableWidth * 0.75);
+            slideHeight = Math.floor(slideWidth * 0.32);
         }
         
-        // Límites mínimos y máximos
-        slideWidth = Math.max(280, Math.min(slideWidth, 1295));
+        // Límites mínimos y máximos para asegurar usabilidad
+        slideWidth = Math.max(280, Math.min(slideWidth, 1200));
         slideHeight = Math.max(157, Math.min(slideHeight, 400));
-        slideGap = Math.max(8, slideGap);
-        sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
+        
+        // Gap entre slides (similar al carousel)
+        const slideGap = Math.max(8, Math.floor(viewportWidth * 0.015));
+        
+        // Espacio lateral para centrar el slider
+        const sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
+        
+        console.log('Slider: Dimensiones calculadas -', {
+            viewportWidth,
+            availableWidth,
+            slideWidth,
+            slideHeight,
+            slideGap,
+            sideSpace
+        });
         
         return { slideWidth, slideHeight, slideGap, sideSpace, viewportWidth };
     }
 
-    // Función mejorada para manejar el resize
+    // Función mejorada para manejar el resize (optimizada)
     function handleResize() {
         if (isDestroyed) return;
         
         const currentViewportWidth = document.documentElement.clientWidth || window.innerWidth;
         
         // Solo proceder si hay un cambio significativo en el ancho
-        if (Math.abs(currentViewportWidth - lastViewportWidth) < 10) {
+        if (Math.abs(currentViewportWidth - lastViewportWidth) < 20) {
             return;
         }
         
@@ -144,7 +155,7 @@
             slide.style.flexShrink = '0';
             slide.style.flexGrow = '0';
             
-            // Ajustar imagen dentro del slide con object-fit
+            // Ajustar imagen dentro del slide
             const img = slide.querySelector('.slider-img-wrapper img');
             if (img) {
                 img.style.width = '100%';
@@ -186,7 +197,7 @@
         
         // Si es una actualización forzada o hay diferencias significativas
         const currentSlideWidth = parseInt(slides[0]?.style.width) || 0;
-        const needsUpdate = forceUpdate || Math.abs(currentSlideWidth - dimensions.slideWidth) > 5;
+        const needsUpdate = forceUpdate || Math.abs(currentSlideWidth - dimensions.slideWidth) > 10;
         
         if (needsUpdate) {
             // Aplicar nuevos estilos a todos los slides
@@ -231,7 +242,9 @@
         if (isDestroyed) return;
         
         const dimensions = calculateResponsiveDimensions();
-        const navBtnOffset = Math.max(10, Math.floor(dimensions.sideSpace / 2 - 30));
+        
+        // Calcular offset de botones de navegación (posicionados en los espacios laterales)
+        const navBtnOffset = Math.max(15, Math.floor(dimensions.sideSpace / 3));
 
         // Actualizar variables CSS de forma forzada
         const root = document.documentElement;
@@ -245,7 +258,10 @@
         document.body.style.overflowX = 'hidden';
         document.documentElement.style.overflowX = 'hidden';
         
-        console.log('Slider: Variables CSS actualizadas -', dimensions);
+        console.log('Slider: Variables CSS actualizadas -', {
+            ...dimensions,
+            navBtnOffset
+        });
     }
 
     // Función mejorada para verificar integridad
@@ -271,7 +287,7 @@
             const widthDifference = Math.abs(currentWidth - dimensions.slideWidth);
             const heightDifference = Math.abs(currentHeight - dimensions.slideHeight);
             
-            if (widthDifference > 5 || heightDifference > 5) {
+            if (widthDifference > 10 || heightDifference > 10) {
                 needsCorrection = true;
                 issues.push(`Slide ${index}: actual ${currentWidth}x${currentHeight}px, esperado ${dimensions.slideWidth}x${dimensions.slideHeight}px`);
             }
@@ -281,7 +297,7 @@
         const currentMarginLeft = parseInt(wrapper.style.marginLeft) || 0;
         const marginDifference = Math.abs(currentMarginLeft - dimensions.sideSpace);
         
-        if (marginDifference > 5) {
+        if (marginDifference > 10) {
             needsCorrection = true;
             issues.push(`Wrapper marginLeft: actual ${currentMarginLeft}px, esperado ${dimensions.sideSpace}px`);
         }
@@ -689,46 +705,46 @@
             slidesData = movies;
             totalSlides = movies.length;
             
-            // Renderizar
-            renderSlider(movies);
-            
-            // Agregar listener de resize mejorado
-            window.addEventListener('resize', handleResize, { passive: true });
-            
-            console.log('Slider: Inicialización completada');
-        } else {
-            console.error('Slider: No se pudieron cargar datos');
-        }
-    }
+   // Renderizar
+           renderSlider(movies);
+           
+           // Agregar listener de resize mejorado
+           window.addEventListener('resize', handleResize, { passive: true });
+           
+           console.log('Slider: Inicialización completada');
+       } else {
+           console.error('Slider: No se pudieron cargar datos');
+       }
+   }
 
-    // Cleanup al cerrar
-    window.addEventListener('beforeunload', destroy);
-    
-    // Auto-init
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
+   // Cleanup al cerrar
+   window.addEventListener('beforeunload', destroy);
+   
+   // Auto-init
+   if (document.readyState === 'loading') {
+       document.addEventListener('DOMContentLoaded', init);
+   } else {
+       init();
+   }
 
-    // Exponer API pública
-    window.sliderIndependent = {
-        goToSlide,
-        next: () => goToSlide(currentIndex + 1),
-        prev: () => goToSlide(currentIndex - 1),
-        getCurrentIndex: () => currentIndex,
-        getTotalSlides: () => totalSlides,
-        getSlidesData: () => slidesData,
-        getLastViewportWidth: () => lastViewportWidth,
-        calculateResponsiveDimensions,
-        init,
-        renderSlider,
-        updateSliderCSSVariables,
-        updateSliderLayout,
-        forceCompleteRecalculation,
-        verifySliderIntegrity,
-        openDetailsModal,
-        destroy
-    };
+   // Exponer API pública
+   window.sliderIndependent = {
+       goToSlide,
+       next: () => goToSlide(currentIndex + 1),
+       prev: () => goToSlide(currentIndex - 1),
+       getCurrentIndex: () => currentIndex,
+       getTotalSlides: () => totalSlides,
+       getSlidesData: () => slidesData,
+       getLastViewportWidth: () => lastViewportWidth,
+       calculateResponsiveDimensions,
+       init,
+       renderSlider,
+       updateSliderCSSVariables,
+       updateSliderLayout,
+       forceCompleteRecalculation,
+       verifySliderIntegrity,
+       openDetailsModal,
+       destroy
+   };
 
 })();
