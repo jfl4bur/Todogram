@@ -16,8 +16,8 @@
         
         if (viewportWidth <= 480) {
             // Mobile
-            slideWidth = Math.floor(viewportWidth * 0.40);
-            slideHeight = Math.floor(slideWidth * 0.17); // Ratio 16:9
+            slideWidth = Math.floor(viewportWidth * 0.30);
+            slideHeight = Math.floor(slideWidth * 0.12); // Ratio 16:9
             slideGap = Math.floor(viewportWidth * 0.03);
         } else if (viewportWidth <= 768) {
             // Tablet
