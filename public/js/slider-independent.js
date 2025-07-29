@@ -37,7 +37,7 @@
         }
         
         // Límites mínimos y máximos
-        slideWidth = Math.max(280, Math.min(slideWidth, 800));
+        slideWidth = Math.max(280, Math.min(slideWidth, 1468));
         slideHeight = Math.max(157, Math.min(slideHeight, 450));
         slideGap = Math.max(8, slideGap);
         sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
