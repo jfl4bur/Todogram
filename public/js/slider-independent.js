@@ -1,4 +1,4 @@
-// Slider Independiente - VERSIÓN FINAL CORREGIDA
+// Slider Independiente - VERSIÓN COMPLETAMENTE CORREGIDA Y FUNCIONAL
 (function () {
     let currentIndex = 0;
     let totalSlides = 0;
@@ -16,78 +16,67 @@
     let startTransform = 0;
     let currentTransform = 0;
 
-// FUNCIÓN COMPLETAMENTE REDISEÑADA: Calcular dimensiones responsivas
-    function calculateResponsiveDimensions() {
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        const isMobile = viewportWidth <= 768;
-        const isTablet = viewportWidth > 768 && viewportWidth <= 1024;
-        const isLandscape = viewportWidth > viewportHeight && isMobile;
-        
-        let slideWidth, slideHeight, slideGap, sideSpace, buttonSpace;
+    // SISTEMA DE DIMENSIONES COMPLETAMENTE NUEVO
+    function getSliderDimensions() {
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+        const isMobile = vw <= 768;
+        const isTablet = vw > 768 && vw <= 1024;
         
         if (isMobile) {
-            // MÓVIL: Slide que ocupe casi todo el ancho con pequeñas partes laterales visibles
-            slideWidth = Math.round(viewportWidth * 0.85); // 85% del viewport
-            slideHeight = Math.round(slideWidth * 0.56); // Ratio 16:9
-            slideGap = 12;
-            sideSpace = Math.round((viewportWidth - slideWidth) / 2);
-            buttonSpace = 45;
+            // MÓVIL: Como Netflix mobile - slide principal + peek de laterales
+            return {
+                slideWidth: Math.round(vw * 0.82),
+                slideHeight: Math.round(vw * 0.82 * 0.56), // 16:9
+                gap: 12,
+                containerPadding: Math.round(vw * 0.09), // 9% cada lado
+                isMobile: true,
+                isTablet: false
+            };
         } else if (isTablet) {
-            // TABLET: Slide grande
-            slideWidth = Math.round(viewportWidth * 0.75);
-            slideHeight = Math.round(slideWidth * 0.50);
-            slideGap = 18;
-            sideSpace = Math.round((viewportWidth - slideWidth) / 2);
-            buttonSpace = 55;
+            // TABLET: Intermedio
+            return {
+                slideWidth: Math.round(vw * 0.7),
+                slideHeight: Math.round(vw * 0.7 * 0.5),
+                gap: 16,
+                containerPadding: Math.round(vw * 0.15),
+                isMobile: false,
+                isTablet: true
+            };
         } else {
-            // DESKTOP: Slide MUY GRANDE como en la imagen de referencia
-            slideWidth = Math.round(viewportWidth * 0.75); // 75% del viewport, sin límite máximo
-            slideHeight = Math.round(slideWidth * 0.42); // Ratio panorámico
-            slideGap = 20;
-            sideSpace = Math.round((viewportWidth - slideWidth) / 2);
-            buttonSpace = 70;
+            // DESKTOP: Como tu imagen - slide MUY grande + pequeños peeks
+            return {
+                slideWidth: Math.round(vw * 0.76), // 76% del viewport
+                slideHeight: Math.round(vw * 0.76 * 0.42), // Ratio panorámico
+                gap: 20,
+                containerPadding: Math.round(vw * 0.12), // 12% cada lado
+                isMobile: false,
+                isTablet: false
+            };
         }
-        
-        console.log('Slider: Dimensiones calculadas', {
-            viewportWidth,
-            slideWidth,
-            slideHeight,
-            slideGap,
-            sideSpace,
-            buttonSpace,
-            isMobile,
-            isTablet
-        });
-        
-        return { slideWidth, slideHeight, slideGap, sideSpace, buttonSpace, isMobile, isTablet, isLandscape };
     }
 
-    // Detectar dispositivos móviles y táctiles
-    function isMobileDevice() {
-        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-               window.innerWidth <= 768;
-    }
-
+    // Detectar dispositivos táctiles
     function isTouchDevice() {
-        return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        return 'ontouchstart' in window || 
+               navigator.maxTouchPoints > 0 || 
+               /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     }
 
-    // FUNCIÓN CORREGIDA: Configurar eventos touch/swipe
+    // Configurar eventos touch/swipe
     function setupTouchEvents() {
-        const wrapper = document.getElementById('slider-wrapper');
-        if (!wrapper) return;
+        const container = document.getElementById('slider-wrapper')?.parentElement;
+        if (!container) return;
         
         // Limpiar eventos previos
-        wrapper.removeEventListener('touchstart', handleTouchStart);
-        wrapper.removeEventListener('touchmove', handleTouchMove);
-        wrapper.removeEventListener('touchend', handleTouchEnd);
+        container.removeEventListener('touchstart', handleTouchStart);
+        container.removeEventListener('touchmove', handleTouchMove);
+        container.removeEventListener('touchend', handleTouchEnd);
         
-        // Solo en dispositivos táctiles
         if (isTouchDevice()) {
-            wrapper.addEventListener('touchstart', handleTouchStart, { passive: false });
-            wrapper.addEventListener('touchmove', handleTouchMove, { passive: false });
-            wrapper.addEventListener('touchend', handleTouchEnd, { passive: false });
+            container.addEventListener('touchstart', handleTouchStart, { passive: false });
+            container.addEventListener('touchmove', handleTouchMove, { passive: false });
+            container.addEventListener('touchend', handleTouchEnd, { passive: false });
         }
     }
 
@@ -100,10 +89,8 @@
         
         const wrapper = document.getElementById('slider-wrapper');
         if (wrapper) {
-            const transform = wrapper.style.transform;
-            const match = transform.match(/translateX\(([^)]+)\)/);
-            startTransform = match ? parseFloat(match[1]) : 0;
-            currentTransform = startTransform;
+            const currentTransformMatch = wrapper.style.transform.match(/translateX\(([^)]+)\)/);
+            startTransform = currentTransformMatch ? parseFloat(currentTransformMatch[1]) : 0;
             wrapper.style.transition = 'none';
         }
     }
@@ -134,7 +121,7 @@
         }
         
         const deltaX = touchEndX - touchStartX;
-        const threshold = 50;
+        const threshold = 60;
         
         if (Math.abs(deltaX) > threshold) {
             const direction = deltaX > 0 ? -1 : 1;
@@ -144,152 +131,122 @@
         }
     }
 
-    // FUNCIÓN COMPLETAMENTE CORREGIDA: Posicionar botones
-    function positionNavigationButtons() {
+    // CREAR Y POSICIONAR BOTONES DE NAVEGACIÓN
+    function setupNavigationButtons() {
         const prevBtn = document.getElementById('slider-prev');
         const nextBtn = document.getElementById('slider-next');
         const container = document.getElementById('slider-wrapper')?.parentElement;
         
         if (!prevBtn || !nextBtn || !container) return;
         
-        const dimensions = calculateResponsiveDimensions();
+        const dims = getSliderDimensions();
         
-        // CORREGIR: Asegurar posicionamiento del contenedor
-        container.style.position = 'relative';
+        // Limpiar estilos completamente
+        prevBtn.removeAttribute('style');
+        nextBtn.removeAttribute('style');
         
-        // Estilos base para ambos botones
-        const baseButtonStyle = {
+        // Estilo base para botones
+        const buttonStyles = {
             position: 'absolute',
-            top: '0',
-            bottom: '0',
-            zIndex: '1000',
+            zIndex: '1002',
             border: 'none',
-            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
             color: 'white',
             cursor: 'pointer',
-            transition: 'all 0.3s ease',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
             fontFamily: 'Arial, sans-serif',
             fontWeight: 'bold',
-            width: dimensions.isMobile ? '60px' : '80px'
+            fontSize: dims.isMobile ? '22px' : '28px',
+            width: dims.isMobile ? '45px' : '55px',
+            height: `${dims.slideHeight}px`,
+            top: dims.isMobile ? '15px' : '25px'
         };
         
-        // Aplicar estilos a ambos botones
-        Object.assign(prevBtn.style, baseButtonStyle);
-        Object.assign(nextBtn.style, baseButtonStyle);
+        // Aplicar estilos
+        Object.assign(prevBtn.style, buttonStyles);
+        Object.assign(nextBtn.style, buttonStyles);
         
-        // Posicionamiento específico
-        prevBtn.style.left = '0';
-        prevBtn.style.fontSize = dimensions.isMobile ? '24px' : '32px';
+        // Posicionamiento
+        prevBtn.style.left = `${dims.containerPadding}px`;
+        prevBtn.style.borderRadius = '8px 0 0 8px';
         prevBtn.innerHTML = '‹';
         
-        nextBtn.style.right = '0';
-        nextBtn.style.fontSize = dimensions.isMobile ? '24px' : '32px';
+        nextBtn.style.right = `${dims.containerPadding}px`;
+        nextBtn.style.borderRadius = '0 8px 8px 0';
         nextBtn.innerHTML = '›';
         
-        // SOLO efectos hover en desktop NO táctil
-        if (!isTouchDevice()) {
+        // Solo hover en desktop no táctil
+        if (!isTouchDevice() && !dims.isMobile && !dims.isTablet) {
             [prevBtn, nextBtn].forEach(btn => {
-                btn.addEventListener('mouseenter', () => {
-                    btn.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
-                });
-                
-                btn.addEventListener('mouseleave', () => {
-                    btn.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-                });
+                btn.onmouseenter = () => btn.style.backgroundColor = 'rgba(0, 0, 0, 0.95)';
+                btn.onmouseleave = () => btn.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
             });
         }
         
-        console.log('Slider: Botones posicionados correctamente');
+        console.log('✅ Botones configurados');
     }
 
-    // FUNCIÓN CORREGIDA: Crear paginación
-    function createAndPositionPagination() {
+    // CREAR PAGINACIÓN
+    function setupPagination() {
         const pagination = document.getElementById('slider-pagination');
         if (!pagination) return;
         
-        const dimensions = calculateResponsiveDimensions();
+        const dims = getSliderDimensions();
         
-        // Limpiar paginación
         pagination.innerHTML = '';
+        pagination.style.cssText = `
+            position: absolute;
+            bottom: ${dims.isMobile ? '12px' : '20px};
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 1001;
+        `;
         
-        // CORREGIR: Posicionamiento de paginación
-        pagination.style.position = 'absolute';
-        pagination.style.bottom = dimensions.isMobile ? '15px' : '25px';
-        pagination.style.left = '50%';
-        pagination.style.transform = 'translateX(-50%)';
-        pagination.style.display = 'flex';
-        pagination.style.gap = '6px';
-        pagination.style.zIndex = '999';
-        pagination.style.justifyContent = 'center';
-        pagination.style.alignItems = 'center';
-        
-        // Crear dots
         for (let i = 0; i < totalSlides; i++) {
             const dot = document.createElement('button');
-            dot.className = 'slider-pagination-dot';
-            dot.dataset.slide = i;
+            dot.className = 'slider-dot';
+            dot.dataset.index = i;
             
-            const dotSize = dimensions.isMobile ? '8px' : '10px';
-            dot.style.width = dotSize;
-            dot.style.height = dotSize;
-            dot.style.borderRadius = '50%';
-            dot.style.border = 'none';
-            dot.style.backgroundColor = i === currentIndex ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.5)';
-            dot.style.cursor = 'pointer';
-            dot.style.transition = 'all 0.3s ease';
-            dot.style.padding = '0';
-            dot.style.margin = '0';
+            dot.style.cssText = `
+                width: ${dims.isMobile ? '10px' : '12px'};
+                height: ${dims.isMobile ? '10px' : '12px'};
+                border-radius: 50%;
+                border: none;
+                background: ${i === currentIndex ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.4)'};
+                cursor: pointer;
+                transition: all 0.3s ease;
+                padding: 0;
+                margin: 0;
+            `;
             
-            // Evento click en dot
-            dot.addEventListener('click', (e) => {
+            dot.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 if (!isTransitioning && !isDragging) {
                     goToSlide(i);
                 }
-            });
+            };
             
             pagination.appendChild(dot);
         }
         
-        console.log('Slider: Paginación creada y posicionada');
+        console.log('✅ Paginación configurada');
     }
 
-    // FUNCIÓN CORREGIDA: Actualizar variables CSS
-    function updateSliderCSSVariables() {
-        if (isDestroyed) return;
-        
-        const dimensions = calculateResponsiveDimensions();
-        const root = document.documentElement;
-        
-        root.style.setProperty('--slider-slide-width', `${dimensions.slideWidth}px`);
-        root.style.setProperty('--slider-slide-height', `${dimensions.slideHeight}px`);
-        root.style.setProperty('--slider-slide-gap', `${dimensions.slideGap}px`);
-        root.style.setProperty('--slider-container-padding', `${dimensions.containerPadding}px`);
-        
-        // Prevenir scroll horizontal
-        document.body.style.overflowX = 'hidden';
-        
-        console.log('Slider: Variables CSS actualizadas');
-    }
-
-    // FUNCIÓN COMPLETAMENTE CORREGIDA: Actualizar posición
+    // ACTUALIZAR POSICIÓN DEL SLIDER
     function updateSliderPosition(animate = true) {
         if (isDestroyed) return;
         
         const wrapper = document.getElementById('slider-wrapper');
         if (!wrapper) return;
         
-        const dimensions = calculateResponsiveDimensions();
-        const slideDistance = dimensions.slideWidth + dimensions.slideGap;
-        
-        // CORREGIR: Centrar el slide activo
-        const containerWidth = wrapper.parentElement.offsetWidth;
-        const centerOffset = (containerWidth - dimensions.slideWidth) / 2;
-        const translateX = centerOffset - (slideDistance * currentIndex);
+        const dims = getSliderDimensions();
+        const slideStep = dims.slideWidth + dims.gap;
+        const translateX = -(slideStep * currentIndex);
         
         if (animate) {
             wrapper.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
@@ -303,26 +260,25 @@
         
         wrapper.style.transform = `translateX(${translateX}px)`;
         
-        console.log('Slider: Posición actualizada a slide', currentIndex);
+        console.log(`🎯 Slider posición: slide ${currentIndex}, translateX: ${translateX}px`);
     }
 
-    // Cargar datos del slider
+    // CARGAR DATOS DEL SLIDER
     async function loadSliderData() {
         try {
-            console.log('Slider: Cargando datos...');
+            console.log('📡 Cargando datos del slider...');
             const response = await fetch(DATA_URL);
-            if (!response.ok) throw new Error('No se pudo cargar data.json');
+            if (!response.ok) throw new Error('Error al cargar data.json');
             const data = await response.json();
             
             const movies = data
-                .filter(item => item && typeof item === 'object' && item['Categoría'] === 'Películas' && typeof item['Slider'] === 'string' && item['Slider'].trim() !== '')
+                .filter(item => item && typeof item === 'object' && item['Categoría'] === 'Películas' && item['Slider'])
                 .map((item, index) => ({
                     id: index.toString(),
                     title: item['Título'] || 'Sin título',
-                    description: item['Synopsis'] || 'Descripción no disponible',
+                    description: item['Synopsis'] || 'Sin descripción',
                     posterUrl: item['Portada'] || '',
-                    postersUrl: item['Carteles'] || '',
-                    backgroundUrl: item['Fondo'] || '',
+                    sliderUrl: item['Slider'] || '',
                     year: item['Año'] ? item['Año'].toString() : '',
                     duration: item['Duración'] || '',
                     genre: item['Géneros'] || '',
@@ -341,30 +297,29 @@
                     writers: item['Escritor(es)'] || '',
                     audios: item['Audios'] || '',
                     subtitles: item['Subtítulos'] || '',
-                    audioList: item['Audios'] ? item['Audios'].split(',').map(audio => audio.trim()) : [],
-                    subtitleList: item['Subtítulos'] ? item['Subtítulos'].split(',').map(sub => sub.trim()) : [],
+                    audioList: item['Audios'] ? item['Audios'].split(',').map(a => a.trim()) : [],
+                    subtitleList: item['Subtítulos'] ? item['Subtítulos'].split(',').map(s => s.trim()) : [],
                     audiosCount: item['Audios'] ? item['Audios'].split(',').length : 0,
-                    subtitlesCount: item['Subtítulos'] ? item['Subtítulos'].split(',').length : 0,
-                    sliderUrl: item['Slider'] || ''
+                    subtitlesCount: item['Subtítulos'] ? item['Subtítulos'].split(',').length : 0
                 }));
 
-            console.log('Slider: Datos cargados:', movies.length, 'películas');
+            console.log(`📚 Datos cargados: ${movies.length} películas`);
             return movies;
         } catch (error) {
-            console.error('Slider: Error cargando datos:', error);
+            console.error('❌ Error cargando datos:', error);
             return [];
         }
     }
 
-    // FUNCIÓN COMPLETAMENTE CORREGIDA: Renderizar slider
+    // RENDERIZAR SLIDER COMPLETO
     function renderSlider(moviesData = []) {
         if (isDestroyed) return;
         
-        console.log('Slider: Iniciando renderizado...');
+        console.log('🎬 Iniciando renderizado del slider...');
         
         const sliderWrapper = document.getElementById('slider-wrapper');
         if (!sliderWrapper) {
-            console.error('Slider: slider-wrapper no encontrado');
+            console.error('❌ slider-wrapper no encontrado');
             return;
         }
 
@@ -377,174 +332,175 @@
         totalSlides = slidesData.length;
         
         if (totalSlides === 0) {
-            console.error('Slider: No hay slides para renderizar');
+            console.error('❌ No hay slides para renderizar');
             return;
         }
 
-        const dimensions = calculateResponsiveDimensions();
-        lastViewportWidth = window.innerWidth;
+        const dims = getSliderDimensions();
         
-        // Actualizar variables CSS
-        updateSliderCSSVariables();
-        
-        // CORREGIR: Configurar contenedor padre
-        const sliderContainer = sliderWrapper.parentElement;
-        if (sliderContainer) {
-            sliderContainer.style.width = '100%';
-            sliderContainer.style.height = `${dimensions.slideHeight + 60}px`; // Altura del slide + espacio para paginación
-            sliderContainer.style.overflow = 'hidden';
-            sliderContainer.style.position = 'relative';
-            sliderContainer.style.display = 'flex';
-            sliderContainer.style.alignItems = 'center';
-            sliderContainer.style.justifyContent = 'center';
-            sliderContainer.style.padding = `0 ${dimensions.containerPadding}px`;
+        // CONFIGURAR CONTENEDOR PRINCIPAL
+        const container = sliderWrapper.parentElement;
+        if (container) {
+            container.style.cssText = `
+                position: relative;
+                width: 100vw;
+                height: ${dims.slideHeight + (dims.isMobile ? 40 : 60)}px;
+                overflow: hidden;
+                margin: 0;
+                padding: 0;
+                display: block;
+            `;
         }
         
-        // CORREGIR: Configuración del wrapper
-        sliderWrapper.innerHTML = '';
-        sliderWrapper.style.display = 'flex';
-        sliderWrapper.style.flexDirection = 'row';
-        sliderWrapper.style.alignItems = 'center';
-        sliderWrapper.style.justifyContent = 'flex-start';
-        sliderWrapper.style.position = 'relative';
-        sliderWrapper.style.width = `${(dimensions.slideWidth + dimensions.slideGap) * totalSlides}px`;
-        sliderWrapper.style.height = `${dimensions.slideHeight}px`;
-        sliderWrapper.style.transform = 'translateX(0px)';
-        sliderWrapper.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-        sliderWrapper.style.willChange = 'transform';
+        // CONFIGURAR WRAPPER DEL SLIDER
+        const totalWidth = (dims.slideWidth + dims.gap) * totalSlides;
+        sliderWrapper.style.cssText = `
+            display: flex;
+            position: relative;
+            width: ${totalWidth}px;
+            height: ${dims.slideHeight}px;
+            padding-left: ${dims.containerPadding}px;
+            margin-top: ${dims.isMobile ? '15px' : '25px'};
+            transform: translateX(0px);
+            transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: transform;
+        `;
         
-        // Crear slides
+        // LIMPIAR Y CREAR SLIDES
+        sliderWrapper.innerHTML = '';
+        
         slidesData.forEach((movie, index) => {
-            const slideDiv = document.createElement('div');
-            slideDiv.className = 'slider-slide';
-            slideDiv.dataset.index = index;
+            const slide = document.createElement('div');
+            slide.className = 'slider-slide';
+            slide.dataset.index = index;
             
-            // CORREGIR: Estilos del slide
-            slideDiv.style.width = `${dimensions.slideWidth}px`;
-            slideDiv.style.height = `${dimensions.slideHeight}px`;
-            slideDiv.style.flexShrink = '0';
-            slideDiv.style.marginRight = `${dimensions.slideGap}px`;
-            slideDiv.style.position = 'relative';
-            slideDiv.style.borderRadius = '12px';
-            slideDiv.style.overflow = 'hidden';
-            slideDiv.style.cursor = 'pointer';
-            slideDiv.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
-            slideDiv.style.backgroundColor = '#333';
-            slideDiv.style.userSelect = 'none';
-            slideDiv.style.webkitUserSelect = 'none';
-            slideDiv.style.webkitTapHighlightColor = 'transparent';
-            
-            // ELIMINAR COMPLETAMENTE hover en dispositivos táctiles
-            const isTouch = isTouchDevice();
-            if (!isTouch) {
-                slideDiv.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
-            }
-            
-            const imageUrl = movie.sliderUrl || `https://via.placeholder.com/${dimensions.slideWidth}x${dimensions.slideHeight}/333/fff?text=${encodeURIComponent(movie.title)}`;
+            const imageUrl = movie.sliderUrl || `https://via.placeholder.com/${dims.slideWidth}x${dims.slideHeight}/333/fff?text=${encodeURIComponent(movie.title)}`;
             const mainGenre = movie.genre ? movie.genre.split(/[·,]/)[0].trim() : '';
             
-            slideDiv.innerHTML = `
-                <div class="slider-img-wrapper" style="width: 100%; height: 100%; overflow: hidden; border-radius: 12px;">
+            slide.style.cssText = `
+                width: ${dims.slideWidth}px;
+                height: ${dims.slideHeight}px;
+                margin-right: ${dims.gap}px;
+                position: relative;
+                border-radius: 12px;
+                overflow: hidden;
+                cursor: pointer;
+                box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+                transition: all 0.3s ease;
+                flex-shrink: 0;
+                background: #222;
+                user-select: none;
+                -webkit-user-select: none;
+                -webkit-tap-highlight-color: transparent;
+            `;
+            
+            slide.innerHTML = `
+                <div style="width: 100%; height: 100%; overflow: hidden; border-radius: 12px;">
                     <img src="${imageUrl}" 
                          alt="${movie.title}" 
                          loading="${index === 0 ? 'eager' : 'lazy'}"
-                         style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;"
-                         onerror="this.src='https://via.placeholder.com/${dimensions.slideWidth}x${dimensions.slideHeight}/333/fff?text=No+Image'">
+                         style="width: 100%; height: 100%; object-fit: cover; display: block;"
+                         onerror="this.src='https://via.placeholder.com/${dims.slideWidth}x${dims.slideHeight}/333/fff?text=Error+Imagen'">
                 </div>
-                <div class="slider-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.85)); padding: ${dimensions.isMobile ? '12px' : '16px'}; color: white;">
-                    <div class="slider-title-movie" style="font-size: ${dimensions.isMobile ? '1rem' : '1.2rem'}; font-weight: bold; margin-bottom: 6px; line-height: 1.2;">${movie.title || 'Sin título'}</div>
-                    <div class="slider-meta" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; font-size: ${dimensions.isMobile ? '0.75rem' : '0.8rem'}; opacity: 0.9;">
+                <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.85)); padding: ${dims.isMobile ? '12px' : '18px'}; color: white;">
+                    <div style="font-size: ${dims.isMobile ? '1.1rem' : '1.3rem'}; font-weight: bold; margin-bottom: 6px; line-height: 1.2;">${movie.title}</div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 6px; font-size: ${dims.isMobile ? '0.8rem' : '0.85rem'}; opacity: 0.9;">
                         ${movie.year ? `<span>${movie.year}</span>` : ''}
                         ${movie.duration ? `<span>${movie.duration}</span>` : ''}
                         ${mainGenre ? `<span>${mainGenre}</span>` : ''}
-                        ${movie.rating ? `<span><i class="fas fa-star" style="color: #ffd700; margin-right: 2px;"></i>${movie.rating}</span>` : ''}
+                        ${movie.rating ? `<span>⭐ ${movie.rating}</span>` : ''}
                     </div>
-                    <div class="slider-description" style="font-size: ${dimensions.isMobile ? '0.7rem' : '0.75rem'}; line-height: 1.3; opacity: 0.85; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${movie.description || movie.synopsis || 'Sin descripción disponible'}</div>
+                    <div style="font-size: ${dims.isMobile ? '0.75rem' : '0.8rem'}; line-height: 1.3; opacity: 0.8; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${movie.description || 'Sin descripción disponible'}</div>
                 </div>
             `;
 
-            // SOLO efectos hover en desktop NO táctil
-            if (!isTouch) {
-                slideDiv.addEventListener('mouseenter', () => {
+            // SOLO HOVER EN DESKTOP NO TÁCTIL
+            if (!isTouchDevice() && !dims.isMobile && !dims.isTablet) {
+                slide.onmouseenter = () => {
                     if (!isTransitioning && !isDragging) {
-                        slideDiv.style.transform = 'scale(1.03)';
-                        slideDiv.style.boxShadow = '0 8px 30px rgba(0,0,0,0.4)';
+                        slide.style.transform = 'scale(1.04)';
+                        slide.style.boxShadow = '0 15px 40px rgba(0,0,0,0.6)';
                     }
-                });
-
-                slideDiv.addEventListener('mouseleave', () => {
+                };
+                slide.onmouseleave = () => {
                     if (!isTransitioning && !isDragging) {
-                        slideDiv.style.transform = 'scale(1)';
-                        slideDiv.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
+                        slide.style.transform = 'scale(1)';
+                        slide.style.boxShadow = '0 8px 25px rgba(0,0,0,0.4)';
                     }
-                });
+                };
             }
 
-            // CORREGIR: Evento click
-            slideDiv.addEventListener('click', (e) => {
+            // EVENTO CLICK PARA ABRIR MODAL
+            slide.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
                 
-                console.log('Slider: Click en slide', movie.title);
+                console.log('🎬 Click en:', movie.title);
                 
                 if (!isTransitioning && !isDragging) {
-                    // Buscar función de modal en diferentes contextos
-                    if (typeof window.openDetailsModal === 'function') {
-                        console.log('Slider: Abriendo modal con window.openDetailsModal');
-                        window.openDetailsModal(movie);
-                    } else if (typeof openDetailsModal === 'function') {
-                        console.log('Slider: Abriendo modal con openDetailsModal global');
-                        openDetailsModal(movie);
-                    } else if (window.parent && typeof window.parent.openDetailsModal === 'function') {
-                        console.log('Slider: Abriendo modal con parent.openDetailsModal');
-                        window.parent.openDetailsModal(movie);
-                    } else {
-                        console.log('Slider: openDetailsModal no encontrado, disparando evento personalizado');
-                        // Disparar múltiples eventos para máxima compatibilidad
-                        const events = [
-                            new CustomEvent('slideClick', { detail: movie, bubbles: true }),
-                            new CustomEvent('openModal', { detail: movie, bubbles: true }),
-                            new CustomEvent('movieClick', { detail: movie, bubbles: true })
-                        ];
-                        
-                        events.forEach(event => {
-                            document.dispatchEvent(event);
-                            window.dispatchEvent(event);
-                            if (window.parent !== window) {
-                                window.parent.document.dispatchEvent(event);
+                    let modalOpened = false;
+                    
+                    // Intentar abrir modal de múltiples formas
+                    const modalMethods = [
+                        () => window.openDetailsModal && window.openDetailsModal(movie),
+                        () => openDetailsModal && openDetailsModal(movie),
+                        () => window.parent?.openDetailsModal && window.parent.openDetailsModal(movie)
+                    ];
+                    
+                    for (const method of modalMethods) {
+                        try {
+                            if (method()) {
+                                modalOpened = true;
+                                console.log('✅ Modal abierto');
+                                break;
                             }
+                        } catch (error) {
+                            console.log('⚠️ Método de modal falló:', error);
+                        }
+                    }
+                    
+                    // Fallback con eventos personalizados
+                    if (!modalOpened) {
+                        console.log('📡 Enviando eventos personalizados...');
+                        
+                        ['movieClick', 'slideClick', 'openModal'].forEach(eventName => {
+                            const event = new CustomEvent(eventName, { 
+                                detail: movie, 
+                                bubbles: true,
+                                cancelable: true
+                            });
+                            document.dispatchEvent(event);
                         });
                         
-                        // Log para debugging
-                        console.log('Slider: Eventos disparados, datos de la película:', movie);
+                        // Último recurso: mostrar info
+                        setTimeout(() => {
+                            const info = `🎬 ${movie.title}\n📅 ${movie.year}\n⭐ ${movie.rating}\n🎭 ${movie.genre}\n\n📝 ${movie.description}`;
+                            alert(info);
+                        }, 100);
                     }
                 }
-            });
+            };
 
-            sliderWrapper.appendChild(slideDiv);
+            sliderWrapper.appendChild(slide);
         });
 
-        // Configurar eventos
+        // CONFIGURAR COMPONENTES
+        setupNavigationButtons();
+        setupPagination();
         setupTouchEvents();
-        positionNavigationButtons();
-        createAndPositionPagination();
         
-        // Posición inicial
+        // POSICIÓN INICIAL
         currentIndex = 0;
         updateSliderPosition(false);
         
-        console.log('Slider: Renderizado completado', {
-            totalSlides,
-            dimensions,
-            wrapperWidth: sliderWrapper.style.width
-        });
+        console.log('✅ Slider renderizado completo:', { totalSlides, dims });
     }
 
-    // Ir a slide específico
+    // NAVEGACIÓN
     function goToSlide(index) {
         if (isTransitioning || isDragging || totalSlides === 0) return;
         
-        // Límites con bucle
+        // Navegación circular
         if (index >= totalSlides) {
             currentIndex = 0;
         } else if (index < 0) {
@@ -556,79 +512,64 @@
         updateSliderPosition(true);
         updatePagination();
         
-        console.log('Slider: Navegando a slide', currentIndex);
+        console.log(`🎯 Navegando a slide ${currentIndex}`);
     }
 
-    // Actualizar paginación
+    // ACTUALIZAR PAGINACIÓN
     function updatePagination() {
-        const dots = document.querySelectorAll('.slider-pagination-dot');
+        const dots = document.querySelectorAll('.slider-dot');
         dots.forEach((dot, index) => {
-            if (index === currentIndex) {
-                dot.style.backgroundColor = 'rgba(255, 255, 255, 1)';
-                dot.style.transform = 'scale(1.2)';
-            } else {
-                dot.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
-                dot.style.transform = 'scale(1)';
-            }
+            dot.style.background = index === currentIndex 
+                ? 'rgba(255, 255, 255, 0.9)' 
+                : 'rgba(255, 255, 255, 0.4)';
         });
     }
 
-    // Manejar resize
+    // MANEJAR RESIZE
     function handleResize() {
         if (isDestroyed) return;
         
-        const currentViewportWidth = window.innerWidth;
-        if (Math.abs(currentViewportWidth - lastViewportWidth) < 50) return;
+        const currentWidth = window.innerWidth;
+        if (Math.abs(currentWidth - lastViewportWidth) < 100) return;
         
         clearTimeout(resizeTimeout);
-        
         resizeTimeout = setTimeout(() => {
-            console.log('Slider: Redimensionando...');
+            console.log('🔄 Redimensionando slider...');
             renderSlider(slidesData);
-        }, 200);
+        }, 250);
         
-        lastViewportWidth = currentViewportWidth;
+        lastViewportWidth = currentWidth;
     }
 
-    // Configurar eventos de navegación
+    // EVENTOS DE NAVEGACIÓN
     function setupNavigationEvents() {
         const prevBtn = document.getElementById('slider-prev');
         const nextBtn = document.getElementById('slider-next');
         
         if (prevBtn) {
-            // Limpiar eventos previos
-            prevBtn.replaceWith(prevBtn.cloneNode(true));
-            const newPrevBtn = document.getElementById('slider-prev');
-            
-            newPrevBtn.addEventListener('click', (e) => {
+            prevBtn.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Slider: Click botón anterior');
                 if (!isTransitioning && !isDragging) {
                     goToSlide(currentIndex - 1);
                 }
-            });
+            };
         }
         
         if (nextBtn) {
-            // Limpiar eventos previos
-            nextBtn.replaceWith(nextBtn.cloneNode(true));
-            const newNextBtn = document.getElementById('slider-next');
-            
-            newNextBtn.addEventListener('click', (e) => {
+            nextBtn.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                console.log('Slider: Click botón siguiente');
                 if (!isTransitioning && !isDragging) {
                     goToSlide(currentIndex + 1);
                 }
-            });
+            };
         }
         
-        console.log('Slider: Eventos de navegación configurados');
+        console.log('✅ Eventos de navegación configurados');
     }
 
-    // Inicializar autoplay
+    // AUTOPLAY
     function setupAutoplay(interval = 6000) {
         if (typeof window.SLIDER_AUTOPLAY !== 'undefined' && !window.SLIDER_AUTOPLAY) {
             return;
@@ -650,12 +591,12 @@
             clearInterval(autoplayTimer);
         }
         
-        // Pausar en hover solo en desktop NO táctil
+        // Pausar en hover solo en desktop
         if (!isTouchDevice()) {
             const container = document.getElementById('slider-wrapper')?.parentElement;
             if (container) {
-                container.addEventListener('mouseenter', stopAutoplay);
-                container.addEventListener('mouseleave', startAutoplay);
+                container.onmouseenter = stopAutoplay;
+                container.onmouseleave = startAutoplay;
             }
         }
         
@@ -669,47 +610,40 @@
         });
         
         startAutoplay();
-        console.log('Slider: Autoplay configurado');
+        console.log('⏯️ Autoplay configurado');
     }
 
-    // Inicialización principal
+    // INICIALIZACIÓN PRINCIPAL
     async function initSlider() {
         if (isDestroyed) return;
         
-        console.log('Slider: Iniciando inicialización...');
+        console.log('🚀 Inicializando slider...');
         
         try {
-            // Cargar datos
             const moviesData = await loadSliderData();
             
             if (moviesData.length === 0) {
-                console.warn('Slider: No hay datos para mostrar');
+                console.warn('⚠️ No hay datos para mostrar');
                 return;
             }
             
-            // Renderizar slider
             renderSlider(moviesData);
             
-            // Configurar eventos después del renderizado
             setTimeout(() => {
                 setupNavigationEvents();
-                positionNavigationButtons();
             }, 100);
             
-            // Configurar resize
             window.addEventListener('resize', handleResize);
-            
-            // Configurar autoplay
             setupAutoplay();
             
-            console.log('Slider: Inicialización completada exitosamente');
+            console.log('✅ Slider inicializado correctamente');
             
         } catch (error) {
-            console.error('Slider: Error durante la inicialización:', error);
+            console.error('❌ Error durante inicialización:', error);
         }
     }
 
-    // Destruir slider
+    // DESTRUIR SLIDER
     function destroySlider() {
         isDestroyed = true;
         
@@ -722,393 +656,28 @@
             wrapper.removeAttribute('style');
         }
         
-        console.log('Slider: Destruido completamente');
+        console.log('🗑️ Slider destruido');
     }
 
-    // FUNCIÓN COMPLETAMENTE CORREGIDA: Dimensiones responsivas
-    function calculateResponsiveDimensions() {
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        const isMobile = viewportWidth <= 768;
-        const isTablet = viewportWidth > 768 && viewportWidth <= 1024;
-        
-        let slideWidth, slideHeight, slideGap, containerPadding;
-        
-        if (isMobile) {
-            // MÓVIL: 85% del viewport para mostrar peek lateral
-            slideWidth = Math.round(viewportWidth * 0.85);
-            slideHeight = Math.round(slideWidth * 0.6);
-            slideGap = 12;
-            containerPadding = Math.round(viewportWidth * 0.05); // Menor padding
-        } else if (isTablet) {
-            // TABLET: 70% del viewport
-            slideWidth = Math.round(viewportWidth * 0.7);
-            slideHeight = Math.round(slideWidth * 0.55);
-            slideGap = 15;
-            containerPadding = Math.round(viewportWidth * 0.08);
-        } else {
-            // DESKTOP: Como imagen 1 - slide grande centrado con peek lateral
-            slideWidth = Math.min(Math.round(viewportWidth * 0.75), 900); // Más grande
-            slideHeight = Math.round(slideWidth * 0.42);
-            slideGap = 20;
-            containerPadding = Math.round(viewportWidth * 0.08); // Menos padding
-        }
-        
-        return { slideWidth, slideHeight, slideGap, containerPadding, isMobile, isTablet };
-    }
-
-    // FUNCIÓN COMPLETAMENTE CORREGIDA: Posicionar botones
-    function positionNavigationButtons() {
-        const prevBtn = document.getElementById('slider-prev');
-        const nextBtn = document.getElementById('slider-next');
-        const container = document.getElementById('slider-wrapper')?.parentElement;
-        
-        if (!prevBtn || !nextBtn || !container) return;
-        
-        const dimensions = calculateResponsiveDimensions();
-        
-        // Posicionamiento del contenedor padre
-        container.style.position = 'relative';
-        
-        // Calcular altura exacta del slide
-        const slideHeight = dimensions.slideHeight;
-        
-        // Estilos base CORREGIDOS
-        const baseButtonStyle = {
-            position: 'absolute',
-            top: '50%',
-            transform: 'translateY(-50%)',
-            zIndex: '1001',
-            border: 'none',
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            color: 'white',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontFamily: 'Arial, sans-serif',
-            fontWeight: 'bold',
-            borderRadius: '0',
-            outline: 'none',
-            userSelect: 'none',
-            webkitUserSelect: 'none',
-            webkitTapHighlightColor: 'transparent',
-            width: dimensions.isMobile ? '50px' : '70px',
-            height: `${slideHeight}px` // ALTURA EXACTA DEL SLIDE
-        };
-        
-        // Aplicar estilos
-        Object.assign(prevBtn.style, baseButtonStyle);
-        Object.assign(nextBtn.style, baseButtonStyle);
-        
-        // Posicionamiento específico
-        prevBtn.style.left = `${dimensions.containerPadding}px`;
-        prevBtn.style.fontSize = dimensions.isMobile ? '22px' : '28px';
-        prevBtn.innerHTML = '‹';
-        
-        nextBtn.style.right = `${dimensions.containerPadding}px`;
-        nextBtn.style.fontSize = dimensions.isMobile ? '22px' : '28px';
-        nextBtn.innerHTML = '›';
-        
-        // ELIMINAR completamente hover en táctiles
-        if (!isTouchDevice()) {
-            prevBtn.style.transition = 'background-color 0.3s ease';
-            nextBtn.style.transition = 'background-color 0.3s ease';
-            
-            prevBtn.onmouseenter = () => prevBtn.style.backgroundColor = 'rgba(0, 0, 0, 0.95)';
-            prevBtn.onmouseleave = () => prevBtn.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-            nextBtn.onmouseenter = () => nextBtn.style.backgroundColor = 'rgba(0, 0, 0, 0.95)';
-            nextBtn.onmouseleave = () => nextBtn.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-        }
-        
-        console.log('Slider: Botones reposicionados con altura completa');
-    }
-
-    // FUNCIÓN COMPLETAMENTE CORREGIDA: Paginación
-    function createAndPositionPagination() {
-        const pagination = document.getElementById('slider-pagination');
-        if (!pagination) return;
-        
-        const dimensions = calculateResponsiveDimensions();
-        
-        pagination.innerHTML = '';
-        
-        // Posicionamiento CORREGIDO
-        pagination.style.position = 'absolute';
-        pagination.style.bottom = dimensions.isMobile ? '10px' : '15px'; // Más cerca del slide
-        pagination.style.left = '50%';
-        pagination.style.transform = 'translateX(-50%)';
-        pagination.style.display = 'flex';
-        pagination.style.gap = dimensions.isMobile ? '8px' : '10px';
-        pagination.style.zIndex = '999';
-        pagination.style.justifyContent = 'center';
-        pagination.style.alignItems = 'center';
-        pagination.style.pointerEvents = 'auto';
-        
-        // Crear dots
-        for (let i = 0; i < totalSlides; i++) {
-            const dot = document.createElement('button');
-            dot.className = 'slider-pagination-dot';
-            dot.dataset.slide = i;
-            
-            const dotSize = dimensions.isMobile ? '10px' : '12px';
-            dot.style.width = dotSize;
-            dot.style.height = dotSize;
-            dot.style.borderRadius = '50%';
-            dot.style.border = 'none';
-            dot.style.backgroundColor = i === currentIndex ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.6)';
-            dot.style.cursor = 'pointer';
-            dot.style.transition = 'all 0.3s ease';
-            dot.style.padding = '0';
-            dot.style.margin = '0';
-            dot.style.outline = 'none';
-            dot.style.userSelect = 'none';
-            dot.style.webkitUserSelect = 'none';
-            dot.style.webkitTapHighlightColor = 'transparent';
-            
-            // CLICK sin preventDefault
-            dot.onclick = (e) => {
-                e.stopPropagation();
-                if (!isTransitioning && !isDragging) {
-                    goToSlide(i);
-                }
-            };
-            
-            pagination.appendChild(dot);
-        }
-        
-        console.log('Slider: Paginación reposicionada');
-    }
-
-    // FUNCIÓN COMPLETAMENTE CORREGIDA: Renderizar slider
-    function renderSlider(moviesData = []) {
-        if (isDestroyed) return;
-        
-        const sliderWrapper = document.getElementById('slider-wrapper');
-        if (!sliderWrapper) return;
-
-        const movies = moviesData.length > 0 ? moviesData : slidesData;
-        const selectedMovies = movies
-            .sort((a, b) => (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0))
-            .slice(0, 8);
-        
-        slidesData = selectedMovies;
-        totalSlides = slidesData.length;
-        
-        if (totalSlides === 0) return;
-
-        const dimensions = calculateResponsiveDimensions();
-        lastViewportWidth = window.innerWidth;
-        
-        updateSliderCSSVariables();
-        
-        // CONFIGURACIÓN CORREGIDA del contenedor padre
-        const sliderContainer = sliderWrapper.parentElement;
-        if (sliderContainer) {
-            sliderContainer.style.width = '100%';
-            sliderContainer.style.height = `${dimensions.slideHeight + 40}px`; // Altura exacta
-            sliderContainer.style.overflow = 'hidden';
-            sliderContainer.style.position = 'relative';
-            sliderContainer.style.display = 'flex';
-            sliderContainer.style.alignItems = 'center';
-            sliderContainer.style.justifyContent = 'center';
-            sliderContainer.style.padding = '0';
-            sliderContainer.style.margin = '0 auto';
-        }
-        
-        // CONFIGURACIÓN CORREGIDA del wrapper
-        sliderWrapper.innerHTML = '';
-        sliderWrapper.style.display = 'flex';
-        sliderWrapper.style.flexDirection = 'row';
-        sliderWrapper.style.alignItems = 'center';
-        sliderWrapper.style.position = 'relative';
-        sliderWrapper.style.width = `${(dimensions.slideWidth + dimensions.slideGap) * totalSlides}px`;
-        sliderWrapper.style.height = `${dimensions.slideHeight}px`;
-        sliderWrapper.style.transform = 'translateX(0px)';
-        sliderWrapper.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-        sliderWrapper.style.willChange = 'transform';
-        
-        // Crear slides
-        slidesData.forEach((movie, index) => {
-            const slideDiv = document.createElement('div');
-            slideDiv.className = 'slider-slide';
-            slideDiv.dataset.index = index;
-            
-            // Estilos CORREGIDOS del slide
-            slideDiv.style.width = `${dimensions.slideWidth}px`;
-            slideDiv.style.height = `${dimensions.slideHeight}px`;
-            slideDiv.style.flexShrink = '0';
-            slideDiv.style.marginRight = `${dimensions.slideGap}px`;
-            slideDiv.style.position = 'relative';
-            slideDiv.style.borderRadius = '12px';
-            slideDiv.style.overflow = 'hidden';
-            slideDiv.style.cursor = 'pointer';
-            slideDiv.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
-            slideDiv.style.backgroundColor = '#333';
-            slideDiv.style.userSelect = 'none';
-            slideDiv.style.webkitUserSelect = 'none';
-            slideDiv.style.webkitTapHighlightColor = 'transparent';
-            
-            // ELIMINAR completamente hover en táctiles
-            const isTouch = isTouchDevice();
-            if (!isTouch) {
-                slideDiv.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
-            }
-            
-            const imageUrl = movie.sliderUrl || `https://via.placeholder.com/${dimensions.slideWidth}x${dimensions.slideHeight}/333/fff?text=${encodeURIComponent(movie.title)}`;
-            const mainGenre = movie.genre ? movie.genre.split(/[·,]/)[0].trim() : '';
-            
-            slideDiv.innerHTML = `
-                <div class="slider-img-wrapper" style="width: 100%; height: 100%; overflow: hidden; border-radius: 12px;">
-                    <img src="${imageUrl}" 
-                         alt="${movie.title}" 
-                         loading="${index === 0 ? 'eager' : 'lazy'}"
-                         style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;"
-                         onerror="this.src='https://via.placeholder.com/${dimensions.slideWidth}x${dimensions.slideHeight}/333/fff?text=No+Image'">
-                </div>
-                <div class="slider-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.85)); padding: ${dimensions.isMobile ? '12px' : '16px'}; color: white;">
-                    <div class="slider-title-movie" style="font-size: ${dimensions.isMobile ? '1rem' : '1.2rem'}; font-weight: bold; margin-bottom: 6px; line-height: 1.2;">${movie.title || 'Sin título'}</div>
-                    <div class="slider-meta" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; font-size: ${dimensions.isMobile ? '0.75rem' : '0.8rem'}; opacity: 0.9;">
-                        ${movie.year ? `<span>${movie.year}</span>` : ''}
-                        ${movie.duration ? `<span>${movie.duration}</span>` : ''}
-                        ${mainGenre ? `<span>${mainGenre}</span>` : ''}
-                        ${movie.rating ? `<span><i class="fas fa-star" style="color: #ffd700; margin-right: 2px;"></i>${movie.rating}</span>` : ''}
-                    </div>
-                    <div class="slider-description" style="font-size: ${dimensions.isMobile ? '0.7rem' : '0.75rem'}; line-height: 1.3; opacity: 0.85; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${movie.description || movie.synopsis || 'Sin descripción disponible'}</div>
-                </div>
-            `;
-
-            // SOLO hover en desktop NO táctil
-            if (!isTouch) {
-                slideDiv.onmouseenter = () => {
-                    if (!isTransitioning && !isDragging) {
-                        slideDiv.style.transform = 'scale(1.03)';
-                        slideDiv.style.boxShadow = '0 8px 30px rgba(0,0,0,0.4)';
-                    }
-                };
-
-                slideDiv.onmouseleave = () => {
-                    if (!isTransitioning && !isDragging) {
-                        slideDiv.style.transform = 'scale(1)';
-                        slideDiv.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
-                    }
-                };
-            }
-
-            // CLICK CORREGIDO
-            slideDiv.onclick = (e) => {
-                e.stopPropagation();
-                
-                if (!isTransitioning && !isDragging) {
-                    console.log('Slider: Click en slide', movie.title);
-                    
-                    // Múltiples intentos de abrir modal
-                    const modalOpeners = [
-                        () => window.openDetailsModal && window.openDetailsModal(movie),
-                        () => window.parent.openDetailsModal && window.parent.openDetailsModal(movie),
-                        () => {
-                            const event = new CustomEvent('openModal', { 
-                                detail: movie, 
-                                bubbles: true,
-                                cancelable: true
-                            });
-                            document.dispatchEvent(event);
-                            window.dispatchEvent(event);
-                        }
-                    ];
-                    
-                    for (const opener of modalOpeners) {
-                        try {
-                            opener();
-                            break;
-                        } catch (e) {
-                            continue;
-                        }
-                    }
-                }
-            };
-
-            sliderWrapper.appendChild(slideDiv);
-        });
-
-        // Configurar todo después del renderizado
-        setupTouchEvents();
-        positionNavigationButtons();
-        createAndPositionPagination();
-        
-        currentIndex = 0;
-        updateSliderPosition(false);
-        
-        console.log('Slider: Renderizado completado correctamente');
-    }
-
-    // FUNCIÓN CORREGIDA: Actualizar posición centrada
-    function updateSliderPosition(animate = true) {
-        if (isDestroyed) return;
-        
-        const wrapper = document.getElementById('slider-wrapper');
-        if (!wrapper) return;
-        
-        const dimensions = calculateResponsiveDimensions();
-        const slideDistance = dimensions.slideWidth + dimensions.slideGap;
-        
-        // Centrar el slide activo perfectamente
-        const containerWidth = wrapper.parentElement.offsetWidth;
-        const centerOffset = (containerWidth - dimensions.slideWidth) / 2;
-        const translateX = centerOffset - (slideDistance * currentIndex);
-        
-        if (animate) {
-            wrapper.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-            isTransitioning = true;
-            setTimeout(() => {
-                isTransitioning = false;
-            }, 500);
-        } else {
-            wrapper.style.transition = 'none';
-        }
-        
-        wrapper.style.transform = `translateX(${translateX}px)`;
-    }
-
-    // EVENTOS DE NAVEGACIÓN CORREGIDOS
-    function setupNavigationEvents() {
-        const prevBtn = document.getElementById('slider-prev');
-        const nextBtn = document.getElementById('slider-next');
-        
-        if (prevBtn) {
-            prevBtn.onclick = (e) => {
-                e.stopPropagation();
-                if (!isTransitioning && !isDragging) {
-                    goToSlide(currentIndex - 1);
-                }
-            };
-        }
-        
-        if (nextBtn) {
-            nextBtn.onclick = (e) => {
-                e.stopPropagation();
-                if (!isTransitioning && !isDragging) {
-                    goToSlide(currentIndex + 1);
-                }
-            };
-        }
-    }
-
-    // Exponer funciones públicas
-    window.SliderController = {
+    // API PÚBLICA
+    window.sliderAPI = {
         init: initSlider,
         destroy: destroySlider,
         goToSlide: goToSlide,
-        refresh: () => renderSlider(slidesData)
+        next: () => goToSlide(currentIndex + 1),
+        prev: () => goToSlide(currentIndex - 1),
+        getCurrentIndex: () => currentIndex,
+        getTotalSlides: () => totalSlides,
+        isReady: () => !isDestroyed && totalSlides > 0
     };
 
-    // Auto-inicializar si el DOM está listo
+    // AUTO-INICIALIZACIÓN
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initSlider);
     } else {
-        initSlider();
+        setTimeout(initSlider, 100);
     }
 
-    console.log('Slider: Script cargado y listo para inicializar');
+    console.log('📦 Slider script cargado');
 
 })();
