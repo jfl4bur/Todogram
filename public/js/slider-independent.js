@@ -10,6 +10,7 @@
     let touchStartX = 0;
     let touchEndX = 0;
     let isDragging = false;
+    let autoPlayInterval = null;
 
     // Función mejorada para calcular dimensiones responsivas (estilo Rakuten.tv)
     function calculateResponsiveDimensions() {
@@ -21,13 +22,13 @@
         
         if (viewportWidth <= 480) {
             // Mobile: ocupa casi toda la pantalla con poco espacio lateral
-            slideWidth = Math.floor(viewportWidth * 0.85);
+            slideWidth = Math.floor(viewportWidth * 0.80);
             slideHeight = Math.floor(slideWidth * 0.56);
             slideGap = 8;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 768) {
             // Tablet: ocupa la mayor parte con elementos adyacentes visibles
-            slideWidth = Math.floor(viewportWidth * 0.82);
+            slideWidth = Math.floor(viewportWidth * 0.75);
             slideHeight = Math.floor(slideWidth * 0.52);
             slideGap = 12;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
@@ -407,6 +408,45 @@
         openDetailsModal(movie, slideDiv);
     }
 
+    // Función para iniciar autoplay
+    function startAutoPlay() {
+        if (autoPlayInterval) {
+            clearInterval(autoPlayInterval);
+        }
+        
+        autoPlayInterval = setInterval(() => {
+            if (!isTransitioning && !isDragging && totalSlides > 0) {
+                goToSlide(currentIndex + 1);
+            }
+        }, 7000); // 7 segundos
+        
+        console.log('Slider: Autoplay iniciado cada 7 segundos');
+    }
+
+    // Función para detener autoplay
+    function stopAutoPlay() {
+        if (autoPlayInterval) {
+            clearInterval(autoPlayInterval);
+            autoPlayInterval = null;
+            console.log('Slider: Autoplay detenido');
+        }
+    }
+
+    // Función para pausar autoplay temporalmente
+    function pauseAutoPlay() {
+        if (autoPlayInterval) {
+            clearInterval(autoPlayInterval);
+            autoPlayInterval = null;
+        }
+    }
+
+    // Función para reanudar autoplay
+    function resumeAutoPlay() {
+        if (!autoPlayInterval && totalSlides > 0) {
+            startAutoPlay();
+        }
+    }
+
     // Cargar datos
     async function loadSliderData() {
         try {
@@ -617,7 +657,11 @@
                 e.preventDefault();
                 e.stopPropagation();
                 if (!isTransitioning && totalSlides > 0) {
+                    // Pausar autoplay temporalmente
+                    pauseAutoPlay();
                     goToSlide(currentIndex - 1);
+                    // Reanudar autoplay después de un momento
+                    setTimeout(resumeAutoPlay, 3000);
                 }
             });
         }
@@ -629,7 +673,11 @@
                 e.preventDefault();
                 e.stopPropagation();
                 if (!isTransitioning && totalSlides > 0) {
+                    // Pausar autoplay temporalmente
+                    pauseAutoPlay();
                     goToSlide(currentIndex + 1);
+                    // Reanudar autoplay después de un momento
+                    setTimeout(resumeAutoPlay, 3000);
                 }
             });
         }
@@ -655,7 +703,11 @@
                 e.preventDefault();
                 e.stopPropagation();
                 if (!isTransitioning) {
+                    // Pausar autoplay temporalmente
+                    pauseAutoPlay();
                     goToSlide(i);
+                    // Reanudar autoplay después de un momento
+                    setTimeout(resumeAutoPlay, 3000);
                 }
             });
             
@@ -678,6 +730,12 @@
         currentIndex = index;
         updateSliderPosition();
         updatePagination();
+        
+        // Reiniciar autoplay después de navegación manual
+        if (autoPlayInterval) {
+            clearInterval(autoPlayInterval);
+            startAutoPlay();
+        }
     }
 
     // Actualizar paginación
@@ -691,6 +749,9 @@
     // Función para abrir modal
     function openDetailsModal(movie, element) {
         console.log('Slider: Abriendo modal para:', movie.title);
+        
+        // Pausar autoplay cuando se abre el modal
+        pauseAutoPlay();
         
         function tryOpenModal() {
             if (window.detailsModal && typeof window.detailsModal.show === 'function') {
@@ -722,6 +783,7 @@
         isDestroyed = true;
         
         clearTimeout(resizeTimeout);
+        stopAutoPlay();
         window.removeEventListener('resize', handleResize);
         
         // Limpiar event listeners adicionales
@@ -775,6 +837,9 @@
             // Agregar listener de resize mejorado
             window.addEventListener('resize', handleResize, { passive: true });
             
+            // Iniciar autoplay
+            startAutoPlay();
+            
             console.log('Slider: Inicialización completada');
         } else {
             console.error('Slider: No se pudieron cargar datos');
@@ -801,6 +866,10 @@
         getSlidesData: () => slidesData,
         getLastViewportWidth: () => lastViewportWidth,
         calculateResponsiveDimensions,
+        startAutoPlay,
+        stopAutoPlay,
+        pauseAutoPlay,
+        resumeAutoPlay,
         init,
         renderSlider,
         updateSliderCSSVariables,

@@ -2233,9 +2233,12 @@ html, body {
     margin-right: 0;
 }
 
-.slider-slide:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(255, 255, 255, 0.15);
+/* Hover solo en dispositivos con mouse */
+@media (hover: hover) and (pointer: fine) {
+    .slider-slide:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(255, 255, 255, 0.15);
+    }
 }
 
 .slider-slide img {
@@ -2277,10 +2280,13 @@ html, body {
     border-radius: 0 0 8px 8px !important;
 }
 
-.slider-slide:hover .slider-overlay {
-    opacity: 1 !important;
-    transform: translateY(0) !important;
-    pointer-events: all !important;
+/* Hover solo en dispositivos con mouse */
+@media (hover: hover) and (pointer: fine) {
+    .slider-slide:hover .slider-overlay {
+        opacity: 1 !important;
+        transform: translateY(0) !important;
+        pointer-events: all !important;
+    }
 }
 
 .slider-title-movie {
@@ -2408,12 +2414,12 @@ html, body {
     }
     
     .slider-slide {
-        width: 75vw;
+        width: 65vw;
         margin-right: 2vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 75vw) / 2);
+        margin-left: calc((100vw - 65vw) / 2);
     }
     
     .slider-nav-btn {
@@ -2442,12 +2448,12 @@ html, body {
     }
     
     .slider-slide {
-        width: 65vw;
+        width: 60vw;
         margin-right: 2.5vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 65vw) / 2);
+        margin-left: calc((100vw - 60vw) / 2);
     }
     
     .slider-nav-btn {
@@ -2469,12 +2475,12 @@ html, body {
     }
     
     .slider-slide {
-        width: 80vw;
+        width: 75vw;
         margin-right: 1.5vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 80vw) / 2);
+        margin-left: calc((100vw - 75vw) / 2);
     }
     
     .slider-nav-btn {
@@ -2500,12 +2506,12 @@ html, body {
     }
     
     .slider-slide {
-        width: 82vw;
+        width: 75vw;
         margin-right: 1vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 82vw) / 2);
+        margin-left: calc((100vw - 75vw) / 2);
     }
     
     .slider-nav {
@@ -2540,12 +2546,12 @@ html, body {
     }
     
     .slider-slide {
-        width: 85vw;
+        width: 80vw;
         margin-right: 0.8vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 85vw) / 2);
+        margin-left: calc((100vw - 80vw) / 2);
     }
     
     .slider-nav {
