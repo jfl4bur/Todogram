@@ -2408,12 +2408,12 @@ html, body {
     }
     
     .slider-slide {
-        width: 70vw;
+        width: 75vw;
         margin-right: 2vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 70vw) / 2);
+        margin-left: calc((100vw - 75vw) / 2);
     }
     
     .slider-nav-btn {
@@ -2500,12 +2500,12 @@ html, body {
     }
     
     .slider-slide {
-        width: 88vw;
+        width: 82vw;
         margin-right: 1vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 88vw) / 2);
+        margin-left: calc((100vw - 82vw) / 2);
     }
     
     .slider-nav {
@@ -2540,12 +2540,12 @@ html, body {
     }
     
     .slider-slide {
-        width: 90vw;
+        width: 85vw;
         margin-right: 0.8vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 90vw) / 2);
+        margin-left: calc((100vw - 85vw) / 2);
     }
     
     .slider-nav {

@@ -21,31 +21,31 @@
         
         if (viewportWidth <= 480) {
             // Mobile: ocupa casi toda la pantalla con poco espacio lateral
-            slideWidth = Math.floor(viewportWidth * 0.90);
+            slideWidth = Math.floor(viewportWidth * 0.85);
             slideHeight = Math.floor(slideWidth * 0.56);
             slideGap = 8;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 768) {
             // Tablet: ocupa la mayor parte con elementos adyacentes visibles
-            slideWidth = Math.floor(viewportWidth * 0.88);
+            slideWidth = Math.floor(viewportWidth * 0.82);
             slideHeight = Math.floor(slideWidth * 0.52);
             slideGap = 12;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1024) {
             // Desktop pequeño: mayor visibilidad de elementos adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.80);
+            slideWidth = Math.floor(viewportWidth * 0.75);
             slideHeight = Math.floor(slideWidth * 0.45);
             slideGap = 16;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1400) {
             // Desktop mediano: estilo Rakuten.tv
-            slideWidth = Math.floor(viewportWidth * 0.70);
+            slideWidth = Math.floor(viewportWidth * 0.65);
             slideHeight = Math.floor(slideWidth * 0.42);
             slideGap = 20;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else {
             // Desktop grande: máxima visibilidad de elementos adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.65);
+            slideWidth = Math.floor(viewportWidth * 0.60);
             slideHeight = Math.floor(slideWidth * 0.38);
             slideGap = 24;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
@@ -392,6 +392,21 @@
         touchEndX = 0;
     }
 
+    // Función para manejar click en slide (separada del touch)
+    function handleSlideClick(e, movie, slideDiv) {
+        if (isTransitioning) return;
+        
+        // Prevenir que el click se active durante el swipe
+        if (isDragging) {
+            isDragging = false;
+            return;
+        }
+        
+        e.preventDefault();
+        console.log('Slider: Click en slide:', movie.title);
+        openDetailsModal(movie, slideDiv);
+    }
+
     // Cargar datos
     async function loadSliderData() {
         try {
@@ -565,11 +580,7 @@
 
             // Click handler
             slideDiv.addEventListener('click', (e) => {
-                if (!isTransitioning) {
-                    e.preventDefault();
-                    console.log('Slider: Click en slide:', movie.title);
-                    openDetailsModal(movie, slideDiv);
-                }
+                handleSlideClick(e, movie, slideDiv);
             });
 
             sliderWrapper.appendChild(slideDiv);
