@@ -2407,29 +2407,29 @@ html, body {
 /* Desktop - Dimensiones grandes como Rakuten.tv */
 @media (min-width: 1024px) {
     .slider-section {
-        height: 700px;
-        margin-top: 100px;
+        height: 450px;
+        margin-top: 60px;
     }
     
     .slider-slide {
-        width: 90vw;
+        width: 93vw;
         margin-right: 2vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 90vw) / 2);
-}
-
-.slider-nav-btn {
-    width: 60px !important;
-    height: 60px !important;
-    font-size: 24px !important;
-}
-
-.slider-nav-btn i {
-    font-size: 20px !important;
-}
-
+        margin-left: calc((100vw - 93vw) / 2);
+    }
+    
+    .slider-nav-btn {
+        width: 60px !important;
+        height: 60px !important;
+        font-size: 24px !important;
+    }
+    
+    .slider-nav-btn i {
+        font-size: 20px !important;
+    }
+    
     .slider-pagination-dot {
         width: 10px !important;
         height: 10px !important;
@@ -2437,17 +2437,17 @@ html, body {
 }
 
 @media (min-width: 1400px) {
-.slider-section {
-        height: 800px;
+    .slider-section {
+        height: 500px;
     }
     
     .slider-slide {
-        width: 85vw;
+        width: 93vw;
         margin-right: 2.5vw;
-}
-
-.slider-wrapper {
-        margin-left: calc((100vw - 85vw) / 2);
+    }
+    
+    .slider-wrapper {
+        margin-left: calc((100vw - 93vw) / 2);
     }
     
     .slider-nav-btn {
@@ -2464,8 +2464,8 @@ html, body {
 /* Tablet - Visibilidad de items adyacentes */
 @media (max-width: 1023px) and (min-width: 769px) {
     .slider-section {
-        height: 550px;
-        margin-top: 90px;
+        height: 350px;
+        margin-top: 50px;
     }
     
     .slider-slide {
@@ -2491,8 +2491,8 @@ html, body {
 /* Mobile - Mejor centrado y visibilidad */
 @media (max-width: 768px) {
     .slider-section {
-        height: 450px;
-        margin-top: 80px;
+        height: 280px;
+        margin-top: 40px;
     }
     
     .slider-slide {
@@ -2527,17 +2527,17 @@ html, body {
 /* Mobile pequeño - iPhone 11 y similares */
 @media (max-width: 480px) {
     .slider-section {
-        height: 400px;
-        margin-top: 70px;
+        height: 250px;
+        margin-top: 35px;
     }
     
     .slider-slide {
-        width: 75vw;
+        width: 65vw;
         margin-right: 0.8vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 75vw) / 2);
+        margin-left: calc((100vw - 65vw) / 2);
     }
     
     .slider-nav {
