@@ -849,7 +849,7 @@
             setupTouchNavigation();
             
             // Ajustar controles para móviles
-            adjustMobileControls();
+            // adjustMobileControls();
             
             // Configurar resize listener
             window.addEventListener('resize', handleResize);
