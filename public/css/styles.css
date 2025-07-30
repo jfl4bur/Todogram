@@ -2370,10 +2370,8 @@ html, body {
 
 /* Paginación en posición correcta como Rakuten.tv */
 .slider-pagination {
-    position: absolute !important;
-    bottom: 20px !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
+    position: static !important;
+    margin: 20px auto 40px auto !important;
     display: flex !important;
     justify-content: center !important;
     gap: 0.5rem !important;
@@ -2414,12 +2412,12 @@ html, body {
     }
     
     .slider-slide {
-        width: 65vw;
+        width: 85vw;
         margin-right: 2vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 65vw) / 2);
+        margin-left: calc((100vw - 85vw) / 2);
     }
     
     .slider-nav-btn {
@@ -2430,10 +2428,6 @@ html, body {
     
     .slider-nav-btn i {
         font-size: 20px !important;
-    }
-    
-    .slider-pagination {
-        bottom: 30px !important;
     }
     
     .slider-pagination-dot {
@@ -2448,12 +2442,12 @@ html, body {
     }
     
     .slider-slide {
-        width: 60vw;
+        width: 80vw;
         margin-right: 2.5vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 60vw) / 2);
+        margin-left: calc((100vw - 80vw) / 2);
     }
     
     .slider-nav-btn {
@@ -2492,10 +2486,6 @@ html, body {
     .slider-nav-btn i {
         font-size: 18px !important;
     }
-    
-    .slider-pagination {
-        bottom: 25px !important;
-    }
 }
 
 /* Mobile - Mejor centrado y visibilidad */
@@ -2526,10 +2516,6 @@ html, body {
     
     .slider-nav-btn i {
         font-size: 14px !important;
-    }
-    
-    .slider-pagination {
-        bottom: 20px !important;
     }
     
     .slider-pagination-dot {
@@ -2566,10 +2552,6 @@ html, body {
     
     .slider-nav-btn i {
         font-size: 12px !important;
-    }
-    
-    .slider-pagination {
-        bottom: 15px !important;
     }
     
     .slider-pagination-dot {

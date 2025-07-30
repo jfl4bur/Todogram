@@ -40,13 +40,13 @@
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1400) {
             // Desktop mediano: estilo Rakuten.tv
-            slideWidth = Math.floor(viewportWidth * 0.65);
+            slideWidth = Math.floor(viewportWidth * 0.85);
             slideHeight = Math.floor(slideWidth * 0.42);
             slideGap = 20;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else {
             // Desktop grande: máxima visibilidad de elementos adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.60);
+            slideWidth = Math.floor(viewportWidth * 0.80);
             slideHeight = Math.floor(slideWidth * 0.38);
             slideGap = 24;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
@@ -404,6 +404,7 @@
         }
         
         e.preventDefault();
+        e.stopPropagation();
         console.log('Slider: Click en slide:', movie.title);
         openDetailsModal(movie, slideDiv);
     }
