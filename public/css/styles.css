@@ -2412,12 +2412,12 @@ html, body {
     }
     
     .slider-slide {
-        width: 93vw;
+        width: 92vw;
         margin-right: 2vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 93vw) / 2);
+        margin-left: calc((100vw - 92vw) / 2);
     }
     
     .slider-nav-btn {
@@ -2442,12 +2442,12 @@ html, body {
     }
     
     .slider-slide {
-        width: 93vw;
+        width: 92vw;
         margin-right: 2.5vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 93vw) / 2);
+        margin-left: calc((100vw - 92vw) / 2);
     }
     
     .slider-nav-btn {
@@ -2469,12 +2469,12 @@ html, body {
     }
     
     .slider-slide {
-        width: 75vw;
+        width: 80vw;
         margin-right: 1.5vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 75vw) / 2);
+        margin-left: calc((100vw - 80vw) / 2);
     }
     
     .slider-nav-btn {
@@ -2496,12 +2496,12 @@ html, body {
     }
     
     .slider-slide {
-        width: 75vw;
+        width: 80vw;
         margin-right: 1vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 75vw) / 2);
+        margin-left: calc((100vw - 80vw) / 2);
     }
     
     .slider-nav {
@@ -2529,25 +2529,44 @@ html, body {
     .slider-section {
         height: 400px;
         margin-top: 70px;
+        overflow: hidden;
+    }
+    
+    .slider-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
     }
     
     .slider-slide {
-        width: 65vw;
+        width: 70vw;
         margin-right: 0.8vw;
+        flex-shrink: 0;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 65vw) / 2);
+        margin-left: calc((100vw - 70vw) / 2);
+        display: flex;
+        align-items: center;
     }
     
     .slider-nav {
         padding: 0 10px !important;
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        pointer-events: none;
     }
     
     .slider-nav-btn {
         width: 40px !important;
         height: 40px !important;
         font-size: 16px !important;
+        pointer-events: auto;
     }
     
     .slider-nav-btn i {

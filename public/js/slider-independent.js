@@ -21,32 +21,32 @@
         let slideWidth, slideHeight, slideGap, sideSpace;
         
         if (viewportWidth <= 480) {
-            // Mobile: más estrecho para mejor visibilidad de adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.65);
+            // Mobile: mejor centrado con elementos adyacentes visibles
+            slideWidth = Math.floor(viewportWidth * 0.70);
             slideHeight = Math.floor(slideWidth * 0.56);
             slideGap = 8;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 768) {
             // Tablet: elementos adyacentes visibles
-            slideWidth = Math.floor(viewportWidth * 0.75);
+            slideWidth = Math.floor(viewportWidth * 0.80);
             slideHeight = Math.floor(slideWidth * 0.52);
             slideGap = 12;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1024) {
             // Desktop pequeño: mayor visibilidad de elementos adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.75);
+            slideWidth = Math.floor(viewportWidth * 0.80);
             slideHeight = Math.floor(slideWidth * 0.45);
             slideGap = 16;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1400) {
             // Desktop mediano: muy ancho como Rakuten.tv
-            slideWidth = Math.floor(viewportWidth * 0.93);
+            slideWidth = Math.floor(viewportWidth * 0.92);
             slideHeight = Math.floor(slideWidth * 0.42);
             slideGap = 20;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else {
             // Desktop grande: máximo ancho con elementos adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.93);
+            slideWidth = Math.floor(viewportWidth * 0.92);
             slideHeight = Math.floor(slideWidth * 0.38);
             slideGap = 24;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
