@@ -1,4 +1,4 @@
-// Slider Independiente - Con detección automática de viewport mejorada (estilo Rakuten.tv)
+// Slider Independiente - Con corrección de dimensiones (desktop más ancho, móvil mejor visualización)
 (function () {
     let currentIndex = 0;
     let totalSlides = 0;
@@ -8,49 +8,47 @@
     let isDestroyed = false;
     let lastViewportWidth = 0;
 
-    // Función mejorada para calcular dimensiones responsivas (estilo Rakuten.tv)
+    // Función corregida para calcular dimensiones responsivas
     function calculateResponsiveDimensions() {
         const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
         
-        // Calcular el ancho del slide para ocupar la mayor parte de la pantalla
-        // dejando espacio para ver elementos adyacentes
         let slideWidth, slideHeight, slideGap, sideSpace;
         
         if (viewportWidth <= 480) {
-            // Mobile: ocupa casi toda la pantalla con poco espacio lateral
-            slideWidth = Math.floor(viewportWidth * 0.85);
-            slideHeight = Math.floor(slideWidth * 0.5);
+            // Mobile: slide más ancho para mostrar adyacentes solo 50px
+            slideWidth = Math.floor(viewportWidth - 100); // Deja 50px de cada lado para mostrar adyacentes
+            slideHeight = Math.floor(slideWidth * 0.45); // Relación de aspecto ajustada
+            slideGap = 8;
+            sideSpace = 50; // Exactamente 50px para mostrar adyacentes
+        } else if (viewportWidth <= 768) {
+            // Tablet: más ancho, mejor visibilidad de adyacentes
+            slideWidth = Math.floor(viewportWidth * 0.78);
+            slideHeight = Math.floor(slideWidth * 0.42);
             slideGap = 12;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
-        } else if (viewportWidth <= 768) {
-            // Tablet: ocupa la mayor parte con elementos adyacentes visibles
-            slideWidth = Math.floor(viewportWidth * 0.82);
-            slideHeight = Math.floor(slideWidth * 0.45);
+        } else if (viewportWidth <= 1024) {
+            // Desktop pequeño: slides más anchos como solicitas
+            slideWidth = Math.floor(viewportWidth * 0.85); // Aumentado de 0.78 a 0.85
+            slideHeight = Math.floor(slideWidth * 0.38); // Proporción ajustada para no ser más alto
             slideGap = 16;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
-        } else if (viewportWidth <= 1024) {
-            // Desktop pequeño: mayor visibilidad de elementos adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.78);
-            slideHeight = Math.floor(slideWidth * 0.4);
+        } else if (viewportWidth <= 1400) {
+            // Desktop mediano: aún más ancho
+            slideWidth = Math.floor(viewportWidth * 0.88); // Aumentado de 0.75 a 0.88
+            slideHeight = Math.floor(slideWidth * 0.35); // Mantiene la altura controlada
             slideGap = 20;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
-        } else if (viewportWidth <= 1400) {
-            // Desktop mediano
-            slideWidth = Math.floor(viewportWidth * 0.75);
-            slideHeight = Math.floor(slideWidth * 0.35);
-            slideGap = 24;
-            sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else {
-            // Desktop grande: máxima visibilidad de elementos adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.72);
-            slideHeight = Math.floor(slideWidth * 0.32);
-            slideGap = 28;
+            // Desktop grande: máximo ancho pero altura controlada
+            slideWidth = Math.floor(viewportWidth * 0.90); // Aumentado de 0.72 a 0.90
+            slideHeight = Math.floor(slideWidth * 0.32); // Altura aún más controlada
+            slideGap = 24;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         }
         
-        // Límites mínimos y máximos
-        slideWidth = Math.max(280, Math.min(slideWidth, 1600));
-        slideHeight = Math.max(157, Math.min(slideHeight, 450));
+        // Límites ajustados para el nuevo comportamiento
+        slideWidth = Math.max(280, Math.min(slideWidth, 1600)); // Máximo aumentado
+        slideHeight = Math.max(140, Math.min(slideHeight, 400)); // Altura máxima reducida
         slideGap = Math.max(8, slideGap);
         sideSpace = Math.max(20, sideSpace);
         
@@ -242,14 +240,21 @@
         }
     }
 
-    // Función actualizada para variables CSS
+    // Función actualizada para variables CSS con mejor posicionamiento de botones
     function updateSliderCSSVariables() {
         if (isDestroyed) return;
         
         const dimensions = calculateResponsiveDimensions();
         
-        // Calcular offset de botones de navegación (fuera del área de contenido)
-        const navBtnOffset = Math.max(10, Math.floor(dimensions.sideSpace * 0.3));
+        // Calcular offset de botones mejorado para móviles
+        let navBtnOffset;
+        if (dimensions.viewportWidth <= 480) {
+            // En móvil, posicionar botones más cerca del centro para que estén junto a los slides
+            navBtnOffset = Math.max(5, Math.floor(dimensions.sideSpace * 0.2));
+        } else {
+            // En desktop, mantener posición exterior
+            navBtnOffset = Math.max(10, Math.floor(dimensions.sideSpace * 0.3));
+        }
 
         // Actualizar variables CSS de forma forzada
         const root = document.documentElement;
@@ -681,75 +686,86 @@
         if (nextBtn) nextBtn.replaceWith(nextBtn.cloneNode(true));
         dots.forEach(dot => dot.replaceWith(dot.cloneNode(true)));
         
-        // Limpiar datos
         slidesData = [];
-        totalSlides = 0;
         currentIndex = 0;
+        totalSlides = 0;
+        isTransitioning = false;
         lastViewportWidth = 0;
+        
+        console.log('Slider: Destruido correctamente');
+    }
+
+    // Auto-play (opcional)
+    let autoPlayInterval = null;
+    
+    function startAutoPlay() {
+        if (autoPlayInterval) return;
+        
+        autoPlayInterval = setInterval(() => {
+            if (!isTransitioning && totalSlides > 0 && !isDestroyed) {
+                goToSlide(currentIndex + 1);
+            }
+        }, 5000);
+    }
+    
+    function stopAutoPlay() {
+        if (autoPlayInterval) {
+            clearInterval(autoPlayInterval);
+            autoPlayInterval = null;
+        }
     }
 
     // Inicialización
-    async function init() {
+    async function initSlider() {
         if (isDestroyed) return;
         
         console.log('Slider: Inicializando...');
         
-        // Prevenir scroll horizontal
-        document.body.style.overflowX = 'hidden';
-        document.documentElement.style.overflowX = 'hidden';
-        
-        // Guardar viewport inicial
-        lastViewportWidth = document.documentElement.clientWidth || window.innerWidth;
-        
-        // Inicializar variables CSS
-        updateSliderCSSVariables();
-        
-        // Cargar datos
-        const movies = await loadSliderData();
-        if (movies && movies.length > 0) {
-            slidesData = movies;
-            totalSlides = movies.length;
+        try {
+            // Cargar datos
+            const moviesData = await loadSliderData();
             
-            // Renderizar
-            renderSlider(movies);
+            if (moviesData.length === 0) {
+                console.warn('Slider: No hay datos para mostrar');
+                return;
+            }
             
-            // Agregar listener de resize mejorado
+            // Renderizar slider
+            renderSlider(moviesData);
+            
+            // Configurar eventos
             window.addEventListener('resize', handleResize, { passive: true });
             
-            console.log('Slider: Inicialización completada');
-        } else {
-            console.error('Slider: No se pudieron cargar datos');
+            // Auto-play opcional (descomenta si lo necesitas)
+            // startAutoPlay();
+            
+            console.log('Slider: Inicializado correctamente');
+            
+        } catch (error) {
+            console.error('Slider: Error en inicialización:', error);
         }
     }
 
-    // Cleanup al cerrar
-    window.addEventListener('beforeunload', destroy);
-    
-    // Auto-init
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', init);
-    } else {
-        init();
-    }
-
-    // Exponer API pública
-    window.sliderIndependent = {
-        goToSlide,
+    // Exponer funciones públicas
+    window.independentSlider = {
+        init: initSlider,
+        destroy: destroy,
+        goToSlide: goToSlide,
         next: () => goToSlide(currentIndex + 1),
         prev: () => goToSlide(currentIndex - 1),
+        startAutoPlay: startAutoPlay,
+        stopAutoPlay: stopAutoPlay,
         getCurrentIndex: () => currentIndex,
         getTotalSlides: () => totalSlides,
-        getSlidesData: () => slidesData,
-        getLastViewportWidth: () => lastViewportWidth,
-        calculateResponsiveDimensions,
-        init,
-        renderSlider,
-        updateSliderCSSVariables,
-        updateSliderLayout,
-        forceCompleteRecalculation,
-        verifySliderIntegrity,
-        openDetailsModal,
-        destroy
+        isReady: () => totalSlides > 0 && !isDestroyed
     };
+
+    // Auto-inicialización cuando el DOM esté listo
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initSlider);
+    } else {
+        // Si el DOM ya está cargado, inicializar inmediatamente
+        setTimeout(initSlider, 100);
+    }
 
 })();
