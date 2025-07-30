@@ -2412,24 +2412,24 @@ html, body {
     }
     
     .slider-slide {
-        width: 92vw;
+        width: 90vw;
         margin-right: 2vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 92vw) / 2);
-    }
-    
-    .slider-nav-btn {
-        width: 60px !important;
-        height: 60px !important;
-        font-size: 24px !important;
-    }
-    
-    .slider-nav-btn i {
-        font-size: 20px !important;
-    }
-    
+        margin-left: calc((100vw - 90vw) / 2);
+}
+
+.slider-nav-btn {
+    width: 60px !important;
+    height: 60px !important;
+    font-size: 24px !important;
+}
+
+.slider-nav-btn i {
+    font-size: 20px !important;
+}
+
     .slider-pagination-dot {
         width: 10px !important;
         height: 10px !important;
@@ -2437,17 +2437,17 @@ html, body {
 }
 
 @media (min-width: 1400px) {
-    .slider-section {
+.slider-section {
         height: 800px;
     }
     
     .slider-slide {
-        width: 92vw;
+        width: 85vw;
         margin-right: 2.5vw;
-    }
-    
-    .slider-wrapper {
-        margin-left: calc((100vw - 92vw) / 2);
+}
+
+.slider-wrapper {
+        margin-left: calc((100vw - 85vw) / 2);
     }
     
     .slider-nav-btn {
@@ -2469,12 +2469,12 @@ html, body {
     }
     
     .slider-slide {
-        width: 80vw;
+        width: 75vw;
         margin-right: 1.5vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 80vw) / 2);
+        margin-left: calc((100vw - 75vw) / 2);
     }
     
     .slider-nav-btn {
@@ -2496,18 +2496,18 @@ html, body {
     }
     
     .slider-slide {
-        width: 75vw;
+        width: 70vw;
         margin-right: 1vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 75vw) / 2);
+        margin-left: calc((100vw - 70vw) / 2);
     }
     
     .slider-nav {
         padding: 0 15px !important;
-    }
-    
+}
+
     .slider-nav-btn {
         width: 45px !important;
         height: 45px !important;
@@ -2532,12 +2532,12 @@ html, body {
     }
     
     .slider-slide {
-        width: 65vw;
+        width: 75vw;
         margin-right: 0.8vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 65vw) / 2);
+        margin-left: calc((100vw - 75vw) / 2);
     }
     
     .slider-nav {
