@@ -16,33 +16,37 @@
     let startTransform = 0;
     let currentTransform = 0;
 
-    // FUNCIÓN CORREGIDA: Calcular dimensiones responsivas
+    // FUNCIÓN COMPLETAMENTE REDISEÑADA: Calcular dimensiones responsivas
     function calculateResponsiveDimensions() {
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
         const isMobile = viewportWidth <= 768;
         const isTablet = viewportWidth > 768 && viewportWidth <= 1024;
+        const isLandscape = viewportWidth > viewportHeight && isMobile;
         
-        let slideWidth, slideHeight, slideGap, containerPadding;
+        let slideWidth, slideHeight, slideGap, sideSpace, buttonSpace;
         
         if (isMobile) {
-            // MÓVIL: Slide principal + peek lateral
-            slideWidth = Math.round(viewportWidth * 0.75); // 75% del viewport
-            slideHeight = Math.round(slideWidth * 0.6); // Ratio más cuadrado para móvil
+            // MÓVIL: Slide centrado con partes laterales visibles
+            slideWidth = Math.round(viewportWidth * 0.80); // 80% del viewport
+            slideHeight = Math.round(slideWidth * 0.65); // Ratio más cuadrado para móvil
             slideGap = 15;
-            containerPadding = Math.round(viewportWidth * 0.08); // 8% padding lateral
+            sideSpace = Math.round((viewportWidth - slideWidth) / 2);
+            buttonSpace = 50;
         } else if (isTablet) {
-            // TABLET: Similar pero más grande
-            slideWidth = Math.round(viewportWidth * 0.65);
-            slideHeight = Math.round(slideWidth * 0.55);
+            // TABLET: Slide más grande
+            slideWidth = Math.round(viewportWidth * 0.70);
+            slideHeight = Math.round(slideWidth * 0.60);
             slideGap = 20;
-            containerPadding = Math.round(viewportWidth * 0.1);
+            sideSpace = Math.round((viewportWidth - slideWidth) / 2);
+            buttonSpace = 60;
         } else {
-            // DESKTOP: Como imagen 1 - slide principal grande + peek lateral
-            slideWidth = Math.min(Math.round(viewportWidth * 0.6), 800); // Máximo 800px
-            slideHeight = Math.round(slideWidth * 0.4); // Ratio panorámico
+            // DESKTOP: Como imagen 1 - slide grande con pequeñas partes laterales
+            slideWidth = Math.min(Math.round(viewportWidth * 0.85), 1200); // Más grande, máximo 1200px
+            slideHeight = Math.round(slideWidth * 0.45); // Ratio panorámico
             slideGap = 25;
-            containerPadding = Math.round(viewportWidth * 0.15); // 15% padding lateral
+            sideSpace = Math.round((viewportWidth - slideWidth) / 2);
+            buttonSpace = 80;
         }
         
         console.log('Slider: Dimensiones calculadas', {
@@ -50,12 +54,13 @@
             slideWidth,
             slideHeight,
             slideGap,
-            containerPadding,
+            sideSpace,
+            buttonSpace,
             isMobile,
             isTablet
         });
         
-        return { slideWidth, slideHeight, slideGap, containerPadding, isMobile, isTablet };
+        return { slideWidth, slideHeight, slideGap, sideSpace, buttonSpace, isMobile, isTablet, isLandscape };
     }
 
     // Detectar dispositivos móviles y táctiles
