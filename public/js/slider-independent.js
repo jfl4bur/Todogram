@@ -1,4 +1,4 @@
-// Slider Independiente - VERSIÓN COMPLETAMENTE CORREGIDA
+// Slider Independiente - VERSIÓN FINAL CORREGIDA
 (function () {
     let currentIndex = 0;
     let totalSlides = 0;
@@ -16,37 +16,33 @@
     let startTransform = 0;
     let currentTransform = 0;
 
-    // FUNCIÓN COMPLETAMENTE REDISEÑADA: Calcular dimensiones responsivas
+    // FUNCIÓN CORREGIDA: Calcular dimensiones responsivas
     function calculateResponsiveDimensions() {
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
         const isMobile = viewportWidth <= 768;
         const isTablet = viewportWidth > 768 && viewportWidth <= 1024;
-        const isLandscape = viewportWidth > viewportHeight && isMobile;
         
-        let slideWidth, slideHeight, slideGap, sideSpace, buttonSpace;
+        let slideWidth, slideHeight, slideGap, containerPadding;
         
         if (isMobile) {
-            // MÓVIL: Slide ocupa casi todo el ancho, pequeñas partes visibles a los lados
-            slideWidth = Math.round(viewportWidth * 0.85); // 85% del viewport
-            slideHeight = Math.round(slideWidth * 0.56); // Ratio 16:9
-            slideGap = 20;
-            sideSpace = Math.round((viewportWidth - slideWidth) / 2); // Centrado
-            buttonSpace = 50; // Espacio para botones
+            // MÓVIL: Slide principal + peek lateral
+            slideWidth = Math.round(viewportWidth * 0.75); // 75% del viewport
+            slideHeight = Math.round(slideWidth * 0.6); // Ratio más cuadrado para móvil
+            slideGap = 15;
+            containerPadding = Math.round(viewportWidth * 0.08); // 8% padding lateral
         } else if (isTablet) {
-            // TABLET: Similar a móvil pero un poco más grande
-            slideWidth = Math.round(viewportWidth * 0.75);
-            slideHeight = Math.round(slideWidth * 0.56);
-            slideGap = 25;
-            sideSpace = Math.round((viewportWidth - slideWidth) / 2);
-            buttonSpace = 60;
+            // TABLET: Similar pero más grande
+            slideWidth = Math.round(viewportWidth * 0.65);
+            slideHeight = Math.round(slideWidth * 0.55);
+            slideGap = 20;
+            containerPadding = Math.round(viewportWidth * 0.1);
         } else {
-            // DESKTOP: Como en la imagen 1 - un slide principal con partes laterales visibles
-            slideWidth = Math.min(Math.round(viewportWidth * 0.7), 900); // Máximo 900px
-            slideHeight = Math.round(slideWidth * 0.45); // Ratio más panorámico
-            slideGap = 30;
-            sideSpace = Math.round((viewportWidth - slideWidth) / 2);
-            buttonSpace = 80;
+            // DESKTOP: Como imagen 1 - slide principal grande + peek lateral
+            slideWidth = Math.min(Math.round(viewportWidth * 0.6), 800); // Máximo 800px
+            slideHeight = Math.round(slideWidth * 0.4); // Ratio panorámico
+            slideGap = 25;
+            containerPadding = Math.round(viewportWidth * 0.15); // 15% padding lateral
         }
         
         console.log('Slider: Dimensiones calculadas', {
@@ -54,27 +50,25 @@
             slideWidth,
             slideHeight,
             slideGap,
-            sideSpace,
-            buttonSpace,
+            containerPadding,
             isMobile,
             isTablet
         });
         
-        return { slideWidth, slideHeight, slideGap, sideSpace, buttonSpace, isMobile, isTablet, isLandscape };
+        return { slideWidth, slideHeight, slideGap, containerPadding, isMobile, isTablet };
     }
 
-    // Detectar dispositivos móviles
+    // Detectar dispositivos móviles y táctiles
     function isMobileDevice() {
         return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
                window.innerWidth <= 768;
     }
 
-    // Detectar dispositivos táctiles
     function isTouchDevice() {
         return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
     }
 
-    // Configurar eventos touch/swipe
+    // FUNCIÓN CORREGIDA: Configurar eventos touch/swipe
     function setupTouchEvents() {
         const wrapper = document.getElementById('slider-wrapper');
         if (!wrapper) return;
@@ -145,7 +139,7 @@
         }
     }
 
-    // FUNCIÓN COMPLETAMENTE REDISEÑADA: Posicionar botones
+    // FUNCIÓN COMPLETAMENTE CORREGIDA: Posicionar botones
     function positionNavigationButtons() {
         const prevBtn = document.getElementById('slider-prev');
         const nextBtn = document.getElementById('slider-next');
@@ -155,77 +149,58 @@
         
         const dimensions = calculateResponsiveDimensions();
         
+        // CORREGIR: Asegurar posicionamiento del contenedor
+        container.style.position = 'relative';
+        
         // Estilos base para ambos botones
         const baseButtonStyle = {
             position: 'absolute',
-            top: '50%',
-            transform: 'translateY(-50%)',
+            top: '0',
+            bottom: '0',
             zIndex: '1000',
             border: 'none',
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            backgroundColor: 'rgba(0, 0, 0, 0.7)',
             color: 'white',
             cursor: 'pointer',
             transition: 'all 0.3s ease',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
-            borderRadius: '50%',
             fontFamily: 'Arial, sans-serif',
-            fontWeight: 'bold'
+            fontWeight: 'bold',
+            width: dimensions.isMobile ? '60px' : '80px'
         };
-        
-        // Tamaños responsivos
-        let buttonSize, fontSize;
-        if (dimensions.isMobile) {
-            buttonSize = '50px';
-            fontSize = '20px';
-        } else if (dimensions.isTablet) {
-            buttonSize = '60px';
-            fontSize = '24px';
-        } else {
-            buttonSize = '70px';
-            fontSize = '28px';
-        }
         
         // Aplicar estilos a ambos botones
         Object.assign(prevBtn.style, baseButtonStyle);
         Object.assign(nextBtn.style, baseButtonStyle);
         
-        prevBtn.style.width = buttonSize;
-        prevBtn.style.height = buttonSize;
-        prevBtn.style.fontSize = fontSize;
-        prevBtn.style.left = '20px';
+        // Posicionamiento específico
+        prevBtn.style.left = '0';
+        prevBtn.style.fontSize = dimensions.isMobile ? '24px' : '32px';
         prevBtn.innerHTML = '‹';
         
-        nextBtn.style.width = buttonSize;
-        nextBtn.style.height = buttonSize;
-        nextBtn.style.fontSize = fontSize;
-        nextBtn.style.right = '20px';
+        nextBtn.style.right = '0';
+        nextBtn.style.fontSize = dimensions.isMobile ? '24px' : '32px';
         nextBtn.innerHTML = '›';
         
-        // Efectos hover solo en desktop no táctil
+        // SOLO efectos hover en desktop NO táctil
         if (!isTouchDevice()) {
             [prevBtn, nextBtn].forEach(btn => {
                 btn.addEventListener('mouseenter', () => {
-                    btn.style.backgroundColor = 'rgba(0, 0, 0, 0.95)';
-                    btn.style.transform = 'translateY(-50%) scale(1.1)';
+                    btn.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
                 });
                 
                 btn.addEventListener('mouseleave', () => {
-                    btn.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-                    btn.style.transform = 'translateY(-50%) scale(1)';
+                    btn.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
                 });
             });
         }
         
-        // Asegurar posicionamiento del contenedor
-        container.style.position = 'relative';
-        
-        console.log('Slider: Botones posicionados');
+        console.log('Slider: Botones posicionados correctamente');
     }
 
-    // FUNCIÓN COMPLETAMENTE REDISEÑADA: Crear paginación
+    // FUNCIÓN CORREGIDA: Crear paginación
     function createAndPositionPagination() {
         const pagination = document.getElementById('slider-pagination');
         if (!pagination) return;
@@ -235,13 +210,13 @@
         // Limpiar paginación
         pagination.innerHTML = '';
         
-        // Posicionar paginación
+        // CORREGIR: Posicionamiento de paginación
         pagination.style.position = 'absolute';
-        pagination.style.bottom = dimensions.isMobile ? '20px' : '30px';
+        pagination.style.bottom = dimensions.isMobile ? '15px' : '25px';
         pagination.style.left = '50%';
         pagination.style.transform = 'translateX(-50%)';
         pagination.style.display = 'flex';
-        pagination.style.gap = '8px';
+        pagination.style.gap = '6px';
         pagination.style.zIndex = '999';
         pagination.style.justifyContent = 'center';
         pagination.style.alignItems = 'center';
@@ -252,12 +227,12 @@
             dot.className = 'slider-pagination-dot';
             dot.dataset.slide = i;
             
-            const dotSize = dimensions.isMobile ? '10px' : '12px';
+            const dotSize = dimensions.isMobile ? '8px' : '10px';
             dot.style.width = dotSize;
             dot.style.height = dotSize;
             dot.style.borderRadius = '50%';
             dot.style.border = 'none';
-            dot.style.backgroundColor = i === currentIndex ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.4)';
+            dot.style.backgroundColor = i === currentIndex ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.5)';
             dot.style.cursor = 'pointer';
             dot.style.transition = 'all 0.3s ease';
             dot.style.padding = '0';
@@ -275,10 +250,10 @@
             pagination.appendChild(dot);
         }
         
-        console.log('Slider: Paginación creada');
+        console.log('Slider: Paginación creada y posicionada');
     }
 
-    // Actualizar variables CSS
+    // FUNCIÓN CORREGIDA: Actualizar variables CSS
     function updateSliderCSSVariables() {
         if (isDestroyed) return;
         
@@ -288,7 +263,7 @@
         root.style.setProperty('--slider-slide-width', `${dimensions.slideWidth}px`);
         root.style.setProperty('--slider-slide-height', `${dimensions.slideHeight}px`);
         root.style.setProperty('--slider-slide-gap', `${dimensions.slideGap}px`);
-        root.style.setProperty('--slider-side-space', `${dimensions.sideSpace}px`);
+        root.style.setProperty('--slider-container-padding', `${dimensions.containerPadding}px`);
         
         // Prevenir scroll horizontal
         document.body.style.overflowX = 'hidden';
@@ -296,7 +271,7 @@
         console.log('Slider: Variables CSS actualizadas');
     }
 
-    // FUNCIÓN COMPLETAMENTE REDISEÑADA: Actualizar posición
+    // FUNCIÓN COMPLETAMENTE CORREGIDA: Actualizar posición
     function updateSliderPosition(animate = true) {
         if (isDestroyed) return;
         
@@ -305,7 +280,11 @@
         
         const dimensions = calculateResponsiveDimensions();
         const slideDistance = dimensions.slideWidth + dimensions.slideGap;
-        const translateX = -(slideDistance * currentIndex);
+        
+        // CORREGIR: Centrar el slide activo
+        const containerWidth = wrapper.parentElement.offsetWidth;
+        const centerOffset = (containerWidth - dimensions.slideWidth) / 2;
+        const translateX = centerOffset - (slideDistance * currentIndex);
         
         if (animate) {
             wrapper.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
@@ -372,7 +351,7 @@
         }
     }
 
-    // FUNCIÓN COMPLETAMENTE REDISEÑADA: Renderizar slider
+    // FUNCIÓN COMPLETAMENTE CORREGIDA: Renderizar slider
     function renderSlider(moviesData = []) {
         if (isDestroyed) return;
         
@@ -403,19 +382,20 @@
         // Actualizar variables CSS
         updateSliderCSSVariables();
         
-        // Configurar contenedor padre
+        // CORREGIR: Configurar contenedor padre
         const sliderContainer = sliderWrapper.parentElement;
         if (sliderContainer) {
             sliderContainer.style.width = '100%';
-            sliderContainer.style.height = `${dimensions.slideHeight + 80}px`; // Altura fija + espacio para paginación
+            sliderContainer.style.height = `${dimensions.slideHeight + 60}px`; // Altura del slide + espacio para paginación
             sliderContainer.style.overflow = 'hidden';
             sliderContainer.style.position = 'relative';
             sliderContainer.style.display = 'flex';
             sliderContainer.style.alignItems = 'center';
             sliderContainer.style.justifyContent = 'center';
+            sliderContainer.style.padding = `0 ${dimensions.containerPadding}px`;
         }
         
-        // CONFIGURACIÓN CRÍTICA DEL WRAPPER
+        // CORREGIR: Configuración del wrapper
         sliderWrapper.innerHTML = '';
         sliderWrapper.style.display = 'flex';
         sliderWrapper.style.flexDirection = 'row';
@@ -424,8 +404,6 @@
         sliderWrapper.style.position = 'relative';
         sliderWrapper.style.width = `${(dimensions.slideWidth + dimensions.slideGap) * totalSlides}px`;
         sliderWrapper.style.height = `${dimensions.slideHeight}px`;
-        sliderWrapper.style.left = '50%';
-        sliderWrapper.style.marginLeft = `-${dimensions.slideWidth / 2}px`; // Centrar el primer slide
         sliderWrapper.style.transform = 'translateX(0px)';
         sliderWrapper.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
         sliderWrapper.style.willChange = 'transform';
@@ -436,42 +414,47 @@
             slideDiv.className = 'slider-slide';
             slideDiv.dataset.index = index;
             
-            // ESTILOS CRÍTICOS DEL SLIDE
+            // CORREGIR: Estilos del slide
             slideDiv.style.width = `${dimensions.slideWidth}px`;
             slideDiv.style.height = `${dimensions.slideHeight}px`;
             slideDiv.style.flexShrink = '0';
             slideDiv.style.marginRight = `${dimensions.slideGap}px`;
             slideDiv.style.position = 'relative';
-            slideDiv.style.borderRadius = '15px';
+            slideDiv.style.borderRadius = '12px';
             slideDiv.style.overflow = 'hidden';
             slideDiv.style.cursor = 'pointer';
-            slideDiv.style.boxShadow = '0 8px 25px rgba(0,0,0,0.4)';
-            slideDiv.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
+            slideDiv.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
             slideDiv.style.backgroundColor = '#333';
+            slideDiv.style.userSelect = 'none';
+            slideDiv.style.webkitUserSelect = 'none';
+            slideDiv.style.webkitTapHighlightColor = 'transparent';
             
-            // REMOVER TODOS LOS EFECTOS HOVER EN DISPOSITIVOS TÁCTILES
+            // ELIMINAR COMPLETAMENTE hover en dispositivos táctiles
             const isTouch = isTouchDevice();
+            if (!isTouch) {
+                slideDiv.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
+            }
             
             const imageUrl = movie.sliderUrl || `https://via.placeholder.com/${dimensions.slideWidth}x${dimensions.slideHeight}/333/fff?text=${encodeURIComponent(movie.title)}`;
             const mainGenre = movie.genre ? movie.genre.split(/[·,]/)[0].trim() : '';
             
             slideDiv.innerHTML = `
-                <div class="slider-img-wrapper" style="width: 100%; height: 100%; overflow: hidden; border-radius: 15px;">
+                <div class="slider-img-wrapper" style="width: 100%; height: 100%; overflow: hidden; border-radius: 12px;">
                     <img src="${imageUrl}" 
                          alt="${movie.title}" 
                          loading="${index === 0 ? 'eager' : 'lazy'}"
                          style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;"
                          onerror="this.src='https://via.placeholder.com/${dimensions.slideWidth}x${dimensions.slideHeight}/333/fff?text=No+Image'">
                 </div>
-                <div class="slider-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: ${dimensions.isMobile ? '15px' : '20px'}; color: white;">
-                    <div class="slider-title-movie" style="font-size: ${dimensions.isMobile ? '1.1rem' : '1.4rem'}; font-weight: bold; margin-bottom: 8px; line-height: 1.2;">${movie.title || 'Sin título'}</div>
-                    <div class="slider-meta" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; font-size: ${dimensions.isMobile ? '0.8rem' : '0.9rem'}; opacity: 0.9;">
+                <div class="slider-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.85)); padding: ${dimensions.isMobile ? '12px' : '16px'}; color: white;">
+                    <div class="slider-title-movie" style="font-size: ${dimensions.isMobile ? '1rem' : '1.2rem'}; font-weight: bold; margin-bottom: 6px; line-height: 1.2;">${movie.title || 'Sin título'}</div>
+                    <div class="slider-meta" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; font-size: ${dimensions.isMobile ? '0.75rem' : '0.8rem'}; opacity: 0.9;">
                         ${movie.year ? `<span>${movie.year}</span>` : ''}
                         ${movie.duration ? `<span>${movie.duration}</span>` : ''}
                         ${mainGenre ? `<span>${mainGenre}</span>` : ''}
                         ${movie.rating ? `<span><i class="fas fa-star" style="color: #ffd700; margin-right: 2px;"></i>${movie.rating}</span>` : ''}
                     </div>
-                    <div class="slider-description" style="font-size: ${dimensions.isMobile ? '0.75rem' : '0.85rem'}; line-height: 1.3; opacity: 0.85; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${movie.description || movie.synopsis || 'Sin descripción disponible'}</div>
+                    <div class="slider-description" style="font-size: ${dimensions.isMobile ? '0.7rem' : '0.75rem'}; line-height: 1.3; opacity: 0.85; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${movie.description || movie.synopsis || 'Sin descripción disponible'}</div>
                 </div>
             `;
 
@@ -479,20 +462,20 @@
             if (!isTouch) {
                 slideDiv.addEventListener('mouseenter', () => {
                     if (!isTransitioning && !isDragging) {
-                        slideDiv.style.transform = 'scale(1.05)';
-                        slideDiv.style.boxShadow = '0 12px 35px rgba(0,0,0,0.5)';
+                        slideDiv.style.transform = 'scale(1.03)';
+                        slideDiv.style.boxShadow = '0 8px 30px rgba(0,0,0,0.4)';
                     }
                 });
 
                 slideDiv.addEventListener('mouseleave', () => {
                     if (!isTransitioning && !isDragging) {
                         slideDiv.style.transform = 'scale(1)';
-                        slideDiv.style.boxShadow = '0 8px 25px rgba(0,0,0,0.4)';
+                        slideDiv.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
                     }
                 });
             }
 
-            // EVENTO CLICK CORREGIDO
+            // CORREGIR: Evento click
             slideDiv.addEventListener('click', (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -500,26 +483,38 @@
                 console.log('Slider: Click en slide', movie.title);
                 
                 if (!isTransitioning && !isDragging) {
-                    // Intentar abrir modal
+                    // Buscar función de modal en diferentes contextos
                     if (typeof window.openDetailsModal === 'function') {
-                        console.log('Slider: Abriendo modal con openDetailsModal');
+                        console.log('Slider: Abriendo modal con window.openDetailsModal');
                         window.openDetailsModal(movie);
                     } else if (typeof openDetailsModal === 'function') {
                         console.log('Slider: Abriendo modal con openDetailsModal global');
                         openDetailsModal(movie);
+                    } else if (window.parent && typeof window.parent.openDetailsModal === 'function') {
+                        console.log('Slider: Abriendo modal con parent.openDetailsModal');
+                        window.parent.openDetailsModal(movie);
                     } else {
-                        console.log('Slider: openDetailsModal no encontrado, datos de la película:', movie);
-                        // Fallback: disparar evento personalizado
-                        const event = new CustomEvent('slideClick', { detail: movie });
-                        document.dispatchEvent(event);
+                        console.log('Slider: openDetailsModal no encontrado, disparando evento personalizado');
+                        // Disparar múltiples eventos para máxima compatibilidad
+                        const events = [
+                            new CustomEvent('slideClick', { detail: movie, bubbles: true }),
+                            new CustomEvent('openModal', { detail: movie, bubbles: true }),
+                            new CustomEvent('movieClick', { detail: movie, bubbles: true })
+                        ];
+                        
+                        events.forEach(event => {
+                            document.dispatchEvent(event);
+                            window.dispatchEvent(event);
+                            if (window.parent !== window) {
+                                window.parent.document.dispatchEvent(event);
+                            }
+                        });
+                        
+                        // Log para debugging
+                        console.log('Slider: Eventos disparados, datos de la película:', movie);
                     }
                 }
             });
-
-            // Prevenir selección de texto
-            slideDiv.style.userSelect = 'none';
-            slideDiv.style.webkitUserSelect = 'none';
-            slideDiv.style.webkitTapHighlightColor = 'transparent';
 
             sliderWrapper.appendChild(slideDiv);
         });
@@ -564,10 +559,10 @@
         const dots = document.querySelectorAll('.slider-pagination-dot');
         dots.forEach((dot, index) => {
             if (index === currentIndex) {
-                dot.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+                dot.style.backgroundColor = 'rgba(255, 255, 255, 1)';
                 dot.style.transform = 'scale(1.2)';
             } else {
-                dot.style.backgroundColor = 'rgba(255, 255, 255, 0.4)';
+                dot.style.backgroundColor = 'rgba(255, 255, 255, 0.5)';
                 dot.style.transform = 'scale(1)';
             }
         });
@@ -650,7 +645,7 @@
             clearInterval(autoplayTimer);
         }
         
-        // Pausar en hover solo en desktop
+        // Pausar en hover solo en desktop NO táctil
         if (!isTouchDevice()) {
             const container = document.getElementById('slider-wrapper')?.parentElement;
             if (container) {
@@ -693,7 +688,7 @@
             // Configurar eventos después del renderizado
             setTimeout(() => {
                 setupNavigationEvents();
-                positionNavigationButtons(); // Re-posicionar después de setup
+                positionNavigationButtons();
             }, 100);
             
             // Configurar resize
@@ -722,42 +717,393 @@
             wrapper.removeAttribute('style');
         }
         
-        console.log('Slider: Destruido');
+        console.log('Slider: Destruido completamente');
     }
 
-    // Función para reinicializar el slider
-    function reinitializeSlider() {
+    // FUNCIÓN COMPLETAMENTE CORREGIDA: Dimensiones responsivas
+    function calculateResponsiveDimensions() {
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const isMobile = viewportWidth <= 768;
+        const isTablet = viewportWidth > 768 && viewportWidth <= 1024;
+        
+        let slideWidth, slideHeight, slideGap, containerPadding;
+        
+        if (isMobile) {
+            // MÓVIL: 85% del viewport para mostrar peek lateral
+            slideWidth = Math.round(viewportWidth * 0.85);
+            slideHeight = Math.round(slideWidth * 0.6);
+            slideGap = 12;
+            containerPadding = Math.round(viewportWidth * 0.05); // Menor padding
+        } else if (isTablet) {
+            // TABLET: 70% del viewport
+            slideWidth = Math.round(viewportWidth * 0.7);
+            slideHeight = Math.round(slideWidth * 0.55);
+            slideGap = 15;
+            containerPadding = Math.round(viewportWidth * 0.08);
+        } else {
+            // DESKTOP: Como imagen 1 - slide grande centrado con peek lateral
+            slideWidth = Math.min(Math.round(viewportWidth * 0.75), 900); // Más grande
+            slideHeight = Math.round(slideWidth * 0.42);
+            slideGap = 20;
+            containerPadding = Math.round(viewportWidth * 0.08); // Menos padding
+        }
+        
+        return { slideWidth, slideHeight, slideGap, containerPadding, isMobile, isTablet };
+    }
+
+    // FUNCIÓN COMPLETAMENTE CORREGIDA: Posicionar botones
+    function positionNavigationButtons() {
+        const prevBtn = document.getElementById('slider-prev');
+        const nextBtn = document.getElementById('slider-next');
+        const container = document.getElementById('slider-wrapper')?.parentElement;
+        
+        if (!prevBtn || !nextBtn || !container) return;
+        
+        const dimensions = calculateResponsiveDimensions();
+        
+        // Posicionamiento del contenedor padre
+        container.style.position = 'relative';
+        
+        // Calcular altura exacta del slide
+        const slideHeight = dimensions.slideHeight;
+        
+        // Estilos base CORREGIDOS
+        const baseButtonStyle = {
+            position: 'absolute',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: '1001',
+            border: 'none',
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            color: 'white',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontFamily: 'Arial, sans-serif',
+            fontWeight: 'bold',
+            borderRadius: '0',
+            outline: 'none',
+            userSelect: 'none',
+            webkitUserSelect: 'none',
+            webkitTapHighlightColor: 'transparent',
+            width: dimensions.isMobile ? '50px' : '70px',
+            height: `${slideHeight}px` // ALTURA EXACTA DEL SLIDE
+        };
+        
+        // Aplicar estilos
+        Object.assign(prevBtn.style, baseButtonStyle);
+        Object.assign(nextBtn.style, baseButtonStyle);
+        
+        // Posicionamiento específico
+        prevBtn.style.left = `${dimensions.containerPadding}px`;
+        prevBtn.style.fontSize = dimensions.isMobile ? '22px' : '28px';
+        prevBtn.innerHTML = '‹';
+        
+        nextBtn.style.right = `${dimensions.containerPadding}px`;
+        nextBtn.style.fontSize = dimensions.isMobile ? '22px' : '28px';
+        nextBtn.innerHTML = '›';
+        
+        // ELIMINAR completamente hover en táctiles
+        if (!isTouchDevice()) {
+            prevBtn.style.transition = 'background-color 0.3s ease';
+            nextBtn.style.transition = 'background-color 0.3s ease';
+            
+            prevBtn.onmouseenter = () => prevBtn.style.backgroundColor = 'rgba(0, 0, 0, 0.95)';
+            prevBtn.onmouseleave = () => prevBtn.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+            nextBtn.onmouseenter = () => nextBtn.style.backgroundColor = 'rgba(0, 0, 0, 0.95)';
+            nextBtn.onmouseleave = () => nextBtn.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+        }
+        
+        console.log('Slider: Botones reposicionados con altura completa');
+    }
+
+    // FUNCIÓN COMPLETAMENTE CORREGIDA: Paginación
+    function createAndPositionPagination() {
+        const pagination = document.getElementById('slider-pagination');
+        if (!pagination) return;
+        
+        const dimensions = calculateResponsiveDimensions();
+        
+        pagination.innerHTML = '';
+        
+        // Posicionamiento CORREGIDO
+        pagination.style.position = 'absolute';
+        pagination.style.bottom = dimensions.isMobile ? '10px' : '15px'; // Más cerca del slide
+        pagination.style.left = '50%';
+        pagination.style.transform = 'translateX(-50%)';
+        pagination.style.display = 'flex';
+        pagination.style.gap = dimensions.isMobile ? '8px' : '10px';
+        pagination.style.zIndex = '999';
+        pagination.style.justifyContent = 'center';
+        pagination.style.alignItems = 'center';
+        pagination.style.pointerEvents = 'auto';
+        
+        // Crear dots
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('button');
+            dot.className = 'slider-pagination-dot';
+            dot.dataset.slide = i;
+            
+            const dotSize = dimensions.isMobile ? '10px' : '12px';
+            dot.style.width = dotSize;
+            dot.style.height = dotSize;
+            dot.style.borderRadius = '50%';
+            dot.style.border = 'none';
+            dot.style.backgroundColor = i === currentIndex ? 'rgba(255, 255, 255, 1)' : 'rgba(255, 255, 255, 0.6)';
+            dot.style.cursor = 'pointer';
+            dot.style.transition = 'all 0.3s ease';
+            dot.style.padding = '0';
+            dot.style.margin = '0';
+            dot.style.outline = 'none';
+            dot.style.userSelect = 'none';
+            dot.style.webkitUserSelect = 'none';
+            dot.style.webkitTapHighlightColor = 'transparent';
+            
+            // CLICK sin preventDefault
+            dot.onclick = (e) => {
+                e.stopPropagation();
+                if (!isTransitioning && !isDragging) {
+                    goToSlide(i);
+                }
+            };
+            
+            pagination.appendChild(dot);
+        }
+        
+        console.log('Slider: Paginación reposicionada');
+    }
+
+    // FUNCIÓN COMPLETAMENTE CORREGIDA: Renderizar slider
+    function renderSlider(moviesData = []) {
         if (isDestroyed) return;
         
-        destroySlider();
-        isDestroyed = false;
+        const sliderWrapper = document.getElementById('slider-wrapper');
+        if (!sliderWrapper) return;
+
+        const movies = moviesData.length > 0 ? moviesData : slidesData;
+        const selectedMovies = movies
+            .sort((a, b) => (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0))
+            .slice(0, 8);
         
-        setTimeout(() => {
-            initSlider();
-        }, 100);
+        slidesData = selectedMovies;
+        totalSlides = slidesData.length;
+        
+        if (totalSlides === 0) return;
+
+        const dimensions = calculateResponsiveDimensions();
+        lastViewportWidth = window.innerWidth;
+        
+        updateSliderCSSVariables();
+        
+        // CONFIGURACIÓN CORREGIDA del contenedor padre
+        const sliderContainer = sliderWrapper.parentElement;
+        if (sliderContainer) {
+            sliderContainer.style.width = '100%';
+            sliderContainer.style.height = `${dimensions.slideHeight + 40}px`; // Altura exacta
+            sliderContainer.style.overflow = 'hidden';
+            sliderContainer.style.position = 'relative';
+            sliderContainer.style.display = 'flex';
+            sliderContainer.style.alignItems = 'center';
+            sliderContainer.style.justifyContent = 'center';
+            sliderContainer.style.padding = '0';
+            sliderContainer.style.margin = '0 auto';
+        }
+        
+        // CONFIGURACIÓN CORREGIDA del wrapper
+        sliderWrapper.innerHTML = '';
+        sliderWrapper.style.display = 'flex';
+        sliderWrapper.style.flexDirection = 'row';
+        sliderWrapper.style.alignItems = 'center';
+        sliderWrapper.style.position = 'relative';
+        sliderWrapper.style.width = `${(dimensions.slideWidth + dimensions.slideGap) * totalSlides}px`;
+        sliderWrapper.style.height = `${dimensions.slideHeight}px`;
+        sliderWrapper.style.transform = 'translateX(0px)';
+        sliderWrapper.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        sliderWrapper.style.willChange = 'transform';
+        
+        // Crear slides
+        slidesData.forEach((movie, index) => {
+            const slideDiv = document.createElement('div');
+            slideDiv.className = 'slider-slide';
+            slideDiv.dataset.index = index;
+            
+            // Estilos CORREGIDOS del slide
+            slideDiv.style.width = `${dimensions.slideWidth}px`;
+            slideDiv.style.height = `${dimensions.slideHeight}px`;
+            slideDiv.style.flexShrink = '0';
+            slideDiv.style.marginRight = `${dimensions.slideGap}px`;
+            slideDiv.style.position = 'relative';
+            slideDiv.style.borderRadius = '12px';
+            slideDiv.style.overflow = 'hidden';
+            slideDiv.style.cursor = 'pointer';
+            slideDiv.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
+            slideDiv.style.backgroundColor = '#333';
+            slideDiv.style.userSelect = 'none';
+            slideDiv.style.webkitUserSelect = 'none';
+            slideDiv.style.webkitTapHighlightColor = 'transparent';
+            
+            // ELIMINAR completamente hover en táctiles
+            const isTouch = isTouchDevice();
+            if (!isTouch) {
+                slideDiv.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
+            }
+            
+            const imageUrl = movie.sliderUrl || `https://via.placeholder.com/${dimensions.slideWidth}x${dimensions.slideHeight}/333/fff?text=${encodeURIComponent(movie.title)}`;
+            const mainGenre = movie.genre ? movie.genre.split(/[·,]/)[0].trim() : '';
+            
+            slideDiv.innerHTML = `
+                <div class="slider-img-wrapper" style="width: 100%; height: 100%; overflow: hidden; border-radius: 12px;">
+                    <img src="${imageUrl}" 
+                         alt="${movie.title}" 
+                         loading="${index === 0 ? 'eager' : 'lazy'}"
+                         style="width: 100%; height: 100%; object-fit: cover; object-position: center; display: block;"
+                         onerror="this.src='https://via.placeholder.com/${dimensions.slideWidth}x${dimensions.slideHeight}/333/fff?text=No+Image'">
+                </div>
+                <div class="slider-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.85)); padding: ${dimensions.isMobile ? '12px' : '16px'}; color: white;">
+                    <div class="slider-title-movie" style="font-size: ${dimensions.isMobile ? '1rem' : '1.2rem'}; font-weight: bold; margin-bottom: 6px; line-height: 1.2;">${movie.title || 'Sin título'}</div>
+                    <div class="slider-meta" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; font-size: ${dimensions.isMobile ? '0.75rem' : '0.8rem'}; opacity: 0.9;">
+                        ${movie.year ? `<span>${movie.year}</span>` : ''}
+                        ${movie.duration ? `<span>${movie.duration}</span>` : ''}
+                        ${mainGenre ? `<span>${mainGenre}</span>` : ''}
+                        ${movie.rating ? `<span><i class="fas fa-star" style="color: #ffd700; margin-right: 2px;"></i>${movie.rating}</span>` : ''}
+                    </div>
+                    <div class="slider-description" style="font-size: ${dimensions.isMobile ? '0.7rem' : '0.75rem'}; line-height: 1.3; opacity: 0.85; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${movie.description || movie.synopsis || 'Sin descripción disponible'}</div>
+                </div>
+            `;
+
+            // SOLO hover en desktop NO táctil
+            if (!isTouch) {
+                slideDiv.onmouseenter = () => {
+                    if (!isTransitioning && !isDragging) {
+                        slideDiv.style.transform = 'scale(1.03)';
+                        slideDiv.style.boxShadow = '0 8px 30px rgba(0,0,0,0.4)';
+                    }
+                };
+
+                slideDiv.onmouseleave = () => {
+                    if (!isTransitioning && !isDragging) {
+                        slideDiv.style.transform = 'scale(1)';
+                        slideDiv.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
+                    }
+                };
+            }
+
+            // CLICK CORREGIDO
+            slideDiv.onclick = (e) => {
+                e.stopPropagation();
+                
+                if (!isTransitioning && !isDragging) {
+                    console.log('Slider: Click en slide', movie.title);
+                    
+                    // Múltiples intentos de abrir modal
+                    const modalOpeners = [
+                        () => window.openDetailsModal && window.openDetailsModal(movie),
+                        () => window.parent.openDetailsModal && window.parent.openDetailsModal(movie),
+                        () => {
+                            const event = new CustomEvent('openModal', { 
+                                detail: movie, 
+                                bubbles: true,
+                                cancelable: true
+                            });
+                            document.dispatchEvent(event);
+                            window.dispatchEvent(event);
+                        }
+                    ];
+                    
+                    for (const opener of modalOpeners) {
+                        try {
+                            opener();
+                            break;
+                        } catch (e) {
+                            continue;
+                        }
+                    }
+                }
+            };
+
+            sliderWrapper.appendChild(slideDiv);
+        });
+
+        // Configurar todo después del renderizado
+        setupTouchEvents();
+        positionNavigationButtons();
+        createAndPositionPagination();
+        
+        currentIndex = 0;
+        updateSliderPosition(false);
+        
+        console.log('Slider: Renderizado completado correctamente');
     }
 
-    // Exponer funciones globales
-    window.sliderAPI = {
+    // FUNCIÓN CORREGIDA: Actualizar posición centrada
+    function updateSliderPosition(animate = true) {
+        if (isDestroyed) return;
+        
+        const wrapper = document.getElementById('slider-wrapper');
+        if (!wrapper) return;
+        
+        const dimensions = calculateResponsiveDimensions();
+        const slideDistance = dimensions.slideWidth + dimensions.slideGap;
+        
+        // Centrar el slide activo perfectamente
+        const containerWidth = wrapper.parentElement.offsetWidth;
+        const centerOffset = (containerWidth - dimensions.slideWidth) / 2;
+        const translateX = centerOffset - (slideDistance * currentIndex);
+        
+        if (animate) {
+            wrapper.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            isTransitioning = true;
+            setTimeout(() => {
+                isTransitioning = false;
+            }, 500);
+        } else {
+            wrapper.style.transition = 'none';
+        }
+        
+        wrapper.style.transform = `translateX(${translateX}px)`;
+    }
+
+    // EVENTOS DE NAVEGACIÓN CORREGIDOS
+    function setupNavigationEvents() {
+        const prevBtn = document.getElementById('slider-prev');
+        const nextBtn = document.getElementById('slider-next');
+        
+        if (prevBtn) {
+            prevBtn.onclick = (e) => {
+                e.stopPropagation();
+                if (!isTransitioning && !isDragging) {
+                    goToSlide(currentIndex - 1);
+                }
+            };
+        }
+        
+        if (nextBtn) {
+            nextBtn.onclick = (e) => {
+                e.stopPropagation();
+                if (!isTransitioning && !isDragging) {
+                    goToSlide(currentIndex + 1);
+                }
+            };
+        }
+    }
+
+    // Exponer funciones públicas
+    window.SliderController = {
         init: initSlider,
         destroy: destroySlider,
-        reinitialize: reinitializeSlider,
         goToSlide: goToSlide,
-        next: () => goToSlide(currentIndex + 1),
-        prev: () => goToSlide(currentIndex - 1),
-        getCurrentIndex: () => currentIndex,
-        getTotalSlides: () => totalSlides,
-        isReady: () => !isDestroyed && totalSlides > 0
+        refresh: () => renderSlider(slidesData)
     };
 
-    // Auto-inicialización cuando el DOM esté listo
+    // Auto-inicializar si el DOM está listo
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initSlider);
     } else {
-        // DOM ya está listo, inicializar inmediatamente
-        setTimeout(initSlider, 100);
+        initSlider();
     }
 
-    console.log('Slider: Script cargado y listo');
+    console.log('Slider: Script cargado y listo para inicializar');
 
 })();
