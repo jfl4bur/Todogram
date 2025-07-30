@@ -16,7 +16,7 @@
     let startTransform = 0;
     let currentTransform = 0;
 
-    // FUNCIÓN COMPLETAMENTE REDISEÑADA: Calcular dimensiones responsivas
+// FUNCIÓN COMPLETAMENTE REDISEÑADA: Calcular dimensiones responsivas
     function calculateResponsiveDimensions() {
         const viewportWidth = window.innerWidth;
         const viewportHeight = window.innerHeight;
@@ -27,26 +27,26 @@
         let slideWidth, slideHeight, slideGap, sideSpace, buttonSpace;
         
         if (isMobile) {
-            // MÓVIL: Slide centrado con partes laterales visibles
-            slideWidth = Math.round(viewportWidth * 0.80); // 80% del viewport
-            slideHeight = Math.round(slideWidth * 0.65); // Ratio más cuadrado para móvil
-            slideGap = 15;
+            // MÓVIL: Slide que ocupe casi todo el ancho con pequeñas partes laterales visibles
+            slideWidth = Math.round(viewportWidth * 0.85); // 85% del viewport
+            slideHeight = Math.round(slideWidth * 0.56); // Ratio 16:9
+            slideGap = 12;
             sideSpace = Math.round((viewportWidth - slideWidth) / 2);
-            buttonSpace = 50;
+            buttonSpace = 45;
         } else if (isTablet) {
-            // TABLET: Slide más grande
-            slideWidth = Math.round(viewportWidth * 0.70);
-            slideHeight = Math.round(slideWidth * 0.60);
+            // TABLET: Slide grande
+            slideWidth = Math.round(viewportWidth * 0.75);
+            slideHeight = Math.round(slideWidth * 0.50);
+            slideGap = 18;
+            sideSpace = Math.round((viewportWidth - slideWidth) / 2);
+            buttonSpace = 55;
+        } else {
+            // DESKTOP: Slide MUY GRANDE como en la imagen de referencia
+            slideWidth = Math.round(viewportWidth * 0.75); // 75% del viewport, sin límite máximo
+            slideHeight = Math.round(slideWidth * 0.42); // Ratio panorámico
             slideGap = 20;
             sideSpace = Math.round((viewportWidth - slideWidth) / 2);
-            buttonSpace = 60;
-        } else {
-            // DESKTOP: Como imagen 1 - slide grande con pequeñas partes laterales
-            slideWidth = Math.min(Math.round(viewportWidth * 0.85), 1200); // Más grande, máximo 1200px
-            slideHeight = Math.round(slideWidth * 0.45); // Ratio panorámico
-            slideGap = 25;
-            sideSpace = Math.round((viewportWidth - slideWidth) / 2);
-            buttonSpace = 80;
+            buttonSpace = 70;
         }
         
         console.log('Slider: Dimensiones calculadas', {
