@@ -1997,81 +1997,6 @@ html {
     background-color: #141414;
 }
 
-/* Slider Independiente */
-.slider-section {
-    position: relative;
-    margin-bottom: 40px;
-}
-
-.slider-container {
-    position: relative;
-    overflow: hidden;
-}
-
-.slider-wrapper {
-    display: flex;
-    transition: transform 0.5s ease-in-out;
-}
-
-.slider-slide {
-    flex-shrink: 0;
-    box-sizing: border-box;
-    position: relative;
-    cursor: pointer;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.slider-slide:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 10px 20px rgba(255, 255, 255, 0.1);
-}
-
-.slider-nav {
-    position: absolute;
-    top: 50%;
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    transform: translateY(-50%);
-    pointer-events: none;
-    z-index: 10;
-}
-
-.slider-nav-btn {
-    pointer-events: all;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    border: none;
-    padding: 15px;
-    cursor: pointer;
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background-color 0.3s ease;
-}
-
-.slider-nav-btn:hover {
-    background-color: rgba(0, 0, 0, 0.8);
-}
-
-.slider-nav-btn.prev {
-    margin-left: 20px;
-}
-
-.slider-nav-btn.next {
-    margin-right: 20px;
-}
-
-
-
-.carousel-section {
-  margin-bottom: 40px;
-  position: relative;
-}
-
 /* Ajustes para modales */
 .details-modal-overlay {
   position: fixed;
@@ -2250,7 +2175,71 @@ html, body {
     max-width: 100% !important;
 }
 
+/* Slider Independiente - Estilo Rakuten.tv */
+.slider-section {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    margin-top: 100px;
+    background: #141414;
+    overflow: hidden;
+}
 
+.slider-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.slider-wrapper {
+    position: relative;
+    display: flex;
+    height: 100%;
+    width: auto;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    /* Centrar el primer slide manualmente */
+    margin-left: calc((100vw - 87vw) / 2);
+}
+
+.slider-slide {
+    flex: 0 0 auto;
+    width: 87vw;
+    height: 100%;
+    margin-right: 2vw;
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #000;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.slider-slide:last-child {
+    margin-right: 0;
+}
+
+.slider-slide:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(255, 255, 255, 0.15);
+}
+
+.slider-slide img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Ajuste para la imagen dentro del slide */
+.slider-img-wrapper {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border-radius: 12px;
+}
 
 .slider-overlay {
     position: absolute !important;
@@ -2270,7 +2259,8 @@ html, body {
     transform: translateY(20px) !important;
     transition: all 0.4s ease !important;
     pointer-events: none !important;
-    box-sizing: border-box !important; /* Añadido */
+    box-sizing: border-box !important;
+    border-radius: 0 0 12px 12px !important;
 }
 
 .slider-slide:hover .slider-overlay {
@@ -2317,48 +2307,7 @@ html, body {
     color: white !important;
 }
 
-/* Paginación */
-.slider-pagination {
-    position: static !important;
-    margin: 10px auto 40px auto !important;
-    display: flex !important;
-    justify-content: center !important;
-    gap: 0.5rem !important;
-    left: unset !important;
-    right: unset !important;
-    bottom: unset !important;
-    transform: none !important;
-    max-width: 100% !important; /* Añadido */
-    overflow: hidden !important; /* Añadido */
-}
-
-.slider-pagination-dot {
-    width: 10px !important;
-    height: 10px !important;
-    border-radius: 50% !important;
-    background: rgba(255, 255, 255, 0.4) !important;
-    border: none !important;
-    cursor: pointer !important;
-    transition: all 0.3s ease !important;
-    opacity: 0.6 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    box-sizing: border-box !important; /* Añadido */
-}
-
-.slider-pagination-dot.active {
-    background: #ffffff !important;
-    opacity: 1 !important;
-    transform: scale(1.2) !important;
-}
-
-.slider-pagination-dot:hover {
-    background: rgba(255, 255, 255, 0.8) !important;
-    opacity: 1 !important;
-    transform: scale(1.1) !important;
-}
-
-/* 1. CORRECCIÓN PARA CENTRAR LOS BOTONES DE NAVEGACIÓN */
+/* Navegación centrada verticalmente */
 .slider-nav {
     position: absolute !important;
     top: 50% !important;
@@ -2400,67 +2349,56 @@ html, body {
     font-size: 20px !important;
 }
 
-/* 2. CORRECCIÓN PARA MOSTRAR UN SLIDE A LA VEZ CENTRADO */
-.slider-section {
-    position: relative;
-    width: 100%;
-    height: 430px;
-    margin-top: 100px;
-    background: #141414;
+/* Paginación mejorada */
+.slider-pagination {
+    position: static !important;
+    margin: 20px auto 40px auto !important;
+    display: flex !important;
+    justify-content: center !important;
+    gap: 0.5rem !important;
+    left: unset !important;
+    right: unset !important;
+    bottom: unset !important;
+    transform: none !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
 }
 
-.slider-container {
-    position: relative;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
+.slider-pagination-dot {
+    width: 12px !important;
+    height: 12px !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.4) !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    opacity: 0.6 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
 }
 
-.slider-wrapper {
-    position: relative;
-    display: flex;
-    height: 100%;
-    width: auto;
-    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    /* Centrar el primer slide manualmente */
-    margin-left: calc((100vw - 87vw) / 2);
+.slider-pagination-dot.active {
+    background: #ffffff !important;
+    opacity: 1 !important;
+    transform: scale(1.2) !important;
 }
 
-.slider-slide {
-    flex: 0 0 auto;
-    width: 87vw;
-    height: 100%;
-    margin-right: 2vw;
-    position: relative;
-    border-radius: 8px;
-    overflow: hidden;
-    background: #000;
-}
-
-.slider-slide:last-child {
-    margin-right: 0;
-}
-
-.slider-slide img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-/* Ajuste para la imagen dentro del slide */
-.slider-img-wrapper {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
+.slider-pagination-dot:hover {
+    background: rgba(255, 255, 255, 0.8) !important;
+    opacity: 1 !important;
+    transform: scale(1.1) !important;
 }
 
 /* Responsive para mantener un slide centrado */
 @media (max-width: 768px) {
+    .slider-section {
+        height: 450px;
+        margin-top: 80px;
+    }
+    
     .slider-nav {
-        padding: 0 10px !important;
+        padding: 0 15px !important;
     }
     
     .slider-nav-btn {
@@ -2481,12 +2419,21 @@ html, body {
     .slider-wrapper {
         margin-left: calc((100vw - 90vw) / 2);
     }
+    
+    .slider-pagination {
+        margin: 15px auto 30px auto !important;
+    }
 }
 
 @media (max-width: 480px) {
+    .slider-section {
+        height: 400px;
+        margin-top: 70px;
+    }
+    
     .slider-nav-btn {
-        width: 40px !important;
-        height: 40px !important;
+        width: 45px !important;
+        height: 45px !important;
         font-size: 18px !important;
     }
     
@@ -2495,11 +2442,72 @@ html, body {
     }
     
     .slider-slide {
-        width: 95vw;
+        width: 92vw;
         margin-right: 0.5vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 95vw) / 2);
+        margin-left: calc((100vw - 92vw) / 2);
+    }
+    
+    .slider-pagination {
+        margin: 10px auto 25px auto !important;
+    }
+    
+    .slider-pagination-dot {
+        width: 10px !important;
+        height: 10px !important;
+    }
+}
+
+/* Desktop - Dimensiones más grandes como Rakuten.tv */
+@media (min-width: 1024px) {
+    .slider-section {
+        height: 600px;
+        margin-top: 120px;
+    }
+    
+    .slider-slide {
+        width: 75vw;
+        margin-right: 1.5vw;
+    }
+    
+    .slider-wrapper {
+        margin-left: calc((100vw - 75vw) / 2);
+    }
+    
+    .slider-nav-btn {
+        width: 70px !important;
+        height: 70px !important;
+        font-size: 28px !important;
+    }
+    
+    .slider-nav-btn i {
+        font-size: 24px !important;
+    }
+}
+
+@media (min-width: 1400px) {
+    .slider-section {
+        height: 700px;
+    }
+    
+    .slider-slide {
+        width: 70vw;
+        margin-right: 2vw;
+    }
+    
+    .slider-wrapper {
+        margin-left: calc((100vw - 70vw) / 2);
+    }
+    
+    .slider-nav-btn {
+        width: 80px !important;
+        height: 80px !important;
+        font-size: 32px !important;
+    }
+    
+    .slider-nav-btn i {
+        font-size: 28px !important;
     }
 }

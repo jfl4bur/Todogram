@@ -7,6 +7,9 @@
     let slidesData = [];
     let isDestroyed = false;
     let lastViewportWidth = 0;
+    let touchStartX = 0;
+    let touchEndX = 0;
+    let isDragging = false;
 
     // Función mejorada para calcular dimensiones responsivas (estilo Rakuten.tv)
     function calculateResponsiveDimensions() {
@@ -18,39 +21,39 @@
         
         if (viewportWidth <= 480) {
             // Mobile: ocupa casi toda la pantalla con poco espacio lateral
-            slideWidth = Math.floor(viewportWidth * 0.85);
-            slideHeight = Math.floor(slideWidth * 0.5);
-            slideGap = 12;
+            slideWidth = Math.floor(viewportWidth * 0.92);
+            slideHeight = Math.floor(slideWidth * 0.56);
+            slideGap = 8;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 768) {
             // Tablet: ocupa la mayor parte con elementos adyacentes visibles
-            slideWidth = Math.floor(viewportWidth * 0.82);
-            slideHeight = Math.floor(slideWidth * 0.45);
-            slideGap = 16;
+            slideWidth = Math.floor(viewportWidth * 0.88);
+            slideHeight = Math.floor(slideWidth * 0.52);
+            slideGap = 12;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1024) {
             // Desktop pequeño: mayor visibilidad de elementos adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.78);
-            slideHeight = Math.floor(slideWidth * 0.4);
-            slideGap = 20;
+            slideWidth = Math.floor(viewportWidth * 0.75);
+            slideHeight = Math.floor(slideWidth * 0.45);
+            slideGap = 16;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1400) {
-            // Desktop mediano
-            slideWidth = Math.floor(viewportWidth * 0.75);
-            slideHeight = Math.floor(slideWidth * 0.35);
-            slideGap = 24;
+            // Desktop mediano: estilo Rakuten.tv
+            slideWidth = Math.floor(viewportWidth * 0.68);
+            slideHeight = Math.floor(slideWidth * 0.42);
+            slideGap = 20;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else {
             // Desktop grande: máxima visibilidad de elementos adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.72);
-            slideHeight = Math.floor(slideWidth * 0.32);
-            slideGap = 28;
+            slideWidth = Math.floor(viewportWidth * 0.65);
+            slideHeight = Math.floor(slideWidth * 0.38);
+            slideGap = 24;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         }
         
         // Límites mínimos y máximos
-        slideWidth = Math.max(280, Math.min(slideWidth, 1400));
-        slideHeight = Math.max(157, Math.min(slideHeight, 450));
+        slideWidth = Math.max(300, Math.min(slideWidth, 1600));
+        slideHeight = Math.max(168, Math.min(slideHeight, 600));
         slideGap = Math.max(8, slideGap);
         sideSpace = Math.max(20, sideSpace);
         
@@ -248,7 +251,7 @@
         
         const dimensions = calculateResponsiveDimensions();
         
-        // Calcular offset de botones de navegación (fuera del área de contenido)
+        // Calcular offset de botones de navegación (centrados verticalmente)
         const navBtnOffset = Math.max(10, Math.floor(dimensions.sideSpace * 0.3));
 
         // Actualizar variables CSS de forma forzada
@@ -350,6 +353,43 @@
                 isTransitioning = false;
             }, 600);
         }
+    }
+
+    // Funciones para manejo de touch/swipe
+    function handleTouchStart(e) {
+        if (isTransitioning) return;
+        touchStartX = e.touches[0].clientX;
+        isDragging = true;
+        console.log('Slider: Touch start en', touchStartX);
+    }
+
+    function handleTouchMove(e) {
+        if (!isDragging || isTransitioning) return;
+        e.preventDefault();
+        touchEndX = e.touches[0].clientX;
+    }
+
+    function handleTouchEnd(e) {
+        if (!isDragging || isTransitioning) return;
+        
+        const swipeThreshold = 50;
+        const diff = touchStartX - touchEndX;
+        
+        console.log('Slider: Touch end - diff:', diff);
+        
+        if (Math.abs(diff) > swipeThreshold) {
+            if (diff > 0) {
+                // Swipe izquierda - siguiente slide
+                goToSlide(currentIndex + 1);
+            } else {
+                // Swipe derecha - slide anterior
+                goToSlide(currentIndex - 1);
+            }
+        }
+        
+        isDragging = false;
+        touchStartX = 0;
+        touchEndX = 0;
     }
 
     // Cargar datos
@@ -456,6 +496,11 @@
         sliderWrapper.style.left = '0px';
         sliderWrapper.style.marginLeft = `${dimensions.sideSpace}px`;
         
+        // Agregar event listeners para touch
+        sliderWrapper.addEventListener('touchstart', handleTouchStart, { passive: false });
+        sliderWrapper.addEventListener('touchmove', handleTouchMove, { passive: false });
+        sliderWrapper.addEventListener('touchend', handleTouchEnd, { passive: false });
+        
         console.log('Slider: Creando slides con dimensiones:', dimensions);
         
         // Crear slides
@@ -503,22 +548,18 @@
                 </div>
             `;
 
-            // Efectos hover
+            // Efectos hover mejorados (estilo Rakuten.tv)
             slideDiv.addEventListener('mouseenter', () => {
                 if (!isTransitioning) {
-                    slideDiv.style.transform = 'scale(1.05)';
-                    slideDiv.style.boxShadow = '0 8px 30px rgba(0,0,0,0.4)';
-                    const img = slideDiv.querySelector('img');
-                    if (img) img.style.transform = 'scale(1.1)';
+                    slideDiv.style.transform = 'translateY(-5px)';
+                    slideDiv.style.boxShadow = '0 8px 25px rgba(255, 255, 255, 0.15)';
                 }
             });
 
             slideDiv.addEventListener('mouseleave', () => {
                 if (!isTransitioning) {
-                    slideDiv.style.transform = 'scale(1)';
+                    slideDiv.style.transform = 'translateY(0)';
                     slideDiv.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
-                    const img = slideDiv.querySelector('img');
-                    if (img) img.style.transform = 'scale(1)';
                 }
             });
 
@@ -676,10 +717,17 @@
         const prevBtn = document.getElementById('slider-prev');
         const nextBtn = document.getElementById('slider-next');
         const dots = document.querySelectorAll('.slider-pagination-dot');
+        const wrapper = document.getElementById('slider-wrapper');
         
         if (prevBtn) prevBtn.replaceWith(prevBtn.cloneNode(true));
         if (nextBtn) nextBtn.replaceWith(nextBtn.cloneNode(true));
         dots.forEach(dot => dot.replaceWith(dot.cloneNode(true)));
+        
+        if (wrapper) {
+            wrapper.removeEventListener('touchstart', handleTouchStart);
+            wrapper.removeEventListener('touchmove', handleTouchMove);
+            wrapper.removeEventListener('touchend', handleTouchEnd);
+        }
         
         // Limpiar datos
         slidesData = [];
