@@ -21,7 +21,7 @@
         let slideWidth, slideHeight, slideGap, sideSpace;
         
         if (viewportWidth <= 480) {
-            // Mobile: centrado mejorado con elementos adyacentes visibles
+            // Mobile: más estrecho para que se vea el item adyacente de la derecha
             slideWidth = Math.floor(viewportWidth * 0.65);
             slideHeight = Math.floor(slideWidth * 0.56);
             slideGap = 8;
@@ -34,7 +34,7 @@
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1024) {
             // Desktop pequeño: mayor visibilidad de elementos adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.80);
+            slideWidth = Math.floor(viewportWidth * 0.75);
             slideHeight = Math.floor(slideWidth * 0.45);
             slideGap = 16;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
