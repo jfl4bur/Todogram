@@ -21,8 +21,8 @@
         let slideWidth, slideHeight, slideGap, sideSpace;
         
         if (viewportWidth <= 480) {
-            // Mobile: mejor centrado con elementos adyacentes visibles
-            slideWidth = Math.floor(viewportWidth * 0.70);
+            // Mobile: centrado mejorado con elementos adyacentes visibles
+            slideWidth = Math.floor(viewportWidth * 0.65);
             slideHeight = Math.floor(slideWidth * 0.56);
             slideGap = 8;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
