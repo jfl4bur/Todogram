@@ -21,7 +21,7 @@
         
         if (viewportWidth <= 480) {
             // Mobile: ocupa casi toda la pantalla con poco espacio lateral
-            slideWidth = Math.floor(viewportWidth * 0.92);
+            slideWidth = Math.floor(viewportWidth * 0.90);
             slideHeight = Math.floor(slideWidth * 0.56);
             slideGap = 8;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
@@ -33,13 +33,13 @@
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1024) {
             // Desktop pequeño: mayor visibilidad de elementos adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.75);
+            slideWidth = Math.floor(viewportWidth * 0.80);
             slideHeight = Math.floor(slideWidth * 0.45);
             slideGap = 16;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1400) {
             // Desktop mediano: estilo Rakuten.tv
-            slideWidth = Math.floor(viewportWidth * 0.68);
+            slideWidth = Math.floor(viewportWidth * 0.70);
             slideHeight = Math.floor(slideWidth * 0.42);
             slideGap = 20;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
