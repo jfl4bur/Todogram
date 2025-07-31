@@ -2495,7 +2495,7 @@ html, body {
 /* Mobile - Mejor centrado y visibilidad */
 @media (max-width: 768px) {
     .slider-section {
-        height: 120px;
+        height: 115px;
         margin-top: 40px;
     }
     s
