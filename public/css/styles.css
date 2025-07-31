@@ -2532,12 +2532,12 @@ html, body {
     }
     
     .slider-slide {
-        width: 85vw;
+        width: 80vw;
         margin-right: 0.8vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 85vw) / 2);
+        margin-left: calc((100vw - 80vw) / 2);
     }
     
     .slider-nav {
