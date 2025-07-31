@@ -2562,17 +2562,17 @@ html, body {
 
 @media (max-width: 390px) {
     .slider-section {
-        height: 150px;
+        height: 160px;
         margin-top: 35px;
     }
     
     .slider-slide {
-        width: 80vw;
+        width: 82vw;
         margin-right: 0.8vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 80vw) / 2);
+        margin-left: calc((100vw - 82vw) / 2);
     }
     
     .slider-nav {
