@@ -2491,17 +2491,17 @@ html, body {
 /* Mobile - Mejor centrado y visibilidad */
 @media (max-width: 768px) {
     .slider-section {
-        height: 110px;
+        height: 150px;
         margin-top: 40px;
     }
     
     .slider-slide {
-        width: 75vw;
+        width: 80vw;
         margin-right: 1.2vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 75vw) / 2);
+        margin-left: calc((100vw - 80vw) / 2);
     }
     
     .slider-nav {
