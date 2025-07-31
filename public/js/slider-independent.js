@@ -54,7 +54,7 @@
         
         // Límites mínimos y máximos
         slideWidth = Math.max(300, Math.min(slideWidth, 1600));
-        slideHeight = Math.max(168, Math.min(slideHeight, 400)); // Máximo 400px para desktop
+        slideHeight = Math.max(120, Math.min(slideHeight, 400)); // Máximo 400px para desktop
         slideGap = Math.max(8, slideGap);
         sideSpace = Math.max(20, sideSpace);
         
@@ -62,7 +62,7 @@
             viewportWidth,
             slideWidth,
             slideHeight,
-            slideGap,
+            slideGap,s
             sideSpace,
             percentage: Math.round((slideWidth / viewportWidth) * 100) + '%'
         });
