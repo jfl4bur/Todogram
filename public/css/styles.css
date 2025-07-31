@@ -9,6 +9,9 @@
     --item-height: 271px;
     --modal-scale: 1.7;
 }
+.container {
+    padding-right: 0px !important;
+}
 
 .secondary-actions-row {
     display: flex;
