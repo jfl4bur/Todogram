@@ -2537,7 +2537,7 @@ html, body {
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 40vw) / 2);
+        margin-left: 30px;
     }
     
     .slider-nav {
