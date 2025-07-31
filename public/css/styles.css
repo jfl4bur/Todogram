@@ -2572,7 +2572,7 @@ html, body {
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 75vw) / 2);
+        margin-left: calc((100vw - 80vw) / 2);
     }
     
     .slider-nav {
