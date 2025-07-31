@@ -2407,7 +2407,7 @@ html, body {
 /* Desktop - Dimensiones grandes como Rakuten.tv */
 @media (min-width: 1024px) {
     .slider-section {
-        height: 450px;
+        height: 380px;
         margin-top: 60px;
     }
     
@@ -2438,7 +2438,7 @@ html, body {
 
 @media (min-width: 1400px) {
     .slider-section {
-        height: 500px;
+        height: 420px;
     }
     
     .slider-slide {
