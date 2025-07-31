@@ -2527,17 +2527,17 @@ html, body {
 /* Mobile pequeño - iPhone 11 y similares */
 @media (max-width: 480px) {
     .slider-section {
-        height: 180px;
+        height: 140px;
         margin-top: 35px;
     }
     
     .slider-slide {
-        width: 65vw;
+        width: 40vw;
         margin-right: 0.8vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 65vw) / 2);
+        margin-left: calc((100vw - 40vw) / 2);
     }
     
     .slider-nav {
