@@ -2562,7 +2562,7 @@ html, body {
 
 @media (max-width: 390px) {
     .slider-section {
-        height: 160px;
+        height: 150px;
         margin-top: 35px;
     }
     
