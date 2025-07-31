@@ -1149,6 +1149,7 @@
     position: relative;
     border-radius: 2px;
     overflow: hidden;
+    margin-right: 10px;
 }
 
 .carousel-progress-bar {
