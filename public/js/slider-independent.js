@@ -40,7 +40,7 @@
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1400) {
             // Desktop mediano: muy ancho como Rakuten.tv
-            slideWidth = Math.floor(viewportWidth * 0.93);
+            slideWidth = Math.floor(viewportWidth * 0.95);
             slideHeight = Math.floor(slideWidth * 0.38);
             slideGap = 20;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
