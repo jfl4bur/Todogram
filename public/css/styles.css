@@ -2493,9 +2493,9 @@ html, body {
 }
 
 /* Mobile - Mejor centrado y visibilidad */
-@media (min-width: 769px) {
+@media (max-width: 768px) {
     .slider-section {
-        height: 168px;
+        height: 130px;
         margin-top: 40px;
     }
     
@@ -2531,7 +2531,7 @@ html, body {
 /* Mobile pequeño - iPhone 11 y similares */
 @media (max-width: 480px) {
     .slider-section {
-        height: 125px;
+        height: 13px;
         margin-top: 35px;
     }
     
