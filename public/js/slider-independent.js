@@ -46,7 +46,7 @@
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else {
             // Desktop grande: máximo ancho con elementos adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.85);
+            slideWidth = Math.floor(viewportWidth * 0.87);
             slideHeight = Math.floor(slideWidth * 0.39);
             slideGap = 24;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
