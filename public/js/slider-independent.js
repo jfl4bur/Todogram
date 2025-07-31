@@ -40,14 +40,14 @@
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1400) {
             // Desktop mediano: muy ancho como Rakuten.tv
-            slideWidth = Math.floor(viewportWidth * 0.95);
+            slideWidth = Math.floor(viewportWidth * 0.82);
             slideHeight = Math.floor(slideWidth * 0.38);
             slideGap = 20;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else {
             // Desktop grande: máximo ancho con elementos adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.90);
-            slideHeight = Math.floor(slideWidth * 0.40);
+            slideWidth = Math.floor(viewportWidth * 0.85);
+            slideHeight = Math.floor(slideWidth * 0.39);
             slideGap = 24;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         }

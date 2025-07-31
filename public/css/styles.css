@@ -2412,12 +2412,12 @@ html, body {
     }
     
     .slider-slide {
-        width: 95vw;
+        width: 82vw;
         margin-right: 2vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 95vw) / 2);
+        margin-left: calc((100vw - 82vw) / 2);
     }
     
     .slider-nav-btn {
@@ -2438,16 +2438,16 @@ html, body {
 
 @media (min-width: 1400px) {
     .slider-section {
-        height: 400px;
+        height: 390px;
     }
     
     .slider-slide {
-        width: 90vw;
+        width: 85vw;
         margin-right: 2.5vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 90vw) / 2);
+        margin-left: calc((100vw - 85vw) / 2);
     }
     
     .slider-nav-btn {
