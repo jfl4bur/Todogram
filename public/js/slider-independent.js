@@ -20,7 +20,7 @@
         // dejando espacio para ver elementos adyacentes
         let slideWidth, slideHeight, slideGap, sideSpace;
         
-        if (viewportWidth <= 480) {
+        if (viewportWidth <= 380) {
             // Mobile: más estrecho para mejor visibilidad de adyacentes
             slideWidth = Math.floor(viewportWidth * 0.80);
             slideHeight = Math.floor(slideWidth * 0.17);
