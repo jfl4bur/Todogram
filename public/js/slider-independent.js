@@ -23,31 +23,31 @@
         if (viewportWidth <= 480) {
             // Mobile: más estrecho para mejor visibilidad de adyacentes
             slideWidth = Math.floor(viewportWidth * 0.65);
-            slideHeight = Math.floor(slideWidth * 0.56);
+            slideHeight = Math.floor(slideWidth * 0.22);
             slideGap = 8;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 768) {
             // Tablet: más estrecho para elementos adyacentes visibles
             slideWidth = Math.floor(viewportWidth * 0.75);
-            slideHeight = Math.floor(slideWidth * 0.52);
+            slideHeight = Math.floor(slideWidth * 0.26);
             slideGap = 12;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1024) {
             // Desktop pequeño: mayor visibilidad de elementos adyacentes
             slideWidth = Math.floor(viewportWidth * 0.75);
-            slideHeight = Math.floor(slideWidth * 0.45);
+            slideHeight = Math.floor(slideWidth * 0.35);
             slideGap = 16;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1400) {
             // Desktop mediano: muy ancho como Rakuten.tv
             slideWidth = Math.floor(viewportWidth * 0.93);
-            slideHeight = Math.floor(slideWidth * 0.42);
+            slideHeight = Math.floor(slideWidth * 0.50);
             slideGap = 20;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else {
             // Desktop grande: máximo ancho con elementos adyacentes
             slideWidth = Math.floor(viewportWidth * 0.93);
-            slideHeight = Math.floor(slideWidth * 0.38);
+            slideHeight = Math.floor(slideWidth * 0.45);
             slideGap = 24;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         }
