@@ -2464,17 +2464,17 @@ html, body {
 /* Tablet - Visibilidad de items adyacentes */
 @media (max-width: 1023px) and (min-width: 769px) {
     .slider-section {
-        height: 260px;
+        height: 200px;
         margin-top: 50px;
     }
     
     .slider-slide {
-        width: 80vw;
-        margin-right: 1.5vw;
+        width: 75vw;
+        margin-right: 1.2vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 80vw) / 2);
+        margin-left: calc((100vw - 75vw) / 2);
     }
     
     .slider-nav-btn {
