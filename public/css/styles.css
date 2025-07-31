@@ -2464,7 +2464,7 @@ html, body {
 /* Tablet - Visibilidad de items adyacentes */
 @media (max-width: 1023px) and (min-width: 769px) {
     .slider-section {
-        height: 350px;
+        height: 260px;
         margin-top: 50px;
     }
     
