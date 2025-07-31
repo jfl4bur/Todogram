@@ -62,7 +62,7 @@
             viewportWidth,
             slideWidth,
             slideHeight,
-            slideGap,s
+            slideGap,
             sideSpace,
             percentage: Math.round((slideWidth / viewportWidth) * 100) + '%'
         });
