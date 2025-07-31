@@ -2495,17 +2495,17 @@ html, body {
 /* Mobile - Mejor centrado y visibilidad */
 @media (max-width: 768px) {
     .slider-section {
-        height: 140px;
+        height: 168px;
         margin-top: 40px;
     }
     
     .slider-slide {
-        width: 85vw;
+        width: 75vw;
         margin-right: 1.2vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 85vw) / 2);
+        margin-left: calc((100vw - 75vw) / 2);
     }
     
     .slider-nav {
@@ -2531,7 +2531,7 @@ html, body {
 /* Mobile pequeño - iPhone 11 y similares */
 @media (max-width: 480px) {
     .slider-section {
-        height: 140px;
+        height: 130px;
         margin-top: 35px;
     }
     
