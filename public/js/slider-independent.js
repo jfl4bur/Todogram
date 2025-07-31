@@ -22,7 +22,7 @@
         
         if (viewportWidth <= 480) {
             // Mobile: más estrecho para mejor visibilidad de adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.75);
+            slideWidth = Math.floor(viewportWidth * 0.70);
             slideHeight = Math.floor(slideWidth * 0.12);
             slideGap = 8;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
