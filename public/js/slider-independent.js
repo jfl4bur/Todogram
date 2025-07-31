@@ -20,17 +20,11 @@
         // dejando espacio para ver elementos adyacentes
         let slideWidth, slideHeight, slideGap, sideSpace;
         
-        if (viewportWidth <= 390) {
+        if (viewportWidth <= 480) {
             // Mobile: más estrecho para mejor visibilidad de adyacentes
             slideWidth = Math.floor(viewportWidth * 0.75);
-            slideHeight = Math.floor(slideWidth * 0.12);
+            slideHeight = Math.floor(slideWidth * 0.17);
             slideGap = 8;
-            sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
-        } else if (viewportWidth <= 468) {
-            // Tablet: más estrecho para elementos adyacentes visibles
-            slideWidth = Math.floor(viewportWidth * 0.75);
-            slideHeight = Math.floor(slideWidth * 0.18);
-            slideGap = 12;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 768) {
             // Tablet: más estrecho para elementos adyacentes visibles
