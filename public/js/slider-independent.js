@@ -27,7 +27,7 @@
         if (viewportWidth <= 480) {
             // Mobile: más estrecho para mejor visibilidad de adyacentes
             slideWidth = Math.floor(viewportWidth * 0.75);
-            slideHeight = Math.floor(slideWidth * 0.14);
+            slideHeight = Math.floor(slideWidth * 0.18);
             slideGap = 8;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 768) {
@@ -61,6 +61,15 @@
         slideHeight = Math.max(120, Math.min(slideHeight, 400)); // Máximo 400px para desktop
         slideGap = Math.max(8, slideGap);
         sideSpace = Math.max(20, sideSpace);
+        
+        // Correcciones específicas para Safari
+        if (isSafari) {
+            // Safari tiene problemas con el cálculo de porcentajes, usar valores más conservadores
+            slideWidth = Math.floor(slideWidth * 0.75); // Reducir ligeramente el ancho
+            slideHeight = Math.floor(slideHeight * 0.99); // Reducir ligeramente la altura
+            // Asegurar que el gap sea consistente
+            slideGap = Math.max(slideGap, 10);
+        }
         
         console.log('Slider: Dimensiones calculadas -', {
             viewportWidth,
@@ -758,7 +767,7 @@
                     <img src="${imageUrl}" 
                          alt="${movie.title}" 
                          loading="${index === 0 ? 'eager' : 'lazy'}"
-                         style="width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform 0.3s ease;"
+                         style="width: 100%; height: 100%; object-fit: fill; object-position: center; transition: transform 0.3s ease;"
                          onerror="this.src='https://via.placeholder.com/${dimensions.slideWidth}x${dimensions.slideHeight}/333/fff?text=No+Image'">
                 </div>
                 <div class="slider-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 20px; color: white; border-radius: 0 0 12px 12px;">
