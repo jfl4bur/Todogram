@@ -2540,13 +2540,13 @@ html, body {
     .slider-section {
         height: 140px !important;
         margin-top: 35px;
-       /* padding: 0 8px; */
+        padding: 0 8px;
      }
     
     .slider-slide {
         width: 90vw;
         margin-right: 0.8vw;
-        max-height: -webkit-fill-available !important;
+        /* max-height: -webkit-fill-available !important; */
     }
     
     .slider-wrapper {
