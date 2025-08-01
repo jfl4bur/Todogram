@@ -26,31 +26,31 @@
         
         if (viewportWidth <= 480) {
             // Mobile: más estrecho para mejor visibilidad de adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.85);
+            slideWidth = Math.floor(viewportWidth * 0.86);
             slideHeight = Math.floor(slideWidth * 0.18);
             slideGap = 8;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 768) {
             // Tablet: más estrecho para elementos adyacentes visibles
-            slideWidth = Math.floor(viewportWidth * 0.85);
+            slideWidth = Math.floor(viewportWidth * 0.86);
             slideHeight = Math.floor(slideWidth * 0.20);
             slideGap = 12;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1024) {
             // Desktop pequeño: mayor visibilidad de elementos adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.85);
+            slideWidth = Math.floor(viewportWidth * 0.86);
             slideHeight = Math.floor(slideWidth * 0.22);
             slideGap = 16;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1400) {
             // Desktop mediano: muy ancho como Rakuten.tv
-            slideWidth = Math.floor(viewportWidth * 0.88);
+            slideWidth = Math.floor(viewportWidth * 0.86);
             slideHeight = Math.floor(slideWidth * 0.40);
             slideGap = 20;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else {
             // Desktop grande: máximo ancho con elementos adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.85);
+            slideWidth = Math.floor(viewportWidth * 0.86);
             slideHeight = Math.floor(slideWidth * 0.42);
             slideGap = 24;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
@@ -65,7 +65,7 @@
         // Correcciones específicas para Safari
         if (isSafari) {
             // Safari tiene problemas con el cálculo de porcentajes, usar valores más conservadores
-            slideWidth = Math.floor(slideWidth * 0.85); // Reducir ligeramente el ancho
+            slideWidth = Math.floor(slideWidth * 0.86); // Reducir ligeramente el ancho
             slideHeight = Math.floor(slideHeight * 0.99); // Reducir ligeramente la altura
             // Asegurar que el gap sea consistente
             slideGap = Math.max(slideGap, 10);
