@@ -2547,6 +2547,7 @@ html, body {
         width: 90vw;
         margin-right: 0.8vw;
         /* max-height: -webkit-fill-available !important; */
+        height: 120px !important;
     }
     
     .slider-wrapper {
