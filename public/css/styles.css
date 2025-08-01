@@ -2470,7 +2470,7 @@ html, body {
 }
 
 /* Tablet - Visibilidad de items adyacentes */
-@media (max-width: 1023px) and (min-width: 844px) {
+@media (max-width: 1023px) and (min-width: 845px) {
     .slider-section {
         height: 200px;
         margin-top: 50px;
