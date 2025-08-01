@@ -2538,7 +2538,7 @@ html, body {
 /* Mobile pequeño - iPhone 11 y similares */
 @media (max-width: 480px) {
     .slider-section {
-        height: 120px !important;
+        height: 140px !important;
         margin-top: 35px;
        /* padding: 0 8px; */
      }
