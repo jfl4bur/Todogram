@@ -27,7 +27,7 @@
         if (viewportWidth <= 480) {
             // Mobile: más estrecho para mejor visibilidad de adyacentes
             slideWidth = Math.floor(viewportWidth * 0.90);
-            slideHeight = Math.floor(slideWidth * 0.13);
+            slideHeight = Math.floor(slideWidth * 0.14);
             slideGap = 8;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 768) {
@@ -58,14 +58,14 @@
         
         // Límites mínimos y máximos
         slideWidth = Math.max(300, Math.min(slideWidth, 2000));
-        slideHeight = Math.max(120, Math.min(slideHeight, 400)); // Máximo 400px para desktop
+        slideHeight = Math.max(140, Math.min(slideHeight, 400)); // Máximo 400px para desktop
         slideGap = Math.max(8, slideGap);
         sideSpace = Math.max(20, sideSpace);
         
         // Correcciones específicas para Safari
         if (isSafari) {
             // Safari tiene problemas con el cálculo de porcentajes, usar valores más conservadores
-            slideWidth = Math.floor(slideWidth * 0.88); // Reducir ligeramente el ancho
+            slideWidth = Math.floor(slideWidth * 0.90); // Reducir ligeramente el ancho
             slideHeight = Math.floor(slideHeight * 0.99); // Reducir ligeramente la altura
             // Asegurar que el gap sea consistente
             slideGap = Math.max(slideGap, 10);
