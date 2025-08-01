@@ -38,7 +38,7 @@
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1024) {
             // Desktop pequeño: mayor visibilidad de elementos adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.88);
+            slideWidth = Math.floor(viewportWidth * 0.90);
             slideHeight = Math.floor(slideWidth * 0.19);
             slideGap = 16;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
@@ -66,7 +66,7 @@
         if (isSafari) {
             // Safari tiene problemas con el cálculo de porcentajes, usar valores más conservadores
             slideWidth = Math.floor(slideWidth * 0.90); // Reducir ligeramente el ancho
-            slideHeight = Math.floor(slideHeight * 1); // Reducir ligeramente la altura
+            slideHeight = Math.floor(slideHeight * 1.1); // Reducir ligeramente la altura
             // Asegurar que el gap sea consistente
             slideGap = Math.max(slideGap, 10);
         }
