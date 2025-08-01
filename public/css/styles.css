@@ -2612,7 +2612,7 @@ html, body {
     
     .slider-slide {
         width: 90vw;
-        margin-right: 0.8vw;
+        margin-right: 0.5vw;
         /* max-height: -webkit-fill-available !important; */
         height: 120px !important;
     }
