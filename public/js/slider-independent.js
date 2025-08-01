@@ -16,6 +16,10 @@
     function calculateResponsiveDimensions() {
         const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
         
+        // Detectar Safari para aplicar correcciones específicas
+        const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) || 
+                        (navigator.userAgent.includes('Mac') && navigator.userAgent.includes('Safari'));
+        
         // Calcular el ancho del slide para ocupar la mayor parte de la pantalla
         // dejando espacio para ver elementos adyacentes
         let slideWidth, slideHeight, slideGap, sideSpace;
@@ -58,16 +62,26 @@
         slideGap = Math.max(8, slideGap);
         sideSpace = Math.max(20, sideSpace);
         
+        // Correcciones específicas para Safari
+        if (isSafari) {
+            // Safari tiene problemas con el cálculo de porcentajes, usar valores más conservadores
+            slideWidth = Math.floor(slideWidth * 0.98); // Reducir ligeramente el ancho
+            slideHeight = Math.floor(slideHeight * 0.98); // Reducir ligeramente la altura
+            // Asegurar que el gap sea consistente
+            slideGap = Math.max(slideGap, 10);
+        }
+        
         console.log('Slider: Dimensiones calculadas -', {
             viewportWidth,
             slideWidth,
             slideHeight,
             slideGap,
             sideSpace,
-            percentage: Math.round((slideWidth / viewportWidth) * 100) + '%'
+            percentage: Math.round((slideWidth / viewportWidth) * 100) + '%',
+            isSafari
         });
         
-        return { slideWidth, slideHeight, slideGap, sideSpace, viewportWidth };
+        return { slideWidth, slideHeight, slideGap, sideSpace, viewportWidth, isSafari };
     }
 
     // Función mejorada para manejar el resize (optimizada)
@@ -179,6 +193,45 @@
         // Reposicionar el wrapper correctamente
         wrapper.style.marginLeft = `${dimensions.sideSpace}px`;
         wrapper.style.left = '0px';
+        
+        // Correcciones específicas para Safari
+        if (dimensions.isSafari) {
+            console.log('Slider: Aplicando correcciones específicas para Safari');
+            
+            // Forzar recálculo de layout en Safari
+            wrapper.style.webkitTransform = 'translate3d(0,0,0)';
+            wrapper.style.transform = 'translate3d(0,0,0)';
+            
+            // Asegurar que las imágenes mantengan sus dimensiones
+            slides.forEach((slide, index) => {
+                const imgWrapper = slide.querySelector('.slider-img-wrapper');
+                const img = slide.querySelector('.slider-img-wrapper img');
+                
+                if (imgWrapper) {
+                    imgWrapper.style.width = '100%';
+                    imgWrapper.style.height = '100%';
+                    imgWrapper.style.webkitTransform = 'translate3d(0,0,0)';
+                    imgWrapper.style.transform = 'translate3d(0,0,0)';
+                }
+                
+                if (img) {
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.webkitTransform = 'translate3d(0,0,0)';
+                    img.style.transform = 'translate3d(0,0,0)';
+                    img.style.webkitBackfaceVisibility = 'hidden';
+                    img.style.backfaceVisibility = 'hidden';
+                }
+                
+                // Forzar reflow adicional en Safari
+                slide.offsetHeight;
+                slide.offsetWidth;
+            });
+            
+            // Forzar reflow del wrapper
+            wrapper.offsetHeight;
+            wrapper.offsetWidth;
+        }
         
         // Actualizar posición del slider
         updateSliderPosition(true);
@@ -309,6 +362,26 @@
         if (marginDifference > 10) {
             needsCorrection = true;
             issues.push(`Wrapper marginLeft: actual ${currentMarginLeft}px, esperado ${dimensions.sideSpace}px`);
+        }
+        
+        // Verificación específica para Safari
+        if (dimensions.isSafari) {
+            console.log('Slider: Verificando integridad específica para Safari');
+            
+            // Verificar que las transformaciones 3D estén aplicadas
+            slides.forEach((slide, index) => {
+                const img = slide.querySelector('.slider-img-wrapper img');
+                if (img && (!img.style.webkitTransform || !img.style.transform)) {
+                    needsCorrection = true;
+                    issues.push(`Slide ${index}: faltan transformaciones 3D para Safari`);
+                }
+            });
+            
+            // Verificar que el wrapper tenga las transformaciones correctas
+            if (!wrapper.style.webkitTransform || !wrapper.style.transform) {
+                needsCorrection = true;
+                issues.push('Wrapper: faltan transformaciones 3D para Safari');
+            }
         }
         
         if (needsCorrection) {
@@ -641,6 +714,19 @@
         setTimeout(() => {
             if (!isDestroyed) {
                 verifySliderIntegrity();
+                
+                // Corrección adicional específica para Safari
+                const dimensions = calculateResponsiveDimensions();
+                if (dimensions.isSafari) {
+                    console.log('Slider: Aplicando corrección post-renderizado para Safari');
+                    
+                    // Forzar un segundo recálculo después de un breve delay
+                    setTimeout(() => {
+                        if (!isDestroyed) {
+                            forceCompleteRecalculation();
+                        }
+                    }, 100);
+                }
             }
         }, 200);
     }

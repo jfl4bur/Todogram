@@ -1316,6 +1316,76 @@
     #carousel-wrapper {
         -webkit-overflow-scrolling: touch;
     }
+    
+    /* ===== CORRECCIONES ESPECÍFICAS PARA SAFARI EN EL SLIDER ===== */
+    .slider-wrapper {
+        -webkit-transform: translate3d(0,0,0);
+        transform: translate3d(0,0,0);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        -webkit-perspective: 1000px;
+        perspective: 1000px;
+        will-change: transform;
+    }
+    
+    .slider-slide {
+        -webkit-transform: translate3d(0,0,0);
+        transform: translate3d(0,0,0);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        -webkit-perspective: 1000px;
+        perspective: 1000px;
+        will-change: transform;
+        /* Forzar recálculo de dimensiones en Safari */
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+        /* Asegurar que las dimensiones se calculen correctamente */
+        min-width: 0;
+        min-height: 0;
+    }
+    
+    .slider-slide img {
+        -webkit-transform: translate3d(0,0,0);
+        transform: translate3d(0,0,0);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        /* Forzar que Safari respete las dimensiones */
+        width: 100% !important;
+        height: 100% !important;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+    
+    .slider-img-wrapper {
+        -webkit-transform: translate3d(0,0,0);
+        transform: translate3d(0,0,0);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+        /* Asegurar que el wrapper mantenga las dimensiones */
+        width: 100% !important;
+        height: 100% !important;
+        -webkit-box-sizing: border-box;
+        box-sizing: border-box;
+    }
+    
+    /* Forzar recálculo de variables CSS en Safari */
+    .slider-section {
+        -webkit-transform: translate3d(0,0,0);
+        transform: translate3d(0,0,0);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+    
+    /* Asegurar que las transiciones funcionen correctamente en Safari */
+    .slider-wrapper {
+        -webkit-transition: -webkit-transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+    
+    .slider-slide {
+        -webkit-transition: -webkit-transform 0.3s ease, -webkit-box-shadow 0.3s ease;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
 }
 
 @keyframes iosModalIn {
