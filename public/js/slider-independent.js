@@ -65,8 +65,8 @@
         // Correcciones específicas para Safari
         if (isSafari) {
             // Safari tiene problemas con el cálculo de porcentajes, usar valores más conservadores
-            slideWidth = Math.floor(slideWidth * 0.98); // Reducir ligeramente el ancho
-            slideHeight = Math.floor(slideHeight * 0.98); // Reducir ligeramente la altura
+            slideWidth = Math.floor(slideWidth * 0.90); // Reducir ligeramente el ancho
+            slideHeight = Math.floor(slideHeight * 0.90); // Reducir ligeramente la altura
             // Asegurar que el gap sea consistente
             slideGap = Math.max(slideGap, 10);
         }
@@ -183,7 +183,7 @@
             if (img) {
                 img.style.width = '100%';
                 img.style.height = '100%';
-                img.style.objectFit = 'fill';
+                img.style.objectFit = 'cover';
                 img.style.objectPosition = 'center';
             }
             
@@ -286,7 +286,7 @@
                 if (img) {
                     img.style.width = '100%';
                     img.style.height = '100%';
-                    img.style.objectFit = 'fill';
+                    img.style.objectFit = 'cover';
                     img.style.objectPosition = 'center';
                     img.style.transition = 'transform 0.3s ease';
                 }
