@@ -2506,12 +2506,12 @@ html, body {
     }
     
     .slider-slide {
-        width: 95vw;
+        width: 99vw;
         margin-right: 1.2vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 95vw) / 2);
+        margin-left: calc((100vw - 99vw) / 2);
     }
     
     .slider-nav {
