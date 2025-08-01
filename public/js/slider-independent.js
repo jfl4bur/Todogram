@@ -27,31 +27,31 @@
         if (viewportWidth <= 480) {
             // Mobile: más estrecho para mejor visibilidad de adyacentes
             slideWidth = Math.floor(viewportWidth * 0.75);
-            slideHeight = Math.floor(slideWidth * 0.18;
+            slideHeight = Math.floor(slideWidth * 0.18);
             slideGap = 8;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 768) {
             // Tablet: más estrecho para elementos adyacentes visibles
             slideWidth = Math.floor(viewportWidth * 0.75);
-            slideHeight = Math.floor(slideWidth * 0.18);
+            slideHeight = Math.floor(slideWidth * 0.20);
             slideGap = 12;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1024) {
             // Desktop pequeño: mayor visibilidad de elementos adyacentes
             slideWidth = Math.floor(viewportWidth * 0.80);
-            slideHeight = Math.floor(slideWidth * 0.26);
+            slideHeight = Math.floor(slideWidth * 0.28);
             slideGap = 16;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1400) {
             // Desktop mediano: muy ancho como Rakuten.tv
-            slideWidth = Math.floor(viewportWidth * 0.82);
-            slideHeight = Math.floor(slideWidth * 0.38);
+            slideWidth = Math.floor(viewportWidth * 0.80);
+            slideHeight = Math.floor(slideWidth * 0.40);
             slideGap = 20;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else {
             // Desktop grande: máximo ancho con elementos adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.90);
-            slideHeight = Math.floor(slideWidth * 0.42);
+            slideWidth = Math.floor(viewportWidth * 0.80);
+            slideHeight = Math.floor(slideWidth * 0.45);
             slideGap = 24;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         }
@@ -729,6 +729,8 @@
         sliderWrapper.style.position = 'relative';
         sliderWrapper.style.left = '0px';
         sliderWrapper.style.marginLeft = `${dimensions.sideSpace}px`;
+        sliderWrapper.style.width = 'fit-content';
+        sliderWrapper.style.minWidth = '100%';
         
         // Configurar compatibilidad touch
         setupTouchCompatibility();
@@ -940,6 +942,23 @@
         dots.forEach((dot, index) => {
             dot.classList.toggle('active', index === currentIndex);
         });
+        
+        // Ajustar posición de paginación basada en el ancho del slider
+        const pagination = document.getElementById('slider-pagination');
+        const wrapper = document.getElementById('slider-wrapper');
+        if (pagination && wrapper) {
+            const wrapperWidth = wrapper.scrollWidth;
+            const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+            
+            // Si el wrapper es más ancho que el viewport, centrar la paginación
+            if (wrapperWidth > viewportWidth) {
+                pagination.style.maxWidth = `${viewportWidth - 40}px`;
+                pagination.style.margin = '15px auto 30px auto';
+            } else {
+                pagination.style.maxWidth = 'none';
+                pagination.style.margin = '15px auto 30px auto';
+            }
+        }
     }
 
     // Función para abrir modal
