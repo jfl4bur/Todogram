@@ -2500,19 +2500,19 @@ html, body {
 
 @media (max-width: 844px) {
     .slider-section {
-        height: 199px;
+        height: 200px;
         margin-top: 40px;
        /* padding: 0 30px; */
     }
     
     .slider-slide {
-        width: 90vw;
+        width: 95vw;
         margin-right: 1.2vw;
-        margin-left: 6px;
+       /* margin-left: 6px; */
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 90vw) / 2);
+        margin-left: calc((100vw - 95vw) / 2);
     }
     
     .slider-nav {
@@ -2607,7 +2607,7 @@ html, body {
     .slider-section {
         height: 140px !important;
         margin-top: 35px;
-        padding: 0 8px;
+      /*  padding: 0 8px; */
      }
     
     .slider-slide {
