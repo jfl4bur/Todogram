@@ -58,7 +58,7 @@
         
         // Límites mínimos y máximos
         slideWidth = Math.max(300, Math.min(slideWidth, 1600));
-        slideHeight = Math.max(120, Math.min(slideHeight, 400)); // Máximo 400px para desktop
+        slideHeight = Math.max(140, Math.min(slideHeight, 400)); // Máximo 400px para desktop
         slideGap = Math.max(8, slideGap);
         sideSpace = Math.max(20, sideSpace);
         
@@ -66,7 +66,7 @@
         if (isSafari) {
             // Safari tiene problemas con el cálculo de porcentajes, usar valores más conservadores
             slideWidth = Math.floor(slideWidth * 0.90); // Reducir ligeramente el ancho
-            slideHeight = Math.floor(slideHeight * 0.95); // Reducir ligeramente la altura
+            slideHeight = Math.floor(slideHeight * 0.99); // Reducir ligeramente la altura
             // Asegurar que el gap sea consistente
             slideGap = Math.max(slideGap, 10);
         }
