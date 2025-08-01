@@ -38,8 +38,8 @@
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1024) {
             // Desktop pequeño: mayor visibilidad de elementos adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.88);
-            slideHeight = Math.floor(slideWidth * 0.32);
+            slideWidth = Math.floor(viewportWidth * 0.90);
+            slideHeight = Math.floor(slideWidth * 0.22);
             slideGap = 16;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1400) {
@@ -57,8 +57,8 @@
         }
         
         // Límites mínimos y máximos
-        slideWidth = Math.max(300, Math.min(slideWidth, 1600));
-        slideHeight = Math.max(120, Math.min(slideHeight, 400)); // Máximo 400px para desktop
+        slideWidth = Math.max(300, Math.min(slideWidth, 2000));
+        slideHeight = Math.max(120, Math.min(slideHeight, 599)); // Máximo 400px para desktop
         slideGap = Math.max(8, slideGap);
         sideSpace = Math.max(20, sideSpace);
         

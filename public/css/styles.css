@@ -2475,18 +2475,18 @@ html, body {
 /* Tablet - Visibilidad de items adyacentes */
 @media (max-width: 1023px) and (min-width: 769px) {
     .slider-section {
-        height: 320px;
+        height: 220px;
         margin-top: 50px;
         /* padding: 0 15px; */
     }
     
     .slider-slide {
-        width: 88vw;
+        width: 90vw;
         margin-right: 1.2vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 88vw) / 2);
+        margin-left: calc((100vw - 90vw) / 2);
     }
     
     .slider-nav-btn {
