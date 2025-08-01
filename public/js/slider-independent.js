@@ -65,8 +65,8 @@
         // Correcciones específicas para Safari
         if (isSafari) {
             // Safari tiene problemas con el cálculo de porcentajes, usar valores más conservadores
-            slideWidth = Math.floor(slideWidth * 0.95); // Reducir ligeramente el ancho
-            slideHeight = Math.floor(slideHeight * 0.99); // Reducir ligeramente la altura
+            slideWidth = Math.floor(slideWidth * 0.93); // Reducir ligeramente el ancho
+            slideHeight = Math.floor(slideHeight * 0.95); // Reducir ligeramente la altura
             // Asegurar que el gap sea consistente
             slideGap = Math.max(slideGap, 10);
         }
