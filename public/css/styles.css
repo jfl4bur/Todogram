@@ -2607,7 +2607,7 @@ html, body {
     .slider-section {
         height: 140px !important;
         margin-top: 35px;
-      /*  padding: 0 8px; */
+       /* padding: 0 8px;*/
      }
     
     .slider-slide {
@@ -2615,7 +2615,7 @@ html, body {
         margin-right: 0.5vw;
         /* max-height: -webkit-fill-available !important; */
         height: 120px !important;
-        margin-left: 8px;
+        margin-left: 3px;
     }
     
     .slider-wrapper {
