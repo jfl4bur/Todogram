@@ -2415,7 +2415,7 @@ html, body {
     .slider-section {
         height: 400px;
         margin-top: 60px;
-      /*  padding: 0 20px; */
+        padding: 0 20px;
     }
     
     .slider-slide {
@@ -2474,7 +2474,7 @@ html, body {
     .slider-section {
         height: 200px;
         margin-top: 50px;
-        /* padding: 0 15px; */
+        padding: 0 15px;
     }
     
     .slider-slide {
@@ -2502,7 +2502,7 @@ html, body {
     .slider-section {
         height: 200px;
         margin-top: 50px;
-        /* padding: 0 15px; */
+        padding: 0 15px;
     }
     
     .slider-slide {
@@ -2530,7 +2530,7 @@ html, body {
     .slider-section {
         height: 190px;
         margin-top: 40px;
-        /* padding: 0 10px; */
+        padding: 0 10px;
     }
     
     .slider-slide {
