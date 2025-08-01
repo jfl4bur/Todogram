@@ -50,7 +50,7 @@
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else {
             // Desktop grande: máximo ancho con elementos adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.80);
+            slideWidth = Math.floor(viewportWidth * 0.9);
             slideHeight = Math.floor(slideWidth * 0.45);
             slideGap = 24;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
@@ -58,7 +58,7 @@
         
         // Límites mínimos y máximos
         slideWidth = Math.max(300, Math.min(slideWidth, 1600));
-        slideHeight = Math.max(12, Math.min(slideHeight, 400)); // Máximo 400px para desktop
+        slideHeight = Math.max(120 Math.min(slideHeight, 400)); // Máximo 400px para desktop
         slideGap = Math.max(8, slideGap);
         sideSpace = Math.max(20, sideSpace);
         
