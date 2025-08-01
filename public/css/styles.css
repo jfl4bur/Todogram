@@ -2181,12 +2181,7 @@ html, body {
 
 /* ===== SLIDER ESTILO RAKUTEN.TV ===== */
 
-/* Variables CSS para el slider */
-:root {
-    --slider-slide-width: 85vw;
-    --slider-slide-gap: 1.5vw;
-    --slider-side-space: calc((100% - var(--slider-slide-width)) / 2);
-}
+/* Slider Independiente - CSS Optimizado para Safari/iPhone */
 
 /* Prevenir scroll horizontal global */
 html, body {
@@ -2194,16 +2189,19 @@ html, body {
     max-width: 100% !important;
 }
 
-/* Slider Independiente - Estilo Rakuten.tv */
+/* Sección principal del slider */
 .slider-section {
     position: relative;
     width: 100%;
-    height: 600px;
-    margin-top: 80px;
+    height: 240px; /* Altura base para mobile */
+    margin-top: 60px;
     background: #141414;
     overflow: hidden;
+    padding: 20px 0;
+    box-sizing: border-box;
 }
 
+/* Contenedor del slider */
 .slider-container {
     position: relative;
     width: 100%;
@@ -2211,57 +2209,73 @@ html, body {
     overflow: hidden;
 }
 
+/* Wrapper principal - Simplificado para Safari */
 .slider-wrapper {
     position: relative;
     display: flex;
-    height: 100%;
-    width: auto;
+    align-items: center;
+    width: fit-content;
+    min-width: 100%;
+    height: 160px; /* Altura base para mobile */
     transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    margin-left: calc((100vw - 85vw) / 2);
+    
+    /* Optimizaciones específicas para Safari/iOS */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    will-change: transform;
 }
 
+/* Slides individuales */
 .slider-slide {
-    flex: 0 0 auto;
-    width: 85vw;
-    height: 100%;
-    margin-right: 1.5vw;
     position: relative;
-    border-radius: 8px;
+    flex-shrink: 0;
+    width: 280px; /* Ancho base para mobile */
+    height: 160px; /* Altura base para mobile */
+    border-radius: 12px;
     overflow: hidden;
     background: #000;
     cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    
+    /* Optimizaciones específicas para Safari/iOS */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
 }
 
-.slider-slide:last-child {
-    margin-right: 0;
-}
-
-/* Hover solo en dispositivos con mouse */
-@media (hover: hover) and (pointer: fine) {
-    .slider-slide:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(255, 255, 255, 0.15);
-    }
-}
-
-.slider-slide img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-/* Ajuste para la imagen dentro del slide */
+/* Wrapper de imagen */
 .slider-img-wrapper {
     width: 100%;
     height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: block;
     overflow: hidden;
-    border-radius: 8px;
+    border-radius: 12px;
+    
+    /* Optimizaciones específicas para Safari/iOS */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
 }
 
+/* Imágenes del slider */
+.slider-img-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    
+    /* Optimizaciones específicas para Safari/iOS */
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+/* Overlay de información */
 .slider-overlay {
     position: absolute !important;
     bottom: 0 !important;
@@ -2274,65 +2288,80 @@ html, body {
         rgba(0, 0, 0, 0.4) 60%,
         transparent 100%
     ) !important;
-    padding: 2rem !important;
+    padding: 1rem !important;
     color: white !important;
     opacity: 0 !important;
-    transform: translateY(20px) !important;
+    transform: translateY(10px) !important;
     transition: all 0.4s ease !important;
     pointer-events: none !important;
     box-sizing: border-box !important;
-    border-radius: 0 0 8px 8px !important;
+    border-radius: 0 0 12px 12px !important;
 }
 
 /* Hover solo en dispositivos con mouse */
 @media (hover: hover) and (pointer: fine) {
-.slider-slide:hover .slider-overlay {
-    opacity: 1 !important;
-    transform: translateY(0) !important;
-    pointer-events: all !important;
+    .slider-slide:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(255, 255, 255, 0.15);
+    }
+    
+    .slider-slide:hover .slider-overlay {
+        opacity: 1 !important;
+        transform: translateY(0) !important;
+        pointer-events: all !important;
     }
 }
 
+/* Título de la película */
 .slider-title-movie {
-    font-size: clamp(1.5rem, 3vw, 2.5rem) !important;
+    font-size: 1.1rem !important;
     font-weight: 700 !important;
-    margin-bottom: 0.8rem !important;
+    margin-bottom: 0.5rem !important;
     line-height: 1.2 !important;
     text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8) !important;
     color: white !important;
+    display: -webkit-box !important;
+    -webkit-line-clamp: 2 !important;
+    -webkit-box-orient: vertical !important;
+    overflow: hidden !important;
 }
 
+/* Metadatos */
 .slider-meta {
     display: flex !important;
     flex-wrap: wrap !important;
-    gap: 1rem !important;
-    margin-bottom: 1rem !important;
-    font-size: 0.9rem !important;
+    gap: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+    font-size: 0.8rem !important;
     opacity: 0.9 !important;
 }
 
 .slider-meta span {
     display: flex !important;
     align-items: center !important;
-    gap: 0.3rem !important;
+    gap: 0.2rem !important;
     font-weight: 500 !important;
     color: white !important;
 }
 
+.slider-meta i {
+    color: #ffd700 !important;
+    font-size: 0.7rem !important;
+}
+
+/* Descripción */
 .slider-description {
-    font-size: 0.95rem !important;
-    line-height: 1.5 !important;
+    font-size: 0.75rem !important;
+    line-height: 1.4 !important;
     opacity: 0.85 !important;
-    max-width: 70% !important;
     display: -webkit-box !important;
-    -webkit-line-clamp: 3 !important;
-    line-clamp: 3 !important;
+    -webkit-line-clamp: 2 !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
     color: white !important;
 }
 
-/* Navegación centrada verticalmente como Rakuten.tv */
+/* Navegación */
 .slider-nav {
     position: absolute !important;
     top: 50% !important;
@@ -2344,7 +2373,7 @@ html, body {
     align-items: center !important;
     pointer-events: none !important;
     z-index: 10 !important;
-    padding: 0 20px !important;
+    padding: 0 15px !important;
     box-sizing: border-box !important;
 }
 
@@ -2353,11 +2382,11 @@ html, body {
     background: rgba(0,0,0,0.7) !important;
     border: none !important;
     color: white !important;
-    width: 50px !important;
-    height: 50px !important;
+    width: 45px !important;
+    height: 45px !important;
     border-radius: 50% !important;
     cursor: pointer !important;
-    font-size: 20px !important;
+    font-size: 18px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -2366,24 +2395,24 @@ html, body {
 
 .slider-nav-btn:hover {
     background: rgba(0,0,0,0.9) !important;
-    transform: scale(1) !important;
+    transform: scale(1.05) !important;
 }
 
 .slider-nav-btn i {
-    font-size: 16px !important;
+    font-size: 14px !important;
 }
 
-/* Paginación en posición correcta como Rakuten.tv */
+/* Paginación */
 .slider-pagination {
-    position: static !important;
-    margin: 15px auto 30px auto !important;
+    position: absolute !important;
+    bottom: 10px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
     display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    gap: 6px !important;
+    gap: 8px !important;
     z-index: 10 !important;
-    padding: 0 20px !important;
-    flex-wrap: wrap !important;
+    padding: 0 !important;
+    margin: 0 !important;
 }
 
 .slider-pagination-dot {
@@ -2391,102 +2420,89 @@ html, body {
     height: 8px !important;
     border-radius: 50% !important;
     background: rgba(255, 255, 255, 0.4) !important;
-    border: none !important;
     cursor: pointer !important;
     transition: all 0.3s ease !important;
-    opacity: 0.6 !important;
-    margin: 0 2px !important;
+    border: none !important;
     padding: 0 !important;
-    box-sizing: border-box !important;
-    flex-shrink: 0 !important;
+    margin: 0 !important;
 }
 
 .slider-pagination-dot.active {
-    background: #ffffff !important;
-    opacity: 1 !important;
+    background: rgba(255, 255, 255, 0.9) !important;
     transform: scale(1.2) !important;
 }
 
 .slider-pagination-dot:hover {
-    background: rgba(255, 255, 255, 0.8) !important;
-    opacity: 1 !important;
+    background: rgba(255, 255, 255, 0.7) !important;
     transform: scale(1.1) !important;
 }
 
-/* Desktop - Dimensiones grandes como Rakuten.tv */
-@media (min-width: 1024px) {
+/* Estados de carga */
+.slider-slide.loading {
+    background: #222 !important;
+    animation: pulse 1.5s ease-in-out infinite alternate !important;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+
+/* Responsive Design */
+
+/* Tablet Portrait */
+@media (min-width: 768px) and (max-width: 1024px) {
     .slider-section {
-        height: 400px;
-        margin-top: 60px;
-        padding: 0 20px;
-    }
-    
-    .slider-slide {
-        width: 80vw;
-        margin-right: 2vw;
+        height: 280px;
+        padding: 30px 0;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 80vw) / 2);
+        height: 200px;
+    }
+    
+    .slider-slide {
+        width: 320px;
+        height: 200px;
     }
     
     .slider-nav-btn {
-        width: 60px !important;
-        height: 60px !important;
-        font-size: 24px !important;
-    }
-    
-    .slider-nav-btn i {
+        width: 50px !important;
+        height: 50px !important;
         font-size: 20px !important;
     }
     
-    .slider-pagination-dot {
-        width: 10px !important;
-        height: 10px !important;
-        margin: 0 3px !important;
+    .slider-title-movie {
+        font-size: 1.2rem !important;
+    }
+    
+    .slider-meta {
+        font-size: 0.85rem !important;
+    }
+    
+    .slider-description {
+        font-size: 0.8rem !important;
     }
 }
 
-@media (min-width: 1400px) {
+/* Desktop */
+@media (min-width: 1025px) {
     .slider-section {
-        height: 420px;
-    }
-    
-    .slider-slide {
-        width: 90vw;
-        margin-right: 2.5vw;
+        height: 320px;
+        padding: 40px 0;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 90vw) / 2);
-    }
-    
-    .slider-nav-btn {
-        width: 70px !important;
-        height: 70px !important;
-        font-size: 28px !important;
-    }
-    
-    .slider-nav-btn i {
-        font-size: 24px !important;
-    }
-}
-
-/* Tablet - Visibilidad de items adyacentes */
-@media (max-width: 1023px) and (min-width: 769px) {
-    .slider-section {
-        height: 220px;
-        margin-top: 50px;
-        padding: 0 15px;
+        height: 240px;
     }
     
     .slider-slide {
-        width: 75vw;
-        margin-right: 1.2vw;
+        width: 380px;
+        height: 240px;
     }
     
-    .slider-wrapper {
-        margin-left: calc((100vw - 75vw) / 2);
+    .slider-nav {
+        padding: 0 25px !important;
     }
     
     .slider-nav-btn {
@@ -2495,68 +2511,73 @@ html, body {
         font-size: 22px !important;
     }
     
-    .slider-nav-btn i {
-        font-size: 18px !important;
+    .slider-title-movie {
+        font-size: 1.3rem !important;
+    }
+    
+    .slider-meta {
+        font-size: 0.9rem !important;
+    }
+    
+    .slider-description {
+        font-size: 0.85rem !important;
     }
 }
 
-/* Mobile - Mejor centrado y visibilidad */
-@media (max-width: 768px) {
+/* Extra Large Screens */
+@media (min-width: 1440px) {
     .slider-section {
-        height: 200px;
-        margin-top: 40px;
-        padding: 0 10px;
-    }
-    
-    .slider-slide {
-        width: 75vw;
-        margin-right: 1.2vw;
+        height: 360px;
+        padding: 50px 0;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 75vw) / 2);
+        height: 280px;
+    }
+    
+    .slider-slide {
+        width: 420px;
+        height: 280px;
     }
     
     .slider-nav {
-        padding: 0 15px !important;
+        padding: 0 35px !important;
     }
-
+    
     .slider-nav-btn {
-        width: 45px !important;
-        height: 45px !important;
-        font-size: 18px !important;
+        width: 60px !important;
+        height: 60px !important;
+        font-size: 24px !important;
     }
     
-    .slider-nav-btn i {
-        font-size: 14px !important;
+    .slider-title-movie {
+        font-size: 1.4rem !important;
     }
     
-    .slider-pagination-dot {
-        width: 8px !important;
-        height: 8px !important;
-        margin: 0 2px !important;
+    .slider-meta {
+        font-size: 0.95rem !important;
+    }
+    
+    .slider-description {
+        font-size: 0.9rem !important;
     }
 }
 
-/* Mobile pequeño - iPhone 11 y similares */
-@media (max-width: 480px) {
+/* Ajustes específicos para iPhone */
+@media only screen and (max-device-width: 480px) {
     .slider-section {
-        height: 180px;
-        margin-top: 35px;
-        padding: 0 8px;
-    }
-    
-    .slider-slide {
-        width: 75vw;
-        margin-right: 0.8vw;
+        margin-top: 50px;
+        height: 220px;
+        padding: 15px 0;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 75vw) / 2);
+        height: 150px;
     }
     
-    .slider-nav {
-        padding: 0 10px !important;
+    .slider-slide {
+        width: 260px;
+        height: 150px;
     }
     
     .slider-nav-btn {
@@ -2572,7 +2593,55 @@ html, body {
     .slider-pagination-dot {
         width: 6px !important;
         height: 6px !important;
-        margin: 0 1px !important;
+    }
+    
+    .slider-title-movie {
+        font-size: 1rem !important;
+    }
+    
+    .slider-meta {
+        font-size: 0.75rem !important;
+    }
+    
+    .slider-description {
+        font-size: 0.7rem !important;
     }
 }
 
+/* Optimizaciones adicionales para Safari */
+@supports (-webkit-touch-callout: none) {
+    .slider-wrapper,
+    .slider-slide,
+    .slider-img-wrapper,
+    .slider-img-wrapper img {
+        -webkit-transform: translate3d(0,0,0);
+        transform: translate3d(0,0,0);
+        -webkit-perspective: 1000px;
+        perspective: 1000px;
+    }
+    
+    .slider-slide {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+}
+
+/* Mejoras de accesibilidad */
+.slider-nav-btn:focus,
+.slider-pagination-dot:focus {
+    outline: 2px solid #fff !important;
+    outline-offset: 2px !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .slider-wrapper,
+    .slider-slide,
+    .slider-overlay,
+    .slider-nav-btn,
+    .slider-pagination-dot {
+        transition: none !important;
+        animation: none !important;
+    }
+}
