@@ -32,7 +32,7 @@
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 844) {
             // Tablet: más estrecho para elementos adyacentes visibles
-            slideWidth = Math.floor(viewportWidth * 0.99);
+            slideWidth = Math.floor(viewportWidth * 0.90);
             slideHeight = Math.floor(slideWidth * 0.18);
             slideGap = 12;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
@@ -44,7 +44,7 @@
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1024) {
             // Desktop pequeño: mayor visibilidad de elementos adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.95);
+            slideWidth = Math.floor(viewportWidth * 0.90);
             slideHeight = Math.floor(slideWidth * 0.18);
             slideGap = 16;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
