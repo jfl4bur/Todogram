@@ -2422,12 +2422,12 @@ html, body {
     }
     
     .slider-slide {
-        width: 87vw;
+        width: 88vw;
         margin-right: 2vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 87vw) / 2);
+        margin-left: calc((100vw - 88vw) / 2);
     }
     
     .slider-nav-btn {
@@ -2475,18 +2475,18 @@ html, body {
 /* Tablet - Visibilidad de items adyacentes */
 @media (max-width: 1023px) and (min-width: 769px) {
     .slider-section {
-        height: 220px;
+        height: 320px;
         margin-top: 50px;
         /* padding: 0 15px; */
     }
     
     .slider-slide {
-        width: 87vw;
+        width: 88vw;
         margin-right: 1.2vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 87vw) / 2);
+        margin-left: calc((100vw - 88vw) / 2);
     }
     
     .slider-nav-btn {
@@ -2509,12 +2509,12 @@ html, body {
     }
     
     .slider-slide {
-        width: 87vw;
+        width: 88vw;
         margin-right: 1.2vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 87vw) / 2);
+        margin-left: calc((100vw - 88vw) / 2);
     }
     
     .slider-nav {
@@ -2547,12 +2547,12 @@ html, body {
     }
     
     .slider-slide {
-        width: 87vw;
+        width: 88vw;
         margin-right: 0.8vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 87vw) / 2);
+        margin-left: calc((100vw - 88vw) / 2);
     }
     
     .slider-nav {
