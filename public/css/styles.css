@@ -2472,18 +2472,18 @@ html, body {
 /* Tablet - Visibilidad de items adyacentes */
 @media (max-width: 1023px) and (min-width: 769px) {
     .slider-section {
-        height: 340px !important;
+        height: 340px;
         margin-top: 50px;
         /* padding: 0 15px; */
     }
     
     .slider-slide {
-        width: 95vw;
+        width: 88vw;
         margin-right: 1.2vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 95vw) / 2);
+        margin-left: calc((100vw - 88vw) / 2);
     }
     
     .slider-nav-btn {
@@ -2500,7 +2500,7 @@ html, body {
 /* Mobile - Mejor centrado y visibilidad */
 @media (max-width: 768px) {
     .slider-section {
-        height: 190px !important;
+        height: 190px;
         margin-top: 40px;
         /* padding: 0 10px; */
     }
@@ -2545,7 +2545,6 @@ html, body {
     
     .slider-slide {
         width: 90vw;
-        height: 120px !important;
         margin-right: 0.8vw;
         /* max-height: -webkit-fill-available !important; */
     }
