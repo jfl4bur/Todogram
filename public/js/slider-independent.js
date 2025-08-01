@@ -72,9 +72,9 @@
         if (isSafari) {
             // Safari tiene problemas con el cálculo de porcentajes, usar valores más conservadores
             slideWidth = Math.floor(slideWidth * 0.90); // Reducir ligeramente el ancho
-            slideHeight = Math.floor(slideHeight * 1.1); // Reducir ligeramente la altura
+            slideHeight = Math.floor(slideHeight * 1); // Reducir ligeramente la altura
             // Asegurar que el gap sea consistente
-            slideGap = Math.max(slideGap, 10);
+            slideGap = Math.max(slideGap, 15);
         }
         
         console.log('Slider: Dimensiones calculadas -', {
