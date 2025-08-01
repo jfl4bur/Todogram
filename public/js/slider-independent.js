@@ -38,7 +38,7 @@
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1024) {
             // Desktop pequeño: mayor visibilidad de elementos adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.90);
+            slideWidth = Math.floor(viewportWidth * 0.95);
             slideHeight = Math.floor(slideWidth * 0.32);
             slideGap = 16;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
