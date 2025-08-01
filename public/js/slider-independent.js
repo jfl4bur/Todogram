@@ -30,6 +30,12 @@
             slideHeight = Math.floor(slideWidth * 0.12);
             slideGap = 8;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
+        } else if (viewportWidth <= 844) {
+            // Tablet: más estrecho para elementos adyacentes visibles
+            slideWidth = Math.floor(viewportWidth * 0.95);
+            slideHeight = Math.floor(slideWidth * 0.17);
+            slideGap = 12;
+            sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 768) {
             // Tablet: más estrecho para elementos adyacentes visibles
             slideWidth = Math.floor(viewportWidth * 0.95);
