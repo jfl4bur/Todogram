@@ -2615,6 +2615,7 @@ html, body {
         margin-right: 0.5vw;
         /* max-height: -webkit-fill-available !important; */
         height: 120px !important;
+        margin-left: 8px;
     }
     
     .slider-wrapper {
