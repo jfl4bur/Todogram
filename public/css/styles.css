@@ -2170,7 +2170,7 @@ html {
     --slider-slide-width: 87vw;
     --slider-slide-gap: 2vw;
     --slider-side-space: calc((100% - var(--slider-slide-width)) / 2);
-    --slider-nav-btn-offset: calc(var(--slider-side-space) / 2 - 30px);
+    --slider-nav-btn-offset: calc(var(--slider-side-space) / 2 - 20px);
 }
 
 /* Prevenir scroll horizontal global */
