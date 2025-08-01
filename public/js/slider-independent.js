@@ -58,7 +58,7 @@
         
         // Límites mínimos y máximos
         slideWidth = Math.max(300, Math.min(slideWidth, 1600));
-        slideHeight = Math.max(115, Math.min(slideHeight, 400)); // Máximo 400px para desktop
+        slideHeight = Math.max(12, Math.min(slideHeight, 400)); // Máximo 400px para desktop
         slideGap = Math.max(8, slideGap);
         sideSpace = Math.max(20, sideSpace);
         
@@ -448,7 +448,8 @@
         }
     }
 
-    // Funciones para manejo de touch/swipe
+    // Funciones para manejo de touch/swipe (comentadas - ahora se manejan en setupTouchCompatibility)
+    /*
     function handleTouchStart(e) {
         if (isTransitioning) return;
         touchStartX = e.touches[0].clientX;
@@ -484,6 +485,7 @@
         touchStartX = 0;
         touchEndX = 0;
     }
+    */
 
     // Función para mejorar la compatibilidad con touch en dispositivos móviles
     function setupTouchCompatibility() {
@@ -496,23 +498,73 @@
         if (isMobile) {
             console.log('Slider: Configurando compatibilidad touch para móvil');
             
+            // Variables para detectar swipe real
+            let touchStartTime = 0;
+            let touchDistance = 0;
+            let hasMoved = false;
+            
             // Asegurar que los eventos touch funcionen correctamente
-            wrapper.addEventListener('touchstart', handleTouchStart, { passive: false });
-            wrapper.addEventListener('touchmove', handleTouchMove, { passive: false });
-            wrapper.addEventListener('touchend', handleTouchEnd, { passive: false });
+            wrapper.addEventListener('touchstart', (e) => {
+                if (isTransitioning) return;
+                touchStartX = e.touches[0].clientX;
+                touchStartTime = Date.now();
+                touchDistance = 0;
+                hasMoved = false;
+                isDragging = true;
+                console.log('Slider: Touch start en', touchStartX);
+            }, { passive: false });
+            
+            wrapper.addEventListener('touchmove', (e) => {
+                if (!isDragging || isTransitioning) return;
+                e.preventDefault();
+                touchEndX = e.touches[0].clientX;
+                touchDistance = Math.abs(touchStartX - touchEndX);
+                hasMoved = touchDistance > 10; // Umbral mínimo para considerar movimiento
+            }, { passive: false });
+            
+            wrapper.addEventListener('touchend', (e) => {
+                if (!isDragging || isTransitioning) return;
+                
+                const touchEndTime = Date.now();
+                const touchDuration = touchEndTime - touchStartTime;
+                const swipeThreshold = 50;
+                
+                console.log('Slider: Touch end - diff:', touchDistance, 'duration:', touchDuration, 'moved:', hasMoved);
+                
+                // Solo considerar como swipe si hay movimiento significativo y tiempo razonable
+                if (hasMoved && touchDistance > swipeThreshold && touchDuration < 500) {
+                    if (touchStartX > touchEndX) {
+                        // Swipe izquierda - siguiente slide
+                        goToSlide(currentIndex + 1);
+                    } else {
+                        // Swipe derecha - slide anterior
+                        goToSlide(currentIndex - 1);
+                    }
+                }
+                
+                // Resetear variables
+                isDragging = false;
+                touchStartX = 0;
+                touchEndX = 0;
+                touchStartTime = 0;
+                touchDistance = 0;
+                hasMoved = false;
+            }, { passive: false });
             
             // Agregar eventos de click mejorados para móvil
             const slides = document.querySelectorAll('.slider-slide');
             slides.forEach((slide, index) => {
                 slide.addEventListener('click', (e) => {
-                    // Prevenir que el click se active durante el swipe
-                    if (isDragging) {
+                    // Solo prevenir click si realmente hubo un swipe significativo
+                    if (isDragging && hasMoved && touchDistance > 30) {
+                        console.log('Slider: Previniendo click durante swipe activo');
                         e.preventDefault();
                         e.stopPropagation();
                         return;
                     }
                     
                     // Permitir el click normal
+                    console.log('Slider: Permitiendo click en slide');
                     const movie = slidesData[index];
                     if (movie) {
                         handleSlideClick(e, movie, slide);
@@ -526,11 +578,8 @@
     function handleSlideClick(e, movie, slideDiv) {
         if (isTransitioning) return;
         
-        // Prevenir que el click se active durante el swipe
-        if (isDragging) {
-            isDragging = false;
-            return;
-        }
+        // La prevención de swipe ya se maneja en setupTouchCompatibility
+        // Esta función solo se llama cuando el click es legítimo
         
         e.preventDefault();
         e.stopPropagation();
@@ -944,9 +993,9 @@
         dots.forEach(dot => dot.replaceWith(dot.cloneNode(true)));
         
         if (wrapper) {
-            wrapper.removeEventListener('touchstart', handleTouchStart);
-            wrapper.removeEventListener('touchmove', handleTouchMove);
-            wrapper.removeEventListener('touchend', handleTouchEnd);
+            // Los event listeners de touch ahora se manejan en setupTouchCompatibility
+            // y se limpian automáticamente al reemplazar el wrapper
+            wrapper.replaceWith(wrapper.cloneNode(true));
         }
         
         // Limpiar datos
