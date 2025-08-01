@@ -2502,12 +2502,13 @@ html, body {
     .slider-section {
         height: 200px;
         margin-top: 40px;
-        padding: 0 30px;
+       /* padding: 0 30px; */
     }
     
     .slider-slide {
         width: 99vw;
         margin-right: 1.2vw;
+        margin-left: 6px;
     }
     
     .slider-wrapper {
