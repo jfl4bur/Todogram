@@ -702,10 +702,8 @@
         // Usar los datos proporcionados o los datos cargados
         const movies = moviesData.length > 0 ? moviesData : slidesData;
 
-        // Seleccionar películas para el slider
-        const selectedMovies = movies
-            .sort((a, b) => (parseFloat(b.rating) || 0) - (parseFloat(a.rating) || 0))
-            .slice(0, 8);
+        // Seleccionar las últimas 12 películas para el slider
+        const selectedMovies = movies.slice(-12);
         
         console.log('Slider: Películas seleccionadas:', selectedMovies.length);
 
