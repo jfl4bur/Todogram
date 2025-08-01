@@ -201,17 +201,39 @@
             // Forzar recálculo de layout en Safari
             wrapper.style.webkitTransform = 'translate3d(0,0,0)';
             wrapper.style.transform = 'translate3d(0,0,0)';
+            wrapper.style.webkitBackfaceVisibility = 'hidden';
+            wrapper.style.backfaceVisibility = 'hidden';
+            wrapper.style.webkitPerspective = '1000px';
+            wrapper.style.perspective = '1000px';
+            wrapper.style.willChange = 'transform';
             
             // Asegurar que las imágenes mantengan sus dimensiones
             slides.forEach((slide, index) => {
                 const imgWrapper = slide.querySelector('.slider-img-wrapper');
                 const img = slide.querySelector('.slider-img-wrapper img');
                 
+                // Aplicar transformaciones 3D al slide
+                slide.style.webkitTransform = 'translate3d(0,0,0)';
+                slide.style.transform = 'translate3d(0,0,0)';
+                slide.style.webkitBackfaceVisibility = 'hidden';
+                slide.style.backfaceVisibility = 'hidden';
+                slide.style.webkitPerspective = '1000px';
+                slide.style.perspective = '1000px';
+                slide.style.willChange = 'transform';
+                slide.style.webkitBoxSizing = 'border-box';
+                slide.style.boxSizing = 'border-box';
+                
                 if (imgWrapper) {
                     imgWrapper.style.width = '100%';
                     imgWrapper.style.height = '100%';
                     imgWrapper.style.webkitTransform = 'translate3d(0,0,0)';
                     imgWrapper.style.transform = 'translate3d(0,0,0)';
+                    imgWrapper.style.webkitBackfaceVisibility = 'hidden';
+                    imgWrapper.style.backfaceVisibility = 'hidden';
+                    imgWrapper.style.webkitBoxSizing = 'border-box';
+                    imgWrapper.style.boxSizing = 'border-box';
+                    imgWrapper.style.overflow = 'hidden';
+                    imgWrapper.style.borderRadius = '12px';
                 }
                 
                 if (img) {
@@ -221,6 +243,10 @@
                     img.style.transform = 'translate3d(0,0,0)';
                     img.style.webkitBackfaceVisibility = 'hidden';
                     img.style.backfaceVisibility = 'hidden';
+                    img.style.webkitBoxSizing = 'border-box';
+                    img.style.boxSizing = 'border-box';
+                    img.style.objectFit = 'fill';
+                    img.style.objectPosition = 'center';
                 }
                 
                 // Forzar reflow adicional en Safari
@@ -231,6 +257,27 @@
             // Forzar reflow del wrapper
             wrapper.offsetHeight;
             wrapper.offsetWidth;
+            
+            // Aplicar correcciones adicionales después de un breve delay
+            setTimeout(() => {
+                if (!isDestroyed) {
+                    slides.forEach((slide, index) => {
+                        // Forzar aplicación de estilos CSS
+                        slide.style.setProperty('width', `${dimensions.slideWidth}px`, 'important');
+                        slide.style.setProperty('height', `${dimensions.slideHeight}px`, 'important');
+                        slide.style.setProperty('flex-basis', `${dimensions.slideWidth}px`, 'important');
+                        
+                        const img = slide.querySelector('.slider-img-wrapper img');
+                        if (img) {
+                            img.style.setProperty('width', '100%', 'important');
+                            img.style.setProperty('height', '100%', 'important');
+                        }
+                    });
+                    
+                    // Forzar reflow final
+                    wrapper.offsetHeight;
+                }
+            }, 50);
         }
         
         // Actualizar posición del slider
@@ -319,6 +366,56 @@
         // Prevenir scroll horizontal
         document.body.style.overflowX = 'hidden';
         document.documentElement.style.overflowX = 'hidden';
+        
+        // Aplicar correcciones específicas para Safari inmediatamente
+        if (dimensions.isSafari) {
+            console.log('Slider: Aplicando correcciones CSS específicas para Safari');
+            
+            // Forzar aplicación de estilos CSS directamente
+            const slides = document.querySelectorAll('.slider-slide');
+            slides.forEach((slide, index) => {
+                // Aplicar estilos CSS directamente con !important
+                slide.style.setProperty('width', `${dimensions.slideWidth}px`, 'important');
+                slide.style.setProperty('height', `${dimensions.slideHeight}px`, 'important');
+                slide.style.setProperty('flex-basis', `${dimensions.slideWidth}px`, 'important');
+                slide.style.setProperty('flex-shrink', '0', 'important');
+                slide.style.setProperty('flex-grow', '0', 'important');
+                slide.style.setProperty('webkit-transform', 'translate3d(0,0,0)', 'important');
+                slide.style.setProperty('transform', 'translate3d(0,0,0)', 'important');
+                slide.style.setProperty('webkit-backface-visibility', 'hidden', 'important');
+                slide.style.setProperty('backface-visibility', 'hidden', 'important');
+                
+                // Aplicar estilos a las imágenes
+                const img = slide.querySelector('.slider-img-wrapper img');
+                if (img) {
+                    img.style.setProperty('width', '100%', 'important');
+                    img.style.setProperty('height', '100%', 'important');
+                    img.style.setProperty('webkit-transform', 'translate3d(0,0,0)', 'important');
+                    img.style.setProperty('transform', 'translate3d(0,0,0)', 'important');
+                    img.style.setProperty('webkit-backface-visibility', 'hidden', 'important');
+                    img.style.setProperty('backface-visibility', 'hidden', 'important');
+                }
+                
+                // Aplicar estilos al wrapper de imagen
+                const imgWrapper = slide.querySelector('.slider-img-wrapper');
+                if (imgWrapper) {
+                    imgWrapper.style.setProperty('width', '100%', 'important');
+                    imgWrapper.style.setProperty('height', '100%', 'important');
+                    imgWrapper.style.setProperty('webkit-transform', 'translate3d(0,0,0)', 'important');
+                    imgWrapper.style.setProperty('transform', 'translate3d(0,0,0)', 'important');
+                }
+            });
+            
+            // Aplicar estilos al wrapper principal
+            const wrapper = document.getElementById('slider-wrapper');
+            if (wrapper) {
+                wrapper.style.setProperty('webkit-transform', 'translate3d(0,0,0)', 'important');
+                wrapper.style.setProperty('transform', 'translate3d(0,0,0)', 'important');
+                wrapper.style.setProperty('webkit-backface-visibility', 'hidden', 'important');
+                wrapper.style.setProperty('backface-visibility', 'hidden', 'important');
+                wrapper.style.setProperty('margin-left', `${dimensions.sideSpace}px`, 'important');
+            }
+        }
         
         console.log('Slider: Variables CSS actualizadas -', {
             ...dimensions,
@@ -719,6 +816,57 @@
                 const dimensions = calculateResponsiveDimensions();
                 if (dimensions.isSafari) {
                     console.log('Slider: Aplicando corrección post-renderizado para Safari');
+                    
+                    // Forzar aplicación de estilos CSS específicos para Safari
+                    const slides = document.querySelectorAll('.slider-slide');
+                    slides.forEach((slide, index) => {
+                        // Aplicar estilos CSS con máxima prioridad
+                        slide.style.setProperty('width', `${dimensions.slideWidth}px`, 'important');
+                        slide.style.setProperty('height', `${dimensions.slideHeight}px`, 'important');
+                        slide.style.setProperty('flex-basis', `${dimensions.slideWidth}px`, 'important');
+                        slide.style.setProperty('flex-shrink', '0', 'important');
+                        slide.style.setProperty('flex-grow', '0', 'important');
+                        slide.style.setProperty('webkit-transform', 'translate3d(0,0,0)', 'important');
+                        slide.style.setProperty('transform', 'translate3d(0,0,0)', 'important');
+                        slide.style.setProperty('webkit-backface-visibility', 'hidden', 'important');
+                        slide.style.setProperty('backface-visibility', 'hidden', 'important');
+                        slide.style.setProperty('webkit-box-sizing', 'border-box', 'important');
+                        slide.style.setProperty('box-sizing', 'border-box', 'important');
+                        
+                        // Aplicar estilos a las imágenes
+                        const img = slide.querySelector('.slider-img-wrapper img');
+                        if (img) {
+                            img.style.setProperty('width', '100%', 'important');
+                            img.style.setProperty('height', '100%', 'important');
+                            img.style.setProperty('webkit-transform', 'translate3d(0,0,0)', 'important');
+                            img.style.setProperty('transform', 'translate3d(0,0,0)', 'important');
+                            img.style.setProperty('webkit-backface-visibility', 'hidden', 'important');
+                            img.style.setProperty('backface-visibility', 'hidden', 'important');
+                            img.style.setProperty('object-fit', 'fill', 'important');
+                            img.style.setProperty('object-position', 'center', 'important');
+                        }
+                        
+                        // Aplicar estilos al wrapper de imagen
+                        const imgWrapper = slide.querySelector('.slider-img-wrapper');
+                        if (imgWrapper) {
+                            imgWrapper.style.setProperty('width', '100%', 'important');
+                            imgWrapper.style.setProperty('height', '100%', 'important');
+                            imgWrapper.style.setProperty('webkit-transform', 'translate3d(0,0,0)', 'important');
+                            imgWrapper.style.setProperty('transform', 'translate3d(0,0,0)', 'important');
+                            imgWrapper.style.setProperty('overflow', 'hidden', 'important');
+                            imgWrapper.style.setProperty('border-radius', '12px', 'important');
+                        }
+                    });
+                    
+                    // Aplicar estilos al wrapper principal
+                    const wrapper = document.getElementById('slider-wrapper');
+                    if (wrapper) {
+                        wrapper.style.setProperty('webkit-transform', 'translate3d(0,0,0)', 'important');
+                        wrapper.style.setProperty('transform', 'translate3d(0,0,0)', 'important');
+                        wrapper.style.setProperty('webkit-backface-visibility', 'hidden', 'important');
+                        wrapper.style.setProperty('backface-visibility', 'hidden', 'important');
+                        wrapper.style.setProperty('margin-left', `${dimensions.sideSpace}px`, 'important');
+                    }
                     
                     // Forzar un segundo recálculo después de un breve delay
                     setTimeout(() => {
