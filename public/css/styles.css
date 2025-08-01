@@ -2225,7 +2225,7 @@ html, body {
     position: relative;
     border-radius: 8px;
     overflow: hidden;
-    background: #000;
+    /* background: #000; */
     cursor: pointer;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
