@@ -640,11 +640,15 @@
             if (!response.ok) throw new Error('No se pudo cargar data.json');
             const data = await response.json();
             
-            // Filtrar solo películas que tengan imagen en 'Slider'
-            const movies = data
-                .filter(item => item && typeof item === 'object' && item['Categoría'] === 'Películas' && typeof item['Slider'] === 'string' && item['Slider'].trim() !== '')
-                .map((item, index) => ({
-                    id: index.toString(),
+            // Obtener la lista de todas las películas como en el carrusel para obtener el índice correcto
+            const allMovies = data.filter(item => item && typeof item === 'object' && item['Categoría'] === 'Películas');
+
+            // Filtrar solo películas que tengan imagen en 'Slider' y mapear con el índice original
+            const movies = allMovies
+                .map((item, index) => ({ ...item, originalIndex: index })) // Guardar el índice original
+                .filter(item => typeof item['Slider'] === 'string' && item['Slider'].trim() !== '')
+                .map(item => ({
+                    id: item.originalIndex.toString(), // Usar el índice original como ID
                     title: item['Título'] || 'Sin título',
                     description: item['Synopsis'] || 'Descripción no disponible',
                     posterUrl: item['Portada'] || '',

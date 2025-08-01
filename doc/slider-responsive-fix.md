@@ -1,175 +1,75 @@
-# Solución para Responsive en Tiempo Real del Slider
+# Solución para Responsive en Tiempo Real del Slider y Sincronización de Modales
 
 ## Problema Identificado
 
-El slider tenía problemas con el responsive en tiempo real debido a:
+El slider presentaba dos problemas principales:
 
-1. **CSS generado dinámicamente**: Los estilos se creaban en JavaScript con valores hardcodeados
-2. **Recálculo lento**: Solo se actualizaba después de un timeout de 200ms
-3. **Variables no reactivas**: Los valores no se actualizaban automáticamente con el viewport
+1.  **Responsive en tiempo real deficiente**: Los estilos se generaban con JavaScript y no se adaptaban fluidamente a los cambios de tamaño de la ventana.
+2.  **Desincronización con el modal del carrusel**: El slider utilizaba un sistema de IDs independiente, lo que impedía que abriera el mismo `details-modal` que el carrusel, rompiendo la consistencia de la experiencia de usuario.
 
 ## Solución Implementada
 
-### 1. Migración de CSS a Variables CSS
+### 1. Migración a Variables CSS para un Responsive Fluido
 
-**Antes:**
+Se abandonó la generación de estilos en JavaScript en favor de un sistema basado en **variables CSS**, permitiendo que el navegador gestione el responsive de forma nativa y eficiente.
+
+**Antes (JavaScript dinámico):**
 ```javascript
-// CSS generado dinámicamente en JavaScript
 const slideWidth = Math.floor(viewportWidth * 0.87);
-const slideGap = Math.floor(viewportWidth * 0.02);
-const sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
-
-styleElement.textContent = `
-    .slider-slide {
-        flex: 0 0 ${slideWidth}px !important;
-        width: ${slideWidth}px !important;
-        margin-right: ${slideGap}px !important;
-    }
-    .slider-wrapper {
-        left: ${sideSpace}px !important;
-    }
-`;
+styleElement.textContent = `.slider-slide { width: ${slideWidth}px !important; }`;
 ```
 
-**Después:**
+**Después (Variables CSS en `styles.css`):**
 ```css
-/* Variables CSS en styles.css */
 :root {
     --slider-slide-width: 87vw;
-    --slider-slide-gap: 2vw;
-    --slider-side-space: calc((100vw - var(--slider-slide-width)) / 2);
-    --slider-nav-btn-offset: calc(var(--slider-side-space) / 2 - 30px);
+    /* ... otras variables ... */
 }
 
 .slider-slide {
-    flex: 0 0 var(--slider-slide-width) !important;
     width: var(--slider-slide-width) !important;
-    margin-right: var(--slider-slide-gap) !important;
-}
-
-.slider-wrapper {
-    left: var(--slider-side-space) !important;
 }
 ```
 
-### 2. Actualización Dinámica de Variables CSS
+El script `slider-independent.js` ahora solo se encarga de actualizar estas variables cuando es estrictamente necesario, resultando en una adaptación instantánea y sin saltos.
 
+### 2. Sincronización de IDs para un Modal Unificado
+
+Para asegurar que tanto el slider como el carrusel abran el mismo modal, se modificó la lógica de carga de datos en `slider-independent.js`.
+
+**El problema:** El slider filtraba primero las películas con imagen de slider y *después* les asignaba un índice de `0` a `N`. Esto creaba IDs (`0`, `1`, `2`, ...) que no correspondían con los índices originales del `data.json`, que eran los que usaba el carrusel.
+
+**La solución:**
+
+1.  **Se mapean todas las películas primero**: Se cargan todas las películas de la categoría "Películas" y se les añade su **índice original** (`originalIndex`).
+2.  **Se filtra después**: Se filtra la lista para obtener solo las que tienen una imagen de slider, pero conservando su `originalIndex`.
+3.  **Se asigna el ID correcto**: El `id` de cada película del slider ahora es su `originalIndex`, asegurando que coincida con el ID que utiliza el carrusel.
+
+**Implementación en `slider-independent.js`:**
 ```javascript
-function updateSliderCSSVariables() {
-    const viewportWidth = window.innerWidth;
-    const slideWidth = Math.floor(viewportWidth * 0.87);
-    const slideGap = Math.floor(viewportWidth * 0.02);
-    const sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
-    const navBtnOffset = Math.floor(sideSpace / 2 - 30);
+async function loadSliderData() {
+    // ...
+    const allMovies = data.filter(item => item['Categoría'] === 'Películas');
 
-    // Actualizar variables CSS en tiempo real
-    document.documentElement.style.setProperty('--slider-slide-width', `${slideWidth}px`);
-    document.documentElement.style.setProperty('--slider-slide-gap', `${slideGap}px`);
-    document.documentElement.style.setProperty('--slider-side-space', `${sideSpace}px`);
-    document.documentElement.style.setProperty('--slider-nav-btn-offset', `${navBtnOffset}px`);
-}
-```
-
-### 3. Resize Handler Mejorado
-
-```javascript
-function handleResize() {
-    clearTimeout(resizeTimeout);
-    
-    // Actualización inmediata para mejor respuesta
-    if (totalSlides > 0) {
-        updateSliderCSSVariables();
-        updateSliderPosition();
-    }
-    
-    // Actualización adicional después de un breve delay
-    resizeTimeout = setTimeout(() => {
-        if (totalSlides > 0) {
-            updateSliderCSSVariables();
-            updateSliderPosition();
-        }
-    }, 100); // Reducido de 200ms a 100ms
-}
-```
-
-### 4. Posicionamiento Usando Variables CSS
-
-```javascript
-function updateSliderPosition() {
-    const wrapper = document.getElementById('slider-wrapper');
-    if (!wrapper) return;
-    
-    isTransitioning = true;
-    
-    // Obtener valores de las variables CSS
-    const slideWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-width')) || Math.floor(window.innerWidth * 0.87);
-    const slideGap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--slider-slide-gap')) || Math.floor(window.innerWidth * 0.02);
-    
-    const translateX = -(slideWidth + slideGap) * currentIndex;
-    wrapper.style.transform = `translateX(${translateX}px)`;
-    
-    setTimeout(() => {
-        isTransitioning = false;
-    }, 600);
+    const movies = allMovies
+        .map((item, index) => ({ ...item, originalIndex: index })) // 1. Guardar índice original
+        .filter(item => typeof item['Slider'] === 'string' && item['Slider'].trim() !== '') // 2. Filtrar
+        .map(item => ({
+            id: item.originalIndex.toString(), // 3. Usar índice original como ID
+            // ... resto de propiedades
+        }));
+    // ...
 }
 ```
 
 ## Beneficios de la Solución
 
-### 1. **Responsive en Tiempo Real**
-- Las variables CSS se actualizan inmediatamente al cambiar el viewport
-- No hay delay perceptible en la adaptación
-
-### 2. **Mejor Performance**
-- CSS separado del JavaScript
-- Menos recálculos innecesarios
-- Transiciones más suaves
-
-### 3. **Mantenibilidad**
-- Estilos centralizados en `styles.css`
-- Variables CSS fáciles de modificar
-- Código más limpio y organizado
-
-### 4. **Compatibilidad**
-- Funciona en todos los navegadores modernos
-- Fallback automático si las variables CSS no están disponibles
+1.  **Responsive en Tiempo Real**: Adaptación instantánea a cualquier tamaño de pantalla.
+2.  **Experiencia de Usuario Consistente**: El slider y el carrusel ahora abren el mismo modal, permitiendo que el hash (`#movie-ID`) en la URL funcione correctamente para ambos.
+3.  **Performance Mejorada**: Menos manipulación del DOM y recálculos en JavaScript.
+4.  **Mantenibilidad**: Código más limpio, con estilos centralizados y una lógica de datos más predecible.
 
 ## Archivos Modificados
 
-1. **`public/css/styles.css`**
-   - Agregados todos los estilos del slider
-   - Variables CSS para responsive dinámico
-   - Media queries optimizadas
-
-2. **`public/js/slider.js`**
-   - Eliminada función `createRakutenStyles()`
-   - Nueva función `updateSliderCSSVariables()`
-   - Resize handler mejorado
-   - Posicionamiento usando variables CSS
-
-3. **`test-slider-responsive.html`**
-   - Archivo de prueba para verificar responsive
-   - Monitor en tiempo real de variables CSS
-   - Botón para simular resize
-
-## Cómo Probar
-
-1. Abrir `test-slider-responsive.html` en el navegador
-2. Redimensionar la ventana del navegador
-3. Observar que el slider se adapta inmediatamente
-4. Verificar los valores en el panel de información
-
-## Variables CSS Clave
-
-- `--slider-slide-width`: Ancho de cada slide (87vw)
-- `--slider-slide-gap`: Espacio entre slides (2vw)
-- `--slider-side-space`: Espacio lateral para centrar
-- `--slider-nav-btn-offset`: Posición de botones de navegación
-
-## Responsive Breakpoints
-
-- **Desktop**: 87vw slides, 60vh altura
-- **Tablet (≤768px)**: 50vh altura, botones más pequeños
-- **Mobile (≤480px)**: Botones aún más compactos
-
-Esta solución garantiza que el slider se adapte perfectamente a cualquier tamaño de pantalla en tiempo real, manteniendo la funcionalidad y la estética del diseño original. 
+-   **`public/js/slider-independent.js`**: Modificada la función `loadSliderData` para usar el índice original de las películas como ID.
+-   **`doc/slider-responsive-fix.md`**: Actualizada la documentación para reflejar la nueva solución de sincronización de modales.
