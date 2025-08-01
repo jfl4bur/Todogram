@@ -56,7 +56,7 @@
         }
         
         // Asegurar valores mínimos
-        slideWidth = Math.max(280, slideWidth);
+        slideWidth = Math.max(1600, slideWidth);
         slideHeight = Math.max(140, slideHeight);
         slideGap = Math.max(8, slideGap);
         sideSpace = Math.max(10, sideSpace);
