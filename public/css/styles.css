@@ -2326,6 +2326,7 @@ html, body {
     max-width: 70% !important;
     display: -webkit-box !important;
     -webkit-line-clamp: 3 !important;
+    line-clamp: 3 !important;
     -webkit-box-orient: vertical !important;
     overflow: hidden !important;
     color: white !important;
@@ -2365,7 +2366,7 @@ html, body {
 
 .slider-nav-btn:hover {
     background: rgba(0,0,0,0.9) !important;
-    transform: scale(1.1) !important;
+    transform: scale(1) !important;
 }
 
 .slider-nav-btn i {
