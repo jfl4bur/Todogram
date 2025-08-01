@@ -2475,6 +2475,7 @@ html, body {
         height: 200px;
         margin-top: 50px;
         padding: 0 15px;
+        margin: 0 -15px !important
     }
     
     .slider-slide {
