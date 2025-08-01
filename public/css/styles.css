@@ -2472,7 +2472,7 @@ html, body {
 /* Tablet - Visibilidad de items adyacentes */
 @media (max-width: 1023px) and (min-width: 769px) {
     .slider-section {
-        height: 320px;
+        height: 340px;
         margin-top: 50px;
         /* padding: 0 15px; */
     }
@@ -2500,7 +2500,7 @@ html, body {
 /* Mobile - Mejor centrado y visibilidad */
 @media (max-width: 768px) {
     .slider-section {
-        height: 170px;
+        height: 190px;
         margin-top: 40px;
         /* padding: 0 10px; */
     }
