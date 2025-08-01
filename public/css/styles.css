@@ -2543,7 +2543,7 @@ html, body {
     .slider-section {
         height: 180px;
         margin-top: 35px;
-        padding: 0 8px;
+        padding: 0;
     }
     
     .slider-slide {
