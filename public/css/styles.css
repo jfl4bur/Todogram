@@ -2478,12 +2478,12 @@ html, body {
     }
     
     .slider-slide {
-        width: 90vw;
+        width: 91vw;
         margin-right: 1.2vw;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 90vw) / 2);
+        margin-left: calc((100vw - 91vw) / 2);
     }
     
     .slider-nav-btn {
