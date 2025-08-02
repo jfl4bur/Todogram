@@ -1160,7 +1160,8 @@
         // Solo transparente en desktop cuando está en el top
         if (scrollTop === 0 && isDesktop) {
             header.classList.add('at-top');
-        } else if (scrollTop > 0) {
+        } else {
+            // En móviles siempre background, en desktop cuando no está en top
             header.classList.add('not-at-top');
         }
     }
