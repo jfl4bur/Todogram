@@ -2710,22 +2710,24 @@ html, body {
 /* ===== FOOTER ESTILO RAKUTEN.TV ===== */
 
 .slider-footer {
-  width: 100vw;
+  width: 100%;
   background: #0a0a0a;
   border-top: 1px solid #1a1a1a;
   position: relative;
   z-index: 1000;
   margin-top: 80px;
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.3s ease, transform 0.3s ease;
+  margin-bottom: -20px;
+  transition: opacity 0.3s ease, margin-bottom 0.3s ease;
   box-sizing: border-box;
   overflow-x: hidden;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .slider-footer.visible {
   opacity: 1;
-  transform: translateY(0);
+  margin-bottom: 0;
 }
 
 .slider-footer-inner {
