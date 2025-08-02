@@ -23,8 +23,115 @@
 </head>
 <body>
     <div id="header-root"></div>
+    
+    <!-- ESQUELETO DEL SLIDER (se muestra antes de que se cargue el slider real) -->
+    <div class="slider-section" id="slider-skeleton">
+        <h2 class="slider-title">Destacadas</h2>
+        <div class="slider-container">
+            <div class="slider-wrapper" id="slider-skeleton-wrapper">
+                <!-- Slides skeleton -->
+                <div class="slider-slide skeleton-slide">
+                    <div class="slider-img-wrapper">
+                        <div class="skeleton-placeholder"></div>
+                    </div>
+                    <div class="slider-overlay">
+                        <div class="slider-title-movie skeleton-text"></div>
+                        <div class="slider-meta">
+                            <span class="skeleton-text-small"></span>
+                            <span class="skeleton-text-small"></span>
+                            <span class="skeleton-text-small"></span>
+                        </div>
+                        <div class="slider-description skeleton-text-medium"></div>
+                    </div>
+                </div>
+                <div class="slider-slide skeleton-slide">
+                    <div class="slider-img-wrapper">
+                        <div class="skeleton-placeholder"></div>
+                    </div>
+                    <div class="slider-overlay">
+                        <div class="slider-title-movie skeleton-text"></div>
+                        <div class="slider-meta">
+                            <span class="skeleton-text-small"></span>
+                            <span class="skeleton-text-small"></span>
+                            <span class="skeleton-text-small"></span>
+                        </div>
+                        <div class="slider-description skeleton-text-medium"></div>
+                    </div>
+                </div>
+                <div class="slider-slide skeleton-slide">
+                    <div class="slider-img-wrapper">
+                        <div class="skeleton-placeholder"></div>
+                    </div>
+                    <div class="slider-overlay">
+                        <div class="slider-title-movie skeleton-text"></div>
+                        <div class="slider-meta">
+                            <span class="skeleton-text-small"></span>
+                            <span class="skeleton-text-small"></span>
+                            <span class="skeleton-text-small"></span>
+                        </div>
+                        <div class="slider-description skeleton-text-medium"></div>
+                    </div>
+                </div>
+                <div class="slider-slide skeleton-slide">
+                    <div class="slider-img-wrapper">
+                        <div class="skeleton-placeholder"></div>
+                    </div>
+                    <div class="slider-overlay">
+                        <div class="slider-title-movie skeleton-text"></div>
+                        <div class="slider-meta">
+                            <span class="skeleton-text-small"></span>
+                            <span class="skeleton-text-small"></span>
+                            <span class="skeleton-text-small"></span>
+                        </div>
+                        <div class="slider-description skeleton-text-medium"></div>
+                    </div>
+                </div>
+                <div class="slider-slide skeleton-slide">
+                    <div class="slider-img-wrapper">
+                        <div class="skeleton-placeholder"></div>
+                    </div>
+                    <div class="slider-overlay">
+                        <div class="slider-title-movie skeleton-text"></div>
+                        <div class="slider-meta">
+                            <span class="skeleton-text-small"></span>
+                            <span class="skeleton-text-small"></span>
+                            <span class="skeleton-text-small"></span>
+                        </div>
+                        <div class="slider-description skeleton-text-medium"></div>
+                    </div>
+                </div>
+                <div class="slider-slide skeleton-slide">
+                    <div class="slider-img-wrapper">
+                        <div class="skeleton-placeholder"></div>
+                    </div>
+                    <div class="slider-overlay">
+                        <div class="slider-title-movie skeleton-text"></div>
+                        <div class="slider-meta">
+                            <span class="skeleton-text-small"></span>
+                            <span class="skeleton-text-small"></span>
+                            <span class="skeleton-text-small"></span>
+                        </div>
+                        <div class="slider-description skeleton-text-medium"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="slider-nav">
+            <button class="slider-nav-btn prev skeleton-btn"><i class="fas fa-chevron-left"></i></button>
+            <button class="slider-nav-btn next skeleton-btn"><i class="fas fa-chevron-right"></i></button>
+        </div>
+    </div>
+    <div class="slider-pagination" id="slider-skeleton-pagination">
+        <button class="slider-pagination-dot skeleton-dot active"></button>
+        <button class="slider-pagination-dot skeleton-dot"></button>
+        <button class="slider-pagination-dot skeleton-dot"></button>
+        <button class="slider-pagination-dot skeleton-dot"></button>
+        <button class="slider-pagination-dot skeleton-dot"></button>
+        <button class="slider-pagination-dot skeleton-dot"></button>
+    </div>
+    
     <!-- SLIDER CAROUSEL TIPO RAKUTEN.TV -->
-    <div class="slider-section">
+    <div class="slider-section" id="slider-real" style="display: none;">
         <h2 class="slider-title"></h2>
         <div class="slider-container">
             <div class="slider-wrapper" id="slider-wrapper">
@@ -188,11 +295,72 @@
             setTimeout(() => {
                 if (window.sliderIndependent) {
                     console.log('Index: Slider independiente disponible');
+                    
+                    // Configurar transición del esqueleto
+                    const skeletonSection = document.getElementById('slider-skeleton');
+                    const realSection = document.getElementById('slider-real');
+                    
+                    if (skeletonSection && realSection) {
+                        // Asegurar que el esqueleto esté visible inicialmente
+                        skeletonSection.style.display = 'block';
+                        skeletonSection.style.opacity = '1';
+                        realSection.style.display = 'none';
+                        
+                        console.log('Index: Esqueleto del slider configurado correctamente');
+                    }
                 } else {
                     console.error('Index: Slider independiente no disponible');
                 }
             }, 1000);
         });
+        
+        // Función para manejar la transición del esqueleto
+        function handleSkeletonTransition() {
+            const skeletonSection = document.getElementById('slider-skeleton');
+            const skeletonPagination = document.getElementById('slider-skeleton-pagination');
+            const realSection = document.getElementById('slider-real');
+            const realPagination = document.getElementById('slider-pagination');
+            
+            if (skeletonSection && realSection) {
+                // Fade out del esqueleto
+                skeletonSection.style.transition = 'opacity 0.8s ease-out';
+                skeletonSection.style.opacity = '0';
+                
+                if (skeletonPagination) {
+                    skeletonPagination.style.transition = 'opacity 0.8s ease-out';
+                    skeletonPagination.style.opacity = '0';
+                }
+                
+                // Mostrar slider real después del fade out
+                setTimeout(() => {
+                    skeletonSection.style.display = 'none';
+                    if (skeletonPagination) {
+                        skeletonPagination.style.display = 'none';
+                    }
+                    
+                    realSection.style.display = 'block';
+                    realSection.style.opacity = '0';
+                    realSection.style.transition = 'opacity 0.8s ease-in';
+                    
+                    if (realPagination) {
+                        realPagination.style.opacity = '0';
+                        realPagination.style.transition = 'opacity 0.8s ease-in';
+                    }
+                    
+                    // Fade in del slider real
+                    setTimeout(() => {
+                        realSection.style.opacity = '1';
+                        if (realPagination) {
+                            realPagination.style.opacity = '1';
+                        }
+                    }, 100);
+                    
+                }, 800);
+            }
+        }
+        
+        // Exponer la función globalmente para que el slider la pueda usar
+        window.handleSkeletonTransition = handleSkeletonTransition;
     </script>
 </body>
 </html>

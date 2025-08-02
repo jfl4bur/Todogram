@@ -1063,9 +1063,66 @@
             // Iniciar autoplay
             startAutoPlay();
             
+            // Ocultar esqueleto y mostrar slider real
+            hideSkeletonAndShowSlider();
+            
             console.log('Slider: Inicialización completada');
         } else {
             console.error('Slider: No se pudieron cargar datos');
+        }
+    }
+
+    // Función para ocultar esqueleto y mostrar slider real
+    function hideSkeletonAndShowSlider() {
+        // Usar la función de transición del index si está disponible
+        if (window.handleSkeletonTransition) {
+            window.handleSkeletonTransition();
+            console.log('Slider: Transición de esqueleto a slider real usando función del index');
+        } else {
+            // Fallback si la función del index no está disponible
+            const skeletonSection = document.getElementById('slider-skeleton');
+            const skeletonPagination = document.getElementById('slider-skeleton-pagination');
+            const realSection = document.getElementById('slider-real');
+            const realPagination = document.getElementById('slider-pagination');
+            
+            if (skeletonSection && realSection) {
+                // Ocultar esqueleto con fade out
+                skeletonSection.style.transition = 'opacity 0.8s ease-out';
+                skeletonSection.style.opacity = '0';
+                
+                if (skeletonPagination) {
+                    skeletonPagination.style.transition = 'opacity 0.8s ease-out';
+                    skeletonPagination.style.opacity = '0';
+                }
+                
+                // Mostrar slider real con fade in
+                setTimeout(() => {
+                    skeletonSection.style.display = 'none';
+                    if (skeletonPagination) {
+                        skeletonPagination.style.display = 'none';
+                    }
+                    
+                    realSection.style.display = 'block';
+                    realSection.style.opacity = '0';
+                    realSection.style.transition = 'opacity 0.8s ease-in';
+                    
+                    if (realPagination) {
+                        realPagination.style.opacity = '0';
+                        realPagination.style.transition = 'opacity 0.8s ease-in';
+                    }
+                    
+                    // Fade in del slider real
+                    setTimeout(() => {
+                        realSection.style.opacity = '1';
+                        if (realPagination) {
+                            realPagination.style.opacity = '1';
+                        }
+                    }, 100);
+                    
+                }, 800);
+                
+                console.log('Slider: Transición de esqueleto a slider real completada (fallback)');
+            }
         }
     }
 
@@ -1100,6 +1157,7 @@
         forceCompleteRecalculation,
         verifySliderIntegrity,
         openDetailsModal,
+        hideSkeletonAndShowSlider,
         destroy
     };
 

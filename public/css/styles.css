@@ -2400,7 +2400,7 @@ html, body {
 }
 
 .slider-pagination-dot.active {
-    background: #ffffff !important;
+    background: var(--primary-color) !important;
     opacity: 1 !important;
     transform: scale(1.2) !important;
 }
@@ -2411,236 +2411,191 @@ html, body {
     transform: scale(1.1) !important;
 }
 
-/* Desktop - Dimensiones grandes como Rakuten.tv */
-@media (min-width: 1024px) {
-    .slider-section {
-        height: 400px;
-        margin-top: 60px;
-      /*  padding: 0 20px;*/
+/* Estilos para el esqueleto del slider */
+.skeleton-slide {
+    background: #2a2a2a !important;
+    border-radius: 12px !important;
+    overflow: hidden !important;
+    position: relative !important;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3) !important;
+    flex-shrink: 0 !important;
+    flex-grow: 0 !important;
+    margin-right: 16px !important;
+}
+
+.skeleton-slide:last-child {
+    margin-right: 0 !important;
+}
+
+.skeleton-placeholder {
+    width: 100% !important;
+    height: 100% !important;
+    background: linear-gradient(90deg, #2a2a2a 25%, #3a3a3a 50%, #2a2a2a 75%) !important;
+    background-size: 200% 100% !important;
+    animation: skeleton-loading 1.5s infinite !important;
+    border-radius: 12px !important;
+}
+
+.skeleton-text {
+    height: 24px !important;
+    background: linear-gradient(90deg, #3a3a3a 25%, #4a4a4a 50%, #3a3a3a 75%) !important;
+    background-size: 200% 100% !important;
+    animation: skeleton-loading 1.5s infinite !important;
+    border-radius: 4px !important;
+    margin-bottom: 8px !important;
+    width: 80% !important;
+}
+
+.skeleton-text-medium {
+    height: 16px !important;
+    background: linear-gradient(90deg, #3a3a3a 25%, #4a4a4a 50%, #3a3a3a 75%) !important;
+    background-size: 200% 100% !important;
+    animation: skeleton-loading 1.5s infinite !important;
+    border-radius: 4px !important;
+    margin-bottom: 8px !important;
+    width: 60% !important;
+}
+
+.skeleton-text-small {
+    height: 12px !important;
+    background: linear-gradient(90deg, #3a3a3a 25%, #4a4a4a 50%, #3a3a3a 75%) !important;
+    background-size: 200% 100% !important;
+    animation: skeleton-loading 1.5s infinite !important;
+    border-radius: 4px !important;
+    width: 40px !important;
+    margin-right: 8px !important;
+}
+
+.skeleton-btn {
+    background: rgba(0,0,0,0.5) !important;
+    opacity: 0.7 !important;
+}
+
+.skeleton-btn i {
+    opacity: 0.5 !important;
+}
+
+.skeleton-dot {
+    background: rgba(255, 255, 255, 0.2) !important;
+    opacity: 0.4 !important;
+}
+
+.skeleton-dot.active {
+    background: rgba(255, 255, 255, 0.4) !important;
+    opacity: 0.6 !important;
+}
+
+@keyframes skeleton-loading {
+    0% {
+        background-position: 200% 0;
     }
-    
-    .slider-slide {
-        width: 88vw;
-        margin-right: 2vw;
-    }
-    
-    .slider-wrapper {
-        margin-left: calc((100vw - 88vw) / 2);
-    }
-    
-    .slider-nav-btn {
-        width: 60px !important;
-        height: 60px !important;
-        font-size: 24px !important;
-    }
-    
-    .slider-nav-btn i {
-        font-size: 20px !important;
-    }
-    
-    .slider-pagination-dot {
-        width: 10px !important;
-        height: 10px !important;
-        margin: 0 3px !important;
+    100% {
+        background-position: -200% 0;
     }
 }
 
+/* Mostrar overlay del skeleton */
+.skeleton-slide .slider-overlay {
+    opacity: 1 !important;
+    transform: translateY(0) !important;
+    pointer-events: none !important;
+    background: linear-gradient(
+        to top,
+        rgba(0, 0, 0, 0.8) 0%,
+        rgba(0, 0, 0, 0.6) 30%,
+        rgba(0, 0, 0, 0.3) 60%,
+        transparent 100%
+    ) !important;
+}
+
+/* Aplicar dimensiones responsivas al esqueleto */
+#slider-skeleton-wrapper {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    transform: translateX(0) !important;
+    transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+    position: relative !important;
+    left: 0px !important;
+    width: fit-content !important;
+    min-width: 100% !important;
+}
+
+/* Dimensiones responsivas para el esqueleto */
 @media (min-width: 1400px) {
-    .slider-section {
-        height: 420px;
+    .skeleton-slide {
+        width: 1260px !important;
+        height: 504px !important;
+        flex-basis: 1260px !important;
     }
-    
-    .slider-slide {
-        width: 88vw;
-        margin-right: 2.5vw;
-    }
-    
-    .slider-wrapper {
-        margin-left: calc((100vw - 88vw) / 2);
-    }
-    
-    .slider-nav-btn {
-        width: 70px !important;
-        height: 70px !important;
-        font-size: 28px !important;
-    }
-    
-    .slider-nav-btn i {
-        font-size: 24px !important;
+    #slider-skeleton-wrapper {
+        margin-left: 70px !important;
     }
 }
 
-/* Tablet - Visibilidad de items adyacentes */
+@media (min-width: 1024px) and (max-width: 1399px) {
+    .skeleton-slide {
+        width: 920px !important;
+        height: 166px !important;
+        flex-basis: 920px !important;
+    }
+    #slider-skeleton-wrapper {
+        margin-left: 40px !important;
+    }
+}
+
 @media (max-width: 1023px) and (min-width: 845px) {
-    .slider-section {
-        height: 200px;
-        margin-top: 50px;
-      /*  padding: 0 15px;*/
-      /*  margin: 0 -15px !important*/
+    .skeleton-slide {
+        width: 760px !important;
+        height: 129px !important;
+        flex-basis: 760px !important;
     }
-    
-    .slider-slide {
-        width: 98vw;
-        margin-right: 1.2vw;
-    }
-    
-    .slider-wrapper {
-        margin-left: calc((100vw - 98vw) / 2);
-    }
-    
-    .slider-nav-btn {
-        width: 55px !important;
-        height: 55px !important;
-        font-size: 22px !important;
-    }
-    
-    .slider-nav-btn i {
-        font-size: 18px !important;
+    #slider-skeleton-wrapper {
+        margin-left: 120px !important;
     }
 }
 
 @media (max-width: 844px) {
-    .slider-section {
-        height: 200px;
-        margin-top: 40px;
-       /* padding: 0 30px; */
+    .skeleton-slide {
+        width: 760px !important;
+        height: 129px !important;
+        flex-basis: 760px !important;
     }
-    
-    .slider-slide {
-        width: 95vw;
-        margin-right: 1.2vw;
-       /* margin-left: 6px; */
-    }
-    
-    .slider-wrapper {
-        margin-left: calc((100vw - 95vw) / 2);
-    }
-    
-    .slider-nav {
-        padding: 0 15px !important;
-    }
-
-    .slider-nav-btn {
-        width: 45px !important;
-        height: 45px !important;
-        font-size: 18px !important;
-    }
-    
-    .slider-nav-btn i {
-        font-size: 14px !important;
-    }
-    
-    .slider-pagination-dot {
-        width: 8px !important;
-        height: 8px !important;
-        margin: 0 2px !important;
+    #slider-skeleton-wrapper {
+        margin-left: 20px !important;
     }
 }
 
-/* Tablet - Visibilidad de items adyacentes */
 @media (max-width: 843px) and (min-width: 769px) {
-    .slider-section {
-        height: 200px;
-        margin-top: 50px;
-      /*  padding: 0 15px;*/
+    .skeleton-slide {
+        width: 730px !important;
+        height: 124px !important;
+        flex-basis: 730px !important;
     }
-    
-    .slider-slide {
-        width: 91vw;
-        margin-right: 1.2vw;
-    }
-    
-    .slider-wrapper {
-        margin-left: calc((100vw - 91vw) / 2);
-    }
-    
-    .slider-nav-btn {
-        width: 55px !important;
-        height: 55px !important;
-        font-size: 22px !important;
-    }
-    
-    .slider-nav-btn i {
-        font-size: 18px !important;
+    #slider-skeleton-wrapper {
+        margin-left: 35px !important;
     }
 }
 
-/* Mobile - Mejor centrado y visibilidad */
 @media (max-width: 768px) {
-    .slider-section {
-        height: 190px;
-        margin-top: 40px;
-      /*  padding: 0 10px;*/
+    .skeleton-slide {
+        width: 680px !important;
+        height: 116px !important;
+        flex-basis: 680px !important;
     }
-    
-    .slider-slide {
-        width: 95vw;
-        margin-right: 1.2vw;
-    }
-    
-    .slider-wrapper {
-        margin-left: calc((100vw - 50vw) / 2);
-    }
-    
-    .slider-nav {
-        padding: 0 15px !important;
-    }
-
-    .slider-nav-btn {
-        width: 45px !important;
-        height: 45px !important;
-        font-size: 18px !important;
-    }
-    
-    .slider-nav-btn i {
-        font-size: 14px !important;
-    }
-    
-    .slider-pagination-dot {
-        width: 8px !important;
-        height: 8px !important;
-        margin: 0 2px !important;
+    #slider-skeleton-wrapper {
+        margin-left: 60px !important;
     }
 }
 
-/* Mobile pequeño - iPhone 11 y similares */
 @media (max-width: 480px) {
-    .slider-section {
-        height: 140px !important;
-        margin-top: 35px;
-       /* padding: 0 8px;*/
-     }
-    
-    .slider-slide {
-        width: 90vw;
-        margin-right: 0.5vw;
-        /* max-height: -webkit-fill-available !important; */
-        height: 120px !important;
-        margin-left: 3px;
+    .skeleton-slide {
+        width: 432px !important;
+        height: 52px !important;
+        flex-basis: 432px !important;
     }
-    
-    .slider-wrapper {
-        margin-left: calc((100vw - 90vw) / 2) +40px;
-    }
-    
-    .slider-nav {
-        padding: 0 10px !important;
-    }
-    
-    .slider-nav-btn {
-        width: 40px !important;
-        height: 40px !important;
-        font-size: 16px !important;
-    }
-    
-    .slider-nav-btn i {
-        font-size: 12px !important;
-    }
-    
-    .slider-pagination-dot {
-        width: 6px !important;
-        height: 6px !important;
-        margin: 0 1px !important;
+    #slider-skeleton-wrapper {
+        margin-left: 24px !important;
     }
 }
 
