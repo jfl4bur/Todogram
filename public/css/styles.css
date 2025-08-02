@@ -1896,8 +1896,8 @@
 /* HEADER Y MENÚ RESPONSIVE RAKUTEN.TV */
 .slider-header {
   width: 100%;
-  background: #141414;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  background: transparent;
+  box-shadow: none;
   position: fixed;
   top: 0;
   left: 0;
@@ -1910,10 +1910,10 @@
   transform: translateY(0);
 }
 .slider-header.scrolled {
-  background: rgba(20, 20, 20, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: 0 4px 24px rgba(0,0,0,0.25);
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  box-shadow: none;
 }
 .slider-header.hidden {
   transform: translateY(-100%)
@@ -2272,8 +2272,8 @@ html, body {
 .slider-background-blur {
     position: absolute;
     top: 0;
-    left: 5%; /* Centrado: (100% - 90%) / 2 = 5% */
-    width: 90%;
+    left: 0;
+    width: 100%;
     height: 100%;
     background-size: 100% 100%; /* object-fit: fill */
     background-position: center;
@@ -2285,8 +2285,8 @@ html, body {
     transform: scale(1.1);
     border-radius: 50% 50% 50% 50%; /* Ovalado */
     margin: 0 -2px -2px -2px; /* Se sale 2px por cada lado excepto arriba */
-    width: calc(90% + 4px); /* Compensar el margen negativo */
-    left: calc(5% - 2px); /* Ajustar posición por el margen */
+    width: calc(100% + 4px); /* Compensar el margen negativo */
+    left: -2px; /* Ajustar posición por el margen */
     box-shadow: 0 0 30px rgba(255, 255, 255, 0.1); /* Brillo adicional */
 }
 
