@@ -694,8 +694,10 @@
         console.log('Slider: Iniciando renderizado...');
         
         const sliderWrapper = document.getElementById('slider-wrapper');
-        if (!sliderWrapper) {
-            console.error('Slider: slider-wrapper no encontrado');
+        const sliderSkeleton = document.getElementById('slider-skeleton');
+
+        if (!sliderWrapper || !sliderSkeleton) {
+            console.error('Slider: slider-wrapper o slider-skeleton no encontrado');
             return;
         }
 
@@ -713,6 +715,7 @@
         
         if (totalSlides === 0) {
             console.error('Slider: No hay slides para renderizar');
+            sliderSkeleton.style.display = 'none';
             return;
         }
 
@@ -812,6 +815,10 @@
 
             sliderWrapper.appendChild(slideDiv);
         });
+
+        // Ocultar esqueleto y mostrar slider
+        sliderSkeleton.style.display = 'none';
+        sliderWrapper.style.display = 'flex';
 
         // Configurar controles
         setupControls();
