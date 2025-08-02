@@ -2268,11 +2268,35 @@ html, body {
     overflow: hidden;
 }
 
+/* Fondo blur del slide activo */
+.slider-background-blur {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 80%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: blur(25px) brightness(0.2) saturate(1.2);
+    opacity: 0;
+    transition: opacity 1s ease, filter 1s ease;
+    z-index: 1;
+    transform: scale(1.1);
+    border-radius: 0 20px 20px 0;
+}
+
+.slider-background-blur.active {
+    opacity: 1;
+    filter: blur(20px) brightness(0.3) saturate(1.1);
+}
+
 .slider-container {
     position: relative;
     width: 100%;
     height: 100%;
     overflow: hidden;
+    z-index: 2;
 }
 
 .slider-wrapper {
@@ -2300,9 +2324,14 @@ html, body {
 
 /* Hover solo en dispositivos con mouse */
 @media (hover: hover) and (pointer: fine) {
+    .slider-slide {
+        transition: transform 0.3s ease, box-shadow 0.3s ease, z-index 0s;
+    }
+    
     .slider-slide:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 25px rgba(255, 255, 255, 0.15);
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+        z-index: 10;
     }
 }
 

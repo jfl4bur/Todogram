@@ -839,6 +839,17 @@
             console.error('Slider: slider-wrapper no encontrado');
             return;
         }
+        
+        // Crear elemento de fondo blur si no existe
+        let backgroundBlur = document.querySelector('.slider-background-blur');
+        if (!backgroundBlur) {
+            backgroundBlur = document.createElement('div');
+            backgroundBlur.className = 'slider-background-blur';
+            const sliderSection = document.querySelector('.slider-section');
+            if (sliderSection) {
+                sliderSection.insertBefore(backgroundBlur, sliderSection.firstChild);
+            }
+        }
 
         // Usar los datos proporcionados o los datos cargados
         const movies = moviesData.length > 0 ? moviesData : slidesData;
@@ -971,6 +982,7 @@
         currentIndex = 0;
         updateSliderPosition(true);
         updatePagination();
+        updateBackgroundBlur();
         
         console.log('Slider: Renderizado completado');
         
@@ -1093,6 +1105,7 @@
         currentIndex = index;
         updateSliderPosition();
         updatePagination();
+        updateBackgroundBlur();
         
         // Reiniciar autoplay después de navegación manual
         if (autoPlayInterval) {
@@ -1123,6 +1136,30 @@
                 pagination.style.maxWidth = 'none';
                 pagination.style.margin = '15px auto 30px auto';
             }
+        }
+    }
+
+    // Función para actualizar el fondo blur
+    function updateBackgroundBlur() {
+        const backgroundBlur = document.querySelector('.slider-background-blur');
+        if (!backgroundBlur || !slidesData[currentIndex]) return;
+        
+        const currentMovie = slidesData[currentIndex];
+        const imageUrl = currentMovie.sliderUrl || currentMovie.posterUrl || '';
+        
+        if (imageUrl) {
+            // Remover clase activa para transición
+            backgroundBlur.classList.remove('active');
+            
+            // Cambiar imagen de fondo
+            backgroundBlur.style.backgroundImage = `url(${imageUrl})`;
+            
+            // Reactivar después de un pequeño delay para la transición
+            setTimeout(() => {
+                backgroundBlur.classList.add('active');
+            }, 50);
+            
+            console.log('Slider: Fondo blur actualizado para slide', currentIndex);
         }
     }
 
@@ -1273,6 +1310,7 @@
         updateSliderLayout,
         forceCompleteRecalculation,
         verifySliderIntegrity,
+        updateBackgroundBlur,
         openDetailsModal,
         destroy
     };
