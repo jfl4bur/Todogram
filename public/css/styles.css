@@ -2245,6 +2245,8 @@ html {
 html, body {
     overflow-x: hidden !important;
     max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
 }
 
 /* ===== SLIDER ESTILO RAKUTEN.TV ===== */
@@ -2260,6 +2262,8 @@ html, body {
 html, body {
     overflow-x: hidden !important;
     max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
 }
 
 /* Slider Independiente - Estilo Rakuten.tv */
@@ -2723,6 +2727,10 @@ html, body {
   opacity: 0;
   transform: translateY(20px);
   transition: opacity 0.3s ease, transform 0.3s ease;
+  left: 0;
+  right: 0;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .slider-footer.visible {
