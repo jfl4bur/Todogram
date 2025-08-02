@@ -1896,8 +1896,8 @@
 /* HEADER Y MENÚ RESPONSIVE RAKUTEN.TV */
 .slider-header {
   width: 100%;
-  background: #141414;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  background: transparent;
+  /* box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);*/
   position: fixed;
   top: 0;
   left: 0;
@@ -1911,13 +1911,13 @@
 }
 
 .slider-header.at-top {
-  background: transparent;
+  background: #141414;
   box-shadow: none;
 }
 
 .slider-header.not-at-top {
-  background: #0a0a0a;
-  border-top: 1px solid #1a1a1a;
+  background: #141414;
+  border-top: 1px solid #141414;
   box-shadow: none;
 }
 .slider-header.scrolled {
@@ -2313,7 +2313,9 @@ html, body {
 
 .slider-background-blur.active {
     filter: blur(35px) brightness(1.0) saturate(1.8) contrast(1.5);
-    opacity: 0.5; /* Mantener transparencia al 50% */
+    opacity: 0.25;
+    width: 88%;
+    margin: auto;
 }
 
 .slider-section {
