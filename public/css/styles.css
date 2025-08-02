@@ -2284,11 +2284,20 @@ html, body {
     top: -100px; /* Se sale 100px por arriba */
     padding-top: 100px; /* Compensar el top negativo */
     box-shadow: 0 0 50px rgba(255, 255, 255, 0.2); /* Brillo adicional */
+    z-index: 1; /* Fondo detrás del slider */
 }
 
 .slider-section.active {
     filter: blur(35px) brightness(1.0) saturate(1.8) contrast(1.5);
     box-shadow: 0 0 60px rgba(255, 255, 255, 0.3); /* Más brillo cuando está activo */
+}
+
+.slider-container {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    z-index: 2; /* Slider por encima del fondo */
 }
 
 .slider-container {
@@ -2316,6 +2325,11 @@ html, body {
     /* background: #000; */
     cursor: pointer;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    z-index: 3; /* Slider por encima del fondo */
+}
+
+.slider-slide {
+    z-index: 4; /* Slides por encima del fondo */
 }
 
 .slider-slide:last-child {
@@ -2433,7 +2447,7 @@ html, body {
     justify-content: space-between !important;
     align-items: center !important;
     pointer-events: none !important;
-    z-index: 10 !important;
+    z-index: 15 !important;
     padding: 0 20px !important;
     box-sizing: border-box !important;
 }
@@ -2471,7 +2485,7 @@ html, body {
     justify-content: center !important;
     align-items: center !important;
     gap: 6px !important;
-    z-index: 10 !important;
+    z-index: 15 !important;
     padding: 0 20px !important;
     flex-wrap: wrap !important;
 }
