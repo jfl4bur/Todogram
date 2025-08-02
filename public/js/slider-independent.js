@@ -147,6 +147,7 @@
         updateSliderCSSVariables();
         updateSkeletonDimensions(); // Actualizar skeleton también
         updateSliderLayout(true);
+        updateBackgroundBlur(); // Actualizar fondo blur también
         
         // Actualización con debounce
         resizeTimeout = setTimeout(() => {
@@ -272,6 +273,7 @@
         
         // Actualizar posición del slider
         updateSliderPosition(true);
+        updateBackgroundBlur(); // Actualizar fondo blur
         
         console.log('Slider: Recálculo completo finalizado');
     }
@@ -1154,12 +1156,24 @@
             // Cambiar imagen de fondo
             backgroundBlur.style.backgroundImage = `url(${imageUrl})`;
             
+            // Calcular posición del slide activo para centrar el fondo
+            const dimensions = calculateResponsiveDimensions();
+            const slideWidth = dimensions.slideWidth + dimensions.slideGap;
+            const slidePosition = -(slideWidth * currentIndex);
+            const slideCenter = slidePosition + (dimensions.slideWidth / 2);
+            const viewportCenter = (document.documentElement.clientWidth || window.innerWidth) / 2;
+            const offsetFromCenter = slideCenter - viewportCenter;
+            
+            // Ajustar posición del fondo blur para que esté centrado al slide
+            const blurOffset = (offsetFromCenter / viewportCenter) * 45; // 45% del ancho disponible
+            backgroundBlur.style.left = `${5 + blurOffset}%`;
+            
             // Reactivar después de un pequeño delay para la transición
             setTimeout(() => {
                 backgroundBlur.classList.add('active');
             }, 50);
             
-            console.log('Slider: Fondo blur actualizado para slide', currentIndex);
+            console.log('Slider: Fondo blur actualizado para slide', currentIndex, 'offset:', blurOffset);
         }
     }
 

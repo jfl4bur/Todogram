@@ -2272,15 +2272,15 @@ html, body {
 .slider-background-blur {
     position: absolute;
     top: 0;
-    left: 0;
-    width: 80%;
+    left: 5%; /* Centrado: (100% - 90%) / 2 = 5% */
+    width: 90%;
     height: 100%;
-    background-size: cover;
+    background-size: 100% 100%; /* object-fit: fill */
     background-position: center;
     background-repeat: no-repeat;
     filter: blur(25px) brightness(0.2) saturate(1.2);
     opacity: 0;
-    transition: opacity 1s ease, filter 1s ease;
+    transition: opacity 1s ease, filter 1s ease, left 0.8s ease;
     z-index: 1;
     transform: scale(1.1);
     border-radius: 0 20px 20px 0;
