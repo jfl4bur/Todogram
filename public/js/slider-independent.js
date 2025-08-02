@@ -465,9 +465,10 @@
         // Obtener dimensiones actuales
         const dimensions = calculateResponsiveDimensions();
         
-        // Calcular posición
+        // Calcular posición (estilo Rakuten.tv)
         const translateX = -(dimensions.slideWidth + dimensions.slideGap) * currentIndex;
-        wrapper.style.transform = `translateX(${translateX}px)`;
+        wrapper.style.transform = `translate3d(${translateX}px, 0, 0)`;
+        wrapper.style.webkitTransform = `translate3d(${translateX}px, 0, 0)`;
         
         console.log('Slider: Posición actualizada -', {
             index: currentIndex,
@@ -480,7 +481,7 @@
         if (!forceUpdate) {
             setTimeout(() => {
                 isTransitioning = false;
-            }, 600);
+            }, 800);
         }
     }
 
@@ -523,7 +524,7 @@
     }
     */
 
-    // Función para mejorar la compatibilidad con touch en dispositivos móviles
+    // Función para mejorar la compatibilidad con touch en dispositivos móviles (estilo Rakuten.tv)
     function setupTouchCompatibility() {
         const wrapper = document.getElementById('slider-wrapper');
         if (!wrapper) return;
@@ -532,30 +533,59 @@
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
         if (isMobile) {
-            console.log('Slider: Configurando compatibilidad touch para móvil');
+            console.log('Slider: Configurando compatibilidad touch para móvil (estilo Rakuten.tv)');
             
-            // Variables para detectar swipe real
+            // Variables para detectar swipe real (mejoradas)
             let touchStartTime = 0;
             let touchDistance = 0;
             let hasMoved = false;
+            let touchStartY = 0;
+            let isHorizontalSwipe = false;
             
             // Asegurar que los eventos touch funcionen correctamente
             wrapper.addEventListener('touchstart', (e) => {
                 if (isTransitioning) return;
                 touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
                 touchStartTime = Date.now();
                 touchDistance = 0;
                 hasMoved = false;
+                isHorizontalSwipe = false;
                 isDragging = true;
-                console.log('Slider: Touch start en', touchStartX);
+                console.log('Slider: Touch start en', touchStartX, touchStartY);
             }, { passive: false });
             
             wrapper.addEventListener('touchmove', (e) => {
                 if (!isDragging || isTransitioning) return;
                 e.preventDefault();
                 touchEndX = e.touches[0].clientX;
+                const touchEndY = e.touches[0].clientY;
                 touchDistance = Math.abs(touchStartX - touchEndX);
-                hasMoved = touchDistance > 10; // Umbral mínimo para considerar movimiento
+                const verticalDistance = Math.abs(touchStartY - touchEndY);
+                
+                // Determinar si es un swipe horizontal (como Rakuten.tv)
+                if (touchDistance > 10 && touchDistance > verticalDistance * 1.5) {
+                    hasMoved = true;
+                    isHorizontalSwipe = true;
+                }
+                
+                // Aplicar efecto visual de seguimiento (estilo Rakuten.tv)
+                if (hasMoved && isHorizontalSwipe) {
+                    const slides = document.querySelectorAll('.slider-slide');
+                    slides.forEach((slide, index) => {
+                        const slideRect = slide.getBoundingClientRect();
+                        const slideCenter = slideRect.left + slideRect.width / 2;
+                        const touchCenter = touchEndX;
+                        const distance = Math.abs(slideCenter - touchCenter);
+                        const maxDistance = window.innerWidth / 2;
+                        
+                        if (distance < maxDistance) {
+                            const scale = 1 - (distance / maxDistance) * 0.1;
+                            slide.style.transform = `translate3d(0, -8px, 0) scale(${scale})`;
+                            slide.style.webkitTransform = `translate3d(0, -8px, 0) scale(${scale})`;
+                        }
+                    });
+                }
             }, { passive: false });
             
             wrapper.addEventListener('touchend', (e) => {
@@ -563,17 +593,27 @@
                 
                 const touchEndTime = Date.now();
                 const touchDuration = touchEndTime - touchStartTime;
-                const swipeThreshold = 50;
+                const swipeThreshold = 60; // Umbral más alto para evitar swipes accidentales
+                const maxDuration = 800; // Tiempo máximo para considerar swipe válido
                 
-                console.log('Slider: Touch end - diff:', touchDistance, 'duration:', touchDuration, 'moved:', hasMoved);
+                console.log('Slider: Touch end - diff:', touchDistance, 'duration:', touchDuration, 'moved:', hasMoved, 'horizontal:', isHorizontalSwipe);
                 
-                // Solo considerar como swipe si hay movimiento significativo y tiempo razonable
-                if (hasMoved && touchDistance > swipeThreshold && touchDuration < 500) {
+                // Restaurar transformaciones de los slides
+                const slides = document.querySelectorAll('.slider-slide');
+                slides.forEach((slide) => {
+                    slide.style.transform = 'translate3d(0, 0, 0)';
+                    slide.style.webkitTransform = 'translate3d(0, 0, 0)';
+                });
+                
+                // Solo considerar como swipe si es horizontal, hay movimiento significativo y tiempo razonable
+                if (hasMoved && isHorizontalSwipe && touchDistance > swipeThreshold && touchDuration < maxDuration) {
                     if (touchStartX > touchEndX) {
                         // Swipe izquierda - siguiente slide
+                        console.log('Slider: Swipe izquierda detectado');
                         goToSlide(currentIndex + 1);
                     } else {
                         // Swipe derecha - slide anterior
+                        console.log('Slider: Swipe derecha detectado');
                         goToSlide(currentIndex - 1);
                     }
                 }
@@ -582,9 +622,11 @@
                 isDragging = false;
                 touchStartX = 0;
                 touchEndX = 0;
+                touchStartY = 0;
                 touchStartTime = 0;
                 touchDistance = 0;
                 hasMoved = false;
+                isHorizontalSwipe = false;
             }, { passive: false });
             
             // Agregar eventos de click mejorados para móvil
@@ -592,7 +634,7 @@
             slides.forEach((slide, index) => {
                 slide.addEventListener('click', (e) => {
                     // Solo prevenir click si realmente hubo un swipe significativo
-                    if (isDragging && hasMoved && touchDistance > 30) {
+                    if (isDragging && hasMoved && isHorizontalSwipe && touchDistance > 40) {
                         console.log('Slider: Previniendo click durante swipe activo');
                         e.preventDefault();
                         e.stopPropagation();
@@ -758,17 +800,21 @@
         // Limpiar wrapper
         sliderWrapper.innerHTML = '';
         
-        // Configurar wrapper con centrado correcto
+        // Configurar wrapper con centrado correcto (estilo Rakuten.tv)
         sliderWrapper.style.display = 'flex';
         sliderWrapper.style.flexDirection = 'row';
         sliderWrapper.style.flexWrap = 'nowrap';
         sliderWrapper.style.transform = 'translateX(0)';
-        sliderWrapper.style.transition = 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        sliderWrapper.style.transition = 'transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
         sliderWrapper.style.position = 'relative';
         sliderWrapper.style.left = '0px';
         sliderWrapper.style.marginLeft = `${dimensions.sideSpace}px`;
         sliderWrapper.style.width = 'fit-content';
         sliderWrapper.style.minWidth = '100%';
+        sliderWrapper.style.backfaceVisibility = 'hidden';
+        sliderWrapper.style.webkitBackfaceVisibility = 'hidden';
+        sliderWrapper.style.transform = 'translate3d(0,0,0)';
+        sliderWrapper.style.webkitTransform = 'translate3d(0,0,0)';
         
         // Configurar compatibilidad touch
         setupTouchCompatibility();
@@ -793,7 +839,11 @@
             slideDiv.style.overflow = 'hidden';
             slideDiv.style.cursor = 'pointer';
             slideDiv.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
-            slideDiv.style.transition = 'transform 0.3s ease, box-shadow 0.3s ease';
+            slideDiv.style.transition = 'transform 0.5s ease, box-shadow 0.5s ease';
+            slideDiv.style.backfaceVisibility = 'hidden';
+            slideDiv.style.webkitBackfaceVisibility = 'hidden';
+            slideDiv.style.transform = 'translate3d(0,0,0)';
+            slideDiv.style.webkitTransform = 'translate3d(0,0,0)';
             
             // Usar solo la imagen del campo 'Slider' como principal
             const imageUrl = movie.sliderUrl || `https://via.placeholder.com/${dimensions.slideWidth}x${dimensions.slideHeight}/333/fff?text=${encodeURIComponent(movie.title)}`;
@@ -805,10 +855,10 @@
                     <img src="${imageUrl}" 
                          alt="${movie.title}" 
                          loading="${index === 0 ? 'eager' : 'lazy'}"
-                         style="width: 100%; height: 100%; object-fit: fill; object-position: center; transition: transform 0.3s ease;"
+                         style="width: 100%; height: 100%; object-fit: fill; object-position: center; transition: transform 0.5s ease; backface-visibility: hidden; -webkit-backface-visibility: hidden;"
                          onerror="this.src='https://via.placeholder.com/${dimensions.slideWidth}x${dimensions.slideHeight}/333/fff?text=No+Image'">
                 </div>
-                <div class="slider-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 20px; color: white; border-radius: 0 0 12px 12px;">
+                <div class="slider-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 20px; color: white; border-radius: 0 0 12px 12px; transition: opacity 0.5s ease; backface-visibility: hidden; -webkit-backface-visibility: hidden;">
                     <div class="slider-title-movie" style="font-size: clamp(1rem, 2.5vw, 1.5rem); font-weight: bold; margin-bottom: 8px; line-height: 1.2;">${movie.title || 'Sin título'}</div>
                     <div class="slider-meta" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; font-size: clamp(0.75rem, 2vw, 0.9rem); opacity: 0.9;">
                         ${movie.year ? `<span>${movie.year}</span>` : ''}
@@ -823,15 +873,31 @@
             // Efectos hover mejorados (estilo Rakuten.tv)
             slideDiv.addEventListener('mouseenter', () => {
                 if (!isTransitioning) {
-                    slideDiv.style.transform = 'translateY(-5px)';
-                    slideDiv.style.boxShadow = '0 8px 25px rgba(255, 255, 255, 0.15)';
+                    slideDiv.style.transform = 'translate3d(0, -8px, 0) scale(1.02)';
+                    slideDiv.style.webkitTransform = 'translate3d(0, -8px, 0) scale(1.02)';
+                    slideDiv.style.boxShadow = '0 12px 30px rgba(0, 0, 0, 0.4)';
+                    
+                    // Efecto sutil en la imagen
+                    const img = slideDiv.querySelector('.slider-img-wrapper img');
+                    if (img) {
+                        img.style.transform = 'scale(1.05)';
+                        img.style.webkitTransform = 'scale(1.05)';
+                    }
                 }
             });
 
             slideDiv.addEventListener('mouseleave', () => {
                 if (!isTransitioning) {
-                    slideDiv.style.transform = 'translateY(0)';
+                    slideDiv.style.transform = 'translate3d(0, 0, 0) scale(1)';
+                    slideDiv.style.webkitTransform = 'translate3d(0, 0, 0) scale(1)';
                     slideDiv.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
+                    
+                    // Restaurar imagen
+                    const img = slideDiv.querySelector('.slider-img-wrapper img');
+                    if (img) {
+                        img.style.transform = 'scale(1)';
+                        img.style.webkitTransform = 'scale(1)';
+                    }
                 }
             });
 
