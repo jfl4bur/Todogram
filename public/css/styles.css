@@ -2711,3 +2711,230 @@ html, body {
     }
 }
 
+/* ===== FOOTER ESTILO RAKUTEN.TV ===== */
+
+.slider-footer {
+  width: 100%;
+  background: #0a0a0a;
+  border-top: 1px solid #1a1a1a;
+  position: relative;
+  z-index: 1000;
+  margin-top: 80px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.slider-footer.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.slider-footer-inner {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 48px 24px 24px 24px;
+}
+
+.slider-footer-logo {
+  display: flex;
+  align-items: center;
+  margin-bottom: 32px;
+  opacity: 0.7;
+}
+
+.slider-footer-logo svg {
+  height: 32px;
+  width: auto;
+  display: block;
+}
+
+.slider-footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 32px;
+  margin-bottom: 32px;
+}
+
+.slider-footer-section {
+  display: flex;
+  flex-direction: column;
+}
+
+.slider-footer-title {
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 16px 0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.slider-footer-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.slider-footer-link {
+  color: #b3b3b3;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: color 0.2s ease;
+  line-height: 1.4;
+}
+
+.slider-footer-link:hover {
+  color: #ffffff;
+}
+
+.slider-footer-social {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+.slider-footer-social-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #1a1a1a;
+  border-radius: 50%;
+  color: #b3b3b3;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.slider-footer-social-link:hover {
+  background: #2a2a2a;
+  color: #ffffff;
+  transform: translateY(-2px);
+}
+
+.slider-footer-social-link i {
+  font-size: 1.1rem;
+}
+
+.slider-footer-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 24px;
+  border-top: 1px solid #1a1a1a;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.slider-footer-copyright {
+  color: #666666;
+  font-size: 0.85rem;
+}
+
+.slider-footer-copyright p {
+  margin: 0;
+}
+
+.slider-footer-languages {
+  display: flex;
+  align-items: center;
+}
+
+.slider-footer-language-select {
+  background: #1a1a1a;
+  border: 1px solid #333333;
+  color: #b3b3b3;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.slider-footer-language-select:hover {
+  border-color: #555555;
+  color: #ffffff;
+}
+
+.slider-footer-language-select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  color: #ffffff;
+}
+
+/* Responsive para el footer */
+@media (max-width: 768px) {
+  .slider-footer-inner {
+    padding: 32px 16px 16px 16px;
+  }
+  
+  .slider-footer-content {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  
+  .slider-footer-title {
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+  }
+  
+  .slider-footer-link {
+    font-size: 0.85rem;
+  }
+  
+  .slider-footer-social-link {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .slider-footer-social-link i {
+    font-size: 1rem;
+  }
+  
+  .slider-footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .slider-footer-copyright {
+    font-size: 0.8rem;
+  }
+  
+  .slider-footer-language-select {
+    font-size: 0.8rem;
+    padding: 6px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .slider-footer-inner {
+    padding: 24px 12px 12px 12px;
+  }
+  
+  .slider-footer-content {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .slider-footer-logo svg {
+    height: 28px;
+  }
+  
+  .slider-footer-social {
+    gap: 12px;
+  }
+  
+  .slider-footer-social-link {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .slider-footer-social-link i {
+    font-size: 0.9rem;
+  }
+}
+
