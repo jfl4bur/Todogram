@@ -210,14 +210,14 @@
 /* Skeleton loader para el slider independiente */
 .slider-skeleton {
     display: flex;
-    gap: 20px;
     width: 100%;
     height: 100%;
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    padding: 0 20px;
     align-items: center;
+    position: relative;
+    margin-left: var(--slider-side-space, 20px);
 }
 
 .slider-skeleton::-webkit-scrollbar {
@@ -236,7 +236,9 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-right: 20px;
+    margin-right: var(--slider-slide-gap, 20px);
+    flex-shrink: 0;
+    flex-grow: 0;
 }
 
 .slider-skeleton-item:last-child {
@@ -250,6 +252,26 @@
     border-radius: 50%;
     border-top-color: var(--primary-color);
     animation: spin 1s linear infinite;
+}
+
+/* Correcciones específicas para Safari en el skeleton */
+@supports (-webkit-appearance: none) {
+    .slider-skeleton {
+        -webkit-transform: translate3d(0,0,0);
+        transform: translate3d(0,0,0);
+    }
+    
+    .slider-skeleton-item {
+        -webkit-transform: translate3d(0,0,0);
+        transform: translate3d(0,0,0);
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+    }
+    
+    .slider-skeleton-spinner {
+        -webkit-transform: translate3d(0,0,0);
+        transform: translate3d(0,0,0);
+    }
 }
 
 .custom-carousel-item {

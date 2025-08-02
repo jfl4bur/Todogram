@@ -103,6 +103,22 @@
         }
     }
 
+    // Función para actualizar el skeleton con las dimensiones correctas
+    function updateSkeletonDimensions() {
+        if (!sliderSkeleton) return;
+        
+        const dimensions = calculateResponsiveDimensions();
+        
+        // Actualizar variables CSS para el skeleton
+        const root = document.documentElement;
+        root.style.setProperty('--slider-slide-width', `${dimensions.slideWidth}px`);
+        root.style.setProperty('--slider-slide-height', `${dimensions.slideHeight}px`);
+        root.style.setProperty('--slider-slide-gap', `${dimensions.slideGap}px`);
+        root.style.setProperty('--slider-side-space', `${dimensions.sideSpace}px`);
+        
+        console.log('Slider: Skeleton actualizado con dimensiones:', dimensions);
+    }
+
     // Función mejorada para manejar el resize (optimizada)
     function handleResize() {
         if (isDestroyed) return;
@@ -129,6 +145,7 @@
         
         // Aplicar cambios inmediatamente
         updateSliderCSSVariables();
+        updateSkeletonDimensions(); // Actualizar skeleton también
         updateSliderLayout(true);
         
         // Actualización con debounce
@@ -1062,7 +1079,11 @@
         if (sliderSkeleton && sliderWrapper) {
             sliderSkeleton.style.display = 'flex';
             sliderWrapper.style.display = 'none';
-            console.log('Slider: Skeleton configurado inicialmente');
+            
+            // Actualizar skeleton con dimensiones correctas
+            updateSkeletonDimensions();
+            
+            console.log('Slider: Skeleton configurado inicialmente con dimensiones responsivas');
         }
         
         // Prevenir scroll horizontal
@@ -1116,7 +1137,8 @@
         getSlidesData: () => slidesData,
         getLastViewportWidth: () => lastViewportWidth,
         calculateResponsiveDimensions,
-        showSlider, // Agregar la nueva función
+        showSlider,
+        updateSkeletonDimensions, // Agregar la nueva función
         startAutoPlay,
         stopAutoPlay,
         pauseAutoPlay,
