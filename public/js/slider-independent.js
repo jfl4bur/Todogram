@@ -842,15 +842,11 @@
             return;
         }
         
-        // Crear elemento de fondo blur si no existe
-        let backgroundBlur = document.querySelector('.slider-background-blur');
-        if (!backgroundBlur) {
-            backgroundBlur = document.createElement('div');
-            backgroundBlur.className = 'slider-background-blur';
-            const sliderSection = document.querySelector('.slider-section');
-            if (sliderSection) {
-                sliderSection.insertBefore(backgroundBlur, sliderSection.firstChild);
-            }
+        // Obtener referencia al slider-section
+        const sliderSection = document.querySelector('.slider-section');
+        if (!sliderSection) {
+            console.error('Slider: slider-section no encontrado');
+            return;
         }
 
         // Usar los datos proporcionados o los datos cargados
@@ -1143,38 +1139,33 @@
 
     // Función para actualizar el fondo blur
     function updateBackgroundBlur() {
-        const backgroundBlur = document.querySelector('.slider-background-blur');
-        if (!backgroundBlur || !slidesData[currentIndex]) return;
+        const sliderSection = document.querySelector('.slider-section');
+        if (!sliderSection || !slidesData[currentIndex]) return;
         
-        const currentMovie = slidesData[currentIndex];
-        const imageUrl = currentMovie.sliderUrl || currentMovie.posterUrl || '';
+        // Array de gradientes diferentes para cada slide
+        const gradients = [
+            'linear-gradient(90deg, #8B0000 0%, #4B0082 25%, #000080 50%, #006400 75%, #FF8C00 100%)',
+            'linear-gradient(90deg, #DC143C 0%, #8A2BE2 25%, #4169E1 50%, #32CD32 75%, #FFD700 100%)',
+            'linear-gradient(90deg, #FF1493 0%, #9932CC 25%, #1E90FF 50%, #00CED1 75%, #FF6347 100%)',
+            'linear-gradient(90deg, #FF4500 0%, #9370DB 25%, #00BFFF 50%, #00FA9A 75%, #FF69B4 100%)',
+            'linear-gradient(90deg, #FF0000 0%, #800080 25%, #0000FF 50%, #008000 75%, #FFFF00 100%)',
+            'linear-gradient(90deg, #FF69B4 0%, #DDA0DD 25%, #87CEEB 50%, #98FB98 75%, #F0E68C 100%)',
+            'linear-gradient(90deg, #FF6347 0%, #DDA0DD 25%, #87CEEB 50%, #90EE90 75%, #F0E68C 100%)',
+            'linear-gradient(90deg, #FF4500 0%, #9370DB 25%, #00BFFF 50%, #00FA9A 75%, #FF69B4 100%)',
+            'linear-gradient(90deg, #DC143C 0%, #8A2BE2 25%, #4169E1 50%, #32CD32 75%, #FFD700 100%)',
+            'linear-gradient(90deg, #FF1493 0%, #9932CC 25%, #1E90FF 50%, #00CED1 75%, #FF6347 100%)',
+            'linear-gradient(90deg, #FF0000 0%, #800080 25%, #0000FF 50%, #008000 75%, #FFFF00 100%)',
+            'linear-gradient(90deg, #FF69B4 0%, #DDA0DD 25%, #87CEEB 50%, #98FB98 75%, #F0E68C 100%)'
+        ];
         
-        if (imageUrl) {
-            // Remover clase activa para transición
-            backgroundBlur.classList.remove('active');
-            
-            // Cambiar imagen de fondo
-            backgroundBlur.style.backgroundImage = `url(${imageUrl})`;
-            
-            // Calcular posición del slide activo para centrar el fondo
-            const dimensions = calculateResponsiveDimensions();
-            const slideWidth = dimensions.slideWidth + dimensions.slideGap;
-            const slidePosition = -(slideWidth * currentIndex);
-            const slideCenter = slidePosition + (dimensions.slideWidth / 2);
-            const viewportCenter = (document.documentElement.clientWidth || window.innerWidth) / 2;
-            const offsetFromCenter = slideCenter - viewportCenter;
-            
-            // Ajustar posición del fondo blur para que esté centrado al slide
-            const blurOffset = offsetFromCenter;
-            backgroundBlur.style.left = `calc(-2px + ${blurOffset}px)`;
-            
-            // Reactivar después de un pequeño delay para la transición
-            setTimeout(() => {
-                backgroundBlur.classList.add('active');
-            }, 50);
-            
-            console.log('Slider: Fondo blur actualizado para slide', currentIndex, 'offset:', blurOffset);
-        }
+        // Seleccionar gradiente basado en el índice actual
+        const gradientIndex = currentIndex % gradients.length;
+        const selectedGradient = gradients[gradientIndex];
+        
+        // Aplicar el gradiente
+        sliderSection.style.background = selectedGradient;
+        
+        console.log('Slider: Fondo gradiente actualizado para slide', currentIndex, 'gradiente:', gradientIndex);
     }
 
     // Función para abrir modal
