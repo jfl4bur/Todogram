@@ -11,6 +11,10 @@
     let touchEndX = 0;
     let isDragging = false;
     let autoPlayInterval = null;
+    
+    // Referencias a elementos del skeleton
+    let sliderSkeleton = null;
+    let sliderWrapper = null;
 
     // Función mejorada para calcular dimensiones responsivas (estilo Rakuten.tv)
     function calculateResponsiveDimensions() {
@@ -88,6 +92,15 @@
         });
         
         return { slideWidth, slideHeight, slideGap, sideSpace, viewportWidth, isSafari };
+    }
+
+    // Función para mostrar el slider y ocultar el skeleton
+    function showSlider() {
+        if (sliderSkeleton && sliderWrapper) {
+            sliderSkeleton.style.display = 'none';
+            sliderWrapper.style.display = 'flex';
+            console.log('Slider: Skeleton ocultado, slider mostrado');
+        }
     }
 
     // Función mejorada para manejar el resize (optimizada)
@@ -694,18 +707,10 @@
         console.log('Slider: Iniciando renderizado...');
         
         const sliderWrapper = document.getElementById('slider-wrapper');
-        const sliderSkeleton = document.getElementById('slider-skeleton');
-        
         if (!sliderWrapper) {
             console.error('Slider: slider-wrapper no encontrado');
             return;
         }
-        
-        // Ocultar skeleton y mostrar slider real
-        if (sliderSkeleton) {
-            sliderSkeleton.style.display = 'none';
-        }
-        sliderWrapper.style.display = 'flex';
 
         // Usar los datos proporcionados o los datos cargados
         const movies = moviesData.length > 0 ? moviesData : slidesData;
@@ -854,6 +859,9 @@
                         }
                     });
                 }
+                
+                // Mostrar el slider y ocultar el skeleton
+                showSlider();
             }
         }, 200);
     }
@@ -1046,6 +1054,17 @@
         
         console.log('Slider: Inicializando...');
         
+        // Inicializar referencias al skeleton
+        sliderSkeleton = document.getElementById('slider-skeleton');
+        sliderWrapper = document.getElementById('slider-wrapper');
+        
+        // Configurar skeleton inicial
+        if (sliderSkeleton && sliderWrapper) {
+            sliderSkeleton.style.display = 'flex';
+            sliderWrapper.style.display = 'none';
+            console.log('Slider: Skeleton configurado inicialmente');
+        }
+        
         // Prevenir scroll horizontal
         document.body.style.overflowX = 'hidden';
         document.documentElement.style.overflowX = 'hidden';
@@ -1097,6 +1116,7 @@
         getSlidesData: () => slidesData,
         getLastViewportWidth: () => lastViewportWidth,
         calculateResponsiveDimensions,
+        showSlider, // Agregar la nueva función
         startAutoPlay,
         stopAutoPlay,
         pauseAutoPlay,
