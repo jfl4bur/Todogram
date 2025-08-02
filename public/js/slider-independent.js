@@ -479,7 +479,9 @@
         
         // Aplicar transición más suave en móvil
         if (isMobile && !forceUpdate) {
-            wrapper.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            // Si es un retorno (forceUpdate), usar transición más rápida
+            const transitionTime = forceUpdate ? '0.15s' : '0.4s';
+            wrapper.style.transition = `transform ${transitionTime} cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
         }
         
         wrapper.style.transform = `translate3d(${translateX}px, 0, 0)`;
@@ -495,7 +497,7 @@
         });
         
         if (!forceUpdate) {
-            const transitionTime = isMobile ? 500 : 800;
+            const transitionTime = isMobile ? (forceUpdate ? 150 : 400) : 800;
             setTimeout(() => {
                 isTransitioning = false;
             }, transitionTime);
@@ -663,7 +665,7 @@
                     
                     if (Math.abs(finalDeltaX) > swipeThreshold && touchDuration < maxDuration) {
                         // Swipe válido - aplicar transición suave
-                        wrapper.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                        wrapper.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
                         
                         if (finalDeltaX < 0) {
                             // Swipe izquierda - siguiente slide
@@ -675,9 +677,9 @@
                             goToSlide(currentIndex - 1);
                         }
                     } else {
-                        // Swipe insuficiente - volver a posición original con transición suave
-                        console.log('Slider: Volviendo a posición original - transición suave');
-                        wrapper.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                        // Swipe insuficiente - volver a posición original con transición rápida
+                        console.log('Slider: Volviendo a posición original - transición rápida');
+                        wrapper.style.transition = 'transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
                         updateSliderPosition(true);
                     }
                 }
