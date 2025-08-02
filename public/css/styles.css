@@ -2308,8 +2308,6 @@ html, body {
 .slider-background-blur.active {
     filter: blur(35px) brightness(1.0) saturate(1.8) contrast(1.5);
     opacity: 0.5; /* Mantener transparencia al 50% */
-    width: 85%;
-    margin: auto;
 }
 
 .slider-section {
@@ -2550,7 +2548,7 @@ html, body {
 @media (min-width: 1024px) {
     .slider-section {
         height: 400px;
-        margin-top: -25px;
+        margin-top: -255px;
       /*  padding: 0 20px;*/
     }
     
@@ -2608,8 +2606,8 @@ html, body {
 /* Tablet - Visibilidad de items adyacentes */
 @media (max-width: 1023px) and (min-width: 845px) {
     .slider-section {
-        height: 300px;
-        margin-top: -50px;
+        height: 200px;
+        margin-top: 50px;
       /*  padding: 0 15px;*/
       /*  margin: 0 -15px !important*/
     }
