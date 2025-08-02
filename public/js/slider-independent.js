@@ -1158,10 +1158,14 @@
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
         
         // Remover todas las clases primero
-        header.classList.remove('over-slider', 'over-carousel');
+        header.classList.remove('over-slider', 'over-carousel', 'at-top');
         
-        // Si el header está sobre el slider, hacerlo transparente
-        if (scrollTop + headerBottom > sliderTop) {
+        // Si está en el top (scrollTop = 0), hacerlo transparente
+        if (scrollTop === 0) {
+            header.classList.add('at-top');
+        }
+        // Si el header está sobre el slider, hacerlo 30% opaco
+        else if (scrollTop + headerBottom > sliderTop) {
             header.classList.add('over-slider');
         } else {
             // Verificar si está sobre algún carrusel
@@ -1183,6 +1187,10 @@
     function updateBackgroundBlur() {
         const backgroundBlur = document.querySelector('.slider-background-blur');
         if (!backgroundBlur || !slidesData[currentIndex]) return;
+        
+        // Solo actualizar en escritorio (no en móviles/tablets)
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if (isMobile) return;
         
         const currentMovie = slidesData[currentIndex];
         const imageUrl = currentMovie.sliderUrl || currentMovie.posterUrl || '';
