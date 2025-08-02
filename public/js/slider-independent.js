@@ -1145,6 +1145,25 @@
         }
     }
 
+    // Función para manejar la transparencia del header
+    function handleHeaderTransparency() {
+        const header = document.querySelector('.slider-header');
+        const sliderSection = document.querySelector('.slider-section');
+        
+        if (!header || !sliderSection) return;
+        
+        const headerBottom = header.offsetTop + header.offsetHeight;
+        const sliderTop = sliderSection.offsetTop;
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        // Si el header está sobre el slider, hacerlo transparente
+        if (scrollTop + headerBottom > sliderTop) {
+            header.classList.add('over-slider');
+        } else {
+            header.classList.remove('over-slider');
+        }
+    }
+
     // Función para actualizar el fondo blur
     function updateBackgroundBlur() {
         const backgroundBlur = document.querySelector('.slider-background-blur');
@@ -1208,6 +1227,7 @@
         clearTimeout(resizeTimeout);
         stopAutoPlay();
         window.removeEventListener('resize', handleResize);
+        window.removeEventListener('scroll', handleHeaderTransparency);
         
         // Limpiar event listeners adicionales
         const prevBtn = document.getElementById('slider-prev');
@@ -1272,11 +1292,14 @@
             // Renderizar
             renderSlider(movies);
             
-            // Agregar listener de resize mejorado
-            window.addEventListener('resize', handleResize, { passive: true });
-            
-            // Iniciar autoplay
-            startAutoPlay();
+                    // Agregar listener de resize mejorado
+        window.addEventListener('resize', handleResize, { passive: true });
+        
+        // Agregar listener para detectar cuando el header está sobre el slider
+        window.addEventListener('scroll', handleHeaderTransparency, { passive: true });
+        
+        // Iniciar autoplay
+        startAutoPlay();
             
             console.log('Slider: Inicialización completada');
         } else {
@@ -1317,6 +1340,7 @@
         forceCompleteRecalculation,
         verifySliderIntegrity,
         updateBackgroundBlur,
+        handleHeaderTransparency,
         openDetailsModal,
         destroy
     };

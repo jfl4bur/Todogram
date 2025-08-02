@@ -1896,8 +1896,8 @@
 /* HEADER Y MENÚ RESPONSIVE RAKUTEN.TV */
 .slider-header {
   width: 100%;
-  background: transparent;
-  box-shadow: none;
+  background: #141414;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
   position: fixed;
   top: 0;
   left: 0;
@@ -1908,6 +1908,11 @@
   align-items: center;
   transition: background 0.3s, backdrop-filter 0.3s, transform 0.3s ease;
   transform: translateY(0);
+}
+
+.slider-header.over-slider {
+  background: transparent;
+  box-shadow: none;
 }
 .slider-header.scrolled {
   background: transparent;
@@ -2271,32 +2276,31 @@ html, body {
 /* Fondo blur del slide activo */
 .slider-background-blur {
     position: absolute;
-    top: -100px; /* Se sale 100px por arriba */
-    left: 0;
-    width: 100%;
-    height: calc(100% + 100px); /* Compensar el top negativo */
+    top: 0;
+    left: 2px; /* 2px de margen por la izquierda */
+    right: 2px; /* 2px de margen por la derecha */
+    bottom: 2px; /* 2px de margen por abajo */
     background-size: 100% 100%; /* object-fit: fill */
     background-position: center;
     background-repeat: no-repeat;
     transition: background-image 1s ease, filter 1s ease;
     filter: blur(40px) brightness(0.8) saturate(1.5) contrast(1.3);
-    box-shadow: 0 0 50px rgba(255, 255, 255, 0.2); /* Brillo adicional */
+    opacity: 0.5; /* Transparente al 50% */
     z-index: 1; /* Fondo detrás del slider */
 }
 
 .slider-background-blur.active {
     filter: blur(35px) brightness(1.0) saturate(1.8) contrast(1.5);
-    box-shadow: 0 0 60px rgba(255, 255, 255, 0.3); /* Más brillo cuando está activo */
+    opacity: 0.5; /* Mantener transparencia al 50% */
 }
 
 .slider-section {
     position: relative;
     width: 100%;
-    height: 500px; /* Aumentado para compensar el top negativo */
+    height: 400px; /* Altura normal sin extensión */
     margin-top: 80px;
     background: transparent;
     overflow: hidden;
-    padding-top: 100px; /* Compensar el top negativo */
 }
 
 .slider-container {
@@ -2527,7 +2531,7 @@ html, body {
 /* Desktop - Dimensiones grandes como Rakuten.tv */
 @media (min-width: 1024px) {
     .slider-section {
-        height: 500px;
+        height: 400px;
         margin-top: 75px;
       /*  padding: 0 20px;*/
     }
@@ -2560,7 +2564,7 @@ html, body {
 
 @media (min-width: 1400px) {
     .slider-section {
-        height: 520px;
+        height: 420px;
     }
     
     .slider-slide {
@@ -2586,7 +2590,7 @@ html, body {
 /* Tablet - Visibilidad de items adyacentes */
 @media (max-width: 1023px) and (min-width: 845px) {
     .slider-section {
-        height: 300px;
+        height: 200px;
         margin-top: 50px;
       /*  padding: 0 15px;*/
       /*  margin: 0 -15px !important*/
@@ -2614,7 +2618,7 @@ html, body {
 
 @media (max-width: 844px) {
     .slider-section {
-        height: 300px;
+        height: 200px;
         margin-top: 40px;
        /* padding: 0 30px; */
     }
@@ -2653,7 +2657,7 @@ html, body {
 /* Tablet - Visibilidad de items adyacentes */
 @media (max-width: 843px) and (min-width: 769px) {
     .slider-section {
-        height: 300px;
+        height: 200px;
         margin-top: 50px;
       /*  padding: 0 15px;*/
     }
@@ -2681,7 +2685,7 @@ html, body {
 /* Mobile - Mejor centrado y visibilidad */
 @media (max-width: 768px) {
     .slider-section {
-        height: 290px;
+        height: 190px;
         margin-top: 40px;
       /*  padding: 0 10px;*/
     }
@@ -2719,7 +2723,7 @@ html, body {
 /* Mobile pequeño - iPhone 11 y similares */
 @media (max-width: 480px) {
     .slider-section {
-        height: 240px !important;
+        height: 140px !important;
         margin-top: 35px;
        /* padding: 0 8px;*/
      }
