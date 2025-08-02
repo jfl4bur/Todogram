@@ -2292,7 +2292,7 @@ html, body {
     right: 2px; /* 2px de margen por la derecha */
     bottom: 2px; /* 2px de margen por abajo */
     height: calc(100% + 100px); /* Altura normal + 100px de extensión */
-    background-size: cover; /* Ocupa todo el espacio disponible */
+    background-size: 100% 100%; /* Forzar que ocupe exactamente todo el espacio */
     background-position: center;
     background-repeat: no-repeat;
     transition: background-image 1s ease, filter 1s ease;
