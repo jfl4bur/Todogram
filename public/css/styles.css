@@ -1914,6 +1914,12 @@
   background: transparent;
   box-shadow: none;
 }
+
+.slider-header.over-carousel {
+  background: #0a0a0a;
+  border-top: 1px solid #1a1a1a;
+  box-shadow: none;
+}
 .slider-header.scrolled {
   background: transparent;
   backdrop-filter: none;
@@ -2276,10 +2282,11 @@ html, body {
 /* Fondo blur del slide activo */
 .slider-background-blur {
     position: absolute;
-    top: 0;
+    top: -100px; /* Se extiende 100px hacia arriba */
     left: 2px; /* 2px de margen por la izquierda */
     right: 2px; /* 2px de margen por la derecha */
     bottom: 2px; /* 2px de margen por abajo */
+    height: calc(100% + 100px); /* Altura normal + 100px de extensión */
     background-size: 100% 100%; /* object-fit: fill */
     background-position: center;
     background-repeat: no-repeat;

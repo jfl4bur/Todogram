@@ -1149,6 +1149,7 @@
     function handleHeaderTransparency() {
         const header = document.querySelector('.slider-header');
         const sliderSection = document.querySelector('.slider-section');
+        const carouselSections = document.querySelectorAll('.carousel-section');
         
         if (!header || !sliderSection) return;
         
@@ -1156,11 +1157,25 @@
         const sliderTop = sliderSection.offsetTop;
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
         
+        // Remover todas las clases primero
+        header.classList.remove('over-slider', 'over-carousel');
+        
         // Si el header está sobre el slider, hacerlo transparente
         if (scrollTop + headerBottom > sliderTop) {
             header.classList.add('over-slider');
         } else {
-            header.classList.remove('over-slider');
+            // Verificar si está sobre algún carrusel
+            let isOverCarousel = false;
+            carouselSections.forEach(carousel => {
+                const carouselTop = carousel.offsetTop;
+                if (scrollTop + headerBottom > carouselTop) {
+                    isOverCarousel = true;
+                }
+            });
+            
+            if (isOverCarousel) {
+                header.classList.add('over-carousel');
+            }
         }
     }
 
