@@ -2278,17 +2278,22 @@ html, body {
     background-size: 100% 100%; /* object-fit: fill */
     background-position: center;
     background-repeat: no-repeat;
-    filter: blur(25px) brightness(0.2) saturate(1.2);
+    filter: blur(25px) brightness(0.4) saturate(1.3) contrast(1.1);
     opacity: 0;
     transition: opacity 1s ease, filter 1s ease, left 0.8s ease;
     z-index: 1;
     transform: scale(1.1);
-    border-radius: 0 20px 20px 0;
+    border-radius: 50% 50% 50% 50%; /* Ovalado */
+    margin: 0 -2px -2px -2px; /* Se sale 2px por cada lado excepto arriba */
+    width: calc(90% + 4px); /* Compensar el margen negativo */
+    left: calc(5% - 2px); /* Ajustar posición por el margen */
+    box-shadow: 0 0 30px rgba(255, 255, 255, 0.1); /* Brillo adicional */
 }
 
 .slider-background-blur.active {
     opacity: 1;
-    filter: blur(20px) brightness(0.3) saturate(1.1);
+    filter: blur(20px) brightness(0.6) saturate(1.2) contrast(1.2);
+    box-shadow: 0 0 40px rgba(255, 255, 255, 0.15); /* Más brillo cuando está activo */
 }
 
 .slider-container {

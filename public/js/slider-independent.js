@@ -1166,7 +1166,7 @@
             
             // Ajustar posición del fondo blur para que esté centrado al slide
             const blurOffset = (offsetFromCenter / viewportCenter) * 45; // 45% del ancho disponible
-            backgroundBlur.style.left = `${5 + blurOffset}%`;
+            backgroundBlur.style.left = `calc(5% - 2px + ${blurOffset}%)`;
             
             // Reactivar después de un pequeño delay para la transición
             setTimeout(() => {
