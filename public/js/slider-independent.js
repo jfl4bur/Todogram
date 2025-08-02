@@ -1165,14 +1165,15 @@
             header.classList.add('at-top');
         }
         // Si el header está sobre el slider, hacerlo 30% opaco
-        else if (scrollTop + headerBottom > sliderTop) {
+        else if (scrollTop + headerBottom > sliderTop && scrollTop < sliderTop + sliderSection.offsetHeight) {
             header.classList.add('over-slider');
         } else {
             // Verificar si está sobre algún carrusel
             let isOverCarousel = false;
             carouselSections.forEach(carousel => {
                 const carouselTop = carousel.offsetTop;
-                if (scrollTop + headerBottom > carouselTop) {
+                const carouselBottom = carouselTop + carousel.offsetHeight;
+                if (scrollTop + headerBottom > carouselTop && scrollTop < carouselBottom) {
                     isOverCarousel = true;
                 }
             });

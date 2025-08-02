@@ -2295,10 +2295,12 @@ html, body {
     background-size: 100% 100%; /* Forzar que ocupe exactamente todo el espacio */
     background-position: center;
     background-repeat: no-repeat;
+    background-attachment: local; /* Asegurar que la imagen se ajuste al contenedor */
     transition: background-image 1s ease, filter 1s ease;
     filter: blur(40px) brightness(0.8) saturate(1.5) contrast(1.3);
     opacity: 0.5; /* Transparente al 50% */
     z-index: 1; /* Fondo detrás del slider */
+    overflow: hidden; /* Asegurar que no se salga del contenedor */
 }
 
 /* Ocultar el blur en móviles y tablets */
