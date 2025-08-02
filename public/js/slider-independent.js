@@ -848,6 +848,14 @@
             console.error('Slider: slider-section no encontrado');
             return;
         }
+        
+        // Crear elemento de fondo blur si no existe
+        let backgroundBlur = document.querySelector('.slider-background-blur');
+        if (!backgroundBlur) {
+            backgroundBlur = document.createElement('div');
+            backgroundBlur.className = 'slider-background-blur';
+            sliderSection.insertBefore(backgroundBlur, sliderSection.firstChild);
+        }
 
         // Usar los datos proporcionados o los datos cargados
         const movies = moviesData.length > 0 ? moviesData : slidesData;
@@ -1139,22 +1147,22 @@
 
     // Función para actualizar el fondo blur
     function updateBackgroundBlur() {
-        const sliderSection = document.querySelector('.slider-section');
-        if (!sliderSection || !slidesData[currentIndex]) return;
+        const backgroundBlur = document.querySelector('.slider-background-blur');
+        if (!backgroundBlur || !slidesData[currentIndex]) return;
         
         const currentMovie = slidesData[currentIndex];
         const imageUrl = currentMovie.sliderUrl || currentMovie.posterUrl || '';
         
         if (imageUrl) {
             // Remover clase activa para transición
-            sliderSection.classList.remove('active');
+            backgroundBlur.classList.remove('active');
             
-            // Cambiar imagen de fondo del slider-section
-            sliderSection.style.backgroundImage = `url(${imageUrl})`;
+            // Cambiar imagen de fondo del elemento blur
+            backgroundBlur.style.backgroundImage = `url(${imageUrl})`;
             
             // Reactivar después de un pequeño delay para la transición
             setTimeout(() => {
-                sliderSection.classList.add('active');
+                backgroundBlur.classList.add('active');
             }, 50);
             
             console.log('Slider: Fondo blur actualizado para slide', currentIndex);
