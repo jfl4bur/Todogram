@@ -1152,16 +1152,14 @@
         if (!header) return;
         
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const isDesktop = window.innerWidth > 768; // Solo desktop
         
         // Remover todas las clases primero
         header.classList.remove('at-top', 'not-at-top');
         
-        // Solo transparente en desktop cuando está en el top
-        if (scrollTop === 0 && isDesktop) {
+        // Transparente solo al inicio (0px), background después de 10px
+        if (scrollTop <= 10) {
             header.classList.add('at-top');
         } else {
-            // En móviles siempre background, en desktop cuando no está en top
             header.classList.add('not-at-top');
         }
     }
