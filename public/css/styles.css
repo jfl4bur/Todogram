@@ -2548,7 +2548,7 @@ html, body {
 @media (min-width: 1024px) {
     .slider-section {
         height: 400px;
-        margin-top: -255px;
+        margin-top: -25px;
       /*  padding: 0 20px;*/
     }
     
