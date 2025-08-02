@@ -2267,20 +2267,21 @@ html, body {
 .slider-section {
     position: relative;
     width: 100%;
-    height: 500px; /* 400px + 100px de extensión */
+    height: 400px; /* Altura normal */
     margin-top: 80px;
     background: #141414;
     overflow: hidden;
+    padding-top: 100px; /* 100px de extensión por arriba solo en desktop */
 }
 
 /* Fondo blur del slide activo */
 .slider-background-blur {
     position: absolute;
-    top: 0; /* Ahora empieza desde el top del slider-section */
+    top: -100px; /* Se extiende 100px hacia arriba */
     left: 2px; /* 2px de margen por la izquierda */
     right: 2px; /* 2px de margen por la derecha */
     bottom: 2px; /* 2px de margen por abajo */
-    height: 100%; /* Ocupa toda la altura del slider-section */
+    height: calc(100% + 100px); /* Altura normal + 100px de extensión */
     background-size: 100% 100%; /* Forzar que ocupe exactamente todo el espacio */
     background-position: center;
     background-repeat: no-repeat;
@@ -2296,6 +2297,11 @@ html, body {
 @media (max-width: 768px) {
     .slider-background-blur {
         display: none;
+    }
+    
+    /* En móviles, quitar el padding-top del slider-section */
+    .slider-section {
+        padding-top: 0;
     }
 }
 
