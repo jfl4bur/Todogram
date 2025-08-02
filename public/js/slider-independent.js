@@ -353,9 +353,15 @@
         root.style.setProperty('--slider-side-space', `${dimensions.sideSpace}px`);
         root.style.setProperty('--slider-nav-btn-offset', `${navBtnOffset}px`);
 
-        // Prevenir scroll horizontal
+        // Prevenir scroll horizontal pero permitir scroll vertical
         document.body.style.overflowX = 'hidden';
         document.documentElement.style.overflowX = 'hidden';
+        
+        // Permitir scroll vertical en móvil
+        if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+            document.body.style.overflowY = 'auto';
+            document.documentElement.style.overflowY = 'auto';
+        }
         
         // Aplicar correcciones mínimas para Safari
         if (dimensions.isSafari) {
@@ -524,7 +530,7 @@
     }
     */
 
-    // Función para mejorar la compatibilidad con touch en dispositivos móviles (estilo Rakuten.tv)
+    // Función para mejorar la compatibilidad con touch en dispositivos móviles (estilo Rakuten.tv mejorado)
     function setupTouchCompatibility() {
         const wrapper = document.getElementById('slider-wrapper');
         if (!wrapper) return;
@@ -533,7 +539,7 @@
         const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
         if (isMobile) {
-            console.log('Slider: Configurando compatibilidad touch para móvil (estilo Rakuten.tv)');
+            console.log('Slider: Configurando compatibilidad touch para móvil (estilo Rakuten.tv mejorado)');
             
             // Variables para detectar swipe real (mejoradas)
             let touchStartTime = 0;
@@ -541,6 +547,9 @@
             let hasMoved = false;
             let touchStartY = 0;
             let isHorizontalSwipe = false;
+            let isVerticalSwipe = false;
+            let initialTransformX = 0;
+            let currentTransformX = 0;
             
             // Asegurar que los eventos touch funcionen correctamente
             wrapper.addEventListener('touchstart', (e) => {
@@ -551,40 +560,77 @@
                 touchDistance = 0;
                 hasMoved = false;
                 isHorizontalSwipe = false;
+                isVerticalSwipe = false;
                 isDragging = true;
-                console.log('Slider: Touch start en', touchStartX, touchStartY);
+                
+                // Obtener la posición actual del wrapper
+                const currentTransform = wrapper.style.transform;
+                if (currentTransform) {
+                    const match = currentTransform.match(/translate3d\(([^,]+),/);
+                    if (match) {
+                        initialTransformX = parseFloat(match[1]);
+                        currentTransformX = initialTransformX;
+                    }
+                }
+                
+                console.log('Slider: Touch start en', touchStartX, touchStartY, 'transform inicial:', initialTransformX);
             }, { passive: false });
             
             wrapper.addEventListener('touchmove', (e) => {
                 if (!isDragging || isTransitioning) return;
-                e.preventDefault();
-                touchEndX = e.touches[0].clientX;
+                
+                const touchEndX = e.touches[0].clientX;
                 const touchEndY = e.touches[0].clientY;
-                touchDistance = Math.abs(touchStartX - touchEndX);
+                const horizontalDistance = Math.abs(touchStartX - touchEndX);
                 const verticalDistance = Math.abs(touchStartY - touchEndY);
                 
-                // Determinar si es un swipe horizontal (como Rakuten.tv)
-                if (touchDistance > 10 && touchDistance > verticalDistance * 1.5) {
+                // Determinar dirección del swipe con mejor precisión
+                if (horizontalDistance > 10 || verticalDistance > 10) {
                     hasMoved = true;
-                    isHorizontalSwipe = true;
-                }
-                
-                // Aplicar efecto visual de seguimiento (estilo Rakuten.tv)
-                if (hasMoved && isHorizontalSwipe) {
-                    const slides = document.querySelectorAll('.slider-slide');
-                    slides.forEach((slide, index) => {
-                        const slideRect = slide.getBoundingClientRect();
-                        const slideCenter = slideRect.left + slideRect.width / 2;
-                        const touchCenter = touchEndX;
-                        const distance = Math.abs(slideCenter - touchCenter);
-                        const maxDistance = window.innerWidth / 2;
+                    
+                    // Calcular la relación entre movimiento horizontal y vertical
+                    const ratio = horizontalDistance / (verticalDistance + 1); // +1 para evitar división por cero
+                    
+                    if (ratio > 1.5) {
+                        // Swipe horizontal predominante - manejar slider
+                        isHorizontalSwipe = true;
+                        isVerticalSwipe = false;
+                        e.preventDefault(); // Prevenir scroll solo para swipe horizontal
                         
-                        if (distance < maxDistance) {
-                            const scale = 1 - (distance / maxDistance) * 0.1;
-                            slide.style.transform = `translate3d(0, -8px, 0) scale(${scale})`;
-                            slide.style.webkitTransform = `translate3d(0, -8px, 0) scale(${scale})`;
+                        // Calcular nueva posición del wrapper
+                        const deltaX = touchEndX - touchStartX;
+                        currentTransformX = initialTransformX + deltaX;
+                        
+                        // Aplicar transformación en tiempo real
+                        wrapper.style.transition = 'none';
+                        wrapper.style.transform = `translate3d(${currentTransformX}px, 0, 0)`;
+                        wrapper.style.webkitTransform = `translate3d(${currentTransformX}px, 0, 0)`;
+                        
+                        console.log('Slider: Movimiento horizontal - deltaX:', deltaX, 'nueva posición:', currentTransformX, 'ratio:', ratio);
+                    } else if (ratio < 0.7) {
+                        // Swipe vertical predominante - permitir scroll de la página
+                        isVerticalSwipe = true;
+                        isHorizontalSwipe = false;
+                        // NO prevenir el evento para permitir scroll
+                        console.log('Slider: Movimiento vertical detectado - permitiendo scroll');
+                    } else {
+                        // Movimiento diagonal - determinar basado en la dirección predominante
+                        if (horizontalDistance > verticalDistance) {
+                            isHorizontalSwipe = true;
+                            isVerticalSwipe = false;
+                            e.preventDefault();
+                            
+                            const deltaX = touchEndX - touchStartX;
+                            currentTransformX = initialTransformX + deltaX;
+                            
+                            wrapper.style.transition = 'none';
+                            wrapper.style.transform = `translate3d(${currentTransformX}px, 0, 0)`;
+                            wrapper.style.webkitTransform = `translate3d(${currentTransformX}px, 0, 0)`;
+                        } else {
+                            isVerticalSwipe = true;
+                            isHorizontalSwipe = false;
                         }
-                    });
+                    }
                 }
             }, { passive: false });
             
@@ -593,28 +639,34 @@
                 
                 const touchEndTime = Date.now();
                 const touchDuration = touchEndTime - touchStartTime;
-                const swipeThreshold = 60; // Umbral más alto para evitar swipes accidentales
-                const maxDuration = 800; // Tiempo máximo para considerar swipe válido
+                const swipeThreshold = 50;
+                const maxDuration = 800;
                 
-                console.log('Slider: Touch end - diff:', touchDistance, 'duration:', touchDuration, 'moved:', hasMoved, 'horizontal:', isHorizontalSwipe);
+                console.log('Slider: Touch end - horizontal:', isHorizontalSwipe, 'vertical:', isVerticalSwipe, 'duration:', touchDuration);
                 
-                // Restaurar transformaciones de los slides
-                const slides = document.querySelectorAll('.slider-slide');
-                slides.forEach((slide) => {
-                    slide.style.transform = 'translate3d(0, 0, 0)';
-                    slide.style.webkitTransform = 'translate3d(0, 0, 0)';
-                });
-                
-                // Solo considerar como swipe si es horizontal, hay movimiento significativo y tiempo razonable
-                if (hasMoved && isHorizontalSwipe && touchDistance > swipeThreshold && touchDuration < maxDuration) {
-                    if (touchStartX > touchEndX) {
-                        // Swipe izquierda - siguiente slide
-                        console.log('Slider: Swipe izquierda detectado');
-                        goToSlide(currentIndex + 1);
+                if (isHorizontalSwipe && hasMoved) {
+                    // Restaurar transición
+                    wrapper.style.transition = 'transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                    
+                    // Determinar dirección del swipe
+                    const finalDeltaX = currentTransformX - initialTransformX;
+                    const dimensions = calculateResponsiveDimensions();
+                    const slideWidth = dimensions.slideWidth + dimensions.slideGap;
+                    
+                    if (Math.abs(finalDeltaX) > swipeThreshold && touchDuration < maxDuration) {
+                        if (finalDeltaX < 0) {
+                            // Swipe izquierda - siguiente slide
+                            console.log('Slider: Swipe izquierda detectado');
+                            goToSlide(currentIndex + 1);
+                        } else {
+                            // Swipe derecha - slide anterior
+                            console.log('Slider: Swipe derecha detectado');
+                            goToSlide(currentIndex - 1);
+                        }
                     } else {
-                        // Swipe derecha - slide anterior
-                        console.log('Slider: Swipe derecha detectado');
-                        goToSlide(currentIndex - 1);
+                        // Volver a la posición original
+                        console.log('Slider: Volviendo a posición original');
+                        updateSliderPosition(true);
                     }
                 }
                 
@@ -627,14 +679,17 @@
                 touchDistance = 0;
                 hasMoved = false;
                 isHorizontalSwipe = false;
+                isVerticalSwipe = false;
+                initialTransformX = 0;
+                currentTransformX = 0;
             }, { passive: false });
             
             // Agregar eventos de click mejorados para móvil
             const slides = document.querySelectorAll('.slider-slide');
             slides.forEach((slide, index) => {
                 slide.addEventListener('click', (e) => {
-                    // Solo prevenir click si realmente hubo un swipe significativo
-                    if (isDragging && hasMoved && isHorizontalSwipe && touchDistance > 40) {
+                    // Solo prevenir click si realmente hubo un swipe horizontal significativo
+                    if (isDragging && hasMoved && isHorizontalSwipe && Math.abs(currentTransformX - initialTransformX) > 30) {
                         console.log('Slider: Previniendo click durante swipe activo');
                         e.preventDefault();
                         e.stopPropagation();
@@ -870,34 +925,20 @@
                 </div>
             `;
 
-            // Efectos hover mejorados (estilo Rakuten.tv)
+            // Efectos hover exactos como Rakuten.tv
             slideDiv.addEventListener('mouseenter', () => {
                 if (!isTransitioning) {
-                    slideDiv.style.transform = 'translate3d(0, -8px, 0) scale(1.02)';
-                    slideDiv.style.webkitTransform = 'translate3d(0, -8px, 0) scale(1.02)';
-                    slideDiv.style.boxShadow = '0 12px 30px rgba(0, 0, 0, 0.4)';
-                    
-                    // Efecto sutil en la imagen
-                    const img = slideDiv.querySelector('.slider-img-wrapper img');
-                    if (img) {
-                        img.style.transform = 'scale(1.05)';
-                        img.style.webkitTransform = 'scale(1.05)';
-                    }
+                    slideDiv.style.transform = 'translateY(-8px)';
+                    slideDiv.style.webkitTransform = 'translateY(-8px)';
+                    slideDiv.style.boxShadow = '0 8px 25px rgba(0, 0, 0, 0.3)';
                 }
             });
 
             slideDiv.addEventListener('mouseleave', () => {
                 if (!isTransitioning) {
-                    slideDiv.style.transform = 'translate3d(0, 0, 0) scale(1)';
-                    slideDiv.style.webkitTransform = 'translate3d(0, 0, 0) scale(1)';
+                    slideDiv.style.transform = 'translateY(0)';
+                    slideDiv.style.webkitTransform = 'translateY(0)';
                     slideDiv.style.boxShadow = '0 4px 20px rgba(0,0,0,0.3)';
-                    
-                    // Restaurar imagen
-                    const img = slideDiv.querySelector('.slider-img-wrapper img');
-                    if (img) {
-                        img.style.transform = 'scale(1)';
-                        img.style.webkitTransform = 'scale(1)';
-                    }
                 }
             });
 
