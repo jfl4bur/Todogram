@@ -696,36 +696,16 @@
         const sliderWrapper = document.getElementById('slider-wrapper');
         const sliderSkeleton = document.getElementById('slider-skeleton');
         
-        console.log('Slider: Elementos encontrados - wrapper:', sliderWrapper, 'skeleton:', sliderSkeleton);
-        
         if (!sliderWrapper) {
             console.error('Slider: slider-wrapper no encontrado');
             return;
         }
         
-        // Mostrar skeleton por un tiempo mínimo antes de ocultarlo
+        // Ocultar skeleton y mostrar slider real
         if (sliderSkeleton) {
-            console.log('Slider: Skeleton encontrado, mostrando...');
-            // Asegurar que el skeleton esté visible
-            sliderSkeleton.style.display = 'flex';
-            console.log('Slider: Skeleton display:', sliderSkeleton.style.display);
-            
-            // Mantener skeleton visible hasta que el slider esté completamente renderizado
-            // Ocultar skeleton después de que todos los slides estén creados
-            const hideSkeleton = () => {
-                if (!isDestroyed && sliderSkeleton) {
-                    console.log('Slider: Ocultando skeleton y mostrando slider real');
-                    sliderSkeleton.style.display = 'none';
-                    sliderWrapper.style.display = 'flex';
-                }
-            };
-            
-            // Ocultar skeleton después de un delay mínimo
-            setTimeout(hideSkeleton, 3000);
-        } else {
-            console.log('Slider: Skeleton no encontrado, mostrando slider directamente');
-            sliderWrapper.style.display = 'flex';
+            sliderSkeleton.style.display = 'none';
         }
+        sliderWrapper.style.display = 'flex';
 
         // Usar los datos proporcionados o los datos cargados
         const movies = moviesData.length > 0 ? moviesData : slidesData;

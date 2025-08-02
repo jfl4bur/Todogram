@@ -203,16 +203,13 @@
 
 /* Skeleton loader para el slider */
 .slider-skeleton {
-    display: flex !important;
+    display: flex;
     gap: var(--slider-slide-gap, 16px);
     width: 100%;
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
     margin-left: var(--slider-side-space, 20px);
-    min-height: 200px;
-    align-items: center;
-    background-color: rgba(255, 0, 0, 0.1); /* Debug temporal */
 }
 
 .slider-skeleton::-webkit-scrollbar {
@@ -223,7 +220,7 @@
     flex: 0 0 auto;
     width: var(--slider-slide-width, 400px);
     height: var(--slider-slide-height, 200px);
-    background-color: #333;
+    background-color: var(--secondary-color);
     position: relative;
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
@@ -231,8 +228,6 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 300px;
-    min-height: 150px;
 }
 
 .slider-skeleton-spinner {
@@ -240,9 +235,8 @@
     height: 40px;
     border: 4px solid rgba(255, 255, 255, 0.1);
     border-radius: 50%;
-    border-top-color: #ff0000;
+    border-top-color: var(--primary-color);
     animation: spin 1s linear infinite;
-    display: block;
 }
 
 @keyframes spin {
@@ -2211,6 +2205,19 @@ html {
 /* ===== CORRECCIÓN DEL SCROLL HORIZONTAL DEL SLIDER ===== */
 
 /* Variables CSS corregidas para el slider */
+:root {
+    --slider-slide-width: 90vw;
+    --slider-slide-gap: 2vw;
+    --slider-side-space: calc((100% - var(--slider-slide-width)) / 2);
+    --slider-nav-btn-offset: calc(var(--slider-side-space) / 2 - 40px);
+}
+
+/* Prevenir scroll horizontal global */
+html, body {
+    overflow-x: hidden !important;
+    max-width: 100% !important;
+}
+
 /* ===== SLIDER ESTILO RAKUTEN.TV ===== */
 
 /* Variables CSS para el slider */
@@ -2218,7 +2225,6 @@ html {
     --slider-slide-width: 90vw;
     --slider-slide-gap: 1.5vw;
     --slider-side-space: calc((100% - var(--slider-slide-width)) / 2);
-    --slider-nav-btn-offset: calc(var(--slider-side-space) / 2 - 40px);
 }
 
 /* Prevenir scroll horizontal global */

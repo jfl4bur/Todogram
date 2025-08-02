@@ -34,13 +34,6 @@ document.addEventListener('DOMContentLoaded', function () {
         if (sliderSkeleton && sliderWrapper) {
             sliderSkeleton.style.display = 'flex';
             sliderWrapper.style.display = 'none';
-            console.log('Main: Skeleton del slider inicializado');
-            console.log('Main: Skeleton visible:', sliderSkeleton.style.display);
-            console.log('Main: Slider wrapper oculto:', sliderWrapper.style.display);
-        } else {
-            console.error('Main: No se encontraron elementos del skeleton del slider');
-            console.error('Main: sliderSkeleton:', sliderSkeleton);
-            console.error('Main: sliderWrapper:', sliderWrapper);
         }
 
         window.carousel = carousel;
