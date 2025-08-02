@@ -464,6 +464,9 @@
             return;
         }
         
+        // Detectar si es móvil para ajustar transiciones
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
         if (!forceUpdate) {
             isTransitioning = true;
         }
@@ -473,6 +476,12 @@
         
         // Calcular posición (estilo Rakuten.tv)
         const translateX = -(dimensions.slideWidth + dimensions.slideGap) * currentIndex;
+        
+        // Aplicar transición más suave en móvil
+        if (isMobile && !forceUpdate) {
+            wrapper.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        }
+        
         wrapper.style.transform = `translate3d(${translateX}px, 0, 0)`;
         wrapper.style.webkitTransform = `translate3d(${translateX}px, 0, 0)`;
         
@@ -481,13 +490,15 @@
             translateX,
             slideWidth: dimensions.slideWidth,
             slideGap: dimensions.slideGap,
-            forceUpdate
+            forceUpdate,
+            isMobile
         });
         
         if (!forceUpdate) {
+            const transitionTime = isMobile ? 500 : 800;
             setTimeout(() => {
                 isTransitioning = false;
-            }, 800);
+            }, transitionTime);
         }
     }
 
@@ -645,27 +656,28 @@
                 console.log('Slider: Touch end - horizontal:', isHorizontalSwipe, 'vertical:', isVerticalSwipe, 'duration:', touchDuration);
                 
                 if (isHorizontalSwipe && hasMoved) {
-                    // Restaurar transición
-                    wrapper.style.transition = 'transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-                    
                     // Determinar dirección del swipe
                     const finalDeltaX = currentTransformX - initialTransformX;
                     const dimensions = calculateResponsiveDimensions();
                     const slideWidth = dimensions.slideWidth + dimensions.slideGap;
                     
                     if (Math.abs(finalDeltaX) > swipeThreshold && touchDuration < maxDuration) {
+                        // Swipe válido - aplicar transición suave
+                        wrapper.style.transition = 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                        
                         if (finalDeltaX < 0) {
                             // Swipe izquierda - siguiente slide
-                            console.log('Slider: Swipe izquierda detectado');
+                            console.log('Slider: Swipe izquierda detectado - transición suave');
                             goToSlide(currentIndex + 1);
                         } else {
                             // Swipe derecha - slide anterior
-                            console.log('Slider: Swipe derecha detectado');
+                            console.log('Slider: Swipe derecha detectado - transición suave');
                             goToSlide(currentIndex - 1);
                         }
                     } else {
-                        // Volver a la posición original
-                        console.log('Slider: Volviendo a posición original');
+                        // Swipe insuficiente - volver a posición original con transición suave
+                        console.log('Slider: Volviendo a posición original - transición suave');
+                        wrapper.style.transition = 'transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
                         updateSliderPosition(true);
                     }
                 }
@@ -1071,7 +1083,10 @@
         
         if (index === currentIndex) return;
         
-        console.log('Slider: Cambiando a slide', index);
+        // Detectar si es móvil para ajustar transiciones
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        console.log('Slider: Cambiando a slide', index, 'móvil:', isMobile);
         
         currentIndex = index;
         updateSliderPosition();
