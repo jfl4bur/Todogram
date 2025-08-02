@@ -1910,17 +1910,6 @@
   transform: translateY(0);
 }
 
-.slider-header.over-slider {
-  background: rgba(20, 20, 20, 0.3); /* 30% opaco (70% transparente) */
-  box-shadow: none;
-}
-
-.slider-header.over-carousel {
-  background: #0a0a0a;
-  border-top: 1px solid #1a1a1a;
-  box-shadow: none;
-}
-
 .slider-header.at-top {
   background: transparent;
   box-shadow: none;
@@ -2278,7 +2267,7 @@ html, body {
 .slider-section {
     position: relative;
     width: 100%;
-    height: 400px;
+    height: 500px; /* 400px + 100px de extensión */
     margin-top: 80px;
     background: #141414;
     overflow: hidden;
@@ -2287,11 +2276,11 @@ html, body {
 /* Fondo blur del slide activo */
 .slider-background-blur {
     position: absolute;
-    top: -100px; /* Se extiende 100px hacia arriba */
+    top: 0; /* Ahora empieza desde el top del slider-section */
     left: 2px; /* 2px de margen por la izquierda */
     right: 2px; /* 2px de margen por la derecha */
     bottom: 2px; /* 2px de margen por abajo */
-    height: calc(100% + 100px); /* Altura normal + 100px de extensión */
+    height: 100%; /* Ocupa toda la altura del slider-section */
     background-size: 100% 100%; /* Forzar que ocupe exactamente todo el espacio */
     background-position: center;
     background-repeat: no-repeat;

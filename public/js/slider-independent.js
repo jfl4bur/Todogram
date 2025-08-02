@@ -1148,39 +1148,17 @@
     // Función para manejar la transparencia del header
     function handleHeaderTransparency() {
         const header = document.querySelector('.slider-header');
-        const sliderSection = document.querySelector('.slider-section');
-        const carouselSections = document.querySelectorAll('.carousel-section');
         
-        if (!header || !sliderSection) return;
+        if (!header) return;
         
-        const headerBottom = header.offsetTop + header.offsetHeight;
-        const sliderTop = sliderSection.offsetTop;
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
         
         // Remover todas las clases primero
-        header.classList.remove('over-slider', 'over-carousel', 'at-top');
+        header.classList.remove('at-top');
         
-        // Si está en el top (scrollTop = 0), hacerlo transparente
+        // Solo transparente en el top, background normal en todo lo demás
         if (scrollTop === 0) {
             header.classList.add('at-top');
-        }
-        // Si el header está sobre el slider, hacerlo 30% opaco
-        else if (scrollTop + headerBottom > sliderTop && scrollTop < sliderTop + sliderSection.offsetHeight) {
-            header.classList.add('over-slider');
-        } else {
-            // Verificar si está sobre algún carrusel
-            let isOverCarousel = false;
-            carouselSections.forEach(carousel => {
-                const carouselTop = carousel.offsetTop;
-                const carouselBottom = carouselTop + carousel.offsetHeight;
-                if (scrollTop + headerBottom > carouselTop && scrollTop < carouselBottom) {
-                    isOverCarousel = true;
-                }
-            });
-            
-            if (isOverCarousel) {
-                header.classList.add('over-carousel');
-            }
         }
     }
 
