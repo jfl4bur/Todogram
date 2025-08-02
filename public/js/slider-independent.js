@@ -118,6 +118,22 @@
         updateSliderCSSVariables();
         updateSliderLayout(true);
         
+        // Actualizar esqueleto si está visible
+        const sliderSkeleton = document.getElementById('slider-skeleton');
+        if (sliderSkeleton && sliderSkeleton.style.display !== 'none') {
+            const dimensions = calculateResponsiveDimensions();
+            const skeletonSlides = sliderSkeleton.querySelectorAll('.slider-skeleton-slide');
+            
+            skeletonSlides.forEach((slide, index) => {
+                slide.style.width = `${dimensions.slideWidth}px`;
+                slide.style.height = `${dimensions.slideHeight}px`;
+                slide.style.flexBasis = `${dimensions.slideWidth}px`;
+                slide.style.marginRight = index < skeletonSlides.length - 1 ? `${dimensions.slideGap}px` : '0';
+            });
+            
+            sliderSkeleton.style.marginLeft = `${dimensions.sideSpace}px`;
+        }
+        
         // Actualización con debounce
         resizeTimeout = setTimeout(() => {
             if (isDestroyed || totalSlides === 0) return;
@@ -693,13 +709,22 @@
         
         console.log('Slider: Iniciando renderizado...');
         
-        const sliderWrapper = document.getElementById('slider-wrapper');
+        // Ocultar esqueleto y mostrar slider real
         const sliderSkeleton = document.getElementById('slider-skeleton');
-
-        if (!sliderWrapper || !sliderSkeleton) {
-            console.error('Slider: slider-wrapper o slider-skeleton no encontrado');
+        const sliderWrapper = document.getElementById('slider-wrapper');
+        
+        if (sliderSkeleton) {
+            sliderSkeleton.style.display = 'none';
+            console.log('Slider: Esqueleto ocultado');
+        }
+        
+        if (!sliderWrapper) {
+            console.error('Slider: slider-wrapper no encontrado');
             return;
         }
+        
+        // Mostrar el wrapper del slider real
+        sliderWrapper.style.display = 'flex';
 
         // Usar los datos proporcionados o los datos cargados
         const movies = moviesData.length > 0 ? moviesData : slidesData;
@@ -715,7 +740,6 @@
         
         if (totalSlides === 0) {
             console.error('Slider: No hay slides para renderizar');
-            sliderSkeleton.style.display = 'none';
             return;
         }
 
@@ -815,10 +839,6 @@
 
             sliderWrapper.appendChild(slideDiv);
         });
-
-        // Ocultar esqueleto y mostrar slider
-        sliderSkeleton.style.display = 'none';
-        sliderWrapper.style.display = 'flex';
 
         // Configurar controles
         setupControls();
@@ -1044,6 +1064,35 @@
         if (isDestroyed) return;
         
         console.log('Slider: Inicializando...');
+        
+        // Mostrar esqueleto inicialmente
+        const sliderSkeleton = document.getElementById('slider-skeleton');
+        const sliderWrapper = document.getElementById('slider-wrapper');
+        
+        if (sliderSkeleton) {
+            sliderSkeleton.style.display = 'flex';
+            console.log('Slider: Esqueleto mostrado');
+            
+            // Aplicar dimensiones responsivas al esqueleto
+            const dimensions = calculateResponsiveDimensions();
+            const skeletonSlides = sliderSkeleton.querySelectorAll('.slider-skeleton-slide');
+            
+            skeletonSlides.forEach((slide, index) => {
+                slide.style.width = `${dimensions.slideWidth}px`;
+                slide.style.height = `${dimensions.slideHeight}px`;
+                slide.style.flexBasis = `${dimensions.slideWidth}px`;
+                slide.style.marginRight = index < skeletonSlides.length - 1 ? `${dimensions.slideGap}px` : '0';
+                slide.style.flexShrink = '0';
+                slide.style.flexGrow = '0';
+            });
+            
+            // Aplicar margen al esqueleto
+            sliderSkeleton.style.marginLeft = `${dimensions.sideSpace}px`;
+        }
+        
+        if (sliderWrapper) {
+            sliderWrapper.style.display = 'none';
+        }
         
         // Prevenir scroll horizontal
         document.body.style.overflowX = 'hidden';
