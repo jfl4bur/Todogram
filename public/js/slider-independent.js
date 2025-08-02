@@ -1154,13 +1154,13 @@
         const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
         
         // Remover todas las clases primero
-        header.classList.remove('at-top', 'not-at-top');
+        header.classList.remove('at-top', 'not-at-top', 'scrolled');
         
-        // Transparente solo al inicio (0px), background después de 10px
+        // Transparente solo al inicio (0-10px), background después de 10px
         if (scrollTop <= 10) {
             header.classList.add('at-top');
         } else {
-            header.classList.add('not-at-top');
+            header.classList.add('not-at-top', 'scrolled');
         }
     }
 

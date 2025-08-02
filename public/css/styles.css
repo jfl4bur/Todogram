@@ -1920,10 +1920,10 @@
   box-shadow: 0 2px 12px rgba(0,0,0,0.15);
 }
 .slider-header.scrolled {
-  background: transparent;
+  background: #141414;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  box-shadow: none;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
 }
 .slider-header.hidden {
   transform: translateY(-100%)
