@@ -1142,30 +1142,23 @@
         const sliderSection = document.querySelector('.slider-section');
         if (!sliderSection || !slidesData[currentIndex]) return;
         
-        // Array de gradientes diferentes para cada slide
-        const gradients = [
-            'linear-gradient(90deg, #8B0000 0%, #4B0082 25%, #000080 50%, #006400 75%, #FF8C00 100%)',
-            'linear-gradient(90deg, #DC143C 0%, #8A2BE2 25%, #4169E1 50%, #32CD32 75%, #FFD700 100%)',
-            'linear-gradient(90deg, #FF1493 0%, #9932CC 25%, #1E90FF 50%, #00CED1 75%, #FF6347 100%)',
-            'linear-gradient(90deg, #FF4500 0%, #9370DB 25%, #00BFFF 50%, #00FA9A 75%, #FF69B4 100%)',
-            'linear-gradient(90deg, #FF0000 0%, #800080 25%, #0000FF 50%, #008000 75%, #FFFF00 100%)',
-            'linear-gradient(90deg, #FF69B4 0%, #DDA0DD 25%, #87CEEB 50%, #98FB98 75%, #F0E68C 100%)',
-            'linear-gradient(90deg, #FF6347 0%, #DDA0DD 25%, #87CEEB 50%, #90EE90 75%, #F0E68C 100%)',
-            'linear-gradient(90deg, #FF4500 0%, #9370DB 25%, #00BFFF 50%, #00FA9A 75%, #FF69B4 100%)',
-            'linear-gradient(90deg, #DC143C 0%, #8A2BE2 25%, #4169E1 50%, #32CD32 75%, #FFD700 100%)',
-            'linear-gradient(90deg, #FF1493 0%, #9932CC 25%, #1E90FF 50%, #00CED1 75%, #FF6347 100%)',
-            'linear-gradient(90deg, #FF0000 0%, #800080 25%, #0000FF 50%, #008000 75%, #FFFF00 100%)',
-            'linear-gradient(90deg, #FF69B4 0%, #DDA0DD 25%, #87CEEB 50%, #98FB98 75%, #F0E68C 100%)'
-        ];
+        const currentMovie = slidesData[currentIndex];
+        const imageUrl = currentMovie.sliderUrl || currentMovie.posterUrl || '';
         
-        // Seleccionar gradiente basado en el índice actual
-        const gradientIndex = currentIndex % gradients.length;
-        const selectedGradient = gradients[gradientIndex];
-        
-        // Aplicar el gradiente
-        sliderSection.style.background = selectedGradient;
-        
-        console.log('Slider: Fondo gradiente actualizado para slide', currentIndex, 'gradiente:', gradientIndex);
+        if (imageUrl) {
+            // Remover clase activa para transición
+            sliderSection.classList.remove('active');
+            
+            // Cambiar imagen de fondo del slider-section
+            sliderSection.style.backgroundImage = `url(${imageUrl})`;
+            
+            // Reactivar después de un pequeño delay para la transición
+            setTimeout(() => {
+                sliderSection.classList.add('active');
+            }, 50);
+            
+            console.log('Slider: Fondo blur actualizado para slide', currentIndex);
+        }
     }
 
     // Función para abrir modal
