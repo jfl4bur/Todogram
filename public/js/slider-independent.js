@@ -118,6 +118,22 @@
         updateSliderCSSVariables();
         updateSliderLayout(true);
         
+        // Actualizar esqueleto si está visible
+        const sliderSkeleton = document.getElementById('slider-skeleton');
+        if (sliderSkeleton && sliderSkeleton.style.display !== 'none') {
+            const dimensions = calculateResponsiveDimensions();
+            const skeletonSlides = sliderSkeleton.querySelectorAll('.slider-skeleton-slide');
+            
+            skeletonSlides.forEach((slide, index) => {
+                slide.style.width = `${dimensions.slideWidth}px`;
+                slide.style.height = `${dimensions.slideHeight}px`;
+                slide.style.flexBasis = `${dimensions.slideWidth}px`;
+                slide.style.marginRight = index < skeletonSlides.length - 1 ? `${dimensions.slideGap}px` : '0';
+            });
+            
+            sliderSkeleton.style.marginLeft = `${dimensions.sideSpace}px`;
+        }
+        
         // Actualización con debounce
         resizeTimeout = setTimeout(() => {
             if (isDestroyed || totalSlides === 0) return;
@@ -693,11 +709,22 @@
         
         console.log('Slider: Iniciando renderizado...');
         
+        // Ocultar esqueleto y mostrar slider real
+        const sliderSkeleton = document.getElementById('slider-skeleton');
         const sliderWrapper = document.getElementById('slider-wrapper');
+        
+        if (sliderSkeleton) {
+            sliderSkeleton.style.display = 'none';
+            console.log('Slider: Esqueleto ocultado');
+        }
+        
         if (!sliderWrapper) {
             console.error('Slider: slider-wrapper no encontrado');
             return;
         }
+        
+        // Mostrar el wrapper del slider real
+        sliderWrapper.style.display = 'flex';
 
         // Usar los datos proporcionados o los datos cargados
         const movies = moviesData.length > 0 ? moviesData : slidesData;
@@ -1038,6 +1065,35 @@
         
         console.log('Slider: Inicializando...');
         
+        // Mostrar esqueleto inicialmente
+        const sliderSkeleton = document.getElementById('slider-skeleton');
+        const sliderWrapper = document.getElementById('slider-wrapper');
+        
+        if (sliderSkeleton) {
+            sliderSkeleton.style.display = 'flex';
+            console.log('Slider: Esqueleto mostrado');
+            
+            // Aplicar dimensiones responsivas al esqueleto
+            const dimensions = calculateResponsiveDimensions();
+            const skeletonSlides = sliderSkeleton.querySelectorAll('.slider-skeleton-slide');
+            
+            skeletonSlides.forEach((slide, index) => {
+                slide.style.width = `${dimensions.slideWidth}px`;
+                slide.style.height = `${dimensions.slideHeight}px`;
+                slide.style.flexBasis = `${dimensions.slideWidth}px`;
+                slide.style.marginRight = index < skeletonSlides.length - 1 ? `${dimensions.slideGap}px` : '0';
+                slide.style.flexShrink = '0';
+                slide.style.flexGrow = '0';
+            });
+            
+            // Aplicar margen al esqueleto
+            sliderSkeleton.style.marginLeft = `${dimensions.sideSpace}px`;
+        }
+        
+        if (sliderWrapper) {
+            sliderWrapper.style.display = 'none';
+        }
+        
         // Prevenir scroll horizontal
         document.body.style.overflowX = 'hidden';
         document.documentElement.style.overflowX = 'hidden';
@@ -1063,66 +1119,9 @@
             // Iniciar autoplay
             startAutoPlay();
             
-            // Ocultar esqueleto y mostrar slider real
-            hideSkeletonAndShowSlider();
-            
             console.log('Slider: Inicialización completada');
         } else {
             console.error('Slider: No se pudieron cargar datos');
-        }
-    }
-
-    // Función para ocultar esqueleto y mostrar slider real
-    function hideSkeletonAndShowSlider() {
-        // Usar la función de transición del index si está disponible
-        if (window.handleSkeletonTransition) {
-            window.handleSkeletonTransition();
-            console.log('Slider: Transición de esqueleto a slider real usando función del index');
-        } else {
-            // Fallback si la función del index no está disponible
-            const skeletonSection = document.getElementById('slider-skeleton');
-            const skeletonPagination = document.getElementById('slider-skeleton-pagination');
-            const realSection = document.getElementById('slider-real');
-            const realPagination = document.getElementById('slider-pagination');
-            
-            if (skeletonSection && realSection) {
-                // Ocultar esqueleto con fade out
-                skeletonSection.style.transition = 'opacity 0.8s ease-out';
-                skeletonSection.style.opacity = '0';
-                
-                if (skeletonPagination) {
-                    skeletonPagination.style.transition = 'opacity 0.8s ease-out';
-                    skeletonPagination.style.opacity = '0';
-                }
-                
-                // Mostrar slider real con fade in
-                setTimeout(() => {
-                    skeletonSection.style.display = 'none';
-                    if (skeletonPagination) {
-                        skeletonPagination.style.display = 'none';
-                    }
-                    
-                    realSection.style.display = 'block';
-                    realSection.style.opacity = '0';
-                    realSection.style.transition = 'opacity 0.8s ease-in';
-                    
-                    if (realPagination) {
-                        realPagination.style.opacity = '0';
-                        realPagination.style.transition = 'opacity 0.8s ease-in';
-                    }
-                    
-                    // Fade in del slider real
-                    setTimeout(() => {
-                        realSection.style.opacity = '1';
-                        if (realPagination) {
-                            realPagination.style.opacity = '1';
-                        }
-                    }, 100);
-                    
-                }, 800);
-                
-                console.log('Slider: Transición de esqueleto a slider real completada (fallback)');
-            }
         }
     }
 
@@ -1157,7 +1156,6 @@
         forceCompleteRecalculation,
         verifySliderIntegrity,
         openDetailsModal,
-        hideSkeletonAndShowSlider,
         destroy
     };
 
