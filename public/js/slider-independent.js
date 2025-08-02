@@ -1147,6 +1147,28 @@
 
 
 
+    // Función para manejar la transparencia del header solo en escritorio
+    function handleHeaderTransparency() {
+        const header = document.querySelector('.slider-header');
+        
+        if (!header) return;
+        
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        const isDesktop = window.innerWidth > 768; // Solo desktop
+        
+        // Remover todas las clases primero
+        header.classList.remove('at-top', 'not-at-top');
+        
+        // Solo aplicar lógica en desktop
+        if (isDesktop) {
+            if (scrollTop <= 10) {
+                header.classList.add('at-top');
+            } else {
+                header.classList.add('not-at-top');
+            }
+        }
+    }
+
     // Función para actualizar el fondo blur
     function updateBackgroundBlur() {
         const backgroundBlur = document.querySelector('.slider-background-blur');
@@ -1214,6 +1236,7 @@
         clearTimeout(resizeTimeout);
         stopAutoPlay();
         window.removeEventListener('resize', handleResize);
+        window.removeEventListener('scroll', handleHeaderTransparency);
         
         // Limpiar event listeners adicionales
         const prevBtn = document.getElementById('slider-prev');
@@ -1282,7 +1305,7 @@
         window.addEventListener('resize', handleResize, { passive: true });
         
         // Agregar listener para detectar cuando el header está sobre el slider
-
+        window.addEventListener('scroll', handleHeaderTransparency, { passive: true });
         
         // Iniciar autoplay
         startAutoPlay();
@@ -1326,6 +1349,7 @@
         forceCompleteRecalculation,
         verifySliderIntegrity,
         updateBackgroundBlur,
+        handleHeaderTransparency,
         openDetailsModal,
         destroy
     };

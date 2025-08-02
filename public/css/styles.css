@@ -1910,6 +1910,17 @@
   transform: translateY(0);
 }
 
+/* Header transparente solo en desktop */
+.slider-header.at-top {
+  background: transparent;
+  box-shadow: none;
+}
+
+.slider-header.not-at-top {
+  background: #141414;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+}
+
 
 .slider-header.scrolled {
   background: #141414;
