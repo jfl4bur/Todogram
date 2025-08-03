@@ -205,9 +205,9 @@ class Carousel {
                 </div>
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none">
                 <div class="carousel-overlay">
-                    <div class="carousel-title">${item.title}</div>
-                    ${metaInfo.length ? `<div class="carousel-meta">${metaInfo.join('')}</div>` : ''}
-                    ${item.description ? `<div class="carousel-description">${item.description}</div>` : ''}
+                    <div class="carousel-title" style="font-family: 'Slider Sans UI', sans-serif;">${item.title}</div>
+                    ${metaInfo.length ? `<div class="carousel-meta" style="font-family: 'Slider Sans UI', sans-serif;">${metaInfo.join('')}</div>` : ''}
+                    ${item.description ? `<div class="carousel-description" style="font-family: 'Slider Sans UI', sans-serif;">${item.description}</div>` : ''}
                 </div>
             `;
 

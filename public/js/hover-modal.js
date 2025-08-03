@@ -93,8 +93,8 @@ class HoverModal {
         `;
         
         this.modalBody.innerHTML = `
-            <h2>${item.title}</h2>
-            <div class="meta-info">
+            <h2 style="font-family: 'Slider Sans UI', sans-serif;">${item.title}</h2>
+            <div class="meta-info" style="font-family: 'Slider Sans UI', sans-serif;">
                 ${metaItems.join('')}
             </div>
             ${genreInfo}
@@ -102,7 +102,7 @@ class HoverModal {
                 ${actionButtons}
                 ${secondaryButtons}
             </div>
-            <p class="description">${item.description}</p>
+            <p class="description" style="font-family: 'Slider Sans UI', sans-serif;">${item.description}</p>
         `;
         
         const position = this.calculateModalPosition(itemElement);
