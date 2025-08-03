@@ -2600,7 +2600,7 @@ html, body {
     .slider-slide {
         width: 88vw;
         margin-right: 2.5vw;
-        height: 410px !important;
+        height: 400px !important;
         margin-left: 0px;
     }
     
@@ -2610,7 +2610,7 @@ html, body {
     
     .slider-nav-btn {
         width: 60px;
-        height: 410px;
+        height: 400px;
         font-size: 28px;
     }
     
