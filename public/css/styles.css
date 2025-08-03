@@ -2473,83 +2473,83 @@ html, body {
 
 /* Navegación centrada verticalmente como Rakuten.tv */
 .slider-nav {
-    position: absolute !important;
-    top: 50% !important;
-    left: 0 !important;
-    right: 0 !important;
-    transform: translateY(-50%) !important;
-    display: flex !important;
-    justify-content: space-between !important;
-    align-items: center !important;
-    pointer-events: none !important;
-    z-index: 15 !important;
-    padding: 0 20px !important;
-    box-sizing: border-box !important;
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    pointer-events: none;
+    z-index: 15;
+    /* padding: 0 20px; */
+    box-sizing: border-box;
 }
 
 .slider-nav-btn {
-    pointer-events: all !important;
-    background: rgba(0,0,0,0.7) !important;
-    border: none !important;
-    color: white !important;
-    width: 50px !important;
-    height: 50px !important;
-    border-radius: 8px !important;
-    cursor: pointer !important;
-    font-size: 20px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    transition: all 0.3s ease !important;
+    pointer-events: all;
+    background: rgba(0,0,0,0.7);
+    border: none;
+    color: white;
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
 }
 
 .slider-nav-btn:hover {
-    background: rgba(0,0,0,0.9) !important;
-    transform: scale(1) !important;
+    background: rgba(0,0,0,0.9);
+    transform: scale(1);
 }
 
 .slider-nav-btn i {
-    font-size: 16px !important;
+    font-size: 16px;
 }
 
 /* Paginación en posición correcta como Rakuten.tv */
 .slider-pagination {
-    position: static !important;
-    margin: 15px auto 30px auto !important;
-    display: flex !important;
-    justify-content: center !important;
-    align-items: center !important;
-    gap: 6px !important;
-    z-index: 15 !important;
-    padding: 0 20px !important;
-    flex-wrap: wrap !important;
+    position: static;
+    margin: 15px auto 30px auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    z-index: 15;
+    padding: 0 20px;
+    flex-wrap: wrap;
 }
 
 .slider-pagination-dot {
-    width: 8px !important;
-    height: 8px !important;
-    border-radius: 50% !important;
-    background: rgba(255, 255, 255, 0.4) !important;
-    border: none !important;
-    cursor: pointer !important;
-    transition: all 0.3s ease !important;
-    opacity: 0.6 !important;
-    margin: 0 2px !important;
-    padding: 0 !important;
-    box-sizing: border-box !important;
-    flex-shrink: 0 !important;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0.6;
+    margin: 0 2px;
+    padding: 0;
+    box-sizing: border-box;
+    flex-shrink: 0;
 }
 
 .slider-pagination-dot.active {
-    background: #ffffff !important;
-    opacity: 1 !important;
-    transform: scale(1.2) !important;
+    background: #ffffff;
+    opacity: 1;
+    transform: scale(1.2);
 }
 
 .slider-pagination-dot:hover {
-    background: rgba(255, 255, 255, 0.8) !important;
-    opacity: 1 !important;
-    transform: scale(1.1) !important;
+    background: rgba(255, 255, 255, 0.8);
+    opacity: 1;
+    transform: scale(1.1);
 }
 
 /* Desktop - Dimensiones grandes como Rakuten.tv */
@@ -2571,18 +2571,18 @@ html, body {
     
     .slider-nav-btn {
         width: calc((100vw - 88vw) / 2);
-        height: 400px !important;
-        font-size: 24px !important;
+        height: 400px;
+        font-size: 24px;
     }
     
     .slider-nav-btn i {
-        font-size: 20px !important;
+        font-size: 20px;
     }
     
     .slider-pagination-dot {
-        width: 10px !important;
-        height: 10px !important;
-        margin: 0 3px !important;
+        width: 10px;
+        height: 10px;
+        margin: 0 3px;
     }
 }
 
@@ -2602,12 +2602,12 @@ html, body {
     
     .slider-nav-btn {
         width: calc((100vw - 88vw) / 2);
-        height: 410px !important;
-        font-size: 28px !important;
+        height: 410px;
+        font-size: 28px;
     }
     
     .slider-nav-btn i {
-        font-size: 24px !important;
+        font-size: 24px;
     }
 }
 
@@ -2617,7 +2617,7 @@ html, body {
         height: 200px;
         margin-top: 50px;
       /*  padding: 0 15px;*/
-      /*  margin: 0 -15px !important*/
+      /*  margin: 0 -15px*/
     }
     
     .slider-slide {
@@ -2631,12 +2631,12 @@ html, body {
     
     .slider-nav-btn {
         width: calc((100vw - 98vw) / 2);
-        height: 180px !important;
-        font-size: 22px !important;
+        height: 180px;
+        font-size: 22px;
     }
     
     .slider-nav-btn i {
-        font-size: 18px !important;
+        font-size: 18px;
     }
 }
 
@@ -2658,23 +2658,23 @@ html, body {
     }
     
     .slider-nav {
-        padding: 0 15px !important;
+        padding: 0 15px;
     }
 
     .slider-nav-btn {
         width: calc((100vw - 95vw) / 2);
-        height: 180px !important;
-        font-size: 18px !important;
+        height: 180px;
+        font-size: 18px;
     }
     
     .slider-nav-btn i {
-        font-size: 14px !important;
+        font-size: 14px;
     }
     
     .slider-pagination-dot {
-        width: 8px !important;
-        height: 8px !important;
-        margin: 0 2px !important;
+        width: 8px;
+        height: 8px;
+        margin: 0 2px;
     }
 }
 
@@ -2697,12 +2697,12 @@ html, body {
     
     .slider-nav-btn {
         width: calc((100vw - 91vw) / 2);
-        height: 180px !important;
-        font-size: 22px !important;
+        height: 180px;
+        font-size: 22px;
     }
     
     .slider-nav-btn i {
-        font-size: 18px !important;
+        font-size: 18px;
     }
 }
 
@@ -2724,30 +2724,30 @@ html, body {
     }
     
     .slider-nav {
-        padding: 0 15px !important;
+        padding: 0 15px;
     }
 
     .slider-nav-btn {
         width: calc((100vw - 95vw) / 2);
-        height: 170px !important;
-        font-size: 18px !important;
+        height: 170px;
+        font-size: 18px;
     }
     
     .slider-nav-btn i {
-        font-size: 14px !important;
+        font-size: 14px;
     }
     
     .slider-pagination-dot {
-        width: 8px !important;
-        height: 8px !important;
-        margin: 0 2px !important;
+        width: 8px;
+        height: 8px;
+        margin: 0 2px;
     }
 }
 
 /* Mobile pequeño - iPhone 11 y similares */
 @media (max-width: 480px) {
     .slider-section {
-        height: 140px !important;
+        height: 140px;
         margin-top: 35px;
        /* padding: 0 8px;*/
      }
@@ -2755,8 +2755,8 @@ html, body {
     .slider-slide {
         width: 90vw;
         margin-right: 0.5vw;
-        /* max-height: -webkit-fill-available !important; */
-        height: 120px !important;
+        /* max-height: -webkit-fill-available; */
+        height: 120px;
         margin-left: 3px;
     }
     
@@ -2765,23 +2765,23 @@ html, body {
     }
     
     .slider-nav {
-        padding: 0 10px !important;
+        padding: 0 10px;
     }
     
     .slider-nav-btn {
         width: calc((100vw - 90vw) / 2);
-        height: 120px !important;
-        font-size: 16px !important;
+        height: 120px;
+        font-size: 16px;
     }
     
     .slider-nav-btn i {
-        font-size: 12px !important;
+        font-size: 12px;
     }
     
     .slider-pagination-dot {
-        width: 6px !important;
-        height: 6px !important;
-        margin: 0 1px !important;
+        width: 6px;
+        height: 6px;
+        margin: 0 1px;
     }
 }
 
