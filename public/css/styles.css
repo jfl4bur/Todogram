@@ -520,6 +520,7 @@ button:focus {
 }
 
 .modal-body h2 {
+    font-family: 'Slider Sans UI', sans-serif;
     font-size: 1.2rem;
     margin-bottom: 10px;
     white-space: nowrap;
@@ -528,6 +529,7 @@ button:focus {
 }
 
 .modal-body .meta-info {
+    font-family: 'Slider Sans UI', sans-serif;
     display: flex;
     gap: 10px;
     font-size: 0.8rem;
@@ -552,6 +554,7 @@ button:focus {
 }
 
 .modal-body .description {
+    font-family: 'Slider Sans UI', sans-serif;
     font-size: 0.8rem;
     line-height: 1.4;
     margin-bottom: 15px;
@@ -569,6 +572,7 @@ button:focus {
 }
 
 .modal-action-btn {
+    font-family: 'Slider Sans UI', sans-serif;
     display: flex;
     align-items: center;
     gap: 5px;
@@ -580,7 +584,6 @@ button:focus {
     transition: all 0.2s ease;
     cursor: pointer;
     border: none;
-    font-family: inherit;
     font-size: 0.8rem;
 }
 
@@ -590,6 +593,13 @@ button:focus {
 
 .modal-action-btn i {
     font-size: 1rem;
+}
+
+.genre-info {
+    font-family: 'Slider Sans UI', sans-serif;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 10px;
 }
 
 .details-modal-overlay {
