@@ -2480,14 +2480,14 @@ html, body {
     position: absolute;
     top: 60%;
     left: 0;
-    right: -15px;
+    right: 0px;
     transform: translateY(-50%);
     display: flex;
     justify-content: space-between;
     align-items: center;
     pointer-events: none;
     z-index: 15;
-    /* padding: 0 20px; */
+    margin: 0px -10px;
     box-sizing: border-box;
 }
 
@@ -2574,7 +2574,7 @@ html, body {
     }
     
     .slider-nav-btn {
-        width: calc((100vw - 88vw) / 2);
+        width: 60px;
         height: 400px;
         font-size: 24px;
     }
@@ -2605,7 +2605,7 @@ html, body {
     }
     
     .slider-nav-btn {
-        width: calc((100vw - 88vw) / 2);
+        width: 60px;
         height: 410px;
         font-size: 28px;
     }
@@ -2634,7 +2634,7 @@ html, body {
     }
     
     .slider-nav-btn {
-        width: calc((100vw - 98vw) / 2);
+        width: 40px;
         height: 180px;
         font-size: 22px;
     }
@@ -2666,7 +2666,7 @@ html, body {
     }
 
     .slider-nav-btn {
-        width: calc((100vw - 95vw) / 2);
+        width: 20px;
         height: 180px;
         font-size: 18px;
     }
@@ -2700,7 +2700,7 @@ html, body {
     }
     
     .slider-nav-btn {
-        width: calc((100vw - 91vw) / 2);
+        width: 20px;
         height: 180px;
         font-size: 22px;
     }
@@ -2732,7 +2732,7 @@ html, body {
     }
 
     .slider-nav-btn {
-        width: calc((100vw - 95vw) / 2);
+        width: 20px;
         height: 170px;
         font-size: 18px;
     }
@@ -2773,7 +2773,7 @@ html, body {
     }
     
     .slider-nav-btn {
-        width: calc((100vw - 90vw) / 2);
+        width: 20px;
         height: 120px;
         font-size: 16px;
     }
