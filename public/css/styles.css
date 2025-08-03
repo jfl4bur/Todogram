@@ -2474,9 +2474,9 @@ html, body {
 /* Navegación centrada verticalmente como Rakuten.tv */
 .slider-nav {
     position: absolute !important;
-    top: 50% !important;
-    left: 0 !important;
-    right: 0 !important;
+    top: calc((100vw - 50vw) / 2) !important;
+    left: calc((100vw - 1vw) / 2) !important;
+    right: calc((100vw - 1vw) / 2) !important;
     transform: translateY(-50%) !important;
     display: flex !important;
     justify-content: space-between !important;
@@ -2492,8 +2492,8 @@ html, body {
     background: rgba(0,0,0,0.7) !important;
     border: none !important;
     color: white !important;
-    width: 50px !important;
-    height: 50px !important;
+    width: calc((100vw - 50vw) / 2) !important;
+    height: calc((100vw - 50vw) / 2) !important;
     border-radius: 8px !important;
     cursor: pointer !important;
     font-size: 20px !important;
