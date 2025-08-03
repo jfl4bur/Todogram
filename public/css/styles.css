@@ -2769,6 +2769,8 @@ html, body {
     }
     
     .slider-nav {
+        position: absolute;
+        top: 50%;
         padding: 0 10px;
     }
     
