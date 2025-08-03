@@ -2571,7 +2571,7 @@ html, body {
     
     .slider-nav-btn {
         width: calc((100vw - 88vw) / 2);
-        height: 500px !important;
+        height: 400px !important;
         font-size: 24px !important;
     }
     
@@ -2602,7 +2602,7 @@ html, body {
     
     .slider-nav-btn {
         width: calc((100vw - 88vw) / 2);
-        height: 510px !important;
+        height: 410px !important;
         font-size: 28px !important;
     }
     
@@ -2631,7 +2631,7 @@ html, body {
     
     .slider-nav-btn {
         width: calc((100vw - 98vw) / 2);
-        height: 200px !important;
+        height: 180px !important;
         font-size: 22px !important;
     }
     
@@ -2644,7 +2644,7 @@ html, body {
     .slider-section {
         height: 200px;
         margin-top: 40px;
-       padding: 0 30px; 
+        padding: 0 30px; 
     }
     
     .slider-slide {
@@ -2663,7 +2663,7 @@ html, body {
 
     .slider-nav-btn {
         width: calc((100vw - 95vw) / 2);
-        height: 200px !important;
+        height: 180px !important;
         font-size: 18px !important;
     }
     
@@ -2697,7 +2697,7 @@ html, body {
     
     .slider-nav-btn {
         width: calc((100vw - 91vw) / 2);
-        height: 200px !important;
+        height: 180px !important;
         font-size: 22px !important;
     }
     
@@ -2729,7 +2729,7 @@ html, body {
 
     .slider-nav-btn {
         width: calc((100vw - 95vw) / 2);
-        height: 190px !important;
+        height: 170px !important;
         font-size: 18px !important;
     }
     
@@ -2770,7 +2770,7 @@ html, body {
     
     .slider-nav-btn {
         width: calc((100vw - 90vw) / 2);
-        height: 140px !important;
+        height: 120px !important;
         font-size: 16px !important;
     }
     
