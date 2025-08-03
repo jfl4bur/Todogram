@@ -2494,7 +2494,7 @@ html, body {
     color: white !important;
     width: 50px !important;
     height: 50px !important;
-    border-radius: 50% !important;
+    border-radius: 8px !important;
     cursor: pointer !important;
     font-size: 20px !important;
     display: flex !important;
@@ -2570,8 +2570,8 @@ html, body {
     }
     
     .slider-nav-btn {
-        width: 60px !important;
-        height: 60px !important;
+        width: 500px !important;
+        height: 500px !important;
         font-size: 24px !important;
     }
     
@@ -2601,8 +2601,8 @@ html, body {
     }
     
     .slider-nav-btn {
-        width: 70px !important;
-        height: 70px !important;
+        width: 510px !important;
+        height: 510px !important;
         font-size: 28px !important;
     }
     
@@ -2630,8 +2630,8 @@ html, body {
     }
     
     .slider-nav-btn {
-        width: 55px !important;
-        height: 55px !important;
+        width: 200px !important;
+        height: 200px !important;
         font-size: 22px !important;
     }
     
@@ -2662,8 +2662,8 @@ html, body {
     }
 
     .slider-nav-btn {
-        width: 45px !important;
-        height: 45px !important;
+        width: 200px !important;
+        height: 200px !important;
         font-size: 18px !important;
     }
     
@@ -2696,8 +2696,8 @@ html, body {
     }
     
     .slider-nav-btn {
-        width: 55px !important;
-        height: 55px !important;
+        width: 200px !important;
+        height: 200px !important;
         font-size: 22px !important;
     }
     
@@ -2728,8 +2728,8 @@ html, body {
     }
 
     .slider-nav-btn {
-        width: 45px !important;
-        height: 45px !important;
+        width: 190px !important;
+        height: 190px !important;
         font-size: 18px !important;
     }
     
@@ -2769,8 +2769,8 @@ html, body {
     }
     
     .slider-nav-btn {
-        width: 40px !important;
-        height: 40px !important;
+        width: 140px !important;
+        height: 140px !important;
         font-size: 16px !important;
     }
     
