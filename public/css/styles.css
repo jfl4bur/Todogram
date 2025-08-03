@@ -2570,7 +2570,7 @@ html, body {
     }
     
     .slider-nav-btn {
-        width: 500px !important;
+        width: calc((100vw - 88vw) / 2);
         height: 500px !important;
         font-size: 24px !important;
     }
@@ -2601,7 +2601,7 @@ html, body {
     }
     
     .slider-nav-btn {
-        width: 510px !important;
+        width: calc((100vw - 88vw) / 2);
         height: 510px !important;
         font-size: 28px !important;
     }
@@ -2630,7 +2630,7 @@ html, body {
     }
     
     .slider-nav-btn {
-        width: 200px !important;
+        width: calc((100vw - 98vw) / 2);
         height: 200px !important;
         font-size: 22px !important;
     }
@@ -2662,7 +2662,7 @@ html, body {
     }
 
     .slider-nav-btn {
-        width: 200px !important;
+        width: calc((100vw - 95vw) / 2);
         height: 200px !important;
         font-size: 18px !important;
     }
@@ -2696,7 +2696,7 @@ html, body {
     }
     
     .slider-nav-btn {
-        width: 200px !important;
+        width: calc((100vw - 91vw) / 2);
         height: 200px !important;
         font-size: 22px !important;
     }
@@ -2720,7 +2720,7 @@ html, body {
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 50vw) / 2);
+        margin-left: calc((100vw - 95vw) / 2);
     }
     
     .slider-nav {
@@ -2738,7 +2738,7 @@ html, body {
     }
     
     .slider-pagination-dot {
-        width: 8px !important;
+        width: calc((100vw - 95vw) / 2);
         height: 8px !important;
         margin: 0 2px !important;
     }
@@ -2769,7 +2769,7 @@ html, body {
     }
     
     .slider-nav-btn {
-        width: 140px !important;
+        width: calc((100vw - 90vw) / 2);
         height: 140px !important;
         font-size: 16px !important;
     }
