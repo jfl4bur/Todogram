@@ -498,7 +498,8 @@ button:focus {
     height: 100%;
     z-index: 1100;
     position: absolute;
-    inset: 1px;
+    inset: 0px;
+    top: 5px;
     content: " ";
     border-radius: inherit;
     background: linear-gradient(transparent 40%, rgb(0, 0, 0) 100%);
