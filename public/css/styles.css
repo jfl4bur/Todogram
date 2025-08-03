@@ -2728,7 +2728,7 @@ html, body {
     }
 
     .slider-nav-btn {
-        width: 190px !important;
+        width: calc((100vw - 95vw) / 2);
         height: 190px !important;
         font-size: 18px !important;
     }
@@ -2738,7 +2738,7 @@ html, body {
     }
     
     .slider-pagination-dot {
-        width: calc((100vw - 95vw) / 2);
+        width: 8px !important;
         height: 8px !important;
         margin: 0 2px !important;
     }
