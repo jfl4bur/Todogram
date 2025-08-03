@@ -2493,7 +2493,7 @@ html, body {
 
 .slider-nav-btn {
     pointer-events: all;
-    /*background: rgba(0, 0, 0, 0.055);*/
+    background: transparent;
     border: none;
     color: white;
     width: 50px;
