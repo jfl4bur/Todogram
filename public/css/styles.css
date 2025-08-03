@@ -2492,8 +2492,8 @@ html, body {
     background: rgba(0,0,0,0.7) !important;
     border: none !important;
     color: white !important;
-    width: calc((100vw - 50vw) / 2) !important;
-    height: calc((100vw - 50vw) / 2) !important;
+    width: 50px !important;
+    height: 50px !important;
     border-radius: 8px !important;
     cursor: pointer !important;
     font-size: 20px !important;
