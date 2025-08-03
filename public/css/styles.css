@@ -2567,6 +2567,8 @@ html, body {
     .slider-slide {
         width: 88vw;
         margin-right: 2vw;
+        height: 400px !important;
+        margin-left: 0px;
     }
     
     .slider-wrapper {
@@ -2598,6 +2600,8 @@ html, body {
     .slider-slide {
         width: 88vw;
         margin-right: 2.5vw;
+        height: 410px !important;
+        margin-left: 0px;
     }
     
     .slider-wrapper {
@@ -2618,7 +2622,7 @@ html, body {
 /* Tablet - Visibilidad de items adyacentes */
 @media (max-width: 1023px) and (min-width: 845px) {
     .slider-section {
-        height: 200px;
+        height: 320px;
         margin-top: 50px;
       /*  padding: 0 15px;*/
       /*  margin: 0 -15px*/
@@ -2627,6 +2631,8 @@ html, body {
     .slider-slide {
         width: 98vw;
         margin-right: 1.2vw;
+        height: 300px !important;
+        margin-left: 0px;
     }
     
     .slider-wrapper {
@@ -2635,7 +2641,7 @@ html, body {
     
     .slider-nav-btn {
         width: 40px;
-        height: 180px;
+        height: 300px;
         font-size: 22px;
     }
     
@@ -2654,7 +2660,8 @@ html, body {
     .slider-slide {
         width: 95vw;
         margin-right: 1.2vw;
-       /* margin-left: 6px; */
+        height: 180px !important;
+        margin-left: 0px;
     }
     
     .slider-wrapper {
@@ -2685,7 +2692,7 @@ html, body {
 /* Tablet - Visibilidad de items adyacentes */
 @media (max-width: 843px) and (min-width: 769px) {
     .slider-section {
-        height: 200px;
+        height: 180px;
         margin-top: 50px;
       /*  padding: 0 15px;*/
     }
@@ -2693,6 +2700,8 @@ html, body {
     .slider-slide {
         width: 91vw;
         margin-right: 1.2vw;
+        height: 160px !important;
+        margin-left: 0px;
     }
     
     .slider-wrapper {
@@ -2701,7 +2710,7 @@ html, body {
     
     .slider-nav-btn {
         width: 20px;
-        height: 180px;
+        height: 160px;
         font-size: 22px;
     }
     
@@ -2721,6 +2730,8 @@ html, body {
     .slider-slide {
         width: 95vw;
         margin-right: 1.2vw;
+        height: 170px !important;
+        margin-left: 0px;
     }
     
     .slider-wrapper {
