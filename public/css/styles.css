@@ -2623,7 +2623,7 @@ html, body {
 @media (max-width: 1023px) and (min-width: 845px) {
     .slider-section {
         height: 320px;
-        margin-top: 50px;
+        margin-top: -60px;
       /*  padding: 0 15px;*/
       /*  margin: 0 -15px*/
     }
