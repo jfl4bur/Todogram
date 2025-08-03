@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const currentScrollY = window.scrollY;
         
         // Efecto de fondo translúcido
-        if (currentScrollY > 10) {
+        if (currentScrollY > 50) {
           header.classList.add('scrolled');
         } else {
           header.classList.remove('scrolled');
@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
           const lastModalScroll = parseInt(detailsModal.dataset.lastScroll) || 0;
           
           // Efecto de fondo translúcido
-          if (modalScrollTop > 10) {
+          if (modalScrollTop > 50) {
             header.classList.add('scrolled');
           } else {
             header.classList.remove('scrolled');
