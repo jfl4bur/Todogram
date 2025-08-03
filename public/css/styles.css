@@ -2644,7 +2644,7 @@ html, body {
     .slider-section {
         height: 200px;
         margin-top: 40px;
-       /* padding: 0 30px; */
+       padding: 0 30px; 
     }
     
     .slider-slide {
