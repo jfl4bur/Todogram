@@ -196,6 +196,7 @@ button:focus {
 }
 
 .carousel-title {
+    font-family: 'Slider Sans UI', sans-serif;
     font-size: 1.8rem;
     font-weight: 600;
     margin-bottom: 15px;
@@ -686,6 +687,7 @@ button:focus {
 }
 
 .details-modal-title {
+    font-family: 'Slider Sans UI', sans-serif;
     font-size: 2.2rem;
     font-weight: 700;
     margin-bottom: 12px;
@@ -768,6 +770,7 @@ button:focus {
 }
 
 .details-modal-action-btn {
+    font-family: 'Slider Sans UI', sans-serif;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2013,6 +2016,7 @@ button:focus {
   justify-content: flex-start;
 }
 .slider-nav-link {
+  font-family: 'Slider Sans UI', sans-serif;
   color: #fff;
   text-decoration: none;
   font-size: 1rem;
@@ -2034,6 +2038,7 @@ button:focus {
   color: var(--primary-color);
 }
 .slider-nav-login {
+  font-family: 'Slider Sans UI', sans-serif;
   background: var(--primary-color);
   color: #fff !important;
   border-radius: 20px;
@@ -2487,6 +2492,7 @@ html, body {
 }
 
 .slider-title-movie {
+    font-family: 'Slider Sans UI', sans-serif;
     font-size: clamp(1.5rem, 3vw, 2.5rem) !important;
     font-weight: 700 !important;
     margin-bottom: 0.8rem !important;
@@ -2919,6 +2925,7 @@ html, body {
 }
 
 .slider-footer-title {
+  font-family: 'Slider Sans UI', sans-serif;
   color: #ffffff;
   font-size: 1rem;
   font-weight: 600;
@@ -2934,6 +2941,7 @@ html, body {
 }
 
 .slider-footer-link {
+  font-family: 'Slider Sans UI', sans-serif;
   color: #b3b3b3;
   text-decoration: none;
   font-size: 0.9rem;
@@ -2985,6 +2993,7 @@ html, body {
 }
 
 .slider-footer-copyright {
+  font-family: 'Slider Sans UI', sans-serif;
   color: #666666;
   font-size: 0.85rem;
 }
@@ -2999,6 +3008,7 @@ html, body {
 }
 
 .slider-footer-language-select {
+  font-family: 'Slider Sans UI', sans-serif;
   background: #1a1a1a;
   border: 1px solid #333333;
   color: #b3b3b3;
