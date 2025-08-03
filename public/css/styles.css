@@ -2474,9 +2474,9 @@ html, body {
 /* Navegación centrada verticalmente como Rakuten.tv */
 .slider-nav {
     position: absolute;
-    top: 50%;
+    top: 60%;
     left: 0;
-    right: 0;
+    right: -15px;
     transform: translateY(-50%);
     display: flex;
     justify-content: space-between;
@@ -2489,7 +2489,7 @@ html, body {
 
 .slider-nav-btn {
     pointer-events: all;
-    background: rgba(0,0,0,0.7);
+    /*background: rgba(0, 0, 0, 0.055);*/
     border: none;
     color: white;
     width: 50px;
@@ -2504,7 +2504,7 @@ html, body {
 }
 
 .slider-nav-btn:hover {
-    background: rgba(0,0,0,0.9);
+    background: rgba(0, 0, 0, 0.04);
     transform: scale(1);
 }
 
