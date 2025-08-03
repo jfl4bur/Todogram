@@ -1896,8 +1896,8 @@
 /* HEADER Y MENÚ RESPONSIVE RAKUTEN.TV */
 .slider-header {
   width: 100%;
-  background: #141414;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  background: transparent;
+  box-shadow: none;
   position: fixed;
   top: 0;
   left: 0;
@@ -1910,15 +1910,13 @@
   transform: translateY(0);
 }
 
-/* Header transparente solo en desktop */
-.slider-header.at-top {
-  background: transparent;
-  box-shadow: none;
-}
-
-.slider-header.not-at-top {
-  background: #141414;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+/* Header transparente por defecto en desktop, con background solo cuando tiene clase .scrolled */
+/* En móvil siempre tiene background desde el inicio */
+@media (max-width: 768px) {
+  .slider-header {
+    background: #141414;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  }
 }
 
 
