@@ -9,6 +9,10 @@
     --item-height: 271px;
     --modal-scale: 1.7;
 }
+button:focus {
+    outline: 0px !important;
+    outline: 0px auto -webkit-focus-ring-color !important;
+}
 .container {
     padding-right: 0px !important;
 }
