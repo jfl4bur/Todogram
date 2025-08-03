@@ -13,7 +13,7 @@
 /* Definiciones de fuentes */
 @font-face {
     font-family: 'Slider Sans UI';
-    src: url('../fonts/RakutenSansUI_W_Lt.747b0811.woff2') format('woff2');
+    src: url('../fonts/TodogramSansUI_W_Lt.747b0811.woff2') format('woff2');
     font-weight: 300;
     font-style: normal;
     font-display: swap;
@@ -21,7 +21,7 @@
 
 @font-face {
     font-family: 'Slider Sans UI';
-    src: url('../fonts/RakutenSansUI_W_Rg.16e85cf1.woff2') format('woff2');
+    src: url('../fonts/TodogramSansUI_W_Rg.16e85cf1.woff2') format('woff2');
     font-weight: 400;
     font-style: normal;
     font-display: swap;
@@ -29,7 +29,7 @@
 
 @font-face {
     font-family: 'Slider Sans UI';
-    src: url('../fonts/RakutenSansUI_W_SBd.c256f426.woff2') format('woff2');
+    src: url('../fonts/TodogramSansUI_W_SBd.c256f426.woff2') format('woff2');
     font-weight: 600;
     font-style: normal;
     font-display: swap;
@@ -37,7 +37,7 @@
 
 @font-face {
     font-family: 'Slider Sans UI';
-    src: url('../fonts/RakutenSansUI_W_Bd.f0ec50fb.woff2') format('woff2');
+    src: url('../fonts/TodogramSansUI_W_Bd.f0ec50fb.woff2') format('woff2');
     font-weight: 700;
     font-style: normal;
     font-display: swap;
