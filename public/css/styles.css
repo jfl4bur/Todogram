@@ -479,7 +479,6 @@ button:focus {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    font-display: swap;
 }
 
 .modal-content.show {
@@ -514,8 +513,6 @@ button:focus {
     object-fit: cover;
     filter: brightness(0.7);
     opacity: 0.7;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
 }
 
 .modal-body {
@@ -523,16 +520,11 @@ button:focus {
     color: white;
     height: calc(100% - 42.25%);
     overflow-y: auto;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
-    font-display: swap;
 }
 
 .modal-body h2 {
     font-family: 'Slider Sans UI', sans-serif;
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-size: 1.2rem;
     margin-bottom: 10px;
     white-space: nowrap;
     overflow: hidden;
@@ -540,22 +532,19 @@ button:focus {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    font-display: swap;
 }
 
 .modal-body .meta-info {
     font-family: 'Slider Sans UI', sans-serif;
     display: flex;
     gap: 10px;
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 0.8rem;
     color: var(--text-secondary);
     margin-bottom: 10px;
     flex-wrap: wrap;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    font-display: swap;
 }
 
 .modal-body .meta-info span {
@@ -575,9 +564,8 @@ button:focus {
 
 .modal-body .description {
     font-family: 'Slider Sans UI', sans-serif;
-    font-size: 1rem;
-    font-weight: 400;
-    line-height: 1.5;
+    font-size: 0.8rem;
+    line-height: 1.4;
     margin-bottom: 15px;
     display: -webkit-box;
     -webkit-line-clamp: 3;
@@ -587,7 +575,6 @@ button:focus {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    font-display: swap;
 }
 
 .modal-actions {
@@ -622,14 +609,12 @@ button:focus {
 
 .genre-info {
     font-family: 'Slider Sans UI', sans-serif;
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 0.8rem;
     color: var(--text-secondary);
     margin-bottom: 10px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    font-display: swap;
 }
 
 /* Clases adicionales para asegurar que las fuentes se apliquen correctamente */
@@ -652,14 +637,6 @@ button:focus {
 
 .details-modal-gallery-item.more {
     font-family: 'Slider Sans UI', sans-serif;
-}
-
-/* Forzar renderizado nítido en hover modal */
-.modal-body * {
-    -webkit-font-smoothing: antialiased !important;
-    -moz-osx-font-smoothing: grayscale !important;
-    text-rendering: optimizeLegibility !important;
-    font-display: swap !important;
 }
 
 .details-modal-overlay {
@@ -758,7 +735,7 @@ button:focus {
 
 .details-modal-title {
     font-family: 'Slider Sans UI', sans-serif;
-    font-size: 2.5rem;
+    font-size: 2.2rem;
     font-weight: 700;
     margin-bottom: 12px;
     line-height: 1.2;
@@ -772,14 +749,12 @@ button:focus {
 }
 
 .details-modal-meta {
-    font-family: 'Slider Sans UI', sans-serif;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 12px;
     margin-bottom: 16px;
-    font-size: 1.1rem;
-    font-weight: 600;
+    font-size: 0.9rem;
     color: rgba(255, 255, 255, 0.8);
 }
 
@@ -945,9 +920,6 @@ button:focus {
 }
 
 .details-modal-description {
-    font-family: 'Slider Sans UI', sans-serif;
-    font-size: 1.1rem;
-    font-weight: 400;
     margin-bottom: 24px;
     line-height: 1.6;
     color: rgba(255, 255, 255, 0.9);
@@ -980,10 +952,9 @@ button:focus {
 }
 
 .details-modal-crew-title {
-    font-family: 'Slider Sans UI', sans-serif;
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     margin-bottom: 12px;
-    font-weight: 700;
+    font-weight: 500;
 }
 
 .details-modal-crew-list {
@@ -1015,16 +986,13 @@ button:focus {
 }
 
 .details-modal-crew-name {
-    font-family: 'Slider Sans UI', sans-serif;
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 0.9rem;
+    font-weight: 500;
     margin-bottom: 2px;
 }
 
 .details-modal-crew-role {
-    font-family: 'Slider Sans UI', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 400;
+    font-size: 0.8rem;
     color: rgba(255, 255, 255, 0.7);
 }
 
@@ -1033,10 +1001,9 @@ button:focus {
 }
 
 .details-modal-cast-title {
-    font-family: 'Slider Sans UI', sans-serif;
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     margin-bottom: 12px;
-    font-weight: 700;
+    font-weight: 500;
 }
 
 .details-modal-cast-list {
@@ -1062,16 +1029,13 @@ button:focus {
 }
 
 .details-modal-cast-name {
-    font-family: 'Slider Sans UI', sans-serif;
-    font-size: 1rem;
-    font-weight: 600;
+    font-size: 0.9rem;
+    font-weight: 500;
     margin-bottom: 2px;
 }
 
 .details-modal-cast-character {
-    font-family: 'Slider Sans UI', sans-serif;
-    font-size: 0.9rem;
-    font-weight: 400;
+    font-size: 0.8rem;
     color: rgba(255, 255, 255, 0.7);
 }
 
@@ -1081,10 +1045,9 @@ button:focus {
 }
 
 .details-modal-gallery-title {
-    font-family: 'Slider Sans UI', sans-serif;
-    font-size: 1.4rem;
+    font-size: 1.2rem;
     margin-bottom: 12px;
-    font-weight: 700;
+    font-weight: 500;
 }
 
 .details-modal-gallery-list {
@@ -2103,8 +2066,8 @@ button:focus {
   font-family: 'Slider Sans UI', sans-serif;
   color: #fff;
   text-decoration: none;
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 500;
   transition: color 0.2s;
   position: relative;
   padding: 0 4px;
@@ -2129,7 +2092,6 @@ button:focus {
   padding: 6px 18px;
   margin-left: 12px;
   font-weight: 700;
-  font-size: 1.1rem;
   transition: background 0.2s;
   line-height: normal;
   white-space: nowrap;
