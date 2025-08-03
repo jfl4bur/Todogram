@@ -2753,7 +2753,7 @@ html, body {
     .slider-section {
         height: 140px;
         margin-top: 35px;
-        padding: 0px 3px;
+        padding: 0px 0px 0px 0px;
      }
     
     .slider-slide {
