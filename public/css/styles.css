@@ -2622,7 +2622,7 @@ html, body {
 /* Tablet - Visibilidad de items adyacentes */
 @media (max-width: 1023px) and (min-width: 845px) {
     .slider-section {
-        height: 415px;
+        height: 420px;
         margin-top: -50px;
       /*  padding: 0 15px;*/
       /*  margin: 0 -15px*/
@@ -2631,13 +2631,13 @@ html, body {
     .slider-slide {
         width: 98vw;
         margin-right: 1.2vw;
-        height: 395px !important;
+        height: 400px !important;
         margin-left: 0px;
     }
 
     .slider-nav {
         position: absolute;
-        top: 70%;
+        top: 60%;
     }
     
     .slider-wrapper {
