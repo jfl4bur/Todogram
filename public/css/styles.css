@@ -2761,7 +2761,7 @@ html, body {
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 90vw) / 2) +40px;
+        margin-left: calc((100vw - 90vw) / 2);
     }
     
     .slider-nav {
