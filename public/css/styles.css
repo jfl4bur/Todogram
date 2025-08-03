@@ -2657,23 +2657,25 @@ html, body {
 
 @media (max-width: 844px) {
     .slider-section {
-        height: 200px;
-        margin-top: 40px;
+        height: 190px;
+        margin-top: 20px;
         padding: 0 30px; 
     }
     
     .slider-slide {
-        width: 95vw;
+        width: 90vw;
         margin-right: 1.2vw;
         height: 180px !important;
         margin-left: 0px;
     }
     
     .slider-wrapper {
-        margin-left: calc((100vw - 95vw) / 2);
+        margin-left: calc((100vw - 90vw) / 2);
     }
     
     .slider-nav {
+        position: absolute;
+        top: 50%;
         padding: 0 15px;
     }
 
