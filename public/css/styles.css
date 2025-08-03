@@ -602,6 +602,28 @@ button:focus {
     margin-bottom: 10px;
 }
 
+/* Clases adicionales para asegurar que las fuentes se apliquen correctamente */
+.details-modal-original-title {
+    font-family: 'Slider Sans UI', sans-serif;
+}
+
+.details-modal-cast-title,
+.details-modal-crew-title,
+.details-modal-gallery-title {
+    font-family: 'Slider Sans UI', sans-serif;
+}
+
+.details-modal-cast-name,
+.details-modal-cast-character,
+.details-modal-crew-name,
+.details-modal-crew-role {
+    font-family: 'Slider Sans UI', sans-serif;
+}
+
+.details-modal-gallery-item.more {
+    font-family: 'Slider Sans UI', sans-serif;
+}
+
 .details-modal-overlay {
     position: fixed;
     top: 0;

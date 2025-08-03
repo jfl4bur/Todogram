@@ -248,17 +248,17 @@ class DetailsModal {
         const backdropsGallery = backdrops.length > 0 ? this.createGallerySkeleton('backdrop', 4) : '';
         
         this.detailsModalBody.innerHTML = `
-            <h1 class="details-modal-title" style="font-family: 'Slider Sans UI', sans-serif;">${item.title}</h1>
-            ${tmdbData?.original_title && tmdbData.original_title.toLowerCase() !== item.title.toLowerCase() ? `<div class="details-modal-original-title" style="font-family: 'Slider Sans UI', sans-serif;">${tmdbData.original_title}</div>` : ''}
-            <div class="details-modal-meta" style="font-family: 'Slider Sans UI', sans-serif;">${metaItems.join('<span class="details-modal-meta-separator">•</span>')}</div>
+            <h1 class="details-modal-title">${item.title}</h1>
+            ${tmdbData?.original_title && tmdbData.original_title.toLowerCase() !== item.title.toLowerCase() ? `<div class="details-modal-original-title">${tmdbData.original_title}</div>` : ''}
+            <div class="details-modal-meta">${metaItems.join('<span class="details-modal-meta-separator">•</span>')}</div>
             ${audioSubtitlesSection}
             <div class="details-modal-actions">
                 <div class="primary-action-row">${actionButtons}</div>
                 <div class="secondary-actions-row">${secondaryButtons}</div>
             </div>
             ${taglineSection}
-            <div class="details-modal-description" style="font-family: 'Slider Sans UI', sans-serif;">${description}</div>
-            <div class="details-modal-info" style="font-family: 'Slider Sans UI', sans-serif;">${infoItems}</div>
+            <div class="details-modal-description">${description}</div>
+            <div class="details-modal-info">${infoItems}</div>
             ${directorsSection}
             ${writersSection}
             ${castSection}
@@ -546,24 +546,24 @@ class DetailsModal {
         for (let i = 0; i < count; i++) {
             skeletonItems.push(`<div class="gallery-skeleton-item ${type}"><div class="gallery-skeleton-spinner"></div></div>`);
         }
-        return `<div class="details-modal-gallery-section"><h3 class="details-modal-gallery-title" style="font-family: 'Slider Sans UI', sans-serif;">${type === 'poster' ? 'Carteles' : 'Imágenes de fondo'}</h3><div class="gallery-skeleton">${skeletonItems.join('')}</div></div>`;
+        return `<div class="details-modal-gallery-section"><h3 class="details-modal-gallery-title">${type === 'poster' ? 'Carteles' : 'Imágenes de fondo'}</h3><div class="gallery-skeleton">${skeletonItems.join('')}</div></div>`;
     }
 
     createGallerySection(images, title, type) {
         if (!images || images.length === 0) return '';
         const showCount = type === 'posters' ? 5 : 4;
         const itemClass = type === 'posters' ? 'poster' : 'backdrop';
-        return `<div class="details-modal-gallery-section"><h3 class="details-modal-gallery-title" style="font-family: 'Slider Sans UI', sans-serif;">${title}</h3><div class="details-modal-gallery-list">${images.slice(0, showCount).map((image, index) => `<div class="details-modal-gallery-item ${itemClass}" data-gallery-type="${type}" data-index="${index}"><img class="details-modal-gallery-image" src="${image.file_path}" loading="lazy" alt="${title} - ${type} ${index + 1}"></div>`).join('')}${images.length > showCount ? `<div class="details-modal-gallery-item more" data-gallery-type="${type}" data-show-more="true" style="font-family: 'Slider Sans UI', sans-serif;"><i class="fas fa-images"></i><span>Ver más (${images.length - showCount})</span></div>` : ''}</div></div>`;
+        return `<div class="details-modal-gallery-section"><h3 class="details-modal-gallery-title">${title}</h3><div class="details-modal-gallery-list">${images.slice(0, showCount).map((image, index) => `<div class="details-modal-gallery-item ${itemClass}" data-gallery-type="${type}" data-index="${index}"><img class="details-modal-gallery-image" src="${image.file_path}" loading="lazy" alt="${title} - ${type} ${index + 1}"></div>`).join('')}${images.length > showCount ? `<div class="details-modal-gallery-item more" data-gallery-type="${type}" data-show-more="true"><i class="fas fa-images"></i><span>Ver más (${images.length - showCount})</span></div>` : ''}</div></div>`;
     }
 
     createCastSection(cast) {
         if (!cast || cast.length === 0) return '';
-        return `<div class="details-modal-cast"><h3 class="details-modal-cast-title" style="font-family: 'Slider Sans UI', sans-serif;">Reparto principal</h3><div class="details-modal-cast-list">${cast.map(person => `<div class="details-modal-cast-item"><img class="details-modal-cast-photo" src="${person.profile_path ? `https://image.tmdb.org/t/p/w185${person.profile_path}` : 'https://www.themoviedb.org/assets/2/v4/glyphicons/basic/glyphicons-basic-4-user-grey-d8fe957375e70239d6abdd549fd7568c89281b2179b5f4470e2e12895792dfa5.svg'}" alt="${person.name}" loading="lazy"><div class="details-modal-cast-name" style="font-family: 'Slider Sans UI', sans-serif;">${person.name}</div><div class="details-modal-cast-character" style="font-family: 'Slider Sans UI', sans-serif;">${person.character}</div></div>`).join('')}</div></div>`;
+        return `<div class="details-modal-cast"><h3 class="details-modal-cast-title">Reparto principal</h3><div class="details-modal-cast-list">${cast.map(person => `<div class="details-modal-cast-item"><img class="details-modal-cast-photo" src="${person.profile_path ? `https://image.tmdb.org/t/p/w185${person.profile_path}` : 'https://www.themoviedb.org/assets/2/v4/glyphicons/basic/glyphicons-basic-4-user-grey-d8fe957375e70239d6abdd549fd7568c89281b2179b5f4470e2e12895792dfa5.svg'}" alt="${person.name}" loading="lazy"><div class="details-modal-cast-name">${person.name}</div><div class="details-modal-cast-character">${person.character}</div></div>`).join('')}</div></div>`;
     }
 
     createCrewSection(crew, title) {
         if (!crew || crew.length === 0) return '';
-        return `<div class="details-modal-crew"><h3 class="details-modal-crew-title" style="font-family: 'Slider Sans UI', sans-serif;">${title}</h3><div class="details-modal-crew-list">${crew.slice(0, 6).map(person => `<div class="details-modal-crew-item"><img class="details-modal-crew-photo" src="${person.profile_path ? `https://image.tmdb.org/t/p/w185${person.profile_path}` : 'https://www.themoviedb.org/assets/2/v4/glyphicons/basic/glyphicons-basic-4-user-grey-d8fe957375e70239d6abdd549fd7568c89281b2179b5f4470e2e12895792dfa5.svg'}" alt="${person.name}" loading="lazy"><div class="details-modal-crew-info"><div class="details-modal-crew-name" style="font-family: 'Slider Sans UI', sans-serif;">${person.name}</div><div class="details-modal-crew-role" style="font-family: 'Slider Sans UI', sans-serif;">${title}</div></div></div>`).join('')}</div></div>`;
+        return `<div class="details-modal-crew"><h3 class="details-modal-crew-title">${title}</h3><div class="details-modal-crew-list">${crew.slice(0, 6).map(person => `<div class="details-modal-crew-item"><img class="details-modal-crew-photo" src="${person.profile_path ? `https://image.tmdb.org/t/p/w185${person.profile_path}` : 'https://www.themoviedb.org/assets/2/v4/glyphicons/basic/glyphicons-basic-4-user-grey-d8fe957375e70239d6abdd549fd7568c89281b2179b5f4470e2e12895792dfa5.svg'}" alt="${person.name}" loading="lazy"><div class="details-modal-crew-info"><div class="details-modal-crew-name">${person.name}</div><div class="details-modal-crew-role">${title}</div></div></div>`).join('')}</div></div>`;
     }
 
     createAudioSubtitlesSection(audiosCount, subtitlesCount, audioList, subtitleList) {

@@ -12,16 +12,16 @@ const headerHTML = `
         </svg>
       </div>
       <nav class="slider-nav-menu">
-        <a href="#" class="slider-nav-link" style="font-family: 'Slider Sans UI', sans-serif;"><i class="fas fa-home"></i><span>Inicio</span></a>
-        <a href="#" class="slider-nav-link" style="font-family: 'Slider Sans UI', sans-serif;"><i class="fas fa-film"></i><span>Películas</span></a>
-        <a href="#" class="slider-nav-link" style="font-family: 'Slider Sans UI', sans-serif;"><i class="fas fa-tv"></i><span>Series</span></a>
-        <a href="#" class="slider-nav-link" style="font-family: 'Slider Sans UI', sans-serif;"><i class="fas fa-child"></i><span>Infantil</span></a>
-        <a href="#" class="slider-nav-link" style="font-family: 'Slider Sans UI', sans-serif;"><i class="fas fa-broadcast-tower"></i><span>Canales</span></a>
-        <a href="#" class="slider-nav-link" style="font-family: 'Slider Sans UI', sans-serif;"><i class="fas fa-shopping-cart"></i><span>Tienda</span></a>
-        <a href="#" class="slider-nav-link" style="font-family: 'Slider Sans UI', sans-serif;"><i class="fas fa-crown"></i><span>Suscripción</span></a>
-        <a href="#" class="slider-nav-link" style="font-family: 'Slider Sans UI', sans-serif;"><i class="fas fa-question-circle"></i><span>Ayuda</span></a>
+        <a href="#" class="slider-nav-link"><i class="fas fa-home"></i><span>Inicio</span></a>
+        <a href="#" class="slider-nav-link"><i class="fas fa-film"></i><span>Películas</span></a>
+        <a href="#" class="slider-nav-link"><i class="fas fa-tv"></i><span>Series</span></a>
+        <a href="#" class="slider-nav-link"><i class="fas fa-child"></i><span>Infantil</span></a>
+        <a href="#" class="slider-nav-link"><i class="fas fa-broadcast-tower"></i><span>Canales</span></a>
+        <a href="#" class="slider-nav-link"><i class="fas fa-shopping-cart"></i><span>Tienda</span></a>
+        <a href="#" class="slider-nav-link"><i class="fas fa-crown"></i><span>Suscripción</span></a>
+        <a href="#" class="slider-nav-link"><i class="fas fa-question-circle"></i><span>Ayuda</span></a>
       </nav>
-      <a href="#" class="slider-nav-login" style="font-family: 'Slider Sans UI', sans-serif;"><i class="fas fa-user"></i><span>Iniciar sesión</span></a>
+      <a href="#" class="slider-nav-login"><i class="fas fa-user"></i><span>Iniciar sesión</span></a>
       <button class="slider-header-burger" id="slider-header-burger">
         <span></span>
         <span></span>
@@ -35,14 +35,14 @@ const headerHTML = `
   
   <!-- Mobile Menu -->
   <div class="slider-mobile-menu" id="slider-mobile-menu">
-    <a href="#" class="slider-nav-link" style="font-family: 'Slider Sans UI', sans-serif;"><i class="fas fa-home"></i><span>Inicio</span></a>
-    <a href="#" class="slider-nav-link" style="font-family: 'Slider Sans UI', sans-serif;"><i class="fas fa-film"></i><span>Películas</span></a>
-    <a href="#" class="slider-nav-link" style="font-family: 'Slider Sans UI', sans-serif;"><i class="fas fa-tv"></i><span>Series</span></a>
-    <a href="#" class="slider-nav-link" style="font-family: 'Slider Sans UI', sans-serif;"><i class="fas fa-child"></i><span>Infantil</span></a>
-    <a href="#" class="slider-nav-link" style="font-family: 'Slider Sans UI', sans-serif;"><i class="fas fa-broadcast-tower"></i><span>Canales</span></a>
-    <a href="#" class="slider-nav-link" style="font-family: 'Slider Sans UI', sans-serif;"><i class="fas fa-shopping-cart"></i><span>Tienda</span></a>
-    <a href="#" class="slider-nav-link" style="font-family: 'Slider Sans UI', sans-serif;"><i class="fas fa-crown"></i><span>Suscripción</span></a>
-    <a href="#" class="slider-nav-link" style="font-family: 'Slider Sans UI', sans-serif;"><i class="fas fa-question-circle"></i><span>Ayuda</span></a>
+    <a href="#" class="slider-nav-link"><i class="fas fa-home"></i><span>Inicio</span></a>
+    <a href="#" class="slider-nav-link"><i class="fas fa-film"></i><span>Películas</span></a>
+    <a href="#" class="slider-nav-link"><i class="fas fa-tv"></i><span>Series</span></a>
+    <a href="#" class="slider-nav-link"><i class="fas fa-child"></i><span>Infantil</span></a>
+    <a href="#" class="slider-nav-link"><i class="fas fa-broadcast-tower"></i><span>Canales</span></a>
+    <a href="#" class="slider-nav-link"><i class="fas fa-shopping-cart"></i><span>Tienda</span></a>
+    <a href="#" class="slider-nav-link"><i class="fas fa-crown"></i><span>Suscripción</span></a>
+    <a href="#" class="slider-nav-link"><i class="fas fa-question-circle"></i><span>Ayuda</span></a>
   </div>
 `;
 

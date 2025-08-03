@@ -945,14 +945,14 @@
                          onerror="this.src='https://via.placeholder.com/${dimensions.slideWidth}x${dimensions.slideHeight}/333/fff?text=No+Image'">
                 </div>
                 <div class="slider-overlay" style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(0,0,0,0.8)); padding: 20px; color: white; border-radius: 0 0 12px 12px; transition: opacity 0.5s ease; backface-visibility: hidden; -webkit-backface-visibility: hidden;">
-                    <div class="slider-title-movie" style="font-family: 'Slider Sans UI', sans-serif; font-size: clamp(1rem, 2.5vw, 1.5rem); font-weight: bold; margin-bottom: 8px; line-height: 1.2;">${movie.title || 'Sin título'}</div>
-                    <div class="slider-meta" style="font-family: 'Slider Sans UI', sans-serif; display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; font-size: clamp(0.75rem, 2vw, 0.9rem); opacity: 0.9;">
+                                    <div class="slider-title-movie">${movie.title || 'Sin título'}</div>
+                <div class="slider-meta">
                         ${movie.year ? `<span>${movie.year}</span>` : ''}
                         ${movie.duration ? `<span>${movie.duration}</span>` : ''}
                         ${mainGenre ? `<span>${mainGenre}</span>` : ''}
                         ${movie.rating ? `<span><i class="fas fa-star" style="color: #ffd700; margin-right: 4px;"></i>${movie.rating}</span>` : ''}
                     </div>
-                    <div class="slider-description" style="font-family: 'Slider Sans UI', sans-serif; font-size: clamp(0.7rem, 1.8vw, 0.85rem); line-height: 1.4; opacity: 0.85; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${movie.description || movie.synopsis || 'Sin descripción disponible'}</div>
+                    <div class="slider-description">${movie.description || movie.synopsis || 'Sin descripción disponible'}</div>
                 </div>
             `;
 

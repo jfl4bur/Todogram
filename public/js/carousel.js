@@ -204,11 +204,11 @@ class Carousel {
                     <img class="poster-image" src="${posterUrl}" alt="${item.title}" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease">
                 </div>
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none">
-                <div class="carousel-overlay">
-                    <div class="carousel-title" style="font-family: 'Slider Sans UI', sans-serif;">${item.title}</div>
-                    ${metaInfo.length ? `<div class="carousel-meta" style="font-family: 'Slider Sans UI', sans-serif;">${metaInfo.join('')}</div>` : ''}
-                    ${item.description ? `<div class="carousel-description" style="font-family: 'Slider Sans UI', sans-serif;">${item.description}</div>` : ''}
-                </div>
+                            <div class="carousel-overlay">
+                <div class="carousel-title">${item.title}</div>
+                ${metaInfo.length ? `<div class="carousel-meta">${metaInfo.join('')}</div>` : ''}
+                ${item.description ? `<div class="carousel-description">${item.description}</div>` : ''}
+            </div>
             `;
 
             if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
