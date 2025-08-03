@@ -476,6 +476,9 @@ button:focus {
     z-index: 1001;
     will-change: transform, opacity;
     cursor: pointer;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
 .modal-content.show {
@@ -526,6 +529,9 @@ button:focus {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
 .modal-body .meta-info {
@@ -536,6 +542,9 @@ button:focus {
     color: var(--text-secondary);
     margin-bottom: 10px;
     flex-wrap: wrap;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
 .modal-body .meta-info span {
@@ -563,6 +572,9 @@ button:focus {
     -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
 .modal-actions {
@@ -600,6 +612,9 @@ button:focus {
     font-size: 0.8rem;
     color: var(--text-secondary);
     margin-bottom: 10px;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
 /* Clases adicionales para asegurar que las fuentes se apliquen correctamente */
