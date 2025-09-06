@@ -1,4 +1,3 @@
-console.log('Main: Script cargado');
 document.addEventListener('DOMContentLoaded', function () {
     const carouselWrapper = document.getElementById('carousel-wrapper');
     const skeleton = document.getElementById('carousel-skeleton');
@@ -23,7 +22,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function initializeComponents() {
-        console.log('Main: Inicializando componentes...');
         const carousel = new Carousel();
         const carouselSeries = new CarouselSeries();
         const hoverModal = new HoverModal();
