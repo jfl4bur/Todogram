@@ -199,6 +199,37 @@
     
     <!-- Script para asegurar la inicialización del slider independiente -->
     <script>
+        // Manejo global de errores para evitar que errores externos afecten la funcionalidad
+        window.addEventListener('error', function(e) {
+            // Filtrar errores de extensiones del navegador y código externo
+            if (e.filename && (
+                e.filename.includes('bundle.js') || 
+                e.filename.includes('content.js') ||
+                e.filename.includes('extension') ||
+                e.message.includes('isActivationTab') ||
+                e.message.includes('merchant')
+            )) {
+                console.warn('Error de extensión/código externo ignorado:', e.message);
+                e.preventDefault();
+                return true;
+            }
+        });
+
+        // Manejo de errores de promesas no capturadas
+        window.addEventListener('unhandledrejection', function(e) {
+            if (e.reason && (
+                e.reason.message && (
+                    e.reason.message.includes('isActivationTab') ||
+                    e.reason.message.includes('merchant') ||
+                    e.reason.message.includes('bundle.js')
+                )
+            )) {
+                console.warn('Promesa rechazada de código externo ignorada:', e.reason);
+                e.preventDefault();
+                return true;
+            }
+        });
+
         // El slider independiente se inicializa automáticamente sin depender del carousel
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Index: DOM cargado, slider independiente se inicializará automáticamente...');

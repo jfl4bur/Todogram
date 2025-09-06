@@ -149,23 +149,29 @@
         updateSliderLayout(true);
         updateBackgroundBlur(); // Actualizar fondo blur también
         
-        // Actualización con debounce
+        // Actualización con debounce optimizada
         resizeTimeout = setTimeout(() => {
             if (isDestroyed || totalSlides === 0) return;
             
             console.log('Slider: Aplicando resize definitivo');
-            forceCompleteRecalculation();
             
-            // Verificar integridad después de un momento
-            setTimeout(() => {
-                if (!isDestroyed) {
-                    verifySliderIntegrity();
-                    // Reactivar transiciones
-                    if (wrapper) {
-                        wrapper.style.transition = 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-                    }
-                }
-            }, 100);
+            // Usar requestAnimationFrame para mejor rendimiento
+            requestAnimationFrame(() => {
+                forceCompleteRecalculation();
+                
+                // Verificar integridad después de un momento
+                requestAnimationFrame(() => {
+                    setTimeout(() => {
+                        if (!isDestroyed) {
+                            verifySliderIntegrity();
+                            // Reactivar transiciones
+                            if (wrapper) {
+                                wrapper.style.transition = 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                            }
+                        }
+                    }, 100);
+                });
+            });
             
         }, 150);
         
@@ -500,9 +506,12 @@
         
         if (!forceUpdate) {
             const transitionTime = isMobile ? (forceUpdate ? 150 : 400) : 800;
-            setTimeout(() => {
-                isTransitioning = false;
-            }, transitionTime);
+            // Usar requestAnimationFrame para mejor rendimiento
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    isTransitioning = false;
+                }, transitionTime);
+            });
         }
     }
 
@@ -742,19 +751,33 @@
             clearInterval(autoPlayInterval);
         }
         
-        autoPlayInterval = setInterval(() => {
-            if (!isTransitioning && !isDragging && totalSlides > 0) {
-                goToSlide(currentIndex + 1);
-            }
-        }, 7000); // 7 segundos
+        // Usar requestAnimationFrame para mejor rendimiento
+        let lastTime = 0;
+        const interval = 7000; // 7 segundos
         
-        console.log('Slider: Autoplay iniciado cada 7 segundos');
+        function autoPlayTick(currentTime) {
+            if (currentTime - lastTime >= interval) {
+                if (!isTransitioning && !isDragging && totalSlides > 0) {
+                    // Usar requestAnimationFrame para la transición
+                    requestAnimationFrame(() => {
+                        goToSlide(currentIndex + 1);
+                    });
+                }
+                lastTime = currentTime;
+            }
+            if (!isDestroyed) {
+                autoPlayInterval = requestAnimationFrame(autoPlayTick);
+            }
+        }
+        
+        autoPlayInterval = requestAnimationFrame(autoPlayTick);
+        console.log('Slider: Autoplay iniciado cada 7 segundos (optimizado)');
     }
 
     // Función para detener autoplay
     function stopAutoPlay() {
         if (autoPlayInterval) {
-            clearInterval(autoPlayInterval);
+            cancelAnimationFrame(autoPlayInterval);
             autoPlayInterval = null;
             console.log('Slider: Autoplay detenido');
         }
@@ -763,7 +786,7 @@
     // Función para pausar autoplay temporalmente
     function pauseAutoPlay() {
         if (autoPlayInterval) {
-            clearInterval(autoPlayInterval);
+            cancelAnimationFrame(autoPlayInterval);
             autoPlayInterval = null;
         }
     }
@@ -992,13 +1015,14 @@
         
         console.log('Slider: Renderizado completado');
         
-        // Verificación final
-        setTimeout(() => {
-            if (!isDestroyed) {
-                verifySliderIntegrity();
-                
-                // Corrección mínima para Safari
-                const dimensions = calculateResponsiveDimensions();
+        // Verificación final (optimizada)
+        requestAnimationFrame(() => {
+            setTimeout(() => {
+                if (!isDestroyed) {
+                    verifySliderIntegrity();
+                    
+                    // Corrección mínima para Safari
+                    const dimensions = calculateResponsiveDimensions();
                 if (dimensions.isSafari) {
                     console.log('Slider: Aplicando corrección mínima post-renderizado para Safari');
                     
@@ -1018,8 +1042,9 @@
                 
                 // Mostrar el slider y ocultar el skeleton
                 showSlider();
-            }
-        }, 200);
+                }
+            }, 200);
+        });
     }
 
     // Configurar controles
@@ -1188,10 +1213,12 @@
             // Cambiar imagen de fondo del elemento blur
             backgroundBlur.style.backgroundImage = `url(${imageUrl})`;
             
-            // Reactivar después de un pequeño delay para la transición
-            setTimeout(() => {
-                backgroundBlur.classList.add('active');
-            }, 50);
+            // Reactivar después de un pequeño delay para la transición (optimizado)
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    backgroundBlur.classList.add('active');
+                }, 50);
+            });
             
             console.log('Slider: Fondo blur actualizado para slide', currentIndex);
         }
