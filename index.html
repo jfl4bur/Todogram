@@ -207,7 +207,9 @@
                 e.filename.includes('content.js') ||
                 e.filename.includes('extension') ||
                 e.message.includes('isActivationTab') ||
-                e.message.includes('merchant')
+                e.message.includes('merchant') ||
+                e.message.includes('runtime.lastError') ||
+                e.message.includes('message port closed')
             )) {
                 console.warn('Error de extensión/código externo ignorado:', e.message);
                 e.preventDefault();
@@ -215,13 +217,15 @@
             }
         });
 
-        // Manejo de errores de promesas no capturadas
+        // Manejo de errores de promesas no capturadas (consolidado)
         window.addEventListener('unhandledrejection', function(e) {
             if (e.reason && (
                 e.reason.message && (
                     e.reason.message.includes('isActivationTab') ||
                     e.reason.message.includes('merchant') ||
-                    e.reason.message.includes('bundle.js')
+                    e.reason.message.includes('bundle.js') ||
+                    e.reason.message.includes('runtime.lastError') ||
+                    e.reason.message.includes('message port closed')
                 )
             )) {
                 console.warn('Promesa rechazada de código externo ignorada:', e.reason);
@@ -229,6 +233,22 @@
                 return true;
             }
         });
+
+        // Manejo específico para errores de runtime de extensiones de Chrome
+        if (typeof chrome !== 'undefined' && chrome.runtime) {
+            // Interceptar errores de runtime de extensiones
+            const originalConsoleError = console.error;
+            console.error = function(...args) {
+                const message = args.join(' ');
+                if (message.includes('runtime.lastError') || 
+                    message.includes('message port closed') ||
+                    message.includes('Receiving end does not exist')) {
+                    console.warn('Error de extensión del navegador ignorado:', message);
+                    return;
+                }
+                originalConsoleError.apply(console, args);
+            };
+        }
 
         // El slider independiente se inicializa automáticamente sin depender del carousel
         document.addEventListener('DOMContentLoaded', function() {
