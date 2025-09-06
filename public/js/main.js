@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function initializeComponents() {
         const carousel = new Carousel();
+        const carouselSeries = new CarouselSeries();
         const hoverModal = new HoverModal();
         const detailsModal = new DetailsModal();
         const videoModal = new VideoModal();
@@ -32,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // No necesitamos configurarlo aquí ya que se inicializa automáticamente
 
         window.carousel = carousel;
+        window.carouselSeries = carouselSeries;
         window.hoverModal = hoverModal;
         window.detailsModal = detailsModal;
         window.videoModal = videoModal;

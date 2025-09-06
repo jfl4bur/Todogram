@@ -1,5 +1,6 @@
 class CarouselSeries {
     constructor() {
+        console.log('CarouselSeries: Inicializando carrusel de series...');
         this.wrapper = document.getElementById('carousel-series-wrapper');
         this.skeleton = document.getElementById('carousel-series-skeleton');
         this.progressBar = document.querySelector('.carousel-series-progress-bar');
@@ -14,8 +15,18 @@ class CarouselSeries {
         this.seriesData = [];
         this.hoverTimeouts = {};
 
+        console.log('CarouselSeries: Elementos encontrados:', {
+            wrapper: !!this.wrapper,
+            skeleton: !!this.skeleton,
+            progressBar: !!this.progressBar,
+            carouselNav: !!this.carouselNav,
+            carouselPrev: !!this.carouselPrev,
+            carouselNext: !!this.carouselNext,
+            carouselContainer: !!this.carouselContainer
+        });
+
         if (!this.wrapper || !this.skeleton || !this.carouselContainer) {
-            console.error("Elementos del carrusel de series no encontrados");
+            console.error("CarouselSeries: Elementos del carrusel de series no encontrados");
             return;
         }
         if (!this.carouselPrev || !this.carouselNext || !this.carouselNav) {
@@ -83,9 +94,11 @@ class CarouselSeries {
 
     async loadSeriesData() {
         try {
+            console.log('CarouselSeries: Cargando datos de series...');
             const response = await fetch(DATA_URL);
             if (!response.ok) throw new Error('No se pudo cargar data.json');
             const data = await response.json();
+            console.log('CarouselSeries: Datos cargados, total elementos:', data.length);
             
             this.seriesData = data
                 .filter(item => item && typeof item === 'object' && 
@@ -116,6 +129,8 @@ class CarouselSeries {
                     temporada: item['Temporada'] || '',
                     episodios: item['Episodios'] || ''
                 }));
+
+            console.log('CarouselSeries: Series filtradas:', this.seriesData.length);
 
             if (this.seriesData.length === 0) {
                 this.seriesData = [
@@ -339,7 +354,4 @@ class CarouselSeries {
     }
 }
 
-// Inicializar el carrusel de series cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', function() {
-    new CarouselSeries();
-});
+// El carrusel de series se inicializará desde main.js
