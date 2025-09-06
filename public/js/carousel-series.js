@@ -7,7 +7,7 @@ class CarouselSeries {
         this.carouselNav = document.getElementById('carousel-series-nav');
         this.carouselPrev = document.getElementById('carousel-series-prev');
         this.carouselNext = document.getElementById('carousel-series-next');
-        this.carouselContainer = document.querySelector('.carousel-section:last-of-type .carousel-container');
+        this.carouselContainer = document.querySelector('#carousel-series-wrapper').closest('.carousel-container');
         this.itemsPerPage = 5;
         this.index = 0;
         this.step = 1000000;
@@ -24,6 +24,8 @@ class CarouselSeries {
             carouselNext: !!this.carouselNext,
             carouselContainer: !!this.carouselContainer
         });
+        
+        console.log('CarouselSeries: carouselContainer value:', this.carouselContainer);
 
         if (!this.wrapper || !this.skeleton || !this.carouselContainer) {
             console.error("CarouselSeries: Elementos del carrusel de series no encontrados");
