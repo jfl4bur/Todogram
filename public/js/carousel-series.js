@@ -7,7 +7,7 @@ class CarouselSeries {
         this.carouselNav = document.getElementById('carousel-series-nav');
         this.carouselPrev = document.getElementById('carousel-series-prev');
         this.carouselNext = document.getElementById('carousel-series-next');
-        this.carouselContainer = document.querySelector('.carousel-series-container');
+        this.carouselContainer = document.querySelector('.carousel-section:last-of-type .carousel-container');
         this.itemsPerPage = 5;
         this.index = 0;
         this.step = 1000000;
@@ -90,6 +90,20 @@ class CarouselSeries {
             this.scrollToNextPage();
         });
         this.wrapper.addEventListener('scroll', () => this.handleScroll());
+    }
+
+    calculateItemsPerPage() {
+        if (!this.wrapper) return;
+        
+        const itemWidth = 194;
+        const gap = 4;
+        const containerWidth = this.wrapper.clientWidth;
+        
+        if (containerWidth > 0) {
+            this.itemsPerPage = Math.max(1, Math.floor(containerWidth / (itemWidth + gap)));
+        } else {
+            this.itemsPerPage = 5;
+        }
     }
 
     async loadSeriesData() {

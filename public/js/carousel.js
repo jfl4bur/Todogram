@@ -92,6 +92,20 @@ class Carousel {
         this.wrapper.addEventListener('scroll', () => this.handleScroll());
     }
 
+    calculateItemsPerPage() {
+        if (!this.wrapper) return;
+        
+        const itemWidth = 194;
+        const gap = 4;
+        const containerWidth = this.wrapper.clientWidth;
+        
+        if (containerWidth > 0) {
+            this.itemsPerPage = Math.max(1, Math.floor(containerWidth / (itemWidth + gap)));
+        } else {
+            this.itemsPerPage = 5;
+        }
+    }
+
     async loadMoviesData() {
         try {
             console.log('Carousel: Cargando datos de películas...');
