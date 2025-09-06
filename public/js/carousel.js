@@ -1,6 +1,5 @@
 class Carousel {
     constructor() {
-        console.log('Carousel: Inicializando carrusel de películas...');
         this.wrapper = document.getElementById('carousel-wrapper');
         this.skeleton = document.getElementById('carousel-skeleton');
         this.progressBar = document.querySelector('.carousel-progress-bar');
@@ -15,18 +14,8 @@ class Carousel {
         this.moviesData = [];
         this.hoverTimeouts = {};
 
-        console.log('Carousel: Elementos encontrados:', {
-            wrapper: !!this.wrapper,
-            skeleton: !!this.skeleton,
-            progressBar: !!this.progressBar,
-            carouselNav: !!this.carouselNav,
-            carouselPrev: !!this.carouselPrev,
-            carouselNext: !!this.carouselNext,
-            carouselContainer: !!this.carouselContainer
-        });
-
         if (!this.wrapper || !this.skeleton || !this.carouselContainer) {
-            console.error("Carousel: Elementos del carrusel no encontrados");
+            console.error("Elementos del carrusel no encontrados");
             return;
         }
         if (!this.carouselPrev || !this.carouselNext || !this.carouselNav) {
@@ -92,27 +81,11 @@ class Carousel {
         this.wrapper.addEventListener('scroll', () => this.handleScroll());
     }
 
-    calculateItemsPerPage() {
-        if (!this.wrapper) return;
-        
-        const itemWidth = 194;
-        const gap = 4;
-        const containerWidth = this.wrapper.clientWidth;
-        
-        if (containerWidth > 0) {
-            this.itemsPerPage = Math.max(1, Math.floor(containerWidth / (itemWidth + gap)));
-        } else {
-            this.itemsPerPage = 5;
-        }
-    }
-
     async loadMoviesData() {
         try {
-            console.log('Carousel: Cargando datos de películas...');
             const response = await fetch(DATA_URL);
             if (!response.ok) throw new Error('No se pudo cargar data.json');
             const data = await response.json();
-            console.log('Carousel: Datos cargados, total elementos:', data.length);
             
             this.moviesData = data
                 .filter(item => item && typeof item === 'object' && item['Categoría'] === 'Películas')
@@ -137,8 +110,6 @@ class Carousel {
                     audioList: item['Audios'] ? item['Audios'].split(',') : [],
                     subtitleList: item['Subtítulos'] ? item['Subtítulos'].split(',') : []
                 }));
-
-            console.log('Carousel: Películas filtradas:', this.moviesData.length);
 
             if (this.moviesData.length === 0) {
                 this.moviesData = [
