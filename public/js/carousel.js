@@ -9,7 +9,7 @@ class Carousel {
         this.carouselContainer = document.querySelector('.carousel-container');
         this.itemsPerPage = 5;
         this.index = 0;
-        this.step = 1000000;
+        this.step = 15; // Renderizar solo 15 elementos inicialmente
         this.moreAppended = false;
         this.moviesData = [];
         this.hoverTimeouts = {};

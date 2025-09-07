@@ -64,9 +64,10 @@ document.addEventListener('DOMContentLoaded', function() {
     return;
   }
   
-  // Variables para scroll
+  // Variables para scroll con debounce
   let lastScrollY = 0;
   let isScrolling = false;
+  let scrollTimeout = null;
   
   // Toggle mobile menu
   function toggleMobileMenu() {
@@ -84,33 +85,39 @@ document.addEventListener('DOMContentLoaded', function() {
     document.body.classList.remove('no-scroll');
   }
   
-  // Función para manejar scroll en la página principal
+  // Función para manejar scroll en la página principal con debounce
   function onScrollHeader() {
-    if (!isScrolling) {
-      isScrolling = true;
-      requestAnimationFrame(() => {
-        const currentScrollY = window.scrollY;
-        
-        // Efecto de fondo translúcido
-        if (currentScrollY > 50) {
-          header.classList.add('scrolled');
-        } else {
-          header.classList.remove('scrolled');
-        }
-        
-        // Ocultar/mostrar header basado en dirección del scroll
-        if (currentScrollY > lastScrollY && currentScrollY > 50) {
-          // Scroll hacia abajo - ocultar header
-          header.classList.add('hidden');
-        } else if (currentScrollY < lastScrollY) {
-          // Scroll hacia arriba - mostrar header
-          header.classList.remove('hidden');
-        }
-        
-        lastScrollY = currentScrollY;
-        isScrolling = false;
-      });
+    if (scrollTimeout) {
+      clearTimeout(scrollTimeout);
     }
+    
+    scrollTimeout = setTimeout(() => {
+      if (!isScrolling) {
+        isScrolling = true;
+        requestAnimationFrame(() => {
+          const currentScrollY = window.scrollY;
+          
+          // Efecto de fondo translúcido
+          if (currentScrollY > 50) {
+            header.classList.add('scrolled');
+          } else {
+            header.classList.remove('scrolled');
+          }
+          
+          // Ocultar/mostrar header basado en dirección del scroll
+          if (currentScrollY > lastScrollY && currentScrollY > 50) {
+            // Scroll hacia abajo - ocultar header
+            header.classList.add('hidden');
+          } else if (currentScrollY < lastScrollY) {
+            // Scroll hacia arriba - mostrar header
+            header.classList.remove('hidden');
+          }
+          
+          lastScrollY = currentScrollY;
+          isScrolling = false;
+        });
+      }
+    }, 16); // ~60fps
   }
   
   // Función para manejar scroll en el details modal

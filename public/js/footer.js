@@ -86,29 +86,38 @@ document.addEventListener('DOMContentLoaded', function() {
     return;
   }
   
-  // Función para manejar scroll en la página principal
+  // Variables para debounce
+  let scrollTimeout = null;
+  
+  // Función para manejar scroll en la página principal con debounce
   function onScrollFooter() {
-    const currentScrollY = window.scrollY;
-    const windowHeight = window.innerHeight;
-    const documentHeight = document.documentElement.scrollHeight;
-    const footerRect = footer.getBoundingClientRect();
-    const isMobile = window.innerWidth <= 768;
-    
-    // En móvil: mostrar cuando el scroll llegue al inicio del footer
-    if (isMobile) {
-      if (footerRect.top <= windowHeight) {
-        footer.classList.add('visible');
-      } else {
-        footer.classList.remove('visible');
-      }
-    } else {
-      // En desktop: mostrar cuando esté cerca del final de la página
-      if (currentScrollY + windowHeight >= documentHeight - 100) {
-        footer.classList.add('visible');
-      } else {
-        footer.classList.remove('visible');
-      }
+    if (scrollTimeout) {
+      clearTimeout(scrollTimeout);
     }
+    
+    scrollTimeout = setTimeout(() => {
+      const currentScrollY = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const footerRect = footer.getBoundingClientRect();
+      const isMobile = window.innerWidth <= 768;
+      
+      // En móvil: mostrar cuando el scroll llegue al inicio del footer
+      if (isMobile) {
+        if (footerRect.top <= windowHeight) {
+          footer.classList.add('visible');
+        } else {
+          footer.classList.remove('visible');
+        }
+      } else {
+        // En desktop: mostrar cuando esté cerca del final de la página
+        if (currentScrollY + windowHeight >= documentHeight - 100) {
+          footer.classList.add('visible');
+        } else {
+          footer.classList.remove('visible');
+        }
+      }
+    }, 16); // ~60fps
   }
   
   // Event listeners

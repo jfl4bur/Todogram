@@ -9,6 +9,7 @@ class ShareModal {
         this.shareLinkInput = document.getElementById('share-link-input');
         this.shareLinkButton = document.getElementById('share-link-button');
         this.currentShareUrl = '';
+        this.isVisible = false;
 
         if (!this.shareModalOverlay || !this.shareModalContent || !this.shareModalClose || !this.sharePreviewImage || 
             !this.sharePreviewTitle || !this.sharePreviewDescription || !this.shareLinkInput || !this.shareLinkButton) {
@@ -50,10 +51,12 @@ class ShareModal {
     }
 
     show(item) {
-        if (!item || !item.shareUrl) {
-            console.error('Item o shareUrl no definidos:', item);
+        if (!item || !item.shareUrl || this.isVisible) {
+            console.error('Item o shareUrl no definidos, o modal ya visible:', item);
             return;
         }
+        
+        this.isVisible = true;
         
         // Actualizar elementos del modal con datos dinámicos del item
         this.sharePreviewImage.src = item.posterUrl || 'https://via.placeholder.com/194x271';
@@ -84,6 +87,7 @@ class ShareModal {
     }
 
     close() {
+        this.isVisible = false;
         this.shareModalContent.style.opacity = '0';
         this.shareModalContent.style.transform = 'translateY(20px)';
         

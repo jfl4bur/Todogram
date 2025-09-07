@@ -23,6 +23,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function initializeComponents() {
         console.log("Main: Inicializando componentes...");
+        
+        // Sistema de cache global para optimización
+        window.performanceCache = {
+            domElements: new Map(),
+            computedStyles: new Map(),
+            lastResize: 0
+        };
+        
         const carousel = new Carousel();
         
         // Inicializar el carrusel de series inmediatamente
@@ -48,19 +56,8 @@ document.addEventListener('DOMContentLoaded', function () {
         window.activeItem = null;
         window.hoverModalItem = null;
 
-        // Inicializar el slider independiente
-        function initializeSlider() {
-            if (window.sliderIndependent) {
-                console.log('Main: Slider independiente disponible');
-                // El slider independiente se inicializa automáticamente
-            } else {
-                console.log('Main: Esperando slider independiente...');
-                setTimeout(initializeSlider, 100);
-            }
-        }
-        
-        // Iniciar el slider después de un pequeño delay
-        setTimeout(initializeSlider, 500);
+        // El slider independiente se inicializa automáticamente
+        // No necesitamos delays ni polling
 
         // Función para generar URL de compartir
         window.generateShareUrl = function(item, originalUrl) {
@@ -146,9 +143,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Manejar parámetros de URL al cargar la página
         window.addEventListener('load', function() {
-            setTimeout(() => {
+            // Usar requestAnimationFrame para mejor rendimiento
+            requestAnimationFrame(() => {
                 processUrlParams();
-            }, 500);
+            });
         });
 
         // Manejar cambios en el hash de la URL
@@ -158,9 +156,10 @@ document.addEventListener('DOMContentLoaded', function () {
             if (newHash !== lastHash) {
                 lastHash = newHash;
                 console.log('Hash cambió a:', newHash);
-                setTimeout(() => {
+                // Usar requestAnimationFrame para mejor rendimiento
+                requestAnimationFrame(() => {
                     processUrlParams();
-                }, 300);
+                });
             }
         });
 

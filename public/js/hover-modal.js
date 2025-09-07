@@ -9,6 +9,7 @@ class HoverModal {
         this.hoverModalItem = null;
         this.hoverModalOrigin = { x: 0, y: 0 };
         this.hoverModalTimeout = null;
+        this.isVisible = false;
 
         if (!this.modalOverlay || !this.modalContent || !this.carouselContainer) {
             console.error("Elementos del hover modal no encontrados");
@@ -22,7 +23,13 @@ class HoverModal {
             return;
         }
 
+        // Evitar mostrar si ya está visible
+        if (this.isVisible) {
+            return;
+        }
+
         window.isModalOpen = true;
+        this.isVisible = true;
         
         // Usar postersUrl como prioridad (campo "Carteles")
         const backdropUrl = item.postersUrl || item.backgroundUrl || item.posterUrl;
@@ -159,6 +166,7 @@ class HoverModal {
             clearTimeout(this.hoverModalTimeout);
         }
         
+        this.isVisible = false;
         this.modalContent.style.opacity = '0';
         this.modalContent.style.transform = 'translate(-50%, -50%) scale(0.9)';
         

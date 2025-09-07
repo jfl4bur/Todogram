@@ -3,6 +3,7 @@ class VideoModal {
         this.videoModalOverlay = document.getElementById('video-modal-overlay');
         this.videoModalClose = document.getElementById('video-modal-close');
         this.videoIframe = document.getElementById('video-iframe');
+        this.isPlaying = false;
 
         if (!this.videoModalOverlay || !this.videoIframe) {
             console.error("Elementos del modal de video no encontrados");
@@ -26,7 +27,7 @@ class VideoModal {
     }
 
     play(url) {
-        if (!url) return;
+        if (!url || this.isPlaying) return;
         
         let embedUrl = '';
         if (url.includes('youtube.com') || url.includes('youtu.be')) {
@@ -37,12 +38,14 @@ class VideoModal {
         
         if (!embedUrl) return;
         
+        this.isPlaying = true;
         this.videoIframe.src = embedUrl;
         this.videoModalOverlay.style.display = 'flex';
         document.body.style.overflow = 'hidden';
     }
 
     close() {
+        this.isPlaying = false;
         this.videoIframe.src = '';
         this.videoModalOverlay.style.display = 'none';
         document.body.style.overflow = 'auto';

@@ -8,6 +8,7 @@ class DetailsModal {
         this.activeItem = null;
         this.isDetailsModalOpen = false;
         this.TMDB_API_KEY = 'f28077ae6a89b54c86be927ea88d64d9';
+        this.domCache = {}; // Cache para elementos DOM frecuentemente usados
 
         if (!this.detailsModalOverlay || !this.detailsModalContent) {
             console.error("Elementos del modal de detalles no encontrados");

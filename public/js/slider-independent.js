@@ -4,6 +4,7 @@
     let totalSlides = 0;
     let isTransitioning = false;
     let resizeTimeout = null;
+    let animationFrameId = null;
     let slidesData = [];
     let isDestroyed = false;
     let lastViewportWidth = 0;
@@ -130,6 +131,11 @@
             return;
         }
         
+        // Cancelar frame de animación anterior si existe
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+        }
+        
         clearTimeout(resizeTimeout);
         
         console.log('Slider: Resize detectado -', {
@@ -156,7 +162,7 @@
             console.log('Slider: Aplicando resize definitivo');
             
             // Usar requestAnimationFrame para mejor rendimiento
-            requestAnimationFrame(() => {
+            animationFrameId = requestAnimationFrame(() => {
                 forceCompleteRecalculation();
                 
                 // Verificar integridad después de un momento
