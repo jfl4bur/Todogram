@@ -368,8 +368,11 @@ class Carousel {
             const currentScroll = this.wrapper.scrollLeft;
             const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
             
+            // Calcular cuántos items completos caben en la pantalla
+            const itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
+            
             // Calcular la posición exacta del siguiente scroll
-            const targetScroll = currentScroll + actualScrollAmount;
+            const targetScroll = currentScroll + (itemsPerViewport * (itemWidth + gap));
             
             // Si estamos cerca del final, ir al final para mostrar el último item completo
             if (targetScroll >= maxScroll - (itemWidth + gap)) {
@@ -379,13 +382,10 @@ class Carousel {
                     behavior: 'smooth'
                 });
             } else {
-                // Alinear a los límites de los items para que el de la izquierda esté completo
-                const alignedScroll = Math.round(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
-                
-                console.log(`Carousel: Next - Current: ${currentScroll}, Target: ${targetScroll}, Aligned: ${alignedScroll}`);
+                console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}`);
                 
                 this.wrapper.scrollTo({
-                    left: alignedScroll,
+                    left: targetScroll,
                     behavior: 'smooth'
                 });
             }
@@ -880,8 +880,11 @@ class SeriesCarousel {
             const currentScroll = this.wrapper.scrollLeft;
             const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
             
+            // Calcular cuántos items completos caben en la pantalla
+            const itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
+            
             // Calcular la posición exacta del siguiente scroll
-            const targetScroll = currentScroll + actualScrollAmount;
+            const targetScroll = currentScroll + (itemsPerViewport * (itemWidth + gap));
             
             // Si estamos cerca del final, ir al final para mostrar el último item completo
             if (targetScroll >= maxScroll - (itemWidth + gap)) {
@@ -891,13 +894,10 @@ class SeriesCarousel {
                     behavior: 'smooth'
                 });
             } else {
-                // Alinear a los límites de los items para que el de la izquierda esté completo
-                const alignedScroll = Math.round(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
-                
-                console.log(`Carousel: Next - Current: ${currentScroll}, Target: ${targetScroll}, Aligned: ${alignedScroll}`);
+                console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}`);
                 
                 this.wrapper.scrollTo({
-                    left: alignedScroll,
+                    left: targetScroll,
                     behavior: 'smooth'
                 });
             }
