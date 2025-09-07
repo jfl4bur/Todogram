@@ -332,12 +332,15 @@ class Carousel {
         const containerWidth = this.wrapper.clientWidth;
         
         // Calcular cuántos elementos caben realmente en el viewport
-        // Usar Math.floor para obtener el número exacto de elementos completos visibles
-        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / (itemWidth + gap)));
+        // Usar un cálculo más agresivo para asegurar que avance todos los elementos visibles
+        const itemsPerViewport = Math.max(1, Math.ceil(containerWidth / (itemWidth + gap)) + 1);
         const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
         
         console.log(`Carousel: Paginación dinámica - ${itemsPerViewport} elementos por viewport`);
         console.log(`Carousel: Container width: ${containerWidth}px`);
+        console.log(`Carousel: Item width: ${itemWidth}px, Gap: ${gap}px`);
+        console.log(`Carousel: Cálculo: ${containerWidth} / (${itemWidth} + ${gap}) = ${containerWidth / (itemWidth + gap)}`);
+        console.log(`Carousel: Math.ceil(${containerWidth / (itemWidth + gap)}) = ${itemsPerViewport}`);
         console.log(`Carousel: Scroll amount: ${actualScrollAmount}px`);
         
         if (direction === 'prev') {
@@ -825,12 +828,15 @@ class SeriesCarousel {
         const containerWidth = this.wrapper.clientWidth;
         
         // Calcular cuántos elementos caben realmente en el viewport
-        // Usar Math.floor para obtener el número exacto de elementos completos visibles
-        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / (itemWidth + gap)));
+        // Usar un cálculo más agresivo para asegurar que avance todos los elementos visibles
+        const itemsPerViewport = Math.max(1, Math.ceil(containerWidth / (itemWidth + gap)) + 1);
         const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
         
         console.log(`Carousel: Paginación dinámica - ${itemsPerViewport} elementos por viewport`);
         console.log(`Carousel: Container width: ${containerWidth}px`);
+        console.log(`Carousel: Item width: ${itemWidth}px, Gap: ${gap}px`);
+        console.log(`Carousel: Cálculo: ${containerWidth} / (${itemWidth} + ${gap}) = ${containerWidth / (itemWidth + gap)}`);
+        console.log(`Carousel: Math.ceil(${containerWidth / (itemWidth + gap)}) = ${itemsPerViewport}`);
         console.log(`Carousel: Scroll amount: ${actualScrollAmount}px`);
         
         if (direction === 'prev') {
