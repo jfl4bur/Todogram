@@ -339,30 +339,22 @@ class Carousel {
         const gap = 4;
         const containerWidth = this.wrapper.clientWidth;
         const itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
-        const totalItemWidth = itemWidth + gap;
+        const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
+
         let currentScroll = this.wrapper.scrollLeft;
-        // SNAP: forzar alineación ANTES de calcular el siguiente índice
-        let snappedIndex = Math.round(currentScroll / totalItemWidth);
-        let snappedScroll = snappedIndex * totalItemWidth;
-        // Si el scroll no está alineado, forzar el snap antes de avanzar
-        if (Math.abs(currentScroll - snappedScroll) > 2) {
-            this.wrapper.scrollTo({ left: snappedScroll, behavior: 'auto' });
-            currentScroll = snappedScroll;
-        }
-        // Calcular el índice del primer item visible (ya alineado)
-        let firstVisibleIndex = Math.floor(currentScroll / totalItemWidth);
+        let targetScroll;
         if (direction === 'prev') {
-            firstVisibleIndex = Math.max(0, firstVisibleIndex - itemsPerViewport);
+            targetScroll = Math.max(0, currentScroll - actualScrollAmount);
         } else {
-            firstVisibleIndex = firstVisibleIndex + itemsPerViewport;
+            targetScroll = currentScroll + actualScrollAmount;
         }
-        // Calcular el nuevo scroll alineado exactamente al inicio del item
-        let targetScroll = firstVisibleIndex * totalItemWidth;
-        // Limitar el scroll máximo
+        // Alinear el scroll para que el item de la izquierda quede completo
+        const alignedScroll = Math.round(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
+        // Evitar sobrepasar los límites
         const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
-        targetScroll = Math.max(0, Math.min(targetScroll, maxScroll));
+        const finalScroll = Math.max(0, Math.min(alignedScroll, maxScroll));
         this.wrapper.scrollTo({
-            left: targetScroll,
+            left: finalScroll,
             behavior: 'auto'
         });
     }
@@ -860,8 +852,15 @@ class SeriesCarousel {
             const itemsPerViewport = Math.max(4, Math.floor(containerWidth / (itemWidth + gap)));
             
             // Calcular la posición exacta del siguiente scroll
-            // Usar el ancho total de cada item incluyendo el gap
-            const targetScroll = currentScroll + (itemsPerViewport * (itemWidth + gap));
+            // Si es el primer clic (currentScroll = 0), usar un cálculo especial
+            let targetScroll;
+            if (currentScroll === 0) {
+                // Para el primer clic, mover exactamente por los items que caben
+                targetScroll = itemsPerViewport * (itemWidth + gap);
+            } else {
+                // Para los siguientes clics, usar el cálculo normal
+                targetScroll = currentScroll + (itemsPerViewport * (itemWidth + gap));
+            }
             
             console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}`);
             
