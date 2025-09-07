@@ -171,11 +171,6 @@ class Carousel {
             this.showCarousel();
             this.renderItems();
             
-            // Asegurar que el carrusel comience desde la posición 0 (izquierda)
-            setTimeout(() => {
-                this.wrapper.scrollLeft = 0;
-            }, 100);
-            
             // Notificar que los datos de películas están cargados
             if (window.notifyDataLoaded) {
                 window.notifyDataLoaded();
@@ -207,11 +202,6 @@ class Carousel {
             ];
             this.showCarousel();
             this.renderItems();
-            
-            // Asegurar que el carrusel comience desde la posición 0 (izquierda)
-            setTimeout(() => {
-                this.wrapper.scrollLeft = 0;
-            }, 100);
         }
     }
 
@@ -338,20 +328,9 @@ class Carousel {
     scrollToPrevPage() {
         const itemWidth = 194;
         const gap = 4;
-        const itemSize = itemWidth + gap;
-        const currentScroll = this.wrapper.scrollLeft;
-        
-        // Calcular cuántos elementos completos caben en el viewport
-        const visibleItems = Math.floor(this.wrapper.clientWidth / itemSize);
-        
-        // Calcular la nueva posición de scroll retrocediendo
-        const scrollAmount = visibleItems * itemSize;
-        const newScroll = Math.max(0, currentScroll - scrollAmount);
-        
-        console.log(`Carousel: scrollToPrevPage - currentScroll: ${currentScroll}, visibleItems: ${visibleItems}, scrollAmount: ${scrollAmount}, newScroll: ${newScroll}`);
-        
-        this.wrapper.scrollTo({
-            left: newScroll,
+        const scrollAmount = this.itemsPerPage * (itemWidth + gap);
+        this.wrapper.scrollBy({
+            left: -scrollAmount,
             behavior: 'smooth'
         });
     }
@@ -359,21 +338,9 @@ class Carousel {
     scrollToNextPage() {
         const itemWidth = 194;
         const gap = 4;
-        const itemSize = itemWidth + gap;
-        const currentScroll = this.wrapper.scrollLeft;
-        
-        // Calcular cuántos elementos completos caben en el viewport
-        const visibleItems = Math.floor(this.wrapper.clientWidth / itemSize);
-        
-        // Calcular la nueva posición de scroll avanzando
-        const scrollAmount = visibleItems * itemSize;
-        const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
-        const newScroll = Math.min(maxScroll, currentScroll + scrollAmount);
-        
-        console.log(`Carousel: scrollToNextPage - currentScroll: ${currentScroll}, visibleItems: ${visibleItems}, scrollAmount: ${scrollAmount}, newScroll: ${newScroll}, maxScroll: ${maxScroll}`);
-        
-        this.wrapper.scrollTo({
-            left: newScroll,
+        const scrollAmount = this.itemsPerPage * (itemWidth + gap);
+        this.wrapper.scrollBy({
+            left: scrollAmount,
             behavior: 'smooth'
         });
     }
@@ -641,11 +608,6 @@ class SeriesCarousel {
             this.showCarousel();
             this.renderItems();
             
-            // Asegurar que el carrusel comience desde la posición 0 (izquierda)
-            setTimeout(() => {
-                this.wrapper.scrollLeft = 0;
-            }, 100);
-            
             // Notificar que los datos de series están cargados
             if (window.notifyDataLoaded) {
                 window.notifyDataLoaded();
@@ -677,11 +639,6 @@ class SeriesCarousel {
             ];
             this.showCarousel();
             this.renderItems();
-            
-            // Asegurar que el carrusel comience desde la posición 0 (izquierda)
-            setTimeout(() => {
-                this.wrapper.scrollLeft = 0;
-            }, 100);
             
             // Notificar que los datos de series están cargados (fallback)
             if (window.notifyDataLoaded) {
@@ -848,20 +805,9 @@ class SeriesCarousel {
     scrollToPrevPage() {
         const itemWidth = 194;
         const gap = 4;
-        const itemSize = itemWidth + gap;
-        const currentScroll = this.wrapper.scrollLeft;
-        
-        // Calcular cuántos elementos completos caben en el viewport
-        const visibleItems = Math.floor(this.wrapper.clientWidth / itemSize);
-        
-        // Calcular la nueva posición de scroll retrocediendo
-        const scrollAmount = visibleItems * itemSize;
-        const newScroll = Math.max(0, currentScroll - scrollAmount);
-        
-        console.log(`SeriesCarousel: scrollToPrevPage - currentScroll: ${currentScroll}, visibleItems: ${visibleItems}, scrollAmount: ${scrollAmount}, newScroll: ${newScroll}`);
-        
-        this.wrapper.scrollTo({
-            left: newScroll,
+        const scrollAmount = this.itemsPerPage * (itemWidth + gap);
+        this.wrapper.scrollBy({
+            left: -scrollAmount,
             behavior: 'smooth'
         });
     }
@@ -869,21 +815,9 @@ class SeriesCarousel {
     scrollToNextPage() {
         const itemWidth = 194;
         const gap = 4;
-        const itemSize = itemWidth + gap;
-        const currentScroll = this.wrapper.scrollLeft;
-        
-        // Calcular cuántos elementos completos caben en el viewport
-        const visibleItems = Math.floor(this.wrapper.clientWidth / itemSize);
-        
-        // Calcular la nueva posición de scroll avanzando
-        const scrollAmount = visibleItems * itemSize;
-        const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
-        const newScroll = Math.min(maxScroll, currentScroll + scrollAmount);
-        
-        console.log(`SeriesCarousel: scrollToNextPage - currentScroll: ${currentScroll}, visibleItems: ${visibleItems}, scrollAmount: ${scrollAmount}, newScroll: ${newScroll}, maxScroll: ${maxScroll}`);
-        
-        this.wrapper.scrollTo({
-            left: newScroll,
+        const scrollAmount = this.itemsPerPage * (itemWidth + gap);
+        this.wrapper.scrollBy({
+            left: scrollAmount,
             behavior: 'smooth'
         });
     }
