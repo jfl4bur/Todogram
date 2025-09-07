@@ -282,6 +282,7 @@ class Carousel {
             });
 
             this.wrapper.appendChild(div);
+            console.log(`SeriesCarousel: Elemento ${i} añadido al DOM`);
         }
 
         this.index = end;
@@ -534,7 +535,13 @@ class SeriesCarousel {
     }
 
     async renderItems() {
+        console.log("SeriesCarousel: renderItems llamado");
+        console.log("SeriesCarousel: seriesData.length:", this.seriesData.length);
+        console.log("SeriesCarousel: index:", this.index);
+        console.log("SeriesCarousel: step:", this.step);
+        
         const end = Math.min(this.index + this.step, this.seriesData.length);
+        console.log("SeriesCarousel: end:", end);
         
         for (let i = this.index; i < end; i++) {
             const item = this.seriesData[i];
@@ -638,6 +645,7 @@ class SeriesCarousel {
             });
 
             this.wrapper.appendChild(div);
+            console.log(`SeriesCarousel: Elemento ${i} añadido al DOM`);
         }
 
         this.index = end;
