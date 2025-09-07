@@ -802,9 +802,20 @@
     async function loadSliderData() {
         try {
             console.log('Slider: Cargando datos...');
-            const response = await fetch(DATA_URL);
-            if (!response.ok) throw new Error('No se pudo cargar data.json');
-            const data = await response.json();
+            
+            // Intentar usar datos compartidos primero
+            let data;
+            if (window.sharedData) {
+                console.log('Slider: Usando datos compartidos');
+                data = window.sharedData;
+            } else {
+                console.log('Slider: Haciendo fetch de datos...');
+                const response = await fetch(DATA_URL);
+                if (!response.ok) throw new Error('No se pudo cargar data.json');
+                data = await response.json();
+                // Guardar datos para compartir con otros componentes
+                window.sharedData = data;
+            }
             
             // Obtener la lista de todas las películas como en el carrusel para obtener el índice correcto
             const allMovies = data.filter(item => item && typeof item === 'object' && item['Categoría'] === 'Películas');

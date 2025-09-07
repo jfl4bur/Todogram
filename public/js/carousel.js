@@ -83,9 +83,19 @@ class Carousel {
 
     async loadMoviesData() {
         try {
-            const response = await fetch(DATA_URL);
-            if (!response.ok) throw new Error('No se pudo cargar data.json');
-            const data = await response.json();
+            // Intentar usar datos compartidos primero
+            let data;
+            if (window.sharedData) {
+                console.log("Carousel: Usando datos compartidos");
+                data = window.sharedData;
+            } else {
+                console.log("Carousel: Haciendo fetch de datos...");
+                const response = await fetch(DATA_URL);
+                if (!response.ok) throw new Error('No se pudo cargar data.json');
+                data = await response.json();
+                // Guardar datos para compartir con otros componentes
+                window.sharedData = data;
+            }
             
             this.moviesData = data
                 .filter(item => item && typeof item === 'object' && item['Categoría'] === 'Películas')
@@ -201,7 +211,7 @@ class Carousel {
             div.innerHTML = `
                 <div class="loader"><i class="fas fa-spinner"></i></div>
                 <div class="poster-container">
-                    <img class="poster-image" src="${posterUrl}" alt="${item.title}" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease">
+                    <img class="poster-image" src="${posterUrl}" alt="${item.title}" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease" loading="lazy">
                 </div>
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none">
                             <div class="carousel-overlay">
@@ -339,7 +349,7 @@ class SeriesCarousel {
         this.carouselContainer = document.querySelector('#series-carousel-wrapper').parentElement;
         this.itemsPerPage = 5;
         this.index = 0;
-        this.step = 1000000;
+        this.step = 10; // Renderizar solo 10 elementos inicialmente
         this.moreAppended = false;
         this.seriesData = [];
         this.hoverTimeouts = {};
@@ -427,44 +437,56 @@ class SeriesCarousel {
     async loadSeriesData() {
         try {
             console.log("SeriesCarousel: Cargando datos...");
-            const response = await fetch(DATA_URL);
-            if (!response.ok) throw new Error('No se pudo cargar data.json');
-            const data = await response.json();
             
-            console.log("SeriesCarousel: Datos cargados, filtrando series...");
+            // Intentar usar datos compartidos primero
+            let data;
+            if (window.sharedData) {
+                console.log("SeriesCarousel: Usando datos compartidos");
+                data = window.sharedData;
+            } else {
+                console.log("SeriesCarousel: Haciendo fetch de datos...");
+                const response = await fetch(DATA_URL);
+                if (!response.ok) throw new Error('No se pudo cargar data.json');
+                data = await response.json();
+                // Guardar datos para compartir con otros componentes
+                window.sharedData = data;
+            }
             
-            // Log para debug del filtro
-            const seriesItems = data.filter(item => item && typeof item === 'object' && item['Categoría'] === 'Series');
-            console.log(`SeriesCarousel: Total items con Categoría='Series': ${seriesItems.length}`);
+            console.log("SeriesCarousel: Procesando series...");
             
-            const seriesWithEmptyEpisode = seriesItems.filter(item => !item['Título episodio'] || item['Título episodio'].trim() === '');
-            console.log(`SeriesCarousel: Series con título episodio vacío: ${seriesWithEmptyEpisode.length}`);
+            // Optimización: Un solo filtro y mapeo
+            this.seriesData = [];
+            let seriesIndex = 0;
             
-            this.seriesData = data
-                .filter(item => item && typeof item === 'object' && 
+            for (const item of data) {
+                if (item && typeof item === 'object' && 
                     item['Categoría'] === 'Series' && 
-                    (!item['Título episodio'] || item['Título episodio'].trim() === ''))
-                .map((item, index) => ({
-                    id: `series_${index}`,
-                    title: item['Título'] || 'Sin título',
-                    description: item['Synopsis'] || 'Descripción no disponible',
-                    posterUrl: item['Portada'] || '',
-                    postersUrl: item['Carteles'] || '',
-                    backgroundUrl: item['Portada'] || '',
-                    year: item['Año'] ? item['Año'].toString() : '',
-                    duration: item['Duración'] || '',
-                    genre: item['Géneros'] || '',
-                    rating: item['Puntuación 1-10'] ? item['Puntuación 1-10'].toString() : '',
-                    ageRating: item['Clasificación'] || '',
-                    link: item['Enlace'] || '#',
-                    trailerUrl: item['Trailer'] || '',
-                    videoUrl: item['Video iframe'] || '',
-                    tmdbUrl: item['TMDB'] || '',
-                    audiosCount: item['Audios'] ? item['Audios'].split(',').length : 0,
-                    subtitlesCount: item['Subtítulos'] ? item['Subtítulos'].split(',').length : 0,
-                    audioList: item['Audios'] ? item['Audios'].split(',') : [],
-                    subtitleList: item['Subtítulos'] ? item['Subtítulos'].split(',') : []
-                }));
+                    (!item['Título episodio'] || item['Título episodio'].trim() === '')) {
+                    
+                    this.seriesData.push({
+                        id: `series_${seriesIndex}`,
+                        title: item['Título'] || 'Sin título',
+                        description: item['Synopsis'] || 'Descripción no disponible',
+                        posterUrl: item['Portada'] || '',
+                        postersUrl: item['Carteles'] || '',
+                        backgroundUrl: item['Portada'] || '',
+                        year: item['Año'] ? item['Año'].toString() : '',
+                        duration: item['Duración'] || '',
+                        genre: item['Géneros'] || '',
+                        rating: item['Puntuación 1-10'] ? item['Puntuación 1-10'].toString() : '',
+                        ageRating: item['Clasificación'] || '',
+                        link: item['Enlace'] || '#',
+                        trailerUrl: item['Trailer'] || '',
+                        videoUrl: item['Video iframe'] || '',
+                        tmdbUrl: item['TMDB'] || '',
+                        audiosCount: item['Audios'] ? item['Audios'].split(',').length : 0,
+                        subtitlesCount: item['Subtítulos'] ? item['Subtítulos'].split(',').length : 0,
+                        audioList: item['Audios'] ? item['Audios'].split(',') : [],
+                        subtitleList: item['Subtítulos'] ? item['Subtítulos'].split(',') : []
+                    });
+                    seriesIndex++;
+                }
+            }
 
             console.log(`SeriesCarousel: Se encontraron ${this.seriesData.length} series`);
             
@@ -564,7 +586,7 @@ class SeriesCarousel {
             div.innerHTML = `
                 <div class="loader"><i class="fas fa-spinner"></i></div>
                 <div class="poster-container">
-                    <img class="poster-image" src="${posterUrl}" alt="${item.title}" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease">
+                    <img class="poster-image" src="${posterUrl}" alt="${item.title}" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease" loading="lazy">
                 </div>
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none">
                             <div class="carousel-overlay">
