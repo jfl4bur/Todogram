@@ -22,8 +22,16 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function initializeComponents() {
+        console.log("Main: Inicializando componentes...");
         const carousel = new Carousel();
-        const seriesCarousel = new SeriesCarousel();
+        
+        // Inicializar el carrusel de series con un pequeño delay para asegurar que el DOM esté listo
+        setTimeout(() => {
+            console.log("Main: Inicializando carrusel de series...");
+            const seriesCarousel = new SeriesCarousel();
+            window.seriesCarousel = seriesCarousel;
+        }, 100);
+        
         const hoverModal = new HoverModal();
         const detailsModal = new DetailsModal();
         const videoModal = new VideoModal();
@@ -33,7 +41,6 @@ document.addEventListener('DOMContentLoaded', function () {
         // No necesitamos configurarlo aquí ya que se inicializa automáticamente
 
         window.carousel = carousel;
-        window.seriesCarousel = seriesCarousel;
         window.hoverModal = hoverModal;
         window.detailsModal = detailsModal;
         window.videoModal = videoModal;

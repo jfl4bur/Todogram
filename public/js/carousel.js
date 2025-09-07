@@ -309,6 +309,8 @@ class Carousel {
     }
 
     updateProgressBar() {
+        if (!this.progressBar) return;
+        
         if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
             const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
             this.progressBar.style.width = `${scrollPercentage}%`;
@@ -329,11 +331,11 @@ class SeriesCarousel {
     constructor() {
         this.wrapper = document.getElementById('series-carousel-wrapper');
         this.skeleton = document.getElementById('series-carousel-skeleton');
-        this.progressBar = document.querySelector('.carousel-section:last-child .carousel-progress-bar');
+        this.progressBar = null; // Se configurará después de verificar que wrapper existe
         this.carouselNav = document.getElementById('series-carousel-nav');
         this.carouselPrev = document.getElementById('series-carousel-prev');
         this.carouselNext = document.getElementById('series-carousel-next');
-        this.carouselContainer = document.querySelector('.carousel-section:last-child .carousel-container');
+        this.carouselContainer = document.querySelector('#series-carousel-wrapper').parentElement;
         this.itemsPerPage = 5;
         this.index = 0;
         this.step = 1000000;
@@ -342,7 +344,12 @@ class SeriesCarousel {
         this.hoverTimeouts = {};
 
         if (!this.wrapper || !this.skeleton || !this.carouselContainer) {
-            console.error("Elementos del carrusel de series no encontrados");
+            console.error("Elementos del carrusel de series no encontrados", {
+                wrapper: !!this.wrapper,
+                skeleton: !!this.skeleton,
+                carouselContainer: !!this.carouselContainer,
+                progressBar: !!this.progressBar
+            });
             return;
         }
         if (!this.carouselPrev || !this.carouselNext || !this.carouselNav) {
@@ -364,6 +371,14 @@ class SeriesCarousel {
     }
 
     init() {
+        console.log("SeriesCarousel: Iniciando configuración...");
+        
+        // Configurar el progress bar ahora que sabemos que wrapper existe
+        if (this.wrapper) {
+            this.progressBar = this.wrapper.parentElement.querySelector('.carousel-progress-bar');
+            console.log("SeriesCarousel: Progress bar configurado:", !!this.progressBar);
+        }
+        
         this.setupResizeObserver();
         this.setupEventListeners();
         this.loadSeriesData();
@@ -410,9 +425,19 @@ class SeriesCarousel {
 
     async loadSeriesData() {
         try {
+            console.log("SeriesCarousel: Cargando datos...");
             const response = await fetch(DATA_URL);
             if (!response.ok) throw new Error('No se pudo cargar data.json');
             const data = await response.json();
+            
+            console.log("SeriesCarousel: Datos cargados, filtrando series...");
+            
+            // Log para debug del filtro
+            const seriesItems = data.filter(item => item && typeof item === 'object' && item['Categoría'] === 'Series');
+            console.log(`SeriesCarousel: Total items con Categoría='Series': ${seriesItems.length}`);
+            
+            const seriesWithEmptyEpisode = seriesItems.filter(item => !item['Título episodio'] || item['Título episodio'].trim() === '');
+            console.log(`SeriesCarousel: Series con título episodio vacío: ${seriesWithEmptyEpisode.length}`);
             
             this.seriesData = data
                 .filter(item => item && typeof item === 'object' && 
@@ -424,7 +449,7 @@ class SeriesCarousel {
                     description: item['Synopsis'] || 'Descripción no disponible',
                     posterUrl: item['Portada'] || '',
                     postersUrl: item['Carteles'] || '',
-                    backgroundUrl: item['Fondo'] || '',
+                    backgroundUrl: item['Portada'] || '',
                     year: item['Año'] ? item['Año'].toString() : '',
                     duration: item['Duración'] || '',
                     genre: item['Géneros'] || '',
@@ -440,6 +465,8 @@ class SeriesCarousel {
                     subtitleList: item['Subtítulos'] ? item['Subtítulos'].split(',') : []
                 }));
 
+            console.log(`SeriesCarousel: Se encontraron ${this.seriesData.length} series`);
+            
             if (this.seriesData.length === 0) {
                 this.seriesData = [
                     {
@@ -638,6 +665,8 @@ class SeriesCarousel {
     }
 
     updateProgressBar() {
+        if (!this.progressBar) return;
+        
         if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
             const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
             this.progressBar.style.width = `${scrollPercentage}%`;
