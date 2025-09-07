@@ -350,24 +350,29 @@ class Carousel {
         console.log(`Carousel: Scroll amount: ${actualScrollAmount}px`);
         
         if (direction === 'prev') {
-            // Calcular la posición anterior alineada a items
+            // Calcular la posición anterior
             const currentScroll = this.wrapper.scrollLeft;
-            const targetScroll = Math.max(0, currentScroll - actualScrollAmount);
             
-            // Alinear a los límites de los items
-            const alignedScroll = Math.floor(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
+            // Calcular cuántos items retroceder
+            const currentItemIndex = Math.round(currentScroll / (itemWidth + gap));
+            const prevItemIndex = Math.max(0, currentItemIndex - itemsPerViewport);
+            const targetScroll = prevItemIndex * (itemWidth + gap);
             
-            console.log(`Carousel: Prev - Current: ${currentScroll}, Target: ${targetScroll}, Aligned: ${alignedScroll}`);
+            console.log(`Carousel: Prev - Current: ${currentScroll}, Current item: ${currentItemIndex}, Prev item: ${prevItemIndex}, Target: ${targetScroll}`);
             
             this.wrapper.scrollTo({
-                left: alignedScroll,
+                left: targetScroll,
                 behavior: 'smooth'
             });
         } else {
             // Calcular la posición siguiente
             const currentScroll = this.wrapper.scrollLeft;
             const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
-            const targetScroll = currentScroll + actualScrollAmount;
+            
+            // Calcular cuántos items avanzar
+            const currentItemIndex = Math.round(currentScroll / (itemWidth + gap));
+            const nextItemIndex = currentItemIndex + itemsPerViewport;
+            const targetScroll = nextItemIndex * (itemWidth + gap);
             
             // Si estamos cerca del final, ir al final para mostrar el último item completo
             if (targetScroll >= maxScroll - (itemWidth + gap)) {
@@ -377,13 +382,10 @@ class Carousel {
                     behavior: 'smooth'
                 });
             } else {
-                // Alinear a los límites de los items
-                const alignedScroll = Math.floor(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
-                
-                console.log(`Carousel: Next - Current: ${currentScroll}, Target: ${targetScroll}, Aligned: ${alignedScroll}`);
+                console.log(`Carousel: Next - Current: ${currentScroll}, Current item: ${currentItemIndex}, Next item: ${nextItemIndex}, Target: ${targetScroll}`);
                 
                 this.wrapper.scrollTo({
-                    left: alignedScroll,
+                    left: targetScroll,
                     behavior: 'smooth'
                 });
             }
@@ -860,24 +862,29 @@ class SeriesCarousel {
         console.log(`Carousel: Scroll amount: ${actualScrollAmount}px`);
         
         if (direction === 'prev') {
-            // Calcular la posición anterior alineada a items
+            // Calcular la posición anterior
             const currentScroll = this.wrapper.scrollLeft;
-            const targetScroll = Math.max(0, currentScroll - actualScrollAmount);
             
-            // Alinear a los límites de los items
-            const alignedScroll = Math.floor(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
+            // Calcular cuántos items retroceder
+            const currentItemIndex = Math.round(currentScroll / (itemWidth + gap));
+            const prevItemIndex = Math.max(0, currentItemIndex - itemsPerViewport);
+            const targetScroll = prevItemIndex * (itemWidth + gap);
             
-            console.log(`Carousel: Prev - Current: ${currentScroll}, Target: ${targetScroll}, Aligned: ${alignedScroll}`);
+            console.log(`Carousel: Prev - Current: ${currentScroll}, Current item: ${currentItemIndex}, Prev item: ${prevItemIndex}, Target: ${targetScroll}`);
             
             this.wrapper.scrollTo({
-                left: alignedScroll,
+                left: targetScroll,
                 behavior: 'smooth'
             });
         } else {
             // Calcular la posición siguiente
             const currentScroll = this.wrapper.scrollLeft;
             const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
-            const targetScroll = currentScroll + actualScrollAmount;
+            
+            // Calcular cuántos items avanzar
+            const currentItemIndex = Math.round(currentScroll / (itemWidth + gap));
+            const nextItemIndex = currentItemIndex + itemsPerViewport;
+            const targetScroll = nextItemIndex * (itemWidth + gap);
             
             // Si estamos cerca del final, ir al final para mostrar el último item completo
             if (targetScroll >= maxScroll - (itemWidth + gap)) {
@@ -887,13 +894,10 @@ class SeriesCarousel {
                     behavior: 'smooth'
                 });
             } else {
-                // Alinear a los límites de los items
-                const alignedScroll = Math.floor(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
-                
-                console.log(`Carousel: Next - Current: ${currentScroll}, Target: ${targetScroll}, Aligned: ${alignedScroll}`);
+                console.log(`Carousel: Next - Current: ${currentScroll}, Current item: ${currentItemIndex}, Next item: ${nextItemIndex}, Target: ${targetScroll}`);
                 
                 this.wrapper.scrollTo({
-                    left: alignedScroll,
+                    left: targetScroll,
                     behavior: 'smooth'
                 });
             }
