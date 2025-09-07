@@ -318,7 +318,7 @@ class Carousel {
             });
 
             this.wrapper.appendChild(div);
-            console.log(`SeriesCarousel: Elemento ${i} añadido al DOM`);
+            console.log(`Carousel: Elemento ${i} añadido al DOM`);
         }
 
         this.index = end;
@@ -328,21 +328,42 @@ class Carousel {
     scrollToPrevPage() {
         const itemWidth = 194;
         const gap = 4;
-        const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
-        this.wrapper.scrollBy({
-            left: -scrollAmount,
+        const currentScroll = this.wrapper.scrollLeft;
+        const itemSize = itemWidth + gap;
+        
+        // Calcular la posición exacta para alinear elementos a la izquierda
+        const targetIndex = Math.max(0, this.index - this.itemsPerPage);
+        const targetScroll = targetIndex * itemSize;
+        
+        console.log(`Carousel: scrollToPrevPage - currentIndex: ${this.index}, targetIndex: ${targetIndex}, currentScroll: ${currentScroll}, targetScroll: ${targetScroll}`);
+        
+        this.wrapper.scrollTo({
+            left: targetScroll,
             behavior: 'smooth'
         });
+        
+        this.index = targetIndex;
     }
 
     scrollToNextPage() {
         const itemWidth = 194;
         const gap = 4;
-        const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
-        this.wrapper.scrollBy({
-            left: scrollAmount,
+        const currentScroll = this.wrapper.scrollLeft;
+        const itemSize = itemWidth + gap;
+        const maxIndex = Math.max(0, this.moviesData.length - this.itemsPerPage);
+        
+        // Calcular la posición exacta para alinear elementos a la izquierda
+        const targetIndex = Math.min(maxIndex, this.index + this.itemsPerPage);
+        const targetScroll = targetIndex * itemSize;
+        
+        console.log(`Carousel: scrollToNextPage - currentIndex: ${this.index}, targetIndex: ${targetIndex}, currentScroll: ${currentScroll}, targetScroll: ${targetScroll}, maxIndex: ${maxIndex}`);
+        
+        this.wrapper.scrollTo({
+            left: targetScroll,
             behavior: 'smooth'
         });
+        
+        this.index = targetIndex;
     }
 
     updateProgressBar() {
@@ -805,21 +826,42 @@ class SeriesCarousel {
     scrollToPrevPage() {
         const itemWidth = 194;
         const gap = 4;
-        const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
-        this.wrapper.scrollBy({
-            left: -scrollAmount,
+        const currentScroll = this.wrapper.scrollLeft;
+        const itemSize = itemWidth + gap;
+        
+        // Calcular la posición exacta para alinear elementos a la izquierda
+        const targetIndex = Math.max(0, this.index - this.itemsPerPage);
+        const targetScroll = targetIndex * itemSize;
+        
+        console.log(`SeriesCarousel: scrollToPrevPage - currentIndex: ${this.index}, targetIndex: ${targetIndex}, currentScroll: ${currentScroll}, targetScroll: ${targetScroll}`);
+        
+        this.wrapper.scrollTo({
+            left: targetScroll,
             behavior: 'smooth'
         });
+        
+        this.index = targetIndex;
     }
 
     scrollToNextPage() {
         const itemWidth = 194;
         const gap = 4;
-        const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
-        this.wrapper.scrollBy({
-            left: scrollAmount,
+        const currentScroll = this.wrapper.scrollLeft;
+        const itemSize = itemWidth + gap;
+        const maxIndex = Math.max(0, this.seriesData.length - this.itemsPerPage);
+        
+        // Calcular la posición exacta para alinear elementos a la izquierda
+        const targetIndex = Math.min(maxIndex, this.index + this.itemsPerPage);
+        const targetScroll = targetIndex * itemSize;
+        
+        console.log(`SeriesCarousel: scrollToNextPage - currentIndex: ${this.index}, targetIndex: ${targetIndex}, currentScroll: ${currentScroll}, targetScroll: ${targetScroll}, maxIndex: ${maxIndex}`);
+        
+        this.wrapper.scrollTo({
+            left: targetScroll,
             behavior: 'smooth'
         });
+        
+        this.index = targetIndex;
     }
 
     updateProgressBar() {

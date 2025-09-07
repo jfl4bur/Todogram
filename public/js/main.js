@@ -40,9 +40,9 @@ document.addEventListener('DOMContentLoaded', function () {
         window.carousel = carousel; // Exponer globalmente
         
         // Inicializar el carrusel de series inmediatamente
-        console.log("Main: Inicializando carrusel de series...");
-        const seriesCarousel = new SeriesCarousel();
-        window.seriesCarousel = seriesCarousel;
+            console.log("Main: Inicializando carrusel de series...");
+            const seriesCarousel = new SeriesCarousel();
+            window.seriesCarousel = seriesCarousel;
         
         // Verificar que el carrusel de series se inicializó correctamente
         setTimeout(() => {
