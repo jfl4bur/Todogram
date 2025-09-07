@@ -335,54 +335,28 @@ class Carousel {
 
     scrollToPage(direction) {
         if (!this.wrapper) return;
-        
         const itemWidth = 194;
         const gap = 4;
         const containerWidth = this.wrapper.clientWidth;
-        
-        // Calcular cuántos items caben en la pantalla
         const itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
         const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
-        
-        console.log(`Carousel: Container width: ${containerWidth}px`);
-        console.log(`Carousel: Item width: ${itemWidth}px, Gap: ${gap}px`);
-        console.log(`Carousel: Items que caben en pantalla: ${itemsPerViewport}`);
-        console.log(`Carousel: Scroll amount: ${actualScrollAmount}px`);
-        
+
+        let currentScroll = this.wrapper.scrollLeft;
+        let targetScroll;
         if (direction === 'prev') {
-            // Calcular la posición anterior
-            const currentScroll = this.wrapper.scrollLeft;
-            const targetScroll = Math.max(0, currentScroll - actualScrollAmount);
-            
-            // Alinear a los límites de los items para que el de la izquierda esté completo
-            const alignedScroll = Math.ceil(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
-            
-            console.log(`Carousel: Prev - Current: ${currentScroll}, Target: ${targetScroll}, Aligned: ${alignedScroll}`);
-            
-            this.wrapper.scrollTo({
-                left: alignedScroll,
-                behavior: 'auto'
-            });
+            targetScroll = Math.max(0, currentScroll - actualScrollAmount);
         } else {
-            // Calcular la posición siguiente
-            const currentScroll = this.wrapper.scrollLeft;
-            const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
-            
-            // Calcular cuántos items completos caben en la pantalla
-            // Usar un valor que funcione bien para la mayoría de pantallas
-            const itemsPerViewport = Math.max(4, Math.floor(containerWidth / (itemWidth + gap)));
-            
-            // Calcular la posición exacta del siguiente scroll
-            // Usar el ancho total de cada item incluyendo el gap
-            const targetScroll = currentScroll + (itemsPerViewport * (itemWidth + gap));
-            
-            console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}`);
-            
-            this.wrapper.scrollTo({
-                left: targetScroll,
-                behavior: 'auto'
-            });
+            targetScroll = currentScroll + actualScrollAmount;
         }
+        // Alinear el scroll para que el item de la izquierda quede completo
+        const alignedScroll = Math.round(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
+        // Evitar sobrepasar los límites
+        const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
+        const finalScroll = Math.max(0, Math.min(alignedScroll, maxScroll));
+        this.wrapper.scrollTo({
+            left: finalScroll,
+            behavior: 'auto'
+        });
     }
 
     // Método para contar elementos realmente visibles
