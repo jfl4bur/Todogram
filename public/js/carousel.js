@@ -504,6 +504,12 @@ class SeriesCarousel {
                     item['Categoría'] === 'Series' && 
                     (!item['Título episodio'] || item['Título episodio'].trim() === '')) {
                     
+                    console.log(`SeriesCarousel: Procesando serie "${item['Título']}":`, {
+                        portada: item['Portada'],
+                        carteles: item['Carteles'],
+                        fondo: item['Fondo']
+                    });
+                    
                     this.seriesData.push({
                         id: `series_${seriesIndex}`,
                         title: item['Título'] || 'Sin título',
@@ -532,6 +538,7 @@ class SeriesCarousel {
             console.log(`SeriesCarousel: Se encontraron ${this.seriesData.length} series`);
             
             if (this.seriesData.length === 0) {
+                console.log("SeriesCarousel: No se encontraron series en los datos. Usando datos de ejemplo.");
                 this.seriesData = [
                     {
                         id: "series_12345",
@@ -630,8 +637,15 @@ class SeriesCarousel {
             if (item.ageRating) metaInfo.push(`<span class="age-rating">${item.ageRating}</span>`);
 
             let posterUrl = item.posterUrl;
+            console.log(`SeriesCarousel: Procesando imagen para "${item.title}":`, {
+                originalUrl: item.posterUrl,
+                hasUrl: !!posterUrl,
+                urlType: posterUrl ? (posterUrl.includes('cloudinary') ? 'cloudinary' : 'notion') : 'none'
+            });
+            
             if (!posterUrl) {
                 posterUrl = 'https://via.placeholder.com/194x271';
+                console.log(`SeriesCarousel: Usando placeholder para "${item.title}"`);
             }
 
             div.innerHTML = `
