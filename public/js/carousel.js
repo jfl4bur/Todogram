@@ -382,10 +382,13 @@ class Carousel {
                     behavior: 'smooth'
                 });
             } else {
-                console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}`);
+                // Alinear a los límites de los items para que el de la izquierda esté completo
+                const alignedScroll = Math.floor(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
+                
+                console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}, Aligned: ${alignedScroll}`);
                 
                 this.wrapper.scrollTo({
-                    left: targetScroll,
+                    left: alignedScroll,
                     behavior: 'smooth'
                 });
             }
@@ -894,10 +897,13 @@ class SeriesCarousel {
                     behavior: 'smooth'
                 });
             } else {
-                console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}`);
+                // Alinear a los límites de los items para que el de la izquierda esté completo
+                const alignedScroll = Math.floor(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
+                
+                console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}, Aligned: ${alignedScroll}`);
                 
                 this.wrapper.scrollTo({
-                    left: targetScroll,
+                    left: alignedScroll,
                     behavior: 'smooth'
                 });
             }
