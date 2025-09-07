@@ -31,6 +31,11 @@ document.addEventListener('DOMContentLoaded', function () {
             lastResize: 0
         };
         
+        // Sistema de notificación para datos cargados
+        window.dataLoadedCallbacks = [];
+        window.isDataLoaded = false;
+        window.urlProcessed = false; // Evitar procesar URL múltiples veces
+        
         const carousel = new Carousel();
         
         // Inicializar el carrusel de series inmediatamente
@@ -88,16 +93,41 @@ document.addEventListener('DOMContentLoaded', function () {
         // Función para procesar parámetros de URL
         function processUrlParams(retryCount = 0, maxRetries = 10) {
             console.log('Procesando URL:', window.location.hash);
+            
+            // Evitar procesar múltiples veces
+            if (window.urlProcessed) {
+                console.log('URL ya procesada, saltando...');
+                return;
+            }
+            
             const urlParams = detailsModal.getItemIdFromUrl();
             if (urlParams) {
                 console.log('Parámetros de URL encontrados:', urlParams);
+                
+                // Verificar que los datos estén cargados
+                if (!window.isDataLoaded) {
+                    console.log('Datos aún no cargados, esperando...');
+                    if (retryCount < maxRetries) {
+                        setTimeout(() => processUrlParams(retryCount + 1, maxRetries), 200);
+                    }
+                    return;
+                }
+                
+                // Verificar que los carruseles tengan datos
+                if (!carousel.moviesData || carousel.moviesData.length === 0) {
+                    console.log('Datos del carrusel de películas no disponibles, esperando...');
+                    if (retryCount < maxRetries) {
+                        setTimeout(() => processUrlParams(retryCount + 1, maxRetries), 200);
+                    }
+                    return;
+                }
                 
                 // Buscar en el carousel de películas primero
                 let item = carousel.moviesData.find(movie => movie.id === urlParams.id);
                 let itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
                 
                 // Si no se encuentra en el carousel de películas, buscar en el carrusel de series
-                if (!item && window.seriesCarousel && window.seriesCarousel.seriesData) {
+                if (!item && window.seriesCarousel && window.seriesCarousel.seriesData && window.seriesCarousel.seriesData.length > 0) {
                     item = window.seriesCarousel.seriesData.find(series => series.id === urlParams.id);
                     if (item) {
                         itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
@@ -118,6 +148,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 
                 if (item) {
                     console.log('Item encontrado:', item);
+                    window.urlProcessed = true; // Marcar como procesado
                     if (itemElement) {
                         console.log('Elemento DOM encontrado:', itemElement);
                         detailsModal.show(item, itemElement);
@@ -135,18 +166,42 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 } else {
                     console.error('Item no encontrado para id:', urlParams.id);
+                    window.urlProcessed = true; // Marcar como procesado incluso si no se encuentra
                 }
             } else {
                 console.log('No se encontraron parámetros de URL');
             }
         }
 
+        // Función para notificar que los datos están cargados
+        window.notifyDataLoaded = function() {
+            window.isDataLoaded = true;
+            console.log('Main: Datos cargados, ejecutando callbacks...');
+            window.dataLoadedCallbacks.forEach(callback => {
+                try {
+                    callback();
+                } catch (error) {
+                    console.error('Error en callback de datos cargados:', error);
+                }
+            });
+            window.dataLoadedCallbacks = [];
+        };
+        
         // Manejar parámetros de URL al cargar la página
         window.addEventListener('load', function() {
-            // Usar requestAnimationFrame para mejor rendimiento
-            requestAnimationFrame(() => {
-                processUrlParams();
-            });
+            // Si los datos ya están cargados, procesar inmediatamente
+            if (window.isDataLoaded) {
+                requestAnimationFrame(() => {
+                    processUrlParams();
+                });
+            } else {
+                // Si no, agregar a la cola de callbacks
+                window.dataLoadedCallbacks.push(() => {
+                    requestAnimationFrame(() => {
+                        processUrlParams();
+                    });
+                });
+            }
         });
 
         // Manejar cambios en el hash de la URL
@@ -155,6 +210,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const newHash = window.location.hash;
             if (newHash !== lastHash) {
                 lastHash = newHash;
+                window.urlProcessed = false; // Resetear para permitir procesar nuevo hash
                 console.log('Hash cambió a:', newHash);
                 // Usar requestAnimationFrame para mejor rendimiento
                 requestAnimationFrame(() => {

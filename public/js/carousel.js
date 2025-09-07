@@ -149,6 +149,11 @@ class Carousel {
 
             this.showCarousel();
             this.renderItems();
+            
+            // Notificar que los datos de películas están cargados
+            if (window.notifyDataLoaded) {
+                window.notifyDataLoaded();
+            }
         } catch (error) {
             console.error('Error cargando datos:', error);
             this.moviesData = [
@@ -518,6 +523,11 @@ class SeriesCarousel {
 
             this.showCarousel();
             this.renderItems();
+            
+            // Notificar que los datos de series están cargados
+            if (window.notifyDataLoaded) {
+                window.notifyDataLoaded();
+            }
         } catch (error) {
             console.error('Error cargando datos de series:', error);
             this.seriesData = [
@@ -545,6 +555,11 @@ class SeriesCarousel {
             ];
             this.showCarousel();
             this.renderItems();
+            
+            // Notificar que los datos de series están cargados (fallback)
+            if (window.notifyDataLoaded) {
+                window.notifyDataLoaded();
+            }
         }
     }
 

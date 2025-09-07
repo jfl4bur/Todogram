@@ -1345,6 +1345,11 @@
             // Renderizar
             renderSlider(movies);
             
+            // Notificar que los datos del slider están cargados
+            if (window.notifyDataLoaded) {
+                window.notifyDataLoaded();
+            }
+            
                     // Agregar listener de resize mejorado
         window.addEventListener('resize', handleResize, { passive: true });
         
