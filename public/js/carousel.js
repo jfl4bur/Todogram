@@ -504,13 +504,9 @@ class SeriesCarousel {
                     item['Categoría'] === 'Series' && 
                     (!item['Título episodio'] || item['Título episodio'].trim() === '')) {
                     
-                    console.log(`SeriesCarousel: Procesando serie "${item['Título']}":`, {
-                        portada: item['Portada'],
-                        carteles: item['Carteles'],
-                        fondo: item['Fondo']
-                    });
+                    console.log(`SeriesCarousel: Serie encontrada sin episodio específico: "${item['Título']}"`);
                     
-                    this.seriesData.push({
+                    const seriesItem = {
                         id: `series_${seriesIndex}`,
                         title: item['Título'] || 'Sin título',
                         description: item['Synopsis'] || 'Descripción no disponible',
@@ -530,15 +526,39 @@ class SeriesCarousel {
                         subtitlesCount: item['Subtítulos'] ? item['Subtítulos'].split(',').length : 0,
                         audioList: item['Audios'] ? item['Audios'].split(',') : [],
                         subtitleList: item['Subtítulos'] ? item['Subtítulos'].split(',') : []
+                    };
+                    
+                    console.log(`SeriesCarousel: Procesando serie "${seriesItem.title}"`, {
+                        originalPortada: item['Portada'],
+                        originalCarteles: item['Carteles'],
+                        finalPosterUrl: seriesItem.posterUrl,
+                        finalBackgroundUrl: seriesItem.backgroundUrl,
+                        hasPosterUrl: !!seriesItem.posterUrl,
+                        hasBackgroundUrl: !!seriesItem.backgroundUrl
                     });
+                    
+                    this.seriesData.push(seriesItem);
                     seriesIndex++;
                 }
             }
 
             console.log(`SeriesCarousel: Se encontraron ${this.seriesData.length} series`);
             
+            // Log adicional para debugging
             if (this.seriesData.length === 0) {
-                console.log("SeriesCarousel: No se encontraron series en los datos. Usando datos de ejemplo.");
+                console.log("SeriesCarousel: No se encontraron series. Verificando datos...");
+                const allSeries = data.filter(item => item && typeof item === 'object' && item['Categoría'] === 'Series');
+                console.log(`SeriesCarousel: Total de elementos con categoría 'Series': ${allSeries.length}`);
+                
+                if (allSeries.length > 0) {
+                    console.log("SeriesCarousel: Primeras 3 series encontradas:");
+                    allSeries.slice(0, 3).forEach((series, index) => {
+                        console.log(`  ${index + 1}. "${series['Título']}" - Episodio: "${series['Título episodio'] || 'N/A'}"`);
+                    });
+                }
+            }
+            
+            if (this.seriesData.length === 0) {
                 this.seriesData = [
                     {
                         id: "series_12345",
@@ -629,6 +649,13 @@ class SeriesCarousel {
             div.className = "custom-carousel-item";
             div.dataset.itemId = item.id;
 
+            console.log(`SeriesCarousel: Procesando item ${i}: "${item.title}"`, {
+                posterUrl: item.posterUrl,
+                backgroundUrl: item.backgroundUrl,
+                hasPosterUrl: !!item.posterUrl,
+                hasBackgroundUrl: !!item.backgroundUrl
+            });
+
             const metaInfo = [];
             if (item.year) metaInfo.push(`<span>${item.year}</span>`);
             if (item.duration) metaInfo.push(`<span>${item.duration}</span>`);
@@ -637,15 +664,11 @@ class SeriesCarousel {
             if (item.ageRating) metaInfo.push(`<span class="age-rating">${item.ageRating}</span>`);
 
             let posterUrl = item.posterUrl;
-            console.log(`SeriesCarousel: Procesando imagen para "${item.title}":`, {
-                originalUrl: item.posterUrl,
-                hasUrl: !!posterUrl,
-                urlType: posterUrl ? (posterUrl.includes('cloudinary') ? 'cloudinary' : 'notion') : 'none'
-            });
-            
             if (!posterUrl) {
                 posterUrl = 'https://via.placeholder.com/194x271';
                 console.log(`SeriesCarousel: Usando placeholder para "${item.title}"`);
+            } else {
+                console.log(`SeriesCarousel: Usando imagen real para "${item.title}": ${posterUrl}`);
             }
 
             div.innerHTML = `
