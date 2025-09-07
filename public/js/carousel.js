@@ -79,6 +79,15 @@ class Carousel {
             this.scrollToNextPage();
         });
         this.wrapper.addEventListener('scroll', () => this.handleScroll());
+        
+        // Alineación automática cuando el usuario termina de hacer scroll manual
+        let scrollTimeout;
+        this.wrapper.addEventListener('scroll', () => {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                this.alignScrollOnEnd();
+            }, 150); // Esperar 150ms después del último scroll
+        });
     }
 
     async loadMoviesData() {
@@ -305,23 +314,53 @@ class Carousel {
     }
 
     scrollToPrevPage() {
-        const itemWidth = 194;
-        const gap = 4;
-        const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
-        this.wrapper.scrollBy({
-            left: -scrollAmount,
-            behavior: 'smooth'
-        });
+        this.scrollToPage('prev');
     }
 
     scrollToNextPage() {
+        this.scrollToPage('next');
+    }
+
+    scrollToPage(direction) {
+        if (!this.wrapper) return;
+        
         const itemWidth = 194;
         const gap = 4;
-        const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
-        this.wrapper.scrollBy({
-            left: scrollAmount,
-            behavior: 'smooth'
-        });
+        const containerWidth = this.wrapper.clientWidth;
+        
+        // Calcular cuántos elementos caben realmente en el viewport
+        const itemsPerViewport = Math.floor((containerWidth + gap) / (itemWidth + gap));
+        const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
+        
+        console.log(`Carousel: Paginación dinámica - ${itemsPerViewport} elementos por viewport`);
+        console.log(`Carousel: Scroll amount: ${actualScrollAmount}px`);
+        
+        if (direction === 'prev') {
+            // Calcular la posición anterior alineada
+            const currentScroll = this.wrapper.scrollLeft;
+            const targetScroll = Math.max(0, currentScroll - actualScrollAmount);
+            
+            // Asegurar alineación perfecta
+            const alignedScroll = Math.floor(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
+            
+            this.wrapper.scrollTo({
+                left: alignedScroll,
+                behavior: 'smooth'
+            });
+        } else {
+            // Calcular la posición siguiente alineada
+            const currentScroll = this.wrapper.scrollLeft;
+            const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
+            const targetScroll = Math.min(maxScroll, currentScroll + actualScrollAmount);
+            
+            // Asegurar alineación perfecta
+            const alignedScroll = Math.floor(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
+            
+            this.wrapper.scrollTo({
+                left: alignedScroll,
+                behavior: 'smooth'
+            });
+        }
     }
 
     updateProgressBar() {
@@ -339,6 +378,26 @@ class Carousel {
         this.updateProgressBar();
         if (this.wrapper.scrollLeft + this.wrapper.clientWidth >= this.wrapper.scrollWidth - 200) {
             this.renderItems();
+        }
+    }
+
+    // Método para alinear automáticamente el scroll cuando el usuario termina de hacer scroll manual
+    alignScrollOnEnd() {
+        if (!this.wrapper) return;
+        
+        const itemWidth = 194;
+        const gap = 4;
+        const currentScroll = this.wrapper.scrollLeft;
+        
+        // Calcular la posición más cercana alineada
+        const alignedScroll = Math.round(currentScroll / (itemWidth + gap)) * (itemWidth + gap);
+        
+        // Solo alinear si hay una diferencia significativa (más de 10px)
+        if (Math.abs(currentScroll - alignedScroll) > 10) {
+            this.wrapper.scrollTo({
+                left: alignedScroll,
+                behavior: 'smooth'
+            });
         }
     }
 }
@@ -468,6 +527,15 @@ class SeriesCarousel {
         
         if (this.wrapper) {
             this.wrapper.addEventListener('scroll', () => this.handleScroll());
+            
+            // Alineación automática cuando el usuario termina de hacer scroll manual
+            let scrollTimeout;
+            this.wrapper.addEventListener('scroll', () => {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    this.alignScrollOnEnd();
+                }, 150); // Esperar 150ms después del último scroll
+            });
         } else {
             console.error("SeriesCarousel: Wrapper no encontrado para scroll");
         }
@@ -726,23 +794,53 @@ class SeriesCarousel {
     }
 
     scrollToPrevPage() {
-        const itemWidth = 194;
-        const gap = 4;
-        const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
-        this.wrapper.scrollBy({
-            left: -scrollAmount,
-            behavior: 'smooth'
-        });
+        this.scrollToPage('prev');
     }
 
     scrollToNextPage() {
+        this.scrollToPage('next');
+    }
+
+    scrollToPage(direction) {
+        if (!this.wrapper) return;
+        
         const itemWidth = 194;
         const gap = 4;
-        const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
-        this.wrapper.scrollBy({
-            left: scrollAmount,
-            behavior: 'smooth'
-        });
+        const containerWidth = this.wrapper.clientWidth;
+        
+        // Calcular cuántos elementos caben realmente en el viewport
+        const itemsPerViewport = Math.floor((containerWidth + gap) / (itemWidth + gap));
+        const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
+        
+        console.log(`Carousel: Paginación dinámica - ${itemsPerViewport} elementos por viewport`);
+        console.log(`Carousel: Scroll amount: ${actualScrollAmount}px`);
+        
+        if (direction === 'prev') {
+            // Calcular la posición anterior alineada
+            const currentScroll = this.wrapper.scrollLeft;
+            const targetScroll = Math.max(0, currentScroll - actualScrollAmount);
+            
+            // Asegurar alineación perfecta
+            const alignedScroll = Math.floor(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
+            
+            this.wrapper.scrollTo({
+                left: alignedScroll,
+                behavior: 'smooth'
+            });
+        } else {
+            // Calcular la posición siguiente alineada
+            const currentScroll = this.wrapper.scrollLeft;
+            const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
+            const targetScroll = Math.min(maxScroll, currentScroll + actualScrollAmount);
+            
+            // Asegurar alineación perfecta
+            const alignedScroll = Math.floor(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
+            
+            this.wrapper.scrollTo({
+                left: alignedScroll,
+                behavior: 'smooth'
+            });
+        }
     }
 
     updateProgressBar() {
@@ -760,6 +858,26 @@ class SeriesCarousel {
         this.updateProgressBar();
         if (this.wrapper.scrollLeft + this.wrapper.clientWidth >= this.wrapper.scrollWidth - 200) {
             this.renderItems();
+        }
+    }
+
+    // Método para alinear automáticamente el scroll cuando el usuario termina de hacer scroll manual
+    alignScrollOnEnd() {
+        if (!this.wrapper) return;
+        
+        const itemWidth = 194;
+        const gap = 4;
+        const currentScroll = this.wrapper.scrollLeft;
+        
+        // Calcular la posición más cercana alineada
+        const alignedScroll = Math.round(currentScroll / (itemWidth + gap)) * (itemWidth + gap);
+        
+        // Solo alinear si hay una diferencia significativa (más de 10px)
+        if (Math.abs(currentScroll - alignedScroll) > 10) {
+            this.wrapper.scrollTo({
+                left: alignedScroll,
+                behavior: 'smooth'
+            });
         }
     }
 }
