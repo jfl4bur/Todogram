@@ -200,7 +200,14 @@ class Carousel {
     }
 
     async renderItems() {
-        const end = Math.min(this.index + this.step, this.moviesData.length);
+        // Calcular dinámicamente cuántos items caben en la pantalla
+        const containerWidth = this.wrapper.clientWidth;
+        const itemWidth = 194;
+        const gap = 4;
+        const itemsThatFit = containerWidth > 0 ? Math.floor(containerWidth / (itemWidth + gap)) : 5;
+        const step = Math.max(1, itemsThatFit);
+        
+        const end = Math.min(this.index + step, this.moviesData.length);
         
         for (let i = this.index; i < end; i++) {
             const item = this.moviesData[i];
@@ -678,9 +685,16 @@ class SeriesCarousel {
         console.log("SeriesCarousel: renderItems llamado");
         console.log("SeriesCarousel: seriesData.length:", this.seriesData.length);
         console.log("SeriesCarousel: index:", this.index);
-        console.log("SeriesCarousel: step:", this.step);
         
-        const end = Math.min(this.index + this.step, this.seriesData.length);
+        // Calcular dinámicamente cuántos items caben en la pantalla
+        const containerWidth = this.wrapper.clientWidth;
+        const itemWidth = 194;
+        const gap = 4;
+        const itemsThatFit = containerWidth > 0 ? Math.floor(containerWidth / (itemWidth + gap)) : 5;
+        const step = Math.max(1, itemsThatFit);
+        console.log("SeriesCarousel: step calculado dinámicamente:", step);
+        
+        const end = Math.min(this.index + step, this.seriesData.length);
         console.log("SeriesCarousel: end:", end);
         
         for (let i = this.index; i < end; i++) {
