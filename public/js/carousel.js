@@ -1,3 +1,20 @@
+// Función común para calcular items por página y step dinámicamente
+function calculateCarouselDimensions(wrapper, carouselName) {
+    const itemWidth = 194;
+    const gap = 4;
+    
+    const containerWidth = wrapper.clientWidth;
+    if (containerWidth > 0) {
+        const itemsPerPage = Math.max(1, Math.floor(containerWidth / (itemWidth + gap)));
+        // Calcular step dinámicamente: mostrar 2-3 páginas de elementos
+        const step = Math.max(itemsPerPage * 2, 10);
+        console.log(`${carouselName}: itemsPerPage=${itemsPerPage}, step=${step}, containerWidth=${containerWidth}`);
+        return { itemsPerPage, step };
+    } else {
+        return { itemsPerPage: 5, step: 15 };
+    }
+}
+
 class Carousel {
     constructor() {
         this.wrapper = document.getElementById('carousel-wrapper');
@@ -9,7 +26,7 @@ class Carousel {
         this.carouselContainer = document.querySelector('.carousel-container');
         this.itemsPerPage = 5;
         this.index = 0;
-        this.step = 15; // Renderizar solo 15 elementos inicialmente
+        this.step = 15; // Se calculará dinámicamente basado en itemsPerPage
         this.moreAppended = false;
         this.moviesData = [];
         this.hoverTimeouts = {};
@@ -355,7 +372,7 @@ class SeriesCarousel {
         this.carouselContainer = document.querySelector('#series-carousel-wrapper').parentElement;
         this.itemsPerPage = 5;
         this.index = 0;
-        this.step = 10; // Renderizar solo 10 elementos inicialmente
+        this.step = 10; // Se calculará dinámicamente basado en itemsPerPage
         this.moreAppended = false;
         this.seriesData = [];
         this.hoverTimeouts = {};
