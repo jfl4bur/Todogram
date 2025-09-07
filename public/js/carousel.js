@@ -634,6 +634,20 @@ class SeriesCarousel {
         }
     }
 
+    // Función para manejar URLs expiradas
+    handleImageError(img, itemTitle, isBackground = false) {
+        console.log(`SeriesCarousel: Imagen ${isBackground ? 'de fondo' : ''} fallida para "${itemTitle}", usando placeholder`);
+        const placeholderUrl = `https://via.placeholder.com/194x271/333/fff?text=${encodeURIComponent(itemTitle)}`;
+        img.src = placeholderUrl;
+        img.style.opacity = '1';
+        
+        // Ocultar loader si existe
+        const loader = img.parentElement.previousElementSibling;
+        if (loader && loader.classList.contains('loader')) {
+            loader.style.display = 'none';
+        }
+    }
+
     async renderItems() {
         console.log("SeriesCarousel: renderItems llamado");
         console.log("SeriesCarousel: seriesData.length:", this.seriesData.length);
@@ -669,6 +683,11 @@ class SeriesCarousel {
                 console.log(`SeriesCarousel: Usando placeholder para "${item.title}"`);
             } else {
                 console.log(`SeriesCarousel: Usando imagen real para "${item.title}": ${posterUrl}`);
+                
+                // Verificar si es una URL de AWS S3 que puede expirar
+                if (posterUrl.includes('prod-files-secure.s3.us-west-2.amazonaws.com')) {
+                    console.log(`SeriesCarousel: URL de AWS S3 detectada para "${item.title}" - puede expirar`);
+                }
             }
 
             div.innerHTML = `
