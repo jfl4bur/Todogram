@@ -7,9 +7,9 @@ class Carousel {
         this.carouselPrev = document.getElementById('carousel-prev');
         this.carouselNext = document.getElementById('carousel-next');
         this.carouselContainer = document.querySelector('.carousel-container');
-        this.itemsPerPage = 8; // Valor por defecto más alto
+        this.itemsPerPage = 5;
         this.index = 0;
-        this.step = 16; // Valor por defecto más alto
+        this.step = 15; // Renderizar solo 15 elementos inicialmente
         this.moreAppended = false;
         this.moviesData = [];
         this.hoverTimeouts = {};
@@ -39,16 +39,13 @@ class Carousel {
     init() {
         this.setupResizeObserver();
         this.setupEventListeners();
-        // Calcular items por página dinámicamente
-        this.calculateItemsPerPage();
         this.loadMoviesData();
     }
 
     setupResizeObserver() {
         if (!this.wrapper) {
             console.error('wrapper no definido en setupResizeObserver');
-            this.itemsPerPage = 8;
-            this.step = 16;
+            this.itemsPerPage = 5;
             return;
         }
 
@@ -69,28 +66,6 @@ class Carousel {
             calculate();
         });
         resizeObserver.observe(this.wrapper);
-    }
-
-    calculateItemsPerPage() {
-        if (!this.wrapper) {
-            this.itemsPerPage = 8;
-            this.step = 16;
-            return;
-        }
-
-        const itemWidth = 194;
-        const gap = 4;
-        const containerWidth = this.wrapper.clientWidth;
-        
-        // Calcular cuántos items caben en el viewport
-        this.itemsPerPage = Math.max(1, Math.floor((containerWidth + gap) / (itemWidth + gap)));
-        
-        // El step será el doble de itemsPerPage para renderizar más elementos
-        this.step = this.itemsPerPage * 2;
-        
-        console.log('Carousel: Paginación calculada - itemsPerPage:', this.itemsPerPage, 'step:', this.step);
-        
-        return this.itemsPerPage;
     }
 
     setupEventListeners() {
@@ -330,9 +305,6 @@ class Carousel {
     }
 
     scrollToPrevPage() {
-        // Recalcular paginación antes de hacer scroll
-        this.calculateItemsPerPage();
-        
         const itemWidth = 194;
         const gap = 4;
         const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
@@ -343,9 +315,6 @@ class Carousel {
     }
 
     scrollToNextPage() {
-        // Recalcular paginación antes de hacer scroll
-        this.calculateItemsPerPage();
-        
         const itemWidth = 194;
         const gap = 4;
         const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
@@ -384,9 +353,9 @@ class SeriesCarousel {
         this.carouselPrev = document.getElementById('series-carousel-prev');
         this.carouselNext = document.getElementById('series-carousel-next');
         this.carouselContainer = document.querySelector('#series-carousel-wrapper').parentElement;
-        this.itemsPerPage = 8; // Valor por defecto más alto
+        this.itemsPerPage = 5;
         this.index = 0;
-        this.step = 16; // Valor por defecto más alto
+        this.step = 10; // Renderizar solo 10 elementos inicialmente
         this.moreAppended = false;
         this.seriesData = [];
         this.hoverTimeouts = {};
@@ -438,16 +407,13 @@ class SeriesCarousel {
         
         this.setupResizeObserver();
         this.setupEventListeners();
-        // Calcular items por página dinámicamente
-        this.calculateItemsPerPage();
         this.loadSeriesData();
     }
 
     setupResizeObserver() {
         if (!this.wrapper) {
             console.error('wrapper no definido en setupResizeObserver');
-            this.itemsPerPage = 8;
-            this.step = 16;
+            this.itemsPerPage = 5;
             return;
         }
 
@@ -468,28 +434,6 @@ class SeriesCarousel {
             calculate();
         });
         resizeObserver.observe(this.wrapper);
-    }
-
-    calculateItemsPerPage() {
-        if (!this.wrapper) {
-            this.itemsPerPage = 5;
-            this.step = 10;
-            return;
-        }
-
-        const itemWidth = 194;
-        const gap = 4;
-        const containerWidth = this.wrapper.clientWidth;
-        
-        // Calcular cuántos items caben en el viewport
-        this.itemsPerPage = Math.max(1, Math.floor((containerWidth + gap) / (itemWidth + gap)));
-        
-        // El step será el doble de itemsPerPage para renderizar más elementos
-        this.step = this.itemsPerPage * 2;
-        
-        console.log('SeriesCarousel: Paginación calculada - itemsPerPage:', this.itemsPerPage, 'step:', this.step);
-        
-        return this.itemsPerPage;
     }
 
     setupEventListeners() {
@@ -838,9 +782,6 @@ class SeriesCarousel {
     }
 
     scrollToPrevPage() {
-        // Recalcular paginación antes de hacer scroll
-        this.calculateItemsPerPage();
-        
         const itemWidth = 194;
         const gap = 4;
         const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
@@ -851,9 +792,6 @@ class SeriesCarousel {
     }
 
     scrollToNextPage() {
-        // Recalcular paginación antes de hacer scroll
-        this.calculateItemsPerPage();
-        
         const itemWidth = 194;
         const gap = 4;
         const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
