@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function initializeComponents() {
         const carousel = new Carousel();
+        const seriesCarousel = new SeriesCarousel();
         const hoverModal = new HoverModal();
         const detailsModal = new DetailsModal();
         const videoModal = new VideoModal();
@@ -32,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function () {
         // No necesitamos configurarlo aquí ya que se inicializa automáticamente
 
         window.carousel = carousel;
+        window.seriesCarousel = seriesCarousel;
         window.hoverModal = hoverModal;
         window.detailsModal = detailsModal;
         window.videoModal = videoModal;
@@ -88,11 +90,20 @@ document.addEventListener('DOMContentLoaded', function () {
             if (urlParams) {
                 console.log('Parámetros de URL encontrados:', urlParams);
                 
-                // Buscar en el carousel primero
+                // Buscar en el carousel de películas primero
                 let item = carousel.moviesData.find(movie => movie.id === urlParams.id);
                 let itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
                 
-                // Si no se encuentra en el carousel, buscar en el slider independiente
+                // Si no se encuentra en el carousel de películas, buscar en el carrusel de series
+                if (!item && window.seriesCarousel) {
+                    item = window.seriesCarousel.seriesData.find(series => series.id === urlParams.id);
+                    if (item) {
+                        itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
+                        console.log('Serie encontrada en carrusel de series:', item);
+                    }
+                }
+                
+                // Si no se encuentra en ningún carrusel, buscar en el slider independiente
                 if (!item && window.sliderIndependent) {
                     const sliderData = window.sliderIndependent.getSlidesData();
                     item = sliderData.find(movie => movie.id === urlParams.id);
