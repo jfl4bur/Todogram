@@ -39,9 +39,21 @@ document.addEventListener('DOMContentLoaded', function () {
         const carousel = new Carousel();
         
         // Inicializar el carrusel de series inmediatamente
-        console.log("Main: Inicializando carrusel de series...");
-        const seriesCarousel = new SeriesCarousel();
-        window.seriesCarousel = seriesCarousel;
+            console.log("Main: Inicializando carrusel de series...");
+            const seriesCarousel = new SeriesCarousel();
+            window.seriesCarousel = seriesCarousel;
+        
+        // Verificar que el carrusel de series se inicializó correctamente
+        setTimeout(() => {
+            console.log("Main: Verificando carrusel de series después de 1 segundo...");
+            console.log("Main: seriesCarousel:", !!window.seriesCarousel);
+            console.log("Main: Elementos del carrusel de series:", {
+                wrapper: !!window.seriesCarousel?.wrapper,
+                carouselPrev: !!window.seriesCarousel?.carouselPrev,
+                carouselNext: !!window.seriesCarousel?.carouselNext,
+                carouselNav: !!window.seriesCarousel?.carouselNav
+            });
+        }, 1000);
         
         const hoverModal = new HoverModal();
         const detailsModal = new DetailsModal();
@@ -61,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function () {
         window.activeItem = null;
         window.hoverModalItem = null;
 
-        // El slider independiente se inicializa automáticamente
+                // El slider independiente se inicializa automáticamente
         // No necesitamos delays ni polling
 
         // Función para generar URL de compartir
@@ -207,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function () {
             
             return null;
         };
-        
+
         // Manejar parámetros de URL al cargar la página
         window.addEventListener('load', function() {
             // Si los datos ya están cargados, procesar inmediatamente
@@ -219,7 +231,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Si no, agregar a la cola de callbacks
                 window.dataLoadedCallbacks.push(() => {
                     requestAnimationFrame(() => {
-                        processUrlParams();
+                processUrlParams();
                     });
                 });
             }

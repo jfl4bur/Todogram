@@ -345,6 +345,7 @@ class Carousel {
 
 class SeriesCarousel {
     constructor() {
+        console.log("SeriesCarousel: Constructor iniciado");
         this.wrapper = document.getElementById('series-carousel-wrapper');
         this.skeleton = document.getElementById('series-carousel-skeleton');
         this.progressBar = null; // Se configurará después de verificar que wrapper existe
@@ -358,6 +359,15 @@ class SeriesCarousel {
         this.moreAppended = false;
         this.seriesData = [];
         this.hoverTimeouts = {};
+
+        console.log("SeriesCarousel: Elementos encontrados:", {
+            wrapper: !!this.wrapper,
+            skeleton: !!this.skeleton,
+            carouselNav: !!this.carouselNav,
+            carouselPrev: !!this.carouselPrev,
+            carouselNext: !!this.carouselNext,
+            carouselContainer: !!this.carouselContainer
+        });
 
         if (!this.wrapper || !this.skeleton || !this.carouselContainer) {
             console.error("Elementos del carrusel de series no encontrados", {
@@ -427,16 +437,42 @@ class SeriesCarousel {
     }
 
     setupEventListeners() {
+        console.log("SeriesCarousel: Configurando event listeners...");
+        console.log("SeriesCarousel: Elementos encontrados:", {
+            carouselPrev: !!this.carouselPrev,
+            carouselNext: !!this.carouselNext,
+            wrapper: !!this.wrapper
+        });
+        
         window.addEventListener('resize', () => this.calculateItemsPerPage());
-        this.carouselPrev.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.scrollToPrevPage();
-        });
-        this.carouselNext.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.scrollToNextPage();
-        });
-        this.wrapper.addEventListener('scroll', () => this.handleScroll());
+        
+        if (this.carouselPrev) {
+            this.carouselPrev.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log("SeriesCarousel: Botón anterior clickeado");
+                this.scrollToPrevPage();
+            });
+        } else {
+            console.error("SeriesCarousel: Botón anterior no encontrado");
+        }
+        
+        if (this.carouselNext) {
+            this.carouselNext.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log("SeriesCarousel: Botón siguiente clickeado");
+                this.scrollToNextPage();
+            });
+        } else {
+            console.error("SeriesCarousel: Botón siguiente no encontrado");
+        }
+        
+        if (this.wrapper) {
+            this.wrapper.addEventListener('scroll', () => this.handleScroll());
+        } else {
+            console.error("SeriesCarousel: Wrapper no encontrado para scroll");
+        }
+        
+        console.log("SeriesCarousel: Event listeners configurados correctamente");
     }
 
     async loadSeriesData() {
