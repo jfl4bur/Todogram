@@ -200,12 +200,19 @@ class Carousel {
     }
 
     async renderItems() {
-        // Calcular dinámicamente cuántos items caben en la pantalla
+        // Calcular cuántos items caben en la pantalla
         const containerWidth = this.wrapper.clientWidth;
         const itemWidth = 194;
         const gap = 4;
         const itemsThatFit = containerWidth > 0 ? Math.floor(containerWidth / (itemWidth + gap)) : 5;
-        const step = Math.max(1, itemsThatFit);
+        
+        // Renderizar MÁS items de los que caben (para que haya scroll)
+        const step = Math.max(itemsThatFit * 2, 10); // Renderizar el doble + mínimo 10
+        
+        // Si es la primera vez, limpiar el contenedor
+        if (this.index === 0) {
+            this.wrapper.innerHTML = '';
+        }
         
         const end = Math.min(this.index + step, this.moviesData.length);
         
@@ -686,13 +693,20 @@ class SeriesCarousel {
         console.log("SeriesCarousel: seriesData.length:", this.seriesData.length);
         console.log("SeriesCarousel: index:", this.index);
         
-        // Calcular dinámicamente cuántos items caben en la pantalla
+        // Calcular cuántos items caben en la pantalla
         const containerWidth = this.wrapper.clientWidth;
         const itemWidth = 194;
         const gap = 4;
         const itemsThatFit = containerWidth > 0 ? Math.floor(containerWidth / (itemWidth + gap)) : 5;
-        const step = Math.max(1, itemsThatFit);
-        console.log("SeriesCarousel: step calculado dinámicamente:", step);
+        
+        // Renderizar MÁS items de los que caben (para que haya scroll)
+        const step = Math.max(itemsThatFit * 2, 10); // Renderizar el doble + mínimo 10
+        console.log("SeriesCarousel: items que caben:", itemsThatFit, "step para renderizar:", step);
+        
+        // Si es la primera vez, limpiar el contenedor
+        if (this.index === 0) {
+            this.wrapper.innerHTML = '';
+        }
         
         const end = Math.min(this.index + step, this.seriesData.length);
         console.log("SeriesCarousel: end:", end);
