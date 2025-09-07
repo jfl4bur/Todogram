@@ -355,7 +355,7 @@ class Carousel {
             const targetScroll = Math.max(0, currentScroll - actualScrollAmount);
             
             // Alinear a los límites de los items para que el de la izquierda esté completo
-            const alignedScroll = Math.floor(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
+            const alignedScroll = Math.ceil(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
             
             console.log(`Carousel: Prev - Current: ${currentScroll}, Target: ${targetScroll}, Aligned: ${alignedScroll}`);
             
@@ -377,7 +377,7 @@ class Carousel {
             const targetScroll = currentScroll + (itemsPerViewport * (itemWidth + gap));
             
             // Alinear a los límites de los items para que el de la izquierda esté completo
-            const alignedScroll = Math.floor(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
+            const alignedScroll = Math.ceil(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
             
             console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}, Aligned: ${alignedScroll}`);
             
@@ -863,7 +863,7 @@ class SeriesCarousel {
             const targetScroll = Math.max(0, currentScroll - actualScrollAmount);
             
             // Alinear a los límites de los items para que el de la izquierda esté completo
-            const alignedScroll = Math.floor(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
+            const alignedScroll = Math.ceil(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
             
             console.log(`Carousel: Prev - Current: ${currentScroll}, Target: ${targetScroll}, Aligned: ${alignedScroll}`);
             
@@ -885,7 +885,7 @@ class SeriesCarousel {
             const targetScroll = currentScroll + (itemsPerViewport * (itemWidth + gap));
             
             // Alinear a los límites de los items para que el de la izquierda esté completo
-            const alignedScroll = Math.floor(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
+            const alignedScroll = Math.ceil(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
             
             console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}, Aligned: ${alignedScroll}`);
             
