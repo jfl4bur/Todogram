@@ -343,13 +343,14 @@ class Carousel {
 
         let currentScroll = this.wrapper.scrollLeft;
         let targetScroll;
+        let alignedScroll;
         if (direction === 'prev') {
             targetScroll = Math.max(0, currentScroll - actualScrollAmount);
+            alignedScroll = Math.ceil(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
         } else {
             targetScroll = currentScroll + actualScrollAmount;
+            alignedScroll = Math.floor(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
         }
-        // Alinear el scroll para que el item de la izquierda quede completo
-        const alignedScroll = Math.round(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
         // Evitar sobrepasar los límites
         const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
         const finalScroll = Math.max(0, Math.min(alignedScroll, maxScroll));
@@ -852,15 +853,8 @@ class SeriesCarousel {
             const itemsPerViewport = Math.max(4, Math.floor(containerWidth / (itemWidth + gap)));
             
             // Calcular la posición exacta del siguiente scroll
-            // Si es el primer clic (currentScroll = 0), usar un cálculo especial
-            let targetScroll;
-            if (currentScroll === 0) {
-                // Para el primer clic, mover exactamente por los items que caben
-                targetScroll = itemsPerViewport * (itemWidth + gap);
-            } else {
-                // Para los siguientes clics, usar el cálculo normal
-                targetScroll = currentScroll + (itemsPerViewport * (itemWidth + gap));
-            }
+            // Usar el ancho total de cada item incluyendo el gap
+            const targetScroll = currentScroll + (itemsPerViewport * (itemWidth + gap));
             
             console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}`);
             
