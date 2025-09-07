@@ -322,15 +322,14 @@ class Carousel {
         const gap = 4;
         const containerWidth = this.wrapper.clientWidth;
         
-        // Calcular exactamente cuántos elementos completos caben en el viewport
-        // Usar Math.floor para obtener solo elementos completos
-        const itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
+        // Contar elementos realmente visibles en el DOM
+        const visibleItems = this.getVisibleItemsCount();
+        const itemsPerViewport = Math.max(1, visibleItems);
         const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
         
         console.log(`Carousel: Container width: ${containerWidth}px`);
         console.log(`Carousel: Item width: ${itemWidth}px, Gap: ${gap}px`);
-        console.log(`Carousel: Cálculo exacto: ${containerWidth} / (${itemWidth} + ${gap}) = ${containerWidth / (itemWidth + gap)}`);
-        console.log(`Carousel: Math.floor(${containerWidth / (itemWidth + gap)}) = ${itemsPerViewport} elementos completos`);
+        console.log(`Carousel: Elementos realmente visibles: ${visibleItems}`);
         console.log(`Carousel: Scroll amount: ${actualScrollAmount}px`);
         
         if (direction === 'prev') {
@@ -357,6 +356,28 @@ class Carousel {
                 behavior: 'smooth'
             });
         }
+    }
+
+    // Método para contar elementos realmente visibles
+    getVisibleItemsCount() {
+        if (!this.wrapper) return 1;
+        
+        const items = this.wrapper.querySelectorAll('.custom-carousel-item');
+        if (items.length === 0) return 1;
+        
+        const containerRect = this.wrapper.getBoundingClientRect();
+        let visibleCount = 0;
+        
+        items.forEach(item => {
+            const itemRect = item.getBoundingClientRect();
+            // Un elemento es visible si está completamente dentro del contenedor
+            if (itemRect.left >= containerRect.left && itemRect.right <= containerRect.right) {
+                visibleCount++;
+            }
+        });
+        
+        console.log(`Carousel: Total items: ${items.length}, Completamente visibles: ${visibleCount}`);
+        return Math.max(1, visibleCount);
     }
 
     updateProgressBar() {
@@ -779,15 +800,14 @@ class SeriesCarousel {
         const gap = 4;
         const containerWidth = this.wrapper.clientWidth;
         
-        // Calcular exactamente cuántos elementos completos caben en el viewport
-        // Usar Math.floor para obtener solo elementos completos
-        const itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
+        // Contar elementos realmente visibles en el DOM
+        const visibleItems = this.getVisibleItemsCount();
+        const itemsPerViewport = Math.max(1, visibleItems);
         const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
         
         console.log(`Carousel: Container width: ${containerWidth}px`);
         console.log(`Carousel: Item width: ${itemWidth}px, Gap: ${gap}px`);
-        console.log(`Carousel: Cálculo exacto: ${containerWidth} / (${itemWidth} + ${gap}) = ${containerWidth / (itemWidth + gap)}`);
-        console.log(`Carousel: Math.floor(${containerWidth / (itemWidth + gap)}) = ${itemsPerViewport} elementos completos`);
+        console.log(`Carousel: Elementos realmente visibles: ${visibleItems}`);
         console.log(`Carousel: Scroll amount: ${actualScrollAmount}px`);
         
         if (direction === 'prev') {
@@ -814,6 +834,28 @@ class SeriesCarousel {
                 behavior: 'smooth'
             });
         }
+    }
+
+    // Método para contar elementos realmente visibles
+    getVisibleItemsCount() {
+        if (!this.wrapper) return 1;
+        
+        const items = this.wrapper.querySelectorAll('.custom-carousel-item');
+        if (items.length === 0) return 1;
+        
+        const containerRect = this.wrapper.getBoundingClientRect();
+        let visibleCount = 0;
+        
+        items.forEach(item => {
+            const itemRect = item.getBoundingClientRect();
+            // Un elemento es visible si está completamente dentro del contenedor
+            if (itemRect.left >= containerRect.left && itemRect.right <= containerRect.right) {
+                visibleCount++;
+            }
+        });
+        
+        console.log(`Carousel: Total items: ${items.length}, Completamente visibles: ${visibleCount}`);
+        return Math.max(1, visibleCount);
     }
 
     updateProgressBar() {
