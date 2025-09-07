@@ -13,11 +13,15 @@ function fixCarouselPagination() {
         if (containerWidth > 0) {
             const itemsPerPage = Math.max(1, Math.floor(containerWidth / (itemWidth + gap)));
             // Calcular step dinámicamente: mostrar 2-3 páginas de elementos
-            const step = Math.max(itemsPerPage * 2, 10);
+            const step = Math.max(itemsPerPage * 2, itemsPerPage + 2);
             console.log(`${carouselName}: itemsPerPage=${itemsPerPage}, step=${step}, containerWidth=${containerWidth}`);
             return { itemsPerPage, step };
         } else {
-            return { itemsPerPage: 5, step: 15 };
+            // Si no hay containerWidth, usar valores mínimos dinámicos
+            const fallbackItemsPerPage = 5;
+            const fallbackStep = fallbackItemsPerPage * 2;
+            console.log(`${carouselName}: Usando valores de fallback - itemsPerPage=${fallbackItemsPerPage}, step=${fallbackStep}`);
+            return { itemsPerPage: fallbackItemsPerPage, step: fallbackStep };
         }
     }
     
