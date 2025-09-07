@@ -60,7 +60,7 @@ class Carousel {
                 this.itemsPerPage = Math.max(1, Math.floor(containerWidth / (itemWidth + gap)));
                 console.log(`Carousel: itemsPerPage calculado: ${this.itemsPerPage} para width: ${containerWidth}`);
             } else {
-                this.itemsPerPage = 5;
+                this.itemsPerPage = 1000000;
             }
         };
 
@@ -501,7 +501,7 @@ class SeriesCarousel {
     setupResizeObserver() {
         if (!this.wrapper) {
             console.error('wrapper no definido en setupResizeObserver');
-            this.itemsPerPage = 5;
+            this.itemsPerPage = 1000000;
             return;
         }
 
