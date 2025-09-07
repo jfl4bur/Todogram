@@ -39,6 +39,7 @@ class Carousel {
     init() {
         this.setupResizeObserver();
         this.setupEventListeners();
+        this.calculateItemsPerPage();
         this.loadMoviesData();
     }
 
@@ -66,6 +67,28 @@ class Carousel {
             calculate();
         });
         resizeObserver.observe(this.wrapper);
+    }
+
+    calculateItemsPerPage() {
+        if (!this.wrapper) {
+            this.itemsPerPage = 5;
+            this.step = 15;
+            return;
+        }
+
+        const itemWidth = 194;
+        const gap = 4;
+        const containerWidth = this.wrapper.clientWidth;
+        
+        // Calcular cuántos items caben en el viewport
+        this.itemsPerPage = Math.max(1, Math.floor((containerWidth + gap) / (itemWidth + gap)));
+        
+        // El step será el doble de itemsPerPage para renderizar más elementos
+        this.step = this.itemsPerPage * 2;
+        
+        console.log('Carousel: Paginación calculada - itemsPerPage:', this.itemsPerPage, 'step:', this.step, 'containerWidth:', containerWidth);
+        
+        return this.itemsPerPage;
     }
 
     setupEventListeners() {
@@ -305,6 +328,7 @@ class Carousel {
     }
 
     scrollToPrevPage() {
+        this.calculateItemsPerPage();
         const itemWidth = 194;
         const gap = 4;
         const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
@@ -315,6 +339,7 @@ class Carousel {
     }
 
     scrollToNextPage() {
+        this.calculateItemsPerPage();
         const itemWidth = 194;
         const gap = 4;
         const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
@@ -407,6 +432,7 @@ class SeriesCarousel {
         
         this.setupResizeObserver();
         this.setupEventListeners();
+        this.calculateItemsPerPage();
         this.loadSeriesData();
     }
 
@@ -434,6 +460,28 @@ class SeriesCarousel {
             calculate();
         });
         resizeObserver.observe(this.wrapper);
+    }
+
+    calculateItemsPerPage() {
+        if (!this.wrapper) {
+            this.itemsPerPage = 5;
+            this.step = 10;
+            return;
+        }
+
+        const itemWidth = 194;
+        const gap = 4;
+        const containerWidth = this.wrapper.clientWidth;
+        
+        // Calcular cuántos items caben en el viewport
+        this.itemsPerPage = Math.max(1, Math.floor((containerWidth + gap) / (itemWidth + gap)));
+        
+        // El step será el doble de itemsPerPage para renderizar más elementos
+        this.step = this.itemsPerPage * 2;
+        
+        console.log('SeriesCarousel: Paginación calculada - itemsPerPage:', this.itemsPerPage, 'step:', this.step, 'containerWidth:', containerWidth);
+        
+        return this.itemsPerPage;
     }
 
     setupEventListeners() {
@@ -782,6 +830,7 @@ class SeriesCarousel {
     }
 
     scrollToPrevPage() {
+        this.calculateItemsPerPage();
         const itemWidth = 194;
         const gap = 4;
         const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
@@ -792,6 +841,7 @@ class SeriesCarousel {
     }
 
     scrollToNextPage() {
+        this.calculateItemsPerPage();
         const itemWidth = 194;
         const gap = 4;
         const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
