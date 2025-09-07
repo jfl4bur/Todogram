@@ -200,6 +200,12 @@ class Carousel {
         if (this.wrapper) {
             this.wrapper.style.display = 'flex';
             console.log("SeriesCarousel: Wrapper mostrado");
+            
+            // Configurar resize observer después de mostrar el wrapper
+            setTimeout(() => {
+                console.log("SeriesCarousel: Configurando resize observer después de mostrar wrapper...");
+                this.setupResizeObserver();
+            }, 100);
         }
         
         if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
@@ -451,8 +457,6 @@ class SeriesCarousel {
             console.log("SeriesCarousel: Progress bar configurado:", !!this.progressBar);
         }
         
-        console.log("SeriesCarousel: Configurando resize observer...");
-        this.setupResizeObserver();
         console.log("SeriesCarousel: Configurando event listeners...");
         this.setupEventListeners();
         console.log("SeriesCarousel: Cargando datos de series...");
@@ -480,7 +484,17 @@ class SeriesCarousel {
             console.log("SeriesCarousel: setupResizeObserver - Items per page:", this.itemsPerPage, "Container width:", containerWidth);
         };
 
+        // Intentar calcular inmediatamente
         calculate();
+        
+        // Si el container width es 0, intentar de nuevo después de un delay
+        if (this.wrapper.clientWidth === 0) {
+            console.log("SeriesCarousel: Container width es 0, reintentando en 200ms...");
+            setTimeout(() => {
+                calculate();
+            }, 200);
+        }
+        
         const resizeObserver = new ResizeObserver(() => {
             calculate();
         });
@@ -502,6 +516,7 @@ class SeriesCarousel {
             this.itemsPerPage = Math.max(1, Math.floor(containerWidth / (itemWidth + gap)));
         } else {
             this.itemsPerPage = 5;
+            console.log("SeriesCarousel: Container width es 0, usando valor por defecto");
         }
         
         console.log("SeriesCarousel: calculateItemsPerPage - Items per page:", this.itemsPerPage, "Container width:", containerWidth);
@@ -689,6 +704,12 @@ class SeriesCarousel {
         if (this.wrapper) {
             this.wrapper.style.display = 'flex';
             console.log("SeriesCarousel: Wrapper mostrado");
+            
+            // Configurar resize observer después de mostrar el wrapper
+            setTimeout(() => {
+                console.log("SeriesCarousel: Configurando resize observer después de mostrar wrapper...");
+                this.setupResizeObserver();
+            }, 100);
         }
         
         if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
