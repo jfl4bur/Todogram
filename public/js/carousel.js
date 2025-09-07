@@ -45,8 +45,7 @@ class Carousel {
     setupResizeObserver() {
         if (!this.wrapper) {
             console.error('wrapper no definido en setupResizeObserver');
-            this.itemsPerPage = 1;
-            this.step = 500000;
+            // No establecer valores estáticos, se calcularán dinámicamente cuando sea necesario
             return;
         }
 
@@ -56,15 +55,15 @@ class Carousel {
         const calculate = () => {
             const containerWidth = this.wrapper.clientWidth;
             if (containerWidth > 0) {
-                // Calcular cuántos elementos caben realmente en el viewport
-                this.itemsPerPage = Math.max(1, Math.floor(containerWidth / (itemWidth + gap)));
+                // Calcular dinámicamente basándose en elementos realmente visibles
+                this.itemsPerPage = this.getVisibleItemsCount();
                 // Calcular el step dinámicamente (renderizar más elementos que caben en el viewport)
                 this.step = Math.max(this.itemsPerPage * 2, 10);
-                console.log(`Carousel: itemsPerPage calculado: ${this.itemsPerPage} para width: ${containerWidth}`);
+                console.log(`Carousel: itemsPerPage calculado dinámicamente: ${this.itemsPerPage} para width: ${containerWidth}`);
                 console.log(`Carousel: step calculado: ${this.step}`);
             } else {
-                this.itemsPerPage = 1;
-                this.step = 5;
+                // Si no hay wrapper, no establecer valores estáticos
+                // Se calcularán dinámicamente cuando sea necesario
             }
         };
 
@@ -474,8 +473,7 @@ class SeriesCarousel {
     setupResizeObserver() {
         if (!this.wrapper) {
             console.error('wrapper no definido en setupResizeObserver');
-            this.itemsPerPage = 1;
-            this.step = 5;
+            // No establecer valores estáticos, se calcularán dinámicamente cuando sea necesario
             return;
         }
 
@@ -492,9 +490,8 @@ class SeriesCarousel {
                 console.log(`Carousel: itemsPerPage calculado dinámicamente: ${this.itemsPerPage} para width: ${containerWidth}`);
                 console.log(`Carousel: step calculado: ${this.step}`);
             } else {
-                // Si no hay wrapper, usar valores mínimos dinámicos
-                this.itemsPerPage = 1;
-                this.step = 1;
+                // Si no hay wrapper, no establecer valores estáticos
+                // Se calcularán dinámicamente cuando sea necesario
             }
         };
 
