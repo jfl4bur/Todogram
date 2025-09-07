@@ -74,31 +74,22 @@ class Carousel {
 
     calculateItemsPerPage() {
         if (!this.wrapper) {
-            console.error('Carousel: Wrapper no disponible para calcular items por página');
             this.itemsPerPage = 5;
+            this.step = 10;
             return;
         }
 
-        const itemWidth = 194; // Ancho fijo de cada item
-        const gap = 4; // Gap entre items
+        const itemWidth = 194;
+        const gap = 4;
         const containerWidth = this.wrapper.clientWidth;
         
         // Calcular cuántos items caben en el viewport
-        const itemsPerPage = Math.floor((containerWidth + gap) / (itemWidth + gap));
+        this.itemsPerPage = Math.max(1, Math.floor((containerWidth + gap) / (itemWidth + gap)));
         
-        // Asegurar un mínimo de 1 item
-        this.itemsPerPage = Math.max(1, itemsPerPage);
-        
-        // Actualizar el step basado en itemsPerPage
+        // El step será el doble de itemsPerPage para renderizar más elementos
         this.step = this.itemsPerPage * 2;
         
-        console.log('Carousel: Items por página calculados:', {
-            containerWidth,
-            itemWidth,
-            gap,
-            itemsPerPage: this.itemsPerPage,
-            step: this.step
-        });
+        console.log('Carousel: Paginación calculada - itemsPerPage:', this.itemsPerPage, 'step:', this.step);
         
         return this.itemsPerPage;
     }
@@ -340,6 +331,9 @@ class Carousel {
     }
 
     scrollToPrevPage() {
+        // Recalcular paginación antes de hacer scroll
+        this.calculateItemsPerPage();
+        
         const itemWidth = 194;
         const gap = 4;
         const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
@@ -350,6 +344,9 @@ class Carousel {
     }
 
     scrollToNextPage() {
+        // Recalcular paginación antes de hacer scroll
+        this.calculateItemsPerPage();
+        
         const itemWidth = 194;
         const gap = 4;
         const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
@@ -477,31 +474,22 @@ class SeriesCarousel {
 
     calculateItemsPerPage() {
         if (!this.wrapper) {
-            console.error('SeriesCarousel: Wrapper no disponible para calcular items por página');
             this.itemsPerPage = 5;
+            this.step = 10;
             return;
         }
 
-        const itemWidth = 194; // Ancho fijo de cada item
-        const gap = 4; // Gap entre items
+        const itemWidth = 194;
+        const gap = 4;
         const containerWidth = this.wrapper.clientWidth;
         
         // Calcular cuántos items caben en el viewport
-        const itemsPerPage = Math.floor((containerWidth + gap) / (itemWidth + gap));
+        this.itemsPerPage = Math.max(1, Math.floor((containerWidth + gap) / (itemWidth + gap)));
         
-        // Asegurar un mínimo de 1 item
-        this.itemsPerPage = Math.max(1, itemsPerPage);
-        
-        // Actualizar el step basado en itemsPerPage
+        // El step será el doble de itemsPerPage para renderizar más elementos
         this.step = this.itemsPerPage * 2;
         
-        console.log('SeriesCarousel: Items por página calculados:', {
-            containerWidth,
-            itemWidth,
-            gap,
-            itemsPerPage: this.itemsPerPage,
-            step: this.step
-        });
+        console.log('SeriesCarousel: Paginación calculada - itemsPerPage:', this.itemsPerPage, 'step:', this.step);
         
         return this.itemsPerPage;
     }
@@ -852,6 +840,9 @@ class SeriesCarousel {
     }
 
     scrollToPrevPage() {
+        // Recalcular paginación antes de hacer scroll
+        this.calculateItemsPerPage();
+        
         const itemWidth = 194;
         const gap = 4;
         const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
@@ -862,6 +853,9 @@ class SeriesCarousel {
     }
 
     scrollToNextPage() {
+        // Recalcular paginación antes de hacer scroll
+        this.calculateItemsPerPage();
+        
         const itemWidth = 194;
         const gap = 4;
         const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
