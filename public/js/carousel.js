@@ -852,8 +852,15 @@ class SeriesCarousel {
             const itemsPerViewport = Math.max(4, Math.floor(containerWidth / (itemWidth + gap)));
             
             // Calcular la posición exacta del siguiente scroll
-            // Usar el ancho total de cada item incluyendo el gap
-            const targetScroll = currentScroll + (itemsPerViewport * (itemWidth + gap));
+            // Si es el primer clic (currentScroll = 0), usar un cálculo especial
+            let targetScroll;
+            if (currentScroll === 0) {
+                // Para el primer clic, mover exactamente por los items que caben
+                targetScroll = itemsPerViewport * (itemWidth + gap);
+            } else {
+                // Para los siguientes clics, usar el cálculo normal
+                targetScroll = currentScroll + (itemsPerViewport * (itemWidth + gap));
+            }
             
             console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}`);
             
