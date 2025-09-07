@@ -380,7 +380,10 @@ class Carousel {
     handleScroll() {
         this.updateProgressBar();
         if (this.wrapper.scrollLeft + this.wrapper.clientWidth >= this.wrapper.scrollWidth - 200) {
-            this.renderItems();
+            console.log("SeriesCarousel: Cerca del final, cargando más elementos...");
+            if (this.index < this.seriesData.length) {
+                this.renderItems();
+            }
         }
     }
 }
@@ -397,7 +400,7 @@ class SeriesCarousel {
         this.carouselContainer = document.querySelector('#series-carousel-wrapper').parentElement;
         this.itemsPerPage = 5;
         this.index = 0;
-        this.step = 10; // Renderizar solo 10 elementos inicialmente
+        this.step = 1000; // Renderizar todos los elementos de una vez para mejor funcionalidad
         this.moreAppended = false;
         this.seriesData = [];
         this.hoverTimeouts = {};
@@ -642,7 +645,11 @@ class SeriesCarousel {
 
             console.log("SeriesCarousel: Datos cargados, mostrando carrusel...");
             this.showCarousel();
-            console.log("SeriesCarousel: Renderizando elementos...");
+            console.log("SeriesCarousel: Renderizando TODOS los elementos...");
+            
+            // Asegurar que se rendericen todos los elementos
+            this.index = 0;
+            this.step = this.seriesData.length;
             this.renderItems();
             
             // Notificar que los datos de series están cargados
@@ -677,7 +684,11 @@ class SeriesCarousel {
             ];
             console.log("SeriesCarousel: Datos de fallback cargados, mostrando carrusel...");
             this.showCarousel();
-            console.log("SeriesCarousel: Renderizando elementos de fallback...");
+            console.log("SeriesCarousel: Renderizando TODOS los elementos de fallback...");
+            
+            // Asegurar que se rendericen todos los elementos de fallback
+            this.index = 0;
+            this.step = this.seriesData.length;
             this.renderItems();
             
             // Notificar que los datos de series están cargados (fallback)
@@ -730,6 +741,12 @@ class SeriesCarousel {
         
         const end = Math.min(this.index + this.step, this.seriesData.length);
         console.log("SeriesCarousel: end:", end);
+        
+        // Si no hay más elementos para renderizar, no hacer nada
+        if (end <= this.index) {
+            console.log("SeriesCarousel: No hay más elementos para renderizar");
+            return;
+        }
         
         for (let i = this.index; i < end; i++) {
             const item = this.seriesData[i];
@@ -890,7 +907,10 @@ class SeriesCarousel {
     handleScroll() {
         this.updateProgressBar();
         if (this.wrapper.scrollLeft + this.wrapper.clientWidth >= this.wrapper.scrollWidth - 200) {
-            this.renderItems();
+            console.log("SeriesCarousel: Cerca del final, cargando más elementos...");
+            if (this.index < this.seriesData.length) {
+                this.renderItems();
+            }
         }
     }
 }
