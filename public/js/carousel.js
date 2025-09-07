@@ -39,7 +39,6 @@ class Carousel {
     init() {
         this.setupResizeObserver();
         this.setupEventListeners();
-        this.calculateItemsPerPage();
         this.loadMoviesData();
     }
 
@@ -67,28 +66,6 @@ class Carousel {
             calculate();
         });
         resizeObserver.observe(this.wrapper);
-    }
-
-    calculateItemsPerPage() {
-        if (!this.wrapper) {
-            this.itemsPerPage = 5;
-            this.step = 15;
-            return;
-        }
-
-        const itemWidth = 194;
-        const gap = 4;
-        const containerWidth = this.wrapper.clientWidth;
-        
-        // Calcular cuántos items caben en el viewport
-        this.itemsPerPage = Math.max(1, Math.floor((containerWidth + gap) / (itemWidth + gap)));
-        
-        // El step será el doble de itemsPerPage para renderizar más elementos
-        this.step = this.itemsPerPage * 2;
-        
-        console.log('Carousel: Paginación calculada - itemsPerPage:', this.itemsPerPage, 'step:', this.step, 'containerWidth:', containerWidth);
-        
-        return this.itemsPerPage;
     }
 
     setupEventListeners() {
@@ -328,7 +305,6 @@ class Carousel {
     }
 
     scrollToPrevPage() {
-        this.calculateItemsPerPage();
         const itemWidth = 194;
         const gap = 4;
         const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
@@ -339,7 +315,6 @@ class Carousel {
     }
 
     scrollToNextPage() {
-        this.calculateItemsPerPage();
         const itemWidth = 194;
         const gap = 4;
         const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
@@ -432,7 +407,6 @@ class SeriesCarousel {
         
         this.setupResizeObserver();
         this.setupEventListeners();
-        this.calculateItemsPerPage();
         this.loadSeriesData();
     }
 
@@ -460,28 +434,6 @@ class SeriesCarousel {
             calculate();
         });
         resizeObserver.observe(this.wrapper);
-    }
-
-    calculateItemsPerPage() {
-        if (!this.wrapper) {
-            this.itemsPerPage = 5;
-            this.step = 10;
-            return;
-        }
-
-        const itemWidth = 194;
-        const gap = 4;
-        const containerWidth = this.wrapper.clientWidth;
-        
-        // Calcular cuántos items caben en el viewport
-        this.itemsPerPage = Math.max(1, Math.floor((containerWidth + gap) / (itemWidth + gap)));
-        
-        // El step será el doble de itemsPerPage para renderizar más elementos
-        this.step = this.itemsPerPage * 2;
-        
-        console.log('SeriesCarousel: Paginación calculada - itemsPerPage:', this.itemsPerPage, 'step:', this.step, 'containerWidth:', containerWidth);
-        
-        return this.itemsPerPage;
     }
 
     setupEventListeners() {
@@ -552,9 +504,7 @@ class SeriesCarousel {
                     item['Categoría'] === 'Series' && 
                     (!item['Título episodio'] || item['Título episodio'].trim() === '')) {
                     
-                    console.log(`SeriesCarousel: Serie encontrada sin episodio específico: "${item['Título']}"`);
-                    
-                    const seriesItem = {
+                    this.seriesData.push({
                         id: `series_${seriesIndex}`,
                         title: item['Título'] || 'Sin título',
                         description: item['Synopsis'] || 'Descripción no disponible',
@@ -574,37 +524,12 @@ class SeriesCarousel {
                         subtitlesCount: item['Subtítulos'] ? item['Subtítulos'].split(',').length : 0,
                         audioList: item['Audios'] ? item['Audios'].split(',') : [],
                         subtitleList: item['Subtítulos'] ? item['Subtítulos'].split(',') : []
-                    };
-                    
-                    console.log(`SeriesCarousel: Procesando serie "${seriesItem.title}"`, {
-                        originalPortada: item['Portada'],
-                        originalCarteles: item['Carteles'],
-                        finalPosterUrl: seriesItem.posterUrl,
-                        finalBackgroundUrl: seriesItem.backgroundUrl,
-                        hasPosterUrl: !!seriesItem.posterUrl,
-                        hasBackgroundUrl: !!seriesItem.backgroundUrl
                     });
-                    
-                    this.seriesData.push(seriesItem);
                     seriesIndex++;
                 }
             }
 
             console.log(`SeriesCarousel: Se encontraron ${this.seriesData.length} series`);
-            
-            // Log adicional para debugging
-            if (this.seriesData.length === 0) {
-                console.log("SeriesCarousel: No se encontraron series. Verificando datos...");
-                const allSeries = data.filter(item => item && typeof item === 'object' && item['Categoría'] === 'Series');
-                console.log(`SeriesCarousel: Total de elementos con categoría 'Series': ${allSeries.length}`);
-                
-                if (allSeries.length > 0) {
-                    console.log("SeriesCarousel: Primeras 3 series encontradas:");
-                    allSeries.slice(0, 3).forEach((series, index) => {
-                        console.log(`  ${index + 1}. "${series['Título']}" - Episodio: "${series['Título episodio'] || 'N/A'}"`);
-                    });
-                }
-            }
             
             if (this.seriesData.length === 0) {
                 this.seriesData = [
@@ -682,20 +607,6 @@ class SeriesCarousel {
         }
     }
 
-    // Función para manejar URLs expiradas
-    handleImageError(img, itemTitle, isBackground = false) {
-        console.log(`SeriesCarousel: Imagen ${isBackground ? 'de fondo' : ''} fallida para "${itemTitle}", usando placeholder`);
-        const placeholderUrl = `https://via.placeholder.com/194x271/333/fff?text=${encodeURIComponent(itemTitle)}`;
-        img.src = placeholderUrl;
-        img.style.opacity = '1';
-        
-        // Ocultar loader si existe
-        const loader = img.parentElement.previousElementSibling;
-        if (loader && loader.classList.contains('loader')) {
-            loader.style.display = 'none';
-        }
-    }
-
     async renderItems() {
         console.log("SeriesCarousel: renderItems llamado");
         console.log("SeriesCarousel: seriesData.length:", this.seriesData.length);
@@ -711,13 +622,6 @@ class SeriesCarousel {
             div.className = "custom-carousel-item";
             div.dataset.itemId = item.id;
 
-            console.log(`SeriesCarousel: Procesando item ${i}: "${item.title}"`, {
-                posterUrl: item.posterUrl,
-                backgroundUrl: item.backgroundUrl,
-                hasPosterUrl: !!item.posterUrl,
-                hasBackgroundUrl: !!item.backgroundUrl
-            });
-
             const metaInfo = [];
             if (item.year) metaInfo.push(`<span>${item.year}</span>`);
             if (item.duration) metaInfo.push(`<span>${item.duration}</span>`);
@@ -728,14 +632,6 @@ class SeriesCarousel {
             let posterUrl = item.posterUrl;
             if (!posterUrl) {
                 posterUrl = 'https://via.placeholder.com/194x271';
-                console.log(`SeriesCarousel: Usando placeholder para "${item.title}"`);
-            } else {
-                console.log(`SeriesCarousel: Usando imagen real para "${item.title}": ${posterUrl}`);
-                
-                // Verificar si es una URL de AWS S3 que puede expirar
-                if (posterUrl.includes('prod-files-secure.s3.us-west-2.amazonaws.com')) {
-                    console.log(`SeriesCarousel: URL de AWS S3 detectada para "${item.title}" - puede expirar`);
-                }
             }
 
             div.innerHTML = `
@@ -830,7 +726,6 @@ class SeriesCarousel {
     }
 
     scrollToPrevPage() {
-        this.calculateItemsPerPage();
         const itemWidth = 194;
         const gap = 4;
         const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
@@ -841,7 +736,6 @@ class SeriesCarousel {
     }
 
     scrollToNextPage() {
-        this.calculateItemsPerPage();
         const itemWidth = 194;
         const gap = 4;
         const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
