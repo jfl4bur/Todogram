@@ -376,21 +376,12 @@ class Carousel {
             // Usar el ancho total de cada item incluyendo el gap
             const targetScroll = currentScroll + (itemsPerViewport * (itemWidth + gap));
             
-            // Si estamos cerca del final, ir al final para mostrar el último item completo
-            if (targetScroll >= maxScroll - (itemWidth + gap)) {
-                console.log(`Carousel: Next - Llegando al final, scroll a max: ${maxScroll}`);
-                this.wrapper.scrollTo({
-                    left: maxScroll,
-                    behavior: 'auto'
-                });
-            } else {
-                console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}`);
-                
-                this.wrapper.scrollTo({
-                    left: targetScroll,
-                    behavior: 'auto'
-                });
-            }
+            console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}`);
+            
+            this.wrapper.scrollTo({
+                left: targetScroll,
+                behavior: 'auto'
+            });
         }
     }
 
@@ -890,21 +881,12 @@ class SeriesCarousel {
             // Usar el ancho total de cada item incluyendo el gap
             const targetScroll = currentScroll + (itemsPerViewport * (itemWidth + gap));
             
-            // Si estamos cerca del final, ir al final para mostrar el último item completo
-            if (targetScroll >= maxScroll - (itemWidth + gap)) {
-                console.log(`Carousel: Next - Llegando al final, scroll a max: ${maxScroll}`);
-                this.wrapper.scrollTo({
-                    left: maxScroll,
-                    behavior: 'auto'
-                });
-            } else {
-                console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}`);
-                
-                this.wrapper.scrollTo({
-                    left: targetScroll,
-                    behavior: 'auto'
-                });
-            }
+            console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}`);
+            
+            this.wrapper.scrollTo({
+                left: targetScroll,
+                behavior: 'auto'
+            });
         }
     }
 
