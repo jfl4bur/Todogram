@@ -341,7 +341,15 @@ class Carousel {
         const itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
         const totalItemWidth = itemWidth + gap;
         let currentScroll = this.wrapper.scrollLeft;
-        // Calcular el índice del primer item visible (usando floor para evitar cortes)
+        // SNAP: forzar alineación ANTES de calcular el siguiente índice
+        let snappedIndex = Math.round(currentScroll / totalItemWidth);
+        let snappedScroll = snappedIndex * totalItemWidth;
+        // Si el scroll no está alineado, forzar el snap antes de avanzar
+        if (Math.abs(currentScroll - snappedScroll) > 2) {
+            this.wrapper.scrollTo({ left: snappedScroll, behavior: 'auto' });
+            currentScroll = snappedScroll;
+        }
+        // Calcular el índice del primer item visible (ya alineado)
         let firstVisibleIndex = Math.floor(currentScroll / totalItemWidth);
         if (direction === 'prev') {
             firstVisibleIndex = Math.max(0, firstVisibleIndex - itemsPerViewport);
