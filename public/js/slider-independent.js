@@ -816,8 +816,8 @@
                 data = window.sharedData;
             } else {
                 console.log('Slider: Haciendo fetch de datos...');
-                const response = await fetch(DATA_URL);
-                if (!response.ok) throw new Error('No se pudo cargar data.json');
+            const response = await fetch(DATA_URL);
+            if (!response.ok) throw new Error('No se pudo cargar data.json');
                 data = await response.json();
                 // Guardar datos para compartir con otros componentes
                 window.sharedData = data;

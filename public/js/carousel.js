@@ -185,10 +185,30 @@ class Carousel {
     }
 
     showCarousel() {
-        this.skeleton.style.display = 'none';
-        this.wrapper.style.display = 'flex';
+        console.log("SeriesCarousel: showCarousel ejecutado");
+        console.log("SeriesCarousel: Elementos disponibles:", {
+            skeleton: !!this.skeleton,
+            wrapper: !!this.wrapper,
+            carouselNav: !!this.carouselNav
+        });
+        
+        if (this.skeleton) {
+            this.skeleton.style.display = 'none';
+            console.log("SeriesCarousel: Skeleton ocultado");
+        }
+        
+        if (this.wrapper) {
+            this.wrapper.style.display = 'flex';
+            console.log("SeriesCarousel: Wrapper mostrado");
+        }
+        
         if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-            this.carouselNav.style.display = 'flex';
+            if (this.carouselNav) {
+                this.carouselNav.style.display = 'flex';
+                console.log("SeriesCarousel: Navegación mostrada");
+            }
+        } else {
+            console.log("SeriesCarousel: Navegación oculta (no hover)");
         }
     }
 
@@ -308,20 +328,34 @@ class Carousel {
         const itemWidth = 194;
         const gap = 4;
         const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
-        this.wrapper.scrollBy({
-            left: -scrollAmount,
-            behavior: 'smooth'
-        });
+        console.log("SeriesCarousel: scrollToPrevPage ejecutado");
+        console.log("SeriesCarousel: Scroll amount:", scrollAmount, "Items per page:", this.itemsPerPage);
+        if (this.wrapper) {
+            this.wrapper.scrollBy({
+                left: -scrollAmount,
+                behavior: 'smooth'
+            });
+            console.log("SeriesCarousel: Scroll ejecutado hacia atrás");
+        } else {
+            console.error("SeriesCarousel: Wrapper no disponible para scroll");
+        }
     }
 
     scrollToNextPage() {
         const itemWidth = 194;
         const gap = 4;
         const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
-        this.wrapper.scrollBy({
-            left: scrollAmount,
-            behavior: 'smooth'
-        });
+        console.log("SeriesCarousel: scrollToNextPage ejecutado");
+        console.log("SeriesCarousel: Scroll amount:", scrollAmount, "Items per page:", this.itemsPerPage);
+        if (this.wrapper) {
+            this.wrapper.scrollBy({
+                left: scrollAmount,
+                behavior: 'smooth'
+            });
+            console.log("SeriesCarousel: Scroll ejecutado hacia adelante");
+        } else {
+            console.error("SeriesCarousel: Wrapper no disponible para scroll");
+        }
     }
 
     updateProgressBar() {
@@ -345,6 +379,7 @@ class Carousel {
 
 class SeriesCarousel {
     constructor() {
+        console.log("SeriesCarousel: Constructor iniciado");
         this.wrapper = document.getElementById('series-carousel-wrapper');
         this.skeleton = document.getElementById('series-carousel-skeleton');
         this.progressBar = null; // Se configurará después de verificar que wrapper existe
@@ -358,6 +393,15 @@ class SeriesCarousel {
         this.moreAppended = false;
         this.seriesData = [];
         this.hoverTimeouts = {};
+        
+        console.log("SeriesCarousel: Elementos encontrados:", {
+            wrapper: !!this.wrapper,
+            skeleton: !!this.skeleton,
+            carouselNav: !!this.carouselNav,
+            carouselPrev: !!this.carouselPrev,
+            carouselNext: !!this.carouselNext,
+            carouselContainer: !!this.carouselContainer
+        });
 
         if (!this.wrapper || !this.skeleton || !this.carouselContainer) {
             console.error("Elementos del carrusel de series no encontrados", {
@@ -369,12 +413,22 @@ class SeriesCarousel {
             return;
         }
         if (!this.carouselPrev || !this.carouselNext || !this.carouselNav) {
-            console.error("Elementos de navegación del carrusel de series no encontrados");
+            console.error("Elementos de navegación del carrusel de series no encontrados", {
+                prev: !!this.carouselPrev,
+                next: !!this.carouselNext,
+                nav: !!this.carouselNav
+            });
             const observer = new MutationObserver(() => {
                 this.carouselPrev = document.getElementById('series-carousel-prev');
                 this.carouselNext = document.getElementById('series-carousel-next');
                 this.carouselNav = document.getElementById('series-carousel-nav');
+                console.log("SeriesCarousel: Reintentando encontrar botones...", {
+                    prev: !!this.carouselPrev,
+                    next: !!this.carouselNext,
+                    nav: !!this.carouselNav
+                });
                 if (this.carouselPrev && this.carouselNext && this.carouselNav) {
+                    console.log("SeriesCarousel: Botones encontrados, configurando event listeners...");
                     this.setupEventListeners();
                     observer.disconnect();
                 }
@@ -395,9 +449,13 @@ class SeriesCarousel {
             console.log("SeriesCarousel: Progress bar configurado:", !!this.progressBar);
         }
         
+        console.log("SeriesCarousel: Configurando resize observer...");
         this.setupResizeObserver();
+        console.log("SeriesCarousel: Configurando event listeners...");
         this.setupEventListeners();
+        console.log("SeriesCarousel: Cargando datos de series...");
         this.loadSeriesData();
+        console.log("SeriesCarousel: Inicialización completada");
     }
 
     setupResizeObserver() {
@@ -427,16 +485,37 @@ class SeriesCarousel {
     }
 
     setupEventListeners() {
+        console.log("SeriesCarousel: Configurando event listeners...");
         window.addEventListener('resize', () => this.calculateItemsPerPage());
-        this.carouselPrev.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.scrollToPrevPage();
-        });
-        this.carouselNext.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.scrollToNextPage();
-        });
-        this.wrapper.addEventListener('scroll', () => this.handleScroll());
+        
+        if (this.carouselPrev) {
+            this.carouselPrev.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log("SeriesCarousel: Botón anterior clickeado");
+                this.scrollToPrevPage();
+            });
+            console.log("SeriesCarousel: Event listener del botón anterior configurado");
+        } else {
+            console.error("SeriesCarousel: No se pudo configurar event listener del botón anterior");
+        }
+        
+        if (this.carouselNext) {
+            this.carouselNext.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log("SeriesCarousel: Botón siguiente clickeado");
+                this.scrollToNextPage();
+            });
+            console.log("SeriesCarousel: Event listener del botón siguiente configurado");
+        } else {
+            console.error("SeriesCarousel: No se pudo configurar event listener del botón siguiente");
+        }
+        
+        if (this.wrapper) {
+            this.wrapper.addEventListener('scroll', () => this.handleScroll());
+            console.log("SeriesCarousel: Event listener de scroll configurado");
+        } else {
+            console.error("SeriesCarousel: No se pudo configurar event listener de scroll");
+        }
     }
 
     async loadSeriesData() {
@@ -447,6 +526,7 @@ class SeriesCarousel {
             let data;
             if (window.sharedData) {
                 console.log("SeriesCarousel: Usando datos compartidos");
+                console.log("SeriesCarousel: Datos compartidos disponibles:", window.sharedData.length, "elementos");
                 data = window.sharedData;
             } else {
                 console.log("SeriesCarousel: Haciendo fetch de datos...");
@@ -462,6 +542,7 @@ class SeriesCarousel {
             // Optimización: Un solo filtro y mapeo
             this.seriesData = [];
             let seriesIndex = 0;
+            console.log("SeriesCarousel: Procesando", data.length, "elementos de datos...");
             
             for (const item of data) {
                 if (item && typeof item === 'object' && 
@@ -521,11 +602,14 @@ class SeriesCarousel {
                 ];
             }
 
+            console.log("SeriesCarousel: Datos cargados, mostrando carrusel...");
             this.showCarousel();
+            console.log("SeriesCarousel: Renderizando elementos...");
             this.renderItems();
             
             // Notificar que los datos de series están cargados
             if (window.notifyDataLoaded) {
+                console.log("SeriesCarousel: Notificando que los datos están cargados");
                 window.notifyDataLoaded();
             }
         } catch (error) {
@@ -553,21 +637,44 @@ class SeriesCarousel {
                     subtitleList: ["Español"]
                 }
             ];
+            console.log("SeriesCarousel: Datos de fallback cargados, mostrando carrusel...");
             this.showCarousel();
+            console.log("SeriesCarousel: Renderizando elementos de fallback...");
             this.renderItems();
             
             // Notificar que los datos de series están cargados (fallback)
             if (window.notifyDataLoaded) {
+                console.log("SeriesCarousel: Notificando que los datos de fallback están cargados");
                 window.notifyDataLoaded();
             }
         }
     }
 
     showCarousel() {
-        this.skeleton.style.display = 'none';
-        this.wrapper.style.display = 'flex';
+        console.log("SeriesCarousel: showCarousel ejecutado");
+        console.log("SeriesCarousel: Elementos disponibles:", {
+            skeleton: !!this.skeleton,
+            wrapper: !!this.wrapper,
+            carouselNav: !!this.carouselNav
+        });
+        
+        if (this.skeleton) {
+            this.skeleton.style.display = 'none';
+            console.log("SeriesCarousel: Skeleton ocultado");
+        }
+        
+        if (this.wrapper) {
+            this.wrapper.style.display = 'flex';
+            console.log("SeriesCarousel: Wrapper mostrado");
+        }
+        
         if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-            this.carouselNav.style.display = 'flex';
+            if (this.carouselNav) {
+                this.carouselNav.style.display = 'flex';
+                console.log("SeriesCarousel: Navegación mostrada");
+            }
+        } else {
+            console.log("SeriesCarousel: Navegación oculta (no hover)");
         }
     }
 
@@ -693,20 +800,34 @@ class SeriesCarousel {
         const itemWidth = 194;
         const gap = 4;
         const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
-        this.wrapper.scrollBy({
-            left: -scrollAmount,
-            behavior: 'smooth'
-        });
+        console.log("SeriesCarousel: scrollToPrevPage ejecutado");
+        console.log("SeriesCarousel: Scroll amount:", scrollAmount, "Items per page:", this.itemsPerPage);
+        if (this.wrapper) {
+            this.wrapper.scrollBy({
+                left: -scrollAmount,
+                behavior: 'smooth'
+            });
+            console.log("SeriesCarousel: Scroll ejecutado hacia atrás");
+        } else {
+            console.error("SeriesCarousel: Wrapper no disponible para scroll");
+        }
     }
 
     scrollToNextPage() {
         const itemWidth = 194;
         const gap = 4;
         const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
-        this.wrapper.scrollBy({
-            left: scrollAmount,
-            behavior: 'smooth'
-        });
+        console.log("SeriesCarousel: scrollToNextPage ejecutado");
+        console.log("SeriesCarousel: Scroll amount:", scrollAmount, "Items per page:", this.itemsPerPage);
+        if (this.wrapper) {
+            this.wrapper.scrollBy({
+                left: scrollAmount,
+                behavior: 'smooth'
+            });
+            console.log("SeriesCarousel: Scroll ejecutado hacia adelante");
+        } else {
+            console.error("SeriesCarousel: Wrapper no disponible para scroll");
+        }
     }
 
     updateProgressBar() {
