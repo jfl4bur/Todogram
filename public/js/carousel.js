@@ -55,17 +55,12 @@ class Carousel {
         const calculate = () => {
             const containerWidth = this.wrapper.clientWidth;
             if (containerWidth > 0) {
-                // Calcular inicialmente con matemáticas, luego se actualizará dinámicamente
-                const calculatedItems = Math.floor(containerWidth / (itemWidth + gap));
-                this.itemsPerPage = Math.max(1, calculatedItems);
-                // Calcular el step dinámicamente (renderizar más elementos que caben en el viewport)
-                this.step = Math.max(this.itemsPerPage * 2, 10);
-                console.log(`Carousel: itemsPerPage calculado: ${this.itemsPerPage} para width: ${containerWidth}`);
-                console.log(`Carousel: step calculado: ${this.step}`);
-            } else {
-                // Si no hay wrapper, usar valores mínimos para que funcione
-                this.itemsPerPage = 1;
-                this.step = 5;
+                // Calcular cuántos items caben en la pantalla
+                const itemsThatFit = Math.floor(containerWidth / (itemWidth + gap));
+                this.itemsPerPage = Math.max(1, itemsThatFit);
+                // El step es exactamente los items que caben en la pantalla
+                this.step = this.itemsPerPage;
+                console.log(`Carousel: itemsPerPage: ${this.itemsPerPage}, step: ${this.step} para width: ${containerWidth}`);
             }
         };
 
@@ -327,15 +322,13 @@ class Carousel {
         const gap = 4;
         const containerWidth = this.wrapper.clientWidth;
         
-        // Calcular elementos visibles: usar conteo real si está disponible, sino usar cálculo matemático
-        const visibleItems = this.getVisibleItemsCount();
-        const calculatedItems = Math.floor(containerWidth / (itemWidth + gap));
-        const itemsPerViewport = Math.max(1, visibleItems > 0 ? visibleItems : calculatedItems);
+        // Calcular cuántos items caben en la pantalla
+        const itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
         const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
         
         console.log(`Carousel: Container width: ${containerWidth}px`);
         console.log(`Carousel: Item width: ${itemWidth}px, Gap: ${gap}px`);
-        console.log(`Carousel: Elementos realmente visibles: ${visibleItems}`);
+        console.log(`Carousel: Items que caben en pantalla: ${itemsPerViewport}`);
         console.log(`Carousel: Scroll amount: ${actualScrollAmount}px`);
         
         if (direction === 'prev') {
@@ -486,17 +479,12 @@ class SeriesCarousel {
         const calculate = () => {
             const containerWidth = this.wrapper.clientWidth;
             if (containerWidth > 0) {
-                // Calcular inicialmente con matemáticas, luego se actualizará dinámicamente
-                const calculatedItems = Math.floor(containerWidth / (itemWidth + gap));
-                this.itemsPerPage = Math.max(1, calculatedItems);
-                // Calcular el step dinámicamente (renderizar más elementos que caben en el viewport)
-                this.step = Math.max(this.itemsPerPage * 2, 10);
-                console.log(`Carousel: itemsPerPage calculado: ${this.itemsPerPage} para width: ${containerWidth}`);
-                console.log(`Carousel: step calculado: ${this.step}`);
-            } else {
-                // Si no hay wrapper, usar valores mínimos para que funcione
-                this.itemsPerPage = 1;
-                this.step = 5;
+                // Calcular cuántos items caben en la pantalla
+                const itemsThatFit = Math.floor(containerWidth / (itemWidth + gap));
+                this.itemsPerPage = Math.max(1, itemsThatFit);
+                // El step es exactamente los items que caben en la pantalla
+                this.step = this.itemsPerPage;
+                console.log(`Carousel: itemsPerPage: ${this.itemsPerPage}, step: ${this.step} para width: ${containerWidth}`);
             }
         };
 
@@ -811,15 +799,13 @@ class SeriesCarousel {
         const gap = 4;
         const containerWidth = this.wrapper.clientWidth;
         
-        // Calcular elementos visibles: usar conteo real si está disponible, sino usar cálculo matemático
-        const visibleItems = this.getVisibleItemsCount();
-        const calculatedItems = Math.floor(containerWidth / (itemWidth + gap));
-        const itemsPerViewport = Math.max(1, visibleItems > 0 ? visibleItems : calculatedItems);
+        // Calcular cuántos items caben en la pantalla
+        const itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
         const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
         
         console.log(`Carousel: Container width: ${containerWidth}px`);
         console.log(`Carousel: Item width: ${itemWidth}px, Gap: ${gap}px`);
-        console.log(`Carousel: Elementos realmente visibles: ${visibleItems}`);
+        console.log(`Carousel: Items que caben en pantalla: ${itemsPerViewport}`);
         console.log(`Carousel: Scroll amount: ${actualScrollAmount}px`);
         
         if (direction === 'prev') {
