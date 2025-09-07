@@ -7,9 +7,9 @@ class Carousel {
         this.carouselPrev = document.getElementById('carousel-prev');
         this.carouselNext = document.getElementById('carousel-next');
         this.carouselContainer = document.querySelector('.carousel-container');
-        this.itemsPerPage = 5;
+        this.itemsPerPage = 5; // Se calculará dinámicamente
         this.index = 0;
-        this.step = 15; // Renderizar solo 15 elementos inicialmente
+        this.step = 0; // Se calculará dinámicamente basado en itemsPerPage
         this.moreAppended = false;
         this.moviesData = [];
         this.hoverTimeouts = {};
@@ -39,6 +39,10 @@ class Carousel {
     init() {
         this.setupResizeObserver();
         this.setupEventListeners();
+        // Calcular items por página dinámicamente
+        this.calculateItemsPerPage();
+        // El step será 2x itemsPerPage para renderizar más elementos inicialmente
+        this.step = this.itemsPerPage * 2;
         this.loadMoviesData();
     }
 
@@ -66,6 +70,37 @@ class Carousel {
             calculate();
         });
         resizeObserver.observe(this.wrapper);
+    }
+
+    calculateItemsPerPage() {
+        if (!this.wrapper) {
+            console.error('Carousel: Wrapper no disponible para calcular items por página');
+            this.itemsPerPage = 5;
+            return;
+        }
+
+        const itemWidth = 194; // Ancho fijo de cada item
+        const gap = 4; // Gap entre items
+        const containerWidth = this.wrapper.clientWidth;
+        
+        // Calcular cuántos items caben en el viewport
+        const itemsPerPage = Math.floor((containerWidth + gap) / (itemWidth + gap));
+        
+        // Asegurar un mínimo de 1 item
+        this.itemsPerPage = Math.max(1, itemsPerPage);
+        
+        // Actualizar el step basado en itemsPerPage
+        this.step = this.itemsPerPage * 2;
+        
+        console.log('Carousel: Items por página calculados:', {
+            containerWidth,
+            itemWidth,
+            gap,
+            itemsPerPage: this.itemsPerPage,
+            step: this.step
+        });
+        
+        return this.itemsPerPage;
     }
 
     setupEventListeners() {
@@ -353,9 +388,9 @@ class SeriesCarousel {
         this.carouselPrev = document.getElementById('series-carousel-prev');
         this.carouselNext = document.getElementById('series-carousel-next');
         this.carouselContainer = document.querySelector('#series-carousel-wrapper').parentElement;
-        this.itemsPerPage = 5;
+        this.itemsPerPage = 5; // Se calculará dinámicamente
         this.index = 0;
-        this.step = 10; // Renderizar solo 10 elementos inicialmente
+        this.step = 0; // Se calculará dinámicamente basado en itemsPerPage
         this.moreAppended = false;
         this.seriesData = [];
         this.hoverTimeouts = {};
@@ -407,6 +442,10 @@ class SeriesCarousel {
         
         this.setupResizeObserver();
         this.setupEventListeners();
+        // Calcular items por página dinámicamente
+        this.calculateItemsPerPage();
+        // El step será 2x itemsPerPage para renderizar más elementos inicialmente
+        this.step = this.itemsPerPage * 2;
         this.loadSeriesData();
     }
 
@@ -434,6 +473,37 @@ class SeriesCarousel {
             calculate();
         });
         resizeObserver.observe(this.wrapper);
+    }
+
+    calculateItemsPerPage() {
+        if (!this.wrapper) {
+            console.error('SeriesCarousel: Wrapper no disponible para calcular items por página');
+            this.itemsPerPage = 5;
+            return;
+        }
+
+        const itemWidth = 194; // Ancho fijo de cada item
+        const gap = 4; // Gap entre items
+        const containerWidth = this.wrapper.clientWidth;
+        
+        // Calcular cuántos items caben en el viewport
+        const itemsPerPage = Math.floor((containerWidth + gap) / (itemWidth + gap));
+        
+        // Asegurar un mínimo de 1 item
+        this.itemsPerPage = Math.max(1, itemsPerPage);
+        
+        // Actualizar el step basado en itemsPerPage
+        this.step = this.itemsPerPage * 2;
+        
+        console.log('SeriesCarousel: Items por página calculados:', {
+            containerWidth,
+            itemWidth,
+            gap,
+            itemsPerPage: this.itemsPerPage,
+            step: this.step
+        });
+        
+        return this.itemsPerPage;
     }
 
     setupEventListeners() {
