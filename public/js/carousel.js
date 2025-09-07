@@ -380,7 +380,7 @@ class Carousel {
                 });
             } else {
                 // Alinear a los límites de los items para que el de la izquierda esté completo
-                const alignedScroll = Math.ceil(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
+                const alignedScroll = Math.floor(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
                 
                 console.log(`Carousel: Next - Current: ${currentScroll}, Target: ${targetScroll}, Aligned: ${alignedScroll}`);
                 
@@ -892,7 +892,7 @@ class SeriesCarousel {
                 });
             } else {
                 // Alinear a los límites de los items para que el de la izquierda esté completo
-                const alignedScroll = Math.ceil(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
+                const alignedScroll = Math.floor(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
                 
                 console.log(`Carousel: Next - Current: ${currentScroll}, Target: ${targetScroll}, Aligned: ${alignedScroll}`);
                 
