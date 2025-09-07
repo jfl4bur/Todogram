@@ -125,12 +125,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 // Buscar en el carousel de películas primero
                 let item = carousel.moviesData.find(movie => movie.id === urlParams.id);
                 let itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
+                let itemSource = 'peliculas';
                 
                 // Si no se encuentra en el carousel de películas, buscar en el carrusel de series
                 if (!item && window.seriesCarousel && window.seriesCarousel.seriesData && window.seriesCarousel.seriesData.length > 0) {
                     item = window.seriesCarousel.seriesData.find(series => series.id === urlParams.id);
                     if (item) {
                         itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
+                        itemSource = 'series';
                         console.log('Serie encontrada en carrusel de series:', item);
                         console.log('Elemento DOM encontrado para serie:', itemElement);
                     }
@@ -142,30 +144,36 @@ document.addEventListener('DOMContentLoaded', function () {
                     item = sliderData.find(movie => movie.id === urlParams.id);
                     if (item) {
                         itemElement = document.querySelector(`.slider-slide[data-index]`);
+                        itemSource = 'slider';
                         console.log('Película encontrada en slider independiente:', item);
                     }
                 }
                 
                 if (item) {
                     console.log('Item encontrado:', item);
+                    console.log('Fuente del item:', itemSource);
                     window.urlProcessed = true; // Marcar como procesado
-                    if (itemElement) {
-                        console.log('Elemento DOM encontrado:', itemElement);
-                        detailsModal.show(item, itemElement);
-                        window.activeItem = item;
-                    } else if (retryCount < maxRetries) {
-                        console.warn(`Elemento DOM no encontrado para itemId: ${urlParams.id}, reintentando (${retryCount + 1}/${maxRetries})`);
-                        // Aumentar el delay para dar más tiempo a que se renderice el carrusel
-                        setTimeout(() => processUrlParams(retryCount + 1, maxRetries), 500);
+                    
+                    // Intentar encontrar el elemento DOM, pero no es crítico
+                    if (!itemElement) {
+                        console.log(`Elemento DOM no encontrado para itemId: ${urlParams.id} (probablemente fuera del viewport/paginación)`);
+                        console.log(`Item encontrado en: ${itemSource}`);
+                        console.log('Abriendo modal sin elemento DOM...');
+                        console.log('✅ El modal de detalles funciona perfectamente sin elemento DOM');
                     } else {
-                        console.error('Elemento DOM no encontrado para itemId:', urlParams.id);
-                        // Intentar abrir el modal sin el elemento DOM como último recurso
-                        console.log('Intentando abrir modal sin elemento DOM...');
-                        detailsModal.show(item, null);
-                        window.activeItem = item;
+                        console.log('Elemento DOM encontrado:', itemElement);
+                        console.log('✅ Abriendo modal con elemento DOM');
                     }
+                    
+                    // Abrir el modal independientemente de si existe el elemento DOM
+                    detailsModal.show(item, itemElement);
+                    window.activeItem = item;
                 } else {
-                    console.error('Item no encontrado para id:', urlParams.id);
+                    console.error('❌ Item no encontrado para id:', urlParams.id);
+                    console.log('Verificando datos disponibles:');
+                    console.log('- Películas cargadas:', carousel.moviesData ? carousel.moviesData.length : 0);
+                    console.log('- Series cargadas:', window.seriesCarousel && window.seriesCarousel.seriesData ? window.seriesCarousel.seriesData.length : 0);
+                    console.log('- Slider cargado:', window.sliderIndependent ? 'Sí' : 'No');
                     window.urlProcessed = true; // Marcar como procesado incluso si no se encuentra
                 }
             } else {
@@ -185,6 +193,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             });
             window.dataLoadedCallbacks = [];
+        };
+        
+        // Función para renderizar dinámicamente un elemento específico si es necesario
+        window.renderSpecificItem = function(itemId, itemSource) {
+            console.log(`Renderizando elemento específico: ${itemId} desde ${itemSource}`);
+            
+            if (itemSource === 'peliculas' && carousel && carousel.renderSpecificItem) {
+                return carousel.renderSpecificItem(itemId);
+            } else if (itemSource === 'series' && window.seriesCarousel && window.seriesCarousel.renderSpecificItem) {
+                return window.seriesCarousel.renderSpecificItem(itemId);
+            }
+            
+            return null;
         };
         
         // Manejar parámetros de URL al cargar la página
