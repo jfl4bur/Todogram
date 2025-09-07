@@ -341,8 +341,8 @@ class Carousel {
         const itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
         const totalItemWidth = itemWidth + gap;
         let currentScroll = this.wrapper.scrollLeft;
-        // Calcular el índice del primer item completamente visible
-        let firstVisibleIndex = Math.round(currentScroll / totalItemWidth);
+        // Usar floor para el índice del primer item visible
+        let firstVisibleIndex = Math.floor(currentScroll / totalItemWidth);
         if (direction === 'prev') {
             firstVisibleIndex = Math.max(0, firstVisibleIndex - itemsPerViewport);
         } else {
