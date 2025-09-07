@@ -341,17 +341,17 @@ class Carousel {
         const itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
         const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
 
-    // Alinear el scroll actual hacia el múltiplo inferior antes de calcular el siguiente desplazamiento
-    let currentScroll = this.wrapper.scrollLeft;
-    const alignedCurrentScroll = Math.floor(currentScroll / (itemWidth + gap)) * (itemWidth + gap);
-    this.wrapper.scrollLeft = alignedCurrentScroll;
-    currentScroll = alignedCurrentScroll;
-
+        let currentScroll = this.wrapper.scrollLeft;
         let targetScroll;
         if (direction === 'prev') {
             targetScroll = Math.max(0, currentScroll - actualScrollAmount);
         } else {
-            targetScroll = currentScroll + actualScrollAmount;
+            // Si estamos al inicio, forzar alineación exacta al primer item completo
+            if (currentScroll === 0) {
+                targetScroll = (itemWidth + gap);
+            } else {
+                targetScroll = currentScroll + actualScrollAmount;
+            }
         }
         // Alinear el scroll para que el item de la izquierda quede completo
         const alignedScroll = Math.round(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
