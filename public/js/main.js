@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         // Función para procesar parámetros de URL
-        function processUrlParams(retryCount = 0, maxRetries = 5) {
+        function processUrlParams(retryCount = 0, maxRetries = 10) {
             console.log('Procesando URL:', window.location.hash);
             const urlParams = detailsModal.getItemIdFromUrl();
             if (urlParams) {
@@ -102,11 +102,12 @@ document.addEventListener('DOMContentLoaded', function () {
                 let itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
                 
                 // Si no se encuentra en el carousel de películas, buscar en el carrusel de series
-                if (!item && window.seriesCarousel) {
+                if (!item && window.seriesCarousel && window.seriesCarousel.seriesData) {
                     item = window.seriesCarousel.seriesData.find(series => series.id === urlParams.id);
                     if (item) {
                         itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
                         console.log('Serie encontrada en carrusel de series:', item);
+                        console.log('Elemento DOM encontrado para serie:', itemElement);
                     }
                 }
                 
@@ -121,19 +122,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 
                 if (item) {
-                    console.log('Película encontrada:', item);
+                    console.log('Item encontrado:', item);
                     if (itemElement) {
                         console.log('Elemento DOM encontrado:', itemElement);
                         detailsModal.show(item, itemElement);
                         window.activeItem = item;
                     } else if (retryCount < maxRetries) {
                         console.warn(`Elemento DOM no encontrado para itemId: ${urlParams.id}, reintentando (${retryCount + 1}/${maxRetries})`);
-                        setTimeout(() => processUrlParams(retryCount + 1, maxRetries), 200);
+                        // Aumentar el delay para dar más tiempo a que se renderice el carrusel
+                        setTimeout(() => processUrlParams(retryCount + 1, maxRetries), 500);
                     } else {
                         console.error('Elemento DOM no encontrado para itemId:', urlParams.id);
+                        // Intentar abrir el modal sin el elemento DOM como último recurso
+                        console.log('Intentando abrir modal sin elemento DOM...');
+                        detailsModal.show(item, null);
+                        window.activeItem = item;
                     }
                 } else {
-                    console.error('Película no encontrada para id:', urlParams.id);
+                    console.error('Item no encontrado para id:', urlParams.id);
                 }
             } else {
                 console.log('No se encontraron parámetros de URL');

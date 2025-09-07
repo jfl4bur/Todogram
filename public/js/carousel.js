@@ -547,7 +547,7 @@ class SeriesCarousel {
             const item = this.seriesData[i];
             const div = document.createElement("div");
             div.className = "custom-carousel-item";
-            div.dataset.itemId = i;
+            div.dataset.itemId = item.id;
 
             const metaInfo = [];
             if (item.year) metaInfo.push(`<span>${item.year}</span>`);
