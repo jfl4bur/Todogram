@@ -485,11 +485,11 @@ class SeriesCarousel {
         const calculate = () => {
             const containerWidth = this.wrapper.clientWidth;
             if (containerWidth > 0) {
-                // Calcular cuántos elementos caben realmente en el viewport
-                this.itemsPerPage = Math.max(1, Math.floor(containerWidth / (itemWidth + gap)));
+                // Calcular dinámicamente basándose en elementos realmente visibles
+                this.itemsPerPage = this.getVisibleItemsCount();
                 // Calcular el step dinámicamente (renderizar más elementos que caben en el viewport)
                 this.step = Math.max(this.itemsPerPage * 2, 10);
-                console.log(`Carousel: itemsPerPage calculado: ${this.itemsPerPage} para width: ${containerWidth}`);
+                console.log(`Carousel: itemsPerPage calculado dinámicamente: ${this.itemsPerPage} para width: ${containerWidth}`);
                 console.log(`Carousel: step calculado: ${this.step}`);
             } else {
                 // Si no hay wrapper, usar valores mínimos dinámicos
