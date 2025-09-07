@@ -61,6 +61,10 @@ class Carousel {
                 // El step es exactamente los items que caben en la pantalla
                 this.step = this.itemsPerPage;
                 console.log(`Carousel: itemsPerPage: ${this.itemsPerPage}, step: ${this.step} para width: ${containerWidth}`);
+            } else {
+                // Valores mínimos para que funcione inicialmente
+                this.itemsPerPage = 1;
+                this.step = 1;
             }
         };
 
@@ -485,6 +489,10 @@ class SeriesCarousel {
                 // El step es exactamente los items que caben en la pantalla
                 this.step = this.itemsPerPage;
                 console.log(`Carousel: itemsPerPage: ${this.itemsPerPage}, step: ${this.step} para width: ${containerWidth}`);
+            } else {
+                // Valores mínimos para que funcione inicialmente
+                this.itemsPerPage = 1;
+                this.step = 1;
             }
         };
 
