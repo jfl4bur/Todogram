@@ -339,8 +339,8 @@ class Carousel {
         const gap = 4;
         const totalItemWidth = itemWidth + gap;
         
-        // Usar this.step que ya se calcula en base a los items visibles
-        const itemsToScroll = this.step || 1;
+        // Recalcular items visibles en cada scroll para asegurar que el valor es correcto
+        const itemsToScroll = Math.floor(this.wrapper.clientWidth / totalItemWidth) || 1;
         const scrollAmount = itemsToScroll * totalItemWidth;
 
         let currentScroll = this.wrapper.scrollLeft;
@@ -824,8 +824,8 @@ class SeriesCarousel {
         const gap = 4;
         const totalItemWidth = itemWidth + gap;
         
-        // Usar this.step que ya se calcula en base a los items visibles
-        const itemsToScroll = this.step || 1;
+        // Recalcular items visibles en cada scroll para asegurar que el valor es correcto
+        const itemsToScroll = Math.floor(this.wrapper.clientWidth / totalItemWidth) || 1;
         const scrollAmount = itemsToScroll * totalItemWidth;
 
         let currentScroll = this.wrapper.scrollLeft;
