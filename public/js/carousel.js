@@ -327,7 +327,8 @@ class Carousel {
     scrollToPrevPage() {
         const itemWidth = 194;
         const gap = 4;
-        const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
+        // Usar un scroll amount más pequeño y más apropiado
+        const scrollAmount = Math.min(this.itemsPerPage, 3) * (itemWidth + gap);
         console.log("SeriesCarousel: scrollToPrevPage ejecutado");
         console.log("SeriesCarousel: Scroll amount:", scrollAmount, "Items per page:", this.itemsPerPage);
         if (this.wrapper) {
@@ -344,7 +345,8 @@ class Carousel {
     scrollToNextPage() {
         const itemWidth = 194;
         const gap = 4;
-        const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
+        // Usar un scroll amount más pequeño y más apropiado
+        const scrollAmount = Math.min(this.itemsPerPage, 3) * (itemWidth + gap);
         console.log("SeriesCarousel: scrollToNextPage ejecutado");
         console.log("SeriesCarousel: Scroll amount:", scrollAmount, "Items per page:", this.itemsPerPage);
         if (this.wrapper) {
@@ -475,6 +477,7 @@ class SeriesCarousel {
             } else {
                 this.itemsPerPage = 5;
             }
+            console.log("SeriesCarousel: setupResizeObserver - Items per page:", this.itemsPerPage, "Container width:", containerWidth);
         };
 
         calculate();
@@ -482,6 +485,26 @@ class SeriesCarousel {
             calculate();
         });
         resizeObserver.observe(this.wrapper);
+    }
+
+    calculateItemsPerPage() {
+        if (!this.wrapper) {
+            console.error('wrapper no definido en calculateItemsPerPage');
+            this.itemsPerPage = 5;
+            return;
+        }
+
+        const itemWidth = 194;
+        const gap = 4;
+        const containerWidth = this.wrapper.clientWidth;
+        
+        if (containerWidth > 0) {
+            this.itemsPerPage = Math.max(1, Math.floor(containerWidth / (itemWidth + gap)));
+        } else {
+            this.itemsPerPage = 5;
+        }
+        
+        console.log("SeriesCarousel: calculateItemsPerPage - Items per page:", this.itemsPerPage, "Container width:", containerWidth);
     }
 
     setupEventListeners() {
@@ -799,7 +822,8 @@ class SeriesCarousel {
     scrollToPrevPage() {
         const itemWidth = 194;
         const gap = 4;
-        const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
+        // Usar un scroll amount más pequeño y más apropiado
+        const scrollAmount = Math.min(this.itemsPerPage, 3) * (itemWidth + gap);
         console.log("SeriesCarousel: scrollToPrevPage ejecutado");
         console.log("SeriesCarousel: Scroll amount:", scrollAmount, "Items per page:", this.itemsPerPage);
         if (this.wrapper) {
@@ -816,7 +840,8 @@ class SeriesCarousel {
     scrollToNextPage() {
         const itemWidth = 194;
         const gap = 4;
-        const scrollAmount = Math.max(1, this.itemsPerPage) * (itemWidth + gap);
+        // Usar un scroll amount más pequeño y más apropiado
+        const scrollAmount = Math.min(this.itemsPerPage, 3) * (itemWidth + gap);
         console.log("SeriesCarousel: scrollToNextPage ejecutado");
         console.log("SeriesCarousel: Scroll amount:", scrollAmount, "Items per page:", this.itemsPerPage);
         if (this.wrapper) {
