@@ -90,7 +90,6 @@ class Carousel {
     }
 
     setupEventListeners() {
-        window.addEventListener('resize', () => this.calculateItemsPerPage());
         this.carouselPrev.addEventListener('click', (e) => {
             e.preventDefault();
             this.scrollToPrevPage();
@@ -328,7 +327,13 @@ class Carousel {
     scrollToPrevPage() {
         const itemWidth = 194;
         const gap = 4;
-        const scrollAmount = this.itemsPerPage * (itemWidth + gap);
+        const itemSize = itemWidth + gap;
+        
+        // Calcular itemsPerPage dinámicamente en cada scroll
+        const containerWidth = this.wrapper.clientWidth;
+        const itemsPerPage = containerWidth > 0 ? Math.max(1, Math.floor(containerWidth / itemSize)) : 5;
+        
+        const scrollAmount = itemsPerPage * itemSize;
         this.wrapper.scrollBy({
             left: -scrollAmount,
             behavior: 'smooth'
@@ -338,7 +343,13 @@ class Carousel {
     scrollToNextPage() {
         const itemWidth = 194;
         const gap = 4;
-        const scrollAmount = this.itemsPerPage * (itemWidth + gap);
+        const itemSize = itemWidth + gap;
+        
+        // Calcular itemsPerPage dinámicamente en cada scroll
+        const containerWidth = this.wrapper.clientWidth;
+        const itemsPerPage = containerWidth > 0 ? Math.max(1, Math.floor(containerWidth / itemSize)) : 5;
+        
+        const scrollAmount = itemsPerPage * itemSize;
         this.wrapper.scrollBy({
             left: scrollAmount,
             behavior: 'smooth'
@@ -465,7 +476,6 @@ class SeriesCarousel {
             wrapper: !!this.wrapper
         });
         
-        window.addEventListener('resize', () => this.calculateItemsPerPage());
         
         if (this.carouselPrev) {
             this.carouselPrev.addEventListener('click', (e) => {
@@ -805,7 +815,13 @@ class SeriesCarousel {
     scrollToPrevPage() {
         const itemWidth = 194;
         const gap = 4;
-        const scrollAmount = this.itemsPerPage * (itemWidth + gap);
+        const itemSize = itemWidth + gap;
+        
+        // Calcular itemsPerPage dinámicamente en cada scroll
+        const containerWidth = this.wrapper.clientWidth;
+        const itemsPerPage = containerWidth > 0 ? Math.max(1, Math.floor(containerWidth / itemSize)) : 5;
+        
+        const scrollAmount = itemsPerPage * itemSize;
         this.wrapper.scrollBy({
             left: -scrollAmount,
             behavior: 'smooth'
@@ -815,7 +831,13 @@ class SeriesCarousel {
     scrollToNextPage() {
         const itemWidth = 194;
         const gap = 4;
-        const scrollAmount = this.itemsPerPage * (itemWidth + gap);
+        const itemSize = itemWidth + gap;
+        
+        // Calcular itemsPerPage dinámicamente en cada scroll
+        const containerWidth = this.wrapper.clientWidth;
+        const itemsPerPage = containerWidth > 0 ? Math.max(1, Math.floor(containerWidth / itemSize)) : 5;
+        
+        const scrollAmount = itemsPerPage * itemSize;
         this.wrapper.scrollBy({
             left: scrollAmount,
             behavior: 'smooth'
