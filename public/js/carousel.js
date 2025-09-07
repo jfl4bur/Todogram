@@ -7,9 +7,9 @@ class Carousel {
         this.carouselPrev = document.getElementById('carousel-prev');
         this.carouselNext = document.getElementById('carousel-next');
         this.carouselContainer = document.querySelector('.carousel-container');
-        this.itemsPerPage = 5; // Se calculará dinámicamente
+        this.itemsPerPage = 8; // Valor por defecto más alto
         this.index = 0;
-        this.step = 0; // Se calculará dinámicamente basado en itemsPerPage
+        this.step = 16; // Valor por defecto más alto
         this.moreAppended = false;
         this.moviesData = [];
         this.hoverTimeouts = {};
@@ -41,15 +41,14 @@ class Carousel {
         this.setupEventListeners();
         // Calcular items por página dinámicamente
         this.calculateItemsPerPage();
-        // El step será 2x itemsPerPage para renderizar más elementos inicialmente
-        this.step = this.itemsPerPage * 2;
         this.loadMoviesData();
     }
 
     setupResizeObserver() {
         if (!this.wrapper) {
             console.error('wrapper no definido en setupResizeObserver');
-            this.itemsPerPage = 5;
+            this.itemsPerPage = 8;
+            this.step = 16;
             return;
         }
 
@@ -74,8 +73,8 @@ class Carousel {
 
     calculateItemsPerPage() {
         if (!this.wrapper) {
-            this.itemsPerPage = 5;
-            this.step = 10;
+            this.itemsPerPage = 8;
+            this.step = 16;
             return;
         }
 
@@ -385,9 +384,9 @@ class SeriesCarousel {
         this.carouselPrev = document.getElementById('series-carousel-prev');
         this.carouselNext = document.getElementById('series-carousel-next');
         this.carouselContainer = document.querySelector('#series-carousel-wrapper').parentElement;
-        this.itemsPerPage = 5; // Se calculará dinámicamente
+        this.itemsPerPage = 8; // Valor por defecto más alto
         this.index = 0;
-        this.step = 0; // Se calculará dinámicamente basado en itemsPerPage
+        this.step = 16; // Valor por defecto más alto
         this.moreAppended = false;
         this.seriesData = [];
         this.hoverTimeouts = {};
@@ -441,15 +440,14 @@ class SeriesCarousel {
         this.setupEventListeners();
         // Calcular items por página dinámicamente
         this.calculateItemsPerPage();
-        // El step será 2x itemsPerPage para renderizar más elementos inicialmente
-        this.step = this.itemsPerPage * 2;
         this.loadSeriesData();
     }
 
     setupResizeObserver() {
         if (!this.wrapper) {
             console.error('wrapper no definido en setupResizeObserver');
-            this.itemsPerPage = 5;
+            this.itemsPerPage = 8;
+            this.step = 16;
             return;
         }
 
