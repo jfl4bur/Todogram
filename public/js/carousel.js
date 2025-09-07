@@ -82,15 +82,6 @@ class Carousel {
             this.scrollToNextPage();
         });
         this.wrapper.addEventListener('scroll', () => this.handleScroll());
-        
-        // Alineación automática cuando el usuario termina de hacer scroll manual
-        let scrollTimeout;
-        this.wrapper.addEventListener('scroll', () => {
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => {
-                this.alignScrollOnEnd();
-            }, 150); // Esperar 150ms después del último scroll
-        });
     }
 
     async loadMoviesData() {
@@ -331,9 +322,9 @@ class Carousel {
         const gap = 4;
         const containerWidth = this.wrapper.clientWidth;
         
-        // Calcular cuántos elementos caben realmente en el viewport
-        // Usar un cálculo más agresivo para asegurar que avance todos los elementos visibles
-        const itemsPerViewport = Math.max(1, Math.ceil(containerWidth / (itemWidth + gap)) + 1);
+        // Contar elementos realmente visibles en el DOM
+        const visibleItems = this.countVisibleItems();
+        const itemsPerViewport = Math.max(1, visibleItems);
         const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
         
         console.log(`Carousel: Paginación dinámica - ${itemsPerViewport} elementos por viewport`);
@@ -385,6 +376,28 @@ class Carousel {
         if (this.wrapper.scrollLeft + this.wrapper.clientWidth >= this.wrapper.scrollWidth - 200) {
             this.renderItems();
         }
+    }
+
+    // Método para contar elementos realmente visibles
+    countVisibleItems() {
+        if (!this.wrapper) return 1;
+        
+        const items = this.wrapper.querySelectorAll('.custom-carousel-item');
+        if (items.length === 0) return 1;
+        
+        const containerRect = this.wrapper.getBoundingClientRect();
+        let visibleCount = 0;
+        
+        items.forEach(item => {
+            const itemRect = item.getBoundingClientRect();
+            // Un elemento es visible si está dentro del contenedor
+            if (itemRect.left >= containerRect.left && itemRect.right <= containerRect.right) {
+                visibleCount++;
+            }
+        });
+        
+        console.log(`Carousel: Total items: ${items.length}, Visible items: ${visibleCount}`);
+        return Math.max(1, visibleCount);
     }
 
     // Método para alinear automáticamente el scroll cuando el usuario termina de hacer scroll manual
@@ -546,15 +559,6 @@ class SeriesCarousel {
         
         if (this.wrapper) {
             this.wrapper.addEventListener('scroll', () => this.handleScroll());
-            
-            // Alineación automática cuando el usuario termina de hacer scroll manual
-            let scrollTimeout;
-            this.wrapper.addEventListener('scroll', () => {
-                clearTimeout(scrollTimeout);
-                scrollTimeout = setTimeout(() => {
-                    this.alignScrollOnEnd();
-                }, 150); // Esperar 150ms después del último scroll
-            });
         } else {
             console.error("SeriesCarousel: Wrapper no encontrado para scroll");
         }
@@ -827,9 +831,9 @@ class SeriesCarousel {
         const gap = 4;
         const containerWidth = this.wrapper.clientWidth;
         
-        // Calcular cuántos elementos caben realmente en el viewport
-        // Usar un cálculo más agresivo para asegurar que avance todos los elementos visibles
-        const itemsPerViewport = Math.max(1, Math.ceil(containerWidth / (itemWidth + gap)) + 1);
+        // Contar elementos realmente visibles en el DOM
+        const visibleItems = this.countVisibleItems();
+        const itemsPerViewport = Math.max(1, visibleItems);
         const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
         
         console.log(`Carousel: Paginación dinámica - ${itemsPerViewport} elementos por viewport`);
@@ -881,6 +885,28 @@ class SeriesCarousel {
         if (this.wrapper.scrollLeft + this.wrapper.clientWidth >= this.wrapper.scrollWidth - 200) {
             this.renderItems();
         }
+    }
+
+    // Método para contar elementos realmente visibles
+    countVisibleItems() {
+        if (!this.wrapper) return 1;
+        
+        const items = this.wrapper.querySelectorAll('.custom-carousel-item');
+        if (items.length === 0) return 1;
+        
+        const containerRect = this.wrapper.getBoundingClientRect();
+        let visibleCount = 0;
+        
+        items.forEach(item => {
+            const itemRect = item.getBoundingClientRect();
+            // Un elemento es visible si está dentro del contenedor
+            if (itemRect.left >= containerRect.left && itemRect.right <= containerRect.right) {
+                visibleCount++;
+            }
+        });
+        
+        console.log(`Carousel: Total items: ${items.length}, Visible items: ${visibleCount}`);
+        return Math.max(1, visibleCount);
     }
 
     // Método para alinear automáticamente el scroll cuando el usuario termina de hacer scroll manual
