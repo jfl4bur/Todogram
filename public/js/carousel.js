@@ -46,7 +46,7 @@ class Carousel {
         if (!this.wrapper) {
             console.error('wrapper no definido en setupResizeObserver');
             this.itemsPerPage = 1;
-            this.step = 5;
+            this.step = 500000;
             return;
         }
 
@@ -492,8 +492,9 @@ class SeriesCarousel {
                 console.log(`Carousel: itemsPerPage calculado: ${this.itemsPerPage} para width: ${containerWidth}`);
                 console.log(`Carousel: step calculado: ${this.step}`);
             } else {
+                // Si no hay wrapper, usar valores mínimos dinámicos
                 this.itemsPerPage = 1;
-                this.step = 5;
+                this.step = 1;
             }
         };
 
