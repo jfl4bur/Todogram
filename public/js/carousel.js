@@ -376,10 +376,13 @@ class Carousel {
             // Usar el ancho total de cada item incluyendo el gap
             const targetScroll = currentScroll + (itemsPerViewport * (itemWidth + gap));
             
-            console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}`);
+            // Alinear a los límites de los items para que el de la izquierda esté completo
+            const alignedScroll = Math.floor(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
+            
+            console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}, Aligned: ${alignedScroll}`);
             
             this.wrapper.scrollTo({
-                left: targetScroll,
+                left: alignedScroll,
                 behavior: 'auto'
             });
         }
@@ -881,10 +884,13 @@ class SeriesCarousel {
             // Usar el ancho total de cada item incluyendo el gap
             const targetScroll = currentScroll + (itemsPerViewport * (itemWidth + gap));
             
-            console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}`);
+            // Alinear a los límites de los items para que el de la izquierda esté completo
+            const alignedScroll = Math.floor(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
+            
+            console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}, Aligned: ${alignedScroll}`);
             
             this.wrapper.scrollTo({
-                left: targetScroll,
+                left: alignedScroll,
                 behavior: 'auto'
             });
         }
