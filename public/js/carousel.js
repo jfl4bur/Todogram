@@ -81,6 +81,26 @@ class Carousel {
         this.wrapper.addEventListener('scroll', () => this.handleScroll());
     }
 
+    calculateItemsPerPage() {
+        if (!this.wrapper) {
+            console.error('wrapper no definido en calculateItemsPerPage');
+            this.itemsPerPage = 5;
+            return;
+        }
+
+        const itemWidth = 194;
+        const gap = 4;
+        const containerWidth = this.wrapper.clientWidth;
+        
+        if (containerWidth > 0) {
+            this.itemsPerPage = Math.max(1, Math.floor(containerWidth / (itemWidth + gap)));
+        } else {
+            this.itemsPerPage = 5;
+        }
+        
+        console.log("Carousel: calculateItemsPerPage - Items per page:", this.itemsPerPage, "Container width:", containerWidth);
+    }
+
     async loadMoviesData() {
         try {
             // Intentar usar datos compartidos primero
@@ -533,6 +553,8 @@ class SeriesCarousel {
             this.carouselPrev.addEventListener('click', (e) => {
                 e.preventDefault();
                 console.log("SeriesCarousel: Botón anterior clickeado");
+                console.log("SeriesCarousel: Wrapper disponible:", !!this.wrapper);
+                console.log("SeriesCarousel: Items per page:", this.itemsPerPage);
                 this.scrollToPrevPage();
             });
             console.log("SeriesCarousel: Event listener del botón anterior configurado");
@@ -544,6 +566,8 @@ class SeriesCarousel {
             this.carouselNext.addEventListener('click', (e) => {
                 e.preventDefault();
                 console.log("SeriesCarousel: Botón siguiente clickeado");
+                console.log("SeriesCarousel: Wrapper disponible:", !!this.wrapper);
+                console.log("SeriesCarousel: Items per page:", this.itemsPerPage);
                 this.scrollToNextPage();
             });
             console.log("SeriesCarousel: Event listener del botón siguiente configurado");
