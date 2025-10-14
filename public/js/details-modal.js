@@ -248,6 +248,42 @@ class DetailsModal {
         const postersGallery = posters.length > 0 ? this.createGallerySkeleton('poster', 5) : '';
         const backdropsGallery = backdrops.length > 0 ? this.createGallerySkeleton('backdrop', 4) : '';
         
+        // Sección de episodios/temporadas para series
+        let episodesSection = '';
+        if ((item['Categoría'] === 'Series' || item['series']) && item['Título episodio'] && item['Título episodio'].trim() !== '') {
+            // Buscar todos los episodios de la misma serie y temporada
+            let allData = window.moviesData || [];
+            // Fallback si no está en window
+            if (!allData.length && window.seriesCarousel && window.seriesCarousel.moviesData) {
+                allData = window.seriesCarousel.moviesData;
+            }
+            // Agrupar por temporada si hay campo Temporada
+            let currentSerie = item['Título'] || item['series'] || '';
+            let currentSeason = item['Temporada'] || '';
+            let episodes = allData.filter(ep =>
+                (ep['series'] === item['series'] || ep['Título'] === currentSerie) &&
+                ep['Temporada'] === currentSeason &&
+                ep['Título episodio'] && ep['Título episodio'].trim() !== ''
+            );
+            if (episodes.length > 0) {
+                episodesSection = `<div class="details-modal-episodes-section">
+                    <h3 class="details-modal-episodes-title">Temporada ${currentSeason || '1'}</h3>
+                    <div class="details-modal-episodes-list">
+                        ${episodes.map((ep, idx) => `
+                            <div class="details-modal-episode-item">
+                                <div class="details-modal-episode-number">${idx + 1}</div>
+                                <div class="details-modal-episode-info">
+                                    <div class="details-modal-episode-title">${ep['Título episodio']}</div>
+                                    <div class="details-modal-episode-duration">${ep['Duración'] || ''}</div>
+                                    <div class="details-modal-episode-synopsis">${ep['Synopsis'] || ''}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>`;
+            }
+        }
+
         this.detailsModalBody.innerHTML = `
             <h1 class="details-modal-title">${item.title}</h1>
             ${tmdbData?.original_title && tmdbData.original_title.toLowerCase() !== item.title.toLowerCase() ? `<div class="details-modal-original-title">${tmdbData.original_title}</div>` : ''}
@@ -259,6 +295,7 @@ class DetailsModal {
             </div>
             ${taglineSection}
             <div class="details-modal-description">${description}</div>
+            ${episodesSection}
             <div class="details-modal-info">${infoItems}</div>
             ${directorsSection}
             ${writersSection}
