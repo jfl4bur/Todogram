@@ -420,7 +420,22 @@ class EpisodesCarousel {
             return;
         }
 
-        this.init();
+        // Si seriesCarousel no está aún inicializado, esperar brevemente antes de iniciar
+        if (!window.seriesCarousel && !window.sharedData) {
+            console.log('EpisodesCarousel: esperando a que SeriesCarousel o sharedData estén disponibles...');
+            const wait = setInterval(() => {
+                if (window.seriesCarousel || window.sharedData) {
+                    clearInterval(wait);
+                    try {
+                        this.init();
+                    } catch (e) {
+                        console.error('EpisodesCarousel: error al inicializar después de esperar', e);
+                    }
+                }
+            }, 250);
+        } else {
+            this.init();
+        }
     }
 
     init() {
@@ -465,29 +480,52 @@ class EpisodesCarousel {
                 window.sharedData = data;
             }
 
-            // Filtrar entradas que pertenezcan a series y que tengan 'Título episodio'
+            // Normalizar texto útil para matching
             const normalize = (s) => String(s || '').normalize ? String(s || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().trim() : String(s || '').toLowerCase().trim();
+
+            // Queremos TODOS los episodios pertenecientes a Series.
+            // Estrategia:
+            // - Identificar los índices de los items que son 'Series' (padres)
+            // - Para cada entrada en data que tenga 'Título episodio' no vacío o que explícitamente pertenezca a una serie (Categoría === 'Series' y tenga 'Episodio' o similar), incluirla.
+            const seriesIndices = data.reduce((acc, it, idx) => {
+                if (it && typeof it === 'object' && it['Categoría'] === 'Series' && (!it['Título episodio'] || String(it['Título episodio']).trim() === '')) acc.push(idx);
+                return acc;
+            }, []);
+
             this.episodesData = data
                 .map((item, idx) => ({ raw: item, rawIndex: idx }))
-                .filter(entry => entry.raw && String(entry.raw['Título episodio'] || '').trim() !== '')
+                .filter(entry => {
+                    const raw = entry.raw;
+                    if (!raw || typeof raw !== 'object') return false;
+                    // incluir si tiene 'Título episodio' no vacío
+                    if (String(raw['Título episodio'] || '').trim() !== '') return true;
+                    // incluir si claramente es una entrada de tipo 'episodio' (Categoría serie y no es el registro padre)
+                    if (raw['Categoría'] === 'Series' && raw['Título episodio'] && String(raw['Título episodio']).trim() !== '') return true;
+                    // incluir si pertenece visiblemente a una serie por tener campo 'Episodio' o 'Temporada' u otros indicadores
+                    if (raw['Temporada'] || raw['Episodio'] || raw['Capítulo']) return true;
+                    // fallback: si su título coincide con un padre + tiene campos que lo diferencian, incluir
+                    const t = normalize(raw['Título'] || '');
+                    if (t && seriesIndices.some(si => normalize(data[si]['Título'] || '') === t)) return true;
+                    return false;
+                })
                 .map(entry => {
                     const raw = entry.raw;
-                    const parentTitle = raw['Título'] || '';
+                    const parentTitle = raw['Título'] || raw['Serie'] || '';
                     // buscar un item padre en data que represente la serie (preferir uno sin 'Título episodio')
-                    let parentIndex = data.findIndex(d => normalize(d['Título']) === normalize(parentTitle) && (!d['Título episodio'] || String(d['Título episodio']).trim() === ''));
+                    let parentIndex = data.findIndex(d => normalize(d['Título'] || d['Serie'] || '') === normalize(parentTitle) && (!d['Título episodio'] || String(d['Título episodio']).trim() === ''));
                     if (parentIndex === -1) {
                         // fallback: cualquier coincidencia por título
-                        parentIndex = data.findIndex(d => normalize(d['Título']) === normalize(parentTitle));
+                        parentIndex = data.findIndex(d => normalize(d['Título'] || d['Serie'] || '') === normalize(parentTitle));
                     }
                     const parentItem = parentIndex !== -1 ? data[parentIndex] : raw; // si no hay padre, usar el mismo registro
 
                     return {
                         id: entry.rawIndex.toString(),
-                        title: raw['Título episodio'] || raw['Título'] || 'Episodio',
+                        title: raw['Título episodio'] || raw['Título'] || raw['Capítulo'] || 'Episodio',
                         parentTitle: parentTitle,
                         posterUrl: raw['Portada'] || raw['Carteles'] || parentItem['Portada'] || '',
                         synopsis: raw['Synopsis'] || raw['Sinopsis'] || raw['Descripción'] || '',
-                        videoUrl: raw['Video iframe'] || raw['Video iframe 1'] || raw['Ver Película'] || '',
+                        videoUrl: raw['Video iframe'] || raw['Video iframe 1'] || raw['Ver Película'] || raw['Enlace'] || '',
                         rawIndex: entry.rawIndex,
                         parentIndex: (parentIndex !== -1) ? parentIndex : entry.rawIndex,
                         parentItem: parentItem
@@ -573,7 +611,7 @@ class EpisodesCarousel {
             div.innerHTML = `
                 <div class="loader"><i class="fas fa-spinner"></i></div>
                 <div class="poster-container">
-                    <img class="poster-image" src="${posterUrl}" alt="${ep.title}" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease" loading="lazy">
+                    <img class="poster-image" src="${posterUrl}" alt="${ep.title}" style="opacity:0;transition:opacity 0.3s ease" loading="lazy">
                 </div>
                 <img class="detail-background" src="${posterUrl}" alt="${ep.title} - Background" loading="lazy" style="display:none">
                 <div class="carousel-overlay">
@@ -581,6 +619,23 @@ class EpisodesCarousel {
                     ${ep.synopsis ? `<div class="carousel-description">${ep.synopsis}</div>` : ''}
                 </div>
             `;
+
+            // After inserting HTML, attach a robust load handler to hide the loader
+
+            // Attach load handler to image to hide loader robustly
+            const imgEl = div.querySelector('.poster-image');
+            if (imgEl) {
+                imgEl.addEventListener('load', function () {
+                    try {
+                        const item = this.closest('.custom-carousel-item');
+                        const loader = item ? item.querySelector('.loader') : null;
+                        if (loader) loader.style.display = 'none';
+                        this.style.opacity = '1';
+                    } catch (e) {
+                        this.style.opacity = '1';
+                    }
+                });
+            }
 
             // Hover behavior similar a SeriesCarousel
             if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
@@ -652,8 +707,8 @@ class EpisodesCarousel {
     scrollToNextPage() { this.scrollToPage('next'); }
     scrollToPage(direction) {
         if (!this.wrapper) return;
-        const itemWidth = 320;
-        const gap = 8;
+        const itemWidth = 194;
+        const gap = 4;
         const containerWidth = this.wrapper.clientWidth;
         const itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
         const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
