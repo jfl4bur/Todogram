@@ -3,6 +3,7 @@
     --secondary-color: #2a2a2a;
     --text-color: #ffffff;
     --text-secondary: #cccccc;
+    --text-muted: #dcdcdc;
     --bg-color: #141414;
     --hover-brightness: 1.2;
     --item-width: 194px;
@@ -200,8 +201,6 @@ button:focus {
     font-size: 1.8rem;
     font-weight: 600;
     margin-bottom: 15px;
-    background-color: rgba(42, 42, 42, 0.5);
-    border-radius: 4px;
     padding-left: 5px;
     color: var(--text-color);
 }
@@ -247,49 +246,6 @@ button:focus {
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-/* Skeleton específico para el carrusel de episodios en formato 16:9 */
-.episodes-skeleton .skeleton-item {
-    width: var(--item-width);
-    height: auto;
-}
-.episodes-skeleton .skeleton-item .ratio-16-9 {
-    width: 100%;
-    padding-top: 56.25%;
-    position: relative;
-    background: #111;
-    border-radius: 8px;
-    overflow: hidden;
-}
-.episodes-skeleton .skeleton-item .ratio-16-9 .skeleton-spinner {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    width: 36px;
-    height: 36px;
-    border: 4px solid rgba(255,255,255,0.08);
-    border-top-color: var(--primary-color);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-/* Forzar tamaño y aspect-ratio de los items renderizados en el carrusel de episodios */
-#episodes-carousel-wrapper .custom-carousel-item { 
-    flex: 0 0 auto;
-    width: var(--item-width);
-    box-sizing: border-box;
-}
-#episodes-carousel-wrapper .poster-container { 
-    width: 100%;
-    padding-top: 56.25%;
-    position: relative;
-    overflow: hidden;
-    border-radius: 8px;
-}
-#episodes-carousel-wrapper .poster-container .poster-image { 
-    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
 }
 
 .skeleton-spinner {
@@ -669,8 +625,8 @@ button:focus {
 
     .details-modal-episode-meta{flex:1;min-width:0}
     .details-modal-episode-title{font-weight:700;margin-bottom:8px;font-size:16px}
-    /* Sinopsis de episodios: color ligeramente gris para diferenciar del título */
-    .details-modal-episode-synopsis{color:var(--text-secondary);font-size:14px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis;line-clamp:4}
+    /* Sinopsis de episodios: color ligeramente gris para diferenciar del título. Color ajustado para mayor contraste */
+    .details-modal-episode-synopsis{color:var(--text-muted);font-size:14px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis;line-clamp:4}
 
     /* Responsive: tablets */
     @media (max-width: 992px) {
@@ -1075,7 +1031,7 @@ button:focus {
 .details-modal-description {
     margin-bottom: 24px;
     line-height: 1.6;
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--text-muted); /* mismo gris que las sinopsis de episodios */
 }
 
 .details-modal-info {
