@@ -606,14 +606,21 @@ class DetailsModal {
     // Cache simple para el JSON completo
     async loadAllData() {
         if (this.domCache.allData) return this.domCache.allData;
+        // Si la app ya cargó la data globalmente, usarla
+        if (window.allData && Array.isArray(window.allData) && window.allData.length > 0) {
+            console.log('DetailsModal: usando window.allData en lugar de fetch');
+            this.domCache.allData = window.allData;
+            return this.domCache.allData;
+        }
         try {
+            console.log('DetailsModal: intentando cargar /public/data.json');
             const resp = await fetch('/public/data.json');
             if (!resp.ok) throw new Error('No se pudo cargar data.json');
             const data = await resp.json();
             this.domCache.allData = data;
             return data;
         } catch (err) {
-            console.warn('Fallo al cargar /public/data.json, intentando data.json en la raíz', err);
+            console.warn('DetailsModal: fallo al cargar /public/data.json, intentando /data.json', err);
             try {
                 const resp2 = await fetch('/data.json');
                 if (!resp2.ok) throw new Error('No se pudo cargar data.json');
@@ -621,7 +628,7 @@ class DetailsModal {
                 this.domCache.allData = data2;
                 return data2;
             } catch (err2) {
-                console.error('No se pudo cargar data.json en ninguna ruta', err2);
+                console.error('DetailsModal: No se pudo cargar data.json en ninguna ruta', err2);
                 return [];
             }
         }
@@ -637,7 +644,8 @@ class DetailsModal {
         // Si no hay título episodio y no es serie/anime, no mostrar sección
         if (!itemEpisodeTitle && !/(series|animes|anime|miniserie)/i.test(itemCategory)) return '';
 
-        const allData = await this.loadAllData();
+    const allData = await this.loadAllData();
+    console.log('DetailsModal: getEpisodesSection -> datos cargados, total items:', Array.isArray(allData) ? allData.length : 0);
         if (!Array.isArray(allData) || allData.length === 0) return '';
 
         // Agrupar por el campo 'Título' y filtrar por coincidencias en 'Categoría' de tipo serie
@@ -655,6 +663,7 @@ class DetailsModal {
             const hasEpisode = (d['Título episodio'] || '').toString().trim() !== '';
             return title === normalizedTitle && (hasEpisode || /(series|animes|anime|miniserie)/i.test(cat));
         });
+        console.log('DetailsModal: getEpisodesSection -> encontrados relacionados:', related.length);
 
         if (!related || related.length === 0) return '';
 
