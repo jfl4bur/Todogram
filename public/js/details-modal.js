@@ -385,6 +385,19 @@ class DetailsModal {
         }, 100);
 
         // Insertar la sección de episodios de forma asíncrona (no bloquear el render)
+        // Inicializar la sinopsis principal como colapsada
+        setTimeout(() => {
+            const mainDesc = this.detailsModalBody.querySelector('.details-modal-description');
+            if (mainDesc) {
+                mainDesc.classList.add('collapsed');
+                mainDesc.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    mainDesc.classList.toggle('expanded');
+                    mainDesc.classList.toggle('collapsed');
+                });
+            }
+        }, 50);
+
         this.insertEpisodesSection(item).catch(err => console.warn('DetailsModal: insertEpisodesSection fallo', err));
         
         if (this.isIOS()) {
@@ -767,6 +780,15 @@ class DetailsModal {
                         if (e.target.closest('.details-modal-episode-play')) return;
                         const url = card.getAttribute('data-video-url');
                         if (url) this.openEpisodePlayer(url);
+                    });
+                });
+                // Inicializar sinopsis de episodios como colapsadas y añadir toggle
+                container.querySelectorAll('.details-modal-episode-synopsis').forEach(syn => {
+                    syn.classList.add('collapsed');
+                    syn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        syn.classList.toggle('expanded');
+                        syn.classList.toggle('collapsed');
                     });
                 });
             }

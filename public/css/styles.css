@@ -673,6 +673,41 @@ button:focus {
 
     /* End of episodes styles */
 
+    /* Toggleable synopsis: collapsed (clamped) / expanded (full) */
+    .details-modal-episode-synopsis,
+    .details-modal-description {
+        cursor: pointer;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+
+    .details-modal-episode-synopsis.collapsed,
+    .details-modal-description.collapsed {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 4;
+        line-clamp: 4;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .details-modal-episode-synopsis.expanded,
+    .details-modal-description.expanded {
+        display: block;
+        -webkit-line-clamp: unset;
+        line-clamp: unset;
+        overflow: visible;
+    }
+
+    /* Ensure in small devices the default clamp is 3 lines if needed */
+    @media (max-width: 420px) {
+        .details-modal-episode-synopsis.collapsed,
+        .details-modal-description.collapsed {
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+        }
+    }
+
 .genre-info {
     font-family: 'Slider Sans UI', sans-serif;
     font-size: 0.8rem;
