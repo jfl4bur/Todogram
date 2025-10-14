@@ -65,55 +65,7 @@ class DetailsModal {
                     </div>
                 `;
                 document.body.appendChild(overlay);
-                // Estilos mínimos para el overlay
-                const style = document.createElement('style');
-                style.id = 'details-episode-player-styles';
-                style.innerHTML = `
-                    /* Player overlay */
-                    .details-episode-player-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;z-index:99999}
-                    .details-episode-player-inner{width:100%;height:100%;position:relative;display:flex;align-items:center;justify-content:center}
-                    .details-episode-player-iframe{width:100%;height:100%;border:0}
-                    .details-episode-player-close{position:absolute;top:18px;right:18px;z-index:100000;background:rgba(0,0,0,0.5);color:#fff;border:0;padding:10px 12px;border-radius:6px;font-size:20px;cursor:pointer}
-
-                    /* Episode list layout */
-                    .details-modal-episodes-list{display:flex;flex-direction:column;gap:6px}
-                    .details-modal-episode-item{display:flex;gap:18px;align-items:flex-start;padding:14px 12px;border-bottom:1px solid rgba(255,255,255,0.04)}
-
-                    /* Thumbnail */
-                    .details-modal-episode-thumb{width:220px;height:124px;flex:0 0 220px;overflow:hidden;border-radius:6px;background:#111;position:relative;box-shadow:0 4px 12px rgba(0,0,0,0.6)}
-                    .details-modal-episode-thumb img{width:100%;height:100%;object-fit:cover;display:block}
-                    .details-modal-play-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
-                    .details-modal-play-overlay .details-modal-episode-play{background:rgba(0,0,0,0.6);border:0;color:#fff;padding:14px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
-                    .details-modal-episode-number{position:absolute;left:8px;top:8px;background:rgba(0,0,0,0.45);color:#fff;padding:6px 8px;border-radius:4px;font-weight:700}
-
-                    .details-modal-episode-meta{flex:1;min-width:0}
-                    .details-modal-episode-title{font-weight:700;margin-bottom:8px;font-size:16px}
-                    .details-modal-episode-synopsis{color:rgba(255,255,255,0.82);font-size:14px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis}
-
-                    /* Responsive: tablets */
-                    @media (max-width: 992px) {
-                        .details-modal-episode-thumb{width:180px;height:100px;flex:0 0 180px}
-                        .details-modal-episode-item{gap:14px;padding:12px}
-                        .details-modal-episode-title{font-size:15px}
-                    }
-
-                    /* Responsive: mobile */
-                    @media (max-width: 600px) {
-                        .details-modal-episode-item{flex-direction:column;align-items:flex-start;padding:12px 8px}
-                        .details-modal-episode-thumb{width:100%;height:160px;flex:0 0 auto}
-                        .details-modal-play-overlay .details-modal-episode-play{padding:12px}
-                        .details-modal-episode-meta{width:100%}
-                        .details-modal-episode-title{font-size:15px}
-                        .details-modal-episode-synopsis{font-size:13px}
-                    }
-
-                    /* Small devices: compact */
-                    @media (max-width: 420px) {
-                        .details-modal-episode-thumb{height:140px}
-                        .details-modal-episode-synopsis{-webkit-line-clamp:3}
-                    }
-                `;
-                document.head.appendChild(style);
+                // Los estilos del player y de episodios están ahora en public/css/styles.css
 
                 overlay.addEventListener('click', (e) => {
                     if (e.target === overlay) this.closeEpisodePlayer();
