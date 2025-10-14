@@ -618,7 +618,7 @@ button:focus {
 
     .details-modal-episode-thumb{width:220px;height:124px;flex:0 0 220px;overflow:hidden;border-radius:6px;background:#111;position:relative;box-shadow:0 4px 12px rgba(0,0,0,0.6);max-width:40%;min-width:140px}
     .details-modal-episode-thumb img{width:100%;height:100%;object-fit:cover;display:block}
-    .details-modal-play-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+    .details-modal-play-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
     .details-modal-play-overlay .details-modal-episode-play{background:rgba(0,0,0,0.6);border:0;color:#fff;padding:14px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
     .details-modal-episode-number{position:absolute;left:8px;top:8px;background:rgba(0,0,0,0.45);color:#fff;padding:6px 8px;border-radius:4px;font-weight:700}
 
@@ -663,7 +663,7 @@ button:focus {
     .details-modal-episode-thumb{max-height:220px}
 
     /* If modal content area is narrow, force thumbnails smaller */
-    .details-modal-body .details-modal-episodes .details-modal-episode-item .details-modal-episode-thumb{max-width:45%}
+    .details-modal-body .details-modal-episodes .details-modal-episode-item .details-modal-episode-thumb{max-width:45%;}
     .details-modal-body .details-modal-episodes .details-modal-episode-item{align-items:flex-start}
 
     /* Header season filter */
@@ -1961,6 +1961,9 @@ button:focus {
         --modal-scale: 1.3;
     }
     
+.details-modal-body .details-modal-episodes .details-modal-episode-item .details-modal-episode-thumb {
+    max-width: 100%;
+}
     .carousel-section {
         margin-bottom: 30px;
         margin-left: 20px;
