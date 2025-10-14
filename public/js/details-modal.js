@@ -73,13 +73,15 @@ class DetailsModal {
                     .details-episode-player-inner{width:100%;height:100%;position:relative;display:flex;align-items:center;justify-content:center}
                     .details-episode-player-iframe{width:100%;height:100%;border:0}
                     .details-episode-player-close{position:absolute;top:18px;right:18px;z-index:100000;background:rgba(0,0,0,0.5);color:#fff;border:0;padding:10px 12px;border-radius:6px;font-size:20px;cursor:pointer}
-                    .details-modal-episode-item{display:flex;gap:12px;align-items:flex-start;padding:10px 8px;border-bottom:1px solid rgba(255,255,255,0.04)}
-                    .details-modal-episode-thumb{width:110px;height:62px;flex:0 0 110px;overflow:hidden;border-radius:4px;background:#222}
-                    .details-modal-episode-thumb img{width:100%;height:100%;object-fit:cover}
+                    .details-modal-episode-item{display:flex;gap:18px;align-items:flex-start;padding:18px 12px;border-bottom:1px solid rgba(255,255,255,0.04)}
+                    .details-modal-episode-thumb{width:220px;height:124px;flex:0 0 220px;overflow:hidden;border-radius:6px;background:#111;position:relative;box-shadow:0 4px 12px rgba(0,0,0,0.6)}
+                    .details-modal-episode-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+                    .details-modal-play-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+                    .details-modal-play-overlay .details-modal-episode-play{background:rgba(0,0,0,0.6);border:0;color:#fff;padding:14px 14px;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center}
+                    .details-modal-episode-number{position:absolute;left:8px;top:8px;background:rgba(0,0,0,0.45);color:#fff;padding:6px 8px;border-radius:4px;font-weight:700}
                     .details-modal-episode-meta{flex:1}
-                    .details-modal-episode-title{font-weight:600;margin-bottom:6px}
-                    .details-modal-episode-synopsis{color:rgba(255,255,255,0.8);font-size:13px}
-                    .details-modal-episode-play{background:#e50914;border:0;color:#fff;padding:8px 10px;border-radius:6px;cursor:pointer}
+                    .details-modal-episode-title{font-weight:700;margin-bottom:8px;font-size:16px}
+                    .details-modal-episode-synopsis{color:rgba(255,255,255,0.82);font-size:14px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis}
                 `;
                 document.head.appendChild(style);
 
@@ -854,14 +856,32 @@ class DetailsModal {
 
         // Construir HTML de la sección
         // Construir cards con miniatura, título y sinopsis
+        // Calcular temporadas únicas (omitimos null/undefined)
+        const seasonsSet = new Set(episodes.map(e => e.season).filter(s => s !== null && s !== undefined && !Number.isNaN(s)));
+        const seasons = Array.from(seasonsSet).sort((a,b)=>a-b);
+
         const listItems = episodes.map(ep => {
-            const playBtn = ep.video ? `<button class="details-modal-episode-play" data-video-url="${ep.video}" aria-label="Reproducir episodio"><i class="fas fa-play"></i></button>` : '';
-            const thumbImg = ep.thumb ? `<div class="details-modal-episode-thumb"><img src="${ep.thumb}" loading="lazy" alt="${ep.title}"></div>` : `<div class="details-modal-episode-thumb placeholder"></div>`;
+            const playBtnInner = ep.video ? `<button class="details-modal-episode-play" data-video-url="${ep.video}" aria-label="Reproducir episodio"><i class="fas fa-play"></i></button>` : '';
+            const episodeNumber = ep.episodeIndex ? `<div class="details-modal-episode-number">${ep.episodeIndex}</div>` : '';
+            const thumbImg = ep.thumb ? `<div class="details-modal-episode-thumb">${episodeNumber}<img src="${ep.thumb}" loading="lazy" alt="${ep.title}"><div class="details-modal-play-overlay">${playBtnInner}</div></div>` : `<div class="details-modal-episode-thumb placeholder">${episodeNumber}<div class="details-modal-play-overlay">${playBtnInner}</div></div>`;
             const synopsisHtml = ep.synopsis ? `<div class="details-modal-episode-synopsis">${ep.synopsis}</div>` : '';
-            return `<div class="details-modal-episode-item" data-video-url="${ep.video || ''}">${thumbImg}<div class="details-modal-episode-meta"><div class="details-modal-episode-title">${ep.title}</div>${synopsisHtml}</div>${playBtn}</div>`;
+            // Añadir atributo data-season para filtrado
+            const seasonAttr = ep.season !== null && ep.season !== undefined ? `data-season="${ep.season}"` : 'data-season=""';
+            return `<div class="details-modal-episode-item" ${seasonAttr} data-video-url="${ep.video || ''}">${thumbImg}<div class="details-modal-episode-meta"><div class="details-modal-episode-title">${ep.title}</div>${synopsisHtml}</div></div>`;
         }).join('');
 
-        const section = `<div class="details-modal-episodes"><h3 class="details-modal-episodes-title">Episodios</h3><div class="details-modal-episodes-list">${listItems}</div></div>`;
+        // Construir header con selector de temporadas si hay más de una temporada
+        let headerHtml = `<div class="details-modal-episodes-header"><h3 class="details-modal-episodes-title">Episodios</h3>`;
+        if (seasons.length > 0) {
+            headerHtml += `<div class="details-modal-season-filter"><label for="season-select">Temporada</label><select id="season-select" class="details-modal-season-select"><option value="all">Todas</option>`;
+            seasons.forEach(s => {
+                headerHtml += `<option value="${s}">Temporada ${s}</option>`;
+            });
+            headerHtml += `</select></div>`;
+        }
+        headerHtml += `</div>`;
+
+        const section = `<div class="details-modal-episodes">${headerHtml}<div class="details-modal-episodes-list">${listItems}</div></div>`;
 
         // Delegar listeners para reproducir si hay video
         // (se añadirá en el setTimeout posterior que añade listeners a botones existentes)
@@ -875,7 +895,37 @@ class DetailsModal {
                     if (url) this.openEpisodePlayer(url);
                 });
             });
+            // Inicializar filtro de temporada si existe
+            const seasonSelect = this.detailsModalBody.querySelector('#season-select');
+            if (seasonSelect) {
+                seasonSelect.addEventListener('change', (e) => {
+                    const val = seasonSelect.value;
+                    const items = this.detailsModalBody.querySelectorAll('.details-modal-episode-item');
+                    items.forEach(it => {
+                        const s = it.getAttribute('data-season');
+                        if (val === 'all') {
+                            it.style.display = '';
+                        } else {
+                            if (String(s) === String(val)) it.style.display = '';
+                            else it.style.display = 'none';
+                        }
+                    });
+                });
+            }
         }, 300);
+
+        // Estilos para el header del selector (inserción segura si no existe)
+        const styleHeaderExists = !!document.getElementById('details-modal-episodes-header-styles');
+        if (!styleHeaderExists) {
+            const sh = document.createElement('style');
+            sh.id = 'details-modal-episodes-header-styles';
+            sh.innerHTML = `
+                .details-modal-episodes-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+                .details-modal-season-filter{display:flex;align-items:center;gap:8px}
+                .details-modal-season-select{background:transparent;border:1px solid rgba(255,255,255,0.06);padding:8px 10px;border-radius:6px;color:inherit}
+            `;
+            document.head.appendChild(sh);
+        }
 
         return section;
     }
