@@ -646,6 +646,7 @@ class DetailsModal {
     // Construye la sección HTML de episodios para el item actual
     async getEpisodesSection(item) {
         // Solo aplicable si hay un título de episodio o la categoría indica series/animes
+        console.log('DetailsModal: getEpisodesSection llamado para item:', item && (item['Título'] || item.title));
         if (!item) return '';
         const itemEpisodeTitle = (item['Título episodio'] || item['Título episodio'] === 0) ? String(item['Título episodio']).trim() : '';
         const itemCategory = (item['Categoría'] || '').toLowerCase();
