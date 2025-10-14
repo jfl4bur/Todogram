@@ -401,6 +401,183 @@ class Carousel {
 
 }
 
+class EpisodesCarousel {
+    constructor() {
+        console.log("EpisodesCarousel: Constructor iniciado");
+        this.wrapper = document.getElementById('episodes-carousel-wrapper');
+        this.skeleton = document.getElementById('episodes-carousel-skeleton');
+        this.carouselNav = document.getElementById('episodes-carousel-nav');
+        this.carouselPrev = document.getElementById('episodes-carousel-prev');
+        this.carouselNext = document.getElementById('episodes-carousel-next');
+        this.carouselContainer = this.wrapper ? this.wrapper.parentElement : null;
+        this.itemsPerPage = 0;
+        this.index = 0;
+        this.step = 0;
+        this.episodesData = [];
+
+        if (!this.wrapper || !this.skeleton || !this.carouselContainer) {
+            console.error('EpisodesCarousel: elementos del carrusel no encontrados');
+            return;
+        }
+
+        this.init();
+    }
+
+    init() {
+        this.setupResizeObserver();
+        this.setupEventListeners();
+        this.loadEpisodesData();
+    }
+
+    setupResizeObserver() {
+        const itemWidth = 320; // ancho visual aproximado para items de episodio
+        const gap = 8;
+        const calculate = () => {
+            const containerWidth = this.wrapper.clientWidth;
+            if (containerWidth > 0) {
+                const itemsThatFit = Math.floor(containerWidth / (itemWidth + gap));
+                this.itemsPerPage = Math.max(1, itemsThatFit);
+                this.step = this.itemsPerPage;
+            } else {
+                this.itemsPerPage = 1;
+                this.step = 1;
+            }
+        };
+        calculate();
+        const ro = new ResizeObserver(() => calculate());
+        ro.observe(this.wrapper);
+    }
+
+    setupEventListeners() {
+        if (this.carouselPrev) this.carouselPrev.addEventListener('click', (e) => { e.preventDefault(); this.scrollToPrevPage(); });
+        if (this.carouselNext) this.carouselNext.addEventListener('click', (e) => { e.preventDefault(); this.scrollToNextPage(); });
+        this.wrapper.addEventListener('scroll', () => this.handleScroll());
+    }
+
+    async loadEpisodesData() {
+        try {
+            let data = window.sharedData;
+            if (!data) {
+                const resp = await fetch(DATA_URL);
+                if (!resp.ok) throw new Error('No se pudo cargar data.json');
+                data = await resp.json();
+                window.sharedData = data;
+            }
+
+            // Filtrar entradas que pertenezcan a series (campo 'series' o 'Categoría' igual a 'Series') y que tengan 'Título episodio'
+            this.episodesData = data.filter(item => {
+                if (!item) return false;
+                const hasEpisode = item['Título episodio'] && String(item['Título episodio']).trim() !== '';
+                const isSeriesField = (item['series'] && String(item['series']).trim() !== '') || (item['Categoría'] && String(item['Categoría']).toLowerCase().includes('serie'));
+                return hasEpisode && isSeriesField;
+            }).map((item, idx) => ({
+                id: idx.toString(),
+                title: item['Título episodio'] || item['Título'] || 'Episodio',
+                parentTitle: item['Título'] || '',
+                posterUrl: item['Portada'] || item['Carteles'] || '',
+                synopsis: item['Synopsis'] || item['Sinopsis'] || '',
+                videoUrl: item['Video iframe'] || item['Video iframe 1'] || item['Ver Película'] || ''
+            }));
+
+            if (this.episodesData.length === 0) {
+                // No mostrar skeleton si no hay items
+                this.skeleton.style.display = 'none';
+                return;
+            }
+
+            this.showCarousel();
+            this.renderItems();
+        } catch (err) {
+            console.error('EpisodesCarousel: error cargando datos', err);
+            this.skeleton.style.display = 'none';
+        }
+    }
+
+    showCarousel() {
+        this.skeleton.style.display = 'none';
+        this.wrapper.style.display = 'flex';
+        if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+            this.carouselNav.style.display = 'flex';
+        }
+    }
+
+    renderItems() {
+        const containerWidth = this.wrapper.clientWidth;
+        const itemWidth = 320;
+        const gap = 8;
+        const itemsThatFit = containerWidth > 0 ? Math.floor(containerWidth / (itemWidth + gap)) : 3;
+        const step = Math.max(itemsThatFit * 2, 6);
+
+        if (this.index === 0) this.wrapper.innerHTML = '';
+
+        const end = Math.min(this.index + step, this.episodesData.length);
+        for (let i = this.index; i < end; i++) {
+            const item = this.episodesData[i];
+            const div = document.createElement('div');
+            div.className = 'custom-carousel-item episode-item';
+            div.dataset.itemId = i;
+
+            const poster = item.posterUrl || 'https://via.placeholder.com/320x180?text=Sin+imagen';
+            // Usar ratio 16:9 para la imagen de episodio
+            const posterHtml = `<div class="episode-poster" style="padding-top:56.25%;position:relative;overflow:hidden;border-radius:8px;background:#111"><img src="${poster}" alt="${item.title}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" loading="lazy"></div>`;
+
+            div.innerHTML = `
+                <div class="loader"><i class="fas fa-spinner"></i></div>
+                ${posterHtml}
+                <div class="carousel-overlay">
+                    <div class="carousel-title">${item.title}</div>
+                    <div class="carousel-description">${item.synopsis || ''}</div>
+                </div>
+            `;
+
+            div.addEventListener('click', (e) => {
+                e.preventDefault();
+                const episode = this.episodesData[div.dataset.itemId];
+                if (window.detailsModal) {
+                    // Construir un objeto mínimo para abrir detalles o reproducir directamente
+                    if (episode.videoUrl) window.detailsModal.openEpisodePlayer(episode.videoUrl);
+                    else window.detailsModal.show({ title: episode.title, description: episode.synopsis }, div);
+                }
+            });
+
+            this.wrapper.appendChild(div);
+        }
+        this.index = end;
+    }
+
+    scrollToPrevPage() { this.scrollToPage('prev'); }
+    scrollToNextPage() { this.scrollToPage('next'); }
+    scrollToPage(direction) {
+        if (!this.wrapper) return;
+        const itemWidth = 320;
+        const gap = 8;
+        const containerWidth = this.wrapper.clientWidth;
+        const itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
+        const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
+        let currentScroll = this.wrapper.scrollLeft;
+        let targetScroll = direction === 'prev' ? Math.max(0, currentScroll - actualScrollAmount) : currentScroll + actualScrollAmount;
+        const alignedScroll = Math.round(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
+        const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
+        const finalScroll = Math.max(0, Math.min(alignedScroll, maxScroll));
+        this.wrapper.scrollTo({ left: finalScroll, behavior: 'auto' });
+    }
+
+    handleScroll() {
+        if (this.wrapper.scrollLeft + this.wrapper.clientWidth >= this.wrapper.scrollWidth - 200) {
+            this.renderItems();
+        }
+    }
+}
+
+// Inicializar el EpisodesCarousel cuando el DOM esté listo
+document.addEventListener('DOMContentLoaded', () => {
+    try {
+        window.episodesCarousel = new EpisodesCarousel();
+    } catch (err) {
+        console.warn('EpisodesCarousel: no pudo inicializarse', err);
+    }
+});
+
 class SeriesCarousel {
     constructor() {
         console.log("SeriesCarousel: Constructor iniciado");
