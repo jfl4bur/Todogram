@@ -251,7 +251,7 @@ button:focus {
 
 /* Skeleton específico para el carrusel de episodios en formato 16:9 */
 .episodes-skeleton .skeleton-item {
-    width: 320px;
+    width: var(--item-width);
     height: auto;
 }
 .episodes-skeleton .skeleton-item .ratio-16-9 {
@@ -267,6 +267,29 @@ button:focus {
     left: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
+    width: 36px;
+    height: 36px;
+    border: 4px solid rgba(255,255,255,0.08);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Forzar tamaño y aspect-ratio de los items renderizados en el carrusel de episodios */
+#episodes-carousel-wrapper .custom-carousel-item { 
+    flex: 0 0 auto;
+    width: var(--item-width);
+    box-sizing: border-box;
+}
+#episodes-carousel-wrapper .poster-container { 
+    width: 100%;
+    padding-top: 56.25%;
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+}
+#episodes-carousel-wrapper .poster-container .poster-image { 
+    position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block;
 }
 
 .skeleton-spinner {

@@ -530,8 +530,40 @@ class EpisodesCarousel {
             const ep = this.episodesData[i];
             const div = document.createElement('div');
             div.className = 'custom-carousel-item';
-            // dataset itemId usar el parentIndex (igual que SeriesCarousel usa item.id)
-            div.dataset.itemId = ep.parentIndex.toString();
+
+            // Construir parentMapped temprano para usarlo en dataset y handlers
+            const parent = ep.parentItem || null;
+            // Intentar encontrar la serie equivalente ya mapeada en SeriesCarousel por título
+            let parentMapped = null;
+            const normalize = s => String(s || '').toLowerCase().normalize ? String(s || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().trim() : String(s || '').toLowerCase().trim();
+            const parentTitle = parent ? parent['Título'] || parent['title'] || '' : '';
+            if (window.seriesCarousel && Array.isArray(window.seriesCarousel.seriesData)) {
+                const match = window.seriesCarousel.seriesData.find(sd => normalize(sd.title) === normalize(parentTitle));
+                if (match) parentMapped = match;
+            }
+
+            if (!parentMapped) {
+                parentMapped = parent ? {
+                    id: `series_${ep.parentIndex}`,
+                    title: parent['Título'] || parent['title'] || 'Sin título',
+                    description: parent['Synopsis'] || parent['description'] || '',
+                    posterUrl: parent['Portada'] || parent['posterUrl'] || '',
+                    postersUrl: parent['Carteles'] || '',
+                    backgroundUrl: parent['Portada'] || parent['Fondo'] || '',
+                    year: parent['Año'] ? String(parent['Año']) : '',
+                    duration: parent['Duración'] || '',
+                    genre: parent['Géneros'] || '',
+                    rating: parent['Puntuación 1-10'] ? String(parent['Puntuación 1-10']) : '',
+                    ageRating: parent['Clasificación'] || '',
+                    link: parent['Enlace'] || '#',
+                    trailerUrl: parent['Trailer'] || '',
+                    videoUrl: parent['Video iframe'] || parent['Video iframe 1'] || '',
+                    tmdbUrl: parent['TMDB'] || parent['ID TMDB'] || ''
+                } : { id: `series_${ep.parentIndex}` };
+            }
+
+            // dataset itemId usar el id mapeado del parent (ej. series_0) para que coincida con SeriesCarousel
+            div.dataset.itemId = parentMapped.id;
 
             const metaInfo = [];
             // No tenemos year/duration/genre en el registro de episodio, opcionalmente podríamos extraer del parentItem
@@ -571,10 +603,9 @@ class EpisodesCarousel {
 
                             this.hoverTimeouts[itemId].modal = setTimeout(() => {
                                 // mostrar hover modal del item padre si existe
-                                const parent = ep.parentItem || null;
                                 if (!window.isModalOpen && !window.isDetailsModalOpen) {
-                                    if (window.hoverModal && parent) {
-                                        window.hoverModal.show(parent, div);
+                                    if (window.hoverModal && parentMapped) {
+                                        window.hoverModal.show(parentMapped, div);
                                     }
                                 }
                             }, 200);
@@ -605,27 +636,7 @@ class EpisodesCarousel {
             // Click abre el modal de detalles correspondiente al parentItem con hash
             div.addEventListener('click', (e) => {
                 e.preventDefault();
-                const parentIndex = ep.parentIndex;
-                const parent = ep.parentItem || null;
-                // Construir objeto parent con forma similar a los items de SeriesCarousel
-                const parentMapped = parent ? {
-                    id: `series_${parentIndex}`,
-                    title: parent['Título'] || parent['title'] || 'Sin título',
-                    description: parent['Synopsis'] || parent['description'] || '',
-                    posterUrl: parent['Portada'] || parent['posterUrl'] || '',
-                    postersUrl: parent['Carteles'] || '',
-                    backgroundUrl: parent['Portada'] || parent['Fondo'] || '',
-                    year: parent['Año'] ? String(parent['Año']) : '',
-                    duration: parent['Duración'] || '',
-                    genre: parent['Géneros'] || '',
-                    rating: parent['Puntuación 1-10'] ? String(parent['Puntuación 1-10']) : '',
-                    ageRating: parent['Clasificación'] || '',
-                    link: parent['Enlace'] || '#',
-                    trailerUrl: parent['Trailer'] || '',
-                    videoUrl: parent['Video iframe'] || parent['Video iframe 1'] || '',
-                    tmdbUrl: parent['TMDB'] || parent['ID TMDB'] || ''
-                } : { id: String(parentIndex) };
-
+                // Reusar parentMapped ya construido en el scope exterior
                 if (window.detailsModal && parentMapped) {
                     window.detailsModal.show(parentMapped, div);
                 }
