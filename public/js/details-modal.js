@@ -48,6 +48,88 @@ class DetailsModal {
         this.currentGalleryIndex = 0;
     }
 
+    // Abre un player embebido en fullscreen usando un iframe
+    openEpisodePlayer(url) {
+        try {
+            if (!url) return;
+            // Si ya existe overlay, actualizar src
+            let overlay = document.getElementById('details-episode-player-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'details-episode-player-overlay';
+                overlay.className = 'details-episode-player-overlay';
+                overlay.innerHTML = `
+                    <div class="details-episode-player-inner">
+                        <button class="details-episode-player-close" aria-label="Cerrar">✕</button>
+                        <iframe class="details-episode-player-iframe" src="" frameborder="0" allowfullscreen allow="autoplay; fullscreen"></iframe>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+                // Estilos mínimos para el overlay
+                const style = document.createElement('style');
+                style.id = 'details-episode-player-styles';
+                style.innerHTML = `
+                    .details-episode-player-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.92);display:flex;align-items:center;justify-content:center;z-index:99999}
+                    .details-episode-player-inner{width:100%;height:100%;position:relative;display:flex;align-items:center;justify-content:center}
+                    .details-episode-player-iframe{width:100%;height:100%;border:0}
+                    .details-episode-player-close{position:absolute;top:18px;right:18px;z-index:100000;background:rgba(0,0,0,0.5);color:#fff;border:0;padding:10px 12px;border-radius:6px;font-size:20px;cursor:pointer}
+                    .details-modal-episode-item{display:flex;gap:12px;align-items:flex-start;padding:10px 8px;border-bottom:1px solid rgba(255,255,255,0.04)}
+                    .details-modal-episode-thumb{width:110px;height:62px;flex:0 0 110px;overflow:hidden;border-radius:4px;background:#222}
+                    .details-modal-episode-thumb img{width:100%;height:100%;object-fit:cover}
+                    .details-modal-episode-meta{flex:1}
+                    .details-modal-episode-title{font-weight:600;margin-bottom:6px}
+                    .details-modal-episode-synopsis{color:rgba(255,255,255,0.8);font-size:13px}
+                    .details-modal-episode-play{background:#e50914;border:0;color:#fff;padding:8px 10px;border-radius:6px;cursor:pointer}
+                `;
+                document.head.appendChild(style);
+
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) this.closeEpisodePlayer();
+                });
+                overlay.querySelector('.details-episode-player-close').addEventListener('click', () => this.closeEpisodePlayer());
+            }
+            const iframe = overlay.querySelector('.details-episode-player-iframe');
+            // Si la url es una URL de player P2P que usa hashes, intentar usar como src directamente
+            let didLoad = false;
+            const fallbackTimeout = setTimeout(() => {
+                if (!didLoad) {
+                    console.warn('DetailsModal: iframe no cargó, abriendo en pestaña nueva como fallback');
+                    this.closeEpisodePlayer();
+                    window.open(url, '_blank');
+                }
+            }, 2500);
+
+            iframe.onload = () => {
+                didLoad = true;
+                clearTimeout(fallbackTimeout);
+            };
+            iframe.onerror = () => {
+                clearTimeout(fallbackTimeout);
+                console.warn('DetailsModal: iframe error, abriendo en pestaña nueva');
+                this.closeEpisodePlayer();
+                window.open(url, '_blank');
+            };
+            iframe.src = url;
+            overlay.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        } catch (err) {
+            console.error('DetailsModal: openEpisodePlayer error', err);
+        }
+    }
+
+    closeEpisodePlayer() {
+        try {
+            const overlay = document.getElementById('details-episode-player-overlay');
+            if (!overlay) return;
+            const iframe = overlay.querySelector('.details-episode-player-iframe');
+            if (iframe) iframe.src = 'about:blank';
+            overlay.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        } catch (err) {
+            console.error('DetailsModal: closeEpisodePlayer error', err);
+        }
+    }
+
     setupEventListeners() {
         this.detailsModalClose.addEventListener('click', (e) => {
             e.stopPropagation();
@@ -690,7 +772,17 @@ class DetailsModal {
                     btn.addEventListener('click', (e) => {
                         e.stopPropagation();
                         const url = btn.getAttribute('data-video-url');
-                        if (url && window.videoModal) window.videoModal.play(url);
+                        // Abrir player embebido en pantalla completa
+                        if (url) this.openEpisodePlayer(url);
+                    });
+                });
+                // Click en la tarjeta del episodio abre también el player (si no se pulsa el botón)
+                container.querySelectorAll('.details-modal-episode-item').forEach(card => {
+                    card.addEventListener('click', (e) => {
+                        // Si el click fue en el botón, ya manejado
+                        if (e.target.closest('.details-modal-episode-play')) return;
+                        const url = card.getAttribute('data-video-url');
+                        if (url) this.openEpisodePlayer(url);
                     });
                 });
             }
@@ -747,7 +839,9 @@ class DetailsModal {
                 title: d['Título episodio'] || '',
                 season: d['Temporada'] ? Number(d['Temporada']) : null,
                 episodeIndex: d['Episodios'] ? Number(d['Episodios']) : null,
-                video: d['Video iframe'] || d['Video iframe 1'] || d['Ver Película'] || ''
+                video: d['Video iframe'] || d['Video iframe 1'] || d['Ver Película'] || '',
+                thumb: d['Portada'] || d['Carteles'] || '',
+                synopsis: d['Synopsis'] || d['Sinopsis'] || d['Descripción'] || ''
             }))
             .filter(e => e.title && e.title.trim() !== '')
             .sort((a, b) => {
@@ -759,9 +853,12 @@ class DetailsModal {
         if (episodes.length === 0) return '';
 
         // Construir HTML de la sección
+        // Construir cards con miniatura, título y sinopsis
         const listItems = episodes.map(ep => {
-            const playBtn = ep.video ? `<button class="details-modal-episode-play" data-video-url="${ep.video}"><i class="fas fa-play"></i></button>` : '';
-            return `<div class="details-modal-episode-item">${playBtn}<div class="details-modal-episode-title">${ep.title}</div></div>`;
+            const playBtn = ep.video ? `<button class="details-modal-episode-play" data-video-url="${ep.video}" aria-label="Reproducir episodio"><i class="fas fa-play"></i></button>` : '';
+            const thumbImg = ep.thumb ? `<div class="details-modal-episode-thumb"><img src="${ep.thumb}" loading="lazy" alt="${ep.title}"></div>` : `<div class="details-modal-episode-thumb placeholder"></div>`;
+            const synopsisHtml = ep.synopsis ? `<div class="details-modal-episode-synopsis">${ep.synopsis}</div>` : '';
+            return `<div class="details-modal-episode-item" data-video-url="${ep.video || ''}">${thumbImg}<div class="details-modal-episode-meta"><div class="details-modal-episode-title">${ep.title}</div>${synopsisHtml}</div>${playBtn}</div>`;
         }).join('');
 
         const section = `<div class="details-modal-episodes"><h3 class="details-modal-episodes-title">Episodios</h3><div class="details-modal-episodes-list">${listItems}</div></div>`;
@@ -775,7 +872,7 @@ class DetailsModal {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const url = btn.getAttribute('data-video-url');
-                    if (url && window.videoModal) window.videoModal.play(url);
+                    if (url) this.openEpisodePlayer(url);
                 });
             });
         }, 300);
