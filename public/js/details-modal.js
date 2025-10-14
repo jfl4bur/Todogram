@@ -202,46 +202,63 @@ class DetailsModal {
         }
         
         const description = item.description || (tmdbData?.overview || 'Descripción no disponible');
+
+        // --- SECCIÓN DE EPISODIOS DE SERIE ---
+        let episodiosSection = '';
+        // Si el item tiene campo de serie y título de episodio, mostrar todos los episodios de esa serie
+        if ((item.series || item['Serie'] || item['series']) && (item.episodeTitle || item['Título episodio'] || item['episodeTitle'])) {
+            // Obtener el nombre de la serie y el campo de título de episodio
+            const serieName = item.series || item['Serie'] || item['series'];
+            // Buscar en los datos globales todos los episodios de esa serie
+            let allData = [];
+            if (window.seriesCarousel && Array.isArray(window.seriesCarousel.seriesData)) {
+                allData = window.seriesCarousel.seriesData;
+            } else if (window.carousel && Array.isArray(window.carousel.moviesData)) {
+                allData = window.carousel.moviesData;
+            } else if (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function') {
+                allData = window.sliderIndependent.getSlidesData();
+            }
+            // Filtrar episodios de la misma serie
+            const episodios = allData.filter(ep => (ep.series || ep['Serie'] || ep['series']) === serieName && (ep.episodeTitle || ep['Título episodio'] || ep['episodeTitle']));
+            // Ordenar por número de episodio si existe, si no por título
+            episodios.sort((a, b) => {
+                const numA = parseInt(a.episodeNumber || a['Número episodio'] || a['episodeNumber'] || '0', 10);
+                const numB = parseInt(b.episodeNumber || b['Número episodio'] || b['episodeNumber'] || '0', 10);
+                if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
+                return (a.episodeTitle || a['Título episodio'] || '').localeCompare(b.episodeTitle || b['Título episodio'] || '');
+            });
+            if (episodios.length > 0) {
+                episodiosSection = `<div class="details-modal-episodes-section"><h3>Episodios de la serie</h3><ul class="details-modal-episodes-list">` +
+                    episodios.map((ep, idx) => `<li class="details-modal-episode-item${ep.id === item.id ? ' active' : ''}"><span class="details-modal-episode-number">${idx + 1}</span> <span class="details-modal-episode-title">${ep.episodeTitle || ep['Título episodio']}</span>${ep.duration ? ` <span class='details-modal-episode-duration'>${ep.duration}</span>` : ''}</li>`).join('') +
+                    `</ul></div>`;
+            }
+        }
         
         // Crear secciones de crew y cast usando datos locales si no hay TMDB
-    let directorsSection = '';
-    let episodesSection = '';
-        if (item['series'] && item['series'].trim() !== '' && item['Título episodio'] && item['Título episodio'].trim() !== '') {
-            let allData = window.moviesData || [];
-            if (!allData.length && window.seriesCarousel && window.seriesCarousel.moviesData) {
-                allData = window.seriesCarousel.moviesData;
-            }
-            let episodes = allData.filter(ep =>
-                ep['series'] === item['series'] &&
-                ep['Título episodio'] && ep['Título episodio'].trim() !== ''
-            );
-            episodes.sort((a, b) => {
-                const tempA = a['Temporada'] ? parseInt(a['Temporada']) : 1;
-                const tempB = b['Temporada'] ? parseInt(b['Temporada']) : 1;
-                if (tempA !== tempB) return tempA - tempB;
-                const epA = a['Episodios'] ? parseInt(a['Episodios']) : 0;
-                const epB = b['Episodios'] ? parseInt(b['Episodios']) : 0;
-                if (epA !== epB) return epA - epB;
-                return a['Título episodio'].localeCompare(b['Título episodio']);
-            });
-            if (episodes.length > 0) {
-                episodesSection = `<div class="details-modal-episodes-section">
-                    <h3 class="details-modal-episodes-title">Episodios</h3>
-                    <div class="details-modal-episodes-list">
-                        ${episodes.map((ep, idx) => `
-                            <div class="details-modal-episode-item">
-                                <div class="details-modal-episode-number">${ep['Episodios'] || idx + 1}</div>
-                                <div class="details-modal-episode-info">
-                                    <div class="details-modal-episode-title">${ep['Título episodio']}</div>
-                                    <div class="details-modal-episode-duration">${ep['Duración'] || ''}</div>
-                                    <div class="details-modal-episode-synopsis">${ep['Synopsis'] || ''}</div>
-                                    <div class="details-modal-episode-season">${ep['Temporada'] ? 'Temporada ' + ep['Temporada'] : ''}</div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>`;
-            }
+        let directorsSection = '';
+        let writersSection = '';
+        let castSection = '';
+        
+        if (tmdbData?.directors?.length > 0) {
+            directorsSection = this.createCrewSection(tmdbData.directors, 'Director(es)');
+        } else if (item.director) {
+            // Crear sección de director usando datos locales
+            const directors = item.director.split(',').map(director => ({
+                name: director.trim(),
+                profile_path: null
+            }));
+            directorsSection = this.createCrewSection(directors, 'Director(es)');
+        }
+        
+        if (tmdbData?.writers?.length > 0) {
+            writersSection = this.createCrewSection(tmdbData.writers, 'Escritor(es)');
+        } else if (item.writers) {
+            // Crear sección de escritores usando datos locales
+            const writers = item.writers.split(',').map(writer => ({
+                name: writer.trim(),
+                profile_path: null
+            }));
+            writersSection = this.createCrewSection(writers, 'Escritor(es)');
         }
         
         if (tmdbData?.cast?.length > 0) {
@@ -262,35 +279,6 @@ class DetailsModal {
         const postersGallery = posters.length > 0 ? this.createGallerySkeleton('poster', 5) : '';
         const backdropsGallery = backdrops.length > 0 ? this.createGallerySkeleton('backdrop', 4) : '';
         
-        // Sección de episodios/temporadas para series
-        // (Eliminada declaración duplicada de episodesSection)
-            // Agrupar por temporada si hay campo Temporada
-            let currentSerie = item['Título'] || item['series'] || '';
-            let currentSeason = item['Temporada'] || '';
-            let episodes = allData.filter(ep =>
-                (ep['series'] === item['series'] || ep['Título'] === currentSerie) &&
-                ep['Temporada'] === currentSeason &&
-                ep['Título episodio'] && ep['Título episodio'].trim() !== ''
-            );
-            if (episodes.length > 0) {
-                episodesSection = `<div class="details-modal-episodes-section">
-                    <h3 class="details-modal-episodes-title">Temporada ${currentSeason || '1'}</h3>
-                    <div class="details-modal-episodes-list">
-                        ${episodes.map((ep, idx) => `
-                            <div class="details-modal-episode-item">
-                                <div class="details-modal-episode-number">${idx + 1}</div>
-                                <div class="details-modal-episode-info">
-                                    <div class="details-modal-episode-title">${ep['Título episodio']}</div>
-                                    <div class="details-modal-episode-duration">${ep['Duración'] || ''}</div>
-                                    <div class="details-modal-episode-synopsis">${ep['Synopsis'] || ''}</div>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
-                </div>`;
-            }
-        }
-
         this.detailsModalBody.innerHTML = `
             <h1 class="details-modal-title">${item.title}</h1>
             ${tmdbData?.original_title && tmdbData.original_title.toLowerCase() !== item.title.toLowerCase() ? `<div class="details-modal-original-title">${tmdbData.original_title}</div>` : ''}
@@ -302,7 +290,7 @@ class DetailsModal {
             </div>
             ${taglineSection}
             <div class="details-modal-description">${description}</div>
-            ${episodesSection}
+            ${episodiosSection}
             <div class="details-modal-info">${infoItems}</div>
             ${directorsSection}
             ${writersSection}
