@@ -620,17 +620,26 @@ class DetailsModal {
             this.domCache.allData = data;
             return data;
         } catch (err) {
-            console.warn('DetailsModal: fallo al cargar /public/data.json, intentando /data.json', err);
-            try {
-                const resp2 = await fetch('/data.json');
-                if (!resp2.ok) throw new Error('No se pudo cargar data.json');
-                const data2 = await resp2.json();
-                this.domCache.allData = data2;
-                return data2;
-            } catch (err2) {
-                console.error('DetailsModal: No se pudo cargar data.json en ninguna ruta', err2);
-                return [];
+            console.warn('DetailsModal: fallo al cargar /public/data.json, intentando otras rutas', err);
+            const candidates = ['/data.json', 'public/data.json', './public/data.json', './data.json', '../public/data.json'];
+            for (const path of candidates) {
+                try {
+                    console.log('DetailsModal: intentando cargar', path);
+                    const resp2 = await fetch(path);
+                    if (!resp2.ok) {
+                        console.warn('DetailsModal: ruta', path, 'respondió', resp2.status);
+                        continue;
+                    }
+                    const data2 = await resp2.json();
+                    this.domCache.allData = data2;
+                    return data2;
+                } catch (err2) {
+                    console.warn('DetailsModal: fallo en ruta', path, err2);
+                    continue;
+                }
             }
+            console.error('DetailsModal: No se pudo cargar data.json en ninguna ruta probada');
+            return [];
         }
     }
 
@@ -649,19 +658,21 @@ class DetailsModal {
         if (!Array.isArray(allData) || allData.length === 0) return '';
 
         // Agrupar por el campo 'Título' y filtrar por coincidencias en 'Categoría' de tipo serie
-        const normalizedTitle = (item['Título'] || item.title || '').trim();
+    const normalizedTitle = (item['Título'] || item.title || '').trim();
         if (!normalizedTitle) return '';
 
         // Buscar todos los items que pertenezcan a la misma serie.
         // Regla: coincidencia exacta en 'Título' o coincidencia del campo 'Título' repetido
+        const targetNormalized = this.normalizeText(normalizedTitle);
         const related = allData.filter(d => {
             if (!d) return false;
             const title = (d['Título'] || '').trim();
             const cat = (d['Categoría'] || '').toLowerCase();
-            // Aceptar si título igual y categoría indica serie/anime o si tienen 'Título episodio' no vacío
+            // Aceptar si título igual (normalizado) y categoría indica serie/anime o si tienen 'Título episodio' no vacío
             if (!title) return false;
             const hasEpisode = (d['Título episodio'] || '').toString().trim() !== '';
-            return title === normalizedTitle && (hasEpisode || /(series|animes|anime|miniserie)/i.test(cat));
+            const titleNormalized = this.normalizeText(title);
+            return titleNormalized === targetNormalized && (hasEpisode || /(series|animes|anime|miniserie)/i.test(cat));
         });
         console.log('DetailsModal: getEpisodesSection -> encontrados relacionados:', related.length);
 
