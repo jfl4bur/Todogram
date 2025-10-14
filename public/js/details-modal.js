@@ -202,15 +202,6 @@ class DetailsModal {
         }
         
         const description = item.description || (tmdbData?.overview || 'Descripción no disponible');
-
-        // Construir sección de episodios (si aplica) — se inserta debajo de la sinopsis
-        let episodesSection = '';
-        try {
-            episodesSection = await this.getEpisodesSection(item);
-        } catch (err) {
-            console.error('Error construyendo sección de episodios:', err);
-            episodesSection = '';
-        }
         
         // Crear secciones de crew y cast usando datos locales si no hay TMDB
         let directorsSection = '';
@@ -268,7 +259,6 @@ class DetailsModal {
             </div>
             ${taglineSection}
             <div class="details-modal-description">${description}</div>
-            ${episodesSection}
             <div class="details-modal-info">${infoItems}</div>
             ${directorsSection}
             ${writersSection}
@@ -327,6 +317,9 @@ class DetailsModal {
                 }
             });
         }, 100);
+
+        // Insertar la sección de episodios de forma asíncrona (no bloquear el render)
+        this.insertEpisodesSection(item).catch(err => console.warn('DetailsModal: insertEpisodesSection fallo', err));
         
         if (this.isIOS()) {
             this.detailsModalContent.style.animation = 'none';
@@ -607,10 +600,34 @@ class DetailsModal {
     async loadAllData() {
         if (this.domCache.allData) return this.domCache.allData;
         // Si la app ya cargó la data globalmente, usarla
+        // Si ya existe en window, usarlo; esperar un poco en caso de race con otros módulos
         if (window.allData && Array.isArray(window.allData) && window.allData.length > 0) {
             console.log('DetailsModal: usando window.allData en lugar de fetch');
             this.domCache.allData = window.allData;
             return this.domCache.allData;
+        }
+        // También aceptar sharedData (usado por otros módulos)
+        if (window.sharedData && Array.isArray(window.sharedData) && window.sharedData.length > 0) {
+            console.log('DetailsModal: usando window.sharedData en lugar de fetch');
+            this.domCache.allData = window.sharedData;
+            return this.domCache.allData;
+        }
+
+        // Intentar esperar a que window.sharedData/window.allData se inicialice por otros módulos (race condition)
+        const maxAttempts = 15;
+        for (let i = 0; i < maxAttempts; i++) {
+            if (window.sharedData && Array.isArray(window.sharedData) && window.sharedData.length > 0) {
+                console.log('DetailsModal: detected window.sharedData after wait');
+                this.domCache.allData = window.sharedData;
+                return this.domCache.allData;
+            }
+            if (window.allData && Array.isArray(window.allData) && window.allData.length > 0) {
+                console.log('DetailsModal: detected window.allData after wait');
+                this.domCache.allData = window.allData;
+                return this.domCache.allData;
+            }
+            // small wait
+            await new Promise(r => setTimeout(r, 100));
         }
         try {
             console.log('DetailsModal: intentando cargar /public/data.json');
@@ -643,39 +660,84 @@ class DetailsModal {
         }
     }
 
+    // Inserta la sección de episodios debajo de la sinopsis (si aplica)
+    async insertEpisodesSection(item) {
+        try {
+            const sectionHtml = await this.getEpisodesSection(item);
+            if (!sectionHtml) {
+                // Si no hay sección, opcionalmente insertar texto que indique que no hay episodios
+                // Reintentar una vez después de un pequeño delay por si la data llega justo después
+                await new Promise(r => setTimeout(r, 200));
+                const sectionHtml2 = await this.getEpisodesSection(item);
+                if (!sectionHtml2) return;
+                // Si ahora hay sección, usarla
+                desc && desc.insertAdjacentHTML('afterend', sectionHtml2);
+                return;
+            }
+            // Buscar el nodo de descripción actual y añadir la sección después
+            const desc = this.detailsModalBody.querySelector('.details-modal-description');
+            if (!desc) {
+                // Si no existe la descripción, anexar al final
+                this.detailsModalBody.insertAdjacentHTML('beforeend', sectionHtml);
+                return;
+            }
+            desc.insertAdjacentHTML('afterend', sectionHtml);
+
+            // Añadir listeners para botones de episodio (si los hay)
+            const container = this.detailsModalBody.querySelector('.details-modal-episodes-list');
+            if (container) {
+                container.querySelectorAll('.details-modal-episode-play').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const url = btn.getAttribute('data-video-url');
+                        if (url && window.videoModal) window.videoModal.play(url);
+                    });
+                });
+            }
+        } catch (err) {
+            console.error('DetailsModal: error insertando sección de episodios', err);
+        }
+    }
+
     // Construye la sección HTML de episodios para el item actual
     async getEpisodesSection(item) {
         // Solo aplicable si hay un título de episodio o la categoría indica series/animes
         console.log('DetailsModal: getEpisodesSection llamado para item:', item && (item['Título'] || item.title));
         if (!item) return '';
-        const itemEpisodeTitle = (item['Título episodio'] || item['Título episodio'] === 0) ? String(item['Título episodio']).trim() : '';
-        const itemCategory = (item['Categoría'] || '').toLowerCase();
+    // No depender de la categoría del item: mostrar episodios si existen entradas relacionadas con el mismo título
+    const itemEpisodeTitle = (item['Título episodio'] || item['Título episodio'] === 0) ? String(item['Título episodio']).trim() : '';
 
-        // Si no hay título episodio y no es serie/anime, no mostrar sección
-        if (!itemEpisodeTitle && !/(series|animes|anime|miniserie)/i.test(itemCategory)) return '';
-
-    const allData = await this.loadAllData();
-    console.log('DetailsModal: getEpisodesSection -> datos cargados, total items:', Array.isArray(allData) ? allData.length : 0);
+        const allData = await this.loadAllData();
+        console.log('DetailsModal: getEpisodesSection -> datos cargados, total items:', Array.isArray(allData) ? allData.length : 0);
         if (!Array.isArray(allData) || allData.length === 0) return '';
 
         // Agrupar por el campo 'Título' y filtrar por coincidencias en 'Categoría' de tipo serie
-    const normalizedTitle = (item['Título'] || item.title || '').trim();
-        if (!normalizedTitle) return '';
+        const normalizedTitle = (item['Título'] || item.title || '').trim();
+        // Intentar identificar por ID TMDB también
+        const itemTMDB = (item['ID TMDB'] || item.id_tmdb || item.tmdbId || (item.tmdbUrl ? (item.tmdbUrl.match(/movie\/(\d+)/)?.[1]) : null) || (item.tmdbUrl ? (item.tmdbUrl.match(/series\/(\d+)/)?.[1]) : null)) || '';
+        const targetNormalized = this.normalizeText(normalizedTitle || '');
+        console.log('DetailsModal: getEpisodesSection -> buscando episodios para title:', normalizedTitle, 'tmdb:', itemTMDB);
 
-        // Buscar todos los items que pertenezcan a la misma serie.
-        // Regla: coincidencia exacta en 'Título' o coincidencia del campo 'Título' repetido
-        const targetNormalized = this.normalizeText(normalizedTitle);
+        // Buscar relacionados por varias heurísticas
         const related = allData.filter(d => {
             if (!d) return false;
             const title = (d['Título'] || '').trim();
-            const cat = (d['Categoría'] || '').toLowerCase();
-            // Aceptar si título igual (normalizado) y categoría indica serie/anime o si tienen 'Título episodio' no vacío
-            if (!title) return false;
             const hasEpisode = (d['Título episodio'] || '').toString().trim() !== '';
+            if (!hasEpisode) return false;
+
+            // Coincidencia por ID TMDB si existe
+            const dTMDB = (d['ID TMDB'] || '').toString().trim();
+            if (itemTMDB && dTMDB && itemTMDB.toString() === dTMDB) return true;
+
+            if (!title) return false;
             const titleNormalized = this.normalizeText(title);
-            return titleNormalized === targetNormalized && (hasEpisode || /(series|animes|anime|miniserie)/i.test(cat));
+            if (targetNormalized && (titleNormalized === targetNormalized)) return true;
+            // coincidencia parcial si uno contiene al otro
+            if (targetNormalized && (titleNormalized.includes(targetNormalized) || targetNormalized.includes(titleNormalized))) return true;
+
+            return false;
         });
-        console.log('DetailsModal: getEpisodesSection -> encontrados relacionados:', related.length);
+        console.log('DetailsModal: getEpisodesSection -> relacionados encontrados:', related.length, related.map(r => r['Título episodio']));
 
         if (!related || related.length === 0) return '';
 
