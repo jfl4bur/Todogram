@@ -101,6 +101,66 @@ class DetailsModal {
         }
     }
 
+    // Animación basada en medir la altura real para expandir/colapsar sinopsis
+    animateExpand(el) {
+        if (!el) return;
+        el.style.transition = 'max-height 320ms ease, opacity 220ms ease';
+        el.style.overflow = 'hidden';
+        // from collapsed state (max-height probably set)
+        const startHeight = el.getBoundingClientRect().height;
+        // temporarily set max-height to none to measure full height
+        const prevMax = el.style.maxHeight;
+        el.style.maxHeight = 'none';
+        const fullHeight = el.scrollHeight;
+        // restore to start height then animate to fullHeight
+        el.style.maxHeight = startHeight + 'px';
+        // force reflow
+        void el.offsetHeight;
+        requestAnimationFrame(() => {
+            el.style.maxHeight = fullHeight + 'px';
+        });
+        const cleanup = () => {
+            el.style.maxHeight = 'none';
+            el.style.overflow = '';
+            el.removeEventListener('transitionend', cleanup);
+        };
+        el.addEventListener('transitionend', cleanup);
+        el.classList.remove('collapsed');
+        el.classList.add('expanded');
+    }
+
+    animateCollapse(el) {
+        if (!el) return;
+        el.style.transition = 'max-height 320ms ease, opacity 220ms ease';
+        el.style.overflow = 'hidden';
+        // measure current full height
+        const fullHeight = el.scrollHeight;
+        // set max-height to full height then to 0
+        el.style.maxHeight = fullHeight + 'px';
+        // force reflow
+        void el.offsetHeight;
+        requestAnimationFrame(() => {
+            el.style.maxHeight = '0px';
+        });
+        const cleanup = () => {
+            el.style.maxHeight = '';
+            el.style.overflow = '';
+            el.removeEventListener('transitionend', cleanup);
+        };
+        el.addEventListener('transitionend', cleanup);
+        el.classList.remove('expanded');
+        el.classList.add('collapsed');
+    }
+
+    toggleSynopsisElement(el) {
+        if (!el) return;
+        if (el.classList.contains('expanded')) {
+            this.animateCollapse(el);
+        } else {
+            this.animateExpand(el);
+        }
+    }
+
     closeEpisodePlayer() {
         try {
             const overlay = document.getElementById('details-episode-player-overlay');
@@ -390,10 +450,10 @@ class DetailsModal {
             const mainDesc = this.detailsModalBody.querySelector('.details-modal-description');
             if (mainDesc) {
                 mainDesc.classList.add('collapsed');
+                mainDesc.style.maxHeight = 'calc(1.5em * 4)';
                 mainDesc.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    mainDesc.classList.toggle('expanded');
-                    mainDesc.classList.toggle('collapsed');
+                    this.toggleSynopsisElement(mainDesc);
                 });
             }
         }, 50);
@@ -785,10 +845,30 @@ class DetailsModal {
                 // Inicializar sinopsis de episodios como colapsadas y añadir toggle
                 container.querySelectorAll('.details-modal-episode-synopsis').forEach(syn => {
                     syn.classList.add('collapsed');
+                    syn.style.maxHeight = 'calc(1.5em * 4)';
                     syn.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        syn.classList.toggle('expanded');
-                        syn.classList.toggle('collapsed');
+                        this.toggleSynopsisElement(syn);
+                    });
+                });
+                // Añadir listener en títulos para actualizar hash del navegador
+                const outerItem = item;
+                container.querySelectorAll('.details-modal-episode-title').forEach(titleEl => {
+                    titleEl.style.cursor = 'pointer';
+                    titleEl.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const epHash = titleEl.getAttribute('data-ep-hash') || '';
+                        const currentItem = window.activeItem || outerItem;
+                        const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
+                        const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
+                        const newHash = `id=${baseId}&title=${normalized}${epHash ? '&' + epHash : ''}`;
+                        if (window.location.hash.substring(1) !== newHash) {
+                            window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
+                        }
+                        // además abrir el reproductor si la tarjeta tiene URL de video
+                        const card = titleEl.closest('.details-modal-episode-item');
+                        const videoUrl = card ? card.getAttribute('data-video-url') : null;
+                        if (videoUrl) this.openEpisodePlayer(videoUrl);
                     });
                 });
             }
@@ -871,7 +951,10 @@ class DetailsModal {
             const synopsisHtml = ep.synopsis ? `<div class="details-modal-episode-synopsis">${ep.synopsis}</div>` : '';
             // Añadir atributo data-season para filtrado
             const seasonAttr = ep.season !== null && ep.season !== undefined ? `data-season="${ep.season}"` : 'data-season=""';
-            return `<div class="details-modal-episode-item" ${seasonAttr} data-video-url="${ep.video || ''}">${thumbImg}<div class="details-modal-episode-meta"><div class="details-modal-episode-title">${ep.title}</div>${synopsisHtml}</div></div>`;
+            // Preparar hash para este episodio (usar id del item si disponible, sino title normalizado y capítulo)
+            const epHash = ep.episodeIndex ? `ep=${ep.episodeIndex}` : '';
+            const titleHashAttr = `data-ep-hash="${epHash}"`;
+            return `<div class="details-modal-episode-item" ${seasonAttr} data-video-url="${ep.video || ''}">${thumbImg}<div class="details-modal-episode-meta"><div class="details-modal-episode-title" ${titleHashAttr}>${ep.title}</div>${synopsisHtml}</div></div>`;
         }).join('');
 
         // Construir header con selector de temporadas si hay más de una temporada

@@ -624,8 +624,8 @@ button:focus {
 
     .details-modal-episode-meta{flex:1;min-width:0}
     .details-modal-episode-title{font-weight:700;margin-bottom:8px;font-size:16px}
-    .details-modal-episode-synopsis{color:rgba(255,255,255,0.82);font-size:14px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis;line-clamp:4}
-    .details-modal-episode-synopsis{display:block;line-clamp:4;-webkit-box-orient:vertical}
+    /* Sinopsis de episodios: color ligeramente gris para diferenciar del título */
+    .details-modal-episode-synopsis{color:var(--text-secondary);font-size:14px;line-height:1.5;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;text-overflow:ellipsis;line-clamp:4}
 
     /* Responsive: tablets */
     @media (max-width: 992px) {
@@ -674,11 +674,14 @@ button:focus {
     /* End of episodes styles */
 
     /* Toggleable synopsis: collapsed (clamped) / expanded (full) */
+
     .details-modal-episode-synopsis,
     .details-modal-description {
         cursor: pointer;
         -webkit-user-select: none;
         user-select: none;
+        overflow: hidden;
+        transition: max-height 320ms ease, opacity 220ms ease;
     }
 
     .details-modal-episode-synopsis.collapsed,
@@ -689,6 +692,8 @@ button:focus {
         line-clamp: 4;
         overflow: hidden;
         text-overflow: ellipsis;
+        max-height: calc(1.5em * 4); /* line-height * lines */
+        opacity: 1;
     }
 
     .details-modal-episode-synopsis.expanded,
@@ -697,6 +702,8 @@ button:focus {
         -webkit-line-clamp: unset;
         line-clamp: unset;
         overflow: visible;
+        max-height: 9999px;
+        opacity: 1;
     }
 
     /* Ensure in small devices the default clamp is 3 lines if needed */
@@ -1510,8 +1517,15 @@ button:focus {
 
 /* SOLUCIÓN DEFINITIVA PARA TOOLTIPS EN MÓVILES */
 @media (max-width: 480px) {
-    .details-modal-action-btn.active .tooltip,
-    .modal-actions .details-modal-action-btn.active .tooltip {
+    .details-modal-episode-thumb{height:140px}
+    .details-modal-episode-synopsis{-webkit-line-clamp:3;-webkit-box-orient:vertical;line-clamp:3}
+    .details-modal-episode-synopsis.collapsed,
+    .details-modal-description.collapsed {
+        max-height: calc(1.5em * 3);
+    }
+
+    /* Tooltip styles for mobile */
+    .details-modal-action-btn .tooltip {
         display: block !important;
         opacity: 1 !important;
         visibility: visible !important;
