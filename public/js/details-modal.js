@@ -203,35 +203,13 @@ class DetailsModal {
         
         const description = item.description || (tmdbData?.overview || 'Descripción no disponible');
 
-        // --- SECCIÓN DE EPISODIOS DE SERIE ---
-        let episodiosSection = '';
-        // Si el item tiene campo de serie y título de episodio, mostrar todos los episodios de esa serie
-        if ((item.series || item['Serie'] || item['series']) && (item.episodeTitle || item['Título episodio'] || item['episodeTitle'])) {
-            // Obtener el nombre de la serie y el campo de título de episodio
-            const serieName = item.series || item['Serie'] || item['series'];
-            // Buscar en los datos globales todos los episodios de esa serie
-            let allData = [];
-            if (window.seriesCarousel && Array.isArray(window.seriesCarousel.seriesData)) {
-                allData = window.seriesCarousel.seriesData;
-            } else if (window.carousel && Array.isArray(window.carousel.moviesData)) {
-                allData = window.carousel.moviesData;
-            } else if (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function') {
-                allData = window.sliderIndependent.getSlidesData();
-            }
-            // Filtrar episodios de la misma serie
-            const episodios = allData.filter(ep => (ep.series || ep['Serie'] || ep['series']) === serieName && (ep.episodeTitle || ep['Título episodio'] || ep['episodeTitle']));
-            // Ordenar por número de episodio si existe, si no por título
-            episodios.sort((a, b) => {
-                const numA = parseInt(a.episodeNumber || a['Número episodio'] || a['episodeNumber'] || '0', 10);
-                const numB = parseInt(b.episodeNumber || b['Número episodio'] || b['episodeNumber'] || '0', 10);
-                if (!isNaN(numA) && !isNaN(numB)) return numA - numB;
-                return (a.episodeTitle || a['Título episodio'] || '').localeCompare(b.episodeTitle || b['Título episodio'] || '');
-            });
-            if (episodios.length > 0) {
-                episodiosSection = `<div class="details-modal-episodes-section"><h3>Episodios de la serie</h3><ul class="details-modal-episodes-list">` +
-                    episodios.map((ep, idx) => `<li class="details-modal-episode-item${ep.id === item.id ? ' active' : ''}"><span class="details-modal-episode-number">${idx + 1}</span> <span class="details-modal-episode-title">${ep.episodeTitle || ep['Título episodio']}</span>${ep.duration ? ` <span class='details-modal-episode-duration'>${ep.duration}</span>` : ''}</li>`).join('') +
-                    `</ul></div>`;
-            }
+        // Construir sección de episodios (si aplica) — se inserta debajo de la sinopsis
+        let episodesSection = '';
+        try {
+            episodesSection = await this.getEpisodesSection(item);
+        } catch (err) {
+            console.error('Error construyendo sección de episodios:', err);
+            episodesSection = '';
         }
         
         // Crear secciones de crew y cast usando datos locales si no hay TMDB
@@ -290,7 +268,7 @@ class DetailsModal {
             </div>
             ${taglineSection}
             <div class="details-modal-description">${description}</div>
-            ${episodiosSection}
+            ${episodesSection}
             <div class="details-modal-info">${infoItems}</div>
             ${directorsSection}
             ${writersSection}
@@ -623,5 +601,102 @@ class DetailsModal {
         if (!videoUrl) return '#';
         if (videoUrl.includes('?') || videoUrl.includes('#')) return videoUrl + '&dl=1';
         return videoUrl + '?dl=1';
+    }
+
+    // Cache simple para el JSON completo
+    async loadAllData() {
+        if (this.domCache.allData) return this.domCache.allData;
+        try {
+            const resp = await fetch('/public/data.json');
+            if (!resp.ok) throw new Error('No se pudo cargar data.json');
+            const data = await resp.json();
+            this.domCache.allData = data;
+            return data;
+        } catch (err) {
+            console.warn('Fallo al cargar /public/data.json, intentando data.json en la raíz', err);
+            try {
+                const resp2 = await fetch('/data.json');
+                if (!resp2.ok) throw new Error('No se pudo cargar data.json');
+                const data2 = await resp2.json();
+                this.domCache.allData = data2;
+                return data2;
+            } catch (err2) {
+                console.error('No se pudo cargar data.json en ninguna ruta', err2);
+                return [];
+            }
+        }
+    }
+
+    // Construye la sección HTML de episodios para el item actual
+    async getEpisodesSection(item) {
+        // Solo aplicable si hay un título de episodio o la categoría indica series/animes
+        if (!item) return '';
+        const itemEpisodeTitle = (item['Título episodio'] || item['Título episodio'] === 0) ? String(item['Título episodio']).trim() : '';
+        const itemCategory = (item['Categoría'] || '').toLowerCase();
+
+        // Si no hay título episodio y no es serie/anime, no mostrar sección
+        if (!itemEpisodeTitle && !/(series|animes|anime|miniserie)/i.test(itemCategory)) return '';
+
+        const allData = await this.loadAllData();
+        if (!Array.isArray(allData) || allData.length === 0) return '';
+
+        // Agrupar por el campo 'Título' y filtrar por coincidencias en 'Categoría' de tipo serie
+        const normalizedTitle = (item['Título'] || item.title || '').trim();
+        if (!normalizedTitle) return '';
+
+        // Buscar todos los items que pertenezcan a la misma serie.
+        // Regla: coincidencia exacta en 'Título' o coincidencia del campo 'Título' repetido
+        const related = allData.filter(d => {
+            if (!d) return false;
+            const title = (d['Título'] || '').trim();
+            const cat = (d['Categoría'] || '').toLowerCase();
+            // Aceptar si título igual y categoría indica serie/anime o si tienen 'Título episodio' no vacío
+            if (!title) return false;
+            const hasEpisode = (d['Título episodio'] || '').toString().trim() !== '';
+            return title === normalizedTitle && (hasEpisode || /(series|animes|anime|miniserie)/i.test(cat));
+        });
+
+        if (!related || related.length === 0) return '';
+
+        // Extraer y ordenar por 'Temporada' y 'Episodios' cuando estén presentes
+        const episodes = related
+            .map(d => ({
+                title: d['Título episodio'] || '',
+                season: d['Temporada'] ? Number(d['Temporada']) : null,
+                episodeIndex: d['Episodios'] ? Number(d['Episodios']) : null,
+                video: d['Video iframe'] || d['Video iframe 1'] || d['Ver Película'] || ''
+            }))
+            .filter(e => e.title && e.title.trim() !== '')
+            .sort((a, b) => {
+                if (a.season !== null && b.season !== null && a.season !== b.season) return a.season - b.season;
+                if (a.episodeIndex !== null && b.episodeIndex !== null) return a.episodeIndex - b.episodeIndex;
+                return a.title.localeCompare(b.title, undefined, {numeric: true});
+            });
+
+        if (episodes.length === 0) return '';
+
+        // Construir HTML de la sección
+        const listItems = episodes.map(ep => {
+            const playBtn = ep.video ? `<button class="details-modal-episode-play" data-video-url="${ep.video}"><i class="fas fa-play"></i></button>` : '';
+            return `<div class="details-modal-episode-item">${playBtn}<div class="details-modal-episode-title">${ep.title}</div></div>`;
+        }).join('');
+
+        const section = `<div class="details-modal-episodes"><h3 class="details-modal-episodes-title">Episodios</h3><div class="details-modal-episodes-list">${listItems}</div></div>`;
+
+        // Delegar listeners para reproducir si hay video
+        // (se añadirá en el setTimeout posterior que añade listeners a botones existentes)
+        setTimeout(() => {
+            const container = this.detailsModalBody.querySelector('.details-modal-episodes-list');
+            if (!container) return;
+            container.querySelectorAll('.details-modal-episode-play').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const url = btn.getAttribute('data-video-url');
+                    if (url && window.videoModal) window.videoModal.play(url);
+                });
+            });
+        }, 300);
+
+        return section;
     }
 }
