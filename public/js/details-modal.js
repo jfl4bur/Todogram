@@ -204,30 +204,44 @@ class DetailsModal {
         const description = item.description || (tmdbData?.overview || 'Descripción no disponible');
         
         // Crear secciones de crew y cast usando datos locales si no hay TMDB
-        let directorsSection = '';
-        let writersSection = '';
-        let castSection = '';
-        
-        if (tmdbData?.directors?.length > 0) {
-            directorsSection = this.createCrewSection(tmdbData.directors, 'Director(es)');
-        } else if (item.director) {
-            // Crear sección de director usando datos locales
-            const directors = item.director.split(',').map(director => ({
-                name: director.trim(),
-                profile_path: null
-            }));
-            directorsSection = this.createCrewSection(directors, 'Director(es)');
-        }
-        
-        if (tmdbData?.writers?.length > 0) {
-            writersSection = this.createCrewSection(tmdbData.writers, 'Escritor(es)');
-        } else if (item.writers) {
-            // Crear sección de escritores usando datos locales
-            const writers = item.writers.split(',').map(writer => ({
-                name: writer.trim(),
-                profile_path: null
-            }));
-            writersSection = this.createCrewSection(writers, 'Escritor(es)');
+    let directorsSection = '';
+    let episodesSection = '';
+        if (item['series'] && item['series'].trim() !== '' && item['Título episodio'] && item['Título episodio'].trim() !== '') {
+            let allData = window.moviesData || [];
+            if (!allData.length && window.seriesCarousel && window.seriesCarousel.moviesData) {
+                allData = window.seriesCarousel.moviesData;
+            }
+            let episodes = allData.filter(ep =>
+                ep['series'] === item['series'] &&
+                ep['Título episodio'] && ep['Título episodio'].trim() !== ''
+            );
+            episodes.sort((a, b) => {
+                const tempA = a['Temporada'] ? parseInt(a['Temporada']) : 1;
+                const tempB = b['Temporada'] ? parseInt(b['Temporada']) : 1;
+                if (tempA !== tempB) return tempA - tempB;
+                const epA = a['Episodios'] ? parseInt(a['Episodios']) : 0;
+                const epB = b['Episodios'] ? parseInt(b['Episodios']) : 0;
+                if (epA !== epB) return epA - epB;
+                return a['Título episodio'].localeCompare(b['Título episodio']);
+            });
+            if (episodes.length > 0) {
+                episodesSection = `<div class="details-modal-episodes-section">
+                    <h3 class="details-modal-episodes-title">Episodios</h3>
+                    <div class="details-modal-episodes-list">
+                        ${episodes.map((ep, idx) => `
+                            <div class="details-modal-episode-item">
+                                <div class="details-modal-episode-number">${ep['Episodios'] || idx + 1}</div>
+                                <div class="details-modal-episode-info">
+                                    <div class="details-modal-episode-title">${ep['Título episodio']}</div>
+                                    <div class="details-modal-episode-duration">${ep['Duración'] || ''}</div>
+                                    <div class="details-modal-episode-synopsis">${ep['Synopsis'] || ''}</div>
+                                    <div class="details-modal-episode-season">${ep['Temporada'] ? 'Temporada ' + ep['Temporada'] : ''}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>`;
+            }
         }
         
         if (tmdbData?.cast?.length > 0) {
@@ -249,14 +263,7 @@ class DetailsModal {
         const backdropsGallery = backdrops.length > 0 ? this.createGallerySkeleton('backdrop', 4) : '';
         
         // Sección de episodios/temporadas para series
-        let episodesSection = '';
-        if ((item['Categoría'] === 'Series' || item['series']) && item['Título episodio'] && item['Título episodio'].trim() !== '') {
-            // Buscar todos los episodios de la misma serie y temporada
-            let allData = window.moviesData || [];
-            // Fallback si no está en window
-            if (!allData.length && window.seriesCarousel && window.seriesCarousel.moviesData) {
-                allData = window.seriesCarousel.moviesData;
-            }
+        // (Eliminada declaración duplicada de episodesSection)
             // Agrupar por temporada si hay campo Temporada
             let currentSerie = item['Título'] || item['series'] || '';
             let currentSeason = item['Temporada'] || '';
