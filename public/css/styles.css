@@ -200,6 +200,8 @@ button:focus {
     font-size: 1.8rem;
     font-weight: 600;
     margin-bottom: 15px;
+    background-color: rgba(42, 42, 42, 0.5);
+    border-radius: 4px;
     padding-left: 5px;
     color: var(--text-color);
 }
@@ -245,6 +247,26 @@ button:focus {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+/* Skeleton específico para el carrusel de episodios en formato 16:9 */
+.episodes-skeleton .skeleton-item {
+    width: 320px;
+    height: auto;
+}
+.episodes-skeleton .skeleton-item .ratio-16-9 {
+    width: 100%;
+    padding-top: 56.25%;
+    position: relative;
+    background: #111;
+    border-radius: 8px;
+    overflow: hidden;
+}
+.episodes-skeleton .skeleton-item .ratio-16-9 .skeleton-spinner {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .skeleton-spinner {

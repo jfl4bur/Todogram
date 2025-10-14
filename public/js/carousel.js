@@ -430,8 +430,9 @@ class EpisodesCarousel {
     }
 
     setupResizeObserver() {
-        const itemWidth = 320; // ancho visual aproximado para items de episodio
-        const gap = 8;
+        if (!this.wrapper) return;
+        const itemWidth = 194; // usar mismo cálculo que SeriesCarousel para comportamiento consistente
+        const gap = 4;
         const calculate = () => {
             const containerWidth = this.wrapper.clientWidth;
             if (containerWidth > 0) {
@@ -464,23 +465,36 @@ class EpisodesCarousel {
                 window.sharedData = data;
             }
 
-            // Filtrar entradas que pertenezcan a series (campo 'series' o 'Categoría' igual a 'Series') y que tengan 'Título episodio'
-            this.episodesData = data.filter(item => {
-                if (!item) return false;
-                const hasEpisode = item['Título episodio'] && String(item['Título episodio']).trim() !== '';
-                const isSeriesField = (item['series'] && String(item['series']).trim() !== '') || (item['Categoría'] && String(item['Categoría']).toLowerCase().includes('serie'));
-                return hasEpisode && isSeriesField;
-            }).map((item, idx) => ({
-                id: idx.toString(),
-                title: item['Título episodio'] || item['Título'] || 'Episodio',
-                parentTitle: item['Título'] || '',
-                posterUrl: item['Portada'] || item['Carteles'] || '',
-                synopsis: item['Synopsis'] || item['Sinopsis'] || '',
-                videoUrl: item['Video iframe'] || item['Video iframe 1'] || item['Ver Película'] || ''
-            }));
+            // Filtrar entradas que pertenezcan a series y que tengan 'Título episodio'
+            const normalize = (s) => String(s || '').normalize ? String(s || '').normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().trim() : String(s || '').toLowerCase().trim();
+            this.episodesData = data
+                .map((item, idx) => ({ raw: item, rawIndex: idx }))
+                .filter(entry => entry.raw && String(entry.raw['Título episodio'] || '').trim() !== '')
+                .map(entry => {
+                    const raw = entry.raw;
+                    const parentTitle = raw['Título'] || '';
+                    // buscar un item padre en data que represente la serie (preferir uno sin 'Título episodio')
+                    let parentIndex = data.findIndex(d => normalize(d['Título']) === normalize(parentTitle) && (!d['Título episodio'] || String(d['Título episodio']).trim() === ''));
+                    if (parentIndex === -1) {
+                        // fallback: cualquier coincidencia por título
+                        parentIndex = data.findIndex(d => normalize(d['Título']) === normalize(parentTitle));
+                    }
+                    const parentItem = parentIndex !== -1 ? data[parentIndex] : raw; // si no hay padre, usar el mismo registro
+
+                    return {
+                        id: entry.rawIndex.toString(),
+                        title: raw['Título episodio'] || raw['Título'] || 'Episodio',
+                        parentTitle: parentTitle,
+                        posterUrl: raw['Portada'] || raw['Carteles'] || parentItem['Portada'] || '',
+                        synopsis: raw['Synopsis'] || raw['Sinopsis'] || raw['Descripción'] || '',
+                        videoUrl: raw['Video iframe'] || raw['Video iframe 1'] || raw['Ver Película'] || '',
+                        rawIndex: entry.rawIndex,
+                        parentIndex: (parentIndex !== -1) ? parentIndex : entry.rawIndex,
+                        parentItem: parentItem
+                    };
+                });
 
             if (this.episodesData.length === 0) {
-                // No mostrar skeleton si no hay items
                 this.skeleton.style.display = 'none';
                 return;
             }
@@ -503,46 +517,124 @@ class EpisodesCarousel {
 
     renderItems() {
         const containerWidth = this.wrapper.clientWidth;
-        const itemWidth = 320;
-        const gap = 8;
-        const itemsThatFit = containerWidth > 0 ? Math.floor(containerWidth / (itemWidth + gap)) : 3;
-        const step = Math.max(itemsThatFit * 2, 6);
+        const itemWidth = 194;
+        const gap = 4;
+        const itemsThatFit = containerWidth > 0 ? Math.floor(containerWidth / (itemWidth + gap)) : 5;
+        const step = Math.max(itemsThatFit * 2, 10);
 
         if (this.index === 0) this.wrapper.innerHTML = '';
 
         const end = Math.min(this.index + step, this.episodesData.length);
-        for (let i = this.index; i < end; i++) {
-            const item = this.episodesData[i];
-            const div = document.createElement('div');
-            div.className = 'custom-carousel-item episode-item';
-            div.dataset.itemId = i;
 
-            const poster = item.posterUrl || 'https://via.placeholder.com/320x180?text=Sin+imagen';
-            // Usar ratio 16:9 para la imagen de episodio
-            const posterHtml = `<div class="episode-poster" style="padding-top:56.25%;position:relative;overflow:hidden;border-radius:8px;background:#111"><img src="${poster}" alt="${item.title}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;" loading="lazy"></div>`;
+        for (let i = this.index; i < end; i++) {
+            const ep = this.episodesData[i];
+            const div = document.createElement('div');
+            div.className = 'custom-carousel-item';
+            // dataset itemId usar el parentIndex (igual que SeriesCarousel usa item.id)
+            div.dataset.itemId = ep.parentIndex.toString();
+
+            const metaInfo = [];
+            // No tenemos year/duration/genre en el registro de episodio, opcionalmente podríamos extraer del parentItem
+
+            const posterUrl = ep.posterUrl || 'https://via.placeholder.com/320x180?text=Sin+imagen';
 
             div.innerHTML = `
                 <div class="loader"><i class="fas fa-spinner"></i></div>
-                ${posterHtml}
+                <div class="poster-container">
+                    <img class="poster-image" src="${posterUrl}" alt="${ep.title}" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease" loading="lazy">
+                </div>
+                <img class="detail-background" src="${posterUrl}" alt="${ep.title} - Background" loading="lazy" style="display:none">
                 <div class="carousel-overlay">
-                    <div class="carousel-title">${item.title}</div>
-                    <div class="carousel-description">${item.synopsis || ''}</div>
+                    <div class="carousel-title">${ep.title}</div>
+                    ${ep.synopsis ? `<div class="carousel-description">${ep.synopsis}</div>` : ''}
                 </div>
             `;
 
+            // Hover behavior similar a SeriesCarousel
+            if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+                div.addEventListener('mouseenter', (e) => {
+                    const itemId = div.dataset.itemId;
+                    if (this.hoverTimeouts[itemId]) {
+                        clearTimeout(this.hoverTimeouts[itemId].details);
+                        clearTimeout(this.hoverTimeouts[itemId].modal);
+                    }
+                    const rect = div.getBoundingClientRect();
+                    this.hoverModalOrigin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+                    this.hoverTimeouts[itemId] = {
+                        details: setTimeout(() => {
+                            const background = div.querySelector('.detail-background');
+                            const overlay = div.querySelector('.carousel-overlay');
+                            background.style.display = 'block';
+                            background.style.opacity = '1';
+                            overlay.style.opacity = '1';
+                            overlay.style.transform = 'translateY(0)';
+
+                            this.hoverTimeouts[itemId].modal = setTimeout(() => {
+                                // mostrar hover modal del item padre si existe
+                                const parent = ep.parentItem || null;
+                                if (!window.isModalOpen && !window.isDetailsModalOpen) {
+                                    if (window.hoverModal && parent) {
+                                        window.hoverModal.show(parent, div);
+                                    }
+                                }
+                            }, 200);
+                        }, 600)
+                    };
+                });
+
+                div.addEventListener('mouseleave', () => {
+                    const itemId = div.dataset.itemId;
+                    if (this.hoverTimeouts[itemId]) {
+                        clearTimeout(this.hoverTimeouts[itemId].details);
+                        clearTimeout(this.hoverTimeouts[itemId].modal);
+                        delete this.hoverTimeouts[itemId];
+                    }
+                    const poster = div.querySelector('.poster-image');
+                    const background = div.querySelector('.detail-background');
+                    const overlay = div.querySelector('.carousel-overlay');
+                    if (poster) poster.style.opacity = '1';
+                    if (background) background.style.opacity = '0';
+                    if (overlay) {
+                        overlay.style.opacity = '0';
+                        overlay.style.transform = 'translateY(20px)';
+                    }
+                    setTimeout(() => { if (background) background.style.display = 'none'; }, 300);
+                });
+            }
+
+            // Click abre el modal de detalles correspondiente al parentItem con hash
             div.addEventListener('click', (e) => {
                 e.preventDefault();
-                const episode = this.episodesData[div.dataset.itemId];
-                if (window.detailsModal) {
-                    // Construir un objeto mínimo para abrir detalles o reproducir directamente
-                    if (episode.videoUrl) window.detailsModal.openEpisodePlayer(episode.videoUrl);
-                    else window.detailsModal.show({ title: episode.title, description: episode.synopsis }, div);
+                const parentIndex = ep.parentIndex;
+                const parent = ep.parentItem || null;
+                // Construir objeto parent con forma similar a los items de SeriesCarousel
+                const parentMapped = parent ? {
+                    id: `series_${parentIndex}`,
+                    title: parent['Título'] || parent['title'] || 'Sin título',
+                    description: parent['Synopsis'] || parent['description'] || '',
+                    posterUrl: parent['Portada'] || parent['posterUrl'] || '',
+                    postersUrl: parent['Carteles'] || '',
+                    backgroundUrl: parent['Portada'] || parent['Fondo'] || '',
+                    year: parent['Año'] ? String(parent['Año']) : '',
+                    duration: parent['Duración'] || '',
+                    genre: parent['Géneros'] || '',
+                    rating: parent['Puntuación 1-10'] ? String(parent['Puntuación 1-10']) : '',
+                    ageRating: parent['Clasificación'] || '',
+                    link: parent['Enlace'] || '#',
+                    trailerUrl: parent['Trailer'] || '',
+                    videoUrl: parent['Video iframe'] || parent['Video iframe 1'] || '',
+                    tmdbUrl: parent['TMDB'] || parent['ID TMDB'] || ''
+                } : { id: String(parentIndex) };
+
+                if (window.detailsModal && parentMapped) {
+                    window.detailsModal.show(parentMapped, div);
                 }
             });
 
             this.wrapper.appendChild(div);
         }
         this.index = end;
+        this.updateProgressBar && this.updateProgressBar();
     }
 
     scrollToPrevPage() { this.scrollToPage('prev'); }
