@@ -1956,8 +1956,8 @@ button:focus {
 
 @media (max-width: 480px) {
     :root {
-        --item-width: 96px;
-        --item-height: 134px;
+        --item-width: 115px;
+        --item-height: 161px;
         --modal-scale: 1.3;
     }
     
