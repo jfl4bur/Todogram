@@ -423,7 +423,18 @@ class DetailsModal {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const videoUrl = btn.getAttribute('data-video-url');
-                    window.videoModal.play(videoUrl);
+                    console.log('DetailsModal: play button clicked', { videoUrl, hasVideoModal: !!window.videoModal });
+                    if (window.videoModal && typeof window.videoModal.play === 'function') {
+                        try {
+                            window.videoModal.play(videoUrl);
+                        } catch (err) {
+                            console.error('DetailsModal: window.videoModal.play error', err);
+                            if (videoUrl) window.open(videoUrl, '_blank');
+                        }
+                    } else {
+                        console.warn('DetailsModal: videoModal no disponible, abriendo en nueva pestaña como fallback');
+                        if (videoUrl) window.open(videoUrl, '_blank');
+                    }
                 });
             });
             
