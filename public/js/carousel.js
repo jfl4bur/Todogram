@@ -162,6 +162,8 @@ class EpisodiosSeriesCarousel {
             }
             this.showCarousel();
             this.renderItems();
+            // Intentar abrir el hash tras cargar datos y renderizar ítems
+            setTimeout(() => this.scrollToHash(), 0);
         } catch (error) {
             this.episodiosData = [
                 {
@@ -190,6 +192,7 @@ class EpisodiosSeriesCarousel {
             ];
             this.showCarousel();
             this.renderItems();
+            setTimeout(() => this.scrollToHash(), 0);
         }
     }
     showCarousel() {
@@ -311,13 +314,10 @@ class EpisodiosSeriesCarousel {
         if (!this._hashListener) {
             this._hashListener = true;
             window.addEventListener('hashchange', () => {
-                if (window.location.hash.startsWith('#episodios-series=')) {
-                    this.scrollToHash();
-                }
+                // Siempre reintenta abrir el hash, aunque los ítems no estén listos
+                setTimeout(() => this.scrollToHash(), 0);
             });
         }
-    // Al cargar, si hay hash, centrar y abrir modal (reintenta si aún no está renderizado)
-    setTimeout(() => this.scrollToHash(), 0);
         // Limpiar hash al cerrar modal (si el modal lo permite)
         if (window.detailsModalOverlay) {
             const closeBtn = document.getElementById('details-modal-close');
