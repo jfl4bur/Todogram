@@ -93,7 +93,9 @@ class AnimesCarousel {
             this.animeData = [];
             let animeIndex = 0;
             for (const item of data) {
-                if (item && typeof item === 'object' && item['Categoría'] === 'Animes') {
+                if (item && typeof item === 'object' && 
+                    item['Categoría'] === 'Animes' && 
+                    (!item['Título episodio'] || item['Título episodio'].trim() === '')) {
                     this.animeData.push({
                         id: `anime_${animeIndex}`,
                         title: item['Título'] || 'Sin título',
