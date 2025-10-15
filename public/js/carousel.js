@@ -1095,43 +1095,7 @@ class DocumentalesCarousel {
             this.carouselNav.style.display = 'flex';
         }
     }
-    async renderItems() {
-        const containerWidth = this.wrapper.clientWidth;
-        const itemWidth = 194;
-        const gap = 4;
-        const itemsThatFit = containerWidth > 0 ? Math.floor(containerWidth / (itemWidth + gap)) : 5;
-        const step = Math.max(itemsThatFit * 2, 10);
-        if (this.index === 0) {
-            this.wrapper.innerHTML = '';
-        }
-        const end = Math.min(this.index + step, this.docuData.length);
-        for (let i = this.index; i < end; i++) {
-            const item = this.docuData[i];
-            const div = document.createElement("div");
-            div.className = "custom-carousel-item";
-            div.dataset.itemId = item.id;
-            const metaInfo = [];
-            if (item.year) metaInfo.push(`<span>${item.year}</span>`);
-            if (item.duration) metaInfo.push(`<span>${item.duration}</span>`);
-            if (item.genre) metaInfo.push(`<span>${item.genre}</span>`);
-            if (item.rating) metaInfo.push(`<div class="carousel-rating"><i class="fas fa-star"></i><span>${item.rating}</span></div>`);
-            if (item.ageRating) metaInfo.push(`<span class="age-rating">${item.ageRating}</span>`);
-            let posterUrl = item.posterUrl;
-            if (!posterUrl) posterUrl = 'https://via.placeholder.com/194x271';
-            div.innerHTML = `
-                <div class="loader"><i class="fas fa-spinner"></i></div>
-                <div class="poster-container">
-                    <img class="poster-image" src="${posterUrl}" alt="${item.title}" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease" loading="lazy">
-                </div>
-                <div class="carousel-overlay">
-                    <div class="carousel-title">${item.title}</div>
-                    <div class="genre-info">${metaInfo.join(' • ')}</div>
-                    <div class="carousel-description">${item.description}</div>
-                </div>
-            `;
-            this.wrapper.appendChild(div);
-        }
-    }
+
     scrollToPrevPage() {
         if (!this.wrapper) return;
         const scrollAmount = this.wrapper.clientWidth;
