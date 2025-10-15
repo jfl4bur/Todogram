@@ -9,8 +9,21 @@ class EpisodiosSeriesCarousel {
         const id = params.get('id');
         const title = params.get('title');
         if (!id || !title) return;
-        // Solo continuar si el id existe en episodiosData
-        const item = this.episodiosData.find(ep => String(ep.id) === id && ep.title && ep.title.trim().toLowerCase() === title.trim().toLowerCase());
+        // Normalizar título igual que DetailsModal.normalizeText
+        const normalizeText = (text) => {
+            if (!text) return '';
+            try {
+                return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]/g, '-')
+                    .replace(/-+/g, '-')
+                    .replace(/^-|-$/g, '');
+            } catch (e) {
+                return String(text).toLowerCase();
+            }
+        };
+        const decodedTitle = decodeURIComponent(title);
+        const item = this.episodiosData.find(ep => String(ep.id) === id && ep.title && normalizeText(ep.title) === decodedTitle);
         if (!item) return; // Si no es un episodio, no hacer nada
         const div = this.wrapper.querySelector(`[data-item-id="${CSS.escape(item.id)}"]`);
         if (div) {
@@ -169,6 +182,10 @@ class EpisodiosSeriesCarousel {
             this.renderItems();
             // Intentar abrir el hash tras cargar datos y renderizar ítems
             setTimeout(() => this.scrollToHash(), 0);
+            // Notificar que los datos de episodios están cargados
+            if (window.notifyDataLoaded) {
+                window.notifyDataLoaded();
+            }
         } catch (error) {
             this.episodiosData = [
                 {
@@ -198,6 +215,9 @@ class EpisodiosSeriesCarousel {
             this.showCarousel();
             this.renderItems();
             setTimeout(() => this.scrollToHash(), 0);
+            if (window.notifyDataLoaded) {
+                window.notifyDataLoaded();
+            }
         }
     }
     showCarousel() {
@@ -377,7 +397,8 @@ class EpisodiosSeriesCarousel {
 
 // Inicializar el carrusel de episodios series al cargar la página
 document.addEventListener('DOMContentLoaded', () => {
-    new EpisodiosSeriesCarousel();
+    // Guardar la instancia globalmente para que el main pueda acceder a episodiosData
+    window.episodiosCarousel = new EpisodiosSeriesCarousel();
 });
 class AnimesCarousel {
     constructor() {

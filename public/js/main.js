@@ -42,6 +42,15 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log("Main: Inicializando carrusel de series...");
             const seriesCarousel = new SeriesCarousel();
             window.seriesCarousel = seriesCarousel;
+
+        // Inicializar el carrusel de episodios (Episodios Series)
+            console.log("Main: Inicializando carrusel de episodios...");
+            try {
+                const episodiosCarousel = new EpisodiosSeriesCarousel();
+                window.episodiosCarousel = episodiosCarousel;
+            } catch (e) {
+                console.error('Error inicializando EpisodiosSeriesCarousel:', e);
+            }
         
         // Verificar que el carrusel de series se inicializó correctamente
         setTimeout(() => {
@@ -170,6 +179,17 @@ document.addEventListener('DOMContentLoaded', function () {
                         itemSource = 'animes';
                         console.log('Anime encontrado en carrusel de animes:', item);
                         console.log('Elemento DOM encontrado para anime:', itemElement);
+                    }
+                }
+
+                // Buscar en el carrusel de episodios (Episodios Series)
+                if (!item && window.episodiosCarousel && window.episodiosCarousel.episodiosData && window.episodiosCarousel.episodiosData.length > 0) {
+                    item = window.episodiosCarousel.episodiosData.find(ep => ep.id === urlParams.id);
+                    if (item) {
+                        itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
+                        itemSource = 'episodios';
+                        console.log('Episodio encontrado en carrusel de episodios:', item);
+                        console.log('Elemento DOM encontrado para episodio:', itemElement);
                     }
                 }
 
