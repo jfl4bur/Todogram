@@ -78,8 +78,8 @@
     gap: 4px;
 }
 .skeleton-item.skeleton-16x9 {
-    width: 246px;
-    height: 138px;
+    width: 300px;
+    height: 169px;
     background: #232323;
     border-radius: 8px;
     position: relative;
@@ -90,8 +90,8 @@
 }
 @media (max-width: 768px) {
     .skeleton-item.skeleton-16x9 {
-        width: 160px;
-        height: 90px;
+        width: 180px;
+        height: 101px;
     }
 }
 @media (max-width: 480px) {

@@ -1,23 +1,20 @@
 // Carrusel de Episodios Series (solo episodios con Título episodio completo)
 class EpisodiosSeriesCarousel {
     // ...existing code...
-    scrollToHash() {
-        // Si el hash es de episodios-series, buscar el ítem y abrir el modal
+    scrollToHash(retries = 10) {
         if (!window.location.hash.startsWith('#episodios-series=')) return;
         const hash = window.location.hash.replace('#episodios-series=', '');
         if (!hash) return;
-        // Buscar el ítem en episodiosData
         const item = this.episodiosData.find(ep => encodeURIComponent(ep.id) === hash);
         if (!item) return;
-        // Buscar el div correspondiente
         const div = this.wrapper.querySelector(`[data-item-id="${item.id}"]`);
         if (div) {
-            // Centrar el ítem en el carrusel
             div.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-            // Abrir el modal
             if (window.detailsModal && typeof window.detailsModal.show === 'function') {
                 window.detailsModal.show(item, div);
             }
+        } else if (retries > 0) {
+            setTimeout(() => this.scrollToHash(retries - 1), 120);
         }
     }
     constructor() {
@@ -319,8 +316,8 @@ class EpisodiosSeriesCarousel {
                 }
             });
         }
-        // Al cargar, si hay hash, centrar y abrir modal
-        this.scrollToHash();
+    // Al cargar, si hay hash, centrar y abrir modal (reintenta si aún no está renderizado)
+    setTimeout(() => this.scrollToHash(), 0);
         // Limpiar hash al cerrar modal (si el modal lo permite)
         if (window.detailsModalOverlay) {
             const closeBtn = document.getElementById('details-modal-close');
