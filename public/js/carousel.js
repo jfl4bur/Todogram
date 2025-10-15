@@ -1008,7 +1008,7 @@ class DocumentalesCarousel {
             this.docuData = [];
             let docuIndex = 0;
             for (const item of data) {
-                if (item && typeof item === 'object' && item['Categoría'] === 'Documental') {
+                if (item && typeof item === 'object' && item['Categoría'] === 'Documentales') {
                     this.docuData.push({
                         id: `docu_${docuIndex}`,
                         title: item['Título'] || 'Sin título',
