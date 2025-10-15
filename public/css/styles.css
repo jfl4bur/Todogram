@@ -434,7 +434,7 @@ button:focus {
 .carousel-title {
     font-size: 2rem;
     font-weight: 600;
-    margin-bottom: 5px;
+    margin-bottom: 10px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
