@@ -245,8 +245,10 @@ class EpisodiosSeriesCarousel {
                             overlay.style.opacity = '1';
                         }, 250),
                         modal: setTimeout(() => {
-                            // Aquí puedes abrir el modal de detalles igual que en otros caruseles
-                            if (window.openDetailsModal) window.openDetailsModal(item, 'episodios-series');
+                            if (window.openDetailsModal) {
+                                window.location.hash = `#episodios-series-${item.id}`;
+                                window.openDetailsModal(item, 'episodios-series');
+                            }
                         }, 600)
                     };
                 });
@@ -262,12 +264,33 @@ class EpisodiosSeriesCarousel {
                     overlay.style.opacity = '';
                 });
             } else {
-                // Touch/click para abrir modal
                 div.addEventListener('click', () => {
-                    if (window.openDetailsModal) window.openDetailsModal(item, 'episodios-series');
+                    if (window.openDetailsModal) {
+                        window.location.hash = `#episodios-series-${item.id}`;
+                        window.openDetailsModal(item, 'episodios-series');
+                    }
                 });
             }
             this.wrapper.appendChild(div);
+        }
+        // Barra de progreso
+        if (this.progressBar) {
+            const total = this.episodiosData.length;
+            const visible = end - this.index;
+            const percent = total > 0 ? ((this.index + visible) / total) * 100 : 0;
+            this.progressBar.style.width = percent + '%';
+        }
+        // Hash persistente y navegación directa
+        if (window.location.hash.startsWith('#episodios-series-')) {
+            const hashId = window.location.hash.replace('#episodios-series-', '');
+            const idx = this.episodiosData.findIndex(e => e.id === hashId);
+            if (idx !== -1) {
+                this.index = Math.max(0, Math.min(idx, this.episodiosData.length - this.itemsPerPage));
+                // Abrir modal automáticamente si existe función
+                if (window.openDetailsModal) {
+                    window.openDetailsModal(this.episodiosData[idx], 'episodios-series');
+                }
+            }
         }
     }
     scrollToPrevPage() {
