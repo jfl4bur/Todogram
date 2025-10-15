@@ -231,11 +231,6 @@ class EpisodiosSeriesCarousel {
                         clearTimeout(this.hoverTimeouts[itemId].details);
                         clearTimeout(this.hoverTimeouts[itemId].modal);
                     }
-                    const rect = div.getBoundingClientRect();
-                    this.hoverModalOrigin = {
-                        x: rect.left + rect.width / 2,
-                        y: rect.top + rect.height / 2
-                    };
                     this.hoverTimeouts[itemId] = {
                         details: setTimeout(() => {
                             const background = div.querySelector('.detail-background');
@@ -282,35 +277,32 @@ class EpisodiosSeriesCarousel {
         }
 
         // Hash persistente y navegación directa
-        if (window.location.hash.startsWith('#episodios-series-')) {
-            const hashId = window.location.hash.replace('#episodios-series-', '');
-            const idx = this.episodiosData.findIndex(e => e.id === hashId);
-            if (idx !== -1) {
-                // Si el episodio no está visible, paginar para mostrarlo
-                if (idx < this.index || idx >= end) {
-                    this.index = Math.max(0, Math.min(idx, this.episodiosData.length - this.itemsPerPage));
-                    this.renderItems();
-                    // Scroll para que el episodio esté visible
-                    setTimeout(() => {
-                        const el = this.wrapper.querySelector(`[data-item-id="${hashId}"]`);
-                        if (el) el.scrollIntoView({behavior:'smooth',inline:'center'});
-                    }, 100);
-                } else {
-                    // Abrir modal automáticamente si existe función
-                    if (window.openDetailsModal) {
-                        window.openDetailsModal(this.episodiosData[idx], 'episodios-series');
+        const handleHash = () => {
+            if (window.location.hash.startsWith('#episodios-series-')) {
+                const hashId = window.location.hash.replace('#episodios-series-', '');
+                const idx = this.episodiosData.findIndex(e => e.id === hashId);
+                if (idx !== -1) {
+                    // Si el episodio no está visible, paginar para mostrarlo
+                    if (idx < this.index || idx >= end) {
+                        this.index = Math.max(0, Math.min(idx, this.episodiosData.length - this.itemsPerPage));
+                        this.renderItems();
+                        setTimeout(() => {
+                            const el = this.wrapper.querySelector(`[data-item-id="${hashId}"]`);
+                            if (el) el.scrollIntoView({behavior:'smooth',inline:'center'});
+                        }, 100);
+                    } else {
+                        if (window.openDetailsModal) {
+                            window.openDetailsModal(this.episodiosData[idx], 'episodios-series');
+                        }
                     }
                 }
             }
-        }
-
-        // Escuchar cambios de hash para navegación directa
+        };
+        handleHash();
         if (!this._hashListener) {
             this._hashListener = true;
             window.addEventListener('hashchange', () => {
-                if (window.location.hash.startsWith('#episodios-series-')) {
-                    this.renderItems();
-                }
+                handleHash();
             });
         }
         // Limpiar hash al cerrar modal (si el modal lo permite)
