@@ -40,14 +40,8 @@ document.addEventListener('DOMContentLoaded', function () {
         
         // Inicializar el carrusel de series inmediatamente
             console.log("Main: Inicializando carrusel de series...");
-
             const seriesCarousel = new SeriesCarousel();
             window.seriesCarousel = seriesCarousel;
-
-            // Inicializar el carrusel de documentales
-            console.log("Main: Inicializando carrusel de documentales...");
-            const documentaryCarousel = new DocumentaryCarousel();
-            window.documentaryCarousel = documentaryCarousel;
         
         // Verificar que el carrusel de series se inicializó correctamente
         setTimeout(() => {
