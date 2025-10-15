@@ -1,3 +1,169 @@
+// Carrusel de Documentales (idéntico a SeriesCarousel pero para documentales)
+class DocumentaryCarousel {
+    constructor() {
+        console.log("DocumentaryCarousel: Constructor iniciado");
+        this.wrapper = document.getElementById('documentary-carousel-wrapper');
+        this.skeleton = document.getElementById('documentary-carousel-skeleton');
+        this.progressBar = null;
+        this.carouselNav = document.getElementById('documentary-carousel-nav');
+        this.carouselPrev = document.getElementById('documentary-carousel-prev');
+        this.carouselNext = document.getElementById('documentary-carousel-next');
+        this.carouselContainer = document.querySelector('#documentary-carousel-wrapper').parentElement;
+        this.itemsPerPage = 0;
+        this.index = 0;
+        this.step = 0;
+        this.moreAppended = false;
+        this.docuData = [];
+        this.hoverTimeouts = {};
+
+        if (!this.wrapper || !this.skeleton || !this.carouselContainer) {
+            console.error("Elementos del carrusel de documentales no encontrados", {
+                wrapper: !!this.wrapper,
+                skeleton: !!this.skeleton,
+                carouselContainer: !!this.carouselContainer,
+                progressBar: !!this.progressBar
+            });
+            return;
+        }
+        if (!this.carouselPrev || !this.carouselNext || !this.carouselNav) {
+            console.error("Elementos de navegación del carrusel de documentales no encontrados");
+            const observer = new MutationObserver(() => {
+                this.carouselPrev = document.getElementById('documentary-carousel-prev');
+                this.carouselNext = document.getElementById('documentary-carousel-next');
+                this.carouselNav = document.getElementById('documentary-carousel-nav');
+                if (this.carouselPrev && this.carouselNext && this.carouselNav) {
+                    this.setupEventListeners();
+                    observer.disconnect();
+                }
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+            return;
+        }
+        this.init();
+    }
+
+    init() {
+        if (this.wrapper) {
+            this.progressBar = this.wrapper.parentElement.querySelector('.carousel-progress-bar');
+        }
+        this.setupResizeObserver();
+        this.setupEventListeners();
+        this.loadDocumentaryData();
+    }
+
+    setupResizeObserver() {
+        if (!this.wrapper) return;
+        const itemWidth = 194;
+        const gap = 4;
+        const calculate = () => {
+            const containerWidth = this.wrapper.clientWidth;
+            if (containerWidth > 0) {
+                const itemsThatFit = Math.floor(containerWidth / (itemWidth + gap));
+                this.itemsPerPage = Math.max(1, itemsThatFit);
+                this.step = this.itemsPerPage;
+            } else {
+                this.itemsPerPage = 1;
+                this.step = 1;
+            }
+        };
+        calculate();
+        const resizeObserver = new ResizeObserver(() => { calculate(); });
+        resizeObserver.observe(this.wrapper);
+    }
+
+    setupEventListeners() {
+        window.addEventListener('resize', () => this.calculateItemsPerPage && this.calculateItemsPerPage());
+        if (this.carouselPrev) {
+            this.carouselPrev.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.scrollToPrevPage && this.scrollToPrevPage();
+            });
+        }
+        if (this.carouselNext) {
+            this.carouselNext.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.scrollToNextPage && this.scrollToNextPage();
+            });
+        }
+        if (this.wrapper) {
+            this.wrapper.addEventListener('scroll', () => this.handleScroll && this.handleScroll());
+        }
+    }
+
+    async loadDocumentaryData() {
+        try {
+            let data;
+            if (window.sharedData) {
+                data = window.sharedData;
+            } else {
+                const response = await fetch(DATA_URL);
+                if (!response.ok) throw new Error('No se pudo cargar data.json');
+                data = await response.json();
+                window.sharedData = data;
+            }
+            this.docuData = [];
+            let docIndex = 0;
+            for (const item of data) {
+                if (item && typeof item === 'object' && item['Categoría'] === 'Documental') {
+                    this.docuData.push({
+                        id: `docu_${docIndex}`,
+                        title: item['Título'] || 'Sin título',
+                        description: item['Synopsis'] || 'Descripción no disponible',
+                        posterUrl: item['Portada'] || '',
+                        postersUrl: item['Carteles'] || '',
+                        backgroundUrl: item['Portada'] || '',
+                        year: item['Año'] ? item['Año'].toString() : '',
+                        duration: item['Duración'] || '',
+                        genre: item['Géneros'] || '',
+                        rating: item['Puntuación 1-10'] ? item['Puntuación 1-10'].toString() : '',
+                        ageRating: item['Clasificación'] || '',
+                        link: item['Enlace'] || '#',
+                        trailerUrl: item['Trailer'] || '',
+                        videoUrl: item['Video iframe'] || '',
+                        tmdbUrl: item['TMDB'] || '',
+                        audiosCount: item['Audios'] ? item['Audios'].split(',').length : 0,
+                        subtitlesCount: item['Subtítulos'] ? item['Subtítulos'].split(',').length : 0,
+                        audioList: item['Audios'] ? item['Audios'].split(',') : [],
+                        subtitleList: item['Subtítulos'] ? item['Subtítulos'].split(',') : []
+                    });
+                    docIndex++;
+                }
+            }
+            if (this.docuData.length === 0) {
+                this.docuData = [
+                    {
+                        id: "docu_12345",
+                        title: "Ejemplo de documental",
+                        description: "Este es un documental de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
+                        posterUrl: "https://via.placeholder.com/194x271",
+                        postersUrl: "https://via.placeholder.com/194x271",
+                        backgroundUrl: "https://via.placeholder.com/194x271",
+                        year: "2023",
+                        duration: "90 min",
+                        genre: "Historia",
+                        rating: "8.5",
+                        ageRating: "TP",
+                        link: "#",
+                        trailerUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                        videoUrl: "https://ejemplo.com/video.mp4",
+                        tmdbUrl: "https://www.themoviedb.org/movie/12345",
+                        audiosCount: 1,
+                        subtitlesCount: 1,
+                        audioList: ["Español"],
+                        subtitleList: ["Español"]
+                    }
+                ];
+            }
+            this.showCarousel && this.showCarousel();
+            this.renderItems && this.renderItems();
+        } catch (error) {
+            console.error('Error cargando datos de documentales:', error);
+        }
+    }
+
+    // Métodos de scroll, render, etc. se heredan o se copian igual que en SeriesCarousel
+    // ...
+}
 class Carousel {
     constructor() {
         this.wrapper = document.getElementById('carousel-wrapper');
