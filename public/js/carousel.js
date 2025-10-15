@@ -2,12 +2,13 @@
 class EpisodiosSeriesCarousel {
     // ...existing code...
     scrollToHash(retries = 10) {
-        if (!window.location.hash.startsWith('#episodios-series=')) return;
-        const hash = window.location.hash.replace('#episodios-series=', '');
+        // Usar el título del episodio como identificador único en el hash
+        if (!window.location.hash.startsWith('#episodios-series-title=')) return;
+        const hash = decodeURIComponent(window.location.hash.replace('#episodios-series-title=', ''));
         if (!hash) return;
-        const item = this.episodiosData.find(ep => encodeURIComponent(ep.id) === hash);
+        const item = this.episodiosData.find(ep => ep.title && ep.title.trim() === hash);
         if (!item) return;
-        const div = this.wrapper.querySelector(`[data-item-id="${item.id}"]`);
+        const div = this.wrapper.querySelector(`[data-episodios-title="${CSS.escape(item.title)}"]`);
         if (div) {
             div.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
             if (window.detailsModal && typeof window.detailsModal.show === 'function') {
@@ -212,6 +213,7 @@ class EpisodiosSeriesCarousel {
             const div = document.createElement("div");
             div.className = "custom-carousel-item episodios-series-item";
             div.dataset.itemId = item.id;
+            div.setAttribute('data-episodios-title', item.title);
             const metaInfo = [];
             if (item.serie) metaInfo.push(`<span>${item.serie}</span>`);
             if (item.temporada) metaInfo.push(`<span>T${item.temporada}</span>`);
@@ -296,8 +298,8 @@ class EpisodiosSeriesCarousel {
                     clearTimeout(this.hoverTimeouts[itemId].details);
                     clearTimeout(this.hoverTimeouts[itemId].modal);
                 }
-                // Hash persistente igual que Series
-                const hash = `episodios-series=${encodeURIComponent(item.id)}`;
+                // Hash persistente usando el título del episodio
+                const hash = `episodios-series-title=${encodeURIComponent(item.title)}`;
                 if (window.location.hash !== `#${hash}`) {
                     history.pushState(null, '', `#${hash}`);
                 }
