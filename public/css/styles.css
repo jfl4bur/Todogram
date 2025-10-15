@@ -194,6 +194,7 @@ button:focus {
     margin-bottom: 40px;
     margin-top: 40px;
     position: relative;
+    margin-left: 50px;
 }
 
 .carousel-title {
