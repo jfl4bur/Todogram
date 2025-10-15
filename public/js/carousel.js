@@ -277,6 +277,11 @@ class AnimesCarousel {
                     clearTimeout(this.hoverTimeouts[itemId].details);
                     clearTimeout(this.hoverTimeouts[itemId].modal);
                 }
+                // Actualizar el hash de la URL para persistencia
+                const hash = `id=${encodeURIComponent(item.id)}&title=${encodeURIComponent(item.title)}`;
+                if (window.location.hash !== `#${hash}`) {
+                    history.pushState(null, '', `#${hash}`);
+                }
                 window.detailsModal.show(item, div);
             });
             this.wrapper.appendChild(div);
