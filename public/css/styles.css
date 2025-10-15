@@ -1,3 +1,60 @@
+/* Carrusel de Episodios Series (wrapper) */
+#episodios-series-carousel-wrapper {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 10px;
+    padding-top: 4px;
+    gap: 4px;
+}
+#episodios-series-carousel-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
+/* Skeleton 16:9 para Episodios Series */
+.carousel-skeleton-16x9 {
+    display: flex;
+    gap: 4px;
+}
+.skeleton-item.skeleton-16x9 {
+    width: 246px;
+    height: 138px;
+    background: #232323;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+@media (max-width: 768px) {
+    .skeleton-item.skeleton-16x9 {
+        width: 160px;
+        height: 90px;
+    }
+}
+@media (max-width: 480px) {
+    .skeleton-item.skeleton-16x9 {
+        width: 120px;
+        height: 67px;
+    }
+}
+
+/* Imagen 16:9 para cards de Episodios Series */
+.episodios-series-card-image {
+    width: 100%;
+    aspect-ratio: 16/9;
+    object-fit: cover;
+    border-radius: 8px;
+    background: #232323;
+    transition: opacity 0.3s;
+    opacity: 0;
+}
+.episodios-series-card-image.loaded {
+    opacity: 1;
+}
 /* Gap y scroll para el carrusel de animes */
 #animes-carousel-wrapper {
     display: flex;
