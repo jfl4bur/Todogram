@@ -2,13 +2,16 @@
 class EpisodiosSeriesCarousel {
     // ...existing code...
     scrollToHash(retries = 10) {
-        // Usar el título del episodio como identificador único en el hash
-        if (!window.location.hash.startsWith('#episodios-series-title=')) return;
-        const hash = decodeURIComponent(window.location.hash.replace('#episodios-series-title=', ''));
-        if (!hash) return;
-        const item = this.episodiosData.find(ep => ep.title && ep.title.trim() === hash);
+        // Usar el mismo formato de hash que Series/Animes: #id=...&title=...
+        if (!window.location.hash.startsWith('#id=')) return;
+        const hash = window.location.hash.substring(1); // quitar '#'
+        const params = new URLSearchParams(hash);
+        const id = params.get('id');
+        const title = params.get('title');
+        if (!id || !title) return;
+        const item = this.episodiosData.find(ep => String(ep.id) === id && ep.title === title);
         if (!item) return;
-        const div = this.wrapper.querySelector(`[data-episodios-title="${CSS.escape(item.title)}"]`);
+        const div = this.wrapper.querySelector(`[data-item-id="${CSS.escape(item.id)}"]`);
         if (div) {
             div.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
             if (window.detailsModal && typeof window.detailsModal.show === 'function') {
@@ -206,14 +209,13 @@ class EpisodiosSeriesCarousel {
     async renderItems() {
         // Limpia el wrapper
         this.wrapper.innerHTML = '';
-    const itemWidth = 300; // Aumentado para mayor tamaño
-    const gap = 8; // Un poco más de espacio entre ítems
+        const itemWidth = 300; // Aumentado para mayor tamaño
+        const gap = 8; // Un poco más de espacio entre ítems
         for (let i = 0; i < this.episodiosData.length; i++) {
             const item = this.episodiosData[i];
             const div = document.createElement("div");
             div.className = "custom-carousel-item episodios-series-item";
             div.dataset.itemId = item.id;
-            div.setAttribute('data-episodios-title', item.title);
             const metaInfo = [];
             if (item.serie) metaInfo.push(`<span>${item.serie}</span>`);
             if (item.temporada) metaInfo.push(`<span>T${item.temporada}</span>`);
@@ -298,8 +300,8 @@ class EpisodiosSeriesCarousel {
                     clearTimeout(this.hoverTimeouts[itemId].details);
                     clearTimeout(this.hoverTimeouts[itemId].modal);
                 }
-                // Hash persistente usando el título del episodio
-                const hash = `episodios-series-title=${encodeURIComponent(item.title)}`;
+                // Hash persistente igual que Series/Animes
+                const hash = `id=${encodeURIComponent(item.id)}&title=${encodeURIComponent(item.title)}`;
                 if (window.location.hash !== `#${hash}`) {
                     history.pushState(null, '', `#${hash}`);
                 }
@@ -316,17 +318,16 @@ class EpisodiosSeriesCarousel {
         if (!this._hashListener) {
             this._hashListener = true;
             window.addEventListener('hashchange', () => {
-                // Siempre reintenta abrir el hash, aunque los ítems no estén listos
                 setTimeout(() => this.scrollToHash(), 0);
             });
         }
-        // Limpiar hash al cerrar modal (si el modal lo permite)
+        // Limpiar hash al cerrar modal (igual que otros carouseles)
         if (window.detailsModalOverlay) {
             const closeBtn = document.getElementById('details-modal-close');
             if (closeBtn && !closeBtn._episodiosHashListener) {
                 closeBtn._episodiosHashListener = true;
                 closeBtn.addEventListener('click', () => {
-                    if (window.location.hash.startsWith('#episodios-series=')) {
+                    if (window.location.hash.startsWith('#id=')) {
                         history.replaceState(null, '', window.location.pathname + window.location.search);
                     }
                 });
