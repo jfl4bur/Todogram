@@ -1,3 +1,9 @@
+// Permitir que otros scripts llamen a detailsModal.show mediante window.openDetailsModal
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.detailsModal) {
+        window.openDetailsModal = (item, origen) => window.detailsModal.show(item);
+    }
+});
 class DetailsModal {
     constructor() {
         this.detailsModalOverlay = document.getElementById('details-modal-overlay');
