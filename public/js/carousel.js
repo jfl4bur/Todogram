@@ -1219,5 +1219,5 @@ class DocumentalesCarousel {
 // Inicialización de ambos carruseles
 window.addEventListener('DOMContentLoaded', () => {
     new SeriesCarousel();
-    new DocumentalesCarousel();
+    window.documentalesCarousel = new DocumentalesCarousel();
 });

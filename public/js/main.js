@@ -138,7 +138,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 let item = carousel.moviesData.find(movie => movie.id === urlParams.id);
                 let itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
                 let itemSource = 'peliculas';
-                
+
                 // Si no se encuentra en el carousel de películas, buscar en el carrusel de series
                 if (!item && window.seriesCarousel && window.seriesCarousel.seriesData && window.seriesCarousel.seriesData.length > 0) {
                     item = window.seriesCarousel.seriesData.find(series => series.id === urlParams.id);
@@ -149,7 +149,18 @@ document.addEventListener('DOMContentLoaded', function () {
                         console.log('Elemento DOM encontrado para serie:', itemElement);
                     }
                 }
-                
+
+                // Si no se encuentra en el carrusel de series, buscar en el carrusel de documentales
+                if (!item && window.documentalesCarousel && window.documentalesCarousel.docuData && window.documentalesCarousel.docuData.length > 0) {
+                    item = window.documentalesCarousel.docuData.find(docu => docu.id === urlParams.id);
+                    if (item) {
+                        itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
+                        itemSource = 'documentales';
+                        console.log('Documental encontrado en carrusel de documentales:', item);
+                        console.log('Elemento DOM encontrado para documental:', itemElement);
+                    }
+                }
+
                 // Si no se encuentra en ningún carrusel, buscar en el slider independiente
                 if (!item && window.sliderIndependent) {
                     const sliderData = window.sliderIndependent.getSlidesData();
