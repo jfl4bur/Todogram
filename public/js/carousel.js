@@ -2,15 +2,16 @@
 class EpisodiosSeriesCarousel {
     // ...existing code...
     scrollToHash(retries = 10) {
-        // Usar el mismo formato de hash que Series/Animes: #id=...&title=...
+        // Solo actuar si el id existe en episodiosData
         if (!window.location.hash.startsWith('#id=')) return;
         const hash = window.location.hash.substring(1); // quitar '#'
         const params = new URLSearchParams(hash);
         const id = params.get('id');
         const title = params.get('title');
         if (!id || !title) return;
-        const item = this.episodiosData.find(ep => String(ep.id) === id && ep.title === title);
-        if (!item) return;
+        // Solo continuar si el id existe en episodiosData
+        const item = this.episodiosData.find(ep => String(ep.id) === id && ep.title && ep.title.trim().toLowerCase() === title.trim().toLowerCase());
+        if (!item) return; // Si no es un episodio, no hacer nada
         const div = this.wrapper.querySelector(`[data-item-id="${CSS.escape(item.id)}"]`);
         if (div) {
             div.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
