@@ -1,5 +1,25 @@
 // Carrusel de Episodios Series (solo episodios con Título episodio completo)
 class EpisodiosSeriesCarousel {
+    // ...existing code...
+    scrollToHash() {
+        // Si el hash es de episodios-series, buscar el ítem y abrir el modal
+        if (!window.location.hash.startsWith('#episodios-series=')) return;
+        const hash = window.location.hash.replace('#episodios-series=', '');
+        if (!hash) return;
+        // Buscar el ítem en episodiosData
+        const item = this.episodiosData.find(ep => encodeURIComponent(ep.id) === hash);
+        if (!item) return;
+        // Buscar el div correspondiente
+        const div = this.wrapper.querySelector(`[data-item-id="${item.id}"]`);
+        if (div) {
+            // Centrar el ítem en el carrusel
+            div.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            // Abrir el modal
+            if (window.detailsModal && typeof window.detailsModal.show === 'function') {
+                window.detailsModal.show(item, div);
+            }
+        }
+    }
     constructor() {
         this.wrapper = document.getElementById('episodios-series-carousel-wrapper');
         this.skeleton = document.getElementById('episodios-series-carousel-skeleton');
