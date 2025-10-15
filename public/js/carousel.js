@@ -280,16 +280,49 @@ class EpisodiosSeriesCarousel {
             const percent = total > 0 ? ((this.index + visible) / total) * 100 : 0;
             this.progressBar.style.width = percent + '%';
         }
+
         // Hash persistente y navegación directa
         if (window.location.hash.startsWith('#episodios-series-')) {
             const hashId = window.location.hash.replace('#episodios-series-', '');
             const idx = this.episodiosData.findIndex(e => e.id === hashId);
             if (idx !== -1) {
-                this.index = Math.max(0, Math.min(idx, this.episodiosData.length - this.itemsPerPage));
-                // Abrir modal automáticamente si existe función
-                if (window.openDetailsModal) {
-                    window.openDetailsModal(this.episodiosData[idx], 'episodios-series');
+                // Si el episodio no está visible, paginar para mostrarlo
+                if (idx < this.index || idx >= end) {
+                    this.index = Math.max(0, Math.min(idx, this.episodiosData.length - this.itemsPerPage));
+                    this.renderItems();
+                    // Scroll para que el episodio esté visible
+                    setTimeout(() => {
+                        const el = this.wrapper.querySelector(`[data-item-id="${hashId}"]`);
+                        if (el) el.scrollIntoView({behavior:'smooth',inline:'center'});
+                    }, 100);
+                } else {
+                    // Abrir modal automáticamente si existe función
+                    if (window.openDetailsModal) {
+                        window.openDetailsModal(this.episodiosData[idx], 'episodios-series');
+                    }
                 }
+            }
+        }
+
+        // Escuchar cambios de hash para navegación directa
+        if (!this._hashListener) {
+            this._hashListener = true;
+            window.addEventListener('hashchange', () => {
+                if (window.location.hash.startsWith('#episodios-series-')) {
+                    this.renderItems();
+                }
+            });
+        }
+        // Limpiar hash al cerrar modal (si el modal lo permite)
+        if (window.detailsModalOverlay) {
+            const closeBtn = document.getElementById('details-modal-close');
+            if (closeBtn && !closeBtn._episodiosHashListener) {
+                closeBtn._episodiosHashListener = true;
+                closeBtn.addEventListener('click', () => {
+                    if (window.location.hash.startsWith('#episodios-series-')) {
+                        history.replaceState(null, '', window.location.pathname + window.location.search);
+                    }
+                });
             }
         }
     }
