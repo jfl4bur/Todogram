@@ -374,32 +374,51 @@ class EpisodiosSeriesCarousel {
     }
     scrollToPage(direction) {
         if (!this.wrapper) return;
-        const itemWidth = 246;
-        const gap = 4;
         const containerWidth = this.wrapper.clientWidth;
-        const itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
-        const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
-        let currentScroll = this.wrapper.scrollLeft;
-        let targetScroll;
-        if (direction === 'prev') {
-            targetScroll = Math.max(0, currentScroll - actualScrollAmount);
-        } else {
-            targetScroll = currentScroll + actualScrollAmount;
+
+        // Determinar tamaño real del ítem y gap leyendo el DOM
+        const firstItem = this.wrapper.querySelector('.custom-carousel-item');
+        if (!firstItem) return;
+        const itemRect = firstItem.getBoundingClientRect();
+        const itemWidth = Math.round(itemRect.width);
+
+        // Intentar estimar gap usando el segundo elemento
+        let gap = 0;
+        const secondItem = firstItem.nextElementSibling;
+        if (secondItem) {
+            const secondRect = secondItem.getBoundingClientRect();
+            gap = Math.round(secondRect.left - (itemRect.left + itemRect.width));
+            if (isNaN(gap) || gap < 0) gap = 0;
         }
-        const alignedScroll = Math.round(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
-        const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
-        const finalScroll = Math.max(0, Math.min(alignedScroll, maxScroll));
+
+        const stepSize = itemWidth + gap;
+
+        // Calcular cuántos items completos caben en la vista
+        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
+
+    // Calcular índice del primer item visible actualmente (alinear a la izquierda)
+    const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
+
+        let targetIndex;
+        if (direction === 'prev') {
+            targetIndex = Math.max(0, currentIndex - itemsPerViewport);
+        } else {
+            targetIndex = currentIndex + itemsPerViewport;
+        }
+
+        // Evitar sobrepasar la cantidad de items
+        const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
+        const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
+        targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
+
+        const finalScroll = targetIndex * stepSize;
         this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 
 // (Eliminados duplicados y métodos sobrantes)
 }
 
-// Inicializar el carrusel de episodios series al cargar la página
-document.addEventListener('DOMContentLoaded', () => {
-    // Guardar la instancia globalmente para que el main pueda acceder a episodiosData
-    window.episodiosCarousel = new EpisodiosSeriesCarousel();
-});
+// Nota: la instancia de EpisodiosSeriesCarousel se crea desde `main.js` durante initializeComponents()
 class AnimesCarousel {
     constructor() {
         console.log("AnimesCarousel: Constructor iniciado");
