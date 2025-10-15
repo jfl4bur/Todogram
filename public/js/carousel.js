@@ -1,3 +1,306 @@
+class AnimesCarousel {
+    constructor() {
+        console.log("AnimesCarousel: Constructor iniciado");
+        this.wrapper = document.getElementById('animes-carousel-wrapper');
+        this.skeleton = document.getElementById('animes-carousel-skeleton');
+        this.progressBar = null;
+        this.carouselNav = document.getElementById('animes-carousel-nav');
+        this.carouselPrev = document.getElementById('animes-carousel-prev');
+        this.carouselNext = document.getElementById('animes-carousel-next');
+        this.carouselContainer = document.querySelector('#animes-carousel-wrapper').parentElement;
+        this.itemsPerPage = 0;
+        this.index = 0;
+        this.step = 0;
+        this.moreAppended = false;
+        this.animeData = [];
+        this.hoverTimeouts = {};
+
+        if (!this.wrapper || !this.skeleton || !this.carouselContainer) {
+            console.error("Elementos del carrusel de animes no encontrados");
+            return;
+        }
+        if (!this.carouselPrev || !this.carouselNext || !this.carouselNav) {
+            const observer = new MutationObserver(() => {
+                this.carouselPrev = document.getElementById('animes-carousel-prev');
+                this.carouselNext = document.getElementById('animes-carousel-next');
+                this.carouselNav = document.getElementById('animes-carousel-nav');
+                if (this.carouselPrev && this.carouselNext && this.carouselNav) {
+                    this.setupEventListeners();
+                    observer.disconnect();
+                }
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+            return;
+        }
+        this.init();
+    }
+    init() {
+        if (this.wrapper) {
+            this.progressBar = this.wrapper.parentElement.querySelector('.carousel-progress-bar');
+        }
+        this.setupResizeObserver();
+        this.setupEventListeners();
+        this.loadAnimeData();
+    }
+    setupResizeObserver() {
+        if (!this.wrapper) return;
+        const itemWidth = 194;
+        const gap = 4;
+        const calculate = () => {
+            const containerWidth = this.wrapper.clientWidth;
+            if (containerWidth > 0) {
+                const itemsThatFit = Math.floor(containerWidth / (itemWidth + gap));
+                this.itemsPerPage = Math.max(1, itemsThatFit);
+                this.step = this.itemsPerPage;
+            } else {
+                this.itemsPerPage = 1;
+                this.step = 1;
+            }
+        };
+        calculate();
+        const resizeObserver = new ResizeObserver(() => { calculate(); });
+        resizeObserver.observe(this.wrapper);
+    }
+    setupEventListeners() {
+        window.addEventListener('resize', () => this.calculateItemsPerPage && this.calculateItemsPerPage());
+        if (this.carouselPrev) {
+            this.carouselPrev.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.scrollToPrevPage();
+            });
+        }
+        if (this.carouselNext) {
+            this.carouselNext.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.scrollToNextPage();
+            });
+        }
+        if (this.wrapper) {
+            this.wrapper.addEventListener('scroll', () => this.handleScroll && this.handleScroll());
+        }
+    }
+    async loadAnimeData() {
+        try {
+            let data;
+            if (window.sharedData) {
+                data = window.sharedData;
+            } else {
+                const response = await fetch(DATA_URL);
+                if (!response.ok) throw new Error('No se pudo cargar data.json');
+                data = await response.json();
+                window.sharedData = data;
+            }
+            this.animeData = [];
+            let animeIndex = 0;
+            for (const item of data) {
+                if (item && typeof item === 'object' && item['Categoría'] === 'Animes') {
+                    this.animeData.push({
+                        id: `anime_${animeIndex}`,
+                        title: item['Título'] || 'Sin título',
+                        description: item['Synopsis'] || 'Descripción no disponible',
+                        posterUrl: item['Portada'] || '',
+                        postersUrl: item['Carteles'] || '',
+                        backgroundUrl: item['Portada'] || '',
+                        year: item['Año'] ? item['Año'].toString() : '',
+                        duration: item['Duración'] || '',
+                        genre: item['Géneros'] || '',
+                        rating: item['Puntuación 1-10'] ? item['Puntuación 1-10'].toString() : '',
+                        ageRating: item['Clasificación'] || '',
+                        link: item['Enlace'] || '#',
+                        trailerUrl: item['Trailer'] || '',
+                        videoUrl: item['Video iframe'] || '',
+                        tmdbUrl: item['TMDB'] || '',
+                        audiosCount: item['Audios'] ? item['Audios'].split(',').length : 0,
+                        subtitlesCount: item['Subtítulos'] ? item['Subtítulos'].split(',').length : 0,
+                        audioList: item['Audios'] ? item['Audios'].split(',') : [],
+                        subtitleList: item['Subtítulos'] ? item['Subtítulos'].split(',') : [],
+                        episodes: item['Episodios'] || []
+                    });
+                    animeIndex++;
+                }
+            }
+            if (this.animeData.length === 0) {
+                this.animeData = [
+                    {
+                        id: "anime_12345",
+                        title: "Ejemplo de anime",
+                        description: "Este es un anime de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
+                        posterUrl: "https://via.placeholder.com/194x271",
+                        postersUrl: "https://via.placeholder.com/194x271",
+                        backgroundUrl: "https://via.placeholder.com/194x271",
+                        year: "2023",
+                        duration: "24 min",
+                        genre: "Acción",
+                        rating: "8.5",
+                        ageRating: "TP",
+                        link: "#",
+                        trailerUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                        videoUrl: "https://ejemplo.com/video.mp4",
+                        tmdbUrl: "https://www.themoviedb.org/movie/12345",
+                        audiosCount: 1,
+                        subtitlesCount: 1,
+                        audioList: ["Español"],
+                        subtitleList: ["Español"],
+                        episodes: []
+                    }
+                ];
+            }
+            this.showCarousel();
+            this.renderItems();
+        } catch (error) {
+            this.animeData = [
+                {
+                    id: "anime_12345",
+                    title: "Ejemplo de anime",
+                    description: "Este es un anime de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
+                    posterUrl: "https://via.placeholder.com/194x271",
+                    postersUrl: "https://via.placeholder.com/194x271",
+                    backgroundUrl: "https://via.placeholder.com/194x271",
+                    year: "2023",
+                    duration: "24 min",
+                    genre: "Acción",
+                    rating: "8.5",
+                    ageRating: "TP",
+                    link: "#",
+                    trailerUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                    videoUrl: "https://ejemplo.com/video.mp4",
+                    tmdbUrl: "https://www.themoviedb.org/movie/12345",
+                    audiosCount: 1,
+                    subtitlesCount: 1,
+                    audioList: ["Español"],
+                    subtitleList: ["Español"],
+                    episodes: []
+                }
+            ];
+            this.showCarousel();
+            this.renderItems();
+        }
+    }
+    showCarousel() {
+        this.skeleton.style.display = 'none';
+        this.wrapper.style.display = 'flex';
+        if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+            this.carouselNav.style.display = 'flex';
+        }
+    }
+    async renderItems() {
+        const containerWidth = this.wrapper.clientWidth;
+        const itemWidth = 194;
+        const gap = 4;
+        const itemsThatFit = containerWidth > 0 ? Math.floor(containerWidth / (itemWidth + gap)) : 5;
+        const step = Math.max(itemsThatFit * 2, 10);
+        if (this.index === 0) {
+            this.wrapper.innerHTML = '';
+        }
+        const end = Math.min(this.index + step, this.animeData.length);
+        for (let i = this.index; i < end; i++) {
+            const item = this.animeData[i];
+            const div = document.createElement("div");
+            div.className = "custom-carousel-item";
+            div.dataset.itemId = i;
+            const metaInfo = [];
+            if (item.year) metaInfo.push(`<span>${item.year}</span>`);
+            if (item.duration) metaInfo.push(`<span>${item.duration}</span>`);
+            if (item.genre) metaInfo.push(`<span>${item.genre}</span>`);
+            if (item.rating) metaInfo.push(`<div class=\"carousel-rating\"><i class=\"fas fa-star\"></i><span>${item.rating}</span></div>`);
+            if (item.ageRating) metaInfo.push(`<span class=\"age-rating\">${item.ageRating}</span>`);
+            let posterUrl = item.posterUrl;
+            if (!posterUrl) posterUrl = 'https://via.placeholder.com/194x271';
+            div.innerHTML = `
+                <div class="loader"><i class="fas fa-spinner"></i></div>
+                <div class="poster-container">
+                    <img class="poster-image" src="${posterUrl}" alt="${item.title}" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease" loading="lazy">
+                </div>
+                <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none">
+                <div class="carousel-overlay">
+                    <div class="carousel-title">${item.title}</div>
+                    ${metaInfo.length ? `<div class="carousel-meta">${metaInfo.join('')}</div>` : ''}
+                    ${item.description ? `<div class="carousel-description">${item.description}</div>` : ''}
+                </div>
+            `;
+            if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+                div.addEventListener('mouseenter', (e) => {
+                    const itemId = div.dataset.itemId;
+                    if (this.hoverTimeouts[itemId]) {
+                        clearTimeout(this.hoverTimeouts[itemId].details);
+                        clearTimeout(this.hoverTimeouts[itemId].modal);
+                    }
+                    const rect = div.getBoundingClientRect();
+                    this.hoverModalOrigin = {
+                        x: rect.left + rect.width / 2,
+                        y: rect.top + rect.height / 2
+                    };
+                    this.hoverTimeouts[itemId] = {
+                        details: setTimeout(() => {
+                            const background = div.querySelector('.detail-background');
+                            const overlay = div.querySelector('.carousel-overlay');
+                            background.style.display = 'block';
+                            background.style.opacity = '1';
+                            overlay.style.opacity = '1';
+                            overlay.style.transform = 'translateY(0)';
+                            this.hoverTimeouts[itemId].modal = setTimeout(() => {
+                                if (!window.isModalOpen && !window.isDetailsModalOpen) {
+                                    window.hoverModalItem = div;
+                                    if (window.hoverModal && div) {
+                                        window.hoverModal.show(item, div);
+                                    }
+                                }
+                            }, 200);
+                        }, 900)
+                    };
+                });
+                div.addEventListener('mouseleave', () => {
+                    const itemId = div.dataset.itemId;
+                    if (this.hoverTimeouts[itemId]) {
+                        clearTimeout(this.hoverTimeouts[itemId].details);
+                        clearTimeout(this.hoverTimeouts[itemId].modal);
+                        delete this.hoverTimeouts[itemId];
+                    }
+                    const poster = div.querySelector('.poster-image');
+                    const background = div.querySelector('.detail-background');
+                    const overlay = div.querySelector('.carousel-overlay');
+                    poster.style.opacity = '1';
+                    background.style.opacity = '0';
+                    overlay.style.opacity = '0';
+                    overlay.style.transform = 'translateY(20px)';
+                    setTimeout(() => {
+                        background.style.display = 'none';
+                    }, 300);
+                });
+            }
+            div.addEventListener('click', (e) => {
+                e.preventDefault();
+                const itemId = div.dataset.itemId;
+                if (this.hoverTimeouts[itemId]) {
+                    clearTimeout(this.hoverTimeouts[itemId].details);
+                    clearTimeout(this.hoverTimeouts[itemId].modal);
+                }
+                window.detailsModal.show(item, div);
+            });
+            this.wrapper.appendChild(div);
+        }
+        this.index = end;
+        // Si hay barra de progreso, actualizarla
+        if (this.progressBar) {
+            if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
+                const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
+                this.progressBar.style.width = `${scrollPercentage}%`;
+            } else {
+                this.progressBar.style.width = '100%';
+            }
+        }
+    }
+    scrollToPrevPage() {
+        if (!this.wrapper) return;
+        const scrollAmount = this.wrapper.clientWidth;
+        this.wrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+    }
+    scrollToNextPage() {
+        if (!this.wrapper) return;
+        const scrollAmount = this.wrapper.clientWidth;
+        this.wrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+}
 class Carousel {
     constructor() {
         this.wrapper = document.getElementById('carousel-wrapper');
@@ -1220,4 +1523,5 @@ class DocumentalesCarousel {
 window.addEventListener('DOMContentLoaded', () => {
     new SeriesCarousel();
     window.documentalesCarousel = new DocumentalesCarousel();
+    window.animesCarousel = new AnimesCarousel();
 });

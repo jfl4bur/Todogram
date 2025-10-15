@@ -151,6 +151,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 // Si no se encuentra en el carrusel de series, buscar en el carrusel de documentales
+
                 if (!item && window.documentalesCarousel && window.documentalesCarousel.docuData && window.documentalesCarousel.docuData.length > 0) {
                     item = window.documentalesCarousel.docuData.find(docu => docu.id === urlParams.id);
                     if (item) {
@@ -158,6 +159,17 @@ document.addEventListener('DOMContentLoaded', function () {
                         itemSource = 'documentales';
                         console.log('Documental encontrado en carrusel de documentales:', item);
                         console.log('Elemento DOM encontrado para documental:', itemElement);
+                    }
+                }
+
+                // Si no se encuentra en documentales, buscar en el carrusel de animes
+                if (!item && window.animesCarousel && window.animesCarousel.animeData && window.animesCarousel.animeData.length > 0) {
+                    item = window.animesCarousel.animeData.find(anime => anime.id === urlParams.id);
+                    if (item) {
+                        itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
+                        itemSource = 'animes';
+                        console.log('Anime encontrado en carrusel de animes:', item);
+                        console.log('Elemento DOM encontrado para anime:', itemElement);
                     }
                 }
 

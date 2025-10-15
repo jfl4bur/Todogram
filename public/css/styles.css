@@ -1,3 +1,17 @@
+/* Gap y scroll para el carrusel de animes */
+#animes-carousel-wrapper {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 10px;
+    padding-top: 4px;
+    gap: 4px;
+}
+#animes-carousel-wrapper::-webkit-scrollbar {
+    display: none;
+}
 /* Gap y scroll para el carrusel de documentales */
 #documentales-carousel-wrapper {
     display: flex;
