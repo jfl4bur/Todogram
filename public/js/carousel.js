@@ -187,7 +187,6 @@ class EpisodiosSeriesCarousel {
         this.wrapper.innerHTML = '';
         const itemWidth = 246;
         const gap = 4;
-        // Renderiza todos los episodios (scroll infinito)
         for (let i = 0; i < this.episodiosData.length; i++) {
             const item = this.episodiosData[i];
             const div = document.createElement("div");
@@ -207,7 +206,7 @@ class EpisodiosSeriesCarousel {
             div.innerHTML = `
                 <div class="loader"><i class="fas fa-spinner"></i></div>
                 <div class="poster-container">
-                    <img class="episodios-series-card-image" src="${posterUrl}" alt="${item.title}" loading="lazy">
+                    <img class="episodios-series-card-image" src="${posterUrl}" alt="${item.title}" loading="lazy" style="opacity:0;transition:opacity 0.3s ease">
                 </div>
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none">
                 <div class="carousel-overlay">
@@ -218,8 +217,8 @@ class EpisodiosSeriesCarousel {
             `;
             // Fade-in de imagen
             const img = div.querySelector('.episodios-series-card-image');
-            img.onload = function() { img.classList.add('loaded'); div.querySelector('.loader').style.display = 'none'; };
-            // Hover/modal igual que otros caruseles
+            img.onload = function() { img.style.opacity = '1'; div.querySelector('.loader').style.display = 'none'; };
+            // Hover/modal igual que Series/Animes
             if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
                 div.addEventListener('mouseenter', (e) => {
                     const itemId = div.dataset.itemId;
@@ -227,6 +226,11 @@ class EpisodiosSeriesCarousel {
                         clearTimeout(this.hoverTimeouts[itemId].details);
                         clearTimeout(this.hoverTimeouts[itemId].modal);
                     }
+                    const rect = div.getBoundingClientRect();
+                    this.hoverModalOrigin = {
+                        x: rect.left + rect.width / 2,
+                        y: rect.top + rect.height / 2
+                    };
                     this.hoverTimeouts[itemId] = {
                         details: setTimeout(() => {
                             const background = div.querySelector('.detail-background');
@@ -234,34 +238,53 @@ class EpisodiosSeriesCarousel {
                             background.style.display = 'block';
                             background.style.opacity = '1';
                             overlay.style.opacity = '1';
-                        }, 250),
-                        modal: setTimeout(() => {
-                            if (window.openDetailsModal) {
-                                window.location.hash = `#episodios-series-${item.id}`;
-                                window.openDetailsModal(item, 'episodios-series');
-                            }
-                        }, 600)
+                            overlay.style.transform = 'translateY(0)';
+                            this.hoverTimeouts[itemId].modal = setTimeout(() => {
+                                if (!window.isModalOpen && !window.isDetailsModalOpen) {
+                                    window.hoverModalItem = div;
+                                    if (window.hoverModal && div) {
+                                        window.hoverModal.show(item, div);
+                                    }
+                                }
+                            }, 200);
+                        }, 900)
                     };
                 });
-                div.addEventListener('mouseleave', (e) => {
+                div.addEventListener('mouseleave', () => {
                     const itemId = div.dataset.itemId;
                     if (this.hoverTimeouts[itemId]) {
                         clearTimeout(this.hoverTimeouts[itemId].details);
                         clearTimeout(this.hoverTimeouts[itemId].modal);
+                        delete this.hoverTimeouts[itemId];
                     }
+                    const img = div.querySelector('.episodios-series-card-image');
                     const background = div.querySelector('.detail-background');
                     const overlay = div.querySelector('.carousel-overlay');
-                    background.style.display = 'none';
-                    overlay.style.opacity = '';
-                });
-            } else {
-                div.addEventListener('click', () => {
-                    if (window.openDetailsModal) {
-                        window.location.hash = `#episodios-series-${item.id}`;
-                        window.openDetailsModal(item, 'episodios-series');
-                    }
+                    img.style.opacity = '1';
+                    background.style.opacity = '0';
+                    overlay.style.opacity = '0';
+                    overlay.style.transform = 'translateY(20px)';
+                    setTimeout(() => {
+                        background.style.display = 'none';
+                    }, 300);
                 });
             }
+            div.addEventListener('click', (e) => {
+                e.preventDefault();
+                const itemId = div.dataset.itemId;
+                if (this.hoverTimeouts[itemId]) {
+                    clearTimeout(this.hoverTimeouts[itemId].details);
+                    clearTimeout(this.hoverTimeouts[itemId].modal);
+                }
+                // Hash persistente igual que Series
+                const hash = `episodios-series=${encodeURIComponent(item.id)}`;
+                if (window.location.hash !== `#${hash}`) {
+                    history.pushState(null, '', `#${hash}`);
+                }
+                if (window.detailsModal && typeof window.detailsModal.show === 'function') {
+                    window.detailsModal.show(item, div);
+                }
+            });
             this.wrapper.appendChild(div);
         }
         // Barra de progreso
@@ -271,7 +294,7 @@ class EpisodiosSeriesCarousel {
         if (!this._hashListener) {
             this._hashListener = true;
             window.addEventListener('hashchange', () => {
-                if (window.location.hash.startsWith('#episodios-series-')) {
+                if (window.location.hash.startsWith('#episodios-series=')) {
                     this.scrollToHash();
                 }
             });
@@ -284,7 +307,7 @@ class EpisodiosSeriesCarousel {
             if (closeBtn && !closeBtn._episodiosHashListener) {
                 closeBtn._episodiosHashListener = true;
                 closeBtn.addEventListener('click', () => {
-                    if (window.location.hash.startsWith('#episodios-series-')) {
+                    if (window.location.hash.startsWith('#episodios-series=')) {
                         history.replaceState(null, '', window.location.pathname + window.location.search);
                     }
                 });
