@@ -185,8 +185,8 @@ class EpisodiosSeriesCarousel {
     async renderItems() {
         // Limpia el wrapper
         this.wrapper.innerHTML = '';
-        const itemWidth = 246;
-        const gap = 4;
+    const itemWidth = 300; // Aumentado para mayor tamaño
+    const gap = 8; // Un poco más de espacio entre ítems
         for (let i = 0; i < this.episodiosData.length; i++) {
             const item = this.episodiosData[i];
             const div = document.createElement("div");
@@ -202,13 +202,13 @@ class EpisodiosSeriesCarousel {
             if (item.rating) metaInfo.push(`<div class=\"carousel-rating\"><i class=\"fas fa-star\"></i><span>${item.rating}</span></div>`);
             if (item.ageRating) metaInfo.push(`<span class=\"age-rating\">${item.ageRating}</span>`);
             let posterUrl = item.posterUrl;
-            if (!posterUrl) posterUrl = 'https://via.placeholder.com/246x138';
+            if (!posterUrl) posterUrl = 'https://via.placeholder.com/300x169';
             div.innerHTML = `
                 <div class="loader"><i class="fas fa-spinner"></i></div>
                 <div class="poster-container">
                     <img class="episodios-series-card-image" src="${posterUrl}" alt="${item.title}" loading="lazy" style="opacity:0;transition:opacity 0.3s ease">
                 </div>
-                <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none">
+                <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none;width:300px;height:169px;">
                 <div class="carousel-overlay">
                     <div class="carousel-title">${item.title}</div>
                     ${metaInfo.length ? `<div class="carousel-meta">${metaInfo.join('')}</div>` : ''}
