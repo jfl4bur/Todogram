@@ -183,16 +183,12 @@ class EpisodiosSeriesCarousel {
         }
     }
     async renderItems() {
-        const containerWidth = this.wrapper.clientWidth;
+        // Limpia el wrapper
+        this.wrapper.innerHTML = '';
         const itemWidth = 246;
         const gap = 4;
-        const itemsThatFit = containerWidth > 0 ? Math.floor(containerWidth / (itemWidth + gap)) : 5;
-        const step = Math.max(itemsThatFit * 2, 10);
-        if (this.index === 0) {
-            this.wrapper.innerHTML = '';
-        }
-        const end = Math.min(this.index + step, this.episodiosData.length);
-        for (let i = this.index; i < end; i++) {
+        // Renderiza todos los episodios (scroll infinito)
+        for (let i = 0; i < this.episodiosData.length; i++) {
             const item = this.episodiosData[i];
             const div = document.createElement("div");
             div.className = "custom-carousel-item episodios-series-item";
@@ -269,42 +265,19 @@ class EpisodiosSeriesCarousel {
             this.wrapper.appendChild(div);
         }
         // Barra de progreso
-        if (this.progressBar) {
-            const total = this.episodiosData.length;
-            const visible = end - this.index;
-            const percent = total > 0 ? ((this.index + visible) / total) * 100 : 0;
-            this.progressBar.style.width = percent + '%';
-        }
+        this.updateProgressBar();
 
         // Hash persistente y navegación directa
-        const handleHash = () => {
-            if (window.location.hash.startsWith('#episodios-series-')) {
-                const hashId = window.location.hash.replace('#episodios-series-', '');
-                const idx = this.episodiosData.findIndex(e => e.id === hashId);
-                if (idx !== -1) {
-                    // Si el episodio no está visible, paginar para mostrarlo
-                    if (idx < this.index || idx >= end) {
-                        this.index = Math.max(0, Math.min(idx, this.episodiosData.length - this.itemsPerPage));
-                        this.renderItems();
-                        setTimeout(() => {
-                            const el = this.wrapper.querySelector(`[data-item-id="${hashId}"]`);
-                            if (el) el.scrollIntoView({behavior:'smooth',inline:'center'});
-                        }, 100);
-                    } else {
-                        if (window.openDetailsModal) {
-                            window.openDetailsModal(this.episodiosData[idx], 'episodios-series');
-                        }
-                    }
-                }
-            }
-        };
-        handleHash();
         if (!this._hashListener) {
             this._hashListener = true;
             window.addEventListener('hashchange', () => {
-                handleHash();
+                if (window.location.hash.startsWith('#episodios-series-')) {
+                    this.scrollToHash();
+                }
             });
         }
+        // Al cargar, si hay hash, centrar y abrir modal
+        this.scrollToHash();
         // Limpiar hash al cerrar modal (si el modal lo permite)
         if (window.detailsModalOverlay) {
             const closeBtn = document.getElementById('details-modal-close');
@@ -318,21 +291,44 @@ class EpisodiosSeriesCarousel {
             }
         }
     }
+
+    updateProgressBar() {
+        if (!this.progressBar) return;
+        if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
+            const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
+            this.progressBar.style.width = `${scrollPercentage}%`;
+        } else {
+            this.progressBar.style.width = '100%';
+        }
+    }
+
     scrollToPrevPage() {
-        this.index = Math.max(0, this.index - this.step);
-        this.renderItems();
+        this.scrollToPage('prev');
     }
     scrollToNextPage() {
-        this.index = Math.min(this.episodiosData.length - this.itemsPerPage, this.index + this.step);
-        this.renderItems();
+        this.scrollToPage('next');
     }
-    handleScroll() {
-        // Puedes implementar barra de progreso si lo deseas
+    scrollToPage(direction) {
+        if (!this.wrapper) return;
+        const itemWidth = 246;
+        const gap = 4;
+        const containerWidth = this.wrapper.clientWidth;
+        const itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
+        const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
+        let currentScroll = this.wrapper.scrollLeft;
+        let targetScroll;
+        if (direction === 'prev') {
+            targetScroll = Math.max(0, currentScroll - actualScrollAmount);
+        } else {
+            targetScroll = currentScroll + actualScrollAmount;
+        }
+        const alignedScroll = Math.round(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
+        const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
+        const finalScroll = Math.max(0, Math.min(alignedScroll, maxScroll));
+        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
-    calculateItemsPerPage() {
-        this.setupResizeObserver();
-        this.renderItems();
-    }
+
+// (Eliminados duplicados y métodos sobrantes)
 }
 
 // Inicializar el carrusel de episodios series al cargar la página
