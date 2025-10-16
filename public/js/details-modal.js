@@ -979,6 +979,25 @@ class DetailsModal {
                         this.playEpisode(videoUrl, card, currentItem);
                     });
                 });
+
+                // Delegated fallback: Por si los listeners directos no se ejecutan, asegurar que
+                // cualquier click dentro del contenedor (salvo sinopsis y botones) abra el vídeo.
+                if (!container._delegatedGlobal) {
+                    container._delegatedGlobal = true;
+                    container.addEventListener('click', (e) => {
+                        // No interferir con clicks en la sinopsis
+                        if (e.target.closest('.details-modal-episode-synopsis')) return;
+                        // Si fue click en un control específico (botón de play), dejar su handler
+                        if (e.target.closest('.details-modal-episode-play')) return;
+                        const card = e.target.closest('.details-modal-episode-item');
+                        if (!card) return;
+                        const url = card.getAttribute('data-video-url');
+                        if (!url) return;
+                        const currentItem = window.activeItem || outerItem;
+                        console.log('DetailsModal: delegated container click -> playEpisode', { url });
+                        this.playEpisode(url, card, currentItem);
+                    }, true); // usar captura para mayor robustez
+                }
             }
         } catch (err) {
             console.error('DetailsModal: error insertando sección de episodios', err);
