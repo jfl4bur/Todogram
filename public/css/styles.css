@@ -73,14 +73,14 @@
 }
 .skeleton-item.skeleton-16x9 {
     width: 300px;
-    height: 210px; /* 169 + espacio para labels */
+    height: 210px; /* poster 169 + espacio para labels */
     background: #232323;
     border-radius: 8px;
     position: relative;
     overflow: hidden;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    align-items: flex-start;
+    justify-content: flex-start;
     flex-direction: column;
 }
 
@@ -99,13 +99,13 @@
 @media (max-width: 768px) {
     .skeleton-item.skeleton-16x9 {
         width: 180px;
-        height: 135px; /* 101 + espacio labels */
+        height: 135px; /* poster 101 + labels */
     }
 }
 @media (max-width: 480px) {
     .skeleton-item.skeleton-16x9 {
         width: 120px;
-        height: 95px; /* 67 + espacio labels */
+        height: 95px; /* poster 67 + labels */
     }
 }
 
@@ -516,6 +516,60 @@ button:focus {
     width: 100%;
     height: 100%;
     z-index: 1;
+}
+
+/* Specific overrides for Episodios carousel items: keep poster 16:9 and labels below it */
+.episodios-series-item.custom-carousel-item {
+    width: 300px; /* explicit width for episodios */
+    min-width: 300px;
+    max-width: 300px;
+    height: auto; /* allow height to grow to fit labels */
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    margin: 0;
+    background: transparent;
+}
+
+.episodios-series-item.custom-carousel-item .poster-container,
+.episodios-series-item .poster-container {
+    /* Make poster container participate in normal flow and keep a 16:9 ratio */
+    position: relative !important;
+    width: 100%;
+    height: auto !important;
+    aspect-ratio: 16/9;
+    display: block;
+    overflow: hidden;
+    border-radius: 8px;
+    z-index: 1;
+}
+
+/* Confine overlay inside the poster area and keep it from covering labels */
+.episodios-series-item .carousel-overlay {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    padding: 10px;
+    background: linear-gradient(transparent, rgba(0,0,0,0.9));
+    transform: translateY(0);
+    opacity: 0;
+    z-index: 2;
+}
+
+/* Ensure labels sit below the poster and are visible */
+.episodios-series-item .carousel-labels {
+    padding: 8px 6px 12px 6px;
+    gap: 2px;
+    z-index: 3;
+    background: transparent;
+}
+
+/* Make skeleton items match episodios card sizes */
+.skeleton-item.skeleton-16x9 {
+    width: 300px;
+    height: 210px; /* poster (169) + labels space */
 }
 
 .poster-image {

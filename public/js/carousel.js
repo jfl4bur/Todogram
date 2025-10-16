@@ -264,16 +264,16 @@ class EpisodiosSeriesCarousel {
                 <div class="loader"><i class="fas fa-spinner"></i></div>
                 <div class="poster-container">
                     <img class="episodios-series-card-image" src="${posterUrl}" alt="${item.title}" loading="lazy" style="opacity:0;transition:opacity 0.3s ease">
+                    <div class="carousel-overlay">
+                        ${metaInfo.length ? `<div class="carousel-meta">${metaInfo.join('')}</div>` : ''}
+                        ${item.description ? `<div class="carousel-description">${item.description}</div>` : ''}
+                    </div>
                 </div>
                 <div class="carousel-labels">
                     <div class="carousel-series-title">${item.serie || ''}</div>
                     <div class="carousel-episode-title">${item.title}</div>
                 </div>
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none;width:300px;height:169px;">
-                <div class="carousel-overlay">
-                    ${metaInfo.length ? `<div class="carousel-meta">${metaInfo.join('')}</div>` : ''}
-                    ${item.description ? `<div class="carousel-description">${item.description}</div>` : ''}
-                </div>
             `;
             // Fade-in de imagen
             const img = div.querySelector('.episodios-series-card-image');
