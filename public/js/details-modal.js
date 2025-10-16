@@ -61,6 +61,19 @@ class DetailsModal {
                 if (ev && ev.target && ev.target.closest('.details-modal-episode-synopsis')) return;
                 const url = el ? el.getAttribute('data-video-url') : null;
                 if (!url) return;
+                // Añadir logging y una señal visual temporal para verificar ejecución en runtime
+                try {
+                    console.log('global __playEpisodeFromClick invoked', { el, url, target: ev && ev.target ? ev.target.tagName : null });
+                    if (el) {
+                        el.dataset.__playInvoked = String(Date.now());
+                        const prevOutline = el.style.outline || '';
+                        el.style.outline = '3px solid rgba(0,200,0,0.9)';
+                        setTimeout(() => { try { el.style.outline = prevOutline; } catch (e) {} }, 600);
+                    }
+                } catch (e) {
+                    console.warn('DetailsModal: no se pudo aplicar señal visual de debug', e);
+                }
+
                 if (window.detailsModal && typeof window.detailsModal.playEpisode === 'function') {
                     window.detailsModal.playEpisode(url, el, window.activeItem || null);
                 }
@@ -68,6 +81,23 @@ class DetailsModal {
                 console.error('global __playEpisodeFromClick error', err);
             }
         };
+
+        // Debug: instalar un listener de captura a nivel documento para detectar si
+        // otros scripts interceptan o previenen el flujo de eventos antes de llegar
+        // al onclick inline. Se instala una sola vez.
+        if (!window.__DetailsModalDebugCaptureInstalled) {
+            window.__DetailsModalDebugCaptureInstalled = true;
+            document.addEventListener('click', (e) => {
+                try {
+                    const item = e.target && e.target.closest ? e.target.closest('.details-modal-episode-item') : null;
+                    if (item) {
+                        console.log('DetailsModal: document capture click on .details-modal-episode-item', { target: e.target, item });
+                    }
+                } catch (e) {
+                    console.warn('DetailsModal: capture listener error', e);
+                }
+            }, true);
+        }
     }
 
     // Abre un player embebido en fullscreen usando un iframe
