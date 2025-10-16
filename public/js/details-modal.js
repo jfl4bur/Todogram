@@ -54,20 +54,56 @@ class DetailsModal {
         this.currentGalleryIndex = 0;
     }
 
-    // Delega la reproducción de episodios al VideoModal centralizado
+    // Abre un player embebido en fullscreen usando un iframe
     openEpisodePlayer(url) {
         try {
             if (!url) return;
-            if (window.videoModal && typeof window.videoModal.play === 'function') {
-                window.videoModal.play(url);
-            } else {
-                // Si no existe videoModal, abrir en nueva pestaña como último recurso
-                console.warn('DetailsModal: videoModal no disponible, abriendo en nueva pestaña');
-                window.open(url, '_blank');
+            // Si ya existe overlay, actualizar src
+            let overlay = document.getElementById('details-episode-player-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'details-episode-player-overlay';
+                overlay.className = 'details-episode-player-overlay';
+                overlay.innerHTML = `
+                    <div class="details-episode-player-inner">
+                        <button class="details-episode-player-close" aria-label="Cerrar">✕</button>
+                        <iframe class="details-episode-player-iframe" src="" frameborder="0" allow="autoplay; fullscreen; encrypted-media" allowfullscreen playsinline></iframe>
+                    </div>
+                `;
+                document.body.appendChild(overlay);
+                // Los estilos del player y de episodios están ahora en public/css/styles.css
+
+                overlay.addEventListener('click', (e) => {
+                    if (e.target === overlay) this.closeEpisodePlayer();
+                });
+                overlay.querySelector('.details-episode-player-close').addEventListener('click', () => this.closeEpisodePlayer());
             }
+            const iframe = overlay.querySelector('.details-episode-player-iframe');
+            // Si la url es una URL de player P2P que usa hashes, intentar usar como src directamente
+            let didLoad = false;
+            const fallbackTimeout = setTimeout(() => {
+                if (!didLoad) {
+                    console.warn('DetailsModal: iframe no cargó, abriendo en pestaña nueva como fallback');
+                    this.closeEpisodePlayer();
+                    window.open(url, '_blank');
+                }
+            }, 2500);
+
+            iframe.onload = () => {
+                didLoad = true;
+                clearTimeout(fallbackTimeout);
+            };
+            iframe.onerror = () => {
+                clearTimeout(fallbackTimeout);
+                console.warn('DetailsModal: iframe error, abriendo en pestaña nueva');
+                this.closeEpisodePlayer();
+                window.open(url, '_blank');
+            };
+            iframe.src = url;
+            overlay.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
         } catch (err) {
             console.error('DetailsModal: openEpisodePlayer error', err);
-            try { window.open(url, '_blank'); } catch (e) {}
         }
     }
 
@@ -810,37 +846,27 @@ class DetailsModal {
                     btn.addEventListener('click', (e) => {
                         e.stopPropagation();
                         const url = btn.getAttribute('data-video-url');
-                        if (!url) return;
-                        if (window.videoModal && typeof window.videoModal.play === 'function') {
-                            try {
-                                window.videoModal.play(url);
-                            } catch (err) {
-                                console.error('DetailsModal: videoModal.play error', err);
-                                window.open(url, '_blank');
-                            }
-                        } else {
-                            console.warn('DetailsModal: videoModal no disponible, abriendo en nueva pestaña');
-                            window.open(url, '_blank');
-                        }
+                        // Abrir player embebido en pantalla completa
+                        if (url) this.openEpisodePlayer(url);
                     });
                 });
-                // Click en la tarjeta del episodio abre también el player (miniatura y resto de la tarjeta)
+                // Click en la tarjeta del episodio abre también el player (si no se pulsa el botón)
                 container.querySelectorAll('.details-modal-episode-item').forEach(card => {
                     card.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const url = card.getAttribute('data-video-url');
-                        if (!url) return;
-                        if (window.videoModal && typeof window.videoModal.play === 'function') {
-                            try {
-                                window.videoModal.play(url);
-                            } catch (err) {
-                                console.error('DetailsModal: videoModal.play error', err);
-                                window.open(url, '_blank');
+                        // Si el click fue en el botón de reproducir, ya está manejado
+                        if (e.target.closest('.details-modal-episode-play')) return;
+                        // Si el click vino desde la miniatura (imagen o su overlay), no abrir el player automáticamente.
+                        // En su lugar alternamos la sinopsis si existe para mejorar la UX y evitar apertura forzada a pantalla completa.
+                        if (e.target.closest('.details-modal-episode-thumb') || e.target.tagName === 'IMG') {
+                            const synopsis = card.querySelector('.details-modal-episode-synopsis');
+                            if (synopsis) {
+                                e.stopPropagation();
+                                this.toggleSynopsisElement(synopsis);
                             }
-                        } else {
-                            console.warn('DetailsModal: videoModal no disponible, abriendo en nueva pestaña');
-                            window.open(url, '_blank');
+                            return;
                         }
+                        const url = card.getAttribute('data-video-url');
+                        if (url) this.openEpisodePlayer(url);
                     });
                 });
                 // Inicializar sinopsis de episodios como colapsadas y añadir toggle
@@ -869,13 +895,7 @@ class DetailsModal {
                         // además abrir el reproductor si la tarjeta tiene URL de video
                         const card = titleEl.closest('.details-modal-episode-item');
                         const videoUrl = card ? card.getAttribute('data-video-url') : null;
-                        if (videoUrl) {
-                            if (window.videoModal && typeof window.videoModal.play === 'function') {
-                                try { window.videoModal.play(videoUrl); } catch (err) { console.error('DetailsModal: videoModal.play error', err); window.open(videoUrl, '_blank'); }
-                            } else {
-                                window.open(videoUrl, '_blank');
-                            }
-                        }
+                        if (videoUrl) this.openEpisodePlayer(videoUrl);
                     });
                 });
             }
@@ -986,18 +1006,7 @@ class DetailsModal {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const url = btn.getAttribute('data-video-url');
-                    if (!url) return;
-                    if (window.videoModal && typeof window.videoModal.play === 'function') {
-                        try {
-                            window.videoModal.play(url);
-                        } catch (err) {
-                            console.error('DetailsModal: videoModal.play error', err);
-                            window.open(url, '_blank');
-                        }
-                    } else {
-                        console.warn('DetailsModal: videoModal no disponible, abriendo en nueva pestaña');
-                        window.open(url, '_blank');
-                    }
+                    if (url) this.openEpisodePlayer(url);
                 });
             });
             // Inicializar filtro de temporada si existe
