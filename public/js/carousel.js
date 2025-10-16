@@ -107,7 +107,9 @@ class EpisodiosSeriesCarousel {
             });
         }
         if (this.wrapper) {
-            this.wrapper.addEventListener('scroll', () => this.handleScroll && this.handleScroll());
+            // Use a bound handler to ensure correct `this` and allow removal if needed
+            this._boundHandleScroll = this.handleScroll.bind(this);
+            this.wrapper.addEventListener('scroll', this._boundHandleScroll);
         }
     }
     async loadEpisodiosData() {
@@ -1128,11 +1130,21 @@ class Carousel {
     }
 
     updateProgressBar() {
+        // Ensure we have a reference to the progress bar; try to find it if missing
+        if (!this.progressBar) {
+            try {
+                this.progressBar = this.wrapper && this.wrapper.parentElement ? this.wrapper.parentElement.querySelector('.carousel-progress-bar') : null;
+            } catch (e) {
+                this.progressBar = null;
+            }
+        }
         if (!this.progressBar) return;
-        
+
         if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
             const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
-            this.progressBar.style.width = `${scrollPercentage}%`;
+            // clamp and set width as percent
+            const clamped = Math.max(0, Math.min(100, scrollPercentage));
+            this.progressBar.style.width = `${clamped}%`;
         } else {
             this.progressBar.style.width = '100%';
         }
