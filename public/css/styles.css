@@ -569,24 +569,22 @@ button:focus {
     background: transparent; /* dark area behind spinner */
 }
 
-/* Loader specifico para Episodios: mantener 16:9 y centrar spinner */
+/* Loader inside Episodios cards: force 16:9 box and center spinner */
 .episodios-series-item .loader {
     width: 100%;
     aspect-ratio: 16/9 !important;
-    background: #232323;
     display: flex;
     align-items: center;
     justify-content: center;
-
-    position: relative;
+    background: #232323;
+    border-radius: 8px;
     overflow: hidden;
 }
 
 .episodios-series-item .loader .fa-spinner,
 .episodios-series-item .loader i {
-    color: rgba(255,255,255,0.9);
+    color: rgba(255,255,255,0.95);
     font-size: 28px;
-    animation: spin 1s linear infinite;
 }
 
 .episodios-series-item.custom-carousel-item .poster-container,
@@ -612,7 +610,24 @@ button:focus {
     top: auto;
     padding: 10px;
     background: linear-gradient(transparent, rgba(0,0,0,0.9));
-    /* Note: loader styling is handled globally; the loader is inserted inside .poster-container so it overlays the poster area */
+    transform: translateY(0);
+    opacity: 0;
+    z-index: 2;
+}
+
+/* Ensure labels sit below the poster and are visible */
+.episodios-series-item .carousel-labels {
+    padding: 8px 6px 12px 6px;
+    gap: 2px;
+    z-index: 3;
+    background: transparent;
+}
+
+/* Make skeleton items match episodios card sizes */
+.skeleton-item.skeleton-16x9 {
+    width: 300px;
+    height: 210px; /* poster (169) + labels space */
+}
 
 /* Ensure real poster image fills the poster container and does not stretch the item */
 .episodios-series-item .episodios-series-card-image,
@@ -1678,7 +1693,7 @@ button:focus {
     justify-content: center;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 4;
-
+    aspect-ratio: 16 / 9 !important;
 }
 
 .loader i {
