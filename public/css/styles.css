@@ -577,7 +577,7 @@ button:focus {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 8px;
+    height: auto !important;
     position: relative;
     overflow: hidden;
 }
