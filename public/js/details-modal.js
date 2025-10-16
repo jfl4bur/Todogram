@@ -1163,7 +1163,10 @@ class DetailsModal {
                 return false;
             });
 
-            if (!related || related.length === 0) return null;
+            if (!related || related.length === 0) {
+                console.warn('DetailsModal: openEpisodeByNumber - no related entries found for item', item && (item.title || item['Título']));
+                return false;
+            }
 
             const episodes = related.map(d => ({
                 title: d['Título episodio'] || '',
@@ -1179,17 +1182,19 @@ class DetailsModal {
                 found = episodes.find(e => e.title && e.title.includes(String(epNum)));
             }
 
+            // Loguear resumen de episodios encontrados para debugging
+            console.log('DetailsModal: openEpisodeByNumber -> episodios candidatos:', episodes.map(e => ({episodeIndex: e.episodeIndex, title: e.title, hasVideo: !!e.video})).slice(0,50));
             if (found && found.video) {
                 console.log('DetailsModal: reproducir episodio encontrado para ep=', epNumber, found);
                 this.openEpisodePlayer(found.video);
                 return true;
             }
 
-            console.warn('DetailsModal: no se encontró episodio para ep=', epNumber);
-            return null;
+            console.warn('DetailsModal: no se encontró episodio con video para ep=', epNumber);
+            return false;
         } catch (err) {
             console.error('DetailsModal: openEpisodeByNumber error', err);
-            return null;
+            return false;
         }
     }
 }

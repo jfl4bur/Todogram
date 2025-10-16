@@ -222,13 +222,16 @@ document.addEventListener('DOMContentLoaded', function () {
                     
                     // Abrir el modal independientemente de si existe el elemento DOM
                     // detailsModal.show es async; ejecutar openEpisodeByNumber después si la URL incluye ep
-                    detailsModal.show(item, itemElement).then(() => {
+                    detailsModal.show(item, itemElement).then(async () => {
                         window.activeItem = item;
                         if (urlParams.ep) {
-                            // intentar abrir el episodio especificado
                             try {
                                 console.log('Intentando abrir episodio desde hash ep=', urlParams.ep);
-                                detailsModal.openEpisodeByNumber(item, urlParams.ep);
+                                const ok = await detailsModal.openEpisodeByNumber(item, urlParams.ep);
+                                console.log('Resultado openEpisodeByNumber:', ok);
+                                if (!ok) {
+                                    console.warn('No se pudo reproducir episodio desde hash: puede que no exista o no tenga video.');
+                                }
                             } catch (err) {
                                 console.error('Error intentando abrir episodio desde hash:', err);
                             }
