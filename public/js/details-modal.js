@@ -635,25 +635,54 @@ class DetailsModal {
     updateUrlForModal(item) {
         if (!item || item.id === '0') return;
         const normalizedTitle = this.normalizeText(item.title);
-        // Preservar el parámetro 'ep' si ya estaba presente en la URL
-        try {
-            const currentParams = new URLSearchParams(window.location.hash.substring(1));
-            const existingEp = currentParams.get('ep');
-            let newHash = `id=${item.id}&title=${normalizedTitle}`;
-            if (existingEp) {
-                newHash += `&ep=${encodeURIComponent(existingEp)}`;
-            }
-            if (window.location.hash.substring(1) !== newHash) {
-                window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
-            }
-        } catch (err) {
-            // En caso de error construimos sin ep
-            const newHash = `id=${item.id}&title=${normalizedTitle}`;
-            if (window.location.hash.substring(1) !== newHash) {
-                window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
+        // Construir nuevo hash con id y title pero preservar parámetros adicionales existentes (ej. ep)
+        const newHashBase = `id=${item.id}&title=${normalizedTitle}`;
+        const existingHash = window.location.hash.substring(1);
+        let extras = '';
+        if (existingHash) {
+            try {
+                const params = new URLSearchParams(existingHash);
+                const extraPairs = [];
+                for (const [k, v] of params.entries()) {
+                    if (k === 'id' || k === 'title') continue;
+                    extraPairs.push(`${encodeURIComponent(k)}=${encodeURIComponent(v)}`);
+                }
+                if (extraPairs.length > 0) extras = '&' + extraPairs.join('&');
+            } catch (err) {
+                // Si parsing falla, no hacer nada y sobrescribir solo id/title
+                console.warn('DetailsModal.updateUrlForModal: fallo parsing hash existente, sobrescribiendo sin extras', err);
             }
         }
+        const newHash = newHashBase + extras;
+        if (window.location.hash.substring(1) !== newHash) {
+            window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
+        }
         this.updateMetaTags(item);
+    }
+
+    // Construir hash para el modal conservando parámetros extras existentes
+    buildModalHash(itemId, itemTitle, extraParamsObj = {}) {
+        const base = `id=${itemId}&title=${itemTitle}`;
+        const existingHash = window.location.hash.substring(1);
+        const extras = {};
+        if (existingHash) {
+            try {
+                const params = new URLSearchParams(existingHash);
+                for (const [k, v] of params.entries()) {
+                    if (k === 'id' || k === 'title') continue;
+                    extras[k] = v;
+                }
+            } catch (err) {
+                console.warn('buildModalHash: fallo parseando hash existente', err);
+            }
+        }
+        // Mergeear extras con extraParamsObj (extraParamsObj tiene prioridad)
+        for (const k of Object.keys(extraParamsObj || {})) {
+            if (extraParamsObj[k] == null) delete extras[k];
+            else extras[k] = String(extraParamsObj[k]);
+        }
+        const extraPairs = Object.keys(extras).map(k => `${encodeURIComponent(k)}=${encodeURIComponent(extras[k])}`);
+        return base + (extraPairs.length > 0 ? '&' + extraPairs.join('&') : '');
     }
 
     restoreUrl() {
@@ -956,7 +985,7 @@ class DetailsModal {
                         const currentItem = window.activeItem || outerItem;
                         const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
                         const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
-                        const newHash = `id=${baseId}&title=${normalized}${epHash ? '&' + epHash : ''}`;
+                        const newHash = this.buildModalHash(baseId, normalized, epHash ? {ep: epHash.replace(/^ep=/,'')} : {});
                         if (window.location.hash.substring(1) !== newHash) {
                             window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
                         }
@@ -1083,7 +1112,7 @@ class DetailsModal {
                         const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
                         const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
                         const epHash = card ? (card.getAttribute('data-ep-hash') || '') : '';
-                        const newHash = `id=${baseId}&title=${normalized}${epHash ? '&' + epHash : ''}`;
+                        const newHash = this.buildModalHash(baseId, normalized, epHash ? {ep: epHash.replace(/^ep=/,'')} : {});
                         if (window.location.hash.substring(1) !== newHash) {
                             window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
                         }
@@ -1123,7 +1152,7 @@ class DetailsModal {
                         const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
                         const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
                         const epHash = card.getAttribute('data-ep-hash') || '';
-                        const newHash = `id=${baseId}&title=${normalized}${epHash ? '&' + epHash : ''}`;
+                        const newHash = this.buildModalHash(baseId, normalized, epHash ? {ep: epHash.replace(/^ep=/,'')} : {});
                         if (window.location.hash.substring(1) !== newHash) {
                             window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
                         }
