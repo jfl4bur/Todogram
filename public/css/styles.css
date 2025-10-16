@@ -720,6 +720,32 @@ button:focus {
     transition: opacity 0.3s ease;
 }
 
+/* ===== Mobile overrides placed late to override earlier 300px rule ===== */
+@media (max-width: 480px) {
+    /* Override the specific selector that sets 300px (higher specificity + !important) */
+    .episodios-series-item.custom-carousel-item {
+        width: 100px !important;
+        min-width: 100px !important;
+        max-width: 100px !important;
+    }
+    /* Ensure poster container respects 16:9 and doesn't force large height */
+    .episodios-series-item.custom-carousel-item .poster-container {
+        aspect-ratio: 16/9 !important;
+        width: 100% !important;
+        height: auto !important;
+        position: relative !important;
+    }
+    /* Skeletons smaller */
+    .skeleton-item.skeleton-16x9 {
+        width: 100px !important;
+        height: auto !important;
+    }
+    /* Loader respects smaller size */
+    .loader_episodios {
+        aspect-ratio: 16/9 !important;
+    }
+}
+
 .detail-background {
     position: absolute;
     top: 0;
