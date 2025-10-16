@@ -569,24 +569,6 @@ button:focus {
     background: transparent; /* dark area behind spinner */
 }
 
-/* Loader inside Episodios cards: force 16:9 box and center spinner */
-.episodios-series-item .loader {
-    width: 100%;
-    aspect-ratio: 16/9 !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: #232323;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.episodios-series-item .loader .fa-spinner,
-.episodios-series-item .loader i {
-    color: rgba(255,255,255,0.95);
-    font-size: 28px;
-}
-
 .episodios-series-item.custom-carousel-item .poster-container,
 .episodios-series-item .poster-container {
     /* Make poster container participate in normal flow and keep a 16:9 ratio */
