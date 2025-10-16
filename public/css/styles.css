@@ -4,7 +4,7 @@
     max-width: 300px;
     display: flex;
     flex-direction: column;
-    background: #232323;
+    background: transparent;
     border-radius: 8px;
     overflow: visible;
     position: relative;
@@ -562,7 +562,7 @@ button:focus {
     width: 300px; /* explicit width for episodios */
     min-width: 300px;
     max-width: 300px;
-    height: auto; /* allow height to grow to fit labels */
+    height: auto !important; /* allow height to grow to fit labels */
     display: flex;
     flex-direction: column;
     padding: 0;
@@ -576,11 +576,12 @@ button:focus {
     position: relative !important;
     width: 100%;
     height: auto !important;
-    aspect-ratio: 16/9;
+    aspect-ratio: 16/9 !important;
     display: block;
     overflow: hidden;
     border-radius: 8px;
     z-index: 1;
+    background: #232323; /* dark area behind spinner */
 }
 
 /* Confine overlay inside the poster area and keep it from covering labels */
@@ -609,6 +610,15 @@ button:focus {
 .skeleton-item.skeleton-16x9 {
     width: 300px;
     height: 210px; /* poster (169) + labels space */
+}
+
+/* Ensure real poster image fills the poster container and does not stretch the item */
+.episodios-series-item .episodios-series-card-image,
+.episodios-series-item img.episodios-series-card-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
 }
 
 .poster-image {
