@@ -281,7 +281,7 @@ class EpisodiosSeriesCarousel {
             `;
             // Fade-in de imagen
             const img = div.querySelector('.episodios-series-card-image');
-            img.onload = function() { img.style.opacity = '1'; div.querySelector('.loader').style.display = 'none'; };
+            img.onload = function() { img.style.opacity = '1'; const l = div.querySelector('.loader_episodios') || div.querySelector('.loader'); if (l) l.style.display = 'none'; };
             // Hover/modal igual que Series/Animes
             if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
                 div.addEventListener('mouseenter', (e) => {
