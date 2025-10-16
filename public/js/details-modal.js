@@ -67,7 +67,7 @@ class DetailsModal {
                 overlay.innerHTML = `
                     <div class="details-episode-player-inner">
                         <button class="details-episode-player-close" aria-label="Cerrar">✕</button>
-                        <iframe class="details-episode-player-iframe" src="" frameborder="0" allowfullscreen allow="autoplay; fullscreen"></iframe>
+                        <iframe class="details-episode-player-iframe" src="" frameborder="0" allow="autoplay; fullscreen; encrypted-media" allowfullscreen playsinline></iframe>
                     </div>
                 `;
                 document.body.appendChild(overlay);
