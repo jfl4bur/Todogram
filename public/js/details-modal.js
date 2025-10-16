@@ -879,6 +879,18 @@ class DetailsModal {
                         e.stopPropagation();
                         const url = btn.getAttribute('data-video-url');
                         if (!url) return;
+                        // Actualizar hash amigable (id + título + ep) antes de abrir
+                        try {
+                            const card = btn.closest('.details-modal-episode-item');
+                            const titleEl = card ? card.querySelector('.details-modal-episode-title') : null;
+                            const epHash = titleEl ? (titleEl.getAttribute('data-ep-hash') || '') : '';
+                            const baseId = (item?.id || item?.['ID TMDB'] || '');
+                            const normalized = this.normalizeText(item?.title || item?.['Título'] || '');
+                            const newHash = `id=${baseId}&title=${normalized}${epHash ? '&' + epHash : ''}`;
+                            if (window.location.hash.substring(1) !== newHash) {
+                                history.pushState(null, '', `#${newHash}`);
+                            }
+                        } catch (e) { /* ignore hash errors */ }
                         // Preferir videoModal.play para abrir en modal (no forzar fullscreen)
                         if (window.videoModal && typeof window.videoModal.play === 'function') {
                             try {
@@ -893,21 +905,6 @@ class DetailsModal {
                             this.openEpisodePlayer(url);
                         } catch (err) {
                             console.error('DetailsModal: openEpisodePlayer fallback error', err);
-                            // Mostrar mensaje en consola/overlay en lugar de abrir nueva pestaña
-                            try {
-                                const overlay = document.getElementById('details-episode-player-overlay');
-                                if (overlay) {
-                                    const inner = overlay.querySelector('.details-episode-player-inner');
-                                    let errDiv = inner && inner.querySelector('.details-episode-player-error');
-                                    if (!errDiv && inner) {
-                                        errDiv = document.createElement('div');
-                                        errDiv.className = 'details-episode-player-error';
-                                        errDiv.style.cssText = 'color:#fff;padding:12px;background:rgba(0,0,0,0.6);border-radius:6px;margin-top:8px;text-align:center;';
-                                        inner.appendChild(errDiv);
-                                    }
-                                    if (errDiv) errDiv.textContent = 'No se pudo abrir el reproductor.';
-                                }
-                            } catch (e) { console.warn('DetailsModal: no se pudo mostrar error', e); }
                         }
                     });
                 });
@@ -921,6 +918,17 @@ class DetailsModal {
                         if (e.target.closest('.details-modal-episode-play')) return;
                         e.stopPropagation();
                         const url = card.getAttribute('data-video-url');
+                        // actualizar hash amigable usando el título del episodio dentro de la tarjeta
+                        try {
+                            const titleEl = card.querySelector('.details-modal-episode-title');
+                            const epHash = titleEl ? (titleEl.getAttribute('data-ep-hash') || '') : '';
+                            const baseId = (item?.id || item?.['ID TMDB'] || '');
+                            const normalized = this.normalizeText(item?.title || item?.['Título'] || '');
+                            const newHash = `id=${baseId}&title=${normalized}${epHash ? '&' + epHash : ''}`;
+                            if (window.location.hash.substring(1) !== newHash) {
+                                history.pushState(null, '', `#${newHash}`);
+                            }
+                        } catch (e) { /* ignore */ }
                         if (!url) return;
                         if (window.videoModal && typeof window.videoModal.play === 'function') {
                             try {
@@ -934,20 +942,6 @@ class DetailsModal {
                             this.openEpisodePlayer(url);
                         } catch (err) {
                             console.error('DetailsModal: openEpisodePlayer fallback error', err);
-                            try {
-                                const overlay = document.getElementById('details-episode-player-overlay');
-                                if (overlay) {
-                                    const inner = overlay.querySelector('.details-episode-player-inner');
-                                    let errDiv = inner && inner.querySelector('.details-episode-player-error');
-                                    if (!errDiv && inner) {
-                                        errDiv = document.createElement('div');
-                                        errDiv.className = 'details-episode-player-error';
-                                        errDiv.style.cssText = 'color:#fff;padding:12px;background:rgba(0,0,0,0.6);border-radius:6px;margin-top:8px;text-align:center;';
-                                        inner.appendChild(errDiv);
-                                    }
-                                    if (errDiv) errDiv.textContent = 'No se pudo abrir el reproductor.';
-                                }
-                            } catch (e) { console.warn('DetailsModal: no se pudo mostrar error', e); }
                         }
                     });
                 });
@@ -971,9 +965,11 @@ class DetailsModal {
                         const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
                         const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
                         const newHash = `id=${baseId}&title=${normalized}${epHash ? '&' + epHash : ''}`;
-                        if (window.location.hash.substring(1) !== newHash) {
-                            window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
-                        }
+                        try {
+                            if (window.location.hash.substring(1) !== newHash) {
+                                history.pushState(null, '', `#${newHash}`);
+                            }
+                        } catch (err) { /* ignore */ }
                         // además abrir el reproductor si la tarjeta tiene URL de video
                         const card = titleEl.closest('.details-modal-episode-item');
                         const videoUrl = card ? card.getAttribute('data-video-url') : null;
@@ -990,7 +986,6 @@ class DetailsModal {
                             this.openEpisodePlayer(videoUrl);
                         } catch (err) {
                             console.error('DetailsModal: openEpisodePlayer fallback error', err);
-                            window.open(videoUrl, '_blank');
                         }
                     });
                 });

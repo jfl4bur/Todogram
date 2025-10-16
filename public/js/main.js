@@ -223,6 +223,34 @@ document.addEventListener('DOMContentLoaded', function () {
                     // Abrir el modal independientemente de si existe el elemento DOM
                     detailsModal.show(item, itemElement);
                     window.activeItem = item;
+                    // Si la URL contiene un parámetro de episodio (ep), intentar abrir ese episodio en el player
+                    if (urlParams.ep) {
+                        // Esperar un ciclo para que la sección de episodios se inserte
+                        setTimeout(() => {
+                            try {
+                                const episodesContainer = document.querySelector('.details-modal-episodes-list');
+                                if (episodesContainer) {
+                                    // Buscar el primer elemento que tenga data-ep-hash con el ep solicitado o data-video-url que coincida
+                                    const epSelector = `[data-ep-hash=\"ep=${urlParams.ep}\"]`;
+                                    let titleEl = episodesContainer.querySelector(`.details-modal-episode-title[data-ep-hash=\"ep=${urlParams.ep}\"]`);
+                                    let card = titleEl ? titleEl.closest('.details-modal-episode-item') : null;
+                                    if (!card) {
+                                        // Fallback: buscar por atributo data-video-url que contenga el ep (no garantizado)
+                                        card = episodesContainer.querySelector(`.details-modal-episode-item`);
+                                    }
+                                    if (card) {
+                                        const videoUrl = card.getAttribute('data-video-url');
+                                        if (videoUrl) {
+                                            if (window.videoModal && typeof window.videoModal.play === 'function') {
+                                                try { window.videoModal.play(videoUrl); return; } catch (err) { console.error('Main: videoModal.play error', err); }
+                                            }
+                                            try { detailsModal.openEpisodePlayer(videoUrl); } catch (err) { console.error('Main: openEpisodePlayer error', err); }
+                                        }
+                                    }
+                                }
+                            } catch (err) { console.error('Main: fallo intentando abrir episodio desde hash', err); }
+                        }, 300);
+                    }
                 } else {
                     console.error('❌ Item no encontrado para id:', urlParams.id);
                     console.log('Verificando datos disponibles:');
@@ -303,13 +331,15 @@ document.addEventListener('DOMContentLoaded', function () {
             const params = new URLSearchParams(path);
             const id = params.get('id');
             const title = params.get('title');
+            const ep = params.get('ep');
             console.log('Parámetros extraídos:', { id, title });
             
             if (!id || !title) return null;
             
             return {
                 id: id,
-                normalizedTitle: title
+                normalizedTitle: title,
+                ep: ep || null
             };
         };
     }
