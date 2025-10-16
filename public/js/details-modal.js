@@ -1025,7 +1025,7 @@ class DetailsModal {
         const seasonsSet = new Set(episodes.map(e => e.season).filter(s => s !== null && s !== undefined && !Number.isNaN(s)));
         const seasons = Array.from(seasonsSet).sort((a,b)=>a-b);
 
-        const listItems = episodes.map(ep => {
+            const listItems = episodes.map(ep => {
             const playBtnInner = ep.video ? `<button class="details-modal-episode-play" data-video-url="${ep.video}" aria-label="Reproducir episodio"><i class="fas fa-play"></i></button>` : '';
             const episodeNumber = ep.episodeIndex ? `<div class="details-modal-episode-number">${ep.episodeIndex}</div>` : '';
             const thumbImg = ep.thumb ? `<div class="details-modal-episode-thumb">${episodeNumber}<img src="${ep.thumb}" loading="lazy" alt="${ep.title}"><div class="details-modal-play-overlay">${playBtnInner}</div></div>` : `<div class="details-modal-episode-thumb placeholder">${episodeNumber}<div class="details-modal-play-overlay">${playBtnInner}</div></div>`;
@@ -1035,7 +1035,8 @@ class DetailsModal {
             // Preparar hash para este episodio (usar id del item si disponible, sino title normalizado y capítulo)
             const epHash = ep.episodeIndex ? `ep=${ep.episodeIndex}` : '';
             const titleHashAttr = `data-ep-hash="${epHash}"`;
-            return `<div class="details-modal-episode-item" ${seasonAttr} data-video-url="${ep.video || ''}">${thumbImg}<div class="details-modal-episode-meta"><div class="details-modal-episode-title" ${titleHashAttr}>${ep.title}</div>${synopsisHtml}</div></div>`;
+            // agregar data-ep-hash al contenedor de la tarjeta para acceso desde los botones
+            return `<div class="details-modal-episode-item" ${seasonAttr} data-video-url="${ep.video || ''}" data-ep-hash="${epHash}">${thumbImg}<div class="details-modal-episode-meta"><div class="details-modal-episode-title" ${titleHashAttr}>${ep.title}</div>${synopsisHtml}</div></div>`;
         }).join('');
 
         // Construir header con selector de temporadas si hay más de una temporada
@@ -1059,7 +1060,22 @@ class DetailsModal {
             container.querySelectorAll('.details-modal-episode-play').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    const url = btn.getAttribute('data-video-url');
+                    const card = btn.closest('.details-modal-episode-item');
+                    const url = btn.getAttribute('data-video-url') || (card ? card.getAttribute('data-video-url') : null);
+                    // actualizar hash para este episodio
+                    try {
+                        const outerItem = item;
+                        const currentItem = window.activeItem || outerItem;
+                        const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
+                        const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
+                        const epHash = card ? (card.getAttribute('data-ep-hash') || '') : '';
+                        const newHash = `id=${baseId}&title=${normalized}${epHash ? '&' + epHash : ''}`;
+                        if (window.location.hash.substring(1) !== newHash) {
+                            window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
+                        }
+                    } catch (err) {
+                        console.warn('DetailsModal: no se pudo actualizar hash de episodio', err);
+                    }
                     if (url) this.openEpisodePlayer(url);
                 });
             });
@@ -1080,6 +1096,29 @@ class DetailsModal {
                     });
                 });
             }
+            // Click en la tarjeta del episodio abre también el player (si no se pulsa el botón)
+            container.querySelectorAll('.details-modal-episode-item').forEach(card => {
+                card.addEventListener('click', (e) => {
+                    // Si el click fue en el botón, ya manejado
+                    if (e.target.closest('.details-modal-episode-play')) return;
+                    const url = card.getAttribute('data-video-url');
+                    // actualizar hash para este episodio al click en la tarjeta
+                    try {
+                        const outerItem = item;
+                        const currentItem = window.activeItem || outerItem;
+                        const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
+                        const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
+                        const epHash = card.getAttribute('data-ep-hash') || '';
+                        const newHash = `id=${baseId}&title=${normalized}${epHash ? '&' + epHash : ''}`;
+                        if (window.location.hash.substring(1) !== newHash) {
+                            window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
+                        }
+                    } catch (err) {
+                        console.warn('DetailsModal: no se pudo actualizar hash de episodio (card click)', err);
+                    }
+                    if (url) this.openEpisodePlayer(url);
+                });
+            });
         }, 300);
 
         // Estilos para el header del selector (inserción segura si no existe)
