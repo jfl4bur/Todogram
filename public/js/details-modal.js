@@ -1136,4 +1136,60 @@ class DetailsModal {
 
         return section;
     }
+
+    // Buscar un episodio dentro de la data global por número y abrir el player si se encuentra
+    async openEpisodeByNumber(item, epNumber) {
+        try {
+            if (!item || !epNumber) return null;
+            const allData = await this.loadAllData();
+            if (!Array.isArray(allData) || allData.length === 0) return null;
+
+            const normalizedTitle = (item['Título'] || item.title || '').trim();
+            const targetNormalized = this.normalizeText(normalizedTitle || '');
+
+            // Buscar coincidentes que tengan 'Título episodio' y coincidan con el título del item
+            const related = allData.filter(d => {
+                if (!d) return false;
+                const title = (d['Título'] || '').trim();
+                const hasEpisode = (d['Título episodio'] || '').toString().trim() !== '';
+                if (!hasEpisode) return false;
+                const dTMDB = (d['ID TMDB'] || '').toString().trim();
+                const itemTMDB = (item['ID TMDB'] || item.id_tmdb || item.tmdbId || '') || '';
+                if (itemTMDB && dTMDB && itemTMDB.toString() === dTMDB) return true;
+                if (!title) return false;
+                const titleNormalized = this.normalizeText(title);
+                if (titleNormalized === targetNormalized) return true;
+                if (titleNormalized.includes(targetNormalized) || targetNormalized.includes(titleNormalized)) return true;
+                return false;
+            });
+
+            if (!related || related.length === 0) return null;
+
+            const episodes = related.map(d => ({
+                title: d['Título episodio'] || '',
+                season: d['Temporada'] ? Number(d['Temporada']) : null,
+                episodeIndex: d['Episodios'] ? Number(d['Episodios']) : null,
+                video: d['Video iframe'] || d['Video iframe 1'] || d['Ver Película'] || ''
+            })).filter(e => e.title && e.title.trim() !== '');
+
+            const epNum = Number(epNumber);
+            let found = episodes.find(e => e.episodeIndex === epNum);
+            if (!found) {
+                // intentar por coincidencia parcial en título: buscar que el título del episodio contenga el número
+                found = episodes.find(e => e.title && e.title.includes(String(epNum)));
+            }
+
+            if (found && found.video) {
+                console.log('DetailsModal: reproducir episodio encontrado para ep=', epNumber, found);
+                this.openEpisodePlayer(found.video);
+                return true;
+            }
+
+            console.warn('DetailsModal: no se encontró episodio para ep=', epNumber);
+            return null;
+        } catch (err) {
+            console.error('DetailsModal: openEpisodeByNumber error', err);
+            return null;
+        }
+    }
 }

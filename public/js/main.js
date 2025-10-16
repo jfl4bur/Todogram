@@ -221,8 +221,21 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                     
                     // Abrir el modal independientemente de si existe el elemento DOM
-                    detailsModal.show(item, itemElement);
-                    window.activeItem = item;
+                    // detailsModal.show es async; ejecutar openEpisodeByNumber después si la URL incluye ep
+                    detailsModal.show(item, itemElement).then(() => {
+                        window.activeItem = item;
+                        if (urlParams.ep) {
+                            // intentar abrir el episodio especificado
+                            try {
+                                console.log('Intentando abrir episodio desde hash ep=', urlParams.ep);
+                                detailsModal.openEpisodeByNumber(item, urlParams.ep);
+                            } catch (err) {
+                                console.error('Error intentando abrir episodio desde hash:', err);
+                            }
+                        }
+                    }).catch(err => {
+                        console.error('Error mostrando detailsModal desde processUrlParams:', err);
+                    });
                 } else {
                     console.error('❌ Item no encontrado para id:', urlParams.id);
                     console.log('Verificando datos disponibles:');
@@ -303,13 +316,15 @@ document.addEventListener('DOMContentLoaded', function () {
             const params = new URLSearchParams(path);
             const id = params.get('id');
             const title = params.get('title');
-            console.log('Parámetros extraídos:', { id, title });
+            const ep = params.get('ep');
+            console.log('Parámetros extraídos:', { id, title, ep });
             
             if (!id || !title) return null;
             
             return {
                 id: id,
-                normalizedTitle: title
+                normalizedTitle: title,
+                ep: ep
             };
         };
     }
