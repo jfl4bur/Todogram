@@ -610,6 +610,47 @@ class DetailsModal {
         this.updateMetaTags(item);
     }
 
+    // Helper: actualizar hash amigable y abrir modal de video (videoModal.play o fallback)
+    playEpisode(url, cardElement, currentItem) {
+        console.log('DetailsModal.playEpisode called', { url, hasVideoModal: !!window.videoModal, cardElement });
+        if (!url) return;
+        try {
+            const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
+            const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
+            let epHash = '';
+            try {
+                const titleEl = cardElement ? cardElement.querySelector('.details-modal-episode-title') : null;
+                epHash = titleEl ? (titleEl.getAttribute('data-ep-hash') || '') : '';
+            } catch (e) {
+                epHash = '';
+            }
+            const newHash = `id=${baseId}&title=${normalized}${epHash ? '&' + epHash : ''}`;
+            if (window.location.hash.substring(1) !== newHash) {
+                window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
+            }
+        } catch (errHash) {
+            console.warn('DetailsModal: error updating hash', errHash);
+        }
+
+        // Intentar abrir con videoModal.play
+        if (window.videoModal && typeof window.videoModal.play === 'function') {
+            try {
+                window.videoModal.play(url);
+                return;
+            } catch (err) {
+                console.error('DetailsModal: window.videoModal.play error', err);
+            }
+        }
+
+        // Fallback: overlay embebido
+        try {
+            this.openEpisodePlayer(url);
+            return;
+        } catch (err) {
+            console.error('DetailsModal: openEpisodePlayer fallback error', err);
+        }
+    }
+
     restoreUrl() {
         if (window.location.hash) {
             window.history.replaceState(null, null, window.location.pathname);
@@ -878,50 +919,11 @@ class DetailsModal {
                     btn.addEventListener('click', (e) => {
                         e.stopPropagation();
                         const url = btn.getAttribute('data-video-url');
+                        console.log('DetailsModal: play button clicked handler', { url });
                         if (!url) return;
-                        // Actualizar hash amigable antes de abrir el modal
-                        try {
-                            const currentItem = window.activeItem || outerItem;
-                            const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
-                            const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
-                            const titleEl = btn.closest('.details-modal-episode-item')?.querySelector('.details-modal-episode-title');
-                            const epHash = titleEl ? (titleEl.getAttribute('data-ep-hash') || '') : '';
-                            const newHash = `id=${baseId}&title=${normalized}${epHash ? '&' + epHash : ''}`;
-                            if (window.location.hash.substring(1) !== newHash) {
-                                window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
-                            }
-                        } catch (errHash) {
-                            console.warn('DetailsModal: no se pudo actualizar hash antes de reproducir', errHash);
-                        }
-                        // Preferir videoModal.play para abrir en modal (no forzar fullscreen)
-                        if (window.videoModal && typeof window.videoModal.play === 'function') {
-                            try {
-                                window.videoModal.play(url);
-                                return;
-                            } catch (err) {
-                                console.error('DetailsModal: window.videoModal.play error', err);
-                            }
-                        }
-                        // Fallback a openEpisodePlayer (overlay) — no abrir nuevas pestañas
-                        try {
-                            this.openEpisodePlayer(url);
-                        } catch (err) {
-                            console.error('DetailsModal: openEpisodePlayer fallback error', err);
-                            try {
-                                const overlay = document.getElementById('details-episode-player-overlay');
-                                if (overlay) {
-                                    const inner = overlay.querySelector('.details-episode-player-inner');
-                                    let errDiv = inner && inner.querySelector('.details-episode-player-error');
-                                    if (!errDiv && inner) {
-                                        errDiv = document.createElement('div');
-                                        errDiv.className = 'details-episode-player-error';
-                                        errDiv.style.cssText = 'color:#fff;padding:12px;background:rgba(0,0,0,0.6);border-radius:6px;margin-top:8px;text-align:center;';
-                                        inner.appendChild(errDiv);
-                                    }
-                                    if (errDiv) errDiv.textContent = 'No se pudo abrir el reproductor.';
-                                }
-                            } catch (e) { console.warn('DetailsModal: no se pudo mostrar error', e); }
-                        }
+                        const currentItem = window.activeItem || outerItem;
+                        const card = btn.closest('.details-modal-episode-item');
+                        this.playEpisode(url, card, currentItem);
                     });
                 });
                 // Click en la tarjeta del episodio: abrir el modal de video cuando se haga click en cualquier parte
@@ -934,48 +936,10 @@ class DetailsModal {
                         if (e.target.closest('.details-modal-episode-play')) return;
                         e.stopPropagation();
                         const url = card.getAttribute('data-video-url');
+                        console.log('DetailsModal: card click handler', { url });
                         if (!url) return;
-                        // Actualizar hash amigable antes de abrir el modal
-                        try {
-                            const currentItem = window.activeItem || outerItem;
-                            const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
-                            const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
-                            const titleEl = card.querySelector('.details-modal-episode-title');
-                            const epHash = titleEl ? (titleEl.getAttribute('data-ep-hash') || '') : '';
-                            const newHash = `id=${baseId}&title=${normalized}${epHash ? '&' + epHash : ''}`;
-                            if (window.location.hash.substring(1) !== newHash) {
-                                window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
-                            }
-                        } catch (errHash) {
-                            console.warn('DetailsModal: no se pudo actualizar hash antes de reproducir', errHash);
-                        }
-                        if (window.videoModal && typeof window.videoModal.play === 'function') {
-                            try {
-                                window.videoModal.play(url);
-                                return;
-                            } catch (err) {
-                                console.error('DetailsModal: window.videoModal.play error', err);
-                            }
-                        }
-                        try {
-                            this.openEpisodePlayer(url);
-                        } catch (err) {
-                            console.error('DetailsModal: openEpisodePlayer fallback error', err);
-                            try {
-                                const overlay = document.getElementById('details-episode-player-overlay');
-                                if (overlay) {
-                                    const inner = overlay.querySelector('.details-episode-player-inner');
-                                    let errDiv = inner && inner.querySelector('.details-episode-player-error');
-                                    if (!errDiv && inner) {
-                                        errDiv = document.createElement('div');
-                                        errDiv.className = 'details-episode-player-error';
-                                        errDiv.style.cssText = 'color:#fff;padding:12px;background:rgba(0,0,0,0.6);border-radius:6px;margin-top:8px;text-align:center;';
-                                        inner.appendChild(errDiv);
-                                    }
-                                    if (errDiv) errDiv.textContent = 'No se pudo abrir el reproductor.';
-                                }
-                            } catch (e) { console.warn('DetailsModal: no se pudo mostrar error', e); }
-                        }
+                        const currentItem = window.activeItem || outerItem;
+                        this.playEpisode(url, card, currentItem);
                     });
                 });
                 // Inicializar sinopsis de episodios como colapsadas y añadir toggle
@@ -993,44 +957,12 @@ class DetailsModal {
                     titleEl.style.cursor = 'pointer';
                     titleEl.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        const epHash = titleEl.getAttribute('data-ep-hash') || '';
-                        const currentItem = window.activeItem || outerItem;
-                        const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
-                        const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
-                        const newHash = `id=${baseId}&title=${normalized}${epHash ? '&' + epHash : ''}`;
-                        if (window.location.hash.substring(1) !== newHash) {
-                            window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
-                        }
-                        // además abrir el reproductor si la tarjeta tiene URL de video
+                        console.log('DetailsModal: title click handler');
                         const card = titleEl.closest('.details-modal-episode-item');
                         const videoUrl = card ? card.getAttribute('data-video-url') : null;
                         if (!videoUrl) return;
-                        // Actualizar hash amigable antes de abrir el modal desde el título
-                        try {
-                            const currentItem = window.activeItem || outerItem;
-                            const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
-                            const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
-                            const epHash2 = titleEl.getAttribute('data-ep-hash') || '';
-                            const newHash2 = `id=${baseId}&title=${normalized}${epHash2 ? '&' + epHash2 : ''}`;
-                            if (window.location.hash.substring(1) !== newHash2) {
-                                window.history.replaceState(null, null, `${window.location.pathname}#${newHash2}`);
-                            }
-                        } catch (errHash2) {
-                            console.warn('DetailsModal: no se pudo actualizar hash desde el título', errHash2);
-                        }
-                        if (window.videoModal && typeof window.videoModal.play === 'function') {
-                            try {
-                                window.videoModal.play(videoUrl);
-                                return;
-                            } catch (err) {
-                                console.error('DetailsModal: window.videoModal.play error', err);
-                            }
-                        }
-                        try {
-                            this.openEpisodePlayer(videoUrl);
-                        } catch (err) {
-                            console.error('DetailsModal: openEpisodePlayer fallback error', err);
-                        }
+                        const currentItem = window.activeItem || outerItem;
+                        this.playEpisode(videoUrl, card, currentItem);
                     });
                 });
             }
