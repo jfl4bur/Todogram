@@ -888,18 +888,35 @@ class DetailsModal {
                                 console.error('DetailsModal: window.videoModal.play error', err);
                             }
                         }
-                        // Fallback a openEpisodePlayer (overlay) y finalmente abrir en nueva pestaña
+                        // Fallback a openEpisodePlayer (overlay) — no abrir nuevas pestañas
                         try {
                             this.openEpisodePlayer(url);
                         } catch (err) {
                             console.error('DetailsModal: openEpisodePlayer fallback error', err);
-                            window.open(url, '_blank');
+                            // Mostrar mensaje en consola/overlay en lugar de abrir nueva pestaña
+                            try {
+                                const overlay = document.getElementById('details-episode-player-overlay');
+                                if (overlay) {
+                                    const inner = overlay.querySelector('.details-episode-player-inner');
+                                    let errDiv = inner && inner.querySelector('.details-episode-player-error');
+                                    if (!errDiv && inner) {
+                                        errDiv = document.createElement('div');
+                                        errDiv.className = 'details-episode-player-error';
+                                        errDiv.style.cssText = 'color:#fff;padding:12px;background:rgba(0,0,0,0.6);border-radius:6px;margin-top:8px;text-align:center;';
+                                        inner.appendChild(errDiv);
+                                    }
+                                    if (errDiv) errDiv.textContent = 'No se pudo abrir el reproductor.';
+                                }
+                            } catch (e) { console.warn('DetailsModal: no se pudo mostrar error', e); }
                         }
                     });
                 });
-                // Click en la tarjeta del episodio (incluyendo miniatura) debe abrir el modal de video igual que el botón
+                // Click en la tarjeta del episodio: abrir el modal de video cuando se haga click en cualquier parte
+                // excepto dentro de la sinopsis (que tiene su propio toggle)
                 container.querySelectorAll('.details-modal-episode-item').forEach(card => {
                     card.addEventListener('click', (e) => {
+                        // Si el click fue en la sinopsis, dejar que el handler de sinopsis maneje la acción
+                        if (e.target.closest('.details-modal-episode-synopsis')) return;
                         // Si el click fue en el botón de reproducir, ya está manejado por el handler anterior
                         if (e.target.closest('.details-modal-episode-play')) return;
                         e.stopPropagation();
@@ -917,7 +934,20 @@ class DetailsModal {
                             this.openEpisodePlayer(url);
                         } catch (err) {
                             console.error('DetailsModal: openEpisodePlayer fallback error', err);
-                            window.open(url, '_blank');
+                            try {
+                                const overlay = document.getElementById('details-episode-player-overlay');
+                                if (overlay) {
+                                    const inner = overlay.querySelector('.details-episode-player-inner');
+                                    let errDiv = inner && inner.querySelector('.details-episode-player-error');
+                                    if (!errDiv && inner) {
+                                        errDiv = document.createElement('div');
+                                        errDiv.className = 'details-episode-player-error';
+                                        errDiv.style.cssText = 'color:#fff;padding:12px;background:rgba(0,0,0,0.6);border-radius:6px;margin-top:8px;text-align:center;';
+                                        inner.appendChild(errDiv);
+                                    }
+                                    if (errDiv) errDiv.textContent = 'No se pudo abrir el reproductor.';
+                                }
+                            } catch (e) { console.warn('DetailsModal: no se pudo mostrar error', e); }
                         }
                     });
                 });
