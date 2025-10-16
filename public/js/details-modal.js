@@ -83,9 +83,22 @@ class DetailsModal {
             let didLoad = false;
             const fallbackTimeout = setTimeout(() => {
                 if (!didLoad) {
-                    console.warn('DetailsModal: iframe no cargó, abriendo en pestaña nueva como fallback');
-                    this.closeEpisodePlayer();
-                    window.open(url, '_blank');
+                    console.warn('DetailsModal: iframe no cargó, mostrando mensaje de error en player (no se abrirá nueva pestaña)');
+                    // Mostrar mensaje de error dentro del overlay en lugar de abrir una nueva pestaña
+                    try {
+                        const inner = overlay.querySelector('.details-episode-player-inner');
+                        let errDiv = inner.querySelector('.details-episode-player-error');
+                        if (!errDiv) {
+                            errDiv = document.createElement('div');
+                            errDiv.className = 'details-episode-player-error';
+                            errDiv.style.cssText = 'color:#fff;padding:12px;background:rgba(0,0,0,0.6);border-radius:6px;margin-top:8px;text-align:center;';
+                            inner.appendChild(errDiv);
+                        }
+                        errDiv.textContent = 'No se pudo cargar el reproductor embebido. Intenta reproducir desde otra fuente.';
+                        setTimeout(() => { try { errDiv.remove(); } catch (e) {} }, 5000);
+                    } catch (e) {
+                        console.warn('DetailsModal: no se pudo mostrar mensaje de error en overlay', e);
+                    }
                 }
             }, 2500);
 
@@ -95,9 +108,21 @@ class DetailsModal {
             };
             iframe.onerror = () => {
                 clearTimeout(fallbackTimeout);
-                console.warn('DetailsModal: iframe error, abriendo en pestaña nueva');
-                this.closeEpisodePlayer();
-                window.open(url, '_blank');
+                console.warn('DetailsModal: iframe error, mostrando mensaje en overlay (no se abrirá nueva pestaña)');
+                try {
+                    const inner = overlay.querySelector('.details-episode-player-inner');
+                    let errDiv = inner.querySelector('.details-episode-player-error');
+                    if (!errDiv) {
+                        errDiv = document.createElement('div');
+                        errDiv.className = 'details-episode-player-error';
+                        errDiv.style.cssText = 'color:#fff;padding:12px;background:rgba(0,0,0,0.6);border-radius:6px;margin-top:8px;text-align:center;';
+                        inner.appendChild(errDiv);
+                    }
+                    errDiv.textContent = 'Error cargando el reproductor embebido.';
+                    setTimeout(() => { try { errDiv.remove(); } catch (e) {} }, 5000);
+                } catch (e) {
+                    console.warn('DetailsModal: no se pudo mostrar mensaje de error en overlay', e);
+                }
             };
             iframe.src = url;
             overlay.style.display = 'flex';
@@ -424,16 +449,23 @@ class DetailsModal {
                     e.stopPropagation();
                     const videoUrl = btn.getAttribute('data-video-url');
                     console.log('DetailsModal: play button clicked', { videoUrl, hasVideoModal: !!window.videoModal });
+                    if (!videoUrl) return;
                     if (window.videoModal && typeof window.videoModal.play === 'function') {
                         try {
                             window.videoModal.play(videoUrl);
+                            return;
                         } catch (err) {
                             console.error('DetailsModal: window.videoModal.play error', err);
-                            if (videoUrl) window.open(videoUrl, '_blank');
+                            // Intentar fallback al overlay embebido sin abrir nueva pestaña
+                            try { this.openEpisodePlayer(videoUrl); } catch (e) { console.error('DetailsModal: openEpisodePlayer fallback error', e); }
+                            return;
                         }
-                    } else {
-                        console.warn('DetailsModal: videoModal no disponible, abriendo en nueva pestaña como fallback');
-                        if (videoUrl) window.open(videoUrl, '_blank');
+                    }
+                    // Si no hay videoModal, usar el overlay embebido como fallback (no abrir nueva pestaña)
+                    try {
+                        this.openEpisodePlayer(videoUrl);
+                    } catch (err) {
+                        console.error('DetailsModal: openEpisodePlayer fallback error', err);
                     }
                 });
             });
@@ -846,27 +878,47 @@ class DetailsModal {
                     btn.addEventListener('click', (e) => {
                         e.stopPropagation();
                         const url = btn.getAttribute('data-video-url');
-                        // Abrir player embebido en pantalla completa
-                        if (url) this.openEpisodePlayer(url);
+                        if (!url) return;
+                        // Preferir videoModal.play para abrir en modal (no forzar fullscreen)
+                        if (window.videoModal && typeof window.videoModal.play === 'function') {
+                            try {
+                                window.videoModal.play(url);
+                                return;
+                            } catch (err) {
+                                console.error('DetailsModal: window.videoModal.play error', err);
+                            }
+                        }
+                        // Fallback a openEpisodePlayer (overlay) y finalmente abrir en nueva pestaña
+                        try {
+                            this.openEpisodePlayer(url);
+                        } catch (err) {
+                            console.error('DetailsModal: openEpisodePlayer fallback error', err);
+                            window.open(url, '_blank');
+                        }
                     });
                 });
-                // Click en la tarjeta del episodio abre también el player (si no se pulsa el botón)
+                // Click en la tarjeta del episodio (incluyendo miniatura) debe abrir el modal de video igual que el botón
                 container.querySelectorAll('.details-modal-episode-item').forEach(card => {
                     card.addEventListener('click', (e) => {
-                        // Si el click fue en el botón de reproducir, ya está manejado
+                        // Si el click fue en el botón de reproducir, ya está manejado por el handler anterior
                         if (e.target.closest('.details-modal-episode-play')) return;
-                        // Si el click vino desde la miniatura (imagen o su overlay), no abrir el player automáticamente.
-                        // En su lugar alternamos la sinopsis si existe para mejorar la UX y evitar apertura forzada a pantalla completa.
-                        if (e.target.closest('.details-modal-episode-thumb') || e.target.tagName === 'IMG') {
-                            const synopsis = card.querySelector('.details-modal-episode-synopsis');
-                            if (synopsis) {
-                                e.stopPropagation();
-                                this.toggleSynopsisElement(synopsis);
-                            }
-                            return;
-                        }
+                        e.stopPropagation();
                         const url = card.getAttribute('data-video-url');
-                        if (url) this.openEpisodePlayer(url);
+                        if (!url) return;
+                        if (window.videoModal && typeof window.videoModal.play === 'function') {
+                            try {
+                                window.videoModal.play(url);
+                                return;
+                            } catch (err) {
+                                console.error('DetailsModal: window.videoModal.play error', err);
+                            }
+                        }
+                        try {
+                            this.openEpisodePlayer(url);
+                        } catch (err) {
+                            console.error('DetailsModal: openEpisodePlayer fallback error', err);
+                            window.open(url, '_blank');
+                        }
                     });
                 });
                 // Inicializar sinopsis de episodios como colapsadas y añadir toggle
@@ -895,7 +947,21 @@ class DetailsModal {
                         // además abrir el reproductor si la tarjeta tiene URL de video
                         const card = titleEl.closest('.details-modal-episode-item');
                         const videoUrl = card ? card.getAttribute('data-video-url') : null;
-                        if (videoUrl) this.openEpisodePlayer(videoUrl);
+                        if (!videoUrl) return;
+                        if (window.videoModal && typeof window.videoModal.play === 'function') {
+                            try {
+                                window.videoModal.play(videoUrl);
+                                return;
+                            } catch (err) {
+                                console.error('DetailsModal: window.videoModal.play error', err);
+                            }
+                        }
+                        try {
+                            this.openEpisodePlayer(videoUrl);
+                        } catch (err) {
+                            console.error('DetailsModal: openEpisodePlayer fallback error', err);
+                            window.open(videoUrl, '_blank');
+                        }
                     });
                 });
             }
