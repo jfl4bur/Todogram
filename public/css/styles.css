@@ -88,6 +88,17 @@
     align-items: center;
     justify-content: center;
 }
+
+/* Labels below poster for Episodios Series */
+.carousel-labels{display:flex;flex-direction:column;align-items:flex-start;padding:8px 4px 0 4px;gap:2px}
+.carousel-series-title{font-size:12px;color:rgba(255,255,255,0.8);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.carousel-episode-title{font-size:13px;color:rgba(255,255,255,1);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.episodios-series-item .poster-container{display:block}
+
+/* Skeleton placeholders for labels */
+.skeleton-labels{display:flex;flex-direction:column;align-items:flex-start;padding:8px 6px 0 6px;gap:6px}
+.skeleton-series-line{width:70%;height:10px;background:linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));border-radius:4px}
+.skeleton-episode-line{width:90%;height:12px;background:linear-gradient(90deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));border-radius:4px}
 @media (max-width: 768px) {
     .skeleton-item.skeleton-16x9 {
         width: 180px;

@@ -230,6 +230,18 @@ class EpisodiosSeriesCarousel {
     async renderItems() {
         // Limpia el wrapper
         this.wrapper.innerHTML = '';
+        // Añadir estilos mínimos para etiquetas si no existen
+        if (!document.getElementById('episodios-series-labels-styles')) {
+            const sh = document.createElement('style');
+            sh.id = 'episodios-series-labels-styles';
+            sh.innerHTML = `
+                .carousel-labels{display:flex;flex-direction:column;align-items:flex-start;padding:8px 4px 0 4px;gap:2px}
+                .carousel-series-title{font-size:12px;color:rgba(255,255,255,0.8);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+                .carousel-episode-title{font-size:13px;color:rgba(255,255,255,1);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+                .episodios-series-item .poster-container{display:block}
+            `;
+            document.head.appendChild(sh);
+        }
         const itemWidth = 300; // Aumentado para mayor tamaño
         const gap = 8; // Un poco más de espacio entre ítems
         for (let i = 0; i < this.episodiosData.length; i++) {
@@ -253,9 +265,12 @@ class EpisodiosSeriesCarousel {
                 <div class="poster-container">
                     <img class="episodios-series-card-image" src="${posterUrl}" alt="${item.title}" loading="lazy" style="opacity:0;transition:opacity 0.3s ease">
                 </div>
+                <div class="carousel-labels">
+                    <div class="carousel-series-title">${item.serie || ''}</div>
+                    <div class="carousel-episode-title">${item.title}</div>
+                </div>
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none;width:300px;height:169px;">
                 <div class="carousel-overlay">
-                    <div class="carousel-title">${item.title}</div>
                     ${metaInfo.length ? `<div class="carousel-meta">${metaInfo.join('')}</div>` : ''}
                     ${item.description ? `<div class="carousel-description">${item.description}</div>` : ''}
                 </div>
