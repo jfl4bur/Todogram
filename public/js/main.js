@@ -51,6 +51,14 @@ document.addEventListener('DOMContentLoaded', function () {
             } catch (e) {
                 console.error('Error inicializando EpisodiosSeriesCarousel:', e);
             }
+            // Inicializar el carrusel de episodios para Animes
+            console.log("Main: Inicializando carrusel de episodios (Animes)...");
+            try {
+                const episodiosAnimesCarousel = new EpisodiosAnimesCarousel();
+                window.episodiosAnimesCarousel = episodiosAnimesCarousel;
+            } catch (e) {
+                console.error('Error inicializando EpisodiosAnimesCarousel:', e);
+            }
         
         // Verificar que el carrusel de series se inicializó correctamente
         setTimeout(() => {
@@ -190,6 +198,17 @@ document.addEventListener('DOMContentLoaded', function () {
                         itemSource = 'episodios';
                         console.log('Episodio encontrado en carrusel de episodios:', item);
                         console.log('Elemento DOM encontrado para episodio:', itemElement);
+                    }
+                }
+
+                // Buscar en el carrusel de episodios (Episodios Animes)
+                if (!item && window.episodiosAnimesCarousel && window.episodiosAnimesCarousel.episodiosData && window.episodiosAnimesCarousel.episodiosData.length > 0) {
+                    item = window.episodiosAnimesCarousel.episodiosData.find(ep => ep.id === urlParams.id);
+                    if (item) {
+                        itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
+                        itemSource = 'episodios_animes';
+                        console.log('Episodio (anime) encontrado en carrusel de episodios animes:', item);
+                        console.log('Elemento DOM encontrado para episodio (anime):', itemElement);
                     }
                 }
 

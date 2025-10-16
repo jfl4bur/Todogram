@@ -641,6 +641,27 @@ button:focus {
     animation: spin 1s linear infinite;
 }
 
+/* Loader específico para el carrusel de Episodios Animes (mismo comportamiento que loader_episodios) */
+.loader_episodios_animes {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 4;
+    aspect-ratio: 16 / 9 !important;
+}
+
+.loader_episodios_animes i {
+    font-size: 2rem;
+    color: var(--text-color);
+    animation: spin 1s linear infinite;
+}
+
 .poster-image {
     width: 100%;
     height: 100%;

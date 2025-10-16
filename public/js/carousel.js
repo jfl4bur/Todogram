@@ -437,6 +437,294 @@ class EpisodiosSeriesCarousel {
 // (Eliminados duplicados y métodos sobrantes)
 }
 
+// Carrusel de Episodios Animes (paralelo a EpisodiosSeriesCarousel)
+class EpisodiosAnimesCarousel {
+    scrollToHash(retries = 10) {
+        if (!window.location.hash.startsWith('#id=')) return;
+        const hash = window.location.hash.substring(1);
+        const params = new URLSearchParams(hash);
+        const id = params.get('id');
+        const title = params.get('title');
+        if (!id || !title) return;
+        const normalizeText = (text) => {
+            if (!text) return '';
+            try {
+                return text.normalize("NFD").replace(/[00-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+            } catch (e) { return String(text).toLowerCase(); }
+        };
+        const decodedTitle = decodeURIComponent(title);
+        const item = this.episodiosData.find(ep => String(ep.id) === id && ep.title && normalizeText(ep.title) === decodedTitle);
+        if (!item) return;
+        const div = this.wrapper.querySelector(`[data-item-id="${CSS.escape(item.id)}"]`);
+        if (div) {
+            div.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+            if (window.detailsModal && typeof window.detailsModal.show === 'function') {
+                window.detailsModal.show(item, div);
+            }
+        } else if (retries > 0) {
+            setTimeout(() => this.scrollToHash(retries - 1), 120);
+        }
+    }
+    constructor() {
+        this.wrapper = document.getElementById('episodios-animes-carousel-wrapper');
+        this.skeleton = document.getElementById('episodios-animes-carousel-skeleton');
+        this.progressBar = null;
+        this.carouselNav = document.getElementById('episodios-animes-carousel-nav');
+        this.carouselPrev = document.getElementById('episodios-animes-carousel-prev');
+        this.carouselNext = document.getElementById('episodios-animes-carousel-next');
+        this.carouselContainer = this.wrapper ? this.wrapper.parentElement : null;
+        this.itemsPerPage = 0;
+        this.index = 0;
+        this.step = 0;
+        this.moreAppended = false;
+        this.episodiosData = [];
+        this.hoverTimeouts = {};
+        if (!this.wrapper || !this.skeleton || !this.carouselContainer) return;
+        if (!this.carouselPrev || !this.carouselNext || !this.carouselNav) {
+            const observer = new MutationObserver(() => {
+                this.carouselPrev = document.getElementById('episodios-animes-carousel-prev');
+                this.carouselNext = document.getElementById('episodios-animes-carousel-next');
+                this.carouselNav = document.getElementById('episodios-animes-carousel-nav');
+                if (this.carouselPrev && this.carouselNext && this.carouselNav) {
+                    this.setupEventListeners();
+                    observer.disconnect();
+                }
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+            return;
+        }
+        this.init();
+    }
+    init() {
+        if (this.wrapper) this.progressBar = this.wrapper.parentElement.querySelector('.carousel-progress-bar');
+        this.setupResizeObserver();
+        this.setupEventListeners();
+        this.loadEpisodiosData();
+    }
+    setupResizeObserver() {
+        if (!this.wrapper) return;
+        const itemWidth = 246;
+        const gap = 4;
+        const calculate = () => {
+            const containerWidth = this.wrapper.clientWidth;
+            if (containerWidth > 0) {
+                const itemsThatFit = Math.floor(containerWidth / (itemWidth + gap));
+                this.itemsPerPage = Math.max(1, itemsThatFit);
+                this.step = this.itemsPerPage;
+            } else {
+                this.itemsPerPage = 1;
+                this.step = 1;
+            }
+        };
+        calculate();
+        const resizeObserver = new ResizeObserver(() => { calculate(); });
+        resizeObserver.observe(this.wrapper);
+    }
+    setupEventListeners() {
+        window.addEventListener('resize', () => { if (this.updateProgressBar) this.updateProgressBar(); });
+        if (this.carouselPrev) this.carouselPrev.addEventListener('click', (e) => { e.preventDefault(); this.scrollToPrevPage(); });
+        if (this.carouselNext) this.carouselNext.addEventListener('click', (e) => { e.preventDefault(); this.scrollToNextPage(); });
+        if (this.wrapper) {
+            this.wrapper.addEventListener('scroll', () => { if (this.updateProgressBar) this.updateProgressBar(); });
+            if (this.updateProgressBar) this.updateProgressBar();
+        }
+    }
+    async loadEpisodiosData() {
+        try {
+            let data;
+            if (window.sharedData) data = window.sharedData; else {
+                const response = await fetch(DATA_URL);
+                if (!response.ok) throw new Error('No se pudo cargar data.json');
+                data = await response.json();
+                window.sharedData = data;
+            }
+            this.episodiosData = [];
+            let epIndex = 0;
+            for (const item of data) {
+                if (item && typeof item === 'object' && item['Categoría'] === 'Animes' && item['Título episodio'] && item['Título episodio'].trim() !== '') {
+                    this.episodiosData.push({
+                        id: `ep_anime_${epIndex}`,
+                        title: item['Título episodio'] || 'Sin título',
+                        serie: item['Título'] || '',
+                        description: item['Synopsis'] || 'Descripción no disponible',
+                        posterUrl: item['Portada'] || '',
+                        backgroundUrl: item['Portada'] || '',
+                        year: item['Año'] ? item['Año'].toString() : '',
+                        duration: item['Duración'] || '',
+                        genre: item['Géneros'] || '',
+                        rating: item['Puntuación 1-10'] ? item['Puntuación 1-10'].toString() : '',
+                        ageRating: item['Clasificación'] || '',
+                        link: item['Enlace'] || '#',
+                        trailerUrl: item['Trailer'] || '',
+                        videoUrl: item['Video iframe'] || '',
+                        tmdbUrl: item['TMDB'] || '',
+                        audiosCount: item['Audios'] ? item['Audios'].split(',').length : 0,
+                        subtitlesCount: item['Subtítulos'] ? item['Subtítulos'].split(',').length : 0,
+                        audioList: item['Audios'] ? item['Audios'].split(',') : [],
+                        subtitleList: item['Subtítulos'] ? item['Subtítulos'].split(',') : [],
+                        episodioNum: item['Episodio'] || '',
+                        temporada: item['Temporada'] || ''
+                    });
+                    epIndex++;
+                }
+            }
+            if (this.episodiosData.length === 0) {
+                this.episodiosData = [{ id: "ep_anime_12345", title: "Ejemplo de episodio", serie: "Anime de ejemplo", description: "Ejemplo", posterUrl: "https://via.placeholder.com/246x138", backgroundUrl: "https://via.placeholder.com/246x138", year: "2023", duration: "24 min", genre: "Animación", rating: "8.0", ageRating: "13", link: "#", trailerUrl: "", videoUrl: "", tmdbUrl: "", audiosCount: 1, subtitlesCount: 1, audioList: ["JP"], subtitleList: ["ESP"], episodioNum: "1", temporada: "1" }];
+            }
+            this.showCarousel();
+            this.renderItems();
+            setTimeout(() => this.scrollToHash(), 0);
+            if (window.notifyDataLoaded) window.notifyDataLoaded();
+        } catch (error) {
+            this.episodiosData = [{ id: "ep_anime_12345", title: "Ejemplo de episodio", serie: "Anime de ejemplo", description: "Ejemplo", posterUrl: "https://via.placeholder.com/246x138", backgroundUrl: "https://via.placeholder.com/246x138", year: "2023", duration: "24 min", genre: "Animación", rating: "8.0", ageRating: "13", link: "#", trailerUrl: "", videoUrl: "", tmdbUrl: "", audiosCount: 1, subtitlesCount: 1, audioList: ["JP"], subtitleList: ["ESP"], episodioNum: "1", temporada: "1" }];
+            this.showCarousel();
+            this.renderItems();
+            setTimeout(() => this.scrollToHash(), 0);
+            if (window.notifyDataLoaded) window.notifyDataLoaded();
+        }
+    }
+    showCarousel() {
+        this.skeleton.style.display = 'none';
+        this.wrapper.style.display = 'flex';
+        if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+            this.carouselNav.style.display = 'flex';
+        }
+    }
+    async renderItems() {
+        this.wrapper.innerHTML = '';
+        if (!document.getElementById('episodios-animes-labels-styles')) {
+            const sh = document.createElement('style');
+            sh.id = 'episodios-animes-labels-styles';
+            sh.innerHTML = `
+                .carousel-labels{display:flex;flex-direction:column;align-items:flex-start;padding:8px 4px 0 4px;gap:2px}
+                .carousel-series-title{font-size:12px;color:rgba(255,255,255,0.8);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+                .carousel-episode-title{font-size:13px;color:rgba(255,255,255,1);font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+                .episodios-animes-item .poster-container{display:block}
+            `;
+            document.head.appendChild(sh);
+        }
+        const itemWidth = 300;
+        const gap = 8;
+        for (let i = 0; i < this.episodiosData.length; i++) {
+            const item = this.episodiosData[i];
+            const div = document.createElement('div');
+            div.className = 'custom-carousel-item episodios-animes-item';
+            div.dataset.itemId = item.id;
+            const metaInfo = [];
+            if (item.serie) metaInfo.push(`<span>${item.serie}</span>`);
+            if (item.temporada) metaInfo.push(`<span>T${item.temporada}</span>`);
+            if (item.episodioNum) metaInfo.push(`<span>E${item.episodioNum}</span>`);
+            if (item.year) metaInfo.push(`<span>${item.year}</span>`);
+            if (item.duration) metaInfo.push(`<span>${item.duration}</span>`);
+            if (item.genre) metaInfo.push(`<span>${item.genre}</span>`);
+            if (item.rating) metaInfo.push(`<div class="carousel-rating"><i class="fas fa-star"></i><span>${item.rating}</span></div>`);
+            if (item.ageRating) metaInfo.push(`<span class="age-rating">${item.ageRating}</span>`);
+            let posterUrl = item.posterUrl || 'https://via.placeholder.com/300x169';
+            div.innerHTML = `
+                <div class="loader_episodios_animes"><i class="fas fa-spinner"></i></div>
+                <div class="poster-container">
+                    <img class="episodios-series-card-image" src="${posterUrl}" alt="${item.title}" loading="lazy" style="opacity:0;transition:opacity 0.3s ease">
+                    <div class="carousel-overlay">
+                        ${metaInfo.length ? `<div class="carousel-meta">${metaInfo.join('')}</div>` : ''}
+                        ${item.description ? `<div class="carousel-description">${item.description}</div>` : ''}
+                    </div>
+                </div>
+                <div class="carousel-labels">
+                    <div class="carousel-series-title">${item.serie || ''}</div>
+                    <div class="carousel-episode-title">${item.title}</div>
+                </div>
+                <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none;width:300px;height:169px;">
+            `;
+            const img = div.querySelector('.episodios-series-card-image');
+            img.onload = function() { img.style.opacity = '1'; const l = div.querySelector('.loader_episodios_animes') || div.querySelector('.loader'); if (l) l.style.display = 'none'; };
+            if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+                div.addEventListener('mouseenter', (e) => {
+                    const itemId = div.dataset.itemId;
+                    if (this.hoverTimeouts[itemId]) {
+                        clearTimeout(this.hoverTimeouts[itemId].details);
+                        clearTimeout(this.hoverTimeouts[itemId].modal);
+                    }
+                    const rect = div.getBoundingClientRect();
+                    this.hoverModalOrigin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+                    this.hoverTimeouts[itemId] = { details: setTimeout(() => {
+                        const background = div.querySelector('.detail-background');
+                        const overlay = div.querySelector('.carousel-overlay');
+                        background.style.display = 'block';
+                        background.style.opacity = '1';
+                        overlay.style.opacity = '1';
+                        overlay.style.transform = 'translateY(0)';
+                        this.hoverTimeouts[itemId].modal = setTimeout(() => {
+                            if (!window.isModalOpen && !window.isDetailsModalOpen) {
+                                window.hoverModalItem = div;
+                                if (window.hoverModal && div) window.hoverModal.show(item, div);
+                            }
+                        }, 200);
+                    }, 900) };
+                });
+                div.addEventListener('mouseleave', () => {
+                    const itemId = div.dataset.itemId;
+                    if (this.hoverTimeouts[itemId]) { clearTimeout(this.hoverTimeouts[itemId].details); clearTimeout(this.hoverTimeouts[itemId].modal); delete this.hoverTimeouts[itemId]; }
+                    const img = div.querySelector('.episodios-series-card-image');
+                    const background = div.querySelector('.detail-background');
+                    const overlay = div.querySelector('.carousel-overlay');
+                    img.style.opacity = '1';
+                    background.style.opacity = '0';
+                    overlay.style.opacity = '0';
+                    overlay.style.transform = 'translateY(20px)';
+                    setTimeout(() => { background.style.display = 'none'; }, 300);
+                });
+            }
+            div.addEventListener('click', (e) => {
+                e.preventDefault();
+                const itemId = div.dataset.itemId;
+                if (this.hoverTimeouts[itemId]) { clearTimeout(this.hoverTimeouts[itemId].details); clearTimeout(this.hoverTimeouts[itemId].modal); }
+                const hash = `id=${encodeURIComponent(item.id)}&title=${encodeURIComponent(item.title)}`;
+                if (window.location.hash !== `#${hash}`) history.pushState(null, '', `#${hash}`);
+                if (window.detailsModal && typeof window.detailsModal.show === 'function') window.detailsModal.show(item, div);
+            });
+            this.wrapper.appendChild(div);
+        }
+        this.updateProgressBar();
+        if (!this._hashListener) { this._hashListener = true; window.addEventListener('hashchange', () => { setTimeout(() => this.scrollToHash(), 0); }); }
+        if (window.detailsModalOverlay) {
+            const closeBtn = document.getElementById('details-modal-close');
+            if (closeBtn && !closeBtn._episodiosHashListener) { closeBtn._episodiosHashListener = true; closeBtn.addEventListener('click', () => { if (window.location.hash.startsWith('#id=')) history.replaceState(null, '', window.location.pathname + window.location.search); }); }
+        }
+    }
+    updateProgressBar() {
+        if (!this.progressBar) return;
+        if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
+            const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
+            this.progressBar.style.width = `${scrollPercentage}%`;
+        } else {
+            this.progressBar.style.width = '100%';
+        }
+    }
+    scrollToPrevPage() { this.scrollToPage('prev'); }
+    scrollToNextPage() { this.scrollToPage('next'); }
+    scrollToPage(direction) {
+        if (!this.wrapper) return;
+        const containerWidth = this.wrapper.clientWidth;
+        const firstItem = this.wrapper.querySelector('.custom-carousel-item');
+        if (!firstItem) return;
+        const itemRect = firstItem.getBoundingClientRect();
+        const itemWidth = Math.round(itemRect.width);
+        let gap = 0;
+        const secondItem = firstItem.nextElementSibling;
+        if (secondItem) { const secondRect = secondItem.getBoundingClientRect(); gap = Math.round(secondRect.left - (itemRect.left + itemRect.width)); if (isNaN(gap) || gap < 0) gap = 0; }
+        const stepSize = itemWidth + gap;
+        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
+        const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
+        let targetIndex;
+        if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsPerViewport); else targetIndex = currentIndex + itemsPerViewport;
+        const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
+        const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
+        targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
+        const finalScroll = targetIndex * stepSize;
+        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+    }
+}
+
 // Nota: la instancia de EpisodiosSeriesCarousel se crea desde `main.js` durante initializeComponents()
 class AnimesCarousel {
     constructor() {
