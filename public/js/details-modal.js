@@ -52,6 +52,22 @@ class DetailsModal {
 
         this.galleryImages = [];
         this.currentGalleryIndex = 0;
+
+        // Función global auxiliar usada por los onclick inline de los items de episodio.
+        // Usamos una función global para evitar problemas de listeners que no se ejecutan
+        // en algunos entornos; esta función delega en el objeto detailsModal.
+        window.__playEpisodeFromClick = (ev, el) => {
+            try {
+                if (ev && ev.target && ev.target.closest('.details-modal-episode-synopsis')) return;
+                const url = el ? el.getAttribute('data-video-url') : null;
+                if (!url) return;
+                if (window.detailsModal && typeof window.detailsModal.playEpisode === 'function') {
+                    window.detailsModal.playEpisode(url, el, window.activeItem || null);
+                }
+            } catch (err) {
+                console.error('global __playEpisodeFromClick error', err);
+            }
+        };
     }
 
     // Abre un player embebido en fullscreen usando un iframe
@@ -1081,7 +1097,8 @@ class DetailsModal {
             // Preparar hash para este episodio (usar id del item si disponible, sino title normalizado y capítulo)
             const epHash = ep.episodeIndex ? `ep=${ep.episodeIndex}` : '';
             const titleHashAttr = `data-ep-hash="${epHash}"`;
-            return `<div class="details-modal-episode-item" ${seasonAttr} data-video-url="${ep.video || ''}">${thumbImg}<div class="details-modal-episode-meta"><div class="details-modal-episode-title" ${titleHashAttr}>${ep.title}</div>${synopsisHtml}</div></div>`;
+            // Añadir onclick inline para asegurar que clics en el item ejecuten la reproducción
+            return `<div class="details-modal-episode-item" ${seasonAttr} data-video-url="${ep.video || ''}" onclick="window.__playEpisodeFromClick(event,this)">${thumbImg}<div class="details-modal-episode-meta"><div class="details-modal-episode-title" ${titleHashAttr}>${ep.title}</div>${synopsisHtml}</div></div>`;
         }).join('');
 
         // Construir header con selector de temporadas si hay más de una temporada
