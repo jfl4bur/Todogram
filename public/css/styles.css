@@ -335,7 +335,7 @@ button:focus {
 }
 
 .carousel-section {
-    margin-bottom: 75px;
+    margin-bottom: 65px;
     
 @media (max-width: 600px) {
     .carousel-section {
