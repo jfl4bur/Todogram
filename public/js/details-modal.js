@@ -197,6 +197,24 @@ class DetailsModal {
                 overlay._episodeErrorContainer.remove();
                 overlay._episodeErrorContainer = null;
             }
+            // Quitar parametro `ep` del hash actual manteniendo id/title y otros extras
+            try {
+                const currentHash = window.location.hash.substring(1);
+                if (currentHash) {
+                    const params = new URLSearchParams(currentHash);
+                    if (params.has('ep')) {
+                        params.delete('ep');
+                        const newHashString = params.toString();
+                        if (newHashString) {
+                            window.history.replaceState(null, null, `${window.location.pathname}#${newHashString}`);
+                        } else {
+                            window.history.replaceState(null, null, window.location.pathname);
+                        }
+                    }
+                }
+            } catch (err) {
+                console.warn('DetailsModal: fallo al limpiar ep del hash', err);
+            }
             overlay.style.display = 'none';
             document.body.style.overflow = 'auto';
         } catch (err) {
