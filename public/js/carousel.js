@@ -608,7 +608,8 @@ class EpisodiosAnimesCarousel {
         for (let i = 0; i < this.episodiosData.length; i++) {
             const item = this.episodiosData[i];
             const div = document.createElement('div');
-            div.className = 'custom-carousel-item episodios-animes-item';
+            // Use the exact same item classes as EpisodiosSeriesCarousel so styles and behavior match
+            div.className = 'custom-carousel-item episodios-series-item';
             div.dataset.itemId = item.id;
             const metaInfo = [];
             if (item.serie) metaInfo.push(`<span>${item.serie}</span>`);
@@ -621,7 +622,7 @@ class EpisodiosAnimesCarousel {
             if (item.ageRating) metaInfo.push(`<span class="age-rating">${item.ageRating}</span>`);
             let posterUrl = item.posterUrl || 'https://via.placeholder.com/300x169';
             div.innerHTML = `
-                <div class="loader_episodios_animes"><i class="fas fa-spinner"></i></div>
+                <div class="loader_episodios"><i class="fas fa-spinner"></i></div>
                 <div class="poster-container">
                     <img class="episodios-series-card-image" src="${posterUrl}" alt="${item.title}" loading="lazy" style="opacity:0;transition:opacity 0.3s ease">
                     <div class="carousel-overlay">
@@ -636,7 +637,7 @@ class EpisodiosAnimesCarousel {
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none;width:300px;height:169px;">
             `;
             const img = div.querySelector('.episodios-series-card-image');
-            img.onload = function() { img.style.opacity = '1'; const l = div.querySelector('.loader_episodios_animes') || div.querySelector('.loader'); if (l) l.style.display = 'none'; };
+            img.onload = function() { img.style.opacity = '1'; const l = div.querySelector('.loader_episodios') || div.querySelector('.loader'); if (l) l.style.display = 'none'; };
             if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
                 div.addEventListener('mouseenter', (e) => {
                     const itemId = div.dataset.itemId;
