@@ -724,9 +724,9 @@ button:focus {
 @media (max-width: 480px) {
     /* Override the specific selector that sets 300px (higher specificity + !important) */
     .episodios-series-item.custom-carousel-item {
-        width: 100px !important;
-        min-width: 100px !important;
-        max-width: 100px !important;
+        width: 170px !important;
+        min-width: 170px !important;
+        max-width: 170px !important;
     }
     /* Ensure poster container respects 16:9 and doesn't force large height */
     .episodios-series-item.custom-carousel-item .poster-container {
