@@ -53,51 +53,7 @@ class DetailsModal {
         this.galleryImages = [];
         this.currentGalleryIndex = 0;
 
-        // Función global auxiliar usada por los onclick inline de los items de episodio.
-        // Usamos una función global para evitar problemas de listeners que no se ejecutan
-        // en algunos entornos; esta función delega en el objeto detailsModal.
-        window.__playEpisodeFromClick = (ev, el) => {
-            try {
-                if (ev && ev.target && ev.target.closest('.details-modal-episode-synopsis')) return;
-                const url = el ? el.getAttribute('data-video-url') : null;
-                if (!url) return;
-                // Añadir logging y una señal visual temporal para verificar ejecución en runtime
-                try {
-                    console.log('global __playEpisodeFromClick invoked', { el, url, target: ev && ev.target ? ev.target.tagName : null });
-                    if (el) {
-                        el.dataset.__playInvoked = String(Date.now());
-                        const prevOutline = el.style.outline || '';
-                        el.style.outline = '3px solid rgba(0,200,0,0.9)';
-                        setTimeout(() => { try { el.style.outline = prevOutline; } catch (e) {} }, 600);
-                    }
-                } catch (e) {
-                    console.warn('DetailsModal: no se pudo aplicar señal visual de debug', e);
-                }
-
-                if (window.detailsModal && typeof window.detailsModal.playEpisode === 'function') {
-                    window.detailsModal.playEpisode(url, el, window.activeItem || null);
-                }
-            } catch (err) {
-                console.error('global __playEpisodeFromClick error', err);
-            }
-        };
-
-        // Debug: instalar un listener de captura a nivel documento para detectar si
-        // otros scripts interceptan o previenen el flujo de eventos antes de llegar
-        // al onclick inline. Se instala una sola vez.
-        if (!window.__DetailsModalDebugCaptureInstalled) {
-            window.__DetailsModalDebugCaptureInstalled = true;
-            document.addEventListener('click', (e) => {
-                try {
-                    const item = e.target && e.target.closest ? e.target.closest('.details-modal-episode-item') : null;
-                    if (item) {
-                        console.log('DetailsModal: document capture click on .details-modal-episode-item', { target: e.target, item });
-                    }
-                } catch (e) {
-                    console.warn('DetailsModal: capture listener error', e);
-                }
-            }, true);
-        }
+        // (Removed debug global handler and capture listener to preserve original behavior)
     }
 
     // Abre un player embebido en fullscreen usando un iframe
@@ -983,6 +939,7 @@ class DetailsModal {
                         if (!url) return;
                         const currentItem = window.activeItem || outerItem;
                         const card = btn.closest('.details-modal-episode-item');
+                        // Usar playEpisode para unificar comportamiento y fallback
                         this.playEpisode(url, card, currentItem);
                     });
                 });
@@ -1043,6 +1000,23 @@ class DetailsModal {
                         console.log('DetailsModal: delegated container click -> playEpisode', { url });
                         this.playEpisode(url, card, currentItem);
                     }, true); // usar captura para mayor robustez
+                }
+                // Inicializar filtro de temporada si existe (mover aquí para garantizar container)
+                const seasonSelect = this.detailsModalBody.querySelector('#season-select');
+                if (seasonSelect) {
+                    seasonSelect.addEventListener('change', (e) => {
+                        const val = seasonSelect.value;
+                        const items = this.detailsModalBody.querySelectorAll('.details-modal-episode-item');
+                        items.forEach(it => {
+                            const s = it.getAttribute('data-season');
+                            if (val === 'all') {
+                                it.style.display = '';
+                            } else {
+                                if (String(s) === String(val)) it.style.display = '';
+                                else it.style.display = 'none';
+                            }
+                        });
+                    });
                 }
             }
         } catch (err) {
@@ -1127,8 +1101,8 @@ class DetailsModal {
             // Preparar hash para este episodio (usar id del item si disponible, sino title normalizado y capítulo)
             const epHash = ep.episodeIndex ? `ep=${ep.episodeIndex}` : '';
             const titleHashAttr = `data-ep-hash="${epHash}"`;
-            // Añadir onclick inline para asegurar que clics en el item ejecuten la reproducción
-            return `<div class="details-modal-episode-item" ${seasonAttr} data-video-url="${ep.video || ''}" onclick="window.__playEpisodeFromClick(event,this)">${thumbImg}<div class="details-modal-episode-meta"><div class="details-modal-episode-title" ${titleHashAttr}>${ep.title}</div>${synopsisHtml}</div></div>`;
+            // No usar onclick inline; los listeners se adjuntan posteriormente en insertEpisodesSection
+            return `<div class="details-modal-episode-item" ${seasonAttr} data-video-url="${ep.video || ''}">${thumbImg}<div class="details-modal-episode-meta"><div class="details-modal-episode-title" ${titleHashAttr}>${ep.title}</div>${synopsisHtml}</div></div>`;
         }).join('');
 
         // Construir header con selector de temporadas si hay más de una temporada
@@ -1144,36 +1118,7 @@ class DetailsModal {
 
         const section = `<div class="details-modal-episodes">${headerHtml}<div class="details-modal-episodes-list">${listItems}</div></div>`;
 
-        // Delegar listeners para reproducir si hay video
-        // (se añadirá en el setTimeout posterior que añade listeners a botones existentes)
-        setTimeout(() => {
-            const container = this.detailsModalBody.querySelector('.details-modal-episodes-list');
-            if (!container) return;
-            container.querySelectorAll('.details-modal-episode-play').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const url = btn.getAttribute('data-video-url');
-                    if (url) this.openEpisodePlayer(url);
-                });
-            });
-            // Inicializar filtro de temporada si existe
-            const seasonSelect = this.detailsModalBody.querySelector('#season-select');
-            if (seasonSelect) {
-                seasonSelect.addEventListener('change', (e) => {
-                    const val = seasonSelect.value;
-                    const items = this.detailsModalBody.querySelectorAll('.details-modal-episode-item');
-                    items.forEach(it => {
-                        const s = it.getAttribute('data-season');
-                        if (val === 'all') {
-                            it.style.display = '';
-                        } else {
-                            if (String(s) === String(val)) it.style.display = '';
-                            else it.style.display = 'none';
-                        }
-                    });
-                });
-            }
-        }, 300);
+        // No añadir listeners aquí: insertEpisodesSection adjunta los listeners (play, title, card, delegated)
 
         // Estilos para el header del selector (inserción segura si no existe)
         const styleHeaderExists = !!document.getElementById('details-modal-episodes-header-styles');
