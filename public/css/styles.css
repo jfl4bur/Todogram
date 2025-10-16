@@ -350,7 +350,7 @@ button:focus {
     font-family: 'Slider Sans UI', sans-serif;
     font-size: 1.8rem;
     font-weight: 600;
-    margin-bottom: 15px;
+    margin-bottom: 7px;
     padding-left: 5px;
     color: var(--text-color);
 }
@@ -548,9 +548,9 @@ button:focus {
 }
 
 .carousel-title {
-    font-size: 2rem;
+    font-size: 1.8rem;
     font-weight: 600;
-    margin-bottom: 10px;
+    margin-bottom: 7px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
