@@ -853,8 +853,18 @@ class DetailsModal {
                 // Click en la tarjeta del episodio abre también el player (si no se pulsa el botón)
                 container.querySelectorAll('.details-modal-episode-item').forEach(card => {
                     card.addEventListener('click', (e) => {
-                        // Si el click fue en el botón, ya manejado
+                        // Si el click fue en el botón de reproducir, ya está manejado
                         if (e.target.closest('.details-modal-episode-play')) return;
+                        // Si el click vino desde la miniatura (imagen o su overlay), no abrir el player automáticamente.
+                        // En su lugar alternamos la sinopsis si existe para mejorar la UX y evitar apertura forzada a pantalla completa.
+                        if (e.target.closest('.details-modal-episode-thumb') || e.target.tagName === 'IMG') {
+                            const synopsis = card.querySelector('.details-modal-episode-synopsis');
+                            if (synopsis) {
+                                e.stopPropagation();
+                                this.toggleSynopsisElement(synopsis);
+                            }
+                            return;
+                        }
                         const url = card.getAttribute('data-video-url');
                         if (url) this.openEpisodePlayer(url);
                     });
