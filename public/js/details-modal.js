@@ -80,22 +80,39 @@ class DetailsModal {
             }
             const iframe = overlay.querySelector('.details-episode-player-iframe');
             // Si la url es una URL de player P2P que usa hashes, intentar usar como src directamente
-            let didLoad = false;
-            const fallbackTimeout = setTimeout(() => {
-                if (!didLoad) {
-                    console.warn('DetailsModal: iframe no cargó — no se abrirá pestaña nueva por configuración. Cerrar player.');
-                    this.closeEpisodePlayer();
+            // Implementar fallback que muestre un mensaje de error en el mismo overlay en lugar de cerrarlo
+            if (overlay._fallbackTimeout) {
+                clearTimeout(overlay._fallbackTimeout);
+                overlay._fallbackTimeout = null;
+            }
+            overlay._didLoad = false;
+            // Crear un timeout que muestre el estado de error si el iframe no carga en X ms
+            overlay._fallbackTimeout = setTimeout(() => {
+                if (!overlay._didLoad) {
+                    console.warn('DetailsModal: iframe no cargó — mostrar mensaje de error en player.');
+                    this.showEpisodePlayerError(overlay, 'No se pudo cargar el reproductor en esta página. Puedes reintentar o cerrar este reproductor.');
                 }
             }, 2500);
 
             iframe.onload = () => {
-                didLoad = true;
-                clearTimeout(fallbackTimeout);
+                overlay._didLoad = true;
+                if (overlay._fallbackTimeout) {
+                    clearTimeout(overlay._fallbackTimeout);
+                    overlay._fallbackTimeout = null;
+                }
+                // Si había un mensaje de error, eliminarlo
+                if (overlay._episodeErrorContainer) {
+                    overlay._episodeErrorContainer.remove();
+                    overlay._episodeErrorContainer = null;
+                }
             };
             iframe.onerror = () => {
-                clearTimeout(fallbackTimeout);
-                console.warn('DetailsModal: iframe error — no se abrirá pestaña nueva por configuración. Cerrar player.');
-                this.closeEpisodePlayer();
+                if (overlay._fallbackTimeout) {
+                    clearTimeout(overlay._fallbackTimeout);
+                    overlay._fallbackTimeout = null;
+                }
+                console.warn('DetailsModal: iframe error — mostrar mensaje de error en player.');
+                this.showEpisodePlayerError(overlay, 'Hubo un error cargando el reproductor. Puedes reintentar o cerrar este reproductor.', url);
             };
             iframe.src = url;
             overlay.style.display = 'flex';
@@ -171,10 +188,70 @@ class DetailsModal {
             if (!overlay) return;
             const iframe = overlay.querySelector('.details-episode-player-iframe');
             if (iframe) iframe.src = 'about:blank';
+            // limpiar timeouts y contenedores de error si existen
+            if (overlay._fallbackTimeout) {
+                clearTimeout(overlay._fallbackTimeout);
+                overlay._fallbackTimeout = null;
+            }
+            if (overlay._episodeErrorContainer) {
+                overlay._episodeErrorContainer.remove();
+                overlay._episodeErrorContainer = null;
+            }
             overlay.style.display = 'none';
             document.body.style.overflow = 'auto';
         } catch (err) {
             console.error('DetailsModal: closeEpisodePlayer error', err);
+        }
+    }
+
+    showEpisodePlayerError(overlay, message, lastUrl) {
+        try {
+            // evitar duplicados
+            if (!overlay) return;
+            if (overlay._episodeErrorContainer) return;
+            const container = document.createElement('div');
+            container.className = 'details-episode-player-error';
+            container.innerHTML = `
+                <div class="details-episode-player-error-inner">
+                    <div class="details-episode-player-error-message">${message}</div>
+                    <div class="details-episode-player-error-actions">
+                        <button class="details-episode-player-retry">Reintentar</button>
+                        <button class="details-episode-player-closebtn">Cerrar</button>
+                    </div>
+                </div>
+            `;
+            overlay.appendChild(container);
+            overlay._episodeErrorContainer = container;
+            // Eventos
+            const retryBtn = container.querySelector('.details-episode-player-retry');
+            const closeBtn = container.querySelector('.details-episode-player-closebtn');
+            retryBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                // volver a intentar cargando la url anterior si se proporcionó
+                const iframe = overlay.querySelector('.details-episode-player-iframe');
+                if (iframe && lastUrl) {
+                    // limpiar error visual
+                    container.remove();
+                    overlay._episodeErrorContainer = null;
+                    // re-intentar
+                    iframe.src = lastUrl;
+                    // restablecer timeout
+                    if (overlay._fallbackTimeout) {
+                        clearTimeout(overlay._fallbackTimeout);
+                        overlay._fallbackTimeout = null;
+                    }
+                    overlay._didLoad = false;
+                    overlay._fallbackTimeout = setTimeout(() => {
+                        if (!overlay._didLoad) this.showEpisodePlayerError(overlay, 'No se pudo cargar el reproductor.');
+                    }, 2500);
+                }
+            });
+            closeBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.closeEpisodePlayer();
+            });
+        } catch (err) {
+            console.error('DetailsModal: showEpisodePlayerError', err);
         }
     }
 
