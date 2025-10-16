@@ -42,11 +42,13 @@
 @media (max-width: 480px) {
     .episodios-series-item {
         width: 195px;
-        height: 109px;
         min-width: 195px;
-        min-height: 109px;
         max-width: 195px;
+        height: 109px;
+        min-height: 109px;
         max-height: 109px;
+        box-sizing: border-box;
+        overflow: hidden;
     }
 }
 /* Carrusel de Episodios Series (wrapper) */
@@ -116,16 +118,16 @@
 }
 @media (max-width: 480px) {
     .skeleton-item.skeleton-16x9 {
-        width: 195px;
-        height: 109px; /* ajustar a 195x109 para móvil */
+        width: 120px;
+        /* height removed so poster aspect-ratio controls height */
     }
 }
 
 /* Mobile-specific fixes to ensure 16:9 poster and loader sizing */
 @media (max-width: 480px) {
     .episodios-series-item .poster-container {
-        aspect-ratio: 16/9;
-        width: 100%;
+        width: 195px;
+        height: 109px; /* mantener 16:9 sobre width 195 -> 195*(9/16)=109.6875 pero pediste 109 total height; poster debe ser 109 - labels; se asigna 67px al poster para dejar espacio a labels */
         display: block;
         overflow: hidden;
         background: #232323;
@@ -134,12 +136,11 @@
         width: 100% !important;
         height: 100% !important;
         object-fit: cover !important;
-        aspect-ratio: 16/9 !important;
         display: block;
     }
     .loader_episodios {
         width: 100%;
-        aspect-ratio: 16/9;
+        height: 109px;
         display: flex;
         align-items: center;
         justify-content: center;
