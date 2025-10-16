@@ -473,6 +473,9 @@ class EpisodiosAnimesCarousel {
         this.carouselPrev = document.getElementById('episodios-animes-carousel-prev');
         this.carouselNext = document.getElementById('episodios-animes-carousel-next');
         this.carouselContainer = this.wrapper ? this.wrapper.parentElement : null;
+        // Diagnostic logs to validate DOM presence and initialization order
+        console.log('[EpisodiosAnimesCarousel] constructor -> wrapper:', this.wrapper, 'skeleton:', this.skeleton);
+        console.log('[EpisodiosAnimesCarousel] constructor -> carouselNav:', this.carouselNav, 'carouselPrev:', this.carouselPrev, 'carouselNext:', this.carouselNext, 'carouselContainer:', this.carouselContainer);
         this.itemsPerPage = 0;
         this.index = 0;
         this.step = 0;
