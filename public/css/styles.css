@@ -41,9 +41,9 @@
 }
 @media (max-width: 480px) {
     .episodios-series-item {
-        width: 100px;
-        min-width: 100px;
-        max-width: 100px;
+        width: 120px;
+        min-width: 120px;
+        max-width: 120px;
         /* altura NO fija: dejar que el poster (aspect-ratio 16/9) determine la altura */
     }
 }
@@ -114,7 +114,7 @@
 }
 @media (max-width: 480px) {
     .skeleton-item.skeleton-16x9 {
-        width: 100px;
+        width: 120px;
         /* height removed so poster aspect-ratio controls height */
     }
 }
@@ -136,22 +136,25 @@
         display: block;
     }
     .loader_episodios {
-        width: 100%;
+        width: 92%;
         aspect-ratio: 16/9;
         display: flex;
         align-items: center;
         justify-content: center;
         background: #232323;
-        font-size: 0.85rem;
+        margin-left: 4%;
     }
     /* Ensure labels stay below poster and do not overlap */
     .carousel-labels {
         padding-top: 6px;
-        font-size: 12px;
-        gap: 2px;
     }
-    .carousel-series-title { font-size: 11px; }
-    .carousel-episode-title { font-size: 12px; }
+}
+
+/* Reduce spinner icon size inside loader for small screens */
+@media (max-width: 480px) {
+    .loader_episodios i.fas.fa-spinner {
+        font-size: 14px;
+    }
 }
 
 /* Imagen 16:9 para cards de Episodios Series */
@@ -718,32 +721,6 @@ button:focus {
     /* object-fit: cover; */
     display: block;
     transition: opacity 0.3s ease;
-}
-
-/* ===== Mobile overrides placed late to override earlier 300px rule ===== */
-@media (max-width: 480px) {
-    /* Override the specific selector that sets 300px (higher specificity + !important) */
-    .episodios-series-item.custom-carousel-item {
-        width: 100px !important;
-        min-width: 100px !important;
-        max-width: 100px !important;
-    }
-    /* Ensure poster container respects 16:9 and doesn't force large height */
-    .episodios-series-item.custom-carousel-item .poster-container {
-        aspect-ratio: 16/9 !important;
-        width: 100% !important;
-        height: auto !important;
-        position: relative !important;
-    }
-    /* Skeletons smaller */
-    .skeleton-item.skeleton-16x9 {
-        width: 100px !important;
-        height: auto !important;
-    }
-    /* Loader respects smaller size */
-    .loader_episodios {
-        aspect-ratio: 16/9 !important;
-    }
 }
 
 .detail-background {
