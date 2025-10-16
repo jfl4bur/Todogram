@@ -93,7 +93,8 @@ class EpisodiosSeriesCarousel {
         resizeObserver.observe(this.wrapper);
     }
     setupEventListeners() {
-        window.addEventListener('resize', () => this.calculateItemsPerPage && this.calculateItemsPerPage());
+        // Update progress bar on resize
+        window.addEventListener('resize', () => { if (this.updateProgressBar) this.updateProgressBar(); });
         if (this.carouselPrev) {
             this.carouselPrev.addEventListener('click', (e) => {
                 e.preventDefault();
@@ -107,7 +108,10 @@ class EpisodiosSeriesCarousel {
             });
         }
         if (this.wrapper) {
-            this.wrapper.addEventListener('scroll', () => this.handleScroll && this.handleScroll());
+            // Update progress bar when the wrapper is scrolled
+            this.wrapper.addEventListener('scroll', () => { if (this.updateProgressBar) this.updateProgressBar(); });
+            // Also set initial progress
+            if (this.updateProgressBar) this.updateProgressBar();
         }
     }
     async loadEpisodiosData() {
