@@ -73,15 +73,15 @@
 }
 .skeleton-item.skeleton-16x9 {
     width: 300px;
-    height: 210px; /* poster 169 + espacio para labels */
-    background: #232323;
+    /* height removed to allow poster + two lines to size naturally */
+    background: transparent;
     border-radius: 8px;
     position: relative;
-    overflow: hidden;
+    overflow: visible;
     display: flex;
-    align-items: flex-start;
-    justify-content: flex-start;
     flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
 }
 
 /* Labels below poster for Episodios Series */
@@ -416,32 +416,41 @@ button:focus {
 }
 
 /* Center spinner inside the poster area for skeleton-16x9 */
-.skeleton-item.skeleton-16x9 .skeleton-spinner {
-    position: absolute;
-    /* Center within the poster rectangle (assume poster height ~ 169px) */
-    top: calc((169px - 40px) / 2 + 8px); /* 8px top padding alignment */
-    left: calc(50% - 20px);
+.skeleton-item.skeleton-16x9 .skeleton-poster {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #232323;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Center spinner inside poster */
+.skeleton-item.skeleton-16x9 .skeleton-poster .skeleton-spinner {
+    position: relative;
+    top: 0;
+    left: 0;
+    margin: 0;
     z-index: 5;
 }
 
-/* Ensure skeleton labels sit under the poster and use padding */
-.skeleton-item.skeleton-16x9 .skeleton-labels {
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: 8px;
-    padding: 0 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    z-index: 3;
-}
-
-/* Ensure skeleton placeholder lines are visible and spaced */
-.skeleton-item.skeleton-16x9 .skeleton-series-line,
-.skeleton-item.skeleton-16x9 .skeleton-episode-line {
-    border-radius: 4px;
+/* Independent placeholder lines below poster */
+.skeleton-item.skeleton-16x9 .skeleton-series-line {
+    width: 85%;
+    height: 12px;
+    margin: 0 8px;
+    border-radius: 6px;
     background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+}
+.skeleton-item.skeleton-16x9 .skeleton-episode-line {
+    width: 95%;
+    height: 14px;
+    margin: 0 8px 6px 8px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
 }
 
 @keyframes spin {
