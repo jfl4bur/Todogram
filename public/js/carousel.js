@@ -265,7 +265,7 @@ class EpisodiosSeriesCarousel {
             let posterUrl = item.posterUrl;
             if (!posterUrl) posterUrl = 'https://via.placeholder.com/300x169';
             div.innerHTML = `
-                <div class="loader"><i class="fas fa-spinner"></i></div>
+                <div class="loader_episodios"><i class="fas fa-spinner"></i></div>
                 <div class="poster-container">
                     <img class="episodios-series-card-image" src="${posterUrl}" alt="${item.title}" loading="lazy" style="opacity:0;transition:opacity 0.3s ease">
                     <div class="carousel-overlay">
