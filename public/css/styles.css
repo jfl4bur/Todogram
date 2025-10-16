@@ -34,21 +34,17 @@
 @media (max-width: 768px) {
     .episodios-series-item {
         width: 180px;
-        height: 101px;
         min-width: 180px;
-        min-height: 101px;
         max-width: 180px;
-        max-height: 101px;
+        /* altura NO fija: dejar que el poster (aspect-ratio 16/9) determine la altura */
     }
 }
 @media (max-width: 480px) {
     .episodios-series-item {
         width: 120px;
-        height: 67px;
         min-width: 120px;
-        min-height: 67px;
         max-width: 120px;
-        max-height: 67px;
+        /* altura NO fija: dejar que el poster (aspect-ratio 16/9) determine la altura */
     }
 }
 /* Carrusel de Episodios Series (wrapper) */
@@ -113,13 +109,43 @@
 @media (max-width: 768px) {
     .skeleton-item.skeleton-16x9 {
         width: 180px;
-        height: 135px; /* poster 101 + labels */
+        /* height removed so poster aspect-ratio controls height */
     }
 }
 @media (max-width: 480px) {
     .skeleton-item.skeleton-16x9 {
         width: 120px;
-        height: 95px; /* poster 67 + labels */
+        /* height removed so poster aspect-ratio controls height */
+    }
+}
+
+/* Mobile-specific fixes to ensure 16:9 poster and loader sizing */
+@media (max-width: 480px) {
+    .episodios-series-item .poster-container {
+        aspect-ratio: 16/9;
+        width: 100%;
+        display: block;
+        overflow: hidden;
+        background: #232323;
+    }
+    .episodios-series-card-image {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
+        aspect-ratio: 16/9 !important;
+        display: block;
+    }
+    .loader_episodios {
+        width: 100%;
+        aspect-ratio: 16/9;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #232323;
+    }
+    /* Ensure labels stay below poster and do not overlap */
+    .carousel-labels {
+        padding-top: 6px;
     }
 }
 
