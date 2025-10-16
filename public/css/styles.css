@@ -114,7 +114,7 @@
     width: 100%;
     aspect-ratio: 16/9;
     object-fit: cover;
-    border-radius: 8px;
+    /* border-radius: 8px; */
     background: #232323;
     transition: opacity 0.3s;
     opacity: 0;
@@ -567,8 +567,7 @@ button:focus {
     flex-direction: column;
     padding: 0;
     margin: 0;
-
-    background: #232323; /* dark area behind spinner */
+    background: transparent; /* dark area behind spinner */
 }
 
 .episodios-series-item.custom-carousel-item .poster-container,
@@ -1677,6 +1676,7 @@ button:focus {
     justify-content: center;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 4;
+    aspect-ratio: 16 / 9 !important;
 }
 
 .loader i {
