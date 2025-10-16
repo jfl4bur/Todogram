@@ -577,7 +577,7 @@ button:focus {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: auto !important;
+
     position: relative;
     overflow: hidden;
 }
@@ -612,24 +612,7 @@ button:focus {
     top: auto;
     padding: 10px;
     background: linear-gradient(transparent, rgba(0,0,0,0.9));
-    transform: translateY(0);
-    opacity: 0;
-    z-index: 2;
-}
-
-/* Ensure labels sit below the poster and are visible */
-.episodios-series-item .carousel-labels {
-    padding: 8px 6px 12px 6px;
-    gap: 2px;
-    z-index: 3;
-    background: transparent;
-}
-
-/* Make skeleton items match episodios card sizes */
-.skeleton-item.skeleton-16x9 {
-    width: 300px;
-    height: 210px; /* poster (169) + labels space */
-}
+    /* Note: loader styling is handled globally; the loader is inserted inside .poster-container so it overlays the poster area */
 
 /* Ensure real poster image fills the poster container and does not stretch the item */
 .episodios-series-item .episodios-series-card-image,
