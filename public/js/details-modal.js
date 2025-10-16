@@ -614,6 +614,20 @@ class DetailsModal {
     playEpisode(url, cardElement, currentItem) {
         console.log('DetailsModal.playEpisode called', { url, hasVideoModal: !!window.videoModal, cardElement });
         if (!url) return;
+        // Evitar ejecuciones dobles rápidas en el mismo elemento
+        try {
+            const now = Date.now();
+            if (cardElement) {
+                const last = parseInt(cardElement.dataset._lastPlayed || '0', 10);
+                if (last && (now - last) < 800) {
+                    console.log('DetailsModal.playEpisode: ya reproducido recientemente, ignorando');
+                    return;
+                }
+                cardElement.dataset._lastPlayed = String(now);
+            }
+        } catch (e) {
+            // no crítico
+        }
         try {
             const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
             const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
