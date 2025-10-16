@@ -52,8 +52,6 @@ class DetailsModal {
 
         this.galleryImages = [];
         this.currentGalleryIndex = 0;
-
-        // (Removed debug global handler and capture listener to preserve original behavior)
     }
 
     // Abre un player embebido en fullscreen usando un iframe
@@ -69,7 +67,7 @@ class DetailsModal {
                 overlay.innerHTML = `
                     <div class="details-episode-player-inner">
                         <button class="details-episode-player-close" aria-label="Cerrar">✕</button>
-                        <iframe class="details-episode-player-iframe" src="" frameborder="0" allow="autoplay; fullscreen; encrypted-media" allowfullscreen playsinline></iframe>
+                        <iframe class="details-episode-player-iframe" src="" frameborder="0" allowfullscreen allow="autoplay; fullscreen"></iframe>
                     </div>
                 `;
                 document.body.appendChild(overlay);
@@ -85,22 +83,9 @@ class DetailsModal {
             let didLoad = false;
             const fallbackTimeout = setTimeout(() => {
                 if (!didLoad) {
-                    console.warn('DetailsModal: iframe no cargó, mostrando mensaje de error en player (no se abrirá nueva pestaña)');
-                    // Mostrar mensaje de error dentro del overlay en lugar de abrir una nueva pestaña
-                    try {
-                        const inner = overlay.querySelector('.details-episode-player-inner');
-                        let errDiv = inner.querySelector('.details-episode-player-error');
-                        if (!errDiv) {
-                            errDiv = document.createElement('div');
-                            errDiv.className = 'details-episode-player-error';
-                            errDiv.style.cssText = 'color:#fff;padding:12px;background:rgba(0,0,0,0.6);border-radius:6px;margin-top:8px;text-align:center;';
-                            inner.appendChild(errDiv);
-                        }
-                        errDiv.textContent = 'No se pudo cargar el reproductor embebido. Intenta reproducir desde otra fuente.';
-                        setTimeout(() => { try { errDiv.remove(); } catch (e) {} }, 5000);
-                    } catch (e) {
-                        console.warn('DetailsModal: no se pudo mostrar mensaje de error en overlay', e);
-                    }
+                    console.warn('DetailsModal: iframe no cargó, abriendo en pestaña nueva como fallback');
+                    this.closeEpisodePlayer();
+                    window.open(url, '_blank');
                 }
             }, 2500);
 
@@ -110,21 +95,9 @@ class DetailsModal {
             };
             iframe.onerror = () => {
                 clearTimeout(fallbackTimeout);
-                console.warn('DetailsModal: iframe error, mostrando mensaje en overlay (no se abrirá nueva pestaña)');
-                try {
-                    const inner = overlay.querySelector('.details-episode-player-inner');
-                    let errDiv = inner.querySelector('.details-episode-player-error');
-                    if (!errDiv) {
-                        errDiv = document.createElement('div');
-                        errDiv.className = 'details-episode-player-error';
-                        errDiv.style.cssText = 'color:#fff;padding:12px;background:rgba(0,0,0,0.6);border-radius:6px;margin-top:8px;text-align:center;';
-                        inner.appendChild(errDiv);
-                    }
-                    errDiv.textContent = 'Error cargando el reproductor embebido.';
-                    setTimeout(() => { try { errDiv.remove(); } catch (e) {} }, 5000);
-                } catch (e) {
-                    console.warn('DetailsModal: no se pudo mostrar mensaje de error en overlay', e);
-                }
+                console.warn('DetailsModal: iframe error, abriendo en pestaña nueva');
+                this.closeEpisodePlayer();
+                window.open(url, '_blank');
             };
             iframe.src = url;
             overlay.style.display = 'flex';
@@ -450,25 +423,7 @@ class DetailsModal {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const videoUrl = btn.getAttribute('data-video-url');
-                    console.log('DetailsModal: play button clicked', { videoUrl, hasVideoModal: !!window.videoModal });
-                    if (!videoUrl) return;
-                    if (window.videoModal && typeof window.videoModal.play === 'function') {
-                        try {
-                            window.videoModal.play(videoUrl);
-                            return;
-                        } catch (err) {
-                            console.error('DetailsModal: window.videoModal.play error', err);
-                            // Intentar fallback al overlay embebido sin abrir nueva pestaña
-                            try { this.openEpisodePlayer(videoUrl); } catch (e) { console.error('DetailsModal: openEpisodePlayer fallback error', e); }
-                            return;
-                        }
-                    }
-                    // Si no hay videoModal, usar el overlay embebido como fallback (no abrir nueva pestaña)
-                    try {
-                        this.openEpisodePlayer(videoUrl);
-                    } catch (err) {
-                        console.error('DetailsModal: openEpisodePlayer fallback error', err);
-                    }
+                    window.videoModal.play(videoUrl);
                 });
             });
             
@@ -610,61 +565,6 @@ class DetailsModal {
             window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
         }
         this.updateMetaTags(item);
-    }
-
-    // Helper: actualizar hash amigable y abrir modal de video (videoModal.play o fallback)
-    playEpisode(url, cardElement, currentItem) {
-        console.log('DetailsModal.playEpisode called', { url, hasVideoModal: !!window.videoModal, cardElement });
-        if (!url) return;
-        // Evitar ejecuciones dobles rápidas en el mismo elemento
-        try {
-            const now = Date.now();
-            if (cardElement) {
-                const last = parseInt(cardElement.dataset._lastPlayed || '0', 10);
-                if (last && (now - last) < 800) {
-                    console.log('DetailsModal.playEpisode: ya reproducido recientemente, ignorando');
-                    return;
-                }
-                cardElement.dataset._lastPlayed = String(now);
-            }
-        } catch (e) {
-            // no crítico
-        }
-        try {
-            const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
-            const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
-            let epHash = '';
-            try {
-                const titleEl = cardElement ? cardElement.querySelector('.details-modal-episode-title') : null;
-                epHash = titleEl ? (titleEl.getAttribute('data-ep-hash') || '') : '';
-            } catch (e) {
-                epHash = '';
-            }
-            const newHash = `id=${baseId}&title=${normalized}${epHash ? '&' + epHash : ''}`;
-            if (window.location.hash.substring(1) !== newHash) {
-                window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
-            }
-        } catch (errHash) {
-            console.warn('DetailsModal: error updating hash', errHash);
-        }
-
-        // Intentar abrir con videoModal.play
-        if (window.videoModal && typeof window.videoModal.play === 'function') {
-            try {
-                window.videoModal.play(url);
-                return;
-            } catch (err) {
-                console.error('DetailsModal: window.videoModal.play error', err);
-            }
-        }
-
-        // Fallback: overlay embebido
-        try {
-            this.openEpisodePlayer(url);
-            return;
-        } catch (err) {
-            console.error('DetailsModal: openEpisodePlayer fallback error', err);
-        }
     }
 
     restoreUrl() {
@@ -935,28 +835,17 @@ class DetailsModal {
                     btn.addEventListener('click', (e) => {
                         e.stopPropagation();
                         const url = btn.getAttribute('data-video-url');
-                        console.log('DetailsModal: play button clicked handler', { url });
-                        if (!url) return;
-                        const currentItem = window.activeItem || outerItem;
-                        const card = btn.closest('.details-modal-episode-item');
-                        // Usar playEpisode para unificar comportamiento y fallback
-                        this.playEpisode(url, card, currentItem);
+                        // Abrir player embebido en pantalla completa
+                        if (url) this.openEpisodePlayer(url);
                     });
                 });
-                // Click en la tarjeta del episodio: abrir el modal de video cuando se haga click en cualquier parte
-                // excepto dentro de la sinopsis (que tiene su propio toggle)
+                // Click en la tarjeta del episodio abre también el player (si no se pulsa el botón)
                 container.querySelectorAll('.details-modal-episode-item').forEach(card => {
                     card.addEventListener('click', (e) => {
-                        // Si el click fue en la sinopsis, dejar que el handler de sinopsis maneje la acción
-                        if (e.target.closest('.details-modal-episode-synopsis')) return;
-                        // Si el click fue en el botón de reproducir, ya está manejado por el handler anterior
+                        // Si el click fue en el botón, ya manejado
                         if (e.target.closest('.details-modal-episode-play')) return;
-                        e.stopPropagation();
                         const url = card.getAttribute('data-video-url');
-                        console.log('DetailsModal: card click handler', { url });
-                        if (!url) return;
-                        const currentItem = window.activeItem || outerItem;
-                        this.playEpisode(url, card, currentItem);
+                        if (url) this.openEpisodePlayer(url);
                     });
                 });
                 // Inicializar sinopsis de episodios como colapsadas y añadir toggle
@@ -974,50 +863,20 @@ class DetailsModal {
                     titleEl.style.cursor = 'pointer';
                     titleEl.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        console.log('DetailsModal: title click handler');
+                        const epHash = titleEl.getAttribute('data-ep-hash') || '';
+                        const currentItem = window.activeItem || outerItem;
+                        const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
+                        const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
+                        const newHash = `id=${baseId}&title=${normalized}${epHash ? '&' + epHash : ''}`;
+                        if (window.location.hash.substring(1) !== newHash) {
+                            window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
+                        }
+                        // además abrir el reproductor si la tarjeta tiene URL de video
                         const card = titleEl.closest('.details-modal-episode-item');
                         const videoUrl = card ? card.getAttribute('data-video-url') : null;
-                        if (!videoUrl) return;
-                        const currentItem = window.activeItem || outerItem;
-                        this.playEpisode(videoUrl, card, currentItem);
+                        if (videoUrl) this.openEpisodePlayer(videoUrl);
                     });
                 });
-
-                // Delegated fallback: Por si los listeners directos no se ejecutan, asegurar que
-                // cualquier click dentro del contenedor (salvo sinopsis y botones) abra el vídeo.
-                if (!container._delegatedGlobal) {
-                    container._delegatedGlobal = true;
-                    container.addEventListener('click', (e) => {
-                        // No interferir con clicks en la sinopsis
-                        if (e.target.closest('.details-modal-episode-synopsis')) return;
-                        // Si fue click en un control específico (botón de play), dejar su handler
-                        if (e.target.closest('.details-modal-episode-play')) return;
-                        const card = e.target.closest('.details-modal-episode-item');
-                        if (!card) return;
-                        const url = card.getAttribute('data-video-url');
-                        if (!url) return;
-                        const currentItem = window.activeItem || outerItem;
-                        console.log('DetailsModal: delegated container click -> playEpisode', { url });
-                        this.playEpisode(url, card, currentItem);
-                    }, true); // usar captura para mayor robustez
-                }
-                // Inicializar filtro de temporada si existe (mover aquí para garantizar container)
-                const seasonSelect = this.detailsModalBody.querySelector('#season-select');
-                if (seasonSelect) {
-                    seasonSelect.addEventListener('change', (e) => {
-                        const val = seasonSelect.value;
-                        const items = this.detailsModalBody.querySelectorAll('.details-modal-episode-item');
-                        items.forEach(it => {
-                            const s = it.getAttribute('data-season');
-                            if (val === 'all') {
-                                it.style.display = '';
-                            } else {
-                                if (String(s) === String(val)) it.style.display = '';
-                                else it.style.display = 'none';
-                            }
-                        });
-                    });
-                }
             }
         } catch (err) {
             console.error('DetailsModal: error insertando sección de episodios', err);
@@ -1101,7 +960,6 @@ class DetailsModal {
             // Preparar hash para este episodio (usar id del item si disponible, sino title normalizado y capítulo)
             const epHash = ep.episodeIndex ? `ep=${ep.episodeIndex}` : '';
             const titleHashAttr = `data-ep-hash="${epHash}"`;
-            // No usar onclick inline; los listeners se adjuntan posteriormente en insertEpisodesSection
             return `<div class="details-modal-episode-item" ${seasonAttr} data-video-url="${ep.video || ''}">${thumbImg}<div class="details-modal-episode-meta"><div class="details-modal-episode-title" ${titleHashAttr}>${ep.title}</div>${synopsisHtml}</div></div>`;
         }).join('');
 
@@ -1118,7 +976,36 @@ class DetailsModal {
 
         const section = `<div class="details-modal-episodes">${headerHtml}<div class="details-modal-episodes-list">${listItems}</div></div>`;
 
-        // No añadir listeners aquí: insertEpisodesSection adjunta los listeners (play, title, card, delegated)
+        // Delegar listeners para reproducir si hay video
+        // (se añadirá en el setTimeout posterior que añade listeners a botones existentes)
+        setTimeout(() => {
+            const container = this.detailsModalBody.querySelector('.details-modal-episodes-list');
+            if (!container) return;
+            container.querySelectorAll('.details-modal-episode-play').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const url = btn.getAttribute('data-video-url');
+                    if (url) this.openEpisodePlayer(url);
+                });
+            });
+            // Inicializar filtro de temporada si existe
+            const seasonSelect = this.detailsModalBody.querySelector('#season-select');
+            if (seasonSelect) {
+                seasonSelect.addEventListener('change', (e) => {
+                    const val = seasonSelect.value;
+                    const items = this.detailsModalBody.querySelectorAll('.details-modal-episode-item');
+                    items.forEach(it => {
+                        const s = it.getAttribute('data-season');
+                        if (val === 'all') {
+                            it.style.display = '';
+                        } else {
+                            if (String(s) === String(val)) it.style.display = '';
+                            else it.style.display = 'none';
+                        }
+                    });
+                });
+            }
+        }, 300);
 
         // Estilos para el header del selector (inserción segura si no existe)
         const styleHeaderExists = !!document.getElementById('details-modal-episodes-header-styles');
