@@ -114,7 +114,7 @@
 }
 @media (max-width: 480px) {
     .skeleton-item.skeleton-16x9 {
-        width: 100px;
+        width: 170px;
         /* height removed so poster aspect-ratio controls height */
     }
 }
@@ -737,7 +737,7 @@ button:focus {
     }
     /* Skeletons smaller */
     .skeleton-item.skeleton-16x9 {
-        width: 100px !important;
+        width: 170px !important;
         height: auto !important;
     }
     /* Loader respects smaller size */
