@@ -75,7 +75,7 @@
     width: 300px;
     /* height removed to allow poster + two lines to size naturally */
     background: transparent;
-    border-radius: 8px;
+
     position: relative;
     overflow: visible;
     display: flex;
@@ -420,7 +420,7 @@ button:focus {
     width: 100%;
     aspect-ratio: 16/9;
     background: #232323;
-    border-radius: 8px;
+
     position: relative;
     overflow: hidden;
     display: flex;
@@ -442,14 +442,14 @@ button:focus {
     width: 85%;
     height: 12px;
     margin: 0 8px;
-    border-radius: 6px;
+
     background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
 }
 .skeleton-item.skeleton-16x9 .skeleton-episode-line {
     width: 95%;
     height: 14px;
     margin: 0 8px 6px 8px;
-    border-radius: 6px;
+
     background: linear-gradient(90deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
 }
 
