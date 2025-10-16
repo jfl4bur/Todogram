@@ -635,9 +635,23 @@ class DetailsModal {
     updateUrlForModal(item) {
         if (!item || item.id === '0') return;
         const normalizedTitle = this.normalizeText(item.title);
-        const newHash = `id=${item.id}&title=${normalizedTitle}`;
-        if (window.location.hash.substring(1) !== newHash) {
-            window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
+        // Preservar el parámetro 'ep' si ya estaba presente en la URL
+        try {
+            const currentParams = new URLSearchParams(window.location.hash.substring(1));
+            const existingEp = currentParams.get('ep');
+            let newHash = `id=${item.id}&title=${normalizedTitle}`;
+            if (existingEp) {
+                newHash += `&ep=${encodeURIComponent(existingEp)}`;
+            }
+            if (window.location.hash.substring(1) !== newHash) {
+                window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
+            }
+        } catch (err) {
+            // En caso de error construimos sin ep
+            const newHash = `id=${item.id}&title=${normalizedTitle}`;
+            if (window.location.hash.substring(1) !== newHash) {
+                window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
+            }
         }
         this.updateMetaTags(item);
     }
