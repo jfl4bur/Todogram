@@ -106,7 +106,7 @@
     width: 100%;
     aspect-ratio: 16/9;
     object-fit: cover;
-    border-radius: 8px;
+
     background: #232323;
     transition: opacity 0.3s;
     opacity: 0;
