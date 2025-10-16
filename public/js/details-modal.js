@@ -83,9 +83,8 @@ class DetailsModal {
             let didLoad = false;
             const fallbackTimeout = setTimeout(() => {
                 if (!didLoad) {
-                    console.warn('DetailsModal: iframe no cargó, abriendo en pestaña nueva como fallback');
+                    console.warn('DetailsModal: iframe no cargó — no se abrirá pestaña nueva por configuración. Cerrar player.');
                     this.closeEpisodePlayer();
-                    window.open(url, '_blank');
                 }
             }, 2500);
 
@@ -95,9 +94,8 @@ class DetailsModal {
             };
             iframe.onerror = () => {
                 clearTimeout(fallbackTimeout);
-                console.warn('DetailsModal: iframe error, abriendo en pestaña nueva');
+                console.warn('DetailsModal: iframe error — no se abrirá pestaña nueva por configuración. Cerrar player.');
                 this.closeEpisodePlayer();
-                window.open(url, '_blank');
             };
             iframe.src = url;
             overlay.style.display = 'flex';
