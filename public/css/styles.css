@@ -415,6 +415,35 @@ button:focus {
     animation: spin 1s linear infinite;
 }
 
+/* Center spinner inside the poster area for skeleton-16x9 */
+.skeleton-item.skeleton-16x9 .skeleton-spinner {
+    position: absolute;
+    /* Center within the poster rectangle (assume poster height ~ 169px) */
+    top: calc((169px - 40px) / 2 + 8px); /* 8px top padding alignment */
+    left: calc(50% - 20px);
+    z-index: 5;
+}
+
+/* Ensure skeleton labels sit under the poster and use padding */
+.skeleton-item.skeleton-16x9 .skeleton-labels {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 8px;
+    padding: 0 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    z-index: 3;
+}
+
+/* Ensure skeleton placeholder lines are visible and spaced */
+.skeleton-item.skeleton-16x9 .skeleton-series-line,
+.skeleton-item.skeleton-16x9 .skeleton-episode-line {
+    border-radius: 4px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.06), rgba(255,255,255,0.02));
+}
+
 @keyframes spin {
     to {
         transform: rotate(360deg);
@@ -520,6 +549,7 @@ button:focus {
 
 /* Specific overrides for Episodios carousel items: keep poster 16:9 and labels below it */
 .episodios-series-item.custom-carousel-item {
+    box-shadow: none;
     width: 300px; /* explicit width for episodios */
     min-width: 300px;
     max-width: 300px;
