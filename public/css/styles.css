@@ -273,7 +273,9 @@ button:focus {
     background-color: var(--primary-color);
     border-radius: 2px;
 }
-
+.carousel-section-background {
+       background: linear-gradient(rgba(249, 203, 40, 0) 11.35%, rgba(249, 203, 40, 0.24) 100%);
+}  
 /* Estilos para el modal de galería */
 .gallery-modal {
     display: none;
@@ -354,7 +356,7 @@ button:focus {
     color: white;
     font-size: 16px;
     text-align: center;
-}
+}  
 
 .carousel-section {
     margin-bottom: 75px;
