@@ -57,15 +57,6 @@ class DetailsModal {
     // Abre un player embebido en fullscreen usando un iframe
     openEpisodePlayer(url) {
         try {
-            // Preferir el VideoModal global si existe (overlay central) para evitar abrir iframes fullscreen
-            if (window.videoModal && typeof window.videoModal.play === 'function') {
-                try {
-                    window.videoModal.play(url);
-                    return;
-                } catch (err) {
-                    console.warn('DetailsModal: videoModal.play falló, se usará fallback iframe', err);
-                }
-            }
             if (!url) return;
             // Si ya existe overlay, actualizar src
             let overlay = document.getElementById('details-episode-player-overlay');
@@ -186,24 +177,6 @@ class DetailsModal {
             document.body.style.overflow = 'auto';
         } catch (err) {
             console.error('DetailsModal: closeEpisodePlayer error', err);
-        }
-    }
-
-    // Reproducir en el VideoModal (overlay central) con fallback a nueva pestaña
-    playInVideoModal(url) {
-        if (!url) return;
-        console.log('DetailsModal: playInVideoModal solicitado para:', url);
-        if (window.videoModal && typeof window.videoModal.play === 'function') {
-            try {
-                window.videoModal.play(url);
-            } catch (err) {
-                console.error('DetailsModal: error al llamar videoModal.play', err);
-                // fallback a abertura en nueva pestaña
-                window.open(url, '_blank');
-            }
-        } else {
-            console.warn('DetailsModal: videoModal no disponible, abriendo en nueva pestaña como fallback');
-            window.open(url, '_blank');
         }
     }
 
@@ -451,15 +424,17 @@ class DetailsModal {
                     e.stopPropagation();
                     const videoUrl = btn.getAttribute('data-video-url');
                     console.log('DetailsModal: play button clicked', { videoUrl, hasVideoModal: !!window.videoModal });
-                    // Construir hash igual que al hacer click en título/episodio
-                    const currentItem = window.activeItem || item;
-                    const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
-                    const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
-                    const newHash = `id=${baseId}&title=${normalized}`;
-                    if (window.location.hash.substring(1) !== newHash) {
-                        window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
+                    if (window.videoModal && typeof window.videoModal.play === 'function') {
+                        try {
+                            window.videoModal.play(videoUrl);
+                        } catch (err) {
+                            console.error('DetailsModal: window.videoModal.play error', err);
+                            if (videoUrl) window.open(videoUrl, '_blank');
+                        }
+                    } else {
+                        console.warn('DetailsModal: videoModal no disponible, abriendo en nueva pestaña como fallback');
+                        if (videoUrl) window.open(videoUrl, '_blank');
                     }
-                    if (videoUrl) this.playInVideoModal(videoUrl);
                 });
             });
             
@@ -871,29 +846,18 @@ class DetailsModal {
                     btn.addEventListener('click', (e) => {
                         e.stopPropagation();
                         const url = btn.getAttribute('data-video-url');
-                        // Construir el mismo hash que al hacer clic en el título
-                        const card = btn.closest('.details-modal-episode-item');
-                        const titleEl = card ? card.querySelector('.details-modal-episode-title') : null;
-                        const epHash = titleEl ? (titleEl.getAttribute('data-ep-hash') || '') : '';
-                        const currentItem = window.activeItem || item;
-                        const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
-                        const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
-                        const newHash = `id=${baseId}&title=${normalized}${epHash ? '&' + epHash : ''}`;
-                        if (window.location.hash.substring(1) !== newHash) {
-                            window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
-                        }
-                        // Reproducir usando el VideoModal (overlay central). playInVideoModal tiene fallback.
-                        if (url) this.playInVideoModal(url);
+                        // Abrir player embebido en pantalla completa
+                        if (url) this.openEpisodePlayer(url);
                     });
                 });
-                // Click en la tarjeta del episodio: si el click fue en la sinopsis, toggle; si fue en la miniatura o en cualquier otra parte, reproducir en VideoModal
+                // Click en la tarjeta del episodio abre también el player (si no se pulsa el botón)
                 container.querySelectorAll('.details-modal-episode-item').forEach(card => {
                     card.addEventListener('click', (e) => {
-                        // Si el click fue en el botón de reproducir, ya está manejado por el listener del botón
+                        // Si el click fue en el botón de reproducir, ya está manejado
                         if (e.target.closest('.details-modal-episode-play')) return;
-
-                        // Si el click fue directamente en la sinopsis, alternar su visibilidad
-                        if (e.target.closest('.details-modal-episode-synopsis')) {
+                        // Si el click vino desde la miniatura (imagen o su overlay), no abrir el player automáticamente.
+                        // En su lugar alternamos la sinopsis si existe para mejorar la UX y evitar apertura forzada a pantalla completa.
+                        if (e.target.closest('.details-modal-episode-thumb') || e.target.tagName === 'IMG') {
                             const synopsis = card.querySelector('.details-modal-episode-synopsis');
                             if (synopsis) {
                                 e.stopPropagation();
@@ -901,22 +865,8 @@ class DetailsModal {
                             }
                             return;
                         }
-
-                        // En cualquier otro caso (miniatura, overlay, título dentro de la tarjeta), reproducir en el VideoModal
                         const url = card.getAttribute('data-video-url');
-                        if (url) {
-                            // Construir hash igual que en el título
-                            const titleEl = card.querySelector('.details-modal-episode-title');
-                            const epHash = titleEl ? (titleEl.getAttribute('data-ep-hash') || '') : '';
-                            const currentItem = window.activeItem || item;
-                            const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
-                            const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
-                            const newHash = `id=${baseId}&title=${normalized}${epHash ? '&' + epHash : ''}`;
-                            if (window.location.hash.substring(1) !== newHash) {
-                                window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
-                            }
-                            this.playInVideoModal(url);
-                        }
+                        if (url) this.openEpisodePlayer(url);
                     });
                 });
                 // Inicializar sinopsis de episodios como colapsadas y añadir toggle
@@ -945,7 +895,7 @@ class DetailsModal {
                         // además abrir el reproductor si la tarjeta tiene URL de video
                         const card = titleEl.closest('.details-modal-episode-item');
                         const videoUrl = card ? card.getAttribute('data-video-url') : null;
-                        if (videoUrl) this.playInVideoModal(videoUrl);
+                        if (videoUrl) this.openEpisodePlayer(videoUrl);
                     });
                 });
             }
@@ -1056,7 +1006,7 @@ class DetailsModal {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const url = btn.getAttribute('data-video-url');
-                    if (url) this.playInVideoModal(url);
+                    if (url) this.openEpisodePlayer(url);
                 });
             });
             // Inicializar filtro de temporada si existe
