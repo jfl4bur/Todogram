@@ -146,22 +146,82 @@
 
   // Cargar data.json
   function loadData(){
-    const dataUrl = '/public/data.json';
-    fetch(dataUrl).then(r=>r.json()).then(j=>{
-      data = Array.isArray(j) ? j : (j.items || j.results || []);
-      // extract genres
-      data.forEach(it=>{
-        const g = it.Genre || it.genre || it.genres;
-        if (g){
-          if (Array.isArray(g)) g.forEach(x=>{ if (x && x.toString().trim()) genres.add(x.toString().trim()); }); else g.toString().split(',').forEach(x=>{ const t = x.trim(); if(t) genres.add(t); });
+    // Seguir la misma estrategia que carousel.js/details-modal.js
+    // 1) usar window.sharedData o window.allData si existen
+    // 2) intentar fetch(DATA_URL) (DATA_URL definido en index.html)
+    // 3) si success, asignar window.sharedData = data
+    (async function(){
+      try{
+        // Esperar por window.sharedData/window.allData (race condition con otros módulos)
+        if (window.allData && Array.isArray(window.allData) && window.allData.length > 0){
+          data = window.allData;
+          console.log('Catalogo: usando window.allData');
+        } else if (window.sharedData && Array.isArray(window.sharedData) && window.sharedData.length > 0){
+          data = window.sharedData;
+          console.log('Catalogo: usando window.sharedData');
+        } else {
+          // Intentar esperar a que otro módulo (carousel/slider) cargue la data y la exponga
+          const maxAttempts = 15;
+          let found = false;
+          for (let i=0;i<maxAttempts;i++){
+            if (window.sharedData && Array.isArray(window.sharedData) && window.sharedData.length > 0){
+              data = window.sharedData; found = true; console.log('Catalogo: detected window.sharedData after wait'); break;
+            }
+            if (window.allData && Array.isArray(window.allData) && window.allData.length > 0){
+              data = window.allData; found = true; console.log('Catalogo: detected window.allData after wait'); break;
+            }
+            await new Promise(r=>setTimeout(r,100));
+          }
+          if (!found){
+            // No lo encontró, intentar fetch a DATA_URL
+            const url = typeof DATA_URL !== 'undefined' ? DATA_URL : '/public/data.json';
+            console.log('Catalogo: Haciendo fetch de datos desde', url);
+            const resp = await fetch(url);
+            if (!resp.ok) throw new Error('Respuesta no OK: '+resp.status);
+            const j = await resp.json();
+            data = Array.isArray(j) ? j : (j.items || j.results || j);
+            try{ window.sharedData = data; window.allData = data; }catch(e){}
+          }
         }
-      });
-      renderGenres();
-      // parse hash to set initial tab/genre
-      parseHash();
-    }).catch(err=>{
-      console.error('Error cargando data.json para catálogo', err);
-    });
+
+        // extract genres
+        data.forEach(it=>{
+          const g = it.Genre || it.genre || it.genres;
+          if (g){
+            if (Array.isArray(g)) g.forEach(x=>{ if (x && x.toString().trim()) genres.add(x.toString().trim()); }); else g.toString().split(',').forEach(x=>{ const t = x.trim(); if(t) genres.add(t); });
+          }
+        });
+        renderGenres();
+        // parse hash to set initial tab/genre (abrir modal si corresponde)
+        parseHash();
+      }catch(err){
+        console.error('Catalogo: fallo cargando datos', err);
+        // Intentar rutas alternativas similares a details-modal
+        const candidates = ['/public/data.json','/data.json','public/data.json','./public/data.json','./data.json','../public/data.json'];
+        for (const path of candidates){
+          try{
+            const r = await fetch(path);
+            if (!r.ok) { console.warn('Catalogo: ruta',path,'respondió',r.status); continue; }
+            const jj = await r.json();
+            data = Array.isArray(jj) ? jj : (jj.items || jj.results || jj);
+            try{ window.sharedData = data; window.allData = data; }catch(e){}
+            data.forEach(it=>{
+              const g = it.Genre || it.genre || it.genres;
+              if (g){
+                if (Array.isArray(g)) g.forEach(x=>{ if (x && x.toString().trim()) genres.add(x.toString().trim()); }); else g.toString().split(',').forEach(x=>{ const t = x.trim(); if(t) genres.add(t); });
+              }
+            });
+            renderGenres();
+            parseHash();
+            return;
+          }catch(e){
+            console.warn('Catalogo: fallo en ruta alternativa',path,e);
+            continue;
+          }
+        }
+        console.error('Catalogo: No se pudo cargar data.json en ninguna ruta probada');
+      }
+    })();
   }
 
   function parseHash(){
