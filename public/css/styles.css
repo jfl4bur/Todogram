@@ -1132,8 +1132,14 @@ button:focus {
     border:1px solid rgba(255,255,255,0.04);
     box-shadow: 0 4px 18px rgba(0,0,0,0.6);
     cursor:pointer;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    font-family: 'Slider Sans UI', sans-serif;
+    font-weight:600;
 }
-.catalogo-genre-button::after{content:'▾';margin-left:8px;font-size:0.9rem;opacity:0.9}
+.catalogo-genre-button .catalogo-genre-label{line-height:1}
+.catalogo-caret{color:rgba(255,255,255,0.9);opacity:0.95}
 .catalogo-genre-list{position:absolute;left:0;top:54px;background:#080808;border:1px solid rgba(255,255,255,0.04);padding:18px;min-width:360px;max-width:900px;border-radius:8px;box-shadow:0 18px 50px rgba(0,0,0,0.9);display:grid;grid-template-columns:repeat(3,minmax(140px,1fr));gap:12px}
 .catalogo-genre-list button{display:flex;align-items:center;gap:12px;background:transparent;border:0;color:var(--text-secondary);text-align:left;padding:10px 8px;cursor:pointer;width:100%;white-space:nowrap;font-size:0.98rem}
 .catalogo-genre-list button:hover{background:rgba(255,255,255,0.02);color:var(--text-color)}
@@ -1142,6 +1148,15 @@ button:focus {
 .catalogo-genre-list button.selected .check{background:var(--primary-color);border-color:var(--primary-color)}
 .catalogo-body{flex:1;overflow:auto;padding:8px 32px 48px 32px}
 .catalogo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--item-width),1fr));gap:70px 4px;grid-auto-rows:auto}
+@media (max-width: 900px){
+    .catalogo-grid{gap:34px 6px}
+    .catalogo-genre-list{grid-template-columns:repeat(2,minmax(120px,1fr));min-width:260px}
+}
+@media (max-width: 600px){
+    .catalogo-grid{gap:34px 6px}
+    .catalogo-genre-list{position:static;grid-template-columns:repeat(2,1fr);margin-top:8px;padding:12px}
+    .catalogo-genre-button{font-size:1rem;padding:8px 10px}
+}
 .catalogo-item{background:transparent;padding:4px;border-radius:0;cursor:pointer;display:flex;flex-direction:column;align-items:center}
 .catalogo-item img{width:100%;height:auto;border-radius:0;object-fit:cover;background:#232323}
 .catalogo-item .title{margin-top:8px;font-size:14px;text-align:center;color:var(--text-color)}
