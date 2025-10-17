@@ -353,6 +353,34 @@
                     <p class="share-preview-description" id="share-preview-description"></p>
                 </div>
             </div>
+
+                <!-- Modal de Catálogo (pantalla completa) -->
+                <div class="catalogo-overlay" id="catalogo-overlay" aria-hidden="true">
+                    <div class="catalogo-content" id="catalogo-content">
+                        <button class="catalogo-close" id="catalogo-close">&times;</button>
+                        <header class="catalogo-header">
+                            <h2 class="catalogo-title">Todo el catálogo</h2>
+                            <nav class="catalogo-tabs" id="catalogo-tabs">
+                                <button data-tab="peliculas" class="catalogo-tab">Películas</button>
+                                <button data-tab="series" class="catalogo-tab">Series</button>
+                                <button data-tab="documentales" class="catalogo-tab">Documentales</button>
+                                <button data-tab="animes" class="catalogo-tab">Animes</button>
+                            </nav>
+                            <div class="catalogo-filter">
+                                <button id="catalogo-filter-btn">Géneros ▾</button>
+                                <div class="catalogo-filter-dropdown" id="catalogo-filter-dropdown" aria-hidden="true">
+                                    <!-- géneros se insertan dinámicamente -->
+                                </div>
+                            </div>
+                        </header>
+
+                        <main class="catalogo-main">
+                            <div id="catalogo-list" class="catalogo-list">
+                                <!-- fichas insertadas por JS -->
+                            </div>
+                        </main>
+                    </div>
+                </div>
             
             <div class="share-options">
                 <div class="share-option" id="share-facebook">
@@ -415,6 +443,7 @@
     <script src="https://jfl4bur.github.io/Todogram/public/js/header.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/footer.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/main.js"></script>
+    <script src="https://jfl4bur.github.io/Todogram/public/js/catalogo.js"></script>
     
     <!-- Script para asegurar la inicialización del slider independiente -->
     <script>

@@ -398,6 +398,53 @@ button:focus {
         margin-bottom: 40px;
     }
 }
+
+/* Estilos para modal catálogo */
+.catalogo-overlay{
+    display:none;
+    position:fixed;
+    z-index:11000;
+    left:0;top:0;width:100%;height:100%;
+    background:rgba(10,10,10,0.97);
+    color:var(--text-color);
+    overflow:auto;
+}
+.catalogo-content{
+    max-width:1200px;
+    margin:40px auto;
+    padding:20px 24px 60px 24px;
+}
+.catalogo-close{
+    position:fixed;right:18px;top:18px;z-index:12000;background:transparent;border:0;color:#fff;font-size:36px;cursor:pointer
+}
+.catalogo-header{display:flex;align-items:center;gap:16px;justify-content:space-between;margin-bottom:16px}
+.catalogo-title{font-size:28px;margin:0}
+.catalogo-tabs{display:flex;gap:12px}
+.catalogo-tab{background:transparent;border:0;color:var(--text-secondary);padding:8px 12px;cursor:pointer}
+.catalogo-tab.active{color:var(--text-color);border-bottom:3px solid var(--primary-color)}
+.catalogo-filter{position:relative}
+.catalogo-filter-dropdown{position:absolute;left:0;top:36px;background:rgba(0,0,0,0.6);min-width:220px;padding:12px;border-radius:6px;display:block}
+.catalogo-filter-item{padding:8px 10px;color:var(--text-secondary);cursor:pointer}
+.catalogo-filter-item.selected{background:rgba(255,255,255,0.04);color:var(--text-color)}
+.catalogo-main{padding-top:8px}
+.catalogo-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+.catalogo-card{background:transparent;padding:6px;border-radius:6px;cursor:pointer;transition:transform .14s,box-shadow .14s;overflow:hidden}
+.catalogo-card:hover{transform:translateY(-6px);box-shadow:0 8px 30px rgba(0,0,0,0.6)}
+.catalogo-poster{width:100%;height:240px;object-fit:cover;border-radius:6px;background:#222}
+.catalogo-card-title{font-size:14px;margin:8px 0 0 0;color:var(--text-color);text-overflow:ellipsis;white-space:nowrap;overflow:hidden}
+.catalogo-empty{color:var(--text-secondary);padding:24px;text-align:center}
+
+@media (max-width: 900px){
+    .catalogo-content{margin:20px;padding:14px}
+    .catalogo-poster{height:180px}
+    .catalogo-title{font-size:20px}
+}
+
+@media (max-width: 480px){
+    .catalogo-list{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px}
+    .catalogo-poster{height:140px}
+    .catalogo-header{flex-direction:column;align-items:flex-start;gap:8px}
+}
     margin-top: 40px;
     position: relative;
     margin-left: 50px;
