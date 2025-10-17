@@ -119,14 +119,18 @@
         div.innerHTML = `<img src="${it.posterUrl || 'https://via.placeholder.com/194x271'}" alt="${it.title}">`;
         // hover modal
         div.addEventListener('mouseenter', ()=>{
-            if(window.hoverModal && typeof window.hoverModal.show === 'function'){
-                window.hoverModal.show(it, div);
-                window.hoverModalItem = it;
+            if(window.hoverModal){
+                if(typeof window.hoverModal.cancelHide === 'function') window.hoverModal.cancelHide();
+                if(typeof window.hoverModal.show === 'function'){
+                    window.hoverModal.show(it, div);
+                    window.hoverModalItem = it;
+                }
             }
         });
         div.addEventListener('mouseleave', ()=>{
             if(window.hoverModal && typeof window.hoverModal.hide === 'function'){
-                window.hoverModal.hide();
+                // schedule hide with a small delay to allow movement into modal
+                window.hoverModal.hide(300);
                 window.hoverModalItem = null;
             }
         });

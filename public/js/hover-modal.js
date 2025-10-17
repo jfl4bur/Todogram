@@ -18,11 +18,13 @@ class HoverModal {
         // Bind handlers once to avoid multiple attachments when show() is called repeatedly
         this._onMouseLeave = this._onMouseLeave.bind(this);
         this._onContentClick = this._onContentClick.bind(this);
+    this._onMouseEnter = this._onMouseEnter.bind(this);
         // track the currently shown item and its origin element
         this._currentItem = null;
         this._currentOrigin = null;
 
         // Attach delegated listeners once
+        this.modalContent.addEventListener('mouseenter', this._onMouseEnter);
         this.modalContent.addEventListener('mouseleave', this._onMouseLeave);
         this.modalContent.addEventListener('click', this._onContentClick);
     }
@@ -34,12 +36,16 @@ class HoverModal {
         }
 
         // Evitar mostrar si ya está visible
-        if (this.isVisible) {
-            return;
-        }
 
-        window.isModalOpen = true;
-        this.isVisible = true;
+            // If already visible, cancel any pending hide and continue to update content/position
+            if (this.isVisible) {
+                this.cancelHide();
+            }
+
+    // cancel any pending hide
+    this.cancelHide();
+    window.isModalOpen = true;
+    this.isVisible = true;
         
         // Usar postersUrl como prioridad (campo "Carteles")
         const backdropUrl = item.postersUrl || item.backgroundUrl || item.posterUrl;
@@ -142,27 +148,49 @@ class HoverModal {
     }
 
     close() {
-        if (this.hoverModalTimeout) {
-            clearTimeout(this.hoverModalTimeout);
-        }
-        
+        // clear any pending hide timer
+        this.cancelHide();
         this.isVisible = false;
         this.modalContent.style.opacity = '0';
         this.modalContent.style.transform = 'translate(-50%, -50%) scale(0.9)';
-        
+
         setTimeout(() => {
             this.modalOverlay.style.display = 'none';
             window.isModalOpen = false;
             window.activeItem = null;
             window.hoverModalItem = null;
+            this._currentItem = null;
+            this._currentOrigin = null;
         }, 150);
+    }
+
+    // Schedule hide with a small delay to allow transitions between item -> modal without flicker
+    hide(delay = 300){
+        this.cancelHide();
+        this.hoverModalTimeout = setTimeout(()=>{
+            this.close();
+            this.hoverModalTimeout = null;
+        }, delay);
+    }
+
+    cancelHide(){
+        if(this.hoverModalTimeout){
+            clearTimeout(this.hoverModalTimeout);
+            this.hoverModalTimeout = null;
+        }
     }
 
     // Delegated handler for mouse leave (attached once in constructor)
     _onMouseLeave(e) {
         if (!window.matchMedia("(max-width: 768px)").matches) {
-            this.close();
+            // schedule hide to avoid flicker when moving from item to modal
+            this.hide();
         }
+    }
+
+    _onMouseEnter(e){
+        // cancel any scheduled hide so modal remains visible when cursor moves into it
+        this.cancelHide();
     }
 
     // Delegated click handler for modal content (attached once in constructor)
