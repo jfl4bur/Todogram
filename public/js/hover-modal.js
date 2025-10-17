@@ -15,6 +15,16 @@ class HoverModal {
             console.error("Elementos del hover modal no encontrados");
             return;
         }
+        // Bind handlers once to avoid multiple attachments when show() is called repeatedly
+        this._onMouseLeave = this._onMouseLeave.bind(this);
+        this._onContentClick = this._onContentClick.bind(this);
+        // track the currently shown item and its origin element
+        this._currentItem = null;
+        this._currentOrigin = null;
+
+        // Attach delegated listeners once
+        this.modalContent.addEventListener('mouseleave', this._onMouseLeave);
+        this.modalContent.addEventListener('click', this._onContentClick);
     }
 
     show(item, itemElement) {
@@ -113,51 +123,21 @@ class HoverModal {
         `;
         
         const position = this.calculateModalPosition(itemElement);
-        
+
         this.modalContent.style.left = `${position.left}px`;
         this.modalContent.style.top = `${position.top}px`;
         this.modalContent.style.transform = 'translate(-50%, -50%) scale(0.9)';
-        
+
         this.modalOverlay.style.display = 'block';
-        
+
         void this.modalContent.offsetWidth;
-        
+
         this.modalContent.style.opacity = '1';
         this.modalContent.style.transform = 'translate(-50%, -50%) scale(1)';
-        
-        this.modalContent.addEventListener('mouseleave', () => {
-            if (!window.matchMedia("(max-width: 768px)").matches) {
-                this.close();
-            }
-        });
-        
-        // CORRECCIÓN: Asegurar que el evento se adjunta correctamente
-        this.modalContent.querySelectorAll('[data-video-url]').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const videoUrl = btn.getAttribute('data-video-url');
-                window.videoModal.play(videoUrl);
-            });
-        });
-        
-        this.modalContent.addEventListener('click', (e) => {
-            e.stopPropagation();
-            if (!window.matchMedia("(max-width: 768px)").matches) {
-                this.close();
-                window.detailsModal.show(item, itemElement);
-            }
-        });
-        
-        this.modalContent.querySelector('#share-button').addEventListener('click', (e) => {
-            e.stopPropagation();
-            const item = window.activeItem;
-            if (item && window.shareModal) {
-                const currentUrl = window.location.href;
-                const shareUrl = window.generateShareUrl(item, currentUrl);
-                window.shareModal.show({ ...item, shareUrl });
-            }
-        });
-        
+
+        // Store current item and origin for use by delegated handlers
+        this._currentItem = item;
+        this._currentOrigin = itemElement;
         window.activeItem = item;
     }
 
@@ -176,6 +156,50 @@ class HoverModal {
             window.activeItem = null;
             window.hoverModalItem = null;
         }, 150);
+    }
+
+    // Delegated handler for mouse leave (attached once in constructor)
+    _onMouseLeave(e) {
+        if (!window.matchMedia("(max-width: 768px)").matches) {
+            this.close();
+        }
+    }
+
+    // Delegated click handler for modal content (attached once in constructor)
+    _onContentClick(e) {
+        e.stopPropagation();
+        // Find actionable elements: data-video-url or share-button
+        const actionEl = e.target.closest('[data-video-url], #share-button');
+
+        if (!actionEl) {
+            // Clicked on modal content but not on a specific action -> open details
+            if (!window.matchMedia("(max-width: 768px)").matches) {
+                const item = this._currentItem;
+                const origin = this._currentOrigin;
+                this.close();
+                if (item && window.detailsModal) {
+                    window.detailsModal.show(item, origin);
+                }
+            }
+            return;
+        }
+
+        // Share button
+        if (actionEl.id === 'share-button') {
+            const item = this._currentItem || window.activeItem;
+            if (item && window.shareModal) {
+                const currentUrl = window.location.href;
+                const shareUrl = window.generateShareUrl(item, currentUrl);
+                window.shareModal.show({ ...item, shareUrl });
+            }
+            return;
+        }
+
+        // data-video-url button
+        const videoUrl = actionEl.getAttribute('data-video-url');
+        if (videoUrl && window.videoModal) {
+            window.videoModal.play(videoUrl);
+        }
     }
 
     calculateModalPosition(itemElement) {
