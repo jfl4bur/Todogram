@@ -25,6 +25,7 @@
   }
 
   function openCatalogo(){
+    console.log('Catalogo: openCatalogo()');
     overlay.style.display = 'block';
     overlay.setAttribute('aria-hidden','false');
     document.body.classList.add('no-scroll');
@@ -227,6 +228,7 @@
   function parseHash(){
     const h = location.hash || '';
     if (!h.startsWith('#catalogo')) return;
+    console.log('Catalogo: parseHash ->', h);
     // formats: #catalogo, #catalogo/peliculas, #catalogo/peliculas/accion
     const parts = h.replace(/^#/,'').split('/');
     // parts[0] === 'catalogo'
@@ -254,13 +256,16 @@
 
     if (tiendaBtn) {
       tiendaBtn.addEventListener('click', (e)=>{ e.preventDefault(); location.hash = '#catalogo/peliculas'; });
+      console.log('Catalogo: bindHeaderButtons -> tiendaBtn bound');
     }
     if (tiendaBtnMobile) {
       tiendaBtnMobile.addEventListener('click', (e)=>{ e.preventDefault(); location.hash = '#catalogo/peliculas'; });
+      console.log('Catalogo: bindHeaderButtons -> tiendaBtnMobile bound');
     }
     anyCatalogLinks.forEach(a=>{
       a.addEventListener('click', (e)=>{ e.preventDefault(); location.hash = '#catalogo/peliculas'; });
     });
+    console.log('Catalogo: bindHeaderButtons -> anyCatalogLinks bound:', anyCatalogLinks.length);
   }
 
   window.addEventListener('hashchange', ()=>{
@@ -305,6 +310,8 @@
   document.addEventListener('DOMContentLoaded', ()=>{
     // Bind header buttons después de que header.js haya inyectado el header
     bindHeaderButtons();
+    // Procesar hash actual por si el usuario navegó con #catalogo antes de que el listener se registrara
+    parseHash();
     loadData();
   });
 
