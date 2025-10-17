@@ -30,9 +30,20 @@
     // Abrir catálogo en pantalla completa (no debe tocar el hash aquí para evitar bucles)
     if (overlay.style.display === 'block') return; // ya abierto
     console.log('Catalogo: openCatalogo()');
+    try{
+      // evitar bloqueo ARIA: si algún elemento tiene foco, quitarlo antes de cambiar aria-hidden
+      const active = document.activeElement;
+      if (active && typeof active.blur === 'function') {
+        try{ active.blur(); }catch(e){ /* noop */ }
+      }
+    }catch(e){/* noop */}
     overlay.style.display = 'block';
     overlay.setAttribute('aria-hidden','false');
     document.body.classList.add('no-scroll');
+    // mover foco al botón de cierre para accesibilidad
+    try{
+      if (closeBtn && typeof closeBtn.focus === 'function') closeBtn.focus();
+    }catch(e){/* noop */}
   }
 
   function closeCatalogo(){
@@ -157,6 +168,7 @@
     // 2) intentar fetch(DATA_URL) (DATA_URL definido en index.html)
     // 3) si success, asignar window.sharedData = data
     return (async function(){
+      console.time('Catalogo: loadData');
       try{
         // Esperar por window.sharedData/window.allData (race condition con otros módulos)
         if (window.allData && Array.isArray(window.allData) && window.allData.length > 0){
@@ -190,7 +202,7 @@
           }
         }
 
-        // extract genres
+  // extract genres
         data.forEach(it=>{
           const g = it.Genre || it.genre || it.genres;
           if (g){
@@ -199,9 +211,11 @@
         });
         renderGenres();
         // parse hash to set initial tab/genre (abrir modal si corresponde)
+        console.timeEnd('Catalogo: loadData');
         parseHash();
       }catch(err){
         console.error('Catalogo: fallo cargando datos', err);
+        console.timeEnd('Catalogo: loadData');
         // Intentar rutas alternativas similares a details-modal
         const candidates = ['/public/data.json','/data.json','public/data.json','./public/data.json','./data.json','../public/data.json'];
         for (const path of candidates){
@@ -218,6 +232,7 @@
               }
             });
             renderGenres();
+            console.timeEnd('Catalogo: loadData');
             parseHash();
             return;
           }catch(e){
