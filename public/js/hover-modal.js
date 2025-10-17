@@ -130,16 +130,15 @@ class HoverModal {
         
         const position = this.calculateModalPosition(itemElement);
 
-        this.modalContent.style.left = `${position.left}px`;
-        this.modalContent.style.top = `${position.top}px`;
-        this.modalContent.style.transform = 'translate(-50%, -50%) scale(0.9)';
+    // position modal (keep transform for centering in CSS)
+    this.modalContent.style.left = `${position.left}px`;
+    this.modalContent.style.top = `${position.top}px`;
 
-        this.modalOverlay.style.display = 'block';
-
-        void this.modalContent.offsetWidth;
-
-        this.modalContent.style.opacity = '1';
-        this.modalContent.style.transform = 'translate(-50%, -50%) scale(1)';
+    // show overlay and then add 'show' class to trigger CSS transition
+    this.modalOverlay.style.display = 'block';
+    // force reflow then set show class
+    void this.modalContent.offsetWidth;
+    this.modalContent.classList.add('show');
 
         // Store current item and origin for use by delegated handlers
         this._currentItem = item;
@@ -151,8 +150,8 @@ class HoverModal {
         // clear any pending hide timer
         this.cancelHide();
         this.isVisible = false;
-        this.modalContent.style.opacity = '0';
-        this.modalContent.style.transform = 'translate(-50%, -50%) scale(0.9)';
+        // remove show class to trigger hide transition
+        this.modalContent.classList.remove('show');
 
         setTimeout(() => {
             this.modalOverlay.style.display = 'none';
@@ -161,7 +160,7 @@ class HoverModal {
             window.hoverModalItem = null;
             this._currentItem = null;
             this._currentOrigin = null;
-        }, 150);
+        }, 320); // match CSS transition duration
     }
 
     // Schedule hide with a small delay to allow transitions between item -> modal without flicker

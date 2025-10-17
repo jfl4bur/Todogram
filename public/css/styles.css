@@ -839,7 +839,8 @@ button:focus {
     overflow: hidden;
     transform-origin: center;
     opacity: 0;
-    transform: translateY(20px);
+    /* include centering translate so JS doesn't need to overwrite transform */
+    transform: translate(-50%, -50%) translateY(20px);
     transition: opacity 300ms ease, transform 300ms ease;
     pointer-events: auto;
     z-index: 1001;
@@ -852,7 +853,7 @@ button:focus {
 
 .modal-content.show {
     opacity: 1;
-    transform: translateY(0);
+    transform: translate(-50%, -50%) translateY(0);
 }
 
 /* Backdrop fade for hover modal (subtle) */
@@ -1136,7 +1137,7 @@ button:focus {
 .catalogo-tabs{display:flex;gap:12px;flex-wrap:wrap}
 .catalogo-tab{background:transparent;border:0;color:var(--text-secondary);font-size:18px;padding:6px 10px;cursor:pointer}
 .catalogo-tab.active{color:var(--text-color);border-bottom:2px solid var(--primary-color)}
-.catalogo-controls{margin-left:auto}
+.catalogo-controls{margin-left:0}
 .catalogo-genre-dropdown{position:relative}
 /* Dropdown aligned to left to match UI */
 .catalogo-genre-list{
