@@ -897,8 +897,9 @@ button:focus {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    filter: brightness(0.7);
-    opacity: 0.7;
+    /* dejar brillo "normal" -> quitar filtro y poner opacidad sutil */
+    filter: none;
+    opacity: 0.20; /* más sutil, no tan oscuro */
 }
 
 .modal-body {
