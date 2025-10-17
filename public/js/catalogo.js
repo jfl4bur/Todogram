@@ -120,27 +120,8 @@
         div.className = 'catalogo-item';
         div.dataset.itemId = it.id;
         div.setAttribute('role','listitem');
-        // Reuse same internal structure as carousel items so the shared hover modal behaves identically
-        div.innerHTML = `
-            <div class="loader"><i class="fas fa-spinner"></i></div>
-            <div class="poster-container">
-                <img class="catalogo-card-image" src="${it.posterUrl || 'https://via.placeholder.com/194x271'}" alt="${it.title}" loading="lazy" style="opacity:0;transition:opacity 0.3s ease">
-                <div class="carousel-overlay">
-                    ${it.year || it.genres ? `<div class="carousel-meta">${[it.year, it.genres].filter(Boolean).join(' · ')}</div>` : ''}
-                    ${it.description ? `<div class="carousel-description">${it.description}</div>` : ''}
-                </div>
-            </div>
-            <img class="detail-background" src="${it.backgroundUrl || it.posterUrl || 'https://via.placeholder.com/194x271'}" alt="${it.title} - Background" loading="lazy" style="display:none;width:194px;height:271px;">
-        `;
-
-        // image load fade and hide loader
-        const img = div.querySelector('img.catalogo-card-image');
-        img.addEventListener('load', ()=>{
-            img.style.opacity = '1';
-            const l = div.querySelector('.loader'); if(l) l.style.display = 'none';
-        });
-
-        // hover modal - reproduce exact carousel timings and state changes
+        div.innerHTML = `<img src="${it.posterUrl || 'https://via.placeholder.com/194x271'}" alt="${it.title}">`;
+        // hover modal - reuse same behavior as carousel: 900ms details fade, then 200ms open modal
         div.addEventListener('mouseenter', ()=>{
             const id = div.dataset.itemId;
             // clear previous timers if any
@@ -148,27 +129,20 @@
                 clearTimeout(catalogHoverTimeouts[id].details);
                 clearTimeout(catalogHoverTimeouts[id].modal);
             }
+            const rect = div.getBoundingClientRect();
+            // schedule details overlay (visual feedback)
             catalogHoverTimeouts[id] = {};
-            // save previous carouselContainer so we can restore it later
-            if(window.hoverModal){
-                catalogHoverTimeouts[id].prevCarouselContainer = window.hoverModal.carouselContainer || null;
-                // set carouselContainer to the catalog modal so position calc is correct
-                const container = document.querySelector('.catalogo-modal') || document.getElementById('catalogo-modal-overlay') || document.body;
-                try{ window.hoverModal.carouselContainer = container; }catch(e){}
-            }
             catalogHoverTimeouts[id].details = setTimeout(()=>{
-                const background = div.querySelector('.detail-background');
+                // show visual overlay like carousel (if any)
+                const img = div.querySelector('img');
                 const overlay = div.querySelector('.carousel-overlay');
-                if(background){ background.style.display = 'block'; background.style.opacity = '1'; }
-                if(overlay){ overlay.style.opacity = '1'; overlay.style.transform = 'translateY(0)'; }
+                if(overlay) { overlay.style.opacity = '1'; overlay.style.transform = 'translateY(0)'; }
+                // schedule modal open (200ms after visual)
                 catalogHoverTimeouts[id].modal = setTimeout(()=>{
-                    // Only open hover modal if no other modal is open (same guard as carousels)
-                    if(!window.isModalOpen && !window.isDetailsModalOpen){
-                        window.hoverModalItem = div;
-                        if(window.hoverModal && div){
-                            if(typeof window.hoverModal.cancelHide === 'function') window.hoverModal.cancelHide();
-                            window.hoverModal.show(it, div);
-                        }
+                    if(window.hoverModal && !window.isModalOpen && !window.isDetailsModalOpen){
+                        if(typeof window.hoverModal.cancelHide === 'function') window.hoverModal.cancelHide();
+                        window.hoverModal.show(it, div);
+                        window.hoverModalItem = it;
                     }
                 }, 200);
             }, 900);
@@ -179,8 +153,6 @@
             if(catalogHoverTimeouts[id]){
                 clearTimeout(catalogHoverTimeouts[id].details);
                 clearTimeout(catalogHoverTimeouts[id].modal);
-                // restore previous carouselContainer
-                try{ if(window.hoverModal && catalogHoverTimeouts[id].prevCarouselContainer !== undefined) window.hoverModal.carouselContainer = catalogHoverTimeouts[id].prevCarouselContainer; }catch(e){}
                 delete catalogHoverTimeouts[id];
             }
             if(window.hoverModal && typeof window.hoverModal.hide === 'function'){
@@ -189,28 +161,17 @@
             }
             const overlay = div.querySelector('.carousel-overlay');
             if(overlay){ overlay.style.opacity = '0'; overlay.style.transform = 'translateY(20px)'; }
-            const background = div.querySelector('.detail-background');
-            if(background){ background.style.opacity = '0'; setTimeout(()=>{ background.style.display = 'none'; }, 300); }
         });
-
-        // click -> details (replicar exactamente comportamiento carousel)
-        div.addEventListener('click', (e)=>{
-            e.preventDefault();
-            const itemId = div.dataset.itemId;
-            if(catalogHoverTimeouts[itemId]){
-                clearTimeout(catalogHoverTimeouts[itemId].details);
-                clearTimeout(catalogHoverTimeouts[itemId].modal);
-                delete catalogHoverTimeouts[itemId];
-            }
-            const hash = `id=${encodeURIComponent(it.id)}&title=${encodeURIComponent(it.title)}`;
-            if(window.location.hash !== `#${hash}`){
-                history.pushState(null, '', `#${hash}`);
-            }
+        // click -> details
+        div.addEventListener('click', ()=>{
             if(window.detailsModal && typeof window.detailsModal.show === 'function'){
-                window.detailsModal.show(it, div);
+                const normTitle = normalizeText(it.title);
+                const idHash = `#id=${encodeURIComponent(it.id)}&title=${encodeURIComponent(normTitle)}`;
+                const currentCatalogHash = window.location.hash && window.location.hash.startsWith(CATALOG_HASH) ? window.location.hash : `${CATALOG_HASH}?tab=${encodeURIComponent(document.querySelector('.catalogo-tab.active').dataset.tab)}`;
+                history.pushState({ catalogHash: currentCatalogHash }, '', idHash);
+                window.detailsModal.show(it, div).then(()=>{ window.activeItem = it; }).catch(err=>console.error(err));
             }
         });
-
         return div;
     }
 
