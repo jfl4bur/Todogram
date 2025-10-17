@@ -868,7 +868,7 @@ button:focus {
 }
 
 .modal-content.show .modal-backdrop {
-    opacity: 0.12;
+    opacity: 1;
 }
 
 .modal-header {
