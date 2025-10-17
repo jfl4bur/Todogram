@@ -19,6 +19,7 @@
   let currentTab = 'peliculas';
   let currentGenre = 'all';
   let lastHashProcessed = null;
+  let initialized = false;
 
   // Helpers
   function slugify(s){
@@ -155,7 +156,7 @@
     // 1) usar window.sharedData o window.allData si existen
     // 2) intentar fetch(DATA_URL) (DATA_URL definido en index.html)
     // 3) si success, asignar window.sharedData = data
-    (async function(){
+    return (async function(){
       try{
         // Esperar por window.sharedData/window.allData (race condition con otros módulos)
         if (window.allData && Array.isArray(window.allData) && window.allData.length > 0){
@@ -262,15 +263,15 @@
     const anyCatalogLinks = Array.from(document.querySelectorAll('a[href="#catalogo"], a[href^="#catalogo/"]'));
 
     if (tiendaBtn) {
-      tiendaBtn.addEventListener('click', (e)=>{ e.preventDefault(); location.hash = '#catalogo/peliculas'; });
+      tiendaBtn.addEventListener('click', (e)=>{ e.preventDefault(); ensureInit().then(()=> { location.hash = '#catalogo/peliculas'; }); });
       console.log('Catalogo: bindHeaderButtons -> tiendaBtn bound');
     }
     if (tiendaBtnMobile) {
-      tiendaBtnMobile.addEventListener('click', (e)=>{ e.preventDefault(); location.hash = '#catalogo/peliculas'; });
+      tiendaBtnMobile.addEventListener('click', (e)=>{ e.preventDefault(); ensureInit().then(()=> { location.hash = '#catalogo/peliculas'; }); });
       console.log('Catalogo: bindHeaderButtons -> tiendaBtnMobile bound');
     }
     anyCatalogLinks.forEach(a=>{
-      a.addEventListener('click', (e)=>{ e.preventDefault(); location.hash = '#catalogo/peliculas'; });
+      a.addEventListener('click', (e)=>{ e.preventDefault(); ensureInit().then(()=> { location.hash = '#catalogo/peliculas'; }); });
     });
     console.log('Catalogo: bindHeaderButtons -> anyCatalogLinks bound:', anyCatalogLinks.length);
   }
@@ -278,7 +279,8 @@
   window.addEventListener('hashchange', ()=>{
     const h = location.hash || '';
     if (h.startsWith('#catalogo')){
-      parseHash();
+      // asegurar inicialización antes de procesar hash
+      ensureInit().then(()=> parseHash()).catch(()=> parseHash());
     } else {
       // si salimos del hash catalogo, cerramos
       if (overlay.style.display === 'block') closeCatalogo();
@@ -317,9 +319,18 @@
   document.addEventListener('DOMContentLoaded', ()=>{
     // Bind header buttons después de que header.js haya inyectado el header
     bindHeaderButtons();
-    // Procesar hash actual por si el usuario navegó con #catalogo antes de que el listener se registrara
-    parseHash();
-    loadData();
+    // Si la URL ya contiene #catalogo al cargar la página, inicializamos en background
+    const h = location.hash || '';
+    if (h.startsWith('#catalogo')){
+      // inicializar y luego procesar hash
+      ensureInit().then(()=> parseHash()).catch(()=> parseHash());
+    }
   });
+
+  // Garantizar inicialización única: carga de datos y marcas iniciales
+  function ensureInit(){
+    if (initialized) return Promise.resolve();
+    return loadData().then(()=>{ initialized = true; }).catch(err=>{ console.warn('Catalogo: ensureInit fallo', err); initialized = true; });
+  }
 
 })();
