@@ -18,6 +18,7 @@
   let genreMap = {}; // slug -> display name
   let currentTab = 'peliculas';
   let currentGenre = 'all';
+  let lastHashProcessed = null;
 
   // Helpers
   function slugify(s){
@@ -25,23 +26,25 @@
   }
 
   function openCatalogo(){
+    // Abrir catálogo en pantalla completa (no debe tocar el hash aquí para evitar bucles)
+    if (overlay.style.display === 'block') return; // ya abierto
     console.log('Catalogo: openCatalogo()');
     overlay.style.display = 'block';
     overlay.setAttribute('aria-hidden','false');
     document.body.classList.add('no-scroll');
-    // set hash
-    if (location.hash !== '#catalogo') location.hash = '#catalogo';
   }
 
   function closeCatalogo(){
     overlay.style.display = 'none';
     overlay.setAttribute('aria-hidden','true');
     document.body.classList.remove('no-scroll');
-    // remove hash or go back
-    if (location.hash.startsWith('#catalogo')) history.back();
+    // Quitar el hash sin navegar hacia atrás (replaceState no dispara hashchange)
+    if (location.hash.startsWith('#catalogo')) {
+      try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch(e) { /* noop */ }
+    }
   }
 
-  function setTab(tab){
+  function setTab(tab, suppressHash=false){
     currentTab = tab;
     // update UI
     Array.from(tabsEl.querySelectorAll('.catalogo-tab')).forEach(b=>{
@@ -49,12 +52,13 @@
     });
     // set hash: #catalogo/peliculas o #catalogo/series etc
     const hash = `#catalogo/${tab}` + (currentGenre && currentGenre!=='all' ? `/${currentGenre}` : '');
-    if (location.hash !== hash) location.hash = hash;
+    if (!suppressHash && location.hash !== hash) location.hash = hash;
     persistState();
     renderList();
   }
 
-  function setGenre(genre){
+  function setGenre(genre, suppressHash=false){
+    // allow suppressing hash changes when called as part of parseHash
     currentGenre = genre;
     // highlight in dropdown
     Array.from(filterDropdown.querySelectorAll('[data-genre]')).forEach(el=>{
@@ -62,7 +66,7 @@
     });
     // update hash
     const hash = `#catalogo/${currentTab}` + (genre && genre!=='all' ? `/${genre}` : '');
-    if (location.hash !== hash) location.hash = hash;
+    if (!suppressHash && location.hash !== hash) location.hash = hash;
     persistState();
     renderList();
   }
@@ -228,15 +232,18 @@
   function parseHash(){
     const h = location.hash || '';
     if (!h.startsWith('#catalogo')) return;
+    if (h === lastHashProcessed) return; // ya procesado, evitar bucles
     console.log('Catalogo: parseHash ->', h);
     // formats: #catalogo, #catalogo/peliculas, #catalogo/peliculas/accion
     const parts = h.replace(/^#/,'').split('/');
     // parts[0] === 'catalogo'
     const tab = parts[1] || localStorage.getItem('catalogo:lastTab') || 'peliculas';
     const genre = parts[2] || localStorage.getItem('catalogo:lastGenre') || 'all';
-    setTab(tab);
-    setGenre(genre);
+    // Cuando procesamos el hash queremos actualizar la UI sin volver a escribir el hash
+    setTab(tab, true);
+    setGenre(genre, true);
     openCatalogo();
+    lastHashProcessed = h;
   }
 
   // Persistencia: guardar última selección
