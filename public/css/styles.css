@@ -833,13 +833,13 @@ button:focus {
     background: linear-gradient(rgb(0, 0, 0) 72.64%, rgb(20, 20, 20) 100%);
     width: calc(var(--item-width) * var(--modal-scale));
     height: calc(var(--item-height) * var(--modal-scale));
-    border-radius: 4px;
+    border-radius: 2px;
     box-shadow: rgba(0, 0, 0, 0.65) 0px 0px 50px 16px;
     overflow: hidden;
     transform-origin: center;
     opacity: 0;
     transform: scale(0.9);
-    transition: opacity 150ms ease-out, transform 150ms ease-out;
+    transition: opacity 180ms cubic-bezier(.2,.9,.2,1), transform 220ms cubic-bezier(.2,.9,.2,1);
     pointer-events: auto;
     z-index: 1001;
     will-change: transform, opacity;
@@ -853,6 +853,31 @@ button:focus {
     opacity: 1;
     transform: scale(1);
 }
+
+/* Backdrop fade for hover modal */
+.modal-backdrop {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.12;
+    transition: opacity 240ms ease-out, transform 240ms ease-out;
+    transform: scale(1.01);
+}
+
+.modal-content.show .modal-backdrop {
+    opacity: 0.18;
+    transform: scale(1);
+}
+
+/* subtle pop-in animation for the modal content */
+@keyframes hoverPop {
+    0% { opacity: 0; transform: scale(0.92); }
+    60% { opacity: 1; transform: scale(1.03); }
+    100% { opacity: 1; transform: scale(1); }
+}
+.modal-content.show { animation: hoverPop 260ms cubic-bezier(.2,.9,.2,1); }
 
 .modal-header {
     position: relative;
@@ -1104,7 +1129,7 @@ button:focus {
     background: #000000;
     z-index:900; /* below details modal (1001) */
     display:none;
-    padding:0;
+    padding:18px 0 0 0;
 }
 .catalogo-modal{
     width:100%;
@@ -1129,54 +1154,60 @@ button:focus {
     top:44px;
     background:#0b0b0b;
     border:1px solid rgba(255,255,255,0.06);
-    padding:18px 20px;
-    min-width:320px;
-    max-width:820px;
-    box-shadow:0 10px 40px rgba(0,0,0,0.95);
+    padding:20px 22px;
+    min-width:360px;
+    max-width:900px;
+    box-shadow:0 18px 50px rgba(0,0,0,0.9);
     display:grid;
-    grid-template-columns:repeat(3,minmax(140px,1fr));
-    gap:10px 28px; /* horizontal small, vertical spacing handled by row-gap */
-    row-gap:18px;
-    border-radius:4px;
+    grid-template-columns:repeat(3,minmax(150px,1fr));
+    gap:12px;
+    border-radius:2px;
 }
 .catalogo-genre-list button{
     display:flex;
     align-items:center;
-    gap:12px;
+    gap:8px;
     background:transparent;
     border:0;
     color:var(--text-secondary);
     text-align:left;
-    padding:10px 6px;
+    padding:12px 10px;
     cursor:pointer;
     width:100%;
     white-space:nowrap;
-    font-size:15px;
+    position:relative;
 }
+.catalogo-genre-list button:hover{ background: rgba(255,255,255,0.02); color: var(--text-color); }
 .catalogo-genre-list button.selected{color:var(--text-color);font-weight:700}
-.catalogo-genre-list button .check{width:18px;height:18px;border-radius:2px;border:1px solid rgba(255,255,255,0.08);display:inline-block;margin-right:6px;flex:0 0 18px}
-.catalogo-genre-list button.selected .check{background:var(--primary-color);border-color:var(--primary-color)}
+/* use pseudo-element as check indicator so HTML does not need to include a span */
+.catalogo-genre-list button::before{
+    content: '';
+    width:18px;
+    height:18px;
+    border-radius:2px;
+    border:1px solid rgba(255,255,255,0.08);
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    margin-right:8px;
+    flex:0 0 18px;
+    color:transparent;
+    font-size:12px;
+}
+.catalogo-genre-list button.selected::before{
+    content: '\2713'; /* check mark */
+    background:var(--primary-color);
+    border-color:var(--primary-color);
+    color:#fff;
+    font-weight:700;
+}
 .catalogo-body{flex:1;overflow:auto;padding:8px 32px 48px 32px}
-.catalogo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--item-width),1fr));column-gap:4px;row-gap:70px;gap:4px 70px}
+.catalogo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--item-width),1fr));column-gap:4px;row-gap:75px}
 .catalogo-item{background:transparent;padding:4px;border-radius:0;cursor:pointer;display:flex;flex-direction:column;align-items:center}
-.catalogo-item img{width:100%;height:auto;border-radius:0;object-fit:cover;background:#232323;transition:transform 220ms ease, filter 220ms ease}
+.catalogo-item img{width:100%;height:auto;border-radius:0;object-fit:cover;background:#232323}
 .catalogo-item .title{margin-top:8px;font-size:14px;text-align:center;color:var(--text-color)}
 @media (max-width:1200px){ .catalogo-genre-list{grid-template-columns:repeat(2,minmax(120px,1fr))} }
 @media (max-width:600px){ .catalogo-header{padding:12px} .catalogo-body{padding:8px 12px 24px 12px} .catalogo-genre-list{position:static;grid-template-columns:repeat(2,1fr);margin-top:8px} .catalogo-controls{width:100%;display:flex;justify-content:flex-end} }
-
-/* Hover modal transitions and stacking */
-.modal-content, #modal-content {
-    transition: transform 180ms cubic-bezier(.2,.9,.2,1), opacity 180ms cubic-bezier(.2,.9,.2,1);
-    will-change: transform, opacity;
-}
-.modal-content.show, #modal-content.show {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-}
-.modal-content.hide, #modal-content.hide {
-    transform: translate(-50%, -50%) scale(.95);
-    opacity: 0;
-}
 
 /* Ensure hover modal and details modal overlay show above catalogo */
 .modal-overlay, .modal-content { z-index: 11000 !important; }
