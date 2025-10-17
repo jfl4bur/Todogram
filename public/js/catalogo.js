@@ -1,351 +1,446 @@
-// catalogo.js - muestra un catálogo completo en modal pantalla completa
-// Dependencias: espera que en la página exista #catalogo-overlay, #catalogo-close, #catalogo-list, #catalogo-tabs, #catalogo-filter-dropdown
-
 (function(){
-  const overlay = document.getElementById('catalogo-overlay');
-  const closeBtn = document.getElementById('catalogo-close');
-  const listEl = document.getElementById('catalogo-list');
-  const tabsEl = document.getElementById('catalogo-tabs');
-  const filterBtn = document.getElementById('catalogo-filter-btn');
-  const filterDropdown = document.getElementById('catalogo-filter-dropdown');
-  // header buttons se buscarán y enlazarán después de que el header se inyecte
-  let tiendaBtn = null;
-  let tiendaBtnMobile = null;
+    // catalogo.js - modal catálogo fullscreen completo
+    const CATALOG_HASH = '#catalogo';
 
-  // Estado
-  let data = [];
-  let genres = new Set();
-  let genreMap = {}; // slug -> display name
-  let currentTab = 'peliculas';
-  let currentGenre = 'all';
-  let lastHashProcessed = null;
-  let initialized = false;
-
-  // Helpers
-  function slugify(s){
-    return String(s).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
-  }
-
-  function openCatalogo(){
-    // Abrir catálogo en pantalla completa (no debe tocar el hash aquí para evitar bucles)
-    if (overlay.style.display === 'block') return; // ya abierto
-    console.log('Catalogo: openCatalogo()');
-    try{
-      // evitar bloqueo ARIA: si algún elemento tiene foco, quitarlo antes de cambiar aria-hidden
-      const active = document.activeElement;
-      if (active && typeof active.blur === 'function') {
-        try{ active.blur(); }catch(e){ /* noop */ }
-      }
-    }catch(e){/* noop */}
-    overlay.style.display = 'block';
-    overlay.setAttribute('aria-hidden','false');
-    document.body.classList.add('no-scroll');
-    // mover foco al botón de cierre para accesibilidad
-    try{
-      if (closeBtn && typeof closeBtn.focus === 'function') closeBtn.focus();
-    }catch(e){/* noop */}
-  }
-
-  function closeCatalogo(){
-    overlay.style.display = 'none';
-    overlay.setAttribute('aria-hidden','true');
-    document.body.classList.remove('no-scroll');
-    // Quitar el hash sin navegar hacia atrás (replaceState no dispara hashchange)
-    if (location.hash.startsWith('#catalogo')) {
-      try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch(e) { /* noop */ }
-    }
-  }
-
-  function setTab(tab, suppressHash=false){
-    currentTab = tab;
-    // update UI
-    Array.from(tabsEl.querySelectorAll('.catalogo-tab')).forEach(b=>{
-      b.classList.toggle('active', b.dataset.tab === tab);
-    });
-    // set hash: #catalogo/peliculas o #catalogo/series etc
-    const hash = `#catalogo/${tab}` + (currentGenre && currentGenre!=='all' ? `/${currentGenre}` : '');
-    if (!suppressHash && location.hash !== hash) location.hash = hash;
-    persistState();
-    renderList();
-  }
-
-  function setGenre(genre, suppressHash=false){
-    // allow suppressing hash changes when called as part of parseHash
-    currentGenre = genre;
-    // highlight in dropdown
-    Array.from(filterDropdown.querySelectorAll('[data-genre]')).forEach(el=>{
-      el.classList.toggle('selected', el.dataset.genre === genre);
-    });
-    // update hash
-    const hash = `#catalogo/${currentTab}` + (genre && genre!=='all' ? `/${genre}` : '');
-    if (!suppressHash && location.hash !== hash) location.hash = hash;
-    persistState();
-    renderList();
-  }
-
-  function renderGenres(){
-    filterDropdown.innerHTML = '';
-    const all = document.createElement('div');
-    all.className = 'catalogo-filter-item';
-    all.dataset.genre = 'all';
-    all.textContent = 'Todo el catálogo';
-    all.addEventListener('click', ()=> setGenre('all'));
-    filterDropdown.appendChild(all);
-
-    Array.from(genres).sort().forEach(g=>{
-      const s = slugify(g);
-      genreMap[s] = g;
-      const d = document.createElement('div');
-      d.className = 'catalogo-filter-item';
-      d.dataset.genre = s;
-      d.textContent = g;
-      d.addEventListener('click', ()=> setGenre(s));
-      filterDropdown.appendChild(d);
-    });
-  }
-
-  function renderList(){
-    listEl.innerHTML = '';
-    // filter by tab and genre
-    const filtered = data.filter(item=>{
-      // item.Type: "movie"/"series" etc (guess from data.json structure)
-      const type = (item.Type || item.type || '').toLowerCase();
-      let okType = true;
-      if (currentTab === 'peliculas') okType = type === 'movie' || type === 'pelicula' || item.Category === 'Películas';
-      if (currentTab === 'series') okType = type === 'series' || type === 'show' || item.Category === 'Series';
-      if (currentTab === 'documentales') okType = (item.Genre||'').toLowerCase().includes('documental') || (type==='documentary');
-      if (currentTab === 'animes') okType = (item.Genre||'').toLowerCase().includes('anime') || (item.IsAnime);
-      if (!okType) return false;
-      if (currentGenre && currentGenre !== 'all'){
-        const itemGenres = (item.Genre || item.genres || '').toString().toLowerCase();
-        return itemGenres.includes(currentGenre.replace(/-/g,' ')) || itemGenres.includes(currentGenre);
-      }
-      return true;
-    });
-
-    if (filtered.length === 0){
-      listEl.innerHTML = '<p class="catalogo-empty">No hay resultados</p>';
-      return;
-    }
-
-    filtered.forEach(item=>{
-      const card = document.createElement('article');
-      card.className = 'catalogo-card';
-      card.dataset.id = item.id || item.ID || item.imdb_id || '';
-      const img = document.createElement('img');
-      img.className = 'catalogo-poster';
-      img.src = item.Poster || item.PosterURL || item.poster || (item.Images && item.Images[0]) || '';
-      img.alt = item.Title || item.title || '';
-      card.appendChild(img);
-      const title = document.createElement('h3');
-      title.className = 'catalogo-card-title';
-      title.textContent = item.Title || item.title || '';
-      card.appendChild(title);
-
-      // hover behaviour: show quick overlay
-      card.addEventListener('mouseenter', ()=>{
-        card.classList.add('hover');
-      });
-      card.addEventListener('mouseleave', ()=>{
-        card.classList.remove('hover');
-      });
-
-      // click to open details modal existente
-      card.addEventListener('click', ()=>{
-        // reutilizar detalles modal existente: disparar evento personalizado con item data
-        const evt = new CustomEvent('catalogo:openDetails', { detail: item });
-        window.dispatchEvent(evt);
-      });
-
-      listEl.appendChild(card);
-    });
-  }
-
-  // Cargar data.json
-  function loadData(){
-    // Seguir la misma estrategia que carousel.js/details-modal.js
-    // 1) usar window.sharedData o window.allData si existen
-    // 2) intentar fetch(DATA_URL) (DATA_URL definido en index.html)
-    // 3) si success, asignar window.sharedData = data
-    return (async function(){
-      console.time('Catalogo: loadData');
-      try{
-        // Esperar por window.sharedData/window.allData (race condition con otros módulos)
-        if (window.allData && Array.isArray(window.allData) && window.allData.length > 0){
-          data = window.allData;
-          console.log('Catalogo: usando window.allData');
-        } else if (window.sharedData && Array.isArray(window.sharedData) && window.sharedData.length > 0){
-          data = window.sharedData;
-          console.log('Catalogo: usando window.sharedData');
-        } else {
-          // Intentar esperar a que otro módulo (carousel/slider) cargue la data y la exponga
-          const maxAttempts = 15;
-          let found = false;
-          for (let i=0;i<maxAttempts;i++){
-            if (window.sharedData && Array.isArray(window.sharedData) && window.sharedData.length > 0){
-              data = window.sharedData; found = true; console.log('Catalogo: detected window.sharedData after wait'); break;
-            }
-            if (window.allData && Array.isArray(window.allData) && window.allData.length > 0){
-              data = window.allData; found = true; console.log('Catalogo: detected window.allData after wait'); break;
-            }
-            await new Promise(r=>setTimeout(r,100));
-          }
-          if (!found){
-            // No lo encontró, intentar fetch a DATA_URL
-            const url = typeof DATA_URL !== 'undefined' ? DATA_URL : '/public/data.json';
-            console.log('Catalogo: Haciendo fetch de datos desde', url);
-            const resp = await fetch(url);
-            if (!resp.ok) throw new Error('Respuesta no OK: '+resp.status);
-            const j = await resp.json();
-            data = Array.isArray(j) ? j : (j.items || j.results || j);
-            try{ window.sharedData = data; window.allData = data; }catch(e){}
-          }
+    function normalizeText(text){
+        if(!text) return '';
+        try{
+            return text.toString().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/-+/g, '-')
+                .replace(/^-|-$/g, '');
+        }catch(e){
+            return String(text).toLowerCase().replace(/[^a-z0-9]+/g,'-');
         }
+    }
 
-  // extract genres
-        data.forEach(it=>{
-          const g = it.Genre || it.genre || it.genres;
-          if (g){
-            if (Array.isArray(g)) g.forEach(x=>{ if (x && x.toString().trim()) genres.add(x.toString().trim()); }); else g.toString().split(',').forEach(x=>{ const t = x.trim(); if(t) genres.add(t); });
-          }
+    function createCatalogModal(){
+        if(document.getElementById('catalogo-modal-overlay')) return;
+        const overlay = document.createElement('div');
+        overlay.id = 'catalogo-modal-overlay';
+        overlay.className = 'catalogo-modal-overlay';
+        overlay.style.display = 'none';
+        overlay.setAttribute('aria-hidden','true');
+        overlay.innerHTML = `
+            <div class="catalogo-modal" role="dialog" aria-modal="true">
+                <button class="catalogo-close" id="catalogo-close" aria-label="Cerrar catálogo">&times;</button>
+                <div class="catalogo-header">
+                    <div class="catalogo-tabs" id="catalogo-tabs">
+                        <button data-tab="Películas" class="catalogo-tab active">Películas</button>
+                        <button data-tab="Series" class="catalogo-tab">Series</button>
+                        <button data-tab="Documentales" class="catalogo-tab">Documentales</button>
+                        <button data-tab="Animes" class="catalogo-tab">Animes</button>
+                    </div>
+                    <div class="catalogo-controls">
+                        <div class="catalogo-genre-dropdown" id="catalogo-genre-dropdown">
+                            <button id="catalogo-genre-button" aria-haspopup="true" aria-expanded="false">Todo el catálogo ▾</button>
+                            <div id="catalogo-genre-list" class="catalogo-genre-list" style="display:none" role="menu"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="catalogo-body">
+                    <div class="catalogo-grid" id="catalogo-grid" role="list"></div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+
+        const s = document.createElement('style');
+        s.id = 'catalogo-styles';
+        s.innerHTML = `
+            .catalogo-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:99999;display:flex;align-items:flex-start;justify-content:center;padding:0;margin:0}
+            .catalogo-modal{width:100%;height:100%;background:transparent;color:#fff;position:relative;display:flex;flex-direction:column}
+            .catalogo-close{position:absolute;right:18px;top:18px;background:transparent;border:0;color:#fff;font-size:36px;padding:6px 12px;border-radius:6px;cursor:pointer;z-index:100000}
+            .catalogo-header{display:flex;align-items:center;gap:12px;padding:28px 48px 12px 48px}
+            .catalogo-tabs{display:flex;gap:12px;flex-wrap:wrap}
+            .catalogo-tab{background:transparent;border:0;color:rgba(255,255,255,0.8);font-size:20px;padding:8px 12px;cursor:pointer}
+            .catalogo-tab.active{color:#fff;border-bottom:2px solid #fff}
+            .catalogo-controls{margin-left:auto}
+            .catalogo-genre-dropdown{position:relative}
+            .catalogo-genre-list{position:absolute;right:0;top:44px;background:#0b0b0b;border:1px solid #222;padding:12px;min-width:320px;max-width:680px;box-shadow:0 6px 30px rgba(0,0,0,0.6);display:grid;grid-template-columns:repeat(3,minmax(120px,1fr));gap:6px}
+            .catalogo-genre-list button{display:block;background:transparent;border:0;color:rgba(255,255,255,0.85);text-align:left;padding:8px 6px;cursor:pointer;width:100%;white-space:nowrap}
+            .catalogo-genre-list button.selected{color:#fff;font-weight:700}
+            .catalogo-body{flex:1;overflow:auto;padding:8px 48px 48px 48px}
+            .catalogo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:18px}
+            .catalogo-item{background:transparent;padding:6px;border-radius:6px;cursor:pointer;display:flex;flex-direction:column;align-items:center}
+            .catalogo-item img{width:100%;height:auto;border-radius:4px;object-fit:cover}
+            .catalogo-item .title{margin-top:8px;font-size:14px;text-align:center}
+            @media (max-width:1200px){ .catalogo-genre-list{grid-template-columns:repeat(2,minmax(120px,1fr))} }
+            @media (max-width:600px){ .catalogo-header{padding:12px} .catalogo-body{padding:8px 12px 24px 12px} .catalogo-genre-list{position:static;grid-template-columns:repeat(2,1fr);margin-top:8px} .catalogo-controls{width:100%;display:flex;justify-content:flex-end} }
+        `;
+        document.head.appendChild(s);
+    }
+
+    async function loadData(){
+        if(window.sharedData) return window.sharedData;
+        try{
+            const res = await fetch(DATA_URL);
+            if(!res.ok) throw new Error('No se pudo cargar data.json');
+            const data = await res.json();
+            window.sharedData = data;
+            return data;
+        }catch(e){
+            console.error('catalogo: error cargando datos', e);
+            return [];
+        }
+    }
+
+    function extractGenres(data, category){
+        const set = new Set();
+        data.forEach(item => {
+            if(category && item['Categoría'] && item['Categoría'] !== category) return;
+            const gens = item['Géneros'] || '';
+            gens.split('·').map(g=>g.trim()).filter(Boolean).forEach(g=>set.add(g));
         });
-        renderGenres();
-        // parse hash to set initial tab/genre (abrir modal si corresponde)
-        console.timeEnd('Catalogo: loadData');
-        parseHash();
-      }catch(err){
-        console.error('Catalogo: fallo cargando datos', err);
-        console.timeEnd('Catalogo: loadData');
-        // Intentar rutas alternativas similares a details-modal
-        const candidates = ['/public/data.json','/data.json','public/data.json','./public/data.json','./data.json','../public/data.json'];
-        for (const path of candidates){
-          try{
-            const r = await fetch(path);
-            if (!r.ok) { console.warn('Catalogo: ruta',path,'respondió',r.status); continue; }
-            const jj = await r.json();
-            data = Array.isArray(jj) ? jj : (jj.items || jj.results || jj);
-            try{ window.sharedData = data; window.allData = data; }catch(e){}
-            data.forEach(it=>{
-              const g = it.Genre || it.genre || it.genres;
-              if (g){
-                if (Array.isArray(g)) g.forEach(x=>{ if (x && x.toString().trim()) genres.add(x.toString().trim()); }); else g.toString().split(',').forEach(x=>{ const t = x.trim(); if(t) genres.add(t); });
-              }
+        return Array.from(set).sort();
+    }
+
+    function buildItemFromData(d, index){
+        return {
+            id: d['ID TMDB'] ? d['ID TMDB'] : `i_${index}`,
+            title: d['Título'] || d['Título original'] || 'Sin título',
+            description: d['Synopsis'] || '',
+            posterUrl: d['Portada'] || d['Carteles'] || '',
+            backgroundUrl: d['Carteles'] || d['Portada'] || '',
+            category: d['Categoría'] || 'Películas',
+            genres: d['Géneros'] || '',
+            year: d['Año'] || '',
+            videoUrl: d['Video iframe'] || ''
+        };
+    }
+
+    function renderGrid(items){
+        const grid = document.getElementById('catalogo-grid');
+        grid.innerHTML = '';
+        items.forEach((it, idx)=>{
+            const div = document.createElement('div');
+            div.className = 'catalogo-item';
+            div.dataset.itemId = it.id;
+            div.setAttribute('role','listitem');
+            div.innerHTML = `
+                <img src="${it.posterUrl || 'https://via.placeholder.com/194x271'}" alt="${it.title}">
+                <div class="title">${it.title}</div>
+            `;
+            // hover modal show
+            div.addEventListener('mouseenter', (e)=>{
+                if(window.hoverModal && typeof window.hoverModal.show === 'function'){
+                    window.hoverModal.show(it, div);
+                    window.hoverModalItem = it;
+                }
             });
-            renderGenres();
-            console.timeEnd('Catalogo: loadData');
-            parseHash();
-            return;
-          }catch(e){
-            console.warn('Catalogo: fallo en ruta alternativa',path,e);
-            continue;
-          }
+            div.addEventListener('mouseleave', (e)=>{
+                if(window.hoverModal && typeof window.hoverModal.hide === 'function'){
+                    window.hoverModal.hide();
+                    window.hoverModalItem = null;
+                }
+            });
+            // click -> details with preservation of catalog state
+            div.addEventListener('click', (e)=>{
+                if(window.detailsModal && typeof window.detailsModal.show === 'function'){
+                    const normTitle = normalizeText(it.title);
+                    const idHash = `#id=${encodeURIComponent(it.id)}&title=${encodeURIComponent(normTitle)}`;
+                    // Guardar el estado actual del catálogo
+                    const currentCatalogHash = window.location.hash && window.location.hash.startsWith(CATALOG_HASH) ? window.location.hash : `${CATALOG_HASH}?tab=${encodeURIComponent(document.querySelector('.catalogo-tab.active').dataset.tab)}`;
+                    // Push state con referencia al catalogo
+                    history.pushState({ catalogHash: currentCatalogHash }, '', idHash);
+                    // Abrir detalles
+                    window.detailsModal.show(it, div).then(()=>{
+                        window.activeItem = it;
+                    }).catch(err=>console.error(err));
+                }
+            });
+            grid.appendChild(div);
+        });
+    }
+
+    function applyFiltersAndRender(data, activeTab, genreFilter){
+        const items = data.map(buildItemFromData).filter(it=>{
+            if(activeTab && it.category && it.category !== activeTab) return false;
+            if(genreFilter && genreFilter !== 'Todo el catálogo'){
+                const gens = (it.genres||'').split('·').map(g=>g.trim());
+                if(!gens.includes(genreFilter)) return false;
+            }
+            return true;
+        });
+        renderGrid(items);
+    }
+
+    function parseCatalogHash(){
+        const raw = window.location.hash || '';
+        if(!raw.startsWith(CATALOG_HASH)) return null;
+        const q = raw.substring(CATALOG_HASH.length); // quitar '#catalogo'
+        if(!q) return {};
+        const params = new URLSearchParams(q.replace(/^\?/,''));
+        return {
+            tab: params.get('tab') || null,
+            genre: params.get('genre') || null,
+            id: params.get('id') || null,
+            title: params.get('title') || null
+        };
+    }
+
+    function updateCatalogHash(tab, genre, preserveHistory=false){
+        const params = new URLSearchParams();
+        if(tab) params.set('tab', tab);
+        if(genre) params.set('genre', genre);
+        const newHash = `${CATALOG_HASH}?${params.toString()}`;
+        if(preserveHistory){
+            history.replaceState({}, '', newHash);
+        }else{
+            history.pushState({}, '', newHash);
         }
-        console.error('Catalogo: No se pudo cargar data.json en ninguna ruta probada');
-      }
-    })();
-  }
-
-  function parseHash(){
-    const h = location.hash || '';
-    if (!h.startsWith('#catalogo')) return;
-    if (h === lastHashProcessed) return; // ya procesado, evitar bucles
-    console.log('Catalogo: parseHash ->', h);
-    // formats: #catalogo, #catalogo/peliculas, #catalogo/peliculas/accion
-    const parts = h.replace(/^#/,'').split('/');
-    // parts[0] === 'catalogo'
-    const tab = parts[1] || localStorage.getItem('catalogo:lastTab') || 'peliculas';
-    const genre = parts[2] || localStorage.getItem('catalogo:lastGenre') || 'all';
-    // Cuando procesamos el hash queremos actualizar la UI sin volver a escribir el hash
-    setTab(tab, true);
-    setGenre(genre, true);
-    openCatalogo();
-    lastHashProcessed = h;
-  }
-
-  // Persistencia: guardar última selección
-  function persistState(){
-    try{
-      localStorage.setItem('catalogo:lastTab', currentTab);
-      localStorage.setItem('catalogo:lastGenre', currentGenre || 'all');
-    }catch(e){/* noop */}
-  }
-
-  // Eventos para abrir el catálogo desde el header.
-  function bindHeaderButtons(){
-    tiendaBtn = document.getElementById('btn-tienda');
-    tiendaBtnMobile = document.getElementById('btn-tienda-mobile');
-    // También soportar enlaces que tengan href="#catalogo"
-    const anyCatalogLinks = Array.from(document.querySelectorAll('a[href="#catalogo"], a[href^="#catalogo/"]'));
-
-    if (tiendaBtn) {
-      tiendaBtn.addEventListener('click', (e)=>{ e.preventDefault(); ensureInit().then(()=> { location.hash = '#catalogo/peliculas'; }); });
-      console.log('Catalogo: bindHeaderButtons -> tiendaBtn bound');
     }
-    if (tiendaBtnMobile) {
-      tiendaBtnMobile.addEventListener('click', (e)=>{ e.preventDefault(); ensureInit().then(()=> { location.hash = '#catalogo/peliculas'; }); });
-      console.log('Catalogo: bindHeaderButtons -> tiendaBtnMobile bound');
+
+    // Restaura el hash del catálogo si el estado de la historia lo contiene
+    function maybeRestoreCatalogFromState(event){
+        const state = event && event.state;
+        if(state && state.catalogHash){
+            // reemplazar sin añadir entrada
+            history.replaceState(null, '', state.catalogHash);
+            const parsed = parseCatalogHash();
+            if(parsed){
+                openCatalogOverlay(parsed.tab || 'Películas', parsed.genre || 'Todo el catálogo');
+            }
+        }
     }
-    anyCatalogLinks.forEach(a=>{
-      a.addEventListener('click', (e)=>{ e.preventDefault(); ensureInit().then(()=> { location.hash = '#catalogo/peliculas'; }); });
+
+    // Abrir/cerrar overlay helpers
+    function openCatalogOverlay(tab, genre){
+        const overlay = document.getElementById('catalogo-modal-overlay');
+        if(!overlay) return;
+        overlay.style.display = 'flex';
+        overlay.setAttribute('aria-hidden','false');
+        document.body.classList.add('no-scroll');
+        const tabsContainer = document.getElementById('catalogo-tabs');
+        const genreBtn = document.getElementById('catalogo-genre-button');
+        tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=>{
+            x.classList.toggle('active', x.dataset.tab===tab);
+        });
+        genreBtn.textContent = (genre||'Todo el catálogo') + ' ▾';
+    }
+
+    function closeCatalogOverlay(){
+        const overlay = document.getElementById('catalogo-modal-overlay');
+        if(!overlay) return;
+        overlay.style.display = 'none';
+        overlay.setAttribute('aria-hidden','true');
+        document.body.classList.remove('no-scroll');
+    }
+
+    // Inicialización
+    async function initCatalogo(){
+        createCatalogModal();
+        const overlay = document.getElementById('catalogo-modal-overlay');
+        const closeBtn = document.getElementById('catalogo-close');
+        const tabsContainer = document.getElementById('catalogo-tabs');
+        const genreBtn = document.getElementById('catalogo-genre-button');
+        const genreList = document.getElementById('catalogo-genre-list');
+
+        let data = await loadData();
+
+        // Función para (re)llenar el dropdown según la pestaña actual
+        function populateGenresForTab(tab){
+            const gens = extractGenres(data, tab);
+            genreList.innerHTML = '';
+            const allBtn = document.createElement('button');
+            allBtn.textContent = 'Todo el catálogo';
+            allBtn.classList.add('genre-item');
+            allBtn.addEventListener('click', ()=>{
+                genreBtn.textContent = 'Todo el catálogo ▾';
+                genreList.style.display = 'none';
+                updateCatalogHash(tab, 'Todo el catálogo');
+                applyFiltersAndRender(data, tab, 'Todo el catálogo');
+                markSelectedGenre('Todo el catálogo');
+            });
+            genreList.appendChild(allBtn);
+            gens.forEach(g=>{
+                const b = document.createElement('button');
+                b.textContent = g;
+                b.classList.add('genre-item');
+                b.addEventListener('click', ()=>{
+                    genreBtn.textContent = g + ' ▾';
+                    genreList.style.display = 'none';
+                    updateCatalogHash(tab, g);
+                    applyFiltersAndRender(data, tab, g);
+                    markSelectedGenre(g);
+                });
+                genreList.appendChild(b);
+            });
+        }
+
+        function markSelectedGenre(value){
+            Array.from(genreList.querySelectorAll('button')).forEach(b=>{
+                b.classList.toggle('selected', b.textContent === value);
+            });
+        }
+
+        // pestañas
+        tabsContainer.querySelectorAll('.catalogo-tab').forEach(btn=>{
+            btn.addEventListener('click', ()=>{
+                tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=>x.classList.remove('active'));
+                btn.classList.add('active');
+                const tab = btn.dataset.tab;
+                populateGenresForTab(tab);
+                const currentGenre = genreBtn.textContent.replace(' ▾','') || 'Todo el catálogo';
+                updateCatalogHash(tab, currentGenre);
+                applyFiltersAndRender(data, tab, currentGenre);
+                markSelectedGenre(currentGenre);
+            });
+        });
+
+        // toggle dropdown
+        genreBtn.addEventListener('click', (e)=>{
+            const open = genreList.style.display !== 'none';
+            genreList.style.display = open ? 'none' : 'grid';
+            genreBtn.setAttribute('aria-expanded', String(!open));
+        });
+
+        // close button
+        closeBtn.addEventListener('click', ()=>{
+            // Quitar hash catalogo usando history
+            if(window.location.hash && window.location.hash.startsWith(CATALOG_HASH)){
+                history.back();
+            } else {
+                closeCatalogOverlay();
+            }
+        });
+
+        // Attach header tienda
+        function attachHeaderTienda(){
+            const links = Array.from(document.querySelectorAll('.slider-nav-link'));
+            const tienda = links.find(a=>a.textContent && a.textContent.trim().toLowerCase().includes('tienda'));
+            if(tienda){
+                tienda.addEventListener('click', (e)=>{
+                    e.preventDefault();
+                    const activeTab = tabsContainer.querySelector('.catalogo-tab.active').dataset.tab;
+                    const currentGenre = genreBtn.textContent.replace(' ▾','') || 'Todo el catálogo';
+                    updateCatalogHash(activeTab, currentGenre);
+                    openCatalogOverlay(activeTab, currentGenre);
+                    populateGenresForTab(activeTab);
+                    applyFiltersAndRender(data, activeTab, currentGenre);
+                });
+            }else{
+                setTimeout(attachHeaderTienda, 300);
+            }
+        }
+        attachHeaderTienda();
+
+        // Manejar cambios de hash -> abrir/cerrar catálogo
+        window.addEventListener('hashchange', ()=>{
+            // Si hash es catalogo -> abrir
+            if(window.location.hash && window.location.hash.startsWith(CATALOG_HASH)){
+                const parsed = parseCatalogHash();
+                const tab = parsed && parsed.tab ? parsed.tab : 'Películas';
+                const genre = parsed && parsed.genre ? parsed.genre : 'Todo el catálogo';
+                populateGenresForTab(tab);
+                openCatalogOverlay(tab, genre);
+                applyFiltersAndRender(data, tab, genre);
+                markSelectedGenre(genre);
+            } else if(window.location.hash && window.location.hash.startsWith('#id=')){
+                // Si es detalle y hay item, intentar abrir catálogo en background
+                const params = new URLSearchParams(window.location.hash.substring(1));
+                const id = params.get('id');
+                if(id){
+                    // buscar item
+                    const found = (data || []).find((it, i)=>{ const key = it['ID TMDB'] ? it['ID TMDB'] : `i_${i}`; return String(key)===String(id); });
+                    if(found){
+                        const built = buildItemFromData(found, 0);
+                        const tab = built.category || 'Películas';
+                        const firstGenre = (built.genres||'').split('·').map(x=>x.trim()).filter(Boolean)[0] || 'Todo el catálogo';
+                        populateGenresForTab(tab);
+                        openCatalogOverlay(tab, firstGenre);
+                        applyFiltersAndRender(data, tab, firstGenre);
+                        markSelectedGenre(firstGenre);
+                    }
+                }
+            } else {
+                // limpiar catalogo
+                closeCatalogOverlay();
+            }
+        });
+
+        // Al cargar la página, restaurar si hash incluye catalogo
+        const initial = parseCatalogHash();
+        if(initial!==null){
+            const tab = initial.tab || 'Películas';
+            const genre = initial.genre || 'Todo el catálogo';
+            populateGenresForTab(tab);
+            openCatalogOverlay(tab, genre);
+            applyFiltersAndRender(data, tab, genre);
+            markSelectedGenre(genre);
+        }
+
+        // Si la URL es un detalle directo (#id=...), abrir detalles (main.js normalmente lo hace)
+        if(window.location.hash && window.location.hash.startsWith('#id=')){
+            const params = new URLSearchParams(window.location.hash.substring(1));
+            const id = params.get('id');
+            if(id){
+                const foundIndexItem = (data || []).find((it, i)=>{ const key = it['ID TMDB'] ? it['ID TMDB'] : `i_${i}`; return String(key)===String(id); });
+                if(foundIndexItem){
+                    const built = buildItemFromData(foundIndexItem, 0);
+                    const tab = built.category || 'Películas';
+                    const firstGenre = (built.genres||'').split('·').map(x=>x.trim()).filter(Boolean)[0] || 'Todo el catálogo';
+                    populateGenresForTab(tab);
+                    openCatalogOverlay(tab, firstGenre);
+                    applyFiltersAndRender(data, tab, firstGenre);
+                    markSelectedGenre(firstGenre);
+                }
+            }
+        }
+
+        // Esc para cerrar modal
+        document.addEventListener('keydown', (e)=>{
+            if(e.key === 'Escape'){
+                // si estamos en un detalle, dejar que main.js cierre el details modal; si no, cerrar catálogo
+                if(window.detailsModal && window.detailsModal.isDetailsModalOpen){
+                    window.detailsModal.close();
+                    // si hay estado en history para restaurar catalogo
+                    const st = history.state;
+                    if(st && st.catalogHash){
+                        history.replaceState(null, '', st.catalogHash);
+                        const parsed = parseCatalogHash();
+                        if(parsed) openCatalogOverlay(parsed.tab || 'Películas', parsed.genre || 'Todo el catálogo');
+                    }
+                } else {
+                    // cerrar catálogo
+                    if(window.location.hash && window.location.hash.startsWith(CATALOG_HASH)){
+                        history.back();
+                    } else {
+                        closeCatalogOverlay();
+                    }
+                }
+            }
+        });
+
+        // popstate: si el state contiene catalogHash, restaurarlo
+        window.addEventListener('popstate', (e)=>{
+            const state = e.state;
+            if(state && state.catalogHash){
+                const parsed = parseCatalogHash();
+                // replace hash with catalogHash si es necesario
+                history.replaceState(null, '', state.catalogHash);
+                const p = parseCatalogHash();
+                if(p) openCatalogOverlay(p.tab || 'Películas', p.genre || 'Todo el catálogo');
+            } else {
+                // si el nuevo hash no es catalogo, cerrar overlay
+                if(!window.location.hash || (!window.location.hash.startsWith(CATALOG_HASH) && !window.location.hash.startsWith('#id='))){
+                    closeCatalogOverlay();
+                }
+            }
+        });
+
+        // click fuera dropdown cierra
+        document.addEventListener('click', (e)=>{
+            if(!e.target.closest('.catalogo-genre-dropdown')){
+                genreList.style.display = 'none';
+                genreBtn.setAttribute('aria-expanded','false');
+            }
+        });
+
+    }
+
+    document.addEventListener('DOMContentLoaded', ()=>{
+        try{ initCatalogo(); }catch(e){ console.error('catalogo init error', e); }
     });
-    console.log('Catalogo: bindHeaderButtons -> anyCatalogLinks bound:', anyCatalogLinks.length);
-  }
-
-  window.addEventListener('hashchange', ()=>{
-    const h = location.hash || '';
-    if (h.startsWith('#catalogo')){
-      // asegurar inicialización antes de procesar hash
-      ensureInit().then(()=> parseHash()).catch(()=> parseHash());
-    } else {
-      // si salimos del hash catalogo, cerramos
-      if (overlay.style.display === 'block') closeCatalogo();
-    }
-  });
-
-  if (closeBtn) closeBtn.addEventListener('click', closeCatalogo);
-  overlay.addEventListener('click', (e)=>{
-    if (e.target === overlay) closeCatalogo();
-  });
-
-  // tabs
-  Array.from(tabsEl.querySelectorAll('.catalogo-tab')).forEach(b=>{
-    b.addEventListener('click', ()=> setTab(b.dataset.tab));
-  });
-
-  // filter dropdown toggle
-  filterBtn.addEventListener('click', ()=>{
-    const hidden = filterDropdown.getAttribute('aria-hidden') === 'true';
-    filterDropdown.setAttribute('aria-hidden', String(!hidden));
-  });
-
-  // listen custom event to open details modal
-  window.addEventListener('catalogo:openDetails', (e)=>{
-    const item = e.detail;
-    // disparar a detalles modal existente: si hay función global openDetailsModal usada por el carrusel
-    if (window.openDetailsModal && typeof window.openDetailsModal === 'function'){
-      window.openDetailsModal(item);
-    } else {
-      // fallback: mostrar alert
-      alert(item.Title || item.title || 'Detalle');
-    }
-  });
-
-  // Inicialización
-  document.addEventListener('DOMContentLoaded', ()=>{
-    // Bind header buttons después de que header.js haya inyectado el header
-    bindHeaderButtons();
-    // Si la URL ya contiene #catalogo al cargar la página, inicializamos en background
-    const h = location.hash || '';
-    if (h.startsWith('#catalogo')){
-      // inicializar y luego procesar hash
-      ensureInit().then(()=> parseHash()).catch(()=> parseHash());
-    }
-  });
-
-  // Garantizar inicialización única: carga de datos y marcas iniciales
-  function ensureInit(){
-    if (initialized) return Promise.resolve();
-    return loadData().then(()=>{ initialized = true; }).catch(err=>{ console.warn('Catalogo: ensureInit fallo', err); initialized = true; });
-  }
-
 })();
