@@ -26,17 +26,17 @@
             <div class="catalogo-modal" role="dialog" aria-modal="true">
                 <button class="catalogo-close" id="catalogo-close" aria-label="Cerrar catálogo">&times;</button>
                 <div class="catalogo-header">
-                    <div class="catalogo-tabs" id="catalogo-tabs">
-                        <button data-tab="Películas" class="catalogo-tab active">Películas</button>
-                        <button data-tab="Series" class="catalogo-tab">Series</button>
-                        <button data-tab="Documentales" class="catalogo-tab">Documentales</button>
-                        <button data-tab="Animes" class="catalogo-tab">Animes</button>
-                    </div>
                     <div class="catalogo-controls">
                         <div class="catalogo-genre-dropdown" id="catalogo-genre-dropdown">
                             <button id="catalogo-genre-button" aria-haspopup="true" aria-expanded="false">Todo el catálogo ▾</button>
                             <div id="catalogo-genre-list" class="catalogo-genre-list" style="display:none" role="menu"></div>
                         </div>
+                    </div>
+                    <div class="catalogo-tabs" id="catalogo-tabs">
+                        <button data-tab="Películas" class="catalogo-tab active">Películas</button>
+                        <button data-tab="Series" class="catalogo-tab">Series</button>
+                        <button data-tab="Documentales" class="catalogo-tab">Documentales</button>
+                        <button data-tab="Animes" class="catalogo-tab">Animes</button>
                     </div>
                 </div>
                 <div class="catalogo-body">
@@ -87,52 +87,108 @@
         };
     }
 
-    function renderGrid(items){
+    // Estado y funciones para paginación / lazy-load
+    const catalogState = {
+        allItems: [], // items completos (después de map)
+        filteredItems: [],
+        renderedCount: 0,
+        initialRows: 6,
+        subsequentRows: 3,
+        itemsPerRow: 0,
+        initialBatchSize: 0,
+        subsequentBatchSize: 0,
+        loading: false
+    };
+
+    function computeItemsPerRow(){
         const grid = document.getElementById('catalogo-grid');
-        grid.innerHTML = '';
-        items.forEach((it, idx)=>{
-            const div = document.createElement('div');
-            div.className = 'catalogo-item';
-            div.dataset.itemId = it.id;
-            div.setAttribute('role','listitem');
-            div.innerHTML = `
-                <img src="${it.posterUrl || 'https://via.placeholder.com/194x271'}" alt="${it.title}">
-                <div class="title">${it.title}</div>
-            `;
-            // hover modal show
-            div.addEventListener('mouseenter', (e)=>{
-                if(window.hoverModal && typeof window.hoverModal.show === 'function'){
-                    window.hoverModal.show(it, div);
-                    window.hoverModalItem = it;
-                }
-            });
-            div.addEventListener('mouseleave', (e)=>{
-                if(window.hoverModal && typeof window.hoverModal.hide === 'function'){
-                    window.hoverModal.hide();
-                    window.hoverModalItem = null;
-                }
-            });
-            // click -> details with preservation of catalog state
-            div.addEventListener('click', (e)=>{
-                if(window.detailsModal && typeof window.detailsModal.show === 'function'){
-                    const normTitle = normalizeText(it.title);
-                    const idHash = `#id=${encodeURIComponent(it.id)}&title=${encodeURIComponent(normTitle)}`;
-                    // Guardar el estado actual del catálogo
-                    const currentCatalogHash = window.location.hash && window.location.hash.startsWith(CATALOG_HASH) ? window.location.hash : `${CATALOG_HASH}?tab=${encodeURIComponent(document.querySelector('.catalogo-tab.active').dataset.tab)}`;
-                    // Push state con referencia al catalogo
-                    history.pushState({ catalogHash: currentCatalogHash }, '', idHash);
-                    // Abrir detalles
-                    window.detailsModal.show(it, div).then(()=>{
-                        window.activeItem = it;
-                    }).catch(err=>console.error(err));
-                }
-            });
-            grid.appendChild(div);
+        if(!grid) return 6;
+        const containerWidth = grid.clientWidth || document.documentElement.clientWidth;
+        const rootStyles = getComputedStyle(document.documentElement);
+        const itemW = parseInt(rootStyles.getPropertyValue('--item-width')) || 194;
+        const gap = parseInt(getComputedStyle(grid).getPropertyValue('gap')) || 18;
+        const perRow = Math.max(1, Math.floor((containerWidth + gap) / (itemW + gap)));
+        return perRow;
+    }
+
+    function createCatalogItemElement(it){
+        const div = document.createElement('div');
+        div.className = 'catalogo-item';
+        div.dataset.itemId = it.id;
+        div.setAttribute('role','listitem');
+        div.innerHTML = `<img src="${it.posterUrl || 'https://via.placeholder.com/194x271'}" alt="${it.title}">`;
+        // hover modal
+        div.addEventListener('mouseenter', ()=>{
+            if(window.hoverModal && typeof window.hoverModal.show === 'function'){
+                window.hoverModal.show(it, div);
+                window.hoverModalItem = it;
+            }
         });
+        div.addEventListener('mouseleave', ()=>{
+            if(window.hoverModal && typeof window.hoverModal.hide === 'function'){
+                window.hoverModal.hide();
+                window.hoverModalItem = null;
+            }
+        });
+        // click -> details
+        div.addEventListener('click', ()=>{
+            if(window.detailsModal && typeof window.detailsModal.show === 'function'){
+                const normTitle = normalizeText(it.title);
+                const idHash = `#id=${encodeURIComponent(it.id)}&title=${encodeURIComponent(normTitle)}`;
+                const currentCatalogHash = window.location.hash && window.location.hash.startsWith(CATALOG_HASH) ? window.location.hash : `${CATALOG_HASH}?tab=${encodeURIComponent(document.querySelector('.catalogo-tab.active').dataset.tab)}`;
+                history.pushState({ catalogHash: currentCatalogHash }, '', idHash);
+                window.detailsModal.show(it, div).then(()=>{ window.activeItem = it; }).catch(err=>console.error(err));
+            }
+        });
+        return div;
+    }
+
+    function renderSlice(start, end){
+        const grid = document.getElementById('catalogo-grid');
+        if(!grid) return;
+        const fragment = document.createDocumentFragment();
+        for(let i=start;i<end && i<catalogState.filteredItems.length;i++){
+            const it = catalogState.filteredItems[i];
+            const el = createCatalogItemElement(it);
+            fragment.appendChild(el);
+        }
+        grid.appendChild(fragment);
+    }
+
+    function resetPagination(){
+        catalogState.itemsPerRow = computeItemsPerRow();
+        catalogState.initialBatchSize = Math.max(1, catalogState.itemsPerRow * catalogState.initialRows);
+        catalogState.subsequentBatchSize = Math.max(1, catalogState.itemsPerRow * catalogState.subsequentRows);
+        catalogState.renderedCount = 0;
+        const grid = document.getElementById('catalogo-grid');
+        if(grid) grid.innerHTML = '';
+    }
+
+    function appendNextBatch(){
+        if(catalogState.loading) return;
+        if(catalogState.renderedCount >= catalogState.filteredItems.length) return;
+        catalogState.loading = true;
+        // calcular siguiente batch
+        const isInitial = catalogState.renderedCount === 0;
+        const batch = isInitial ? catalogState.initialBatchSize : catalogState.subsequentBatchSize;
+        const start = catalogState.renderedCount;
+        const end = Math.min(catalogState.renderedCount + batch, catalogState.filteredItems.length);
+        renderSlice(start, end);
+        catalogState.renderedCount = end;
+        catalogState.loading = false;
+        // Si ya renderizamos todos los items, permitir que el overlay sea inline para mostrar footer
+        const overlay = document.getElementById('catalogo-modal-overlay');
+        if(catalogState.renderedCount >= catalogState.filteredItems.length){
+            if(overlay) overlay.classList.add('catalogo-inline');
+        } else {
+            if(overlay) overlay.classList.remove('catalogo-inline');
+        }
     }
 
     function applyFiltersAndRender(data, activeTab, genreFilter){
-        const items = data.map(buildItemFromData).filter(it=>{
+        // map and filter
+        catalogState.allItems = data.map(buildItemFromData);
+        catalogState.filteredItems = catalogState.allItems.filter(it=>{
             if(activeTab && it.category && it.category !== activeTab) return false;
             if(genreFilter && genreFilter !== 'Todo el catálogo'){
                 const gens = (it.genres||'').split('·').map(g=>g.trim());
@@ -140,7 +196,9 @@
             }
             return true;
         });
-        renderGrid(items);
+        // reset pagination and render initial batches
+        resetPagination();
+        appendNextBatch();
     }
 
     function parseCatalogHash(){
@@ -219,6 +277,8 @@
         if(!overlay) return;
         overlay.style.display = 'none';
         overlay.setAttribute('aria-hidden','true');
+        // remover clase inline para restablecer posicion fija
+        overlay.classList.remove('catalogo-inline');
         // restaurar z-index del header si lo modificamos
         const header = document.getElementById('slider-header') || document.querySelector('header.slider-header');
         if(header && header.dataset && Object.prototype.hasOwnProperty.call(header.dataset, '_prevZ')){
@@ -389,6 +449,40 @@
             applyFiltersAndRender(data, tab, genre);
             markSelectedGenre(genre);
         }
+
+        // Scroll handler para lazy-load: cuando estemos cerca del final cargar siguiente batch
+        const bodyEl = document.querySelector('.catalogo-body');
+        let lazyTimer = null;
+        function onCatalogScroll(){
+            if(!bodyEl) return;
+            const threshold = 300; // px desde el final
+            const atBottom = bodyEl.scrollHeight - (bodyEl.scrollTop + bodyEl.clientHeight) < threshold;
+            if(atBottom){
+                // debounce
+                if(lazyTimer) clearTimeout(lazyTimer);
+                lazyTimer = setTimeout(()=>{ appendNextBatch(); lazyTimer = null; }, 120);
+            }
+        }
+        if(bodyEl){
+            bodyEl.addEventListener('scroll', onCatalogScroll);
+        }
+
+        // Resize -> recalcular items per row y si hace falta cargar más para llenar
+        let resizeTimer = null;
+        function onCatalogResize(){
+            if(resizeTimer) clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(()=>{
+                const prev = catalogState.itemsPerRow || 0;
+                catalogState.itemsPerRow = computeItemsPerRow();
+                catalogState.initialBatchSize = Math.max(1, catalogState.itemsPerRow * catalogState.initialRows);
+                catalogState.subsequentBatchSize = Math.max(1, catalogState.itemsPerRow * catalogState.subsequentRows);
+                // Si al cambiar a más columnas el grid queda con menos items visibles, cargar más
+                if(catalogState.renderedCount < Math.min(catalogState.filteredItems.length, catalogState.initialBatchSize)){
+                    appendNextBatch();
+                }
+            }, 120);
+        }
+        window.addEventListener('resize', onCatalogResize);
 
         // Si la URL es un detalle directo (#id=...), abrir detalles (main.js normalmente lo hace)
         if(window.location.hash && window.location.hash.startsWith('#id=')){
