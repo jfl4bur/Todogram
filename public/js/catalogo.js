@@ -83,7 +83,8 @@
             category: d['Categoría'] || 'Películas',
             genres: d['Géneros'] || '',
             year: d['Año'] || '',
-            videoUrl: d['Video iframe'] || ''
+            videoUrl: d['Video iframe'] || d['Video'] || d['Enlace'] || '',
+            trailerUrl: d['Trailer'] || d['TrailerUrl'] || d['trailerUrl'] || ''
         };
     }
 
@@ -99,6 +100,9 @@
         subsequentBatchSize: 0,
         loading: false
     };
+
+    // temporizadores por item para reproducir el comportamiento de hover del carousel
+    const catalogHoverTimeouts = {};
 
     function computeItemsPerRow(){
         const grid = document.getElementById('catalogo-grid');
@@ -116,34 +120,97 @@
         div.className = 'catalogo-item';
         div.dataset.itemId = it.id;
         div.setAttribute('role','listitem');
-        div.innerHTML = `<img src="${it.posterUrl || 'https://via.placeholder.com/194x271'}" alt="${it.title}">`;
-        // hover modal
-        div.addEventListener('mouseenter', ()=>{
-            if(window.hoverModal){
-                if(typeof window.hoverModal.cancelHide === 'function') window.hoverModal.cancelHide();
-                if(typeof window.hoverModal.show === 'function'){
-                    window.hoverModal.show(it, div);
-                    window.hoverModalItem = it;
-                }
-            }
+        // Reuse same internal structure as carousel items so the shared hover modal behaves identically
+        div.innerHTML = `
+            <div class="loader"><i class="fas fa-spinner"></i></div>
+            <div class="poster-container">
+                <img class="catalogo-card-image" src="${it.posterUrl || 'https://via.placeholder.com/194x271'}" alt="${it.title}" loading="lazy" style="opacity:0;transition:opacity 0.3s ease">
+                <div class="carousel-overlay">
+                    ${it.year || it.genres ? `<div class="carousel-meta">${[it.year, it.genres].filter(Boolean).join(' · ')}</div>` : ''}
+                    ${it.description ? `<div class="carousel-description">${it.description}</div>` : ''}
+                </div>
+            </div>
+            <img class="detail-background" src="${it.backgroundUrl || it.posterUrl || 'https://via.placeholder.com/194x271'}" alt="${it.title} - Background" loading="lazy" style="display:none;width:194px;height:271px;">
+        `;
+
+        // image load fade and hide loader
+        const img = div.querySelector('img.catalogo-card-image');
+        img.addEventListener('load', ()=>{
+            img.style.opacity = '1';
+            const l = div.querySelector('.loader'); if(l) l.style.display = 'none';
         });
+
+        // hover modal - reproduce exact carousel timings and state changes
+        div.addEventListener('mouseenter', ()=>{
+            const id = div.dataset.itemId;
+            // clear previous timers if any
+            if(catalogHoverTimeouts[id]){
+                clearTimeout(catalogHoverTimeouts[id].details);
+                clearTimeout(catalogHoverTimeouts[id].modal);
+            }
+            catalogHoverTimeouts[id] = {};
+            // save previous carouselContainer so we can restore it later
+            if(window.hoverModal){
+                catalogHoverTimeouts[id].prevCarouselContainer = window.hoverModal.carouselContainer || null;
+                // set carouselContainer to the catalog modal so position calc is correct
+                const container = document.querySelector('.catalogo-modal') || document.getElementById('catalogo-modal-overlay') || document.body;
+                try{ window.hoverModal.carouselContainer = container; }catch(e){}
+            }
+            catalogHoverTimeouts[id].details = setTimeout(()=>{
+                const background = div.querySelector('.detail-background');
+                const overlay = div.querySelector('.carousel-overlay');
+                if(background){ background.style.display = 'block'; background.style.opacity = '1'; }
+                if(overlay){ overlay.style.opacity = '1'; overlay.style.transform = 'translateY(0)'; }
+                catalogHoverTimeouts[id].modal = setTimeout(()=>{
+                    // Only open hover modal if no other modal is open (same guard as carousels)
+                    if(!window.isModalOpen && !window.isDetailsModalOpen){
+                        window.hoverModalItem = div;
+                        if(window.hoverModal && div){
+                            if(typeof window.hoverModal.cancelHide === 'function') window.hoverModal.cancelHide();
+                            window.hoverModal.show(it, div);
+                        }
+                    }
+                }, 200);
+            }, 900);
+        });
+
         div.addEventListener('mouseleave', ()=>{
+            const id = div.dataset.itemId;
+            if(catalogHoverTimeouts[id]){
+                clearTimeout(catalogHoverTimeouts[id].details);
+                clearTimeout(catalogHoverTimeouts[id].modal);
+                // restore previous carouselContainer
+                try{ if(window.hoverModal && catalogHoverTimeouts[id].prevCarouselContainer !== undefined) window.hoverModal.carouselContainer = catalogHoverTimeouts[id].prevCarouselContainer; }catch(e){}
+                delete catalogHoverTimeouts[id];
+            }
             if(window.hoverModal && typeof window.hoverModal.hide === 'function'){
-                // schedule hide with a small delay to allow movement into modal
                 window.hoverModal.hide(300);
                 window.hoverModalItem = null;
             }
+            const overlay = div.querySelector('.carousel-overlay');
+            if(overlay){ overlay.style.opacity = '0'; overlay.style.transform = 'translateY(20px)'; }
+            const background = div.querySelector('.detail-background');
+            if(background){ background.style.opacity = '0'; setTimeout(()=>{ background.style.display = 'none'; }, 300); }
         });
-        // click -> details
-        div.addEventListener('click', ()=>{
+
+        // click -> details (replicar exactamente comportamiento carousel)
+        div.addEventListener('click', (e)=>{
+            e.preventDefault();
+            const itemId = div.dataset.itemId;
+            if(catalogHoverTimeouts[itemId]){
+                clearTimeout(catalogHoverTimeouts[itemId].details);
+                clearTimeout(catalogHoverTimeouts[itemId].modal);
+                delete catalogHoverTimeouts[itemId];
+            }
+            const hash = `id=${encodeURIComponent(it.id)}&title=${encodeURIComponent(it.title)}`;
+            if(window.location.hash !== `#${hash}`){
+                history.pushState(null, '', `#${hash}`);
+            }
             if(window.detailsModal && typeof window.detailsModal.show === 'function'){
-                const normTitle = normalizeText(it.title);
-                const idHash = `#id=${encodeURIComponent(it.id)}&title=${encodeURIComponent(normTitle)}`;
-                const currentCatalogHash = window.location.hash && window.location.hash.startsWith(CATALOG_HASH) ? window.location.hash : `${CATALOG_HASH}?tab=${encodeURIComponent(document.querySelector('.catalogo-tab.active').dataset.tab)}`;
-                history.pushState({ catalogHash: currentCatalogHash }, '', idHash);
-                window.detailsModal.show(it, div).then(()=>{ window.activeItem = it; }).catch(err=>console.error(err));
+                window.detailsModal.show(it, div);
             }
         });
+
         return div;
     }
 
