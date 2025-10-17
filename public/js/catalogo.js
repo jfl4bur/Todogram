@@ -49,7 +49,7 @@
         const s = document.createElement('style');
         s.id = 'catalogo-styles';
         s.innerHTML = `
-            .catalogo-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:99999;display:flex;align-items:flex-start;justify-content:center;padding:0;margin:0}
+            .catalogo-modal-overlay{position:fixed;left:0;right:0;bottom:0;top:auto;background:rgba(0,0,0,0.95);z-index:9999;display:flex;align-items:flex-start;justify-content:center;padding:0;margin:0}
             .catalogo-modal{width:100%;height:100%;background:transparent;color:#fff;position:relative;display:flex;flex-direction:column}
             .catalogo-close{position:absolute;right:18px;top:18px;background:transparent;border:0;color:#fff;font-size:36px;padding:6px 12px;border-radius:6px;cursor:pointer;z-index:100000}
             .catalogo-header{display:flex;align-items:center;gap:12px;padding:28px 48px 12px 48px}
@@ -209,9 +209,26 @@
     function openCatalogOverlay(tab, genre){
         const overlay = document.getElementById('catalogo-modal-overlay');
         if(!overlay) return;
+        // calcular top basado en header
+        const header = document.getElementById('slider-header') || document.querySelector('header.slider-header');
+        let headerHeight = 0;
+        if(header){
+            const rect = header.getBoundingClientRect();
+            headerHeight = Math.ceil(rect.height);
+            // asegurar que el header quede por encima del overlay
+            try{
+                overlay.style.zIndex = '9999';
+                header.dataset._prevZ = header.style.zIndex || '';
+                header.style.zIndex = String(10000);
+            }catch(e){/* ignore */}
+        }
+        overlay.style.top = headerHeight + 'px';
+        overlay.style.bottom = '0';
+        overlay.style.left = '0';
+        overlay.style.right = '0';
         overlay.style.display = 'flex';
         overlay.setAttribute('aria-hidden','false');
-        document.body.classList.add('no-scroll');
+        // no bloquear scroll del body para permitir interacción con el header
         const tabsContainer = document.getElementById('catalogo-tabs');
         const genreBtn = document.getElementById('catalogo-genre-button');
         tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=>{
@@ -225,7 +242,12 @@
         if(!overlay) return;
         overlay.style.display = 'none';
         overlay.setAttribute('aria-hidden','true');
-        document.body.classList.remove('no-scroll');
+        // restaurar z-index del header si lo modificamos
+        const header = document.getElementById('slider-header') || document.querySelector('header.slider-header');
+        if(header && header.dataset && Object.prototype.hasOwnProperty.call(header.dataset, '_prevZ')){
+            header.style.zIndex = header.dataset._prevZ || '';
+            delete header.dataset._prevZ;
+        }
     }
 
     // Inicialización
@@ -325,6 +347,26 @@
             }
         }
         attachHeaderTienda();
+
+        // Recalcular top del overlay al cambiar tamaño o al cambiar la altura del header
+        function recalcOverlayTop(){
+            const overlay = document.getElementById('catalogo-modal-overlay');
+            if(!overlay || overlay.style.display === 'none') return;
+            const header = document.getElementById('slider-header') || document.querySelector('header.slider-header');
+            let headerHeight = 0;
+            if(header){
+                const rect = header.getBoundingClientRect();
+                headerHeight = Math.ceil(rect.height);
+            }
+            overlay.style.top = headerHeight + 'px';
+        }
+        window.addEventListener('resize', recalcOverlayTop);
+        // También observar cambios en el header (por ejemplo al abrir mobile menu que cambia su altura)
+        const headerEl = document.getElementById('slider-header') || document.querySelector('header.slider-header');
+        if(headerEl){
+            const mo = new MutationObserver(recalcOverlayTop);
+            mo.observe(headerEl, { attributes: true, childList: true, subtree: true });
+        }
 
         // Manejar cambios de hash -> abrir/cerrar catálogo
         window.addEventListener('hashchange', ()=>{
