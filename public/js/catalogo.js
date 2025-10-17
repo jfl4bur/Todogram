@@ -27,15 +27,10 @@
                 <button class="catalogo-close" id="catalogo-close" aria-label="Cerrar catálogo">&times;</button>
                 <div class="catalogo-header">
                     <div class="catalogo-controls">
-                                <div class="catalogo-genre-dropdown" id="catalogo-genre-dropdown">
-                                    <button id="catalogo-genre-button" class="catalogo-genre-button" aria-haspopup="true" aria-expanded="false">
-                                        <span class="catalogo-genre-label">Todo el catálogo</span>
-                                        <svg class="catalogo-caret" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                                            <path d="M7 10l5 5 5-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                                        </svg>
-                                    </button>
-                                    <div id="catalogo-genre-list" class="catalogo-genre-list" style="display:none" role="menu"></div>
-                                </div>
+                        <div class="catalogo-genre-dropdown" id="catalogo-genre-dropdown">
+                            <button id="catalogo-genre-button" aria-haspopup="true" aria-expanded="false">Todo el catálogo ▾</button>
+                            <div id="catalogo-genre-list" class="catalogo-genre-list" style="display:none" role="menu"></div>
+                        </div>
                     </div>
                     <div class="catalogo-tabs" id="catalogo-tabs">
                         <button data-tab="Películas" class="catalogo-tab active">Películas</button>
