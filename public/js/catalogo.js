@@ -252,9 +252,10 @@
             headerHeight = Math.ceil(rect.height);
             // asegurar que el header quede por encima del overlay
             try{
-                overlay.style.zIndex = '9999';
+                // No sobreescribimos el z-index del overlay aquí (usar la regla CSS).
+                // Colocamos el header por encima del overlay (pero por debajo de los modales de detalles/hover)
                 header.dataset._prevZ = header.style.zIndex || '';
-                header.style.zIndex = String(10000);
+                header.style.zIndex = String(1000);
             }catch(e){/* ignore */}
         }
         overlay.style.top = headerHeight + 'px';

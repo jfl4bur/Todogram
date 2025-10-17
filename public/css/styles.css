@@ -36,15 +36,7 @@
         width: 180px;
         min-width: 180px;
         max-width: 180px;
-        /* altura NO fija: dejar que el poster (aspect-ratio 16/9) determine la altura */
-    }
-}
-@media (max-width: 480px) {
-    .episodios-series-item {
-        width: 100px;
-        min-width: 100px;
-        max-width: 100px;
-        /* altura NO fija: dejar que el poster (aspect-ratio 16/9) determine la altura */
+
     }
 }
 /* Carrusel de Episodios Series (wrapper) */
@@ -390,18 +382,15 @@ button:focus {
 }  
 
 .carousel-section {
-    margin-bottom: 55px;
-    
-    
+    margin-bottom: 60px;
+}
+
 @media (max-width: 600px) {
     .carousel-section {
         margin-bottom: 40px;
     }
 }
-    margin-top: 40px;
-    position: relative;
-    margin-left: 50px;
-}
+
 
 .carousel-title {
     font-family: 'Slider Sans UI', sans-serif;
@@ -1148,9 +1137,9 @@ button:focus {
 @media (max-width:600px){ .catalogo-header{padding:12px} .catalogo-body{padding:8px 12px 24px 12px} .catalogo-genre-list{position:static;grid-template-columns:repeat(2,1fr);margin-top:8px} .catalogo-controls{width:100%;display:flex;justify-content:flex-end} }
 
 /* Ensure hover modal and details modal overlay show above catalogo */
-.modal-overlay, .modal-content { z-index: 1000; }
-.details-modal-overlay { z-index: 1001; }
-.video-modal-overlay { z-index: 1002; }
+.modal-overlay, .modal-content { z-index: 11000 !important; }
+.details-modal-overlay { z-index: 11001 !important; }
+.video-modal-overlay { z-index: 11002 !important; }
 
 /* Clases adicionales para asegurar que las fuentes se apliquen correctamente */
 .details-modal-original-title {
