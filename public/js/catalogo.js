@@ -8,8 +8,9 @@
   const tabsEl = document.getElementById('catalogo-tabs');
   const filterBtn = document.getElementById('catalogo-filter-btn');
   const filterDropdown = document.getElementById('catalogo-filter-dropdown');
-  const tiendaBtn = document.getElementById('btn-tienda');
-  const tiendaBtnMobile = document.getElementById('btn-tienda-mobile');
+  // header buttons se buscarán y enlazarán después de que el header se inyecte
+  let tiendaBtn = null;
+  let tiendaBtnMobile = null;
 
   // Estado
   let data = [];
@@ -184,9 +185,23 @@
     }catch(e){/* noop */}
   }
 
-  // Eventos
-  if (tiendaBtn) tiendaBtn.addEventListener('click', (e)=>{ e.preventDefault(); location.hash = '#catalogo/peliculas'; });
-  if (tiendaBtnMobile) tiendaBtnMobile.addEventListener('click', (e)=>{ e.preventDefault(); location.hash = '#catalogo/peliculas'; });
+  // Eventos para abrir el catálogo desde el header.
+  function bindHeaderButtons(){
+    tiendaBtn = document.getElementById('btn-tienda');
+    tiendaBtnMobile = document.getElementById('btn-tienda-mobile');
+    // También soportar enlaces que tengan href="#catalogo"
+    const anyCatalogLinks = Array.from(document.querySelectorAll('a[href="#catalogo"], a[href^="#catalogo/"]'));
+
+    if (tiendaBtn) {
+      tiendaBtn.addEventListener('click', (e)=>{ e.preventDefault(); location.hash = '#catalogo/peliculas'; });
+    }
+    if (tiendaBtnMobile) {
+      tiendaBtnMobile.addEventListener('click', (e)=>{ e.preventDefault(); location.hash = '#catalogo/peliculas'; });
+    }
+    anyCatalogLinks.forEach(a=>{
+      a.addEventListener('click', (e)=>{ e.preventDefault(); location.hash = '#catalogo/peliculas'; });
+    });
+  }
 
   window.addEventListener('hashchange', ()=>{
     const h = location.hash || '';
@@ -228,6 +243,8 @@
 
   // Inicialización
   document.addEventListener('DOMContentLoaded', ()=>{
+    // Bind header buttons después de que header.js haya inyectado el header
+    bindHeaderButtons();
     loadData();
   });
 
