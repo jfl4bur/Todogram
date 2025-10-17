@@ -834,12 +834,13 @@ button:focus {
     width: calc(var(--item-width) * var(--modal-scale));
     height: calc(var(--item-height) * var(--modal-scale));
     border-radius: 2px;
-    box-shadow: rgba(0, 0, 0, 0.65) 0px 0px 50px 16px;
+    /* softer shadow to match carousel feel */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
     overflow: hidden;
     transform-origin: center;
     opacity: 0;
-    transform: scale(0.9);
-    transition: opacity 180ms cubic-bezier(.2,.9,.2,1), transform 220ms cubic-bezier(.2,.9,.2,1);
+    transform: translateY(20px);
+    transition: opacity 300ms ease, transform 300ms ease;
     pointer-events: auto;
     z-index: 1001;
     will-change: transform, opacity;
@@ -851,33 +852,23 @@ button:focus {
 
 .modal-content.show {
     opacity: 1;
-    transform: scale(1);
+    transform: translateY(0);
 }
 
-/* Backdrop fade for hover modal */
+/* Backdrop fade for hover modal (subtle) */
 .modal-backdrop {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     object-fit: cover;
-    opacity: 0.12;
-    transition: opacity 240ms ease-out, transform 240ms ease-out;
-    transform: scale(1.01);
+    opacity: 0.08;
+    transition: opacity 300ms ease;
 }
 
 .modal-content.show .modal-backdrop {
-    opacity: 0.18;
-    transform: scale(1);
+    opacity: 0.12;
 }
-
-/* subtle pop-in animation for the modal content */
-@keyframes hoverPop {
-    0% { opacity: 0; transform: scale(0.92); }
-    60% { opacity: 1; transform: scale(1.03); }
-    100% { opacity: 1; transform: scale(1); }
-}
-.modal-content.show { animation: hoverPop 260ms cubic-bezier(.2,.9,.2,1); }
 
 .modal-header {
     position: relative;
@@ -1184,21 +1175,19 @@ button:focus {
     content: '';
     width:18px;
     height:18px;
-    border-radius:2px;
-    border:1px solid rgba(255,255,255,0.08);
     display:inline-flex;
     align-items:center;
     justify-content:center;
     margin-right:8px;
     flex:0 0 18px;
     color:transparent;
-    font-size:12px;
+    font-size:14px;
 }
 .catalogo-genre-list button.selected::before{
     content: '\2713'; /* check mark */
-    background:var(--primary-color);
-    border-color:var(--primary-color);
-    color:#fff;
+    color: var(--primary-color);
+    background: transparent;
+    border: none;
     font-weight:700;
 }
 .catalogo-body{flex:1;overflow:auto;padding:8px 32px 48px 32px}

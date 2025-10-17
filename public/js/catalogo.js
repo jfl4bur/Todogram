@@ -275,6 +275,15 @@
             x.classList.toggle('active', x.dataset.tab===tab);
         });
         genreBtn.textContent = (genre||'Todo el catálogo') + ' ▾';
+
+        // Ensure genre list is positioned to the left of the catalog area (32px)
+        const genreList = document.getElementById('catalogo-genre-list');
+        if(genreList){
+            genreList.style.position = 'absolute';
+            genreList.style.left = '32px';
+            genreList.style.top = '44px';
+            genreList.style.right = 'auto';
+        }
     }
 
     function closeCatalogOverlay(){
@@ -300,6 +309,14 @@
         const tabsContainer = document.getElementById('catalogo-tabs');
         const genreBtn = document.getElementById('catalogo-genre-button');
         const genreList = document.getElementById('catalogo-genre-list');
+
+        // Reparent genreList into overlay so we can align it to the left of the catalog area
+        if(overlay && genreList && genreList.parentNode !== overlay){
+            overlay.appendChild(genreList);
+            // position it aligned to left padding (32px)
+            genreList.style.left = '32px';
+            genreList.style.right = 'auto';
+        }
 
         let data = await loadData();
 
