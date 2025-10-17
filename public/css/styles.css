@@ -577,6 +577,28 @@ button:focus {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
+/* Make catalog items behave like carousel items on hover (lift up slightly) */
+.catalogo-item {
+    flex: 0 0 auto;
+    width: var(--item-width);
+    height: var(--item-height);
+    border-radius: 0;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.1s ease, box-shadow 0.3s ease;
+    background-color: var(--secondary-color);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .catalogo-item:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.6);
+        z-index: 10;
+    }
+}
+
 @media (hover: hover) and (pointer: fine) {
     .custom-carousel-item:hover {
         transform: translateY(-4px);
@@ -1202,14 +1224,15 @@ button:focus {
 
 /* Ensure hover modal and details modal overlay show above catalogo */
 .modal-overlay, .modal-content { z-index: 11000 !important; }
-.details-modal-overlay { z-index: 11001 !i.episodios-series-item {
+.details-modal-overlay { z-index: 11001 !important; }
+
+.episodios-series-item {
     width: 300px;
     min-width: 300px;
     max-width: 300px;
     display: flex;
     flex-direction: column;
     background: transparent;
-
     overflow: visible;
     position: relative;
     margin: 0;
@@ -4984,11 +5007,11 @@ html, body {
   box-sizing: border-box;
 }
 
-.slider-footer-content {
-  max-width: 100%;
-  overflow-x: hidden;
+slider-footer-content {
+    max-width: 100%;
+    overflow-x: hidden;
 }
-mportant; }
+
 .video-modal-overlay { z-index: 11002 !important; }
 
 /* Clases adicionales para asegurar que las fuentes se apliquen correctamente */
