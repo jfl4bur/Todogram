@@ -491,6 +491,21 @@ button:focus {
     background: linear-gradient(90deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
 }
 
+/* Catalog skeleton: make the carousel skeleton wrap inside the modal */
+#catalogo-skeleton {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: flex-start;
+    align-items: flex-start;
+    overflow: visible; /* let items wrap instead of scrolling */
+}
+
+#catalogo-skeleton .skeleton-item {
+    /* allow variable width depending on container columns */
+    width: var(--item-width);
+}
+
 @keyframes spin {
     to {
         transform: rotate(360deg);

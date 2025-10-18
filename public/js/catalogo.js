@@ -40,7 +40,17 @@
                     </div>
                 </div>
                 <div class="catalogo-body">
-                    <div class="catalogo-grid" id="catalogo-grid" role="list"></div>
+                    <!-- skeleton similar to carousels -->
+                    <div class="carousel-skeleton" id="catalogo-skeleton" style="display:flex;gap:12px;flex-wrap:wrap;">
+                        <!-- generate several skeleton items to match rows -->
+                        <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
+                        <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
+                        <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
+                        <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
+                        <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
+                        <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
+                    </div>
+                    <div class="catalogo-grid" id="catalogo-grid" role="list" aria-busy="false"></div>
                 </div>
             </div>
         `;
@@ -207,6 +217,13 @@
         const end = Math.min(catalogState.renderedCount + batch, catalogState.filteredItems.length);
         renderSlice(start, end);
         catalogState.renderedCount = end;
+        // hide skeleton after first real items are rendered
+        if(start === 0){
+            const sk = document.getElementById('catalogo-skeleton');
+            if(sk) sk.style.display = 'none';
+            const grid = document.getElementById('catalogo-grid');
+            if(grid) grid.setAttribute('aria-busy','false');
+        }
         catalogState.loading = false;
         // Si ya renderizamos todos los items, permitir que el overlay sea inline para mostrar footer
         const overlay = document.getElementById('catalogo-modal-overlay');
