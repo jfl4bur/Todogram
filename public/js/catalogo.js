@@ -35,6 +35,7 @@
             subtitlesCount: d['Subtítulos'] ? String(d['Subtítulos']).split(',').length : 0,
             audioList: d['Audios'] ? String(d['Audios']).split(',').map(s=>s.trim()) : [],
             subtitleList: d['Subtítulos'] ? String(d['Subtítulos']).split(',').map(s=>s.trim()) : []
+            ,raw: d
         };
     }
 

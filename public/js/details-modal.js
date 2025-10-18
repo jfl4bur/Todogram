@@ -287,6 +287,24 @@ class DetailsModal {
     }
 
     async show(item, itemElement) {
+        // Normalize: if catalogo passed a 'raw' original row, copy common local fields so this modal can use them
+        try {
+            const raw = item && item.raw ? item.raw : null;
+            if (raw) {
+                // directors/writers/cast
+                if (!item.director && (raw['Director(es)'] || raw['Director'])) item.director = raw['Director(es)'] || raw['Director'];
+                if (!item.writers && (raw['Escritor(es)'] || raw['Escritor'])) item.writers = raw['Escritor(es)'] || raw['Escritor'];
+                if (!item.cast && (raw['Reparto principal'] || raw['Reparto'])) item.cast = raw['Reparto principal'] || raw['Reparto'];
+                // posters/backdrops/poster
+                if (!item.postersUrl && raw['Carteles']) item.postersUrl = raw['Carteles'];
+                if (!item.posterUrl && raw['Portada']) item.posterUrl = raw['Portada'];
+                if (!item.backgroundUrl && raw['Carteles']) item.backgroundUrl = raw['Carteles'];
+                // tmdb url
+                if (!item.tmdbUrl && raw['TMDB']) item.tmdbUrl = raw['TMDB'];
+            }
+        } catch (e) {
+            console.warn('DetailsModal: fallo al normalizar item.raw', e);
+        }
         console.log('DetailsModal: Abriendo modal para:', item.title);
         console.log('DetailsModal: Datos del item:', {
             videoUrl: item.videoUrl,
@@ -468,8 +486,23 @@ class DetailsModal {
             castSection = this.createCastSection(cast);
         }
         
-        const posters = tmdbImages.posters;
-        const backdrops = tmdbImages.backdrops;
+        let posters = tmdbImages.posters || [];
+        let backdrops = tmdbImages.backdrops || [];
+        // If local data contains single URL strings for posters/backdrops, convert to expected structure
+        try {
+            if ((!posters || posters.length === 0) && item.postersUrl && typeof item.postersUrl === 'string' && item.postersUrl.trim() !== '') {
+                posters = [{ file_path: item.postersUrl }];
+            }
+            if ((!backdrops || backdrops.length === 0) && item.backgroundUrl && typeof item.backgroundUrl === 'string' && item.backgroundUrl.trim() !== '') {
+                backdrops = [{ file_path: item.backgroundUrl }];
+            }
+            // Also if only posterUrl exists, include it in posters
+            if ((!posters || posters.length === 0) && item.posterUrl && typeof item.posterUrl === 'string' && item.posterUrl.trim() !== '') {
+                posters = [{ file_path: item.posterUrl }];
+            }
+        } catch (e) {
+            console.warn('DetailsModal: fallo construyendo poster/backdrop arrays desde datos locales', e);
+        }
         
         const postersGallery = posters.length > 0 ? this.createGallerySkeleton('poster', 5) : '';
         const backdropsGallery = backdrops.length > 0 ? this.createGallerySkeleton('backdrop', 4) : '';
@@ -828,9 +861,12 @@ class DetailsModal {
     async fetchTMDBImages(tmdbUrl) {
         if (!tmdbUrl) return { posters: [], backdrops: [] };
         try {
-            const tmdbId = tmdbUrl.match(/movie\/(\d+)/)?.[1];
+            // Detect whether URL points to movie or TV and call the correct endpoint
+            let type = 'movie';
+            if (/\/tv\//.test(tmdbUrl)) type = 'tv';
+            const tmdbId = tmdbUrl.match(/(movie|tv)\/(\d+)/)?.[2] || tmdbUrl.match(/(\d+)/)?.[1];
             if (!tmdbId) return { posters: [], backdrops: [] };
-            const response = await fetch(`https://api.themoviedb.org/3/movie/${tmdbId}/images?api_key=${this.TMDB_API_KEY}`);
+            const response = await fetch(`https://api.themoviedb.org/3/${type}/${tmdbId}/images?api_key=${this.TMDB_API_KEY}`);
             if (!response.ok) return { posters: [], backdrops: [] };
             const data = await response.json();
             const posters = data.posters?.map(poster => ({ file_path: `https://image.tmdb.org/t/p/w500${poster.file_path}` })) || [];
