@@ -16,6 +16,65 @@
 
     <div id="footer-root"></div>
 
+    <!-- Copia de los modales necesarios (hover, details, video, share) para la página de catálogo -->
+    <div class="modal-overlay" id="modal-overlay" style="display:none;">
+        <div class="modal-content" id="modal-content">
+            <div class="modal-header">
+                <img class="modal-backdrop" id="modal-backdrop" src="" alt="">
+            </div>
+            <div class="modal-body" id="modal-body"></div>
+        </div>
+    </div>
+
+    <div class="details-modal-overlay" id="details-modal-overlay" style="display:none;">
+        <div class="details-modal-content" id="details-modal-content">
+            <button class="details-modal-close" id="details-modal-close">&times;</button>
+            <div class="details-modal-header">
+                <img class="details-modal-backdrop" id="details-modal-backdrop" src="" alt="">
+            </div>
+            <div class="details-modal-body" id="details-modal-body"></div>
+        </div>
+    </div>
+
+    <div class="video-modal-overlay" id="video-modal-overlay" style="display:none;">
+        <div class="video-modal-content">
+            <button class="video-modal-close" id="video-modal-close">&times;</button>
+            <iframe class="video-iframe" id="video-iframe" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <div class="gallery-image-modal" id="gallery-image-modal" style="display:none;">
+        <button class="gallery-image-modal-close" id="gallery-image-modal-close">&times;</button>
+        <div class="gallery-image-modal-nav">
+            <button class="gallery-image-modal-nav-btn" id="gallery-image-modal-prev"><i class="fas fa-chevron-left"></i></button>
+            <button class="gallery-image-modal-nav-btn" id="gallery-image-modal-next"><i class="fas fa-chevron-right"></i></button>
+        </div>
+        <div class="gallery-image-modal-content">
+            <img class="gallery-image-modal-img" id="gallery-image-modal-img" src="" alt="">
+        </div>
+    </div>
+
+    <div class="share-modal-overlay" id="share-modal-overlay" style="display:none;">
+        <div class="share-modal-content" id="share-modal-content">
+            <button class="share-modal-close" id="share-modal-close">&times;</button>
+            <h3 class="share-modal-title">Compartir película</h3>
+            <div class="share-preview" id="share-preview">
+                <img class="share-preview-image" id="share-preview-image" src="" alt="Portada">
+                <div class="share-preview-content">
+                    <h4 class="share-preview-title" id="share-preview-title"></h4>
+                    <p class="share-preview-description" id="share-preview-description"></p>
+                </div>
+            </div>
+            <div class="share-options">
+                <div class="share-option" id="share-facebook">
+                    <div class="share-icon facebook">
+                        <i class="fab fa-facebook-f"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const DATA_URL = "https://jfl4bur.github.io/Todogram/public/data.json";
         window.peliculas = [];

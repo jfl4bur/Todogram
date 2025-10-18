@@ -62,12 +62,18 @@
 
     async function initPage(rootSelector='#catalogo-page-root'){
         const root = document.querySelector(rootSelector); if(!root){ console.error('Catalogo: root no encontrado', rootSelector); return; }
+        // Ensure modals exist (catalog page might be loaded standalone)
+        try{ if(!window.hoverModal && typeof HoverModal === 'function') window.hoverModal = new HoverModal(); }catch(e){}
+        try{ if(!window.detailsModal && typeof DetailsModal === 'function') window.detailsModal = new DetailsModal(); }catch(e){}
+        try{ if(!window.videoModal && typeof VideoModal === 'function') window.videoModal = new VideoModal(); }catch(e){}
+        try{ if(!window.shareModal && typeof ShareModal === 'function') window.shareModal = new ShareModal(); }catch(e){}
         root.innerHTML = `\n            <div class="catalogo-page">\n                <div class="catalogo-page-header">\n                    <div class="catalogo-controls">\n                        <div class="catalogo-genre-dropdown" id="catalogo-genre-dropdown-page">\n                            <button id="catalogo-genre-button-page" aria-haspopup="true" aria-expanded="false">Todo el catálogo ▾</button>\n                            <div id="catalogo-genre-list-page" class="catalogo-genre-list" style="display:none" role="menu"></div>\n                        </div>\n                    </div>\n                    <div class="catalogo-tabs" id="catalogo-tabs-page">\n                        <button data-tab="Películas" class="catalogo-tab active">Películas</button>\n                        <button data-tab="Series" class="catalogo-tab">Series</button>\n                        <button data-tab="Documentales" class="catalogo-tab">Documentales</button>\n                        <button data-tab="Animes" class="catalogo-tab">Animes</button>\n                    </div>\n                </div>\n                <div class="catalogo-page-body">\n                    <div class="carousel-skeleton" id="catalogo-skeleton-page" style="display:flex;gap:12px;flex-wrap:wrap;">\n                        <div class="skeleton-item"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item"><div class="skeleton-spinner"></div></div>\n                    </div>\n                    <div class="catalogo-grid" id="catalogo-grid-page" role="list" aria-busy="false"></div>\n                </div>\n            </div>\n        `;
 
         const tabsContainer = document.getElementById('catalogo-tabs-page');
         const genreBtn = document.getElementById('catalogo-genre-button-page');
         const genreList = document.getElementById('catalogo-genre-list-page');
-        const grid = document.getElementById('catalogo-grid-page');
+    const grid = document.getElementById('catalogo-grid-page');
+    if(grid){ grid.style.columnGap = grid.style.columnGap || getComputedStyle(document.documentElement).getPropertyValue('--catalogo-gap') || '18px'; grid.style.rowGap = grid.style.rowGap || '80px'; }
 
         const data = await loadData();
 
@@ -79,9 +85,11 @@
 
         const initial = parseCatalogHash(); const tab = initial && initial.tab ? initial.tab : 'Películas'; const genre = initial && initial.genre ? initial.genre : 'Todo el catálogo'; populateGenresForTabPage(tab); tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=> x.classList.toggle('active', x.dataset.tab===tab)); genreBtn.textContent = genre + ' ▾'; applyFiltersAndRender(grid, data, tab, genre);
 
-        // lazy load
-        let lazyTimer=null; function onCatalogScroll(){ if(!grid) return; const threshold=300; const atBottom = grid.scrollHeight - (grid.scrollTop + grid.clientHeight) < threshold; if(atBottom){ if(lazyTimer) clearTimeout(lazyTimer); lazyTimer = setTimeout(()=>{ appendNextBatch(grid); lazyTimer=null; }, 120); } }
-        grid.addEventListener('scroll', onCatalogScroll);
+    // lazy load: listen to window scroll so long pages trigger loading
+    let lazyTimer=null;
+    function onCatalogScrollWindow(){ const threshold=700; const distanceFromBottom = document.documentElement.scrollHeight - (window.scrollY + window.innerHeight); if(distanceFromBottom < threshold){ if(lazyTimer) clearTimeout(lazyTimer); lazyTimer = setTimeout(()=>{ appendNextBatch(grid); lazyTimer=null; }, 120); } }
+    window.addEventListener('scroll', onCatalogScrollWindow, { passive:true });
+    if(grid) grid.addEventListener('scroll', ()=> onCatalogScrollWindow());
 
         // resize
         let resizeTimer=null; function onCatalogResize(){ if(resizeTimer) clearTimeout(resizeTimer); resizeTimer = setTimeout(()=>{ state.itemsPerRow = computeItemsPerRow(grid); state.initialBatchSize = Math.max(1, state.itemsPerRow * state.initialRows); state.subsequentBatchSize = Math.max(1, state.itemsPerRow * state.subsequentRows); if(state.renderedCount < Math.min(state.filteredItems.length, state.initialBatchSize)) appendNextBatch(grid); }, 120); }
@@ -91,6 +99,20 @@
         window.addEventListener('hashchange', ()=>{ const parsed = parseCatalogHash(); if(parsed && parsed.tab){ const tab = parsed.tab || 'Películas'; const genre = parsed.genre || 'Todo el catálogo'; tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=> x.classList.toggle('active', x.dataset.tab===tab)); genreBtn.textContent = genre + ' ▾'; populateGenresForTabPage(tab); applyFiltersAndRender(grid, data, tab, genre); } });
 
         document.addEventListener('click', (e)=>{ if(!e.target.closest('.catalogo-genre-dropdown')){ genreList.style.display='none'; genreBtn.setAttribute('aria-expanded','false'); } });
+
+        // Wrap createCard so hover shows the hover modal similar to index
+        const originalCreateCard = createCard;
+        createCard = function(it){
+            const el = originalCreateCard(it);
+            // hover handlers
+            el.addEventListener('mouseenter', ()=>{
+                try{ if(window.hoverModal && typeof window.hoverModal.show==='function'){ window.hoverModal.show(it, el); if(window.hoverModal.cancelHide) window.hoverModal.cancelHide(); } }catch(e){}
+            });
+            el.addEventListener('mouseleave', ()=>{
+                try{ if(window.hoverModal && typeof window.hoverModal.hide==='function'){ window.hoverModal.hide(300); } }catch(e){}
+            });
+            return el;
+        };
     }
 
     document.addEventListener('DOMContentLoaded', ()=>{ try{ initPage(); }catch(e){ console.error('catalogo page init error', e); } });
