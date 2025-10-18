@@ -3294,11 +3294,23 @@ button:focus {
     }
 }
 
-/* Estilos para los tooltips */
-.details-modal-action-btn:hover .tooltip {
+/* Estilos para los tooltips: ahora controlados por la clase .show-tooltip (se usará JS para long-press) */
+.details-modal-action-btn .tooltip {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-50%) translateY(6px);
+}
+.details-modal-action-btn.show-tooltip .tooltip,
+.details-modal-action-btn .tooltip.show-tooltip {
     opacity: 1;
     visibility: visible;
     transform: translateX(-50%) translateY(0);
+}
+
+/* Asegurar que en dispositivos con puntero fino el hover no muestre tooltip automáticamente
+   (mantener control por JS para consistencia entre touch y mouse) */
+@media (hover: hover) and (pointer: fine) {
+    /* En punteros finos no activamos tooltip por :hover; controlamos la visibilidad vía JS */
 }
 
 /* ===== SOLUCIÓN ESPECÍFICA PARA iOS ===== */
@@ -3349,7 +3361,7 @@ button:focus {
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.7);
-    z-index: 1004;
+    z-index: 12000 !important;
     display: none;
     justify-content: center;
     align-items: center;

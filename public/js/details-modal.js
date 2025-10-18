@@ -541,6 +541,42 @@ class DetailsModal {
                     window.shareModal.show({ ...item, shareUrl });
                 }
             });
+
+            // Long-press tooltips: mostrar tooltip solo si el usuario mantiene pulsado ~400ms.
+            const LONG_PRESS_MS = 400;
+            this.detailsModalBody.querySelectorAll('.details-modal-action-btn').forEach(btn => {
+                let holdTimer = null;
+                let moved = false;
+
+                const startHold = (e) => {
+                    e.preventDefault();
+                    moved = false;
+                    // marcar el elemento como el que podría mostrar tooltip
+                    holdTimer = setTimeout(() => {
+                        btn.classList.add('show-tooltip');
+                        const tooltip = btn.querySelector('.tooltip');
+                        if (tooltip) tooltip.classList.add('show-tooltip');
+                    }, LONG_PRESS_MS);
+                };
+
+                const cancelHold = (e) => {
+                    if (holdTimer) {
+                        clearTimeout(holdTimer);
+                        holdTimer = null;
+                    }
+                    btn.classList.remove('show-tooltip');
+                    const tooltip = btn.querySelector('.tooltip');
+                    if (tooltip) tooltip.classList.remove('show-tooltip');
+                };
+
+                btn.addEventListener('touchstart', startHold, { passive: false });
+                btn.addEventListener('mousedown', startHold);
+
+                btn.addEventListener('touchend', (e) => { cancelHold(e); });
+                btn.addEventListener('mouseup', (e) => { cancelHold(e); });
+                btn.addEventListener('mouseleave', (e) => { cancelHold(e); });
+                btn.addEventListener('touchmove', (e) => { moved = true; cancelHold(e); }, { passive: true });
+            });
         }, 100);
 
         // Insertar la sección de episodios de forma asíncrona (no bloquear el render)
