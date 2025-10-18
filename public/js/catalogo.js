@@ -638,4 +638,110 @@
     document.addEventListener('DOMContentLoaded', ()=>{
         try{ initCatalogo(); }catch(e){ console.error('catalogo init error', e); }
     });
+
+    // Inicializar catálogo como página (no modal)
+    async function initCatalogoPage(containerSelector = '#catalogo-page-root'){
+        // Create a page shell if not present
+        let root = document.querySelector(containerSelector);
+        if(!root){
+            root = document.createElement('div');
+            root.id = containerSelector.replace(/^#/, '');
+            root.className = 'catalogo-page-root';
+            document.body.appendChild(root);
+        }
+
+        // Build header for catalog page (reusing markup from modal)
+        root.innerHTML = `
+            <div class="catalogo-page">
+                <div class="catalogo-page-header">
+                    <div class="catalogo-controls">
+                        <div class="catalogo-genre-dropdown" id="catalogo-genre-dropdown-page">
+                            <button id="catalogo-genre-button-page" aria-haspopup="true" aria-expanded="false">Todo el catálogo ▾</button>
+                            <div id="catalogo-genre-list-page" class="catalogo-genre-list" style="display:none" role="menu"></div>
+                        </div>
+                    </div>
+                    <div class="catalogo-tabs" id="catalogo-tabs-page">
+                        <button data-tab="Películas" class="catalogo-tab active">Películas</button>
+                        <button data-tab="Series" class="catalogo-tab">Series</button>
+                        <button data-tab="Documentales" class="catalogo-tab">Documentales</button>
+                        <button data-tab="Animes" class="catalogo-tab">Animes</button>
+                    </div>
+                </div>
+                <div class="catalogo-page-body">
+                    <div class="carousel-skeleton" id="catalogo-skeleton-page" style="display:flex;gap:12px;flex-wrap:wrap;">
+                        <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
+                        <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
+                        <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
+                        <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
+                        <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
+                        <div class="skeleton-item"><div class="skeleton-spinner"></div></div>
+                    </div>
+                    <div class="catalogo-grid" id="catalogo-grid-page" role="list" aria-busy="false"></div>
+                </div>
+            </div>
+        `;
+
+        // Load data and wire controls using the same helpers
+        const data = await loadData();
+        // Populate tabs/genres for page variant
+        const tabsContainer = document.getElementById('catalogo-tabs-page');
+        const genreBtn = document.getElementById('catalogo-genre-button-page');
+        const genreList = document.getElementById('catalogo-genre-list-page');
+
+        function populateGenresForTabPage(tab){
+            const gens = extractGenres(data, tab);
+            genreList.innerHTML = '';
+            const allBtn = document.createElement('button');
+            allBtn.textContent = 'Todo el catálogo';
+            allBtn.classList.add('genre-item');
+            allBtn.addEventListener('click', ()=>{
+                genreBtn.textContent = 'Todo el catálogo ▾';
+                genreList.style.display = 'none';
+                updateCatalogHash(tab, 'Todo el catálogo');
+                applyFiltersAndRender(data, tab, 'Todo el catálogo');
+            });
+            genreList.appendChild(allBtn);
+            gens.forEach(g=>{
+                const b = document.createElement('button');
+                b.textContent = g;
+                b.classList.add('genre-item');
+                b.addEventListener('click', ()=>{
+                    genreBtn.textContent = g + ' ▾';
+                    genreList.style.display = 'none';
+                    updateCatalogHash(tab, g);
+                    applyFiltersAndRender(data, tab, g);
+                });
+                genreList.appendChild(b);
+            });
+        }
+
+        tabsContainer.querySelectorAll('.catalogo-tab').forEach(btn=>{
+            btn.addEventListener('click', ()=>{
+                tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=>x.classList.remove('active'));
+                btn.classList.add('active');
+                const tab = btn.dataset.tab;
+                populateGenresForTabPage(tab);
+                const currentGenre = genreBtn.textContent.replace(' ▾','') || 'Todo el catálogo';
+                updateCatalogHash(tab, currentGenre);
+                applyFiltersAndRender(data, tab, currentGenre);
+            });
+        });
+
+        genreBtn.addEventListener('click', ()=>{ genreList.style.display = genreList.style.display === 'none' ? 'grid' : 'none'; });
+
+        // When the page loads if URL has hash for catalog, respect it
+        const initial = parseCatalogHash();
+        const tab = initial && initial.tab ? initial.tab : 'Películas';
+        const genre = initial && initial.genre ? initial.genre : 'Todo el catálogo';
+        populateGenresForTabPage(tab);
+        tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=> x.classList.toggle('active', x.dataset.tab===tab));
+        genreBtn.textContent = genre + ' ▾';
+        applyFiltersAndRender(data, tab, genre);
+    }
+
+    // Expose API
+    window.Catalogo = {
+        initModal: initCatalogo,
+        initPage: initCatalogoPage || initCatalogoPage // placeholder in case hoisting
+    };
 })();
