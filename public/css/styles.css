@@ -6882,7 +6882,7 @@ html, body {
     margin-left: calc((100vw - 95vw) / 2);
     flex: 0 0 auto;
     width: 95vw;
-    height: 1484ç520px;
+    height: 1484px;
     margin-right: 1.5vw;
     position: relative;
     border-radius: 8px;
@@ -7121,13 +7121,13 @@ html, body {
 
 @media (min-width: 1400px) {
     .slider-section {
-        height: 510px;
+        height: 450px;
     }
     
     .slider-slide {
         width: 88vw;
         margin-right: 2.5vw;
-        height: 488px !important;
+        height: 429px !important;
         margin-left: 0px;
     }
     
