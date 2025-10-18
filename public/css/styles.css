@@ -198,6 +198,9 @@
     --item-width: 194px;
     --item-height: 271px;
     --modal-scale: 1.7;
+    /* Catalog grid gaps used by JS to compute items per row and pagination */
+    --catalogo-gap: 4px;
+    --catalogo-row-gap: 75px;
 }
 
 /* Definiciones de fuentes */

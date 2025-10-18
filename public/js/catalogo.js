@@ -46,7 +46,7 @@
 
     function computeItemsPerRow(grid){ if(!grid) return 6; const containerWidth = grid.clientWidth||document.documentElement.clientWidth; const rootStyles=getComputedStyle(document.documentElement); const itemW = parseInt(rootStyles.getPropertyValue('--item-width'))||194; const gap = parseInt(getComputedStyle(grid).getPropertyValue('gap'))||18; return Math.max(1, Math.floor((containerWidth+gap)/(itemW+gap))); }
 
-    function createCard(it){ const d = document.createElement('div'); d.className='catalogo-item'; d.dataset.itemId = it.id; d.setAttribute('role','listitem'); d.innerHTML = `<img src="${it.posterUrl||'https://via.placeholder.com/194x271'}" alt="${it.title}"><div class="catalogo-item-title">${it.title}</div>`; d.addEventListener('click', ()=>{ if(window.detailsModal && typeof window.detailsModal.show==='function'){ const norm = normalizeText(it.title); history.pushState({}, '', `#id=${encodeURIComponent(it.id)}&title=${encodeURIComponent(norm)}`); window.detailsModal.show(it, d).catch(()=>{}); } }); return d; }
+    function createCard(it){ const d = document.createElement('div'); d.className='catalogo-item'; d.dataset.itemId = it.id; d.setAttribute('role','listitem'); d.innerHTML = `<img loading="lazy" src="${it.posterUrl||'https://via.placeholder.com/194x271'}" alt="${it.title}"><div class="catalogo-item-title">${it.title}</div>`; d.addEventListener('click', ()=>{ if(window.detailsModal && typeof window.detailsModal.show==='function'){ const norm = normalizeText(it.title); history.pushState({}, '', `#id=${encodeURIComponent(it.id)}&title=${encodeURIComponent(norm)}`); try{ const res = window.detailsModal.show(it, d); if(res && typeof res.then === 'function'){ res.catch(()=>{}); } }catch(e){ console.error('Error al abrir detailsModal', e); } } }); return d; }
 
     function resetPagination(grid){ state.itemsPerRow = computeItemsPerRow(grid); state.initialBatchSize = Math.max(1, state.itemsPerRow * state.initialRows); state.subsequentBatchSize = Math.max(1, state.itemsPerRow * state.subsequentRows); state.renderedCount = 0; grid.innerHTML=''; }
 
@@ -77,11 +77,18 @@
 
         const data = await loadData();
 
-        function populateGenresForTabPage(tab){ const gens = extractGenres(data, tab); genreList.innerHTML=''; const allBtn = document.createElement('button'); allBtn.textContent='Todo el catálogo'; allBtn.classList.add('genre-item'); allBtn.addEventListener('click', ()=>{ genreBtn.textContent='Todo el catálogo ▾'; genreList.style.display='none'; updateCatalogHash(tab, 'Todo el catálogo'); applyFiltersAndRender(grid, data, tab, 'Todo el catálogo'); }); genreList.appendChild(allBtn); gens.forEach(g=>{ const b = document.createElement('button'); b.textContent=g; b.classList.add('genre-item'); b.addEventListener('click', ()=>{ genreBtn.textContent = g + ' ▾'; genreList.style.display='none'; updateCatalogHash(tab, g); applyFiltersAndRender(grid, data, tab, g); }); genreList.appendChild(b); }); }
+    function populateGenresForTabPage(tab){ const gens = extractGenres(data, tab); genreList.innerHTML=''; const allBtn = document.createElement('button'); allBtn.textContent='Todo el catálogo'; allBtn.classList.add('genre-item'); allBtn.addEventListener('click', ()=>{ // remove selected from others
+        genreList.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));
+        allBtn.classList.add('selected');
+        genreBtn.textContent='Todo el catálogo ▾'; genreList.style.display='none'; updateCatalogHash(tab, 'Todo el catálogo'); applyFiltersAndRender(grid, data, tab, 'Todo el catálogo'); }); genreList.appendChild(allBtn); gens.forEach(g=>{ const b = document.createElement('button'); b.textContent=g; b.classList.add('genre-item'); b.addEventListener('click', ()=>{ genreList.querySelectorAll('button').forEach(x=>x.classList.remove('selected')); b.classList.add('selected'); genreBtn.textContent = g + ' ▾'; genreList.style.display='none'; updateCatalogHash(tab, g); applyFiltersAndRender(grid, data, tab, g); }); genreList.appendChild(b); }); }
 
         tabsContainer.querySelectorAll('.catalogo-tab').forEach(btn=>{ btn.addEventListener('click', ()=>{ tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); const tab = btn.dataset.tab; populateGenresForTabPage(tab); const currentGenre = genreBtn.textContent.replace(' ▾','') || 'Todo el catálogo'; updateCatalogHash(tab, currentGenre); applyFiltersAndRender(grid, data, tab, currentGenre); }); });
 
-        genreBtn.addEventListener('click', ()=>{ genreList.style.display = genreList.style.display === 'none' ? 'grid' : 'none'; });
+        genreBtn.addEventListener('click', ()=>{
+            const isHidden = genreList.style.display === 'none' || getComputedStyle(genreList).display === 'none';
+            genreList.style.display = isHidden ? 'grid' : 'none';
+            genreBtn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+        });
 
         const initial = parseCatalogHash(); const tab = initial && initial.tab ? initial.tab : 'Películas'; const genre = initial && initial.genre ? initial.genre : 'Todo el catálogo'; populateGenresForTabPage(tab); tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=> x.classList.toggle('active', x.dataset.tab===tab)); genreBtn.textContent = genre + ' ▾'; applyFiltersAndRender(grid, data, tab, genre);
 
@@ -98,7 +105,7 @@
         // hash change
         window.addEventListener('hashchange', ()=>{ const parsed = parseCatalogHash(); if(parsed && parsed.tab){ const tab = parsed.tab || 'Películas'; const genre = parsed.genre || 'Todo el catálogo'; tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=> x.classList.toggle('active', x.dataset.tab===tab)); genreBtn.textContent = genre + ' ▾'; populateGenresForTabPage(tab); applyFiltersAndRender(grid, data, tab, genre); } });
 
-        document.addEventListener('click', (e)=>{ if(!e.target.closest('.catalogo-genre-dropdown')){ genreList.style.display='none'; genreBtn.setAttribute('aria-expanded','false'); } });
+    document.addEventListener('click', (e)=>{ if(!e.target.closest('.catalogo-genre-dropdown')){ genreList.style.display='none'; genreBtn.setAttribute('aria-expanded','false'); } });
 
         // Wrap createCard so hover shows the hover modal similar to index
         const originalCreateCard = createCard;
@@ -115,7 +122,14 @@
         };
     }
 
-    document.addEventListener('DOMContentLoaded', ()=>{ try{ initPage(); }catch(e){ console.error('catalogo page init error', e); } });
+    // Ensure initPage runs whether script is placed before or after DOMContentLoaded
+    function safeInit(){ try{ initPage(); }catch(e){ console.error('catalogo page init error', e); } }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', safeInit);
+    } else {
+        // already loaded
+        safeInit();
+    }
 
     // expose a minimal API to allow manual init if needed
     window.Catalogo = { initPage };

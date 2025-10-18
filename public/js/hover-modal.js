@@ -4,16 +4,21 @@ class HoverModal {
         this.modalContent = document.getElementById('modal-content');
         this.modalBackdrop = document.getElementById('modal-backdrop');
         this.modalBody = document.getElementById('modal-body');
-        this.carouselContainer = document.querySelector('.carousel-container');
+    // Try common carousel/container selectors; fallback to body so positioning still works
+    this.carouselContainer = document.querySelector('.carousel-container') || document.querySelector('.catalogo-grid') || document.querySelector('#catalogo-grid-page') || document.body;
         this.activeItem = null;
         this.hoverModalItem = null;
         this.hoverModalOrigin = { x: 0, y: 0 };
         this.hoverModalTimeout = null;
         this.isVisible = false;
 
-        if (!this.modalOverlay || !this.modalContent || !this.carouselContainer) {
+        if (!this.modalOverlay || !this.modalContent) {
             console.error("Elementos del hover modal no encontrados");
             return;
+        }
+        if (!this.carouselContainer) {
+            console.warn('HoverModal: carousel container no encontrado — usando document.body como fallback');
+            this.carouselContainer = document.body;
         }
         // Bind handlers once to avoid multiple attachments when show() is called repeatedly
         this._onMouseLeave = this._onMouseLeave.bind(this);
