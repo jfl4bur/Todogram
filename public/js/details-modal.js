@@ -519,6 +519,70 @@ class DetailsModal {
                     window.videoModal.play(videoUrl);
                 });
             });
+
+            // Long-press handling for mobile tooltips and to prevent tooltip from showing permanently
+            const LONG_PRESS_MS = 520; // threshold for long-press
+            this.detailsModalBody.querySelectorAll('.details-modal-action-btn').forEach(btn => {
+                // Skip if already wired
+                if (btn._longPressAttached) return;
+                btn._longPressAttached = true;
+
+                let longPressTimer = null;
+                let longPressed = false;
+
+                const clearLongPress = () => {
+                    if (longPressTimer) {
+                        clearTimeout(longPressTimer);
+                        longPressTimer = null;
+                    }
+                };
+
+                const onTouchStart = (e) => {
+                    // Only start long-press for touch input
+                    longPressed = false;
+                    clearLongPress();
+                    longPressTimer = setTimeout(() => {
+                        longPressed = true;
+                        btn.classList.add('active');
+                        // Dispatch a custom event to allow other listeners react if needed
+                        btn.dispatchEvent(new CustomEvent('longpress', { bubbles: true }));
+                    }, LONG_PRESS_MS);
+                };
+
+                const onTouchEnd = (e) => {
+                    clearLongPress();
+                    // If it was a long-press, prevent the following click from triggering actions
+                    if (longPressed) {
+                        // remove active after a short delay so user sees tooltip
+                        setTimeout(() => btn.classList.remove('active'), 600);
+                        // prevent the synthesized click
+                        e.preventDefault();
+                        e.stopPropagation();
+                        // mark to suppress next click
+                        btn._suppressNextClick = true;
+                        setTimeout(() => btn._suppressNextClick = false, 300);
+                    }
+                };
+
+                const onTouchCancel = (e) => {
+                    clearLongPress();
+                };
+
+                const onClick = (e) => {
+                    if (btn._suppressNextClick) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        return;
+                    }
+                    // For non-touch or normal clicks, ensure tooltip class is not permanently left
+                    btn.classList.remove('active');
+                };
+
+                btn.addEventListener('touchstart', onTouchStart, { passive: true });
+                btn.addEventListener('touchend', onTouchEnd);
+                btn.addEventListener('touchcancel', onTouchCancel);
+                btn.addEventListener('click', onClick);
+            });
             
             this.detailsModalBody.querySelectorAll('.details-modal-gallery-item').forEach(item => {
                 item.addEventListener('click', (e) => {
@@ -540,42 +604,6 @@ class DetailsModal {
                     const shareUrl = window.generateShareUrl(item, currentUrl);
                     window.shareModal.show({ ...item, shareUrl });
                 }
-            });
-
-            // Long-press tooltips: mostrar tooltip solo si el usuario mantiene pulsado ~400ms.
-            const LONG_PRESS_MS = 400;
-            this.detailsModalBody.querySelectorAll('.details-modal-action-btn').forEach(btn => {
-                let holdTimer = null;
-                let moved = false;
-
-                const startHold = (e) => {
-                    e.preventDefault();
-                    moved = false;
-                    // marcar el elemento como el que podría mostrar tooltip
-                    holdTimer = setTimeout(() => {
-                        btn.classList.add('show-tooltip');
-                        const tooltip = btn.querySelector('.tooltip');
-                        if (tooltip) tooltip.classList.add('show-tooltip');
-                    }, LONG_PRESS_MS);
-                };
-
-                const cancelHold = (e) => {
-                    if (holdTimer) {
-                        clearTimeout(holdTimer);
-                        holdTimer = null;
-                    }
-                    btn.classList.remove('show-tooltip');
-                    const tooltip = btn.querySelector('.tooltip');
-                    if (tooltip) tooltip.classList.remove('show-tooltip');
-                };
-
-                btn.addEventListener('touchstart', startHold, { passive: false });
-                btn.addEventListener('mousedown', startHold);
-
-                btn.addEventListener('touchend', (e) => { cancelHold(e); });
-                btn.addEventListener('mouseup', (e) => { cancelHold(e); });
-                btn.addEventListener('mouseleave', (e) => { cancelHold(e); });
-                btn.addEventListener('touchmove', (e) => { moved = true; cancelHold(e); }, { passive: true });
             });
         }, 100);
 

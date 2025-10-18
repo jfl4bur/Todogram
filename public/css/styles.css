@@ -11,32 +11,6 @@
     margin: 0;
     padding: 0;
 }
-
-/* ===== OVERRIDE: asegurar que los tooltips sólo se muestren via JS (.show-tooltip) ===== */
-/* Esto fuerza ocultación y evita que reglas anteriores por :hover los muestren accidentalmente */
-.details-modal-action-btn .tooltip {
-    opacity: 0 !important;
-    visibility: hidden !important;
-    transform: translateX(-50%) translateY(6px) !important;
-    pointer-events: none !important;
-    transition: all 0.18s cubic-bezier(.2,.9,.2,1) !important;
-}
-.details-modal-action-btn.show-tooltip .tooltip,
-.details-modal-action-btn .tooltip.show-tooltip {
-    opacity: 1 !important;
-    visibility: visible !important;
-    transform: translateX(-50%) translateY(0) !important;
-    pointer-events: auto !important;
-}
-
-/* También bloquear selectores :hover específicos por si aún existen más abajo */
-.details-modal-action-btn:hover .tooltip {
-    opacity: 0 !important;
-    visibility: hidden !important;
-}
-
-/* Nota: la visibilidad efectiva se controla añadiendo/removiendo la clase .show-tooltip desde JS
-   (implementada en public/js/details-modal.js como long-press). */
 .episodios-series-item .poster-container {
     width: 100%;
     aspect-ratio: 16/9;
@@ -3274,11 +3248,11 @@ button:focus {
         max-height: calc(1.5em * 3);
     }
 
-    /* Tooltip styles for mobile */
+    /* Tooltip styles for mobile: hidden by default, shown when button has .active (long-press) */
     .details-modal-action-btn .tooltip {
-        display: block !important;
-        opacity: 1 !important;
-        visibility: visible !important;
+        display: block;
+        opacity: 0;
+        visibility: hidden;
         position: fixed;
         bottom: 70px;
         left: 50%;
@@ -3293,7 +3267,18 @@ button:focus {
         text-align: center;
         min-width: 120px;
         white-space: nowrap;
-        animation: tooltipFadeIn 0.3s ease;
+        pointer-events: none;
+        transition: opacity 200ms ease, transform 200ms ease;
+    }
+
+    /* Show tooltip only when the action button has .active (set on long-press) */
+    .details-modal-action-btn.active .tooltip,
+    .modal-actions .details-modal-action-btn.active .tooltip {
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: translateX(-50%) translateY(0);
+        pointer-events: auto;
+        animation: tooltipFadeIn 0.18s ease;
     }
     
     @keyframes tooltipFadeIn {
@@ -3320,23 +3305,15 @@ button:focus {
     }
 }
 
-/* Estilos para los tooltips: ahora controlados por la clase .show-tooltip (se usará JS para long-press) */
-.details-modal-action-btn .tooltip {
-    opacity: 0;
-    visibility: hidden;
-    transform: translateX(-50%) translateY(6px);
-}
-.details-modal-action-btn.show-tooltip .tooltip,
-.details-modal-action-btn .tooltip.show-tooltip {
+/* Ensure share modal sits above details modal */
+#share-modal-overlay { z-index: 12100 !important; }
+#share-modal-content { z-index: 12150 !important; }
+
+/* Estilos para los tooltips */
+.details-modal-action-btn:hover .tooltip {
     opacity: 1;
     visibility: visible;
     transform: translateX(-50%) translateY(0);
-}
-
-/* Asegurar que en dispositivos con puntero fino el hover no muestre tooltip automáticamente
-   (mantener control por JS para consistencia entre touch y mouse) */
-@media (hover: hover) and (pointer: fine) {
-    /* En punteros finos no activamos tooltip por :hover; controlamos la visibilidad vía JS */
 }
 
 /* ===== SOLUCIÓN ESPECÍFICA PARA iOS ===== */
@@ -3387,7 +3364,7 @@ button:focus {
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.7);
-    z-index: 12000 !important;
+    z-index: 1004;
     display: none;
     justify-content: center;
     align-items: center;
