@@ -200,7 +200,7 @@
     --modal-scale: 1.7;
     /* Catalog grid gaps used by JS to compute items per row and pagination */
     --catalogo-gap: 4px;
-    --catalogo-row-gap: 75px;
+    --catalogo-row-gap: 48px;
 }
 
 /* Definiciones de fuentes */

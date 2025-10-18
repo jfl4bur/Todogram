@@ -11,79 +11,91 @@ class ShareModal {
         this.currentShareUrl = '';
         this.isVisible = false;
 
-        if (!this.shareModalOverlay || !this.shareModalContent || !this.shareModalClose || !this.sharePreviewImage || 
-            !this.sharePreviewTitle || !this.sharePreviewDescription || !this.shareLinkInput || !this.shareLinkButton) {
-            console.error("Algunos elementos del modal de compartir no encontrados:", {
-                shareModalOverlay: this.shareModalOverlay,
-                shareModalContent: this.shareModalContent,
-                shareModalClose: this.shareModalClose,
-                sharePreviewImage: this.sharePreviewImage,
-                sharePreviewTitle: this.sharePreviewTitle,
-                sharePreviewDescription: this.sharePreviewDescription,
-                shareLinkInput: this.shareLinkInput,
-                shareLinkButton: this.shareLinkButton
-            });
-            return;
-        }
+        // Warn if optional elements are missing but continue: modal can still work with minimal UI
+        const missing = [];
+        if (!this.shareModalOverlay) missing.push('shareModalOverlay');
+        if (!this.shareModalContent) missing.push('shareModalContent');
+        if (!this.shareModalClose) missing.push('shareModalClose');
+        if (!this.sharePreviewImage) missing.push('sharePreviewImage');
+        if (!this.sharePreviewTitle) missing.push('sharePreviewTitle');
+        if (!this.sharePreviewDescription) missing.push('sharePreviewDescription');
+        if (!this.shareLinkInput) missing.push('shareLinkInput');
+        if (!this.shareLinkButton) missing.push('shareLinkButton');
+        if (missing.length) console.warn('ShareModal: faltan elementos opcionales en el DOM:', missing);
 
         this.setupEventListeners();
     }
 
     setupEventListeners() {
-        this.shareModalClose.addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.close();
-        });
-        
-        this.shareModalOverlay.addEventListener('click', (e) => {
-            if (e.target === this.shareModalOverlay) {
+        if (this.shareModalClose) {
+            this.shareModalClose.addEventListener('click', (e) => {
+                e.stopPropagation();
                 this.close();
-            }
-        });
-        
-        this.shareLinkButton.addEventListener('click', () => this.copyShareLink());
-        
+            });
+        }
+
+        if (this.shareModalOverlay) {
+            this.shareModalOverlay.addEventListener('click', (e) => {
+                if (e.target === this.shareModalOverlay) this.close();
+            });
+        }
+
+        if (this.shareLinkButton) this.shareLinkButton.addEventListener('click', () => this.copyShareLink());
+
         document.getElementById('share-facebook')?.addEventListener('click', () => this.shareOnSocial('facebook'));
         document.getElementById('share-twitter')?.addEventListener('click', () => this.shareOnSocial('twitter'));
         document.getElementById('share-whatsapp')?.addEventListener('click', () => this.shareOnSocial('whatsapp'));
         document.getElementById('share-telegram')?.addEventListener('click', () => this.shareOnSocial('telegram'));
         document.getElementById('share-link')?.addEventListener('click', () => this.copyShareLink());
     }
-
     show(item) {
-        if (!item || !item.shareUrl || this.isVisible) {
-            console.error('Item o shareUrl no definidos, o modal ya visible:', item);
+        if (!item || this.isVisible) {
+            console.warn('ShareModal.show llamado sin item o modal ya visible', item);
             return;
         }
-        
+
+        // Generar shareUrl si falta
+        if (!item.shareUrl) {
+            try {
+                const url = new URL(window.location.href);
+                const hashParts = [];
+                if (item.id) hashParts.push('id=' + encodeURIComponent(item.id));
+                if (item.title) hashParts.push('title=' + encodeURIComponent(item.title));
+                if (hashParts.length) url.hash = hashParts.join('&');
+                item.shareUrl = url.toString();
+            } catch (err) {
+                item.shareUrl = window.location.href;
+            }
+        }
+
         this.isVisible = true;
-        
-        // Actualizar elementos del modal con datos dinámicos del item
-        this.sharePreviewImage.src = item.posterUrl || 'https://via.placeholder.com/194x271';
-        this.sharePreviewImage.onerror = function() {
-            this.src = 'https://via.placeholder.com/194x271';
-        };
-        
-        this.sharePreviewTitle.textContent = item.title || 'Título no disponible';
-        
+
+        // Actualizar elementos del modal con datos dinámicos del item (usar guards)
+        if (this.sharePreviewImage) {
+            this.sharePreviewImage.src = item.posterUrl || 'https://via.placeholder.com/194x271';
+            this.sharePreviewImage.onerror = function() { this.src = 'https://via.placeholder.com/194x271'; };
+        }
+
+        if (this.sharePreviewTitle) this.sharePreviewTitle.textContent = item.title || 'Título no disponible';
+
         const maxLength = 120;
         let description = item.description || 'Descripción no disponible';
-        if (description.length > maxLength) {
-            description = description.substring(0, maxLength) + '...';
-        }
-        this.sharePreviewDescription.textContent = description;
-        
-        this.shareLinkInput.value = item.shareUrl;
+        if (description.length > maxLength) description = description.substring(0, maxLength) + '...';
+        if (this.sharePreviewDescription) this.sharePreviewDescription.textContent = description;
+
+        if (this.shareLinkInput) this.shareLinkInput.value = item.shareUrl;
         this.currentShareUrl = item.shareUrl;
-        
-        // Mostrar el modal
-        this.shareModalOverlay.style.display = 'flex';
+
+        // Mostrar el modal (si existen elementos)
+        if (this.shareModalOverlay) this.shareModalOverlay.style.display = 'flex';
         document.body.style.overflow = 'hidden';
-        
-        setTimeout(() => {
-            this.shareModalContent.style.opacity = '1';
-            this.shareModalContent.style.transform = 'translateY(0)';
-        }, 10);
+
+        if (this.shareModalContent) {
+            setTimeout(() => {
+                this.shareModalContent.style.opacity = '1';
+                this.shareModalContent.style.transform = 'translateY(0)';
+            }, 10);
+        }
     }
 
     close() {

@@ -109,7 +109,7 @@
         const genreBtn = document.getElementById('catalogo-genre-button-page');
         const genreList = document.getElementById('catalogo-genre-list-page');
     const grid = document.getElementById('catalogo-grid-page');
-    if(grid){ grid.style.columnGap = grid.style.columnGap || getComputedStyle(document.documentElement).getPropertyValue('--catalogo-gap') || '18px'; grid.style.rowGap = grid.style.rowGap || '80px'; }
+    if(grid){ grid.style.columnGap = grid.style.columnGap || getComputedStyle(document.documentElement).getPropertyValue('--catalogo-gap') || '18px'; grid.style.rowGap = grid.style.rowGap || getComputedStyle(document.documentElement).getPropertyValue('--catalogo-row-gap') || '48px'; }
 
         const data = await loadData();
 
@@ -143,19 +143,34 @@
 
     document.addEventListener('click', (e)=>{ if(!e.target.closest('.catalogo-genre-dropdown')){ genreList.style.display='none'; genreBtn.setAttribute('aria-expanded','false'); } });
 
-        // Wrap createCard so hover shows the hover modal similar to index
+        // Wrap createCard so we can later replace behaviour if needed; keep it lightweight (no per-item hover listeners)
         const originalCreateCard = createCard;
         createCard = function(it){
-            const el = originalCreateCard(it);
-            // hover handlers
-            el.addEventListener('mouseenter', ()=>{
-                try{ if(window.hoverModal && typeof window.hoverModal.show==='function'){ window.hoverModal.show(it, el); if(window.hoverModal.cancelHide) window.hoverModal.cancelHide(); } }catch(e){}
-            });
-            el.addEventListener('mouseleave', ()=>{
-                try{ if(window.hoverModal && typeof window.hoverModal.hide==='function'){ window.hoverModal.hide(300); } }catch(e){}
-            });
-            return el;
+            return originalCreateCard(it);
         };
+
+        // Delegated hover handlers: funcionan para items ya renderizados y para elementos que se agreguen posteriormente
+        if (grid && !grid.__hover_delegation_installed) {
+            grid.addEventListener('mouseover', (e) => {
+                const itemEl = e.target.closest('.catalogo-item');
+                if (!itemEl || !grid.contains(itemEl)) return;
+                const itemId = itemEl.dataset.itemId;
+                if (!itemId) return;
+                const item = state.allItems.find(x => String(x.id) === String(itemId));
+                if (item && window.hoverModal && typeof window.hoverModal.show === 'function') {
+                    try { window.hoverModal.show(item, itemEl); if(window.hoverModal.cancelHide) window.hoverModal.cancelHide(); } catch(err) { console.error('hoverModal.show error', err); }
+                }
+            });
+
+            grid.addEventListener('mouseout', (e) => {
+                const related = e.relatedTarget;
+                if (related && related.closest && related.closest('.catalogo-item')) return;
+                if (window.hoverModal && (typeof window.hoverModal.hide === 'function' || typeof window.hoverModal.close === 'function')) {
+                    try { if(window.hoverModal.hide) window.hoverModal.hide(250); else window.hoverModal.close(); } catch(err) { console.error('hoverModal.hide error', err); }
+                }
+            });
+            grid.__hover_delegation_installed = true;
+        }
     }
 
     // Ensure initPage runs whether script is placed before or after DOMContentLoaded
