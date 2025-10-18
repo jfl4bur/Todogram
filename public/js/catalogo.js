@@ -16,18 +16,25 @@
 
     function buildItemFromData(d, index){
         return {
-            id: d['ID TMDB'] ? d['ID TMDB'] : `i_${index}`,
+            id: d['ID TMDB'] ? String(d['ID TMDB']) : `i_${index}`,
             title: d['Título'] || d['Título original'] || 'Sin título',
-            description: d['Synopsis'] || '',
-            posterUrl: d['Portada'] || d['Carteles'] || '',
+            originalTitle: d['Título original'] || '',
+            description: d['Synopsis'] || d['Sinopsis'] || d['Descripción'] || '',
+            posterUrl: d['Portada'] || '',
+            postersUrl: d['Carteles'] || '',
             backgroundUrl: d['Carteles'] || d['Portada'] || '',
             category: d['Categoría'] || 'Películas',
             genres: d['Géneros'] || '',
             year: d['Año'] || '',
-            videoIframe: d['Video iframe'] || '',
-            videoIframe1: d['Video iframe 1'] || d['Video iframe1'] || '',
-            videoUrl: d['Video'] || d['Enlace'] || '' ,
-            trailerUrl: d['Trailer'] || d['TrailerUrl'] || ''
+            duration: d['Duración'] || '',
+            videoIframe: d['Video iframe'] || d['Video iframe 1'] || d['Video iframe1'] || '',
+            videoUrl: d['Video'] || d['Enlace'] || d['Ver Película'] || '',
+            trailerUrl: d['Trailer'] || d['TrailerUrl'] || '',
+            cast: d['Reparto principal'] || d['Reparto'] || '',
+            audiosCount: d['Audios'] ? String(d['Audios']).split(',').length : 0,
+            subtitlesCount: d['Subtítulos'] ? String(d['Subtítulos']).split(',').length : 0,
+            audioList: d['Audios'] ? String(d['Audios']).split(',').map(s=>s.trim()) : [],
+            subtitleList: d['Subtítulos'] ? String(d['Subtítulos']).split(',').map(s=>s.trim()) : []
         };
     }
 
@@ -42,9 +49,20 @@
     }
 
     // state
-    const state = { allItems: [], filteredItems: [], renderedCount:0, initialRows:6, subsequentRows:3, itemsPerRow:0, initialBatchSize:0, subsequentBatchSize:0, loading:false };
+    const state = { allItems: [], filteredItems: [], renderedCount:0, initialRows:5, subsequentRows:3, itemsPerRow:0, initialBatchSize:0, subsequentBatchSize:0, loading:false };
 
-    function computeItemsPerRow(grid){ if(!grid) return 6; const containerWidth = grid.clientWidth||document.documentElement.clientWidth; const rootStyles=getComputedStyle(document.documentElement); const itemW = parseInt(rootStyles.getPropertyValue('--item-width'))||194; const gap = parseInt(getComputedStyle(grid).getPropertyValue('gap'))||18; return Math.max(1, Math.floor((containerWidth+gap)/(itemW+gap))); }
+    function computeItemsPerRow(grid){
+        if(!grid) return 6;
+        const containerWidth = grid.clientWidth || document.documentElement.clientWidth;
+        const rootStyles = getComputedStyle(document.documentElement);
+        const itemW = parseInt(rootStyles.getPropertyValue('--item-width')) || 194;
+        // Prefer column-gap (grid) otherwise fallback to gap
+        const gridStyles = getComputedStyle(grid);
+        const gapValue = gridStyles.getPropertyValue('column-gap') || gridStyles.getPropertyValue('gap') || rootStyles.getPropertyValue('--catalogo-gap') || '18px';
+        const gap = parseInt(gapValue) || 18;
+        // compute how many items fit per row
+        return Math.max(1, Math.floor((containerWidth + gap) / (itemW + gap)));
+    }
 
     function createCard(it){ const d = document.createElement('div'); d.className='catalogo-item'; d.dataset.itemId = it.id; d.setAttribute('role','listitem'); d.innerHTML = `<img loading="lazy" src="${it.posterUrl||'https://via.placeholder.com/194x271'}" alt="${it.title}"><div class="catalogo-item-title">${it.title}</div>`; d.addEventListener('click', ()=>{ if(window.detailsModal && typeof window.detailsModal.show==='function'){ const norm = normalizeText(it.title); history.pushState({}, '', `#id=${encodeURIComponent(it.id)}&title=${encodeURIComponent(norm)}`); try{ const res = window.detailsModal.show(it, d); if(res && typeof res.then === 'function'){ res.catch(()=>{}); } }catch(e){ console.error('Error al abrir detailsModal', e); } } }); return d; }
 
@@ -52,7 +70,24 @@
 
     function renderSlice(grid, start, end){ const f = document.createDocumentFragment(); for(let i=start;i<end&&i<state.filteredItems.length;i++){ f.appendChild(createCard(state.filteredItems[i])); } grid.appendChild(f); }
 
-    function appendNextBatch(grid){ if(state.loading) return; if(state.renderedCount >= state.filteredItems.length) return; state.loading=true; const isInitial = state.renderedCount===0; const batch = isInitial?state.initialBatchSize:state.subsequentBatchSize; const start=state.renderedCount; const end=Math.min(state.renderedCount+batch, state.filteredItems.length); renderSlice(grid, start, end); state.renderedCount=end; if(start===0){ const sk = document.querySelector('#catalogo-skeleton-page'); if(sk) sk.style.display='none'; } state.loading=false; }
+    function appendNextBatch(grid){
+        if(state.loading) return;
+        if(state.renderedCount >= state.filteredItems.length) return;
+        state.loading = true;
+        const isInitial = state.renderedCount === 0;
+        const batch = isInitial ? state.initialBatchSize : state.subsequentBatchSize;
+        const start = state.renderedCount;
+        const end = Math.min(state.renderedCount + batch, state.filteredItems.length);
+        renderSlice(grid, start, end);
+        state.renderedCount = end;
+        if (start === 0) {
+            const sk = document.querySelector('#catalogo-skeleton-page'); if (sk) sk.style.display = 'none';
+            console.info(`Catalogo: cargados ${state.renderedCount} items (inicial)`);
+        } else {
+            console.info(`Catalogo: cargados ${end - start} items, total ${state.renderedCount}`);
+        }
+        state.loading = false;
+    }
 
     function applyFiltersAndRender(grid, data, tab, genre){ state.allItems = (data||[]).map(buildItemFromData); state.filteredItems = state.allItems.filter(it=>{ if(tab && it.category && it.category!==tab) return false; if(genre && genre!=='Todo el catálogo'){ const gens = (it.genres||'').split('·').map(x=>x.trim()); if(!gens.includes(genre)) return false; } return true; }); resetPagination(grid); appendNextBatch(grid); }
 

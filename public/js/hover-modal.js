@@ -60,7 +60,9 @@ class HoverModal {
             this.src = 'https://www.themoviedb.org/assets/2/v4/glyphicons/basic/glyphicons-basic-4-user-grey-d8fe957375e70239d6abdd549fd7568c89281b2179b5f4470e2e12895792dfa5.svg';
         };
         
-        const trailerUrl = item.trailerUrl;
+    const trailerUrl = item.trailerUrl;
+    // Accept iframe-based video links too (many records use 'Video iframe')
+    const preferredVideo = item.videoUrl || item.videoIframe || item.videoIframe1 || item.videoIframe1 || item.videoIframe;
         
         let metaItems = [];
         
@@ -80,7 +82,7 @@ class HoverModal {
         
         let actionButtons = '';
         
-        if (item.videoUrl) {
+        if (preferredVideo) {
             actionButtons += `
                 <div class="primary-action-row">
                     <button class="details-modal-action-btn primary" data-video-url="${item.videoUrl}">
@@ -133,17 +135,21 @@ class HoverModal {
             <p class="description">${item.description}</p>
         `;
         
+        // show overlay first so computed styles (width) are available for accurate positioning
+    // Allow pointer events on overlay so modalContent can receive mouseenter/mouseleave reliably
+    this.modalOverlay.style.display = 'block';
+    this.modalOverlay.style.pointerEvents = 'auto';
+        // force reflow so computed sizes are correct
+        void this.modalContent.offsetWidth;
+
         const position = this.calculateModalPosition(itemElement);
 
-    // position modal (keep transform for centering in CSS)
-    this.modalContent.style.left = `${position.left}px`;
-    this.modalContent.style.top = `${position.top}px`;
+        // position modal (keep transform for centering in CSS)
+        this.modalContent.style.left = `${position.left}px`;
+        this.modalContent.style.top = `${position.top}px`;
 
-    // show overlay and then add 'show' class to trigger CSS transition
-    this.modalOverlay.style.display = 'block';
-    // force reflow then set show class
-    void this.modalContent.offsetWidth;
-    this.modalContent.classList.add('show');
+        // then add 'show' class to trigger CSS transition
+        this.modalContent.classList.add('show');
 
         // Store current item and origin for use by delegated handlers
         this._currentItem = item;
@@ -160,6 +166,7 @@ class HoverModal {
 
         setTimeout(() => {
             this.modalOverlay.style.display = 'none';
+            this.modalOverlay.style.pointerEvents = 'none';
             window.isModalOpen = false;
             window.activeItem = null;
             window.hoverModalItem = null;
