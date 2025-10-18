@@ -29,6 +29,29 @@ class VideoModal {
     play(url) {
         if (!url || this.isPlaying) return;
 
+        // If caller passed an item object or an array of URLs, normalize to candidate list
+        const normalizeToCandidates = (input) => {
+            // If string, return array with that string
+            if (!input) return [];
+            if (Array.isArray(input)) return input.filter(Boolean);
+            if (typeof input === 'string') return [input];
+            // If it's an item-like object, extract likely video fields
+            const candidates = [];
+            const pushIf = (val) => { if (val && typeof val === 'string' && val.trim() !== '') candidates.push(val.trim()); };
+            // Common field names found in dataset
+            pushIf(input.videoIframe || input.videoIframe1 || input.videoUrl || input.video);
+            // add separately if both exist
+            pushIf(input.videoIframe1);
+            pushIf(input.videoUrl);
+            // also include legacy names
+            pushIf(input.videoIframe);
+            // Remove duplicates preserving order
+            return [...new Set(candidates)];
+        };
+
+        const candidates = normalizeToCandidates(url);
+        if (!candidates || candidates.length === 0) return;
+
         // Helper to safely construct URL objects (add https:// if missing)
         const makeUrl = (raw) => {
             try { return new URL(raw); }
@@ -38,9 +61,9 @@ class VideoModal {
             }
         };
 
-        // If youtube, use direct embed and skip fallback logic
-        if (url.includes('youtube.com') || url.includes('youtu.be')) {
-            const embedUrl = this.getYouTubeEmbedUrl(url);
+        // If a single candidate is youtube, handle it directly
+        if (candidates.length === 1 && (candidates[0].includes('youtube.com') || candidates[0].includes('youtu.be'))) {
+            const embedUrl = this.getYouTubeEmbedUrl(candidates[0]);
             if (!embedUrl) return;
             this.isPlaying = true;
             this.videoIframe.src = embedUrl;
@@ -53,125 +76,81 @@ class VideoModal {
         const PRIMARY = 'todogram.upn.one';
         const SECONDARY = 'todogram.strp2p.live';
 
-        // Attempt to normalize the provided URL and prepare preferred/fallback variants
-        let provided = makeUrl(url);
-        let preferredUrl = null;
-        let fallbackUrl = null;
-
-        if (provided) {
-            // If the provided host already matches primary, preferred = provided
-            if (provided.host.includes('upn.one') || provided.host === PRIMARY) {
-                preferredUrl = provided.href;
-                // build fallback by replacing host
-                try { const u2 = new URL(preferredUrl); u2.host = SECONDARY; fallbackUrl = u2.href; } catch (e) { fallbackUrl = null; }
-            } else if (provided.host.includes('strp2p.live') || provided.host === SECONDARY) {
-                // If provided is secondary, still try primary first by swapping host
-                try { const upnCandidate = new URL(provided.href); upnCandidate.host = PRIMARY; preferredUrl = upnCandidate.href; } catch (e) { preferredUrl = provided.href; }
-                fallbackUrl = provided.href;
-            } else {
-                // Unknown host: attempt both by constructing variants replacing hostname if possible
-                preferredUrl = provided.href;
-                try { const swap = new URL(preferredUrl); swap.host = PRIMARY; preferredUrl = swap.href; swap.host = SECONDARY; fallbackUrl = swap.href; } catch (e) { fallbackUrl = null; }
+        // Build candidate list including host-swapped variants when possible (prefer upn.one)
+        const expandCandidates = (list) => {
+            const expanded = [];
+            for (const raw of list) {
+                if (!raw) continue;
+                expanded.push(raw);
+                const u = makeUrl(raw);
+                if (!u) continue;
+                // If it's upn.one, push an strp2p variant as fallback
+                if (u.host.includes('upn.one')) {
+                    try { const alt = new URL(u.href); alt.host = 'todogram.strp2p.live'; expanded.push(alt.href); } catch (e) {}
+                } else if (u.host.includes('strp2p.live')) {
+                    try { const alt = new URL(u.href); alt.host = 'todogram.upn.one'; expanded.push(alt.href); } catch (e) {}
+                }
             }
-        } else {
-            // As a fallback, attempt naive string replacements
-            if (url.includes('upn.one')) {
-                preferredUrl = url;
-                fallbackUrl = url.replace(/upn\.one/g, 'strp2p.live');
-            } else if (url.includes('strp2p.live')) {
-                preferredUrl = url.replace(/strp2p\.live/g, 'upn.one');
-                fallbackUrl = url;
-            } else {
-                preferredUrl = url;
-                fallbackUrl = null;
+            // Remove duplicates preserving order
+            return [...new Set(expanded)];
+        };
+
+        const expandedCandidates = expandCandidates(candidates);
+
+        // Attempt to load candidates sequentially
+        const iframe = this.videoIframe;
+        if (this._loadTimeout) { clearTimeout(this._loadTimeout); this._loadTimeout = null; }
+
+        const attemptIndex = { i: 0 };
+
+        const attemptNext = () => {
+            if (attemptIndex.i >= expandedCandidates.length) {
+                // all failed
+                console.error('VideoModal: todos los candidatos fallaron', expandedCandidates);
+                this.isPlaying = false;
+                iframe.src = '';
+                this.showLoadError();
+                return;
             }
-        }
 
-        // Function to attempt loading into iframe with fallback logic
-        const tryLoad = (first, second) => {
-            if (!first && !second) return;
-            this.isPlaying = true;
-            this.videoModalOverlay.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
+            const src = expandedCandidates[attemptIndex.i++];
+            let didFinish = false;
 
-            const iframe = this.videoIframe;
-
-            // cleanup helpers
-            if (this._loadTimeout) { clearTimeout(this._loadTimeout); this._loadTimeout = null; }
-            const cleanup = () => {
+            const cleanupAttempt = () => {
                 if (this._loadTimeout) { clearTimeout(this._loadTimeout); this._loadTimeout = null; }
                 iframe.onload = null;
                 iframe.onerror = null;
             };
 
-            const setSrcAndWatch = (src, onSuccess, onFail, timeoutMs = 3500) => {
-                try {
-                    iframe.src = src;
-                } catch (e) {
-                    onFail && onFail(e);
-                    return;
-                }
-
-                let didFinish = false;
-
-                iframe.onload = () => {
-                    if (didFinish) return; didFinish = true;
-                    cleanup();
-                    onSuccess && onSuccess();
-                };
-
-                iframe.onerror = () => {
-                    if (didFinish) return; didFinish = true;
-                    cleanup();
-                    onFail && onFail(new Error('iframe error'));
-                };
-
-                // Timeout: if iframe doesn't load in time, treat as failure and try fallback
-                this._loadTimeout = setTimeout(() => {
-                    if (didFinish) return;
-                    didFinish = true;
-                    cleanup();
-                    onFail && onFail(new Error('timeout'));
-                }, timeoutMs);
+            iframe.onload = () => {
+                if (didFinish) return; didFinish = true;
+                cleanupAttempt();
+                // success
             };
 
-            // Try primary
-            if (first) {
-                setSrcAndWatch(first, () => {
-                    // success on primary
-                }, (err) => {
-                    // attempt secondary if available
-                    if (second) {
-                        setSrcAndWatch(second, () => {}, (err2) => {
-                            // both failed
-                            console.error('VideoModal: fallo al cargar primary y fallback', err, err2);
-                            cleanup();
-                            this.isPlaying = false;
-                            iframe.src = '';
-                            // show minimal error UI inside overlay
-                            this.showLoadError();
-                        });
-                    } else {
-                        console.error('VideoModal: fallo al cargar primary y no hay fallback', err);
-                        cleanup();
-                        this.isPlaying = false;
-                        iframe.src = '';
-                        this.showLoadError();
-                    }
-                });
-            } else if (second) {
-                // Only second available
-                setSrcAndWatch(second, () => {}, (err) => {
-                    console.error('VideoModal: fallo al cargar (solo fallback) ', err);
-                    cleanup();
-                    this.isPlaying = false;
-                    iframe.src = '';
-                    this.showLoadError();
-                });
-            }
+            iframe.onerror = () => {
+                if (didFinish) return; didFinish = true;
+                cleanupAttempt();
+                // try next
+                attemptNext();
+            };
+
+            // Timeout per attempt
+            this._loadTimeout = setTimeout(() => {
+                if (didFinish) return; didFinish = true;
+                cleanupAttempt();
+                attemptNext();
+            }, 4000);
+
+            // Set iframe to candidate
+            try { iframe.src = src; } catch (e) { cleanupAttempt(); attemptNext(); }
+            // Ensure modal visible
+            this.isPlaying = true;
+            this.videoModalOverlay.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
         };
 
-        tryLoad(preferredUrl, fallbackUrl);
+        attemptNext();
     }
 
     close() {

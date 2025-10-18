@@ -515,8 +515,11 @@ class DetailsModal {
             this.detailsModalBody.querySelectorAll('.details-modal-action-btn[data-video-url]').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    const videoUrl = btn.getAttribute('data-video-url');
-                    window.videoModal.play(videoUrl);
+                    const item = window.activeItem || window.activeItem;
+                    if (window.videoModal) {
+                        // prefer passing the full item so video-modal can select candidate urls
+                        window.videoModal.play(item);
+                    }
                 });
             });
 

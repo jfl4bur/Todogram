@@ -222,10 +222,13 @@ class HoverModal {
             return;
         }
 
-        // data-video-url button
+        // data-video-url button -> pass the full item when available so VideoModal can build candidates
         const videoUrl = actionEl.getAttribute('data-video-url');
-        if (videoUrl && window.videoModal) {
-            window.videoModal.play(videoUrl);
+        if (window.videoModal) {
+            const item = this._currentItem || window.activeItem;
+            // Prefer passing the item object so the video modal can inspect videoIframe/videoIframe1/videoUrl
+            if (item) window.videoModal.play(item);
+            else if (videoUrl) window.videoModal.play(videoUrl);
         }
     }
 
