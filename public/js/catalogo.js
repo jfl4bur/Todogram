@@ -435,6 +435,21 @@
         }
         attachHeaderTienda();
 
+        // Delegated handler to support mobile menus / dynamic header links
+        // Capturing false is fine; we also listen for touches via click which covers taps on mobile.
+        document.addEventListener('click', function delegatedTiendaHandler(e){
+            const target = e.target.closest('.slider-nav-link, [data-nav="tienda"], a[href*="tienda"], button[data-nav="tienda"]');
+            if(!target) return;
+            // prevent normal navigation and open catalog overlay
+            try{ e.preventDefault(); }catch(err){}
+            const activeTab = tabsContainer.querySelector('.catalogo-tab.active').dataset.tab;
+            const currentGenre = genreBtn.textContent.replace(' ▾','') || 'Todo el catálogo';
+            updateCatalogHash(activeTab, currentGenre);
+            openCatalogOverlay(activeTab, currentGenre);
+            populateGenresForTab(activeTab);
+            applyFiltersAndRender(data, activeTab, currentGenre);
+        }, false);
+
         // Recalcular top del overlay al cambiar tamaño o al cambiar la altura del header
         function recalcOverlayTop(){
             const overlay = document.getElementById('catalogo-modal-overlay');
