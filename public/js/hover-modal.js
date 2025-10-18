@@ -85,7 +85,7 @@ class HoverModal {
         if (preferredVideo) {
             actionButtons += `
                 <div class="primary-action-row">
-                    <button class="details-modal-action-btn primary" data-video-url="${item.videoUrl}">
+                    <button class="details-modal-action-btn primary" data-video-url="${preferredVideo}">
                         <i class="fas fa-play"></i>
                         <span>Ver Película</span>
                         <span class="tooltip">Reproducir</span>
@@ -228,7 +228,13 @@ class HoverModal {
             const item = this._currentItem || window.activeItem;
             if (item && window.shareModal) {
                 const currentUrl = window.location.href;
-                const shareUrl = window.generateShareUrl(item, currentUrl);
+                let shareUrl = null;
+                try {
+                    shareUrl = (typeof window.generateShareUrl === 'function') ? window.generateShareUrl(item, currentUrl) : null;
+                } catch (err) {
+                    console.warn('hover-modal: generateShareUrl fallo, se usará fallback', err);
+                    shareUrl = null;
+                }
                 window.shareModal.show({ ...item, shareUrl });
             }
             return;
