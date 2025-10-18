@@ -5848,7 +5848,7 @@ slider-footer-content {
     /* Tooltip styles for mobile */
     .details-modal-action-btn .tooltip {
         display: block !important;
-        opacity: 1 !important;
+        /* opacity: 1 !important; */
         visibility: visible !important;
         position: fixed;
         bottom: 70px;
