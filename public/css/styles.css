@@ -11,6 +11,32 @@
     margin: 0;
     padding: 0;
 }
+
+/* ===== OVERRIDE: asegurar que los tooltips sólo se muestren via JS (.show-tooltip) ===== */
+/* Esto fuerza ocultación y evita que reglas anteriores por :hover los muestren accidentalmente */
+.details-modal-action-btn .tooltip {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    transform: translateX(-50%) translateY(6px) !important;
+    pointer-events: none !important;
+    transition: all 0.18s cubic-bezier(.2,.9,.2,1) !important;
+}
+.details-modal-action-btn.show-tooltip .tooltip,
+.details-modal-action-btn .tooltip.show-tooltip {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateX(-50%) translateY(0) !important;
+    pointer-events: auto !important;
+}
+
+/* También bloquear selectores :hover específicos por si aún existen más abajo */
+.details-modal-action-btn:hover .tooltip {
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
+
+/* Nota: la visibilidad efectiva se controla añadiendo/removiendo la clase .show-tooltip desde JS
+   (implementada en public/js/details-modal.js como long-press). */
 .episodios-series-item .poster-container {
     width: 100%;
     aspect-ratio: 16/9;
