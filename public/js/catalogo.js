@@ -139,8 +139,9 @@
                         }
                     } catch (e) { console.warn('catalogo: fallo al normalizar campos de video/share para item', e); }
 
-                    // Persist state using the catalog-specific hash so parseCatalogHash can read it
-                    history.pushState({}, '', `${CATALOG_HASH}?id=${encodeURIComponent(itemToShow.id)}&title=${encodeURIComponent(norm)}`);
+                    // Persist state using the same hash format that carousels use (#id=...&title=...)
+                    const detailHash = `id=${encodeURIComponent(itemToShow.id)}&title=${encodeURIComponent(norm)}`;
+                    if (window.location.hash !== `#${detailHash}`) history.pushState({}, '', `#${detailHash}`);
                     try {
                         if (window.hoverModal) {
                             try { if (typeof window.hoverModal.cancelHide === 'function') window.hoverModal.cancelHide(); } catch(e){}
@@ -256,7 +257,24 @@
 
     function applyFiltersAndRender(grid, data, tab, genre){ state.allItems = (data||[]).map(buildItemFromData); state.filteredItems = state.allItems.filter(it=>{ if(tab && it.category && it.category!==tab) return false; if(genre && genre!=='Todo el catálogo'){ const gens = (it.genres||'').split('·').map(x=>x.trim()); if(!gens.includes(genre)) return false; } return true; }); resetPagination(grid); appendNextBatch(grid); }
 
-    function parseCatalogHash(){ const raw = window.location.hash||''; if(!raw.startsWith(CATALOG_HASH)) return null; const q = raw.substring(CATALOG_HASH.length); if(!q) return {}; const p = new URLSearchParams(q.replace(/^\?/,'')); return { tab:p.get('tab')||null, genre:p.get('genre')||null, id:p.get('id')||null, title:p.get('title')||null }; }
+    function parseCatalogHash(){
+        const raw = window.location.hash || '';
+        if(!raw) return null;
+        // Case 1: catalog-specific hash like '#catalogo?tab=...&id=...'
+        if(raw.startsWith(CATALOG_HASH)){
+            const q = raw.substring(CATALOG_HASH.length);
+            if(!q) return {};
+            const p = new URLSearchParams(q.replace(/^\?/,''));
+            return { tab:p.get('tab')||null, genre:p.get('genre')||null, id:p.get('id')||null, title:p.get('title')||null };
+        }
+        // Case 2: plain hash used by carousels: '#id=...&title=...'
+        const plain = raw.substring(1);
+        if(plain.startsWith('id=') || plain.includes('id=')){
+            const p = new URLSearchParams(plain);
+            return { tab:null, genre:null, id:p.get('id')||null, title:p.get('title')||null };
+        }
+        return null;
+    }
 
     function updateCatalogHash(tab, genre, preserve=false){ const params = new URLSearchParams(); if(tab) params.set('tab', tab); if(genre) params.set('genre', genre); const newHash = `${CATALOG_HASH}?${params.toString()}`; if(preserve) history.replaceState({}, '', newHash); else history.pushState({}, '', newHash); }
 
@@ -304,17 +322,32 @@
         const initial = parseCatalogHash(); const tab = initial && initial.tab ? initial.tab : 'Películas'; const genre = initial && initial.genre ? initial.genre : 'Todo el catálogo'; populateGenresForTabPage(tab); tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=> x.classList.toggle('active', x.dataset.tab===tab)); genreBtn.textContent = genre + ' ▾'; applyFiltersAndRender(grid, data, tab, genre);
 
         // Helper: try to open details modal for an item id present in the hash.
-        function openDetailsForId(id){
+        function openDetailsForId(id, title){
             if(!id) return;
-            // find index in filteredItems
-            const idx = state.filteredItems.findIndex(x=>String(x.id)===String(id));
+            const decodedTitle = title ? decodeURIComponent(title) : null;
+            const normalize = (t) => normalizeText(String(t||''));
+
+            // find index in filteredItems matching id and normalized title when possible
+            let idx = -1;
+            for(let i=0;i<state.filteredItems.length;i++){
+                const it = state.filteredItems[i];
+                if(String(it.id) === String(id)){
+                    if(decodedTitle){
+                        if(normalize(it.title) === normalize(decodedTitle)) { idx = i; break; }
+                    } else { idx = i; break; }
+                }
+            }
             if(idx === -1) return;
+
             // ensure item is rendered (may require loading more batches)
             const tryOpen = () => {
                 if(state.renderedCount > idx){
-                    const el = grid.querySelector(`.catalogo-item[data-item-id="${id}"]`);
+                    const el = grid.querySelector(`.catalogo-item[data-item-id="${CSS.escape(id)}"]`);
                     const item = findExistingItemById(id) || state.allItems.find(x=>String(x.id)===String(id));
-                    if(el && item && window.detailsModal && typeof window.detailsModal.show === 'function'){
+                    if(el){
+                        try { el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); } catch(e){}
+                    }
+                    if((el || !grid) && item && window.detailsModal && typeof window.detailsModal.show === 'function'){
                         try { window.detailsModal.show(item, el); } catch(e){ console.error('catalogo openDetailsForId error', e); }
                     }
                     return;
@@ -331,7 +364,7 @@
         // If initial hash includes an id, attempt to open the details modal for it
         if(initial && initial.id){
             // slight delay to ensure initial batch has been appended
-            setTimeout(()=> openDetailsForId(initial.id), 150);
+            setTimeout(()=> openDetailsForId(initial.id, initial.title), 150);
         }
 
     // lazy load: listen to window scroll so long pages trigger loading
@@ -358,7 +391,7 @@
                 }
                 if(parsed.id){
                     // attempt to open the details modal for this id
-                    setTimeout(()=> openDetailsForId(parsed.id), 150);
+                    setTimeout(()=> openDetailsForId(parsed.id, parsed.title), 150);
                 }
             }
         });
