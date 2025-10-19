@@ -108,15 +108,19 @@
             if(window.detailsModal && typeof window.detailsModal.show==='function'){
                 const norm = normalizeText(it.title);
                 try{
-                    // Try to reuse an existing item object from carousels so DetailsModal receives the same shape
                     const existing = findExistingItemById(it.id);
                     const itemToShow = existing || it;
-                    // Update URL similar a otros lugares
                     history.pushState({}, '', `#id=${encodeURIComponent(itemToShow.id)}&title=${encodeURIComponent(norm)}`);
                     const res = window.detailsModal.show(itemToShow, d);
-                    if(res && typeof res.then === 'function') res.catch(()=>{});
+                    if(res && typeof res.then === 'function') {
+                        res.catch((err) => {
+                            console.error('detailsModal.show rejected', err);
+                            try { if(window.detailsModal && typeof window.detailsModal.close === 'function') window.detailsModal.close(); } catch(e){}
+                        });
+                    }
                 }catch(e){
                     console.error('Error al abrir detailsModal', e);
+                    try { if(window.detailsModal && typeof window.detailsModal.close === 'function') window.detailsModal.close(); } catch(e){}
                 }
             }
         });
@@ -169,6 +173,17 @@
     if(grid){ grid.style.columnGap = grid.style.columnGap || getComputedStyle(document.documentElement).getPropertyValue('--catalogo-gap') || '18px'; grid.style.rowGap = grid.style.rowGap || getComputedStyle(document.documentElement).getPropertyValue('--catalogo-row-gap') || '48px'; }
 
         const data = await loadData();
+
+        // Global fallback: si alguna promesa sin catch provoca un rejection, intentar limpiar modales abiertos
+        if (!window.__catalogo_unhandledrejection_installed) {
+            window.addEventListener('unhandledrejection', (ev) => {
+                console.error('Unhandled rejection capturado en catálogo:', ev.reason);
+                try { if (window.detailsModal && typeof window.detailsModal.close === 'function') window.detailsModal.close(); } catch(e){}
+                try { if (window.shareModal && typeof window.shareModal.close === 'function') window.shareModal.close(); } catch(e){}
+                document.body.style.overflow = 'auto';
+            });
+            window.__catalogo_unhandledrejection_installed = true;
+        }
 
     function populateGenresForTabPage(tab){ const gens = extractGenres(data, tab); genreList.innerHTML=''; const allBtn = document.createElement('button'); allBtn.textContent='Todo el catálogo'; allBtn.classList.add('genre-item'); allBtn.addEventListener('click', ()=>{ // remove selected from others
         genreList.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));
