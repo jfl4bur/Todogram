@@ -231,17 +231,18 @@ class HoverModal {
         // Share button
         if (actionEl.id === 'share-button') {
             const item = this._currentItem || window.activeItem;
-            if (item && window.shareModal) {
-                const currentUrl = window.location.href;
-                let shareUrl = null;
-                try {
-                    shareUrl = (typeof window.generateShareUrl === 'function') ? window.generateShareUrl(item, currentUrl) : null;
-                } catch (err) {
-                    console.warn('hover-modal: generateShareUrl fallo, se usará fallback', err);
-                    shareUrl = null;
+            try {
+                if (typeof window.openShareModal === 'function') {
+                    window.openShareModal(item);
+                } else {
+                    // fallback: ensure shareModal exists and show
+                    if (!window.shareModal && typeof ShareModal === 'function') window.shareModal = new ShareModal();
+                    const currentUrl = window.location.href;
+                    let shareUrl = null;
+                    try { shareUrl = (typeof window.generateShareUrl === 'function') ? window.generateShareUrl(item, currentUrl) : null; } catch(e) { shareUrl = null; }
+                    if (window.shareModal) window.shareModal.show({ ...item, shareUrl });
                 }
-                window.shareModal.show({ ...item, shareUrl });
-            }
+            } catch (err) { console.warn('hover-modal: share open failed', err); }
             return;
         }
 

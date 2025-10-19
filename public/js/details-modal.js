@@ -3,6 +3,37 @@ document.addEventListener('DOMContentLoaded', function() {
     if (window.detailsModal) {
         window.openDetailsModal = (item, origen) => window.detailsModal.show(item);
     }
+    // Helper to open the share modal consistently from any context
+    window.openShareModal = function(item) {
+        try {
+            if (!window.shareModal && typeof ShareModal === 'function') {
+                window.shareModal = new ShareModal();
+            }
+        } catch (err) { /* ignore */ }
+
+        if (window.shareModal && typeof window.shareModal.show === 'function') {
+            try {
+                const currentUrl = window.location.href;
+                let shareUrl = null;
+                try { shareUrl = (typeof window.generateShareUrl === 'function') ? window.generateShareUrl(item, currentUrl) : null; } catch(e) { shareUrl = null; }
+                window.shareModal.show({ ...item, shareUrl });
+                return true;
+            } catch (err) {
+                console.warn('openShareModal failed', err);
+                return false;
+            }
+        }
+
+        // fallback: open shareUrl directly
+        try {
+            const url = (item && item.shareUrl) ? item.shareUrl : window.location.href;
+            window.open(url, '_blank');
+            return true;
+        } catch (err) {
+            console.warn('openShareModal fallback failed', err);
+            return false;
+        }
+    };
 });
 class DetailsModal {
     constructor() {
