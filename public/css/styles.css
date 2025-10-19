@@ -2480,7 +2480,7 @@ button:focus {
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.7);
-    z-index: 1001;
+    z-index: 12000; /* ensure details modal is above other overlays (hover/modal-overlay) */
     display: none;
     overflow-y: auto;
     transition: opacity 0.3s ease;
