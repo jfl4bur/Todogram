@@ -331,18 +331,30 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         DetailsModal.prototype.getItemIdFromUrl = function() {
-            const path = window.location.hash.substring(1);
-            console.log('Hash procesado:', path);
-            if (!path) return null;
-            
-            const params = new URLSearchParams(path);
+            let raw = window.location.hash.substring(1);
+            console.log('Hash procesado (raw):', raw);
+            if (!raw) return null;
+
+            // Si el hash tiene un prefijo de sección como 'catalogo?....' o 'catalogo',
+            // extraer únicamente la parte de query (?a=1&b=2). Si no hay '?', aceptar
+            // la cadena si comienza con 'id=' (antiguo formato).
+            let query = raw;
+            const qIdx = raw.indexOf('?');
+            if (qIdx >= 0) {
+                query = raw.substring(qIdx + 1);
+            } else if (!raw.startsWith('id=') && !raw.startsWith('title=')) {
+                // no hay query y no parece ser un conjunto de params -> nada que hacer
+                return null;
+            }
+
+            const params = new URLSearchParams(query);
             const id = params.get('id');
             const title = params.get('title');
             const ep = params.get('ep');
             console.log('Parámetros extraídos:', { id, title, ep });
-            
+
             if (!id || !title) return null;
-            
+
             return {
                 id: id,
                 normalizedTitle: title,
