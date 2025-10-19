@@ -161,15 +161,6 @@
                     } catch(err) { console.warn('catalogo: fallo al limpiar overlays antes de abrir detailsModal', err); }
 
                     const res = window.detailsModal.show(itemToShow, d);
-                    // Forzar que el overlay de details modal sea visible y reciba eventos —
-                    // previene que overlays anteriores (hover modal o modal genérico) intercepten clicks
-                    try {
-                        const detailsOverlay = document.getElementById('details-modal-overlay');
-                        if (detailsOverlay) {
-                            detailsOverlay.style.display = 'block';
-                            detailsOverlay.style.pointerEvents = 'auto';
-                        }
-                    } catch (e) { console.warn('catalogo: no se pudo forzar detalles overlay', e); }
                     if(res && typeof res.then === 'function') {
                         res.catch((err) => {
                             console.error('detailsModal.show rejected', err);
