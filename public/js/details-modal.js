@@ -553,10 +553,34 @@ class DetailsModal {
             this.detailsModalBody.querySelectorAll('.details-modal-action-btn[data-video-url]').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    const item = window.activeItem || window.activeItem;
+                    const dataVideo = btn.getAttribute('data-video-url');
+                    const item = window.activeItem || null;
+                    // Ensure VideoModal exists as a fallback when called from catalogo
+                    try {
+                        if (!window.videoModal && typeof VideoModal === 'function') {
+                            window.videoModal = new VideoModal();
+                        }
+                    } catch (err) { /* ignore */ }
+
                     if (window.videoModal) {
-                        // prefer passing the full item so video-modal can select candidate urls
-                        window.videoModal.play(item);
+                        // Prefer passing the full item so video-modal can select candidate urls.
+                        // If item is missing or doesn't contain candidates, fall back to the data attribute.
+                        try {
+                            const tried = (item && (item.videoUrl || item.videoIframe || item.videoIframe1));
+                            if (item && tried) {
+                                window.videoModal.play(item);
+                            } else if (dataVideo) {
+                                window.videoModal.play(dataVideo);
+                            }
+                        } catch (err) {
+                            console.warn('details-modal: videoModal.play failed, falling back to dataVideo', err);
+                            if (dataVideo) window.videoModal.play(dataVideo);
+                        }
+                    } else {
+                        // No VideoModal available; try using the attribute raw URL via direct window.open as last resort
+                        if (dataVideo) {
+                            try { window.open(dataVideo, '_blank'); } catch(e) { console.warn('details-modal: fallback open failed', e); }
+                        }
                     }
                 });
             });
@@ -641,13 +665,28 @@ class DetailsModal {
             if (shareBtn) {
                 shareBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    const item = window.activeItem;
+                    const item = window.activeItem || null;
+                    // Ensure ShareModal exists if not created elsewhere
+                    try {
+                        if (!window.shareModal && typeof ShareModal === 'function') {
+                            window.shareModal = new ShareModal();
+                        }
+                    } catch (err) { /* ignore */ }
+
                     if (item && window.shareModal) {
                         const currentUrl = window.location.href;
                         let shareUrl = null;
                         try { shareUrl = (typeof window.generateShareUrl === 'function') ? window.generateShareUrl(item, currentUrl) : null; }
                         catch(err) { console.warn('details-modal: generateShareUrl fallback', err); shareUrl = null; }
                         window.shareModal.show({ ...item, shareUrl });
+                    } else if (item && !window.shareModal) {
+                        // As fallback, open the share URL in a new tab if possible
+                        try {
+                            let fallbackUrl = item.shareUrl || window.location.href;
+                            window.open(fallbackUrl, '_blank');
+                        } catch (err) {
+                            console.warn('details-modal: share fallback failed', err);
+                        }
                     }
                 });
             }
