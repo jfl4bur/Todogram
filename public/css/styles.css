@@ -1744,7 +1744,7 @@ button:focus {
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    margin: 7px;
+    margin: 50px;
 }
 
 .carousel-skeleton::-webkit-scrollbar {
@@ -7271,7 +7271,9 @@ html, body {
       /*  padding: 0 15px;*/
       /*  margin: 0 -15px*/
     }
-
+.carousel-skeleton {
+    margin: 50px;
+}
     .catalogo-grid, #catalogo-grid-page {
         column-gap: 4px !important;
         row-gap: 10px !important;
