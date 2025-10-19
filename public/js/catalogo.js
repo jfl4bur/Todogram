@@ -325,24 +325,58 @@
 
         // Delegated hover handlers: funcionan para items ya renderizados y para elementos que se agreguen posteriormente
         if (grid && !grid.__hover_delegation_installed) {
+            // Hover delegation with delay (match carousels: 900ms) and cancel on leave/move
+            const HOVER_DELAY_MS = 900;
+            const hoverState = new Map(); // itemEl -> { timer }
+
             grid.addEventListener('mouseover', (e) => {
                 const itemEl = e.target.closest('.catalogo-item');
                 if (!itemEl || !grid.contains(itemEl)) return;
                 const itemId = itemEl.dataset.itemId;
                 if (!itemId) return;
                 const item = findExistingItemById(itemId) || state.allItems.find(x => String(x.id) === String(itemId));
-                if (item && window.hoverModal && typeof window.hoverModal.show === 'function') {
-                    try { window.hoverModal.show(item, itemEl); if(window.hoverModal.cancelHide) window.hoverModal.cancelHide(); } catch(err) { console.error('hoverModal.show error', err); }
+
+                // Clear any existing timer for this element
+                if (hoverState.has(itemEl)) {
+                    const existing = hoverState.get(itemEl);
+                    if (existing.timer) { clearTimeout(existing.timer); }
                 }
+
+                // Schedule show after delay
+                const timer = setTimeout(() => {
+                    if (item && window.hoverModal && typeof window.hoverModal.show === 'function') {
+                        try { window.hoverModal.show(item, itemEl); if(window.hoverModal.cancelHide) window.hoverModal.cancelHide(); } catch(err) { console.error('hoverModal.show error', err); }
+                    }
+                }, HOVER_DELAY_MS);
+
+                hoverState.set(itemEl, { timer });
             });
 
+            // Cancel when leaving or moving significantly (avoids showing while scrolling)
             grid.addEventListener('mouseout', (e) => {
+                const itemEl = e.target.closest('.catalogo-item');
+                if (itemEl && hoverState.has(itemEl)) {
+                    const s = hoverState.get(itemEl);
+                    if (s.timer) clearTimeout(s.timer);
+                    hoverState.delete(itemEl);
+                }
+
                 const related = e.relatedTarget;
                 if (related && related.closest && related.closest('.catalogo-item')) return;
                 if (window.hoverModal && (typeof window.hoverModal.hide === 'function' || typeof window.hoverModal.close === 'function')) {
                     try { if(window.hoverModal.hide) window.hoverModal.hide(250); else window.hoverModal.close(); } catch(err) { console.error('hoverModal.hide error', err); }
                 }
             });
+
+            // Clean up timers on pointermove too to avoid accidental shows during touch/drag
+            grid.addEventListener('pointermove', (e) => {
+                // cancel timers for any item under pointer if move detected
+                const itemEl = e.target.closest('.catalogo-item');
+                if (itemEl && hoverState.has(itemEl)) {
+                    const s = hoverState.get(itemEl);
+                    if (s.timer) { clearTimeout(s.timer); hoverState.delete(itemEl); }
+                }
+            }, { passive: true });
             grid.__hover_delegation_installed = true;
         }
     }

@@ -116,6 +116,17 @@
         const DATA_URL = "https://jfl4bur.github.io/Todogram/public/data.json";
         window.peliculas = [];
     </script>
+    <style>
+        /* Hide scrollbars in the catalog grid and modals (cross-browser) */
+        .catalogo-grid, .catalogo-page, .modal-overlay, .details-modal-overlay, .video-modal-overlay, .share-modal-overlay, .gallery-image-modal {
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
+        }
+        .catalogo-grid::-webkit-scrollbar, .modal-overlay::-webkit-scrollbar, .details-modal-overlay::-webkit-scrollbar, .video-modal-overlay::-webkit-scrollbar, .share-modal-overlay::-webkit-scrollbar, .gallery-image-modal::-webkit-scrollbar {
+            display: none; /* Chrome, Safari and Opera */
+            width: 0; height: 0;
+        }
+    </style>
     <!-- slider-independent.js and carousel.js are intentionally omitted here to avoid double initialization and reduce load.
         The catalog page uses a grid rendered by catalogo.js. If you need carousel features, load these scripts conditionally. -->
     <script src="https://jfl4bur.github.io/Todogram/public/js/hover-modal.js"></script>
