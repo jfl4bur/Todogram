@@ -110,6 +110,12 @@
                 try{
                     const existing = findExistingItemById(it.id);
                     const itemToShow = existing || it;
+                    // Ensure global activeItem is set before opening the modal so internal handlers
+                    // (video/share) can reference it immediately when they are invoked.
+                    try { window.activeItem = itemToShow; } catch(e) { /* ignore */ }
+                    // Ensure videoModal exists (catalog page may initialize modals lazily)
+                    try { if(!window.videoModal && typeof VideoModal === 'function') window.videoModal = new VideoModal(); } catch(e) {}
+
                     history.pushState({}, '', `#id=${encodeURIComponent(itemToShow.id)}&title=${encodeURIComponent(norm)}`);
                     const res = window.detailsModal.show(itemToShow, d);
                     if(res && typeof res.then === 'function') {
