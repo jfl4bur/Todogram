@@ -1284,6 +1284,35 @@ button:focus {
     }
 }
 
+/* iPhone / small mobile specific queries */
+@media (max-width:420px) {
+    .catalogo-grid, #catalogo-grid-page {
+        column-gap: 6px !important;
+        row-gap: 4px !important;
+    }
+}
+
+@media (max-width:375px) {
+    .catalogo-grid, #catalogo-grid-page {
+        column-gap: 6px !important;
+        row-gap: 4px !important;
+    }
+}
+
+@media (max-width:360px) {
+    .catalogo-grid, #catalogo-grid-page {
+        column-gap: 6px !important;
+        row-gap: 4px !important;
+    }
+}
+
+@media (max-width:320px) {
+    .catalogo-grid, #catalogo-grid-page {
+        column-gap: 6px !important;
+        row-gap: 4px !important;
+    }
+}
+
 /* Ensure hover modal and details modal overlay show above catalogo */
 .modal-overlay, .modal-content { z-index: 11000 !important; }
 .details-modal-overlay { z-index: 11001 !important; }
