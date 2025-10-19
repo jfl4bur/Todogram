@@ -15,6 +15,9 @@
     }
 
     function buildItemFromData(d, index){
+        const rawGenres = d['Géneros'] || d['Género'] || '';
+        // Normalizar lista de géneros (divisores comunes: · , / | ;)
+        const genresList = String(rawGenres).split(/·|\||,|\/|;/).map(s=>s.trim()).filter(Boolean);
         return {
             id: d['ID TMDB'] ? String(d['ID TMDB']) : `i_${index}`,
             title: d['Título'] || d['Título original'] || 'Sin título',
@@ -24,18 +27,25 @@
             postersUrl: d['Carteles'] || '',
             backgroundUrl: d['Carteles'] || d['Portada'] || '',
             category: d['Categoría'] || 'Películas',
-            genres: d['Géneros'] || '',
+            // item.genre es la propiedad que esperan los modales (una cadena legible)
+            genre: genresList.length ? genresList[0] : '',
+            // mantener también la lista completa
+            genres: rawGenres || '',
+            genresList: genresList,
             year: d['Año'] || '',
             duration: d['Duración'] || '',
             videoIframe: d['Video iframe'] || d['Video iframe 1'] || d['Video iframe1'] || '',
             videoUrl: d['Video'] || d['Enlace'] || d['Ver Película'] || '',
             trailerUrl: d['Trailer'] || d['TrailerUrl'] || '',
             cast: d['Reparto principal'] || d['Reparto'] || '',
+            director: d['Director(es)'] || d['Director'] || '',
+            writers: d['Escritor(es)'] || d['Escritor'] || '',
+            tmdbUrl: d['TMDB'] || d['TMDB URL'] || d['TMDB_URL'] || '',
             audiosCount: d['Audios'] ? String(d['Audios']).split(',').length : 0,
             subtitlesCount: d['Subtítulos'] ? String(d['Subtítulos']).split(',').length : 0,
             audioList: d['Audios'] ? String(d['Audios']).split(',').map(s=>s.trim()) : [],
-            subtitleList: d['Subtítulos'] ? String(d['Subtítulos']).split(',').map(s=>s.trim()) : []
-            ,raw: d
+            subtitleList: d['Subtítulos'] ? String(d['Subtítulos']).split(',').map(s=>s.trim()) : [],
+            raw: d
         };
     }
 
@@ -65,7 +75,54 @@
         return Math.max(1, Math.floor((containerWidth + gap) / (itemW + gap)));
     }
 
-    function createCard(it){ const d = document.createElement('div'); d.className='catalogo-item'; d.dataset.itemId = it.id; d.setAttribute('role','listitem'); d.innerHTML = `<img loading="lazy" src="${it.posterUrl||'https://via.placeholder.com/194x271'}" alt="${it.title}"><div class="catalogo-item-title">${it.title}</div>`; d.addEventListener('click', ()=>{ if(window.detailsModal && typeof window.detailsModal.show==='function'){ const norm = normalizeText(it.title); history.pushState({}, '', `#id=${encodeURIComponent(it.id)}&title=${encodeURIComponent(norm)}`); try{ const res = window.detailsModal.show(it, d); if(res && typeof res.then === 'function'){ res.catch(()=>{}); } }catch(e){ console.error('Error al abrir detailsModal', e); } } }); return d; }
+    function findExistingItemById(id){
+        if(!id) return null;
+        // Candidate sources where carousels keep their data
+        const sources = [
+            window.carousel && window.carousel.moviesData,
+            window.seriesCarousel && window.seriesCarousel.seriesData,
+            window.documentalesCarousel && window.documentalesCarousel.docuData,
+            window.animesCarousel && window.animesCarousel.animeData,
+            window.episodiosCarousel && window.episodiosCarousel.episodiosData,
+            window.episodiosAnimesCarousel && window.episodiosAnimesCarousel.episodiosData,
+            (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function' && window.sliderIndependent.getSlidesData())
+        ];
+        for(const src of sources){
+            if(!src || !Array.isArray(src)) continue;
+            const found = src.find(x => String(x.id) === String(id));
+            if(found) return found;
+        }
+        // fallback to catalog state
+        const foundLocal = state.allItems.find(x => String(x.id) === String(id));
+        return foundLocal || null;
+    }
+
+    function createCard(it){
+        const d = document.createElement('div');
+        d.className='catalogo-item';
+        d.dataset.itemId = it.id;
+        d.setAttribute('role','listitem');
+        d.innerHTML = `<img loading="lazy" src="${it.posterUrl||'https://via.placeholder.com/194x271'}" alt="${it.title}"><div class="catalogo-item-title">${it.title}</div>`;
+
+        d.addEventListener('click', ()=>{
+            if(window.detailsModal && typeof window.detailsModal.show==='function'){
+                const norm = normalizeText(it.title);
+                try{
+                    // Try to reuse an existing item object from carousels so DetailsModal receives the same shape
+                    const existing = findExistingItemById(it.id);
+                    const itemToShow = existing || it;
+                    // Update URL similar a otros lugares
+                    history.pushState({}, '', `#id=${encodeURIComponent(itemToShow.id)}&title=${encodeURIComponent(norm)}`);
+                    const res = window.detailsModal.show(itemToShow, d);
+                    if(res && typeof res.then === 'function') res.catch(()=>{});
+                }catch(e){
+                    console.error('Error al abrir detailsModal', e);
+                }
+            }
+        });
+
+        return d;
+    }
 
     function resetPagination(grid){ state.itemsPerRow = computeItemsPerRow(grid); state.initialBatchSize = Math.max(1, state.itemsPerRow * state.initialRows); state.subsequentBatchSize = Math.max(1, state.itemsPerRow * state.subsequentRows); state.renderedCount = 0; grid.innerHTML=''; }
 
@@ -156,7 +213,7 @@
                 if (!itemEl || !grid.contains(itemEl)) return;
                 const itemId = itemEl.dataset.itemId;
                 if (!itemId) return;
-                const item = state.allItems.find(x => String(x.id) === String(itemId));
+                const item = findExistingItemById(itemId) || state.allItems.find(x => String(x.id) === String(itemId));
                 if (item && window.hoverModal && typeof window.hoverModal.show === 'function') {
                     try { window.hoverModal.show(item, itemEl); if(window.hoverModal.cancelHide) window.hoverModal.cancelHide(); } catch(err) { console.error('hoverModal.show error', err); }
                 }

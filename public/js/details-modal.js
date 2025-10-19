@@ -285,32 +285,9 @@ class DetailsModal {
             }
         });
 
-        // Delegated click handler on content: asegura que botones añadidos dinámicamente respondan
-        this.detailsModalContent.addEventListener('click', (e) => {
-            const actionEl = e.target.closest('[data-video-url], #share-button');
-            if (!actionEl) return;
-            e.stopPropagation();
-            // Share button
-            if (actionEl.id === 'share-button') {
-                const item = window.activeItem;
-                if (item && window.shareModal) {
-                    const currentUrl = window.location.href;
-                    let shareUrl = null;
-                    try { shareUrl = (typeof window.generateShareUrl === 'function') ? window.generateShareUrl(item, currentUrl) : null; }
-                    catch(err) { console.warn('details-modal delegated: generateShareUrl failed', err); shareUrl = null; }
-                    window.shareModal.show({ ...item, shareUrl });
-                }
-                return;
-            }
-
-            // Video button
-            const videoAttr = actionEl.getAttribute('data-video-url');
-            if (window.videoModal) {
-                const item = window.activeItem;
-                if (item) window.videoModal.play(item);
-                else if (videoAttr) window.videoModal.play(videoAttr);
-            }
-        });
+        // NOTE: no añadimos delegación de clicks para acciones aquí para no interferir con la implementación
+        // original del DetailsModal. Los handlers específicos se agregan cuando el modal renderiza su contenido
+        // y el código existente maneja esos eventos. Mantener solo listeners de cierre/overlay.
     }
 
     async show(item, itemElement) {
