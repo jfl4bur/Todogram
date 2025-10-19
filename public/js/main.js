@@ -123,6 +123,16 @@ document.addEventListener('DOMContentLoaded', function () {
         function processUrlParams(retryCount = 0, maxRetries = 10) {
             console.log('Procesando URL:', window.location.hash);
             
+            // Guard: si estamos en la página de catálogo, dejar que `catalogo.js` gestione
+            // la apertura de modales y el procesamiento de hashes para esa sección.
+            // Esto evita intentos duplicados de abrir el mismo modal.
+            try {
+                if (document.querySelector('#catalogo-page-root')) {
+                    console.log('Main: página catálogo detectada, salto processUrlParams (catalogo.js la maneja)');
+                    return;
+                }
+            } catch (err) { /* ignore */ }
+
             // Evitar procesar múltiples veces
             if (window.urlProcessed) {
                 console.log('URL ya procesada, saltando...');
