@@ -14,8 +14,8 @@ const headerHTML = `
       <nav class="slider-nav-menu">
         <a href="/" class="slider-nav-link"><i class="fas fa-home"></i><span>Inicio</span></a>
         <a href="/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Todo+el+cat%C3%A1logo" class="slider-nav-link"><i class="fas fa-film"></i><span>Películas</span></a>
-        <a href="#" class="slider-nav-link"><i class="fas fa-tv"></i><span>Series</span></a>
-        <a href="#" class="slider-nav-link"><i class="fas fa-child"></i><span>Infantil</span></a>
+        <a href="/catalogo/#catalogo?tab=Series&genre=Todo+el+catálogo" class="slider-nav-link"><i class="fas fa-tv"></i><span>Series</span></a>
+        <a href="/catalogo/#catalogo?tab=Documentales&genre=Todo+el+catálogo" class="slider-nav-link"><i class="fas fa-child"></i><span>Documentales</span></a>
         <a href="/catalogo" class="slider-nav-link"><i class="fas fa-broadcast-tower"></i><span>Todo el catálogo</span></a>
         <a href="#" class="slider-nav-link"><i class="fas fa-crown"></i><span>Suscripción</span></a>
         <a href="#" class="slider-nav-link"><i class="fas fa-question-circle"></i><span>Ayuda</span></a>
@@ -36,8 +36,8 @@ const headerHTML = `
   <div class="slider-mobile-menu" id="slider-mobile-menu">
     <a href="/" class="slider-nav-link"><i class="fas fa-home"></i><span>Inicio</span></a>
     <a href="/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Todo+el+cat%C3%A1logo" class="slider-nav-link"><i class="fas fa-film"></i><span>Películas</span></a>
-    <a href="#" class="slider-nav-link"><i class="fas fa-tv"></i><span>Series</span></a>
-    <a href="#" class="slider-nav-link"><i class="fas fa-child"></i><span>Infantil</span></a>
+    <a href="/catalogo/#catalogo?tab=Series&genre=Todo+el+catálogo" class="slider-nav-link"><i class="fas fa-tv"></i><span>Series</span></a>
+    <a href="/catalogo/#catalogo?tab=Documentales&genre=Todo+el+catálogo" class="slider-nav-link"><i class="fas fa-child"></i><span>Documentales</span></a>
     <a href="/catalogo" class="slider-nav-link"><i class="fas fa-broadcast-tower"></i><span>Todo el catálogo</span></a>
     <a href="#" class="slider-nav-link"><i class="fas fa-crown"></i><span>Suscripción</span></a>
     <a href="#" class="slider-nav-link"><i class="fas fa-question-circle"></i><span>Ayuda</span></a>
