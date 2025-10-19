@@ -330,20 +330,11 @@ class DetailsModal {
         console.log('DetailsModal: Modal overlay mostrado con clase show');
         
         if (this.isIOS()) {
-            const iosHelper = document.getElementById('ios-helper');
-            if (iosHelper) {
-                // Forced reflow helper used in index.html to workaround iOS rendering
-                iosHelper.offsetHeight;
-            }
-            // Hide/show trick to avoid visual glitches on some iOS versions
-            try {
-                this.detailsModalContent.style.display = 'none';
-                setTimeout(() => {
-                    this.detailsModalContent.style.display = 'block';
-                }, 50);
-            } catch (e) {
-                console.warn('DetailsModal: fallo al aplicar hide/show iOS workaround', e);
-            }
+            document.getElementById('ios-helper').offsetHeight;
+            this.detailsModalContent.style.display = 'none';
+            setTimeout(() => {
+                this.detailsModalContent.style.display = 'block';
+            }, 50);
         }
 
         let tmdbData = null;
