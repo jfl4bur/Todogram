@@ -104,19 +104,15 @@
         d.setAttribute('role','listitem');
         d.innerHTML = `<img loading="lazy" src="${it.posterUrl||'https://via.placeholder.com/194x271'}" alt="${it.title}"><div class="catalogo-item-title">${it.title}</div>`;
 
-        d.addEventListener('click', ()=>{
+        // Helper to open details modal from any input (click, pointer, touch)
+        const openDetails = () => {
             if(window.detailsModal && typeof window.detailsModal.show==='function'){
                 const norm = normalizeText(it.title);
                 try{
                     const existing = findExistingItemById(it.id);
                     const itemToShow = existing || it;
-                    // Ensure global activeItem is set before opening the modal so internal handlers
-                    // (video/share) can reference it immediately when they are invoked.
                     try { window.activeItem = itemToShow; } catch(e) { /* ignore */ }
-                    // Ensure videoModal exists (catalog page may initialize modals lazily)
                     try { if(!window.videoModal && typeof VideoModal === 'function') window.videoModal = new VideoModal(); } catch(e) {}
-
-                    // Populate preferred video fields on the item (some modal handlers read item.videoUrl/videoIframe)
                     try {
                         const raw = itemToShow && itemToShow.raw ? itemToShow.raw : {};
                         const candidates = [
@@ -130,12 +126,10 @@
                             raw['Enlace']
                         ].filter(Boolean);
                         if (candidates.length) {
-                            // Prefer the first candidate
                             const preferred = candidates[0];
                             if (!itemToShow.videoUrl) itemToShow.videoUrl = preferred;
                             if (!itemToShow.videoIframe) itemToShow.videoIframe = preferred;
                         }
-                        // ensure trailerUrl/shareUrl exist
                         if (!itemToShow.trailerUrl) itemToShow.trailerUrl = itemToShow.trailerUrl || raw['Trailer'] || raw['TrailerUrl'] || '';
                         if (!itemToShow.shareUrl) {
                             try { itemToShow.shareUrl = (typeof window.generateShareUrl === 'function') ? window.generateShareUrl(itemToShow, window.location.href) : null; } catch(e) { itemToShow.shareUrl = null; }
@@ -146,16 +140,11 @@
                     } catch (e) { console.warn('catalogo: fallo al normalizar campos de video/share para item', e); }
 
                     history.pushState({}, '', `#id=${encodeURIComponent(itemToShow.id)}&title=${encodeURIComponent(norm)}`);
-                    // Cleanup potential hover/modal overlays that could intercept clicks
                     try {
-                        // If hoverModal exists, attempt to hide/close it and make its overlay non-interactive
                         if (window.hoverModal) {
                             try { if (typeof window.hoverModal.cancelHide === 'function') window.hoverModal.cancelHide(); } catch(e){}
-                            // Do not call hoverModal.hide/close as they may clear window.activeItem asynchronously.
-                            // Instead disable the hover overlay visually and make it non-interactive.
                             try { if (window.hoverModal.modalOverlay) { window.hoverModal.modalOverlay.style.display = 'none'; window.hoverModal.modalOverlay.style.pointerEvents = 'none'; } } catch(e){}
                         }
-                        // Generic modal overlay id used by hover modal
                         const genericOverlay = document.getElementById('modal-overlay');
                         if (genericOverlay) { genericOverlay.style.display = 'none'; genericOverlay.style.pointerEvents = 'none'; }
                     } catch(err) { console.warn('catalogo: fallo al limpiar overlays antes de abrir detailsModal', err); }
@@ -172,7 +161,30 @@
                     try { if(window.detailsModal && typeof window.detailsModal.close === 'function') window.detailsModal.close(); } catch(e){}
                 }
             }
+        };
+
+        // Click handler (desktop)
+        d.addEventListener('click', ()=>{
+            if(window.detailsModal && typeof window.detailsModal.show==='function'){
+                openDetails();
+            }
         });
+
+        // Pointer/touch handler for mobile devices: open immediately on pointerdown to ensure fast response
+        let pointerHandled = false;
+        d.addEventListener('pointerdown', (ev) => {
+            // Only handle primary button/touch
+            if (ev.isPrimary === false) return;
+            pointerHandled = true;
+            try { ev.preventDefault(); } catch(e){}
+            openDetails();
+        }, { passive: false });
+
+        // Fallback touchend for some browsers
+        d.addEventListener('touchend', (ev) => {
+            if (pointerHandled) { pointerHandled = false; return; }
+            openDetails();
+        }, { passive: true });
 
         return d;
     }
