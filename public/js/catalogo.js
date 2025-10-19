@@ -61,6 +61,12 @@
     function computeItemsPerRow(grid){
         if(!grid) return 6;
         const containerWidth = grid.clientWidth || document.documentElement.clientWidth;
+        // If we previously measured item width/gap from DOM, prefer those real values
+        if (state.measuredItemWidth && state.measuredGap !== undefined) {
+            const itemW = state.measuredItemWidth;
+            const gap = state.measuredGap;
+            return Math.max(1, Math.floor((containerWidth + gap) / (itemW + gap)));
+        }
         const rootStyles = getComputedStyle(document.documentElement);
         const itemW = parseInt(rootStyles.getPropertyValue('--item-width')) || 194;
         // Prefer column-gap (grid) otherwise fallback to gap
@@ -71,7 +77,96 @@
         return Math.max(1, Math.floor((containerWidth + gap) / (itemW + gap)));
     }
 
-    function createCard(it){ const d = document.createElement('div'); d.className='catalogo-item'; d.dataset.itemId = it.id; d.setAttribute('role','listitem'); d.innerHTML = `<img loading="lazy" src="${it.posterUrl||'https://via.placeholder.com/194x271'}" alt="${it.title}"><div class="catalogo-item-title">${it.title}</div>`; d.addEventListener('click', ()=>{ if(window.detailsModal && typeof window.detailsModal.show==='function'){ const norm = normalizeText(it.title); history.pushState({}, '', `#id=${encodeURIComponent(it.id)}&title=${encodeURIComponent(norm)}`); try{ const res = window.detailsModal.show(it, d); if(res && typeof res.then === 'function'){ res.catch(()=>{}); } }catch(e){ console.error('Error al abrir detailsModal', e); } } }); return d; }
+    function createCard(it){
+        const d = document.createElement('div');
+        // Use the same classes/structure as carousel items so CSS and modal logic behave identically
+        d.className = 'custom-carousel-item catalogo-item';
+        d.dataset.itemId = it.id;
+        d.setAttribute('role','listitem');
+        const posterUrl = it.posterUrl || 'https://via.placeholder.com/194x271';
+        const bgUrl = it.backgroundUrl || posterUrl;
+        d.innerHTML = `
+            <div class="loader_episodios"><i class="fas fa-spinner"></i></div>
+            <div class="poster-container">
+                <img class="catalogo-card-image" src="${posterUrl}" alt="${it.title}" loading="lazy" style="opacity:0;transition:opacity 0.3s ease">
+                <div class="carousel-overlay">
+                    ${it.description ? `<div class="carousel-description">${it.description}</div>` : ''}
+                </div>
+            </div>
+            <div class="carousel-labels">
+                <div class="carousel-series-title">${it.genre || ''}</div>
+                <div class="carousel-episode-title">${it.title}</div>
+            </div>
+            <img class="detail-background" src="${bgUrl}" alt="${it.title} - Background" loading="lazy" style="display:none;width:194px;height:271px;">
+        `;
+
+        // fade-in image loader
+        const img = d.querySelector('.catalogo-card-image');
+        img.onload = function(){ img.style.opacity = '1'; const l = d.querySelector('.loader_episodios') || d.querySelector('.loader'); if (l) l.style.display = 'none'; };
+
+        // Hover behavior replicated from carousel (900ms details, 200ms modal)
+        if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+            d.addEventListener('mouseenter', () => {
+                const itemId = d.dataset.itemId;
+                if (!state.hoverTimeouts) state.hoverTimeouts = {};
+                if (state.hoverTimeouts[itemId]) {
+                    clearTimeout(state.hoverTimeouts[itemId].details);
+                    clearTimeout(state.hoverTimeouts[itemId].modal);
+                }
+                const rect = d.getBoundingClientRect();
+                state.hoverModalOrigin = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+                state.hoverTimeouts[itemId] = {
+                    details: setTimeout(() => {
+                        const background = d.querySelector('.detail-background');
+                        const overlay = d.querySelector('.carousel-overlay');
+                        if (background) { background.style.display = 'block'; background.style.opacity = '1'; }
+                        if (overlay) { overlay.style.opacity = '1'; overlay.style.transform = 'translateY(0)'; }
+                        state.hoverTimeouts[itemId].modal = setTimeout(() => {
+                            if (!window.isModalOpen && !window.isDetailsModalOpen) {
+                                window.hoverModalItem = d;
+                                if (window.hoverModal && d) {
+                                    try { window.hoverModal.show(it, d); } catch (err) { console.error('hoverModal.show error', err); }
+                                }
+                            }
+                        }, 200);
+                    }, 900)
+                };
+            });
+            d.addEventListener('mouseleave', () => {
+                const itemId = d.dataset.itemId;
+                if (state.hoverTimeouts && state.hoverTimeouts[itemId]) {
+                    clearTimeout(state.hoverTimeouts[itemId].details);
+                    clearTimeout(state.hoverTimeouts[itemId].modal);
+                    delete state.hoverTimeouts[itemId];
+                }
+                const imgEl = d.querySelector('.catalogo-card-image');
+                const background = d.querySelector('.detail-background');
+                const overlay = d.querySelector('.carousel-overlay');
+                if (imgEl) imgEl.style.opacity = '1';
+                if (background) { background.style.opacity = '0'; setTimeout(() => { background.style.display = 'none'; }, 300); }
+                if (overlay) { overlay.style.opacity = '0'; overlay.style.transform = 'translateY(20px)'; }
+            });
+        }
+
+        d.addEventListener('click', (e) => {
+            e.preventDefault();
+            const itemId = d.dataset.itemId;
+            if (state.hoverTimeouts && state.hoverTimeouts[itemId]) {
+                clearTimeout(state.hoverTimeouts[itemId].details);
+                clearTimeout(state.hoverTimeouts[itemId].modal);
+                delete state.hoverTimeouts[itemId];
+            }
+            const hash = `id=${encodeURIComponent(it.id)}&title=${encodeURIComponent(normalizeText(it.title))}`;
+            if (window.location.hash !== `#${hash}`) {
+                history.pushState(null, '', `#${hash}`);
+            }
+            if (window.detailsModal && typeof window.detailsModal.show === 'function') {
+                try { window.detailsModal.show(it, d); } catch (e) { console.error('Error al abrir detailsModal', e); }
+            }
+        });
+
+        return d;
+    }
 
     function resetPagination(grid){ state.itemsPerRow = computeItemsPerRow(grid); state.initialBatchSize = Math.max(1, state.itemsPerRow * state.initialRows); state.subsequentBatchSize = Math.max(1, state.itemsPerRow * state.subsequentRows); state.renderedCount = 0; grid.innerHTML=''; }
 
@@ -90,10 +185,45 @@
         if (start === 0) {
             const sk = document.querySelector('#catalogo-skeleton-page'); if (sk) sk.style.display = 'none';
             console.info(`Catalogo: cargados ${state.renderedCount} items (inicial)`);
+            // After initial batch rendered, measure real item width and gap to match carousel behavior
+            try { measureGridMetrics(grid); } catch(e){ console.warn('measureGridMetrics fallo', e); }
         } else {
             console.info(`Catalogo: cargados ${end - start} items, total ${state.renderedCount}`);
         }
         state.loading = false;
+    }
+
+    function measureGridMetrics(grid){
+        if(!grid) return;
+        const first = grid.querySelector('[data-item-id]');
+        if(!first) return;
+        // wait a tick to ensure layout
+        requestAnimationFrame(()=>{
+            const firstRect = first.getBoundingClientRect();
+            const second = first.nextElementSibling;
+            let gap = 0;
+            if(second){
+                const secondRect = second.getBoundingClientRect();
+                gap = Math.round(secondRect.left - (firstRect.left + firstRect.width));
+                if(isNaN(gap) || gap < 0) gap = 0;
+            } else {
+                // fallback: try reading computed column-gap
+                const gridStyles = getComputedStyle(grid);
+                const gapValue = gridStyles.getPropertyValue('column-gap') || gridStyles.getPropertyValue('gap') || getComputedStyle(document.documentElement).getPropertyValue('--catalogo-gap') || '18px';
+                gap = parseInt(gapValue) || 18;
+            }
+            state.measuredItemWidth = Math.round(firstRect.width);
+            state.measuredGap = gap;
+            console.info(`Catalogo: medido itemWidth=${state.measuredItemWidth}px gap=${state.measuredGap}px`);
+            // Update CSS variable for item width so grid can align visually
+            try { document.documentElement.style.setProperty('--item-width', `${state.measuredItemWidth}px`); } catch(e){}
+            // Optionally update column-gap to measured gap
+            try { grid.style.columnGap = grid.style.columnGap || `${state.measuredGap}px`; } catch(e){}
+            // Recompute pagination sizes based on measurements
+            state.itemsPerRow = computeItemsPerRow(grid);
+            state.initialBatchSize = Math.max(1, state.itemsPerRow * state.initialRows);
+            state.subsequentBatchSize = Math.max(1, state.itemsPerRow * state.subsequentRows);
+        });
     }
 
     function applyFiltersAndRender(grid, data, tab, genre){
@@ -164,34 +294,11 @@
 
     document.addEventListener('click', (e)=>{ if(!e.target.closest('.catalogo-genre-dropdown')){ genreList.style.display='none'; genreBtn.setAttribute('aria-expanded','false'); } });
 
-        // Wrap createCard so we can later replace behaviour if needed; keep it lightweight (no per-item hover listeners)
+        // Wrap createCard so we can later replace behaviour if needed
         const originalCreateCard = createCard;
         createCard = function(it){
             return originalCreateCard(it);
         };
-
-        // Delegated hover handlers: funcionan para items ya renderizados y para elementos que se agreguen posteriormente
-        if (grid && !grid.__hover_delegation_installed) {
-            grid.addEventListener('mouseover', (e) => {
-                const itemEl = e.target.closest('.catalogo-item');
-                if (!itemEl || !grid.contains(itemEl)) return;
-                const itemId = itemEl.dataset.itemId;
-                if (!itemId) return;
-                const item = state.allItems.find(x => String(x.id) === String(itemId));
-                if (item && window.hoverModal && typeof window.hoverModal.show === 'function') {
-                    try { window.hoverModal.show(item, itemEl); if(window.hoverModal.cancelHide) window.hoverModal.cancelHide(); } catch(err) { console.error('hoverModal.show error', err); }
-                }
-            });
-
-            grid.addEventListener('mouseout', (e) => {
-                const related = e.relatedTarget;
-                if (related && related.closest && related.closest('.catalogo-item')) return;
-                if (window.hoverModal && (typeof window.hoverModal.hide === 'function' || typeof window.hoverModal.close === 'function')) {
-                    try { if(window.hoverModal.hide) window.hoverModal.hide(250); else window.hoverModal.close(); } catch(err) { console.error('hoverModal.hide error', err); }
-                }
-            });
-            grid.__hover_delegation_installed = true;
-        }
     }
 
     // Ensure initPage runs whether script is placed before or after DOMContentLoaded
