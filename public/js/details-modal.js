@@ -697,27 +697,25 @@ class DetailsModal {
                 shareBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const item = window.activeItem || null;
-                    // Ensure ShareModal exists if not created elsewhere
+                    console.log('details-modal: share button clicked, item=', item);
                     try {
-                        if (!window.shareModal && typeof ShareModal === 'function') {
-                            window.shareModal = new ShareModal();
+                        if (typeof window.openShareModal === 'function') {
+                            const ok = window.openShareModal(item);
+                            if (!ok) console.warn('details-modal: openShareModal returned false');
+                        } else {
+                            if (!window.shareModal && typeof ShareModal === 'function') window.shareModal = new ShareModal();
+                            const currentUrl = window.location.href;
+                            let shareUrl = null;
+                            try { shareUrl = (typeof window.generateShareUrl === 'function') ? window.generateShareUrl(item, currentUrl) : null; } catch(err) { shareUrl = null; }
+                            if (window.shareModal && typeof window.shareModal.show === 'function') {
+                                window.shareModal.show({ ...item, shareUrl });
+                            } else {
+                                const url = item && item.shareUrl ? item.shareUrl : window.location.href;
+                                window.open(url, '_blank');
+                            }
                         }
-                    } catch (err) { /* ignore */ }
-
-                    if (item && window.shareModal) {
-                        const currentUrl = window.location.href;
-                        let shareUrl = null;
-                        try { shareUrl = (typeof window.generateShareUrl === 'function') ? window.generateShareUrl(item, currentUrl) : null; }
-                        catch(err) { console.warn('details-modal: generateShareUrl fallback', err); shareUrl = null; }
-                        window.shareModal.show({ ...item, shareUrl });
-                    } else if (item && !window.shareModal) {
-                        // As fallback, open the share URL in a new tab if possible
-                        try {
-                            let fallbackUrl = item.shareUrl || window.location.href;
-                            window.open(fallbackUrl, '_blank');
-                        } catch (err) {
-                            console.warn('details-modal: share fallback failed', err);
-                        }
+                    } catch (err) {
+                        console.error('details-modal: share handler error', err);
                     }
                 });
             }
