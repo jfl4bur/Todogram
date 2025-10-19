@@ -139,7 +139,8 @@
                         }
                     } catch (e) { console.warn('catalogo: fallo al normalizar campos de video/share para item', e); }
 
-                    history.pushState({}, '', `#id=${encodeURIComponent(itemToShow.id)}&title=${encodeURIComponent(norm)}`);
+                    // Persist state using the catalog-specific hash so parseCatalogHash can read it
+                    history.pushState({}, '', `${CATALOG_HASH}?id=${encodeURIComponent(itemToShow.id)}&title=${encodeURIComponent(norm)}`);
                     try {
                         if (window.hoverModal) {
                             try { if (typeof window.hoverModal.cancelHide === 'function') window.hoverModal.cancelHide(); } catch(e){}
@@ -302,6 +303,37 @@
 
         const initial = parseCatalogHash(); const tab = initial && initial.tab ? initial.tab : 'Películas'; const genre = initial && initial.genre ? initial.genre : 'Todo el catálogo'; populateGenresForTabPage(tab); tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=> x.classList.toggle('active', x.dataset.tab===tab)); genreBtn.textContent = genre + ' ▾'; applyFiltersAndRender(grid, data, tab, genre);
 
+        // Helper: try to open details modal for an item id present in the hash.
+        function openDetailsForId(id){
+            if(!id) return;
+            // find index in filteredItems
+            const idx = state.filteredItems.findIndex(x=>String(x.id)===String(id));
+            if(idx === -1) return;
+            // ensure item is rendered (may require loading more batches)
+            const tryOpen = () => {
+                if(state.renderedCount > idx){
+                    const el = grid.querySelector(`.catalogo-item[data-item-id="${id}"]`);
+                    const item = findExistingItemById(id) || state.allItems.find(x=>String(x.id)===String(id));
+                    if(el && item && window.detailsModal && typeof window.detailsModal.show === 'function'){
+                        try { window.detailsModal.show(item, el); } catch(e){ console.error('catalogo openDetailsForId error', e); }
+                    }
+                    return;
+                }
+                // not rendered yet -> append next batch and retry shortly
+                if(state.renderedCount < state.filteredItems.length){
+                    appendNextBatch(grid);
+                    setTimeout(tryOpen, 120);
+                }
+            };
+            tryOpen();
+        }
+
+        // If initial hash includes an id, attempt to open the details modal for it
+        if(initial && initial.id){
+            // slight delay to ensure initial batch has been appended
+            setTimeout(()=> openDetailsForId(initial.id), 150);
+        }
+
     // lazy load: listen to window scroll so long pages trigger loading
     let lazyTimer=null;
     function onCatalogScrollWindow(){ const threshold=700; const distanceFromBottom = document.documentElement.scrollHeight - (window.scrollY + window.innerHeight); if(distanceFromBottom < threshold){ if(lazyTimer) clearTimeout(lazyTimer); lazyTimer = setTimeout(()=>{ appendNextBatch(grid); lazyTimer=null; }, 120); } }
@@ -312,8 +344,24 @@
         let resizeTimer=null; function onCatalogResize(){ if(resizeTimer) clearTimeout(resizeTimer); resizeTimer = setTimeout(()=>{ state.itemsPerRow = computeItemsPerRow(grid); state.initialBatchSize = Math.max(1, state.itemsPerRow * state.initialRows); state.subsequentBatchSize = Math.max(1, state.itemsPerRow * state.subsequentRows); if(state.renderedCount < Math.min(state.filteredItems.length, state.initialBatchSize)) appendNextBatch(grid); }, 120); }
         window.addEventListener('resize', onCatalogResize);
 
-        // hash change
-        window.addEventListener('hashchange', ()=>{ const parsed = parseCatalogHash(); if(parsed && parsed.tab){ const tab = parsed.tab || 'Películas'; const genre = parsed.genre || 'Todo el catálogo'; tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=> x.classList.toggle('active', x.dataset.tab===tab)); genreBtn.textContent = genre + ' ▾'; populateGenresForTabPage(tab); applyFiltersAndRender(grid, data, tab, genre); } });
+        // hash change: update filters and optionally open details if id present
+        window.addEventListener('hashchange', ()=>{
+            const parsed = parseCatalogHash();
+            if(parsed){
+                if(parsed.tab){
+                    const tab = parsed.tab || 'Películas';
+                    const genre = parsed.genre || 'Todo el catálogo';
+                    tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=> x.classList.toggle('active', x.dataset.tab===tab));
+                    genreBtn.textContent = genre + ' ▾';
+                    populateGenresForTabPage(tab);
+                    applyFiltersAndRender(grid, data, tab, genre);
+                }
+                if(parsed.id){
+                    // attempt to open the details modal for this id
+                    setTimeout(()=> openDetailsForId(parsed.id), 150);
+                }
+            }
+        });
 
     document.addEventListener('click', (e)=>{ if(!e.target.closest('.catalogo-genre-dropdown')){ genreList.style.display='none'; genreBtn.setAttribute('aria-expanded','false'); } });
 
