@@ -7306,6 +7306,12 @@ html, body {
         padding: 0 30px; 
     }
     
+    .catalogo-grid, #catalogo-grid-page {
+        column-gap: 6px !important;
+        row-gap: 4px !important;
+        margin: 6px;
+    }
+
     .slider-slide {
         width: 90vw;
         margin-right: 1.2vw;
