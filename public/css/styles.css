@@ -1289,6 +1289,7 @@ button:focus {
     .catalogo-grid, #catalogo-grid-page {
         column-gap: 6px !important;
         row-gap: 4px !important;
+        margin: 6px;
     }
 }
 
@@ -1738,11 +1739,12 @@ button:focus {
 /* Skeleton loader con spinner circular */
 .carousel-skeleton {
     display: flex;
-    gap: 4px;
+    gap: 4px 14px !important;
     width: 100%;
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
+    margin: 7px;
 }
 
 .carousel-skeleton::-webkit-scrollbar {
