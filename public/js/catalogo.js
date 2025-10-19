@@ -325,70 +325,24 @@
 
         // Delegated hover handlers: funcionan para items ya renderizados y para elementos que se agreguen posteriormente
         if (grid && !grid.__hover_delegation_installed) {
-            // Hover delegation with delay (match carousels: 900ms) and cancel on leave/move
-            const HOVER_DELAY_MS = 900;
-            const hoverState = new Map(); // itemEl -> { timer }
-
             grid.addEventListener('mouseover', (e) => {
                 const itemEl = e.target.closest('.catalogo-item');
                 if (!itemEl || !grid.contains(itemEl)) return;
                 const itemId = itemEl.dataset.itemId;
                 if (!itemId) return;
                 const item = findExistingItemById(itemId) || state.allItems.find(x => String(x.id) === String(itemId));
-
-                // Clear any existing timer for this element
-                if (hoverState.has(itemEl)) {
-                    const existing = hoverState.get(itemEl);
-                    if (existing.timer) { clearTimeout(existing.timer); }
+                if (item && window.hoverModal && typeof window.hoverModal.show === 'function') {
+                    try { window.hoverModal.show(item, itemEl); if(window.hoverModal.cancelHide) window.hoverModal.cancelHide(); } catch(err) { console.error('hoverModal.show error', err); }
                 }
-
-                // Schedule show after delay
-                const startX = e.clientX || 0;
-                const startY = e.clientY || 0;
-                const timer = setTimeout(() => {
-                    if (item && window.hoverModal && typeof window.hoverModal.show === 'function') {
-                        try { window.hoverModal.show(item, itemEl); if(window.hoverModal.cancelHide) window.hoverModal.cancelHide(); } catch(err) { console.error('hoverModal.show error', err); }
-                    }
-                }, HOVER_DELAY_MS);
-
-                // Store timer and initial pointer position so we can ignore small moves
-                hoverState.set(itemEl, { timer, startX, startY });
             });
 
-            // Cancel when leaving or moving significantly (avoids showing while scrolling)
             grid.addEventListener('mouseout', (e) => {
-                const itemEl = e.target.closest('.catalogo-item');
-                if (itemEl && hoverState.has(itemEl)) {
-                    const s = hoverState.get(itemEl);
-                    if (s.timer) clearTimeout(s.timer);
-                    hoverState.delete(itemEl);
-                }
-
                 const related = e.relatedTarget;
                 if (related && related.closest && related.closest('.catalogo-item')) return;
                 if (window.hoverModal && (typeof window.hoverModal.hide === 'function' || typeof window.hoverModal.close === 'function')) {
                     try { if(window.hoverModal.hide) window.hoverModal.hide(250); else window.hoverModal.close(); } catch(err) { console.error('hoverModal.hide error', err); }
                 }
             });
-
-            // Clean up timers on pointermove too to avoid accidental shows during touch/drag
-            grid.addEventListener('pointermove', (e) => {
-                // cancel timers for any hovered item only if movement exceeds threshold
-                const itemEl = e.target.closest('.catalogo-item');
-                if (itemEl && hoverState.has(itemEl)) {
-                    const s = hoverState.get(itemEl);
-                    if (!s) return;
-                    const sx = s.startX || e.clientX || 0;
-                    const sy = s.startY || e.clientY || 0;
-                    const dx = Math.abs((e.clientX || 0) - sx);
-                    const dy = Math.abs((e.clientY || 0) - sy);
-                    const MOVE_CANCEL = 6; // px
-                    if (dx > MOVE_CANCEL || dy > MOVE_CANCEL) {
-                        if (s.timer) { clearTimeout(s.timer); }
-                        hoverState.delete(itemEl);
-                    }
-                }
-            }, { passive: true });
             grid.__hover_delegation_installed = true;
         }
     }
