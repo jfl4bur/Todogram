@@ -2426,26 +2426,29 @@ button:focus {
     border:1px solid rgba(255,255,255,0.06);
     padding:20px 22px;
     min-width:360px;
-    max-width:900px;
+    max-width: 900px;
     box-shadow:0 18px 50px rgba(0,0,0,0.9);
     display:grid;
-    grid-template-columns:repeat(3,minmax(150px,1fr));
-    gap:12px;
+    grid-template-columns: repeat(3,minmax(150px,1fr));
+    gap: 10px 4px;
     border-radius:2px;
+    z-index: 1;
+    /* padding-right: 48px !important; */
 }
 .catalogo-genre-list button{
     display:flex;
     align-items:center;
-    gap:8px;
+    gap: 0px;
     background:transparent;
     border:0;
     color:var(--text-secondary);
     text-align:left;
-    padding:12px 10px;
+    padding: 12px 0px;
     cursor:pointer;
     width:100%;
-    white-space:nowrap;
+    white-space: nowrap;
     position:relative;
+    font-size: 1em;
 }
 .catalogo-genre-list button:hover{ background: rgba(255,255,255,0.02); color: var(--text-color); }
 .catalogo-genre-list button.selected{color:var(--text-color);font-weight:700}
