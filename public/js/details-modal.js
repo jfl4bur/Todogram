@@ -360,349 +360,363 @@ class DetailsModal {
             }, 50);
         }
 
-        let tmdbData = null;
-        if (item.tmdbUrl) {
-            tmdbData = await this.fetchTMDBData(item.tmdbUrl);
-        }
-        
-        let tmdbImages = { posters: [], backdrops: [] };
-        if (item.tmdbUrl) {
-            tmdbImages = await this.fetchTMDBImages(item.tmdbUrl);
-        }
-        
-        // Usar postersUrl como prioridad (campo "Carteles")
-        const backdropUrl = item.postersUrl || item.backgroundUrl || item.posterUrl || (tmdbImages.backdrops[0]?.file_path || item.posterUrl);
-        
-        this.detailsModalBackdrop.src = backdropUrl;
-        this.detailsModalBackdrop.onerror = function() {
-            this.src = 'https://www.themoviedb.org/assets/2/v4/glyphicons/basic/glyphicons-basic-4-user-grey-d8fe957375e70239d6abdd549fd7568c89281b2179b5f4470e2e12895792dfa5.svg';
-        };
-        
-    const trailerUrl = item.trailerUrl || (tmdbData?.trailer_url || '');
-    const preferredVideo = item.videoUrl || item.videoIframe || item.videoIframe1 || item['Video iframe'] || item['Video iframe 1'] || '';
-        
-        let metaItems = [];
-        
-    if (item.year) metaItems.push(`<span class="details-modal-meta-item">${item.year}</span>`);
-    if (item.duration) metaItems.push(`<span class="details-modal-meta-item">${item.duration}</span>`);
-    // Mostrar géneros: preferir tmdbData, luego item.genres (array) o item.genre
-    const metaGenres = tmdbData?.genres?.map(g=>g.name).join(', ') || (Array.isArray(item.genres) ? item.genres.join(', ') : (item.genre || ''));
-    if (metaGenres) metaItems.push(`<span class="details-modal-meta-item">${metaGenres}</span>`);
-        
-        const ageRating = tmdbData?.certification || item.ageRating;
-        if (ageRating) metaItems.push(`<span class="details-modal-meta-item"> <span class="age-rating">${ageRating}</span></span>`);
-        
-        if (item.rating) metaItems.push(`<span class="details-modal-meta-item rating"><i class="fas fa-star"></i> ${item.rating}${item.tmdbUrl ? `<img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg" class="details-modal-tmdb-logo" alt="TMDB" onclick="window.open('${item.tmdbUrl}', '_blank')">` : ''}</span>`);
-        
-        // Usar datos locales para audio y subtítulos
-        const audioSubtitlesSection = this.createAudioSubtitlesSection(
-            item.audiosCount || 0, 
-            item.subtitlesCount || 0, 
-            item.audioList || [], 
-            item.subtitleList || []
-        );
-        
-        let actionButtons = '';
-        let secondaryButtons = '';
-        
-        if (preferredVideo) {
-            console.log('DetailsModal: Agregando botón de reproducir con URL:', preferredVideo);
-            actionButtons += `<button class="details-modal-action-btn primary big-btn" data-video-url="${preferredVideo}"><i class="fas fa-play"></i><span>Ver Película</span><span class="tooltip">Reproducir</span></button>`;
-        } else {
-            console.log('DetailsModal: No hay videoUrl disponible para:', item.title);
-        }
-        
-        if (preferredVideo) {
-            console.log('DetailsModal: Agregando botón de descargar con URL:', preferredVideo);
-            secondaryButtons += `<button class="details-modal-action-btn circular" onclick="window.open('${this.generateDownloadUrl(preferredVideo)}', '_blank')"><i class="fas fa-download"></i><span class="tooltip">Descargar</span></button>`;
-        }
-        
-        if (trailerUrl) {
-            secondaryButtons += `<button class="details-modal-action-btn circular" data-video-url="${trailerUrl}"><i class="fas fa-film"></i><span class="tooltip">Ver Tráiler</span></button>`;
-        }
-        
-        secondaryButtons += `<button class="details-modal-action-btn circular" id="share-button"><i class="fas fa-share-alt"></i><span class="tooltip">Compartir</span></button>`;
-        
-        let infoItems = '';
-        
-        // Título original (usar datos locales si no hay TMDB)
-        const originalTitle = tmdbData?.original_title || item.originalTitle;
-        if (originalTitle && originalTitle.toLowerCase() !== item.title.toLowerCase()) {
-            infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Título original</div><div class="details-modal-info-value">${originalTitle}</div></div>`;
-        }
-        
-        if (item.year) {
-            infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Año</div><div class="details-modal-info-value">${item.year}</div></div>`;
-        }
-        
-        if (item.duration) {
-            infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Duración</div><div class="details-modal-info-value">${item.duration}</div></div>`;
-        }
-        
-        if (item.genre) {
-            infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Género</div><div class="details-modal-info-value">${item.genre}</div></div>`;
-        }
-        
-        if (ageRating) {
-            infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Clasificación</div><div class="details-modal-info-value"> <span class="age-rating">${ageRating}</span></div></div>`;
-        }
-        
-        // Productora(s) (usar datos locales si no hay TMDB)
-        const productionCompanies = tmdbData?.production_companies || item.productionCompanies;
-        if (productionCompanies) {
-            infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Productora(s)</div><div class="details-modal-info-value">${productionCompanies}</div></div>`;
-        }
-        
-        // País(es) (usar datos locales si no hay TMDB)
-        const productionCountries = tmdbData?.production_countries || item.productionCountries;
-        if (productionCountries) {
-            infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">País(es)</div><div class="details-modal-info-value">${productionCountries}</div></div>`;
-        }
-        
-        if (tmdbData?.status) {
-            infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Estado</div><div class="details-modal-info-value">${tmdbData.status}</div></div>`;
-        }
-        
-        // Idioma(s) original(es) (usar datos locales si no hay TMDB)
-        const spokenLanguages = tmdbData?.spoken_languages || item.spokenLanguages;
-        if (spokenLanguages) {
-            infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Idioma(s) original(es)</div><div class="details-modal-info-value">${spokenLanguages}</div></div>`;
-        }
-        
-        let taglineSection = '';
-        if (tmdbData?.tagline) {
-            taglineSection = `<div class="details-modal-tagline">"${tmdbData.tagline}"</div>`;
-        }
-        
-        const description = item.description || (tmdbData?.overview || 'Descripción no disponible');
-        
-        // Crear secciones de crew y cast usando datos locales si no hay TMDB
-        let directorsSection = '';
-        let writersSection = '';
-        let castSection = '';
-        
-        if (tmdbData?.directors?.length > 0) {
-            directorsSection = this.createCrewSection(tmdbData.directors, 'Director(es)');
-        } else if (item.director) {
-            // Crear sección de director usando datos locales
-            const directors = item.director.split(',').map(director => ({
-                name: director.trim(),
-                profile_path: null
-            }));
-            directorsSection = this.createCrewSection(directors, 'Director(es)');
-        }
-        
-        if (tmdbData?.writers?.length > 0) {
-            writersSection = this.createCrewSection(tmdbData.writers, 'Escritor(es)');
-        } else if (item.writers) {
-            // Crear sección de escritores usando datos locales
-            const writers = item.writers.split(',').map(writer => ({
-                name: writer.trim(),
-                profile_path: null
-            }));
-            writersSection = this.createCrewSection(writers, 'Escritor(es)');
-        }
-        
-        if (tmdbData?.cast?.length > 0) {
-            castSection = this.createCastSection(tmdbData.cast);
-        } else if (item.cast) {
-            // Crear sección de reparto usando datos locales
-            const cast = item.cast.split(',').map(actor => ({
-                name: actor.trim(),
-                character: '',
-                profile_path: null
-            }));
-            castSection = this.createCastSection(cast);
-        }
-        
-        let posters = tmdbImages.posters || [];
-        let backdrops = tmdbImages.backdrops || [];
-        // If local data contains single URL strings for posters/backdrops, convert to expected structure
         try {
-            if ((!posters || posters.length === 0) && item.postersUrl && typeof item.postersUrl === 'string' && item.postersUrl.trim() !== '') {
-                posters = [{ file_path: item.postersUrl }];
-            }
-            if ((!backdrops || backdrops.length === 0) && item.backgroundUrl && typeof item.backgroundUrl === 'string' && item.backgroundUrl.trim() !== '') {
-                backdrops = [{ file_path: item.backgroundUrl }];
-            }
-            // Also if only posterUrl exists, include it in posters
-            if ((!posters || posters.length === 0) && item.posterUrl && typeof item.posterUrl === 'string' && item.posterUrl.trim() !== '') {
-                posters = [{ file_path: item.posterUrl }];
-            }
-        } catch (e) {
-            console.warn('DetailsModal: fallo construyendo poster/backdrop arrays desde datos locales', e);
-        }
-        
-        const postersGallery = posters.length > 0 ? this.createGallerySkeleton('poster', 5) : '';
-        const backdropsGallery = backdrops.length > 0 ? this.createGallerySkeleton('backdrop', 4) : '';
-        
-        this.detailsModalBody.innerHTML = `
-            <h1 class="details-modal-title">${item.title}</h1>
-            ${tmdbData?.original_title && tmdbData.original_title.toLowerCase() !== item.title.toLowerCase() ? `<div class="details-modal-original-title">${tmdbData.original_title}</div>` : ''}
-            <div class="details-modal-meta">${metaItems.join('<span class="details-modal-meta-separator">•</span>')}</div>
-            ${audioSubtitlesSection}
-            <div class="details-modal-actions">
-                <div class="primary-action-row">${actionButtons}</div>
-                <div class="secondary-actions-row">${secondaryButtons}</div>
-            </div>
-            ${taglineSection}
-            <div class="details-modal-description">${description}</div>
-            <div class="details-modal-info">${infoItems}</div>
-            ${directorsSection}
-            ${writersSection}
-            ${castSection}
-            ${postersGallery}
-            ${backdropsGallery}
-        `;
-        
-        void this.detailsModalOverlay.offsetWidth;
-        
-        this.detailsModalOverlay.style.opacity = '1';
-        this.detailsModalContent.style.transform = 'translateY(0)';
-        this.detailsModalContent.style.opacity = '1';
-        
-        setTimeout(() => {
-            if (posters.length > 0) {
-                const postersSection = this.createGallerySection(posters, 'Carteles', 'posters');
-                const postersContainer = this.detailsModalBody.querySelector('.details-modal-gallery-section:has(.gallery-skeleton)');
-                if (postersContainer) postersContainer.outerHTML = postersSection;
+            let tmdbData = null;
+            if (item.tmdbUrl) {
+                tmdbData = await this.fetchTMDBData(item.tmdbUrl);
             }
             
-            if (backdrops.length > 0) {
-                const backdropsSection = this.createGallerySection(backdrops, 'Imágenes de fondo', 'backdrops');
-                const backdropsContainer = this.detailsModalBody.querySelectorAll('.details-modal-gallery-section:has(.gallery-skeleton)')[1] || 
-                                           this.detailsModalBody.querySelector('.details-modal-gallery-section:has(.gallery-skeleton)');
-                if (backdropsContainer) backdropsContainer.outerHTML = backdropsSection;
+            let tmdbImages = { posters: [], backdrops: [] };
+            if (item.tmdbUrl) {
+                tmdbImages = await this.fetchTMDBImages(item.tmdbUrl);
             }
             
-            this.detailsModalBody.querySelectorAll('.details-modal-action-btn[data-video-url]').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const item = window.activeItem || window.activeItem;
-                    if (window.videoModal) {
-                        // prefer passing the full item so video-modal can select candidate urls
-                        window.videoModal.play(item);
-                    }
-                });
-            });
-
-            // Long-press handling for mobile tooltips and to prevent tooltip from showing permanently
-            const LONG_PRESS_MS = 520; // threshold for long-press
-            this.detailsModalBody.querySelectorAll('.details-modal-action-btn').forEach(btn => {
-                // Skip if already wired
-                if (btn._longPressAttached) return;
-                btn._longPressAttached = true;
-
-                let longPressTimer = null;
-                let longPressed = false;
-
-                const clearLongPress = () => {
-                    if (longPressTimer) {
-                        clearTimeout(longPressTimer);
-                        longPressTimer = null;
-                    }
-                };
-
-                const onTouchStart = (e) => {
-                    // Only start long-press for touch input
-                    longPressed = false;
-                    clearLongPress();
-                    longPressTimer = setTimeout(() => {
-                        longPressed = true;
-                        btn.classList.add('active');
-                        // Dispatch a custom event to allow other listeners react if needed
-                        btn.dispatchEvent(new CustomEvent('longpress', { bubbles: true }));
-                    }, LONG_PRESS_MS);
-                };
-
-                const onTouchEnd = (e) => {
-                    clearLongPress();
-                    // If it was a long-press, prevent the following click from triggering actions
-                    if (longPressed) {
-                        // remove active after a short delay so user sees tooltip
-                        setTimeout(() => btn.classList.remove('active'), 600);
-                        // prevent the synthesized click
-                        e.preventDefault();
+            // Usar postersUrl como prioridad (campo "Carteles")
+            const backdropUrl = item.postersUrl || item.backgroundUrl || item.posterUrl || (tmdbImages.backdrops[0]?.file_path || item.posterUrl);
+            
+            this.detailsModalBackdrop.src = backdropUrl;
+            this.detailsModalBackdrop.onerror = function() {
+                this.src = 'https://www.themoviedb.org/assets/2/v4/glyphicons/basic/glyphicons-basic-4-user-grey-d8fe957375e70239d6abdd549fd7568c89281b2179b5f4470e2e12895792dfa5.svg';
+            };
+            
+            const trailerUrl = item.trailerUrl || (tmdbData?.trailer_url || '');
+            const preferredVideo = item.videoUrl || item.videoIframe || item.videoIframe1 || item['Video iframe'] || item['Video iframe 1'] || '';
+            
+            let metaItems = [];
+            
+            if (item.year) metaItems.push(`<span class="details-modal-meta-item">${item.year}</span>`);
+            if (item.duration) metaItems.push(`<span class="details-modal-meta-item">${item.duration}</span>`);
+            // Mostrar géneros: preferir tmdbData, luego item.genres (array) o item.genre
+            const metaGenres = tmdbData?.genres?.map(g=>g.name).join(', ') || (Array.isArray(item.genres) ? item.genres.join(', ') : (item.genre || ''));
+            if (metaGenres) metaItems.push(`<span class="details-modal-meta-item">${metaGenres}</span>`);
+            
+            const ageRating = tmdbData?.certification || item.ageRating;
+            if (ageRating) metaItems.push(`<span class="details-modal-meta-item"> <span class="age-rating">${ageRating}</span></span>`);
+            
+            if (item.rating) metaItems.push(`<span class="details-modal-meta-item rating"><i class="fas fa-star"></i> ${item.rating}${item.tmdbUrl ? `<img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg" class="details-modal-tmdb-logo" alt="TMDB" onclick="window.open('${item.tmdbUrl}', '_blank')">` : ''}</span>`);
+            
+            // Usar datos locales para audio y subtítulos
+            const audioSubtitlesSection = this.createAudioSubtitlesSection(
+                item.audiosCount || 0, 
+                item.subtitlesCount || 0, 
+                item.audioList || [], 
+                item.subtitleList || []
+            );
+            
+            let actionButtons = '';
+            let secondaryButtons = '';
+            
+            if (preferredVideo) {
+                console.log('DetailsModal: Agregando botón de reproducir con URL:', preferredVideo);
+                actionButtons += `<button class="details-modal-action-btn primary big-btn" data-video-url="${preferredVideo}"><i class="fas fa-play"></i><span>Ver Película</span><span class="tooltip">Reproducir</span></button>`;
+            } else {
+                console.log('DetailsModal: No hay videoUrl disponible para:', item.title);
+            }
+            
+            if (preferredVideo) {
+                console.log('DetailsModal: Agregando botón de descargar con URL:', preferredVideo);
+                secondaryButtons += `<button class="details-modal-action-btn circular" onclick="window.open('${this.generateDownloadUrl(preferredVideo)}', '_blank')"><i class="fas fa-download"></i><span class="tooltip">Descargar</span></button>`;
+            }
+            
+            if (trailerUrl) {
+                secondaryButtons += `<button class="details-modal-action-btn circular" data-video-url="${trailerUrl}"><i class="fas fa-film"></i><span class="tooltip">Ver Tráiler</span></button>`;
+            }
+            
+            secondaryButtons += `<button class="details-modal-action-btn circular" id="share-button"><i class="fas fa-share-alt"></i><span class="tooltip">Compartir</span></button>`;
+            
+            let infoItems = '';
+            
+            // Título original (usar datos locales si no hay TMDB)
+            const originalTitle = tmdbData?.original_title || item.originalTitle;
+            if (originalTitle && originalTitle.toLowerCase() !== item.title.toLowerCase()) {
+                infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Título original</div><div class="details-modal-info-value">${originalTitle}</div></div>`;
+            }
+            
+            if (item.year) {
+                infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Año</div><div class="details-modal-info-value">${item.year}</div></div>`;
+            }
+            
+            if (item.duration) {
+                infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Duración</div><div class="details-modal-info-value">${item.duration}</div></div>`;
+            }
+            
+            if (item.genre) {
+                infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Género</div><div class="details-modal-info-value">${item.genre}</div></div>`;
+            }
+            
+            if (ageRating) {
+                infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Clasificación</div><div class="details-modal-info-value"> <span class="age-rating">${ageRating}</span></div></div>`;
+            }
+            
+            // Productora(s) (usar datos locales si no hay TMDB)
+            const productionCompanies = tmdbData?.production_companies || item.productionCompanies;
+            if (productionCompanies) {
+                infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Productora(s)</div><div class="details-modal-info-value">${productionCompanies}</div></div>`;
+            }
+            
+            // País(es) (usar datos locales si no hay TMDB)
+            const productionCountries = tmdbData?.production_countries || item.productionCountries;
+            if (productionCountries) {
+                infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">País(es)</div><div class="details-modal-info-value">${productionCountries}</div></div>`;
+            }
+            
+            if (tmdbData?.status) {
+                infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Estado</div><div class="details-modal-info-value">${tmdbData.status}</div></div>`;
+            }
+            
+            // Idioma(s) original(es) (usar datos locales si no hay TMDB)
+            const spokenLanguages = tmdbData?.spoken_languages || item.spokenLanguages;
+            if (spokenLanguages) {
+                infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Idioma(s) original(es)</div><div class="details-modal-info-value">${spokenLanguages}</div></div>`;
+            }
+            
+            let taglineSection = '';
+            if (tmdbData?.tagline) {
+                taglineSection = `<div class="details-modal-tagline">"${tmdbData.tagline}"</div>`;
+            }
+            
+            const description = item.description || (tmdbData?.overview || 'Descripción no disponible');
+            
+            // Crear secciones de crew y cast usando datos locales si no hay TMDB
+            let directorsSection = '';
+            let writersSection = '';
+            let castSection = '';
+            
+            if (tmdbData?.directors?.length > 0) {
+                directorsSection = this.createCrewSection(tmdbData.directors, 'Director(es)');
+            } else if (item.director) {
+                // Crear sección de director usando datos locales
+                const directors = item.director.split(',').map(director => ({
+                    name: director.trim(),
+                    profile_path: null
+                }));
+                directorsSection = this.createCrewSection(directors, 'Director(es)');
+            }
+            
+            if (tmdbData?.writers?.length > 0) {
+                writersSection = this.createCrewSection(tmdbData.writers, 'Escritor(es)');
+            } else if (item.writers) {
+                // Crear sección de escritores usando datos locales
+                const writers = item.writers.split(',').map(writer => ({
+                    name: writer.trim(),
+                    profile_path: null
+                }));
+                writersSection = this.createCrewSection(writers, 'Escritor(es)');
+            }
+            
+            if (tmdbData?.cast?.length > 0) {
+                castSection = this.createCastSection(tmdbData.cast);
+            } else if (item.cast) {
+                // Crear sección de reparto usando datos locales
+                const cast = item.cast.split(',').map(actor => ({
+                    name: actor.trim(),
+                    character: '',
+                    profile_path: null
+                }));
+                castSection = this.createCastSection(cast);
+            }
+            
+            let posters = tmdbImages.posters || [];
+            let backdrops = tmdbImages.backdrops || [];
+            // If local data contains single URL strings for posters/backdrops, convert to expected structure
+            try {
+                if ((!posters || posters.length === 0) && item.postersUrl && typeof item.postersUrl === 'string' && item.postersUrl.trim() !== '') {
+                    posters = [{ file_path: item.postersUrl }];
+                }
+                if ((!backdrops || backdrops.length === 0) && item.backgroundUrl && typeof item.backgroundUrl === 'string' && item.backgroundUrl.trim() !== '') {
+                    backdrops = [{ file_path: item.backgroundUrl }];
+                }
+                // Also if only posterUrl exists, include it in posters
+                if ((!posters || posters.length === 0) && item.posterUrl && typeof item.posterUrl === 'string' && item.posterUrl.trim() !== '') {
+                    posters = [{ file_path: item.posterUrl }];
+                }
+            } catch (e) {
+                console.warn('DetailsModal: fallo construyendo poster/backdrop arrays desde datos locales', e);
+            }
+            
+            const postersGallery = posters.length > 0 ? this.createGallerySkeleton('poster', 5) : '';
+            const backdropsGallery = backdrops.length > 0 ? this.createGallerySkeleton('backdrop', 4) : '';
+            
+            this.detailsModalBody.innerHTML = `
+                <h1 class="details-modal-title">${item.title}</h1>
+                ${tmdbData?.original_title && tmdbData.original_title.toLowerCase() !== item.title.toLowerCase() ? `<div class="details-modal-original-title">${tmdbData.original_title}</div>` : ''}
+                <div class="details-modal-meta">${metaItems.join('<span class="details-modal-meta-separator">•</span>')}</div>
+                ${audioSubtitlesSection}
+                <div class="details-modal-actions">
+                    <div class="primary-action-row">${actionButtons}</div>
+                    <div class="secondary-actions-row">${secondaryButtons}</div>
+                </div>
+                ${taglineSection}
+                <div class="details-modal-description">${description}</div>
+                <div class="details-modal-info">${infoItems}</div>
+                ${directorsSection}
+                ${writersSection}
+                ${castSection}
+                ${postersGallery}
+                ${backdropsGallery}
+            `;
+            
+            void this.detailsModalOverlay.offsetWidth;
+            
+            this.detailsModalOverlay.style.opacity = '1';
+            this.detailsModalContent.style.transform = 'translateY(0)';
+            this.detailsModalContent.style.opacity = '1';
+            
+            setTimeout(() => {
+                if (posters.length > 0) {
+                    const postersSection = this.createGallerySection(posters, 'Carteles', 'posters');
+                    const postersContainer = this.detailsModalBody.querySelector('.details-modal-gallery-section:has(.gallery-skeleton)');
+                    if (postersContainer) postersContainer.outerHTML = postersSection;
+                }
+                
+                if (backdrops.length > 0) {
+                    const backdropsSection = this.createGallerySection(backdrops, 'Imágenes de fondo', 'backdrops');
+                    const backdropsContainer = this.detailsModalBody.querySelectorAll('.details-modal-gallery-section:has(.gallery-skeleton)')[1] || 
+                                               this.detailsModalBody.querySelector('.details-modal-gallery-section:has(.gallery-skeleton)');
+                    if (backdropsContainer) backdropsContainer.outerHTML = backdropsSection;
+                }
+                
+                this.detailsModalBody.querySelectorAll('.details-modal-action-btn[data-video-url]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        // mark to suppress next click
-                        btn._suppressNextClick = true;
-                        setTimeout(() => btn._suppressNextClick = false, 300);
-                    }
-                };
+                        const item = window.activeItem || window.activeItem;
+                        if (window.videoModal) {
+                            // prefer passing the full item so video-modal can select candidate urls
+                            window.videoModal.play(item);
+                        }
+                    });
+                });
 
-                const onTouchCancel = (e) => {
-                    clearLongPress();
-                };
+                // Long-press handling for mobile tooltips and to prevent tooltip from showing permanently
+                const LONG_PRESS_MS = 520; // threshold for long-press
+                this.detailsModalBody.querySelectorAll('.details-modal-action-btn').forEach(btn => {
+                    // Skip if already wired
+                    if (btn._longPressAttached) return;
+                    btn._longPressAttached = true;
 
-                const onClick = (e) => {
-                    if (btn._suppressNextClick) {
-                        e.preventDefault();
+                    let longPressTimer = null;
+                    let longPressed = false;
+
+                    const clearLongPress = () => {
+                        if (longPressTimer) {
+                            clearTimeout(longPressTimer);
+                            longPressTimer = null;
+                        }
+                    };
+
+                    const onTouchStart = (e) => {
+                        // Only start long-press for touch input
+                        longPressed = false;
+                        clearLongPress();
+                        longPressTimer = setTimeout(() => {
+                            longPressed = true;
+                            btn.classList.add('active');
+                            // Dispatch a custom event to allow other listeners react if needed
+                            btn.dispatchEvent(new CustomEvent('longpress', { bubbles: true }));
+                        }, LONG_PRESS_MS);
+                    };
+
+                    const onTouchEnd = (e) => {
+                        clearLongPress();
+                        // If it was a long-press, prevent the following click from triggering actions
+                        if (longPressed) {
+                            // remove active after a short delay so user sees tooltip
+                            setTimeout(() => btn.classList.remove('active'), 600);
+                            // prevent the synthesized click
+                            e.preventDefault();
+                            e.stopPropagation();
+                            // mark to suppress next click
+                            btn._suppressNextClick = true;
+                            setTimeout(() => btn._suppressNextClick = false, 300);
+                        }
+                    };
+
+                    const onTouchCancel = (e) => {
+                        clearLongPress();
+                    };
+
+                    const onClick = (e) => {
+                        if (btn._suppressNextClick) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            return;
+                        }
+                        // For non-touch or normal clicks, ensure tooltip class is not permanently left
+                        btn.classList.remove('active');
+                    };
+
+                    btn.addEventListener('touchstart', onTouchStart, { passive: true });
+                    btn.addEventListener('touchend', onTouchEnd);
+                    btn.addEventListener('touchcancel', onTouchCancel);
+                    btn.addEventListener('click', onClick);
+                });
+                
+                this.detailsModalBody.querySelectorAll('.details-modal-gallery-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        const galleryType = item.getAttribute('data-gallery-type');
+                        const showMore = item.getAttribute('data-show-more');
+                        const index = parseInt(item.getAttribute('data-index') || 0);
+                        const images = galleryType === 'posters' ? posters : backdrops;
+                        
+                        if (showMore === 'true') this.showGallery(images, 0);
+                        else if (images && images.length > 0) this.showGallery(images, index);
+                    });
+                });
+                
+                const shareBtn = this.detailsModalBody.querySelector('#share-button');
+                if (shareBtn) {
+                    shareBtn.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        return;
-                    }
-                    // For non-touch or normal clicks, ensure tooltip class is not permanently left
-                    btn.classList.remove('active');
-                };
+                        const item = window.activeItem;
+                        if (item && window.shareModal) {
+                            const currentUrl = window.location.href;
+                            let shareUrl = null;
+                            try { shareUrl = (typeof window.generateShareUrl === 'function') ? window.generateShareUrl(item, currentUrl) : null; }
+                            catch(err) { console.warn('details-modal: generateShareUrl fallback', err); shareUrl = null; }
+                            window.shareModal.show({ ...item, shareUrl });
+                        }
+                    });
+                }
+            }, 100);
 
-                btn.addEventListener('touchstart', onTouchStart, { passive: true });
-                btn.addEventListener('touchend', onTouchEnd);
-                btn.addEventListener('touchcancel', onTouchCancel);
-                btn.addEventListener('click', onClick);
-            });
+            // Insertar la sección de episodios de forma asíncrona (no bloquear el render)
+            // Inicializar la sinopsis principal como colapsada
+            setTimeout(() => {
+                const mainDesc = this.detailsModalBody.querySelector('.details-modal-description');
+                if (mainDesc) {
+                    mainDesc.classList.add('collapsed');
+                    mainDesc.style.maxHeight = 'calc(1.5em * 4)';
+                    mainDesc.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        this.toggleSynopsisElement(mainDesc);
+                    });
+                }
+            }, 50);
+
+            this.insertEpisodesSection(item).catch(err => console.warn('DetailsModal: insertEpisodesSection fallo', err));
             
-            this.detailsModalBody.querySelectorAll('.details-modal-gallery-item').forEach(item => {
-                item.addEventListener('click', (e) => {
-                    const galleryType = item.getAttribute('data-gallery-type');
-                    const showMore = item.getAttribute('data-show-more');
-                    const index = parseInt(item.getAttribute('data-index') || 0);
-                    const images = galleryType === 'posters' ? posters : backdrops;
-                    
-                    if (showMore === 'true') this.showGallery(images, 0);
-                    else if (images && images.length > 0) this.showGallery(images, index);
-                });
-            });
-            
-            const shareBtn = this.detailsModalBody.querySelector('#share-button');
-            if (shareBtn) {
-                shareBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const item = window.activeItem;
-                    if (item && window.shareModal) {
-                        const currentUrl = window.location.href;
-                        let shareUrl = null;
-                        try { shareUrl = (typeof window.generateShareUrl === 'function') ? window.generateShareUrl(item, currentUrl) : null; }
-                        catch(err) { console.warn('details-modal: generateShareUrl fallback', err); shareUrl = null; }
-                        window.shareModal.show({ ...item, shareUrl });
-                    }
+            if (this.isIOS()) {
+                this.detailsModalContent.style.animation = 'none';
+                requestAnimationFrame(() => {
+                    this.detailsModalContent.style.animation = 'iosModalIn 0.4s ease-out forwards';
                 });
             }
-        }, 100);
 
-        // Insertar la sección de episodios de forma asíncrona (no bloquear el render)
-        // Inicializar la sinopsis principal como colapsada
-        setTimeout(() => {
-            const mainDesc = this.detailsModalBody.querySelector('.details-modal-description');
-            if (mainDesc) {
-                mainDesc.classList.add('collapsed');
-                mainDesc.style.maxHeight = 'calc(1.5em * 4)';
-                mainDesc.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    this.toggleSynopsisElement(mainDesc);
-                });
+            window.activeItem = item;
+            console.log('DetailsModal: Modal completado para:', item.title);
+        } catch (err) {
+            console.error('DetailsModal: fallo al construir modal de detalles', err);
+            // Mostrar fallback amigable en el modal en lugar de dejar sólo la imagen
+            try {
+                this.detailsModalBody.innerHTML = `<div style="padding:24px;color:#fff;"><h2>Error cargando detalles</h2><p>No se pudo cargar la información completa. Intenta recargar la página o vuelve a intentarlo más tarde.</p></div>`;
+                this.detailsModalOverlay.style.opacity = '1';
+                this.detailsModalContent.style.transform = 'translateY(0)';
+                this.detailsModalContent.style.opacity = '1';
+                window.activeItem = item;
+            } catch (innerErr) {
+                console.error('DetailsModal: fallo mostrando fallback', innerErr);
             }
-        }, 50);
-
-        this.insertEpisodesSection(item).catch(err => console.warn('DetailsModal: insertEpisodesSection fallo', err));
-        
-        if (this.isIOS()) {
-            this.detailsModalContent.style.animation = 'none';
-            requestAnimationFrame(() => {
-                this.detailsModalContent.style.animation = 'iosModalIn 0.4s ease-out forwards';
-            });
         }
-        
-        window.activeItem = item;
-        console.log('DetailsModal: Modal completado para:', item.title);
     }
 
     close() {
