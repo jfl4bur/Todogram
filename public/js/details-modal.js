@@ -696,21 +696,22 @@ class DetailsModal {
             if (shareBtn) {
                 shareBtn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    const item = window.activeItem || null;
-                    console.log('details-modal: share button clicked, item=', item);
+                    // Use the item captured by the show() closure rather than relying solely on window.activeItem
+                    const shareItem = item || window.activeItem || null;
+                    console.log('details-modal: share button clicked, shareItem=', shareItem);
                     try {
                         if (typeof window.openShareModal === 'function') {
-                            const ok = window.openShareModal(item);
+                            const ok = window.openShareModal(shareItem);
                             if (!ok) console.warn('details-modal: openShareModal returned false');
                         } else {
                             if (!window.shareModal && typeof ShareModal === 'function') window.shareModal = new ShareModal();
                             const currentUrl = window.location.href;
                             let shareUrl = null;
-                            try { shareUrl = (typeof window.generateShareUrl === 'function') ? window.generateShareUrl(item, currentUrl) : null; } catch(err) { shareUrl = null; }
+                            try { shareUrl = (typeof window.generateShareUrl === 'function') ? window.generateShareUrl(shareItem, currentUrl) : null; } catch(err) { shareUrl = null; }
                             if (window.shareModal && typeof window.shareModal.show === 'function') {
-                                window.shareModal.show({ ...item, shareUrl });
+                                window.shareModal.show({ ...shareItem, shareUrl });
                             } else {
-                                const url = item && item.shareUrl ? item.shareUrl : window.location.href;
+                                const url = shareItem && shareItem.shareUrl ? shareItem.shareUrl : window.location.href;
                                 window.open(url, '_blank');
                             }
                         }
