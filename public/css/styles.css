@@ -11,6 +11,17 @@
     margin: 0;
     padding: 0;
 }
+
+/* Important: ensure the details modal is above any generic hover/modal overlays
+   which may have very high z-index values elsewhere. This avoids click interception
+   by other overlay elements when the details modal is open (fixes catalog issue).
+*/
+.details-modal-overlay, .details-modal-overlay.show {
+    z-index: 12001 !important;
+}
+.details-modal-content {
+    z-index: 12002 !important;
+}
 .episodios-series-item .poster-container {
     width: 100%;
     aspect-ratio: 16/9;
