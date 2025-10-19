@@ -11,8 +11,6 @@ class HoverModal {
         this.hoverModalOrigin = { x: 0, y: 0 };
         this.hoverModalTimeout = null;
         this.isVisible = false;
-    this._showTimeout = null;
-    this.HOVER_SHOW_DELAY = 900; // ms, match carousels
 
         if (!this.modalOverlay || !this.modalContent) {
             console.error("Elementos del hover modal no encontrados");
@@ -50,21 +48,16 @@ class HoverModal {
         // Evitar mostrar si ya está visible
 
             // If already visible, cancel any pending hide and continue to update content/position
-                if (this.isVisible) {
-                    this.cancelHide();
-                }
+            if (this.isVisible) {
+                this.cancelHide();
+            }
 
-        // cancel any pending hide or show
-        this.cancelHide();
-        if (this._showTimeout) { clearTimeout(this._showTimeout); this._showTimeout = null; }
-        window.isModalOpen = true;
-
-        // Schedule the actual show after a small delay to match carousel behavior
-        this._showTimeout = setTimeout(() => {
-            this._showTimeout = null;
-            this.isVisible = true;
-
-            // Usar postersUrl como prioridad (campo "Carteles")
+    // cancel any pending hide
+    this.cancelHide();
+    window.isModalOpen = true;
+    this.isVisible = true;
+        
+        // Usar postersUrl como prioridad (campo "Carteles")
         const backdropUrl = item.postersUrl || item.backgroundUrl || item.posterUrl;
         
         this.modalBackdrop.src = backdropUrl;
@@ -151,12 +144,6 @@ class HoverModal {
     // Allow pointer events on overlay so modalContent can receive mouseenter/mouseleave reliably
     this.modalOverlay.style.display = 'block';
     this.modalOverlay.style.pointerEvents = 'auto';
-    // Hide scrollbars for hover modal (both overlay and content)
-    try {
-        this.modalOverlay.style.overflow = 'hidden';
-        this.modalContent.style.overflow = 'hidden';
-        this.modalBody.style.overflow = 'hidden';
-    } catch (e) {}
         // force reflow so computed sizes are correct
         void this.modalContent.offsetWidth;
 
@@ -166,15 +153,13 @@ class HoverModal {
         this.modalContent.style.left = `${position.left}px`;
         this.modalContent.style.top = `${position.top}px`;
 
-    // then add 'show' class to trigger CSS transition
-    this.modalContent.classList.add('show');
+        // then add 'show' class to trigger CSS transition
+        this.modalContent.classList.add('show');
 
         // Store current item and origin for use by delegated handlers
         this._currentItem = item;
         this._currentOrigin = itemElement;
         window.activeItem = item;
-
-    }, this.HOVER_SHOW_DELAY);
     }
 
     close() {
@@ -188,12 +173,6 @@ class HoverModal {
             this.modalOverlay.style.display = 'none';
             this.modalOverlay.style.pointerEvents = 'none';
             window.isModalOpen = false;
-            // restore overflow
-            try {
-                this.modalOverlay.style.overflow = '';
-                this.modalContent.style.overflow = '';
-                this.modalBody.style.overflow = '';
-            } catch (e) {}
             window.activeItem = null;
             window.hoverModalItem = null;
             this._currentItem = null;
@@ -214,10 +193,6 @@ class HoverModal {
         if(this.hoverModalTimeout){
             clearTimeout(this.hoverModalTimeout);
             this.hoverModalTimeout = null;
-        }
-        if(this._showTimeout){
-            clearTimeout(this._showTimeout);
-            this._showTimeout = null;
         }
     }
 
