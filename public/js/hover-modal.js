@@ -35,6 +35,11 @@ class HoverModal {
     }
 
     show(item, itemElement) {
+        // If details modal is open, do not show hover to avoid intercepting clicks
+        try {
+            if (window.detailsModal && window.detailsModal.isDetailsModalOpen) return;
+        } catch (e) {}
+
         if (!itemElement || !(itemElement instanceof HTMLElement)) {
             console.error('itemElement no válido');
             return;
