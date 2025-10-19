@@ -383,11 +383,9 @@ class DetailsModal {
         
         let metaItems = [];
         
-    if (item.year) metaItems.push(`<span class="details-modal-meta-item">${item.year}</span>`);
-    if (item.duration) metaItems.push(`<span class="details-modal-meta-item">${item.duration}</span>`);
-    // Mostrar géneros: preferir tmdbData, luego item.genres (array) o item.genre
-    const metaGenres = tmdbData?.genres?.map(g=>g.name).join(', ') || (Array.isArray(item.genres) ? item.genres.join(', ') : (item.genre || ''));
-    if (metaGenres) metaItems.push(`<span class="details-modal-meta-item">${metaGenres}</span>`);
+        if (item.year) metaItems.push(`<span class="details-modal-meta-item">${item.year}</span>`);
+        if (item.duration) metaItems.push(`<span class="details-modal-meta-item">${item.duration}</span>`);
+        if (item.genre) metaItems.push(`<span class="details-modal-meta-item">${item.genre}</span>`);
         
         const ageRating = tmdbData?.certification || item.ageRating;
         if (ageRating) metaItems.push(`<span class="details-modal-meta-item"> <span class="age-rating">${ageRating}</span></span>`);
