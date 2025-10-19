@@ -307,6 +307,27 @@ button:focus {
     background-color: var(--primary-color);
     border-radius: 2px;
 }
+/* Ocultar scrollbars en los hover modals (carruseles y catalogo) y en
+   la capa de modal general usada por hover-modal.js. Esto aplica tanto
+   para WebKit como para Firefox/Edge. Mantener visible el scroll interno
+   (p. ej. scroll horizontal en listas) pero sin mostrar la barra.
+*/
+.modal-overlay, .modal-content, .modal-body {
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE 10+ */
+}
+.modal-overlay::-webkit-scrollbar, .modal-content::-webkit-scrollbar, .modal-body::-webkit-scrollbar {
+    display: none; /* WebKit */
+}
+
+/* También aplicar a details-modal-overlay usado en catalogo/index */
+.details-modal-overlay, .details-modal-content, .details-modal-body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.details-modal-overlay::-webkit-scrollbar, .details-modal-content::-webkit-scrollbar, .details-modal-body::-webkit-scrollbar {
+    display: none;
+}
 .carousel-section-background {
        background: linear-gradient(rgba(249, 203, 40, 0) 11.35%, rgba(249, 203, 40, 0.24) 100%);
 }  

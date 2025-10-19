@@ -101,14 +101,9 @@ class HoverModal {
         
         let secondaryButtons = '<div class="secondary-actions-row">';
         
-        if (item.videoUrl) {
-            secondaryButtons += `
-                <button class="details-modal-action-btn circular" onclick="window.open('${this.generateDownloadUrl(item.videoUrl)}', '_blank')">
-                    <i class="fas fa-download"></i>
-                    <span class="tooltip">Descargar</span>
-                </button>
-            `;
-        }
+        // Nota: eliminamos el botón de "Descargar" del hover modal para mantener
+        // la descarga únicamente en el modal de detalles. Si se necesita reactivar
+        // en el futuro, restaurar el bloque de abajo.
         
         if (trailerUrl) {
             secondaryButtons += `
