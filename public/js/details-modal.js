@@ -330,13 +330,7 @@ class DetailsModal {
         console.log('DetailsModal: Modal overlay mostrado con clase show');
         
         if (this.isIOS()) {
-            // Algunos pages (p.ej. catalogo) pueden no incluir el helper #ios-helper.
-            // Comprobar existencia antes de acceder a offsetHeight para evitar excepciones
-            const iosHelper = document.getElementById('ios-helper');
-            if (iosHelper) {
-                iosHelper.offsetHeight; // trigger reflow en iOS
-            }
-            // Forzar ocultado temporal y re-pintado para corregir glitches en iOS
+            document.getElementById('ios-helper').offsetHeight;
             this.detailsModalContent.style.display = 'none';
             setTimeout(() => {
                 this.detailsModalContent.style.display = 'block';

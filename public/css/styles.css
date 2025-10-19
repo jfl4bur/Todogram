@@ -17,7 +17,7 @@
    by other overlay elements when the details modal is open (fixes catalog issue).
 */
 .details-modal-overlay, .details-modal-overlay.show {
-    /* z-index: 12001 !important; */
+    z-index: 12001 !important;
 }
 .details-modal-content {
     z-index: 12002 !important;
