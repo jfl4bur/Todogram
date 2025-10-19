@@ -1269,6 +1269,21 @@ button:focus {
 @media (max-width:1200px){ .catalogo-genre-list{grid-template-columns:repeat(2,minmax(120px,1fr))} }
 @media (max-width:600px){ .catalogo-header{padding:12px} .catalogo-body{padding:8px 12px 24px 12px} .catalogo-genre-list{position:static;grid-template-columns:repeat(2,1fr);margin-top:8px} .catalogo-controls{width:100%;display:flex;justify-content:flex-end} }
 
+/* Responsive gaps for catalog grid on tablets and mobile: columns 6px, rows 4px */
+@media (max-width:1024px) {
+    .catalogo-grid {
+        column-gap: 6px !important;
+        row-gap: 4px !important;
+    }
+}
+
+@media (max-width:768px) {
+    .catalogo-grid {
+        column-gap: 6px !important;
+        row-gap: 4px !important;
+    }
+}
+
 /* Ensure hover modal and details modal overlay show above catalogo */
 .modal-overlay, .modal-content { z-index: 11000 !important; }
 .details-modal-overlay { z-index: 11001 !important; }
