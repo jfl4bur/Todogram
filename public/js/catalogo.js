@@ -170,20 +170,61 @@
             }
         });
 
-        // Pointer/touch handler for mobile devices: open immediately on pointerdown to ensure fast response
-        let pointerHandled = false;
-        d.addEventListener('pointerdown', (ev) => {
-            // Only handle primary button/touch
-            if (ev.isPrimary === false) return;
-            pointerHandled = true;
-            try { ev.preventDefault(); } catch(e){}
-            openDetails();
-        }, { passive: false });
+        // Tap vs scroll detection using pointer events
+        // We record pointerdown coords, if pointer moves more than threshold we cancel the tap.
+        let tapCancelled = false;
+        let pointerId = null;
+        let startX = 0, startY = 0;
+        const MOVE_THRESHOLD = 8; // pixels
 
-        // Fallback touchend for some browsers
+        d.addEventListener('pointerdown', (ev) => {
+            if (ev.isPrimary === false) return;
+            tapCancelled = false;
+            pointerId = ev.pointerId;
+            startX = ev.clientX;
+            startY = ev.clientY;
+            // capture pointer to continue receiving move/up even if finger leaves element
+            try { d.setPointerCapture(pointerId); } catch (e) {}
+        }, { passive: true });
+
+        d.addEventListener('pointermove', (ev) => {
+            if (ev.pointerId !== pointerId) return;
+            const dx = Math.abs(ev.clientX - startX);
+            const dy = Math.abs(ev.clientY - startY);
+            if (dx > MOVE_THRESHOLD || dy > MOVE_THRESHOLD) {
+                tapCancelled = true;
+            }
+        }, { passive: true });
+
+        d.addEventListener('pointerup', (ev) => {
+            if (ev.pointerId !== pointerId) return;
+            try { d.releasePointerCapture(pointerId); } catch (e) {}
+            pointerId = null;
+            if (!tapCancelled) {
+                // Treat as tap
+                openDetails();
+            }
+        }, { passive: true });
+
+        // Fallback for older touch-only browsers: use touchstart/touchmove/touchend
+        d.addEventListener('touchstart', (ev) => {
+            const t = ev.touches && ev.touches[0];
+            if (!t) return;
+            tapCancelled = false;
+            startX = t.clientX;
+            startY = t.clientY;
+        }, { passive: true });
+
+        d.addEventListener('touchmove', (ev) => {
+            const t = ev.touches && ev.touches[0];
+            if (!t) return;
+            const dx = Math.abs(t.clientX - startX);
+            const dy = Math.abs(t.clientY - startY);
+            if (dx > MOVE_THRESHOLD || dy > MOVE_THRESHOLD) tapCancelled = true;
+        }, { passive: true });
+
         d.addEventListener('touchend', (ev) => {
-            if (pointerHandled) { pointerHandled = false; return; }
-            openDetails();
+            if (!tapCancelled) openDetails();
         }, { passive: true });
 
         return d;

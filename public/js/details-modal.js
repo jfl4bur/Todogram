@@ -715,6 +715,22 @@ class DetailsModal {
             });
         }
         
+        // Ensure shareUrl is set for the active item so share button always has a target
+        try {
+            if (item && !item.shareUrl) {
+                try {
+                    const u = new URL(window.location.href);
+                    const parts = [];
+                    if (item.id) parts.push('id=' + encodeURIComponent(item.id));
+                    if (item.title) parts.push('title=' + encodeURIComponent(item.title));
+                    if (parts.length) u.hash = parts.join('&');
+                    item.shareUrl = u.toString();
+                } catch (err) {
+                    item.shareUrl = window.location.href;
+                }
+            }
+        } catch (e) { /* ignore */ }
+
         window.activeItem = item;
         console.log('DetailsModal: Modal completado para:', item.title);
     }
