@@ -7273,9 +7273,9 @@ html, body {
     }
 
     .catalogo-grid, #catalogo-grid-page {
-        column-gap: 6px !important;
-        row-gap: 4px !important;
-        margin: 6px;
+        column-gap: 4px !important;
+        row-gap: 10px !important;
+        margin: 50px;
     }
     
     .slider-slide {
