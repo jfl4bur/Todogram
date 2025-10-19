@@ -76,8 +76,10 @@ class HoverModal {
         }
         
         let genreInfo = '';
-        if (item.genre) {
-            genreInfo = `<div class="genre-info">${item.genre}</div>`;
+        // Mostrar múltiples géneros si están disponibles
+        const displayGenres = Array.isArray(item.genres) && item.genres.length ? item.genres.join(', ') : (item.genre || '');
+        if (displayGenres) {
+            genreInfo = `<div class="genre-info">${displayGenres}</div>`;
         }
         
         let actionButtons = '';

@@ -15,6 +15,8 @@
     }
 
     function buildItemFromData(d, index){
+        const rawGenres = d['Géneros'] || d['Género'] || '';
+        const genresArray = String(rawGenres).split('·').map(s => s.trim()).filter(Boolean);
         return {
             id: d['ID TMDB'] ? String(d['ID TMDB']) : `i_${index}`,
             title: d['Título'] || d['Título original'] || 'Sin título',
@@ -24,7 +26,9 @@
             postersUrl: d['Carteles'] || '',
             backgroundUrl: d['Carteles'] || d['Portada'] || '',
             category: d['Categoría'] || 'Películas',
-            genres: d['Géneros'] || '',
+            // `genres` como array y `genre` como primera etiqueta legible (compatibilidad con details/hover)
+            genres: genresArray,
+            genre: genresArray.length ? genresArray[0] : (d['Género'] || ''),
             year: d['Año'] || '',
             duration: d['Duración'] || '',
             videoIframe: d['Video iframe'] || d['Video iframe 1'] || d['Video iframe1'] || '',
@@ -34,8 +38,8 @@
             audiosCount: d['Audios'] ? String(d['Audios']).split(',').length : 0,
             subtitlesCount: d['Subtítulos'] ? String(d['Subtítulos']).split(',').length : 0,
             audioList: d['Audios'] ? String(d['Audios']).split(',').map(s=>s.trim()) : [],
-            subtitleList: d['Subtítulos'] ? String(d['Subtítulos']).split(',').map(s=>s.trim()) : []
-            ,raw: d
+            subtitleList: d['Subtítulos'] ? String(d['Subtítulos']).split(',').map(s=>s.trim()) : [],
+            raw: d
         };
     }
 
@@ -43,8 +47,10 @@
         const s = new Set();
         (data||[]).forEach(d=>{
             if(category && d['Categoría'] && d['Categoría']!==category) return;
-            const gens = d['Géneros'] || '';
-            gens.split('·').map(g=>g.trim()).filter(Boolean).forEach(g=>s.add(g));
+            const raw = d['Géneros'] || d['Género'] || '';
+            // soportar separadores comunes: · , |
+            const parts = String(raw).split(/[·,|]/).map(g=>g.trim()).filter(Boolean);
+            parts.forEach(g=>s.add(g));
         });
         return Array.from(s).sort();
     }
@@ -90,7 +96,22 @@
         state.loading = false;
     }
 
-    function applyFiltersAndRender(grid, data, tab, genre){ state.allItems = (data||[]).map(buildItemFromData); state.filteredItems = state.allItems.filter(it=>{ if(tab && it.category && it.category!==tab) return false; if(genre && genre!=='Todo el catálogo'){ const gens = (it.genres||'').split('·').map(x=>x.trim()); if(!gens.includes(genre)) return false; } return true; }); resetPagination(grid); appendNextBatch(grid); }
+    function applyFiltersAndRender(grid, data, tab, genre){
+        state.allItems = (data||[]).map(buildItemFromData);
+        state.filteredItems = state.allItems.filter(it=>{
+            if(tab && it.category && it.category!==tab) return false;
+            if(genre && genre!=='Todo el catálogo'){
+                let gens = [];
+                if (Array.isArray(it.genres)) gens = it.genres.map(g=>String(g).trim()).filter(Boolean);
+                else if (typeof it.genres === 'string') gens = String(it.genres).split(/[·,|]/).map(x=>x.trim()).filter(Boolean);
+                else if (it.genre) gens = [String(it.genre).trim()];
+                if (!gens.includes(genre)) return false;
+            }
+            return true;
+        });
+        resetPagination(grid);
+        appendNextBatch(grid);
+    }
 
     function parseCatalogHash(){ const raw = window.location.hash||''; if(!raw.startsWith(CATALOG_HASH)) return null; const q = raw.substring(CATALOG_HASH.length); if(!q) return {}; const p = new URLSearchParams(q.replace(/^\?/,'')); return { tab:p.get('tab')||null, genre:p.get('genre')||null, id:p.get('id')||null, title:p.get('title')||null }; }
 
