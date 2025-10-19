@@ -343,13 +343,16 @@
                 }
 
                 // Schedule show after delay
+                const startX = e.clientX || 0;
+                const startY = e.clientY || 0;
                 const timer = setTimeout(() => {
                     if (item && window.hoverModal && typeof window.hoverModal.show === 'function') {
                         try { window.hoverModal.show(item, itemEl); if(window.hoverModal.cancelHide) window.hoverModal.cancelHide(); } catch(err) { console.error('hoverModal.show error', err); }
                     }
                 }, HOVER_DELAY_MS);
 
-                hoverState.set(itemEl, { timer });
+                // Store timer and initial pointer position so we can ignore small moves
+                hoverState.set(itemEl, { timer, startX, startY });
             });
 
             // Cancel when leaving or moving significantly (avoids showing while scrolling)
@@ -370,11 +373,20 @@
 
             // Clean up timers on pointermove too to avoid accidental shows during touch/drag
             grid.addEventListener('pointermove', (e) => {
-                // cancel timers for any item under pointer if move detected
+                // cancel timers for any hovered item only if movement exceeds threshold
                 const itemEl = e.target.closest('.catalogo-item');
                 if (itemEl && hoverState.has(itemEl)) {
                     const s = hoverState.get(itemEl);
-                    if (s.timer) { clearTimeout(s.timer); hoverState.delete(itemEl); }
+                    if (!s) return;
+                    const sx = s.startX || e.clientX || 0;
+                    const sy = s.startY || e.clientY || 0;
+                    const dx = Math.abs((e.clientX || 0) - sx);
+                    const dy = Math.abs((e.clientY || 0) - sy);
+                    const MOVE_CANCEL = 6; // px
+                    if (dx > MOVE_CANCEL || dy > MOVE_CANCEL) {
+                        if (s.timer) { clearTimeout(s.timer); }
+                        hoverState.delete(itemEl);
+                    }
                 }
             }, { passive: true });
             grid.__hover_delegation_installed = true;
