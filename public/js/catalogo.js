@@ -146,30 +146,18 @@
                     } catch (e) { console.warn('catalogo: fallo al normalizar campos de video/share para item', e); }
 
                     history.pushState({}, '', `#id=${encodeURIComponent(itemToShow.id)}&title=${encodeURIComponent(norm)}`);
-                    // Defensive cleanup: ensure any hover/modal overlays won't intercept touch/clicks
+                    // Cleanup potential hover/modal overlays that could intercept clicks
                     try {
-                        // If hoverModal exists, cancel its hide timer and hide its overlay
+                        // If hoverModal exists, attempt to hide/close it and make its overlay non-interactive
                         if (window.hoverModal) {
                             try { if (typeof window.hoverModal.cancelHide === 'function') window.hoverModal.cancelHide(); } catch(e){}
-                            try {
-                                if (window.hoverModal.modalOverlay) {
-                                    window.hoverModal.modalOverlay.style.display = 'none';
-                                    window.hoverModal.modalOverlay.style.pointerEvents = 'none';
-                                }
-                            } catch(e){}
+                            // Do not call hoverModal.hide/close as they may clear window.activeItem asynchronously.
+                            // Instead disable the hover overlay visually and make it non-interactive.
+                            try { if (window.hoverModal.modalOverlay) { window.hoverModal.modalOverlay.style.display = 'none'; window.hoverModal.modalOverlay.style.pointerEvents = 'none'; } } catch(e){}
                         }
-
-                        // Hide any generic overlays that might exist in the page
-                        const overlays = Array.from(document.querySelectorAll('.modal-overlay, #modal-overlay, .modal-backdrop, .modal-content'));
-                        overlays.forEach(o => {
-                            try { o.style.display = 'none'; o.style.pointerEvents = 'none'; } catch(e){}
-                        });
-
-                        // Ensure the details modal overlay itself is allowed to receive pointer events
-                        const detailsOverlay = document.getElementById('details-modal-overlay');
-                        if (detailsOverlay) {
-                            try { detailsOverlay.style.pointerEvents = 'auto'; } catch(e){}
-                        }
+                        // Generic modal overlay id used by hover modal
+                        const genericOverlay = document.getElementById('modal-overlay');
+                        if (genericOverlay) { genericOverlay.style.display = 'none'; genericOverlay.style.pointerEvents = 'none'; }
                     } catch(err) { console.warn('catalogo: fallo al limpiar overlays antes de abrir detailsModal', err); }
 
                     const res = window.detailsModal.show(itemToShow, d);

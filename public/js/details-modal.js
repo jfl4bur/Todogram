@@ -22,22 +22,6 @@ class DetailsModal {
         }
 
         this.setupEventListeners();
-        // Ensure an iOS helper element exists (some pages such as catalogo may omit it).
-        // detailsModal.show uses this helper to force a reflow on iOS; create a hidden
-        // element so the logic won't throw when running on pages that don't include
-        // the original markup (index.html contains #ios-helper).
-        try {
-            if (!document.getElementById('ios-helper')) {
-                const iosHelper = document.createElement('div');
-                iosHelper.id = 'ios-helper';
-                iosHelper.className = 'ios-helper';
-                iosHelper.style.display = 'none';
-                document.body.appendChild(iosHelper);
-            }
-        } catch (e) {
-            // If document.body isn't ready or append fails, ignore — show() will guard usage.
-            console.warn('DetailsModal: no se pudo crear ios-helper automáticamente', e);
-        }
         
         this.galleryModal = document.createElement('div');
         this.galleryModal.id = 'gallery-modal';
@@ -346,20 +330,17 @@ class DetailsModal {
         console.log('DetailsModal: Modal overlay mostrado con clase show');
         
         if (this.isIOS()) {
-            const iosHelperEl = document.getElementById('ios-helper');
-            if (iosHelperEl) {
-                // force reflow on iOS safari to avoid visual issues
-                void iosHelperEl.offsetHeight;
+            // Algunos pages (p.ej. catalogo) pueden no incluir el helper #ios-helper.
+            // Comprobar existencia antes de acceder a offsetHeight para evitar excepciones
+            const iosHelper = document.getElementById('ios-helper');
+            if (iosHelper) {
+                iosHelper.offsetHeight; // trigger reflow en iOS
             }
-            // toggle display in a guarded way to retrigger animation on iOS
-            try {
-                this.detailsModalContent.style.display = 'none';
-                setTimeout(() => {
-                    this.detailsModalContent.style.display = 'block';
-                }, 50);
-            } catch (e) {
-                console.warn('DetailsModal: fallo al togglear display para iOS', e);
-            }
+            // Forzar ocultado temporal y re-pintado para corregir glitches en iOS
+            this.detailsModalContent.style.display = 'none';
+            setTimeout(() => {
+                this.detailsModalContent.style.display = 'block';
+            }, 50);
         }
 
         let tmdbData = null;
