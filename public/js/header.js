@@ -16,8 +16,7 @@ const headerHTML = `
         <a href="#" class="slider-nav-link"><i class="fas fa-film"></i><span>Películas</span></a>
         <a href="#" class="slider-nav-link"><i class="fas fa-tv"></i><span>Series</span></a>
         <a href="#" class="slider-nav-link"><i class="fas fa-child"></i><span>Infantil</span></a>
-        <a href="#" class="slider-nav-link"><i class="fas fa-broadcast-tower"></i><span>Canales</span></a>
-        <a href="/catalogo" class="slider-nav-link"><i class="fas fa-shopping-cart"></i><span>Todo el catálogo</span></a>
+        <a href="/catalogo" class="slider-nav-link"><i class="fas fa-broadcast-tower"></i><span>Todo el catálogo</span></a>
         <a href="#" class="slider-nav-link"><i class="fas fa-crown"></i><span>Suscripción</span></a>
         <a href="#" class="slider-nav-link"><i class="fas fa-question-circle"></i><span>Ayuda</span></a>
       </nav>
@@ -39,8 +38,7 @@ const headerHTML = `
     <a href="#" class="slider-nav-link"><i class="fas fa-film"></i><span>Películas</span></a>
     <a href="#" class="slider-nav-link"><i class="fas fa-tv"></i><span>Series</span></a>
     <a href="#" class="slider-nav-link"><i class="fas fa-child"></i><span>Infantil</span></a>
-    <a href="#" class="slider-nav-link"><i class="fas fa-broadcast-tower"></i><span>Canales</span></a>
-    <a href="/catalogo" class="slider-nav-link"><i class="fas fa-shopping-cart"></i><span>Todo el catálogo</span></a>
+    <a href="/catalogo" class="slider-nav-link"><i class="fas fa-broadcast-tower"></i><span>Todo el catálogo</span></a>
     <a href="#" class="slider-nav-link"><i class="fas fa-crown"></i><span>Suscripción</span></a>
     <a href="#" class="slider-nav-link"><i class="fas fa-question-circle"></i><span>Ayuda</span></a>
   </div>
