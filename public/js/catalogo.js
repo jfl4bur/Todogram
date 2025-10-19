@@ -116,6 +116,35 @@
                     // Ensure videoModal exists (catalog page may initialize modals lazily)
                     try { if(!window.videoModal && typeof VideoModal === 'function') window.videoModal = new VideoModal(); } catch(e) {}
 
+                    // Populate preferred video fields on the item (some modal handlers read item.videoUrl/videoIframe)
+                    try {
+                        const raw = itemToShow && itemToShow.raw ? itemToShow.raw : {};
+                        const candidates = [
+                            itemToShow.videoUrl,
+                            itemToShow.videoIframe,
+                            itemToShow.videoIframe1,
+                            raw['Video iframe'],
+                            raw['Video iframe 1'],
+                            raw['Video'],
+                            raw['Ver Pel\u00edcula'],
+                            raw['Enlace']
+                        ].filter(Boolean);
+                        if (candidates.length) {
+                            // Prefer the first candidate
+                            const preferred = candidates[0];
+                            if (!itemToShow.videoUrl) itemToShow.videoUrl = preferred;
+                            if (!itemToShow.videoIframe) itemToShow.videoIframe = preferred;
+                        }
+                        // ensure trailerUrl/shareUrl exist
+                        if (!itemToShow.trailerUrl) itemToShow.trailerUrl = itemToShow.trailerUrl || raw['Trailer'] || raw['TrailerUrl'] || '';
+                        if (!itemToShow.shareUrl) {
+                            try { itemToShow.shareUrl = (typeof window.generateShareUrl === 'function') ? window.generateShareUrl(itemToShow, window.location.href) : null; } catch(e) { itemToShow.shareUrl = null; }
+                            if (!itemToShow.shareUrl) {
+                                try { const u = new URL(window.location.href); u.hash = `id=${encodeURIComponent(itemToShow.id)}`; itemToShow.shareUrl = u.toString(); } catch(e) { itemToShow.shareUrl = window.location.href; }
+                            }
+                        }
+                    } catch (e) { console.warn('catalogo: fallo al normalizar campos de video/share para item', e); }
+
                     history.pushState({}, '', `#id=${encodeURIComponent(itemToShow.id)}&title=${encodeURIComponent(norm)}`);
                     const res = window.detailsModal.show(itemToShow, d);
                     if(res && typeof res.then === 'function') {

@@ -12,7 +12,7 @@ const headerHTML = `
         </svg>
       </div>
       <nav class="slider-nav-menu">
-        <a href="#" class="slider-nav-link"><i class="fas fa-home"></i><span>Inicio</span></a>
+        <a href="/" class="slider-nav-link"><i class="fas fa-home"></i><span>Inicio</span></a>
         <a href="#" class="slider-nav-link"><i class="fas fa-film"></i><span>Películas</span></a>
         <a href="#" class="slider-nav-link"><i class="fas fa-tv"></i><span>Series</span></a>
         <a href="#" class="slider-nav-link"><i class="fas fa-child"></i><span>Infantil</span></a>
@@ -35,7 +35,7 @@ const headerHTML = `
   
   <!-- Mobile Menu -->
   <div class="slider-mobile-menu" id="slider-mobile-menu">
-    <a href="#" class="slider-nav-link"><i class="fas fa-home"></i><span>Inicio</span></a>
+    <a href="/" class="slider-nav-link"><i class="fas fa-home"></i><span>Inicio</span></a>
     <a href="#" class="slider-nav-link"><i class="fas fa-film"></i><span>Películas</span></a>
     <a href="#" class="slider-nav-link"><i class="fas fa-tv"></i><span>Series</span></a>
     <a href="#" class="slider-nav-link"><i class="fas fa-child"></i><span>Infantil</span></a>
