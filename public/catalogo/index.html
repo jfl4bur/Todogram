@@ -19,23 +19,6 @@
     <!-- Div helper para iOS (usado por DetailsModal para forzar reflow en iOS) -->
     <div id="ios-helper" class="ios-helper" style="display:none;"></div>
 
-    <style>
-        /* Ocultar scrollbars en el catálogo y modales (cross-browser) */
-        .catalogo-grid, .modal-overlay, .details-modal-overlay, .video-modal-overlay, .share-modal-overlay, .gallery-image-modal {
-            -ms-overflow-style: none; /* IE and Edge */
-            scrollbar-width: none; /* Firefox */
-        }
-        .catalogo-grid::-webkit-scrollbar, .modal-overlay::-webkit-scrollbar, .details-modal-overlay::-webkit-scrollbar, .video-modal-overlay::-webkit-scrollbar, .share-modal-overlay::-webkit-scrollbar, .gallery-image-modal::-webkit-scrollbar {
-            display: none; /* Chrome, Safari, Opera */
-            width: 0;
-            height: 0;
-        }
-        /* Evitar scroll visible dentro de modales */
-        .modal-overlay, .details-modal-overlay, .video-modal-overlay, .share-modal-overlay {
-            overflow: hidden !important;
-        }
-    </style>
-
     <!-- Copia de los modales necesarios (hover, details, video, share) para la página de catálogo -->
     <div class="modal-overlay" id="modal-overlay" style="display:none;">
         <div class="modal-content" id="modal-content">

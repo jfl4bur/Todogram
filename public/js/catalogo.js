@@ -325,61 +325,33 @@
 
         // Delegated hover handlers: funcionan para items ya renderizados y para elementos que se agreguen posteriormente
         if (grid && !grid.__hover_delegation_installed) {
-            // Delayed hover behavior to match carousels: avoid showing hover modal immediately
-            // Use a two-stage delay: small pre-show (visual) then show the hover modal after a longer timeout.
-            const HOVER_PRE_DELAY = 200; // ms - small visual pre-delay
-            const HOVER_SHOW_DELAY = 900; // ms - main delay before showing hover modal
-
-            const hoverState = new WeakMap();
-
+            // Show hover with a delay (match carousels behaviour)
+            const HOVER_SHOW_DELAY = 900; // ms - same delay used in carousels
             grid.addEventListener('mouseover', (e) => {
                 const itemEl = e.target.closest('.catalogo-item');
                 if (!itemEl || !grid.contains(itemEl)) return;
                 const itemId = itemEl.dataset.itemId;
                 if (!itemId) return;
                 const item = findExistingItemById(itemId) || state.allItems.find(x => String(x.id) === String(itemId));
-
-                // Initialize state for this element
-                let st = hoverState.get(itemEl);
-                if (!st) {
-                    st = { preTimeout: null, showTimeout: null, shown: false };
-                    hoverState.set(itemEl, st);
-                }
-
-                // clear any previous hide timers
-                if (st.preTimeout) { clearTimeout(st.preTimeout); st.preTimeout = null; }
-                if (st.showTimeout) { clearTimeout(st.showTimeout); st.showTimeout = null; }
-
-                // small pre-delay (reserved for visual feedback if needed)
-                st.preTimeout = setTimeout(() => {
-                    // after pre delay, set main show timeout
-                    st.showTimeout = setTimeout(() => {
-                        try {
-                            if (item && window.hoverModal && typeof window.hoverModal.show === 'function') {
-                                window.hoverModal.show(item, itemEl);
-                                if (window.hoverModal.cancelHide) window.hoverModal.cancelHide();
-                                st.shown = true;
-                            }
-                        } catch (err) {
-                            console.error('hoverModal.show error', err);
-                        }
+                // clear any previous timer on this element
+                try { if (itemEl._hoverTimer) { clearTimeout(itemEl._hoverTimer); itemEl._hoverTimer = null; } } catch(e){}
+                if (item && window.hoverModal && typeof window.hoverModal.show === 'function') {
+                    // schedule showing the hover modal after a short delay to match carousel behaviour
+                    itemEl._hoverTimer = setTimeout(() => {
+                        try { window.hoverModal.show(item, itemEl); if(window.hoverModal.cancelHide) window.hoverModal.cancelHide(); } catch(err) { console.error('hoverModal.show error', err); }
+                        itemEl._hoverTimer = null;
                     }, HOVER_SHOW_DELAY);
-                }, HOVER_PRE_DELAY);
+                }
             });
 
             grid.addEventListener('mouseout', (e) => {
-                const related = e.relatedTarget;
                 const itemEl = e.target.closest('.catalogo-item');
+                // clear any scheduled show timer for the element we left
+                try { if (itemEl && itemEl._hoverTimer) { clearTimeout(itemEl._hoverTimer); itemEl._hoverTimer = null; } } catch(e){}
+                const related = e.relatedTarget;
                 if (related && related.closest && related.closest('.catalogo-item')) return;
-                if (!itemEl) return;
-                const st = hoverState.get(itemEl);
-                if (st) {
-                    if (st.preTimeout) { clearTimeout(st.preTimeout); st.preTimeout = null; }
-                    if (st.showTimeout) { clearTimeout(st.showTimeout); st.showTimeout = null; }
-                    if (st.shown) {
-                        try { if(window.hoverModal && (typeof window.hoverModal.hide === 'function' || typeof window.hoverModal.close === 'function')) { if(window.hoverModal.hide) window.hoverModal.hide(250); else window.hoverModal.close(); } } catch(err) { console.error('hoverModal.hide error', err); }
-                        st.shown = false;
-                    }
+                if (window.hoverModal && (typeof window.hoverModal.hide === 'function' || typeof window.hoverModal.close === 'function')) {
+                    try { if(window.hoverModal.hide) window.hoverModal.hide(250); else window.hoverModal.close(); } catch(err) { console.error('hoverModal.hide error', err); }
                 }
             });
             grid.__hover_delegation_installed = true;
