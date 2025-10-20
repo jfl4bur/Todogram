@@ -476,13 +476,30 @@ button:focus {
     justify-content: center;
 }
 
+/* Make skeleton spinner act as a full-size overlay (same behavior as .loader)
+   and render the small circular spinner using a pseudo-element so the overlay
+   exactly matches the loader's coverage and positioning on all devices. */
 .skeleton-spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 4;
+}
+.skeleton-spinner::before{
+    content: '';
     width: 40px;
     height: 40px;
-    border: 4px solid rgba(255, 255, 255, 0.1);
+    border: 4px solid rgba(255,255,255,0.1);
     border-radius: 50%;
     border-top-color: var(--primary-color);
     animation: spin 1s linear infinite;
+    display: block;
 }
 
 /* Center spinner inside the poster area for skeleton-16x9 */
@@ -499,34 +516,19 @@ button:focus {
 }
 
 /* Center spinner inside poster */
-.skeleton-item.skeleton-16x9 .skeleton-poster .skeleton-spinner {
-    position: relative;
-    top: 0;
-    left: 0;
-    margin: 0;
-    z-index: 5;
-}
-
-/* General poster wrapper for skeleton items so they match the poster-container used by cards */
-.skeleton-item .skeleton-poster {
+.skeleton-item.skeleton-16x9 .skeleton-poster {
     width: 100%;
-    height: 100%;
-    position: relative;
+    aspect-ratio: 16/9;
+    background: #232323;
+
+    position: relative; /* ensure overlay is confined to poster area */
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
-    background: #232323;
 }
 
-/* Center spinner inside poster for any skeleton variant */
-.skeleton-item .skeleton-poster .skeleton-spinner {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 5;
-}
+/* The skeleton-spinner inside the poster will now be an absolute overlay (see .skeleton-spinner above) */
 
 /* Independent placeholder lines below poster */
 .skeleton-item.skeleton-16x9 .skeleton-series-line {
@@ -1287,38 +1289,6 @@ button:focus {
 .catalogo-item{background:transparent;padding:4px;border-radius:0;cursor:pointer;display:flex;flex-direction:column;align-items:center}
 .catalogo-item img{width:100%;height:auto;border-radius:0;object-fit:cover;background:#232323}
 .catalogo-item .title{margin-top:8px;font-size:14px;text-align:center;color:var(--text-color)}
-
-/* Ensure poster container and loader in catalog items match skeleton sizing
-   and are positioned relative to the catalog item so the .loader sits
-   exactly where the skeleton spinner is placed across breakpoints. */
-.catalogo-item{ position: relative; }
-.catalogo-item .poster-container{
-    position: relative; /* confine absolute loader inside this box */
-    width: 100%;
-    height: var(--item-height); /* same height as skeleton */
-    overflow: hidden;
-    display: block;
-}
-.catalogo-item .poster-container img{ width:100%; height:100%; object-fit:cover; display:block; }
-.catalogo-item .poster-container .loader{
-    position: absolute;
-    inset: 0; /* top:0; right:0; bottom:0; left:0; */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: rgba(0,0,0,0.0); /* keep visual parity with skeleton (no extra overlay by default) */
-    z-index: 4;
-}
-
-/* Make skeleton spinner align exactly at center of poster area used by .loader */
-.carousel-skeleton .skeleton-item{ width: var(--item-width); height: var(--item-height); }
-.carousel-skeleton .skeleton-item .skeleton-spinner{
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 5;
-}
 @media (max-width:1200px){ .catalogo-genre-list{grid-template-columns:repeat(2,minmax(120px,1fr))} }
 @media (max-width:600px){ .catalogo-header{padding:12px} .catalogo-body{padding:8px 12px 24px 12px} .catalogo-genre-list{position:static;grid-template-columns:repeat(2,1fr);margin-top:8px} .catalogo-controls{width:100%;display:flex;justify-content:flex-end} }
 
@@ -3281,6 +3251,66 @@ button:focus {
     color: var(--text-color);
     animation: spin 1s linear infinite;
 }
+
+/* ====== Unified overlay for skeletons and loaders ====== */
+/* Ensure poster containers confine overlays */
+.poster-container, .skeleton-poster, .gallery-skeleton-item, .slider-skeleton-item, .skeleton-item {
+    position: relative;
+}
+
+/* Make all skeleton spinner containers behave like the .loader overlay */
+.skeleton-spinner,
+.slider-skeleton-spinner,
+.gallery-skeleton-spinner {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 4;
+}
+
+.slider-skeleton-spinner::before,
+.gallery-skeleton-spinner::before {
+    content: '';
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255,255,255,0.1);
+    border-radius: 50%;
+    border-top-color: var(--primary-color);
+    animation: spin 1s linear infinite;
+    display: block;
+}
+
+/* Keep loader behavior as-is but ensure same z-index and background for parity */
+.loader {
+    z-index: 4;
+    background-color: rgba(0,0,0,0.5);
+}
+
+/* Small screens: adjust spinner size if necessary */
+@media (max-width: 420px) {
+    .skeleton-spinner::before, .slider-skeleton-spinner::before, .gallery-skeleton-spinner::before, .loader i {
+        width: 32px;
+        height: 32px;
+        font-size: 1.4rem;
+    }
+}
+
+/* Very small phones */
+@media (max-width: 360px) {
+    .skeleton-spinner::before, .slider-skeleton-spinner::before, .gallery-skeleton-spinner::before, .loader i {
+        width: 28px;
+        height: 28px;
+        font-size: 1.2rem;
+    }
+}
+
+/* End unified overlay rules */
 
 .carousel-progress {
     height: 3px;
