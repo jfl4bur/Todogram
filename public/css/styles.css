@@ -6877,7 +6877,7 @@ body {
         row-gap: 4px !important;
         margin: 6px;
     }
-.carousel-skeleton {display: grid;grid-template-columns: repeat(auto-fill, minmax(var(--item-width), 1fr));column-gap: 4px !important;row-gap: 6px !important;margin: 4px;padding: 4px;}
+#catalogo-skeleton-page {display: grid;grid-template-columns: repeat(auto-fill, minmax(var(--item-width), 1fr));column-gap: 4px !important;row-gap: 6px !important;margin: 4px;padding: 4px;}
 
 .skeleton-item {
     padding: 4px;
