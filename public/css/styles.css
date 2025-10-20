@@ -1208,7 +1208,7 @@ button:focus {
 .catalogo-tab{background:transparent;border:0;color:var(--text-secondary);font-size:18px;padding:6px 10px;cursor:pointer}
 .catalogo-tab.active{color:var(--text-color);border-bottom:2px solid var(--primary-color)}
 .catalogo-controls{margin-left:0}
-.catalogo-genre-dropdown{position:relative;}
+.catalogo-genre-dropdown{position:relative}
 /* Dropdown aligned to left to match UI */
 .catalogo-genre-list{
     position:absolute;
@@ -2462,7 +2462,7 @@ button:focus {
 .catalogo-tab{background:transparent;border:0;color:var(--text-secondary);font-size:18px;padding:6px 10px;cursor:pointer}
 .catalogo-tab.active{color:var(--text-color);border-bottom:2px solid var(--primary-color)}
 .catalogo-controls{margin-left:0}
-.catalogo-genre-dropdown{position:relative;}
+.catalogo-genre-dropdown{position:relative}
 /* Dropdown aligned to left to match UI */
 .catalogo-genre-list{
     position:absolute;
