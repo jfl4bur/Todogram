@@ -6873,6 +6873,13 @@ body {
     width: var(--item-width);
     height: var(--item-height);
 }
+
+.skeleton-item-catalogo {
+    /* padding: 4px; */
+    width: var(--item-width);
+    height: var(--item-height);
+}
+
 .carousel-skeleton {margin: 0px;gap: 0px 4px !important;}
 }
 
