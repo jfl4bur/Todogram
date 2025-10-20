@@ -6876,8 +6876,15 @@ body {
 
 .skeleton-item-catalogo {
     /* padding: 4px; */
+    flex: 0 0 auto;
     width: var(--item-width);
     height: var(--item-height);
+    background-color: var(--secondary-color);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .carousel-skeleton {margin: 0px;gap: 0px 4px !important;}
