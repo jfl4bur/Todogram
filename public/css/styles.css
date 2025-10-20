@@ -6871,8 +6871,7 @@ body {
         grid-template-columns: repeat(auto-fill, minmax(var(--item-width), 1fr));
         column-gap: 4px !important;
         row-gap: 6px !important;
-        margin: 3px;
-        padding: 4px;
+        margin: 4px;
     }
 
     .skeleton-item {
@@ -6881,7 +6880,7 @@ body {
     }
 
     .skeleton-item-catalogo {
-        padding: 3px;
+        padding: 4px;
         flex: 0 0 auto;
         width: var(--item-width);
         height: var(--item-height);
