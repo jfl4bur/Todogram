@@ -255,7 +255,31 @@
         state.loading = false;
     }
 
-    function applyFiltersAndRender(grid, data, tab, genre){ state.allItems = (data||[]).map(buildItemFromData); state.filteredItems = state.allItems.filter(it=>{ if(tab && it.category && it.category!==tab) return false; if(genre && genre!=='Todo el catálogo'){ const gens = (it.genres||'').split('·').map(x=>x.trim()); if(!gens.includes(genre)) return false; } return true; }); resetPagination(grid); appendNextBatch(grid); }
+    function applyFiltersAndRender(grid, data, tab, genre){
+        state.allItems = (data||[]).map(buildItemFromData);
+        state.filteredItems = state.allItems.filter(it=>{
+            // category mismatch
+            if(tab && it.category && it.category!==tab) return false;
+
+            // Exclude episode rows from the main listings for certain tabs (Series, Animes, Documentales)
+            // Many dataset rows representing episodes include fields like 'Título episodio' or similar.
+            if(tab && (tab === 'Series' || tab === 'Animes' || tab === 'Documentales')){
+                try{
+                    const raw = it.raw || {};
+                    const episodeKeys = ['Título episodio', 'Título episodio completo', 'Título episodio 1', 'Episodio', 'Título episodio (completo)'];
+                    const hasEpisode = episodeKeys.some(k => raw[k] && String(raw[k]).trim() !== '');
+                    if(hasEpisode) return false;
+                }catch(e){ /* ignore and continue */ }
+            }
+
+            if(genre && genre!=='Todo el catálogo'){
+                const gens = (it.genres||'').split('·').map(x=>x.trim()); if(!gens.includes(genre)) return false;
+            }
+            return true;
+        });
+        resetPagination(grid);
+        appendNextBatch(grid);
+    }
 
     function parseCatalogHash(){
         const raw = window.location.hash || '';
