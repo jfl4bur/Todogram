@@ -1263,47 +1263,6 @@ button:focus {
 }
 .catalogo-body{flex:1;overflow:auto;padding:8px 32px 48px 32px}
 .catalogo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--item-width),1fr));column-gap:4px;row-gap:75px}
-
-/* Catalog-specific poster & loader sizing: keep poster container and loader aligned
-   across all devices by using CSS variables. This only targets items inside
-   the catalog grid so episodios/carousels keep their overrides. */
-.catalogo-grid .catalogo-item{ position:relative; width:var(--item-width); box-sizing:border-box; }
-.catalogo-grid .catalogo-item .poster-container{
-    position:relative; /* confine absolute loader inside */
-    width:100%;
-    aspect-ratio: var(--item-aspect, 194/271); /* poster ratio (w/h) */
-    overflow:hidden;
-    background:#232323;
-    display:block;
-}
-.catalogo-grid .catalogo-item .poster-container img{
-    position:absolute;
-    inset:0;
-    width:100%;
-    height:100%;
-    object-fit:cover;
-    display:block;
-}
-.catalogo-grid .catalogo-item .loader{
-    position:absolute;
-    inset:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background-color: rgba(0,0,0,0.45);
-    z-index:4;
-}
-.catalogo-grid .catalogo-item .catalogo-item-title{ text-align:center; margin-top:8px; }
-
-/* Ensure catalog skeletons use same sizes */
-#catalogo-skeleton-page .skeleton-item{ width:var(--item-width); box-sizing:border-box; }
-#catalogo-skeleton-page .skeleton-item .skeleton-poster{ aspect-ratio: var(--item-aspect, 194/271); width:100%; display:block; overflow:hidden; }
-#catalogo-skeleton-page .skeleton-item .skeleton-spinner{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
-
-/* Responsive adjustments: change --item-width at common breakpoints to keep consistent sizing */
-@media (max-width:1024px){ :root{ --item-width:160px; } }
-@media (max-width:768px){ :root{ --item-width:140px; } }
-@media (max-width:420px){ :root{ --item-width:120px; } }
 .catalogo-item{background:transparent;padding:4px;border-radius:0;cursor:pointer;display:flex;flex-direction:column;align-items:center}
 .catalogo-item img{width:100%;height:auto;border-radius:0;object-fit:cover;background:#232323}
 .catalogo-item .title{margin-top:8px;font-size:14px;text-align:center;color:var(--text-color)}
