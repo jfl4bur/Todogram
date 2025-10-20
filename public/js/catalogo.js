@@ -319,7 +319,35 @@
             genreBtn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
         });
 
-        const initial = parseCatalogHash(); const tab = initial && initial.tab ? initial.tab : 'Películas'; const genre = initial && initial.genre ? initial.genre : 'Todo el catálogo'; populateGenresForTabPage(tab); tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=> x.classList.toggle('active', x.dataset.tab===tab)); genreBtn.textContent = genre + ' ▾'; applyFiltersAndRender(grid, data, tab, genre);
+        const initial = parseCatalogHash();
+        // Determine initial tab. If the hash includes a tab, use it.
+        // If the hash only contains an id (from clicking an item), infer the tab/category from the raw data.
+        let tab = 'Películas';
+        let genre = 'Todo el catálogo';
+        if (initial) {
+            if (initial.tab) tab = initial.tab;
+            if (initial.genre) genre = initial.genre;
+        }
+
+        // If hash contains only id (no tab specified), try to infer the category from the data
+        if (initial && initial.id && (!initial.tab || initial.tab === null)) {
+            try {
+                // Build a quick map from data to find the item's category
+                const tempItems = (data||[]).map(buildItemFromData);
+                const found = tempItems.find(x => String(x.id) === String(initial.id));
+                if (found && found.category) {
+                    tab = found.category;
+                    console.log('Catalogo: inferred tab from item id ->', tab);
+                    // Also set genre to 'Todo el catálogo' unless we can infer differently
+                    genre = 'Todo el catálogo';
+                }
+            } catch (e) { console.warn('catalogo: no se pudo inferir categoría desde id en hash', e); }
+        }
+
+        populateGenresForTabPage(tab);
+        tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=> x.classList.toggle('active', x.dataset.tab===tab));
+        genreBtn.textContent = genre + ' ▾';
+        applyFiltersAndRender(grid, data, tab, genre);
 
         // Helper: try to open details modal for an item id present in the hash.
         function openDetailsForId(id, title){
@@ -388,6 +416,20 @@
                     genreBtn.textContent = genre + ' ▾';
                     populateGenresForTabPage(tab);
                     applyFiltersAndRender(grid, data, tab, genre);
+                } else if(parsed.id && (!parsed.tab || parsed.tab === null)){
+                    // infer category from data for this id
+                    try {
+                        const tempItems = (data||[]).map(buildItemFromData);
+                        const found = tempItems.find(x => String(x.id) === String(parsed.id));
+                        if (found && found.category) {
+                            const tab = found.category || 'Películas';
+                            const genre = 'Todo el catálogo';
+                            tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=> x.classList.toggle('active', x.dataset.tab===tab));
+                            genreBtn.textContent = genre + ' ▾';
+                            populateGenresForTabPage(tab);
+                            applyFiltersAndRender(grid, data, tab, genre);
+                        }
+                    } catch (e) { console.warn('catalogo: no se pudo inferir categoría desde id en hash (hashchange)', e); }
                 }
                 if(parsed.id){
                     // attempt to open the details modal for this id
