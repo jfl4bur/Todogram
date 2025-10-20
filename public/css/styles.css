@@ -6883,7 +6883,7 @@ body {
     .skeleton-item-catalogo {
         padding: 3px;
         flex: 0 0 auto;
-        /* width: var(--item-width); */
+        width: var(--item-width);
         height: var(--item-height);
         background-color: var(--secondary-color);
         position: relative;
