@@ -2478,7 +2478,7 @@ button:focus {
     grid-template-columns: repeat(3,minmax(150px,1fr));
     gap: 10px 4px;
     border-radius:2px;
-    z-index: 1;
+    z-index: 2;
     /* padding-right: 48px !important; */
 }
 .catalogo-genre-list button{
