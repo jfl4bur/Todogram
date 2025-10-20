@@ -339,6 +339,26 @@
         try{ if(!window.shareModal && typeof ShareModal === 'function') window.shareModal = new ShareModal(); }catch(e){}
         root.innerHTML = `\n            <div class="catalogo-page">\n                <div class="catalogo-page-header">\n                    <div class="catalogo-controls">\n                        <div class="catalogo-genre-dropdown" id="catalogo-genre-dropdown-page">\n                            <button id="catalogo-genre-button-page" aria-haspopup="true" aria-expanded="false">Todo el catálogo ▾</button>\n                            <div id="catalogo-genre-list-page" class="catalogo-genre-list" style="display:none" role="menu"></div>\n                        </div>\n                    </div>\n                    <div class="catalogo-tabs" id="catalogo-tabs-page">\n                        <button data-tab="Películas" class="catalogo-tab active">Películas</button>\n                        <button data-tab="Series" class="catalogo-tab">Series</button>\n                        <button data-tab="Documentales" class="catalogo-tab">Documentales</button>\n                        <button data-tab="Animes" class="catalogo-tab">Animes</button>\n                    </div>\n                </div>\n                <div class="catalogo-page-body">\n                    <div class="carousel-skeleton" id="catalogo-skeleton-page" style="display:flex;gap:12px;flex-wrap:wrap;">\n                        <div class="skeleton-item"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item"><div class="skeleton-spinner"></div></div>\n                    </div>\n                    <div class="catalogo-grid" id="catalogo-grid-page" role="list" aria-busy="false"></div>\n                </div>\n            </div>\n        `;
 
+        // Normalize skeleton structure: ensure each .skeleton-spinner is wrapped
+        // in a .skeleton-poster element so the skeleton box matches the poster
+        // container used by real cards and the .loader positioning.
+        const skRootElem = document.getElementById('catalogo-skeleton-page');
+        if (skRootElem) {
+            Array.from(skRootElem.querySelectorAll('.skeleton-item')).forEach(si => {
+                try {
+                    // only wrap direct .skeleton-spinner children
+                    const spinner = si.querySelector(':scope > .skeleton-spinner');
+                    if (spinner) {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'skeleton-poster';
+                        // move spinner into wrapper
+                        si.replaceChild(wrapper, spinner);
+                        wrapper.appendChild(spinner);
+                    }
+                } catch (e) { /* ignore */ }
+            });
+        }
+
         const tabsContainer = document.getElementById('catalogo-tabs-page');
         const genreBtn = document.getElementById('catalogo-genre-button-page');
         const genreList = document.getElementById('catalogo-genre-list-page');

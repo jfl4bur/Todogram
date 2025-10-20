@@ -507,6 +507,27 @@ button:focus {
     z-index: 5;
 }
 
+/* General poster wrapper for skeleton items so they match the poster-container used by cards */
+.skeleton-item .skeleton-poster {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    background: #232323;
+}
+
+/* Center spinner inside poster for any skeleton variant */
+.skeleton-item .skeleton-poster .skeleton-spinner {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+}
+
 /* Independent placeholder lines below poster */
 .skeleton-item.skeleton-16x9 .skeleton-series-line {
     width: 85%;
@@ -1266,6 +1287,38 @@ button:focus {
 .catalogo-item{background:transparent;padding:4px;border-radius:0;cursor:pointer;display:flex;flex-direction:column;align-items:center}
 .catalogo-item img{width:100%;height:auto;border-radius:0;object-fit:cover;background:#232323}
 .catalogo-item .title{margin-top:8px;font-size:14px;text-align:center;color:var(--text-color)}
+
+/* Ensure poster container and loader in catalog items match skeleton sizing
+   and are positioned relative to the catalog item so the .loader sits
+   exactly where the skeleton spinner is placed across breakpoints. */
+.catalogo-item{ position: relative; }
+.catalogo-item .poster-container{
+    position: relative; /* confine absolute loader inside this box */
+    width: 100%;
+    height: var(--item-height); /* same height as skeleton */
+    overflow: hidden;
+    display: block;
+}
+.catalogo-item .poster-container img{ width:100%; height:100%; object-fit:cover; display:block; }
+.catalogo-item .poster-container .loader{
+    position: absolute;
+    inset: 0; /* top:0; right:0; bottom:0; left:0; */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,0.0); /* keep visual parity with skeleton (no extra overlay by default) */
+    z-index: 4;
+}
+
+/* Make skeleton spinner align exactly at center of poster area used by .loader */
+.carousel-skeleton .skeleton-item{ width: var(--item-width); height: var(--item-height); }
+.carousel-skeleton .skeleton-item .skeleton-spinner{
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 5;
+}
 @media (max-width:1200px){ .catalogo-genre-list{grid-template-columns:repeat(2,minmax(120px,1fr))} }
 @media (max-width:600px){ .catalogo-header{padding:12px} .catalogo-body{padding:8px 12px 24px 12px} .catalogo-genre-list{position:static;grid-template-columns:repeat(2,1fr);margin-top:8px} .catalogo-controls{width:100%;display:flex;justify-content:flex-end} }
 
