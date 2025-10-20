@@ -1208,7 +1208,7 @@ button:focus {
 .catalogo-tab{background:transparent;border:0;color:var(--text-secondary);font-size:18px;padding:6px 10px;cursor:pointer}
 .catalogo-tab.active{color:var(--text-color);border-bottom:2px solid var(--primary-color)}
 .catalogo-controls{margin-left:0}
-.catalogo-genre-dropdown{position:relative}
+.catalogo-genre-dropdown{position:relative;}
 /* Dropdown aligned to left to match UI */
 .catalogo-genre-list{
     position:absolute;
@@ -2462,7 +2462,7 @@ button:focus {
 .catalogo-tab{background:transparent;border:0;color:var(--text-secondary);font-size:18px;padding:6px 10px;cursor:pointer}
 .catalogo-tab.active{color:var(--text-color);border-bottom:2px solid var(--primary-color)}
 .catalogo-controls{margin-left:0}
-.catalogo-genre-dropdown{position:relative}
+.catalogo-genre-dropdown{position:relative;}
 /* Dropdown aligned to left to match UI */
 .catalogo-genre-list{
     position:absolute;
@@ -2524,7 +2524,7 @@ button:focus {
 .catalogo-item img{width:100%;height:auto;border-radius:0;object-fit:cover;background:#232323}
 .catalogo-item .title{margin-top:8px;font-size:14px;text-align:center;color:var(--text-color)}
 @media (max-width:1200px){ .catalogo-genre-list{grid-template-columns:repeat(2,minmax(120px,1fr))} }
-@media (max-width:600px){ .catalogo-header{padding:12px} .catalogo-body{padding:8px 12px 24px 12px} .catalogo-genre-list{position:static;grid-template-columns:repeat(2,1fr);margin-top:8px} .catalogo-controls{width:100%;display:flex;justify-content:flex-end} }
+@media (max-width:600px){ .catalogo-header{padding:12px} .catalogo-body{padding:8px 12px 24px 12px} .catalogo-genre-list{position:static;grid-template-columns:repeat(2,1fr);margin-top:8px} .catalogo-controls{width:100%;display:flex;justify-content: center;} }
 
 /* Ensure hover modal and details modal overlay show above catalogo */
 .modal-overlay, .modal-content { z-index: 11000 !important; }

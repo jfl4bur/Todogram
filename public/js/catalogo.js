@@ -358,15 +358,57 @@
             window.__catalogo_unhandledrejection_installed = true;
         }
 
-    function populateGenresForTabPage(tab){ const gens = extractGenres(data, tab); genreList.innerHTML=''; const allBtn = document.createElement('button'); allBtn.textContent='Todo el catálogo'; allBtn.classList.add('genre-item'); allBtn.addEventListener('click', ()=>{ // remove selected from others
-        genreList.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));
-        allBtn.classList.add('selected');
-        genreBtn.textContent='Todo el catálogo ▾'; genreList.style.display='none'; updateCatalogHash(tab, 'Todo el catálogo'); applyFiltersAndRender(grid, data, tab, 'Todo el catálogo'); }); genreList.appendChild(allBtn); gens.forEach(g=>{ const b = document.createElement('button'); b.textContent=g; b.classList.add('genre-item'); b.addEventListener('click', ()=>{ genreList.querySelectorAll('button').forEach(x=>x.classList.remove('selected')); b.classList.add('selected'); genreBtn.textContent = g + ' ▾'; genreList.style.display='none'; updateCatalogHash(tab, g); applyFiltersAndRender(grid, data, tab, g); }); genreList.appendChild(b); }); }
+    function populateGenresForTabPage(tab, currentGenre){
+        // currentGenre optional; if not provided, derive from the visible button text
+        const gens = extractGenres(data, tab);
+        genreList.innerHTML = '';
+        const inferred = (typeof currentGenre === 'string' && currentGenre) ? currentGenre : (genreBtn && genreBtn.textContent ? genreBtn.textContent.replace(' ▾','') : 'Todo el catálogo');
+
+        const allBtn = document.createElement('button');
+        allBtn.textContent = 'Todo el catálogo';
+        allBtn.classList.add('genre-item');
+        if (inferred === 'Todo el catálogo') allBtn.classList.add('selected');
+        allBtn.addEventListener('click', ()=>{
+            // remove selected from others
+            genreList.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));
+            allBtn.classList.add('selected');
+            genreBtn.textContent = 'Todo el catálogo ▾';
+            genreList.style.display = 'none';
+            updateCatalogHash(tab, 'Todo el catálogo');
+            applyFiltersAndRender(grid, data, tab, 'Todo el catálogo');
+        });
+        genreList.appendChild(allBtn);
+
+        gens.forEach(g=>{
+            const b = document.createElement('button');
+            b.textContent = g;
+            b.classList.add('genre-item');
+            if (inferred === g) b.classList.add('selected');
+            b.addEventListener('click', ()=>{
+                genreList.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));
+                b.classList.add('selected');
+                genreBtn.textContent = g + ' ▾';
+                genreList.style.display = 'none';
+                updateCatalogHash(tab, g);
+                applyFiltersAndRender(grid, data, tab, g);
+            });
+            genreList.appendChild(b);
+        });
+    }
 
         tabsContainer.querySelectorAll('.catalogo-tab').forEach(btn=>{ btn.addEventListener('click', ()=>{ tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); const tab = btn.dataset.tab; populateGenresForTabPage(tab); const currentGenre = genreBtn.textContent.replace(' ▾','') || 'Todo el catálogo'; updateCatalogHash(tab, currentGenre); applyFiltersAndRender(grid, data, tab, currentGenre); }); });
 
         genreBtn.addEventListener('click', ()=>{
             const isHidden = genreList.style.display === 'none' || getComputedStyle(genreList).display === 'none';
+            if (isHidden) {
+                // Ensure list is populated and the current selection is applied when opening
+                try {
+                    const activeTabBtn = tabsContainer.querySelector('.catalogo-tab.active');
+                    const activeTab = activeTabBtn ? activeTabBtn.dataset.tab : 'Películas';
+                    const currentGenre = (genreBtn && genreBtn.textContent) ? genreBtn.textContent.replace(' ▾','') : 'Todo el catálogo';
+                    populateGenresForTabPage(activeTab, currentGenre);
+                } catch (e) { /* ignore and continue */ }
+            }
             genreList.style.display = isHidden ? 'grid' : 'none';
             genreBtn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
         });
