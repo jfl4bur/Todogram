@@ -611,6 +611,22 @@ class EpisodiosAnimesCarousel {
     }
     async renderItems() {
         this.wrapper.innerHTML = '';
+        // Mostrar mensaje 'No hay resultados' si no hay datos
+        try {
+            let dataLength = 0;
+            if (Array.isArray(this.moviesData)) dataLength = Math.max(dataLength, this.moviesData.length);
+            if (Array.isArray(this.seriesData)) dataLength = Math.max(dataLength, this.seriesData.length);
+            if (Array.isArray(this.docuData)) dataLength = Math.max(dataLength, this.docuData.length);
+            if (Array.isArray(this.animeData)) dataLength = Math.max(dataLength, this.animeData.length);
+            if (Array.isArray(this.episodiosData)) dataLength = Math.max(dataLength, this.episodiosData.length);
+            if (dataLength === 0) {
+                const noResults = document.createElement('div');
+                noResults.className = 'carousel-no-results';
+                noResults.textContent = 'No hay resultados';
+                this.wrapper.appendChild(noResults);
+                return;
+            }
+        } catch (e) { /* ignore */ }
         if (!document.getElementById('episodios-animes-labels-styles')) {
             const sh = document.createElement('style');
             sh.id = 'episodios-animes-labels-styles';
