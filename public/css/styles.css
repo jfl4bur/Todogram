@@ -1502,12 +1502,12 @@ button:focus {
 /* Skeleton loader con spinner circular */
 .carousel-skeleton {
     display: flex;
-    gap: 4px 14px !important;
+    gap: 0px 4px !important;
     width: 100%;
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    margin: 50px;
+    margin: 0px;
 }
 
 .carousel-skeleton::-webkit-scrollbar {
