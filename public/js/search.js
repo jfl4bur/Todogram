@@ -134,14 +134,24 @@
             '#episodios-animes-carousel-wrapper',
             '#catalogo-page-root'
         ],
+        _backupData: {},
         async performSearch(q){
             this._lastQuery = q || '';
             if(!q || String(q).trim() === ''){
-                // clear
+                // clear: hide results and restore original carousels/data
                 const root = document.getElementById('search-results-root');
                 if(root) root.style.display = 'none';
                 restoreDisplay(this._originalSelectors);
                 try{ history.replaceState(null, null, window.location.pathname + window.location.search); }catch(e){}
+                // restore backup data into carousels if present
+                try{
+                    if(this._backupData.movies && window.carousel){ window.carousel.moviesData = this._backupData.movies.slice(); if(typeof window.carousel.renderItems === 'function') window.carousel.renderItems(); }
+                    if(this._backupData.series && window.seriesCarousel){ window.seriesCarousel.seriesData = this._backupData.series.slice(); if(typeof window.seriesCarousel.renderItems === 'function') window.seriesCarousel.renderItems(); }
+                    if(this._backupData.animes && window.animesCarousel){ window.animesCarousel.animeData = this._backupData.animes.slice(); if(typeof window.animesCarousel.renderItems === 'function') window.animesCarousel.renderItems(); }
+                    if(this._backupData.documentales && window.documentalesCarousel){ window.documentalesCarousel.docuData = this._backupData.documentales.slice(); if(typeof window.documentalesCarousel.renderItems === 'function') window.documentalesCarousel.renderItems(); }
+                    if(this._backupData.episodios && window.episodiosCarousel){ window.episodiosCarousel.episodiosData = this._backupData.episodios.slice(); if(typeof window.episodiosCarousel.renderItems === 'function') window.episodiosCarousel.renderItems(); }
+                    if(this._backupData.episodiosAnimes && window.episodiosAnimesCarousel){ window.episodiosAnimesCarousel.episodiosData = this._backupData.episodiosAnimes.slice(); if(typeof window.episodiosAnimesCarousel.renderItems === 'function') window.episodiosAnimesCarousel.renderItems(); }
+                }catch(e){ console.warn('search.restore fail', e); }
                 return;
             }
             const container = buildSearchContainer();
@@ -168,7 +178,70 @@
                 else if(cat === 'Documentales'){ documentales.push(item); }
                 else { movies.push(item); }
             }
-            // render into wrappers
+            // Try to inject into existing carousel instances (so hover/modal and behavior stay identical)
+            function injectIntoCarousel(section, list){
+                try{
+                    if(!Array.isArray(list)) list = [];
+                    const take = list.slice(0, MAX_PER_SECTION);
+                    // movies -> window.carousel.moviesData
+                    if(section === 'movies' && window.carousel){
+                        if(!this._backupData.movies) this._backupData.movies = window.carousel.moviesData ? window.carousel.moviesData.slice() : null;
+                        window.carousel.moviesData = take.map(x=>({ ...x }));
+                        window.carousel.index = 0;
+                        if(typeof window.carousel.showCarousel === 'function') window.carousel.showCarousel();
+                        if(typeof window.carousel.renderItems === 'function') window.carousel.renderItems();
+                        return true;
+                    }
+                    // series -> window.seriesCarousel.seriesData
+                    if(section === 'series' && window.seriesCarousel){
+                        if(!this._backupData.series) this._backupData.series = window.seriesCarousel.seriesData ? window.seriesCarousel.seriesData.slice() : null;
+                        window.seriesCarousel.seriesData = take.map(x=>({ ...x }));
+                        window.seriesCarousel.index = 0;
+                        if(typeof window.seriesCarousel.showCarousel === 'function') window.seriesCarousel.showCarousel();
+                        if(typeof window.seriesCarousel.renderItems === 'function') window.seriesCarousel.renderItems();
+                        return true;
+                    }
+                    // animes -> window.animesCarousel.animeData
+                    if(section === 'animes' && window.animesCarousel){
+                        if(!this._backupData.animes) this._backupData.animes = window.animesCarousel.animeData ? window.animesCarousel.animeData.slice() : null;
+                        window.animesCarousel.animeData = take.map(x=>({ ...x }));
+                        window.animesCarousel.index = 0;
+                        if(typeof window.animesCarousel.showCarousel === 'function') window.animesCarousel.showCarousel();
+                        if(typeof window.animesCarousel.renderItems === 'function') window.animesCarousel.renderItems();
+                        return true;
+                    }
+                    // documentales -> window.documentalesCarousel.docuData
+                    if(section === 'documentales' && window.documentalesCarousel){
+                        if(!this._backupData.documentales) this._backupData.documentales = window.documentalesCarousel.docuData ? window.documentalesCarousel.docuData.slice() : null;
+                        window.documentalesCarousel.docuData = take.map(x=>({ ...x }));
+                        window.documentalesCarousel.index = 0;
+                        if(typeof window.documentalesCarousel.showCarousel === 'function') window.documentalesCarousel.showCarousel();
+                        if(typeof window.documentalesCarousel.renderItems === 'function') window.documentalesCarousel.renderItems();
+                        return true;
+                    }
+                    // episodios -> window.episodiosCarousel or window.episodiosAnimesCarousel
+                    if(section === 'episodios'){
+                        if(window.episodiosCarousel){
+                            if(!this._backupData.episodios) this._backupData.episodios = window.episodiosCarousel.episodiosData ? window.episodiosCarousel.episodiosData.slice() : null;
+                            window.episodiosCarousel.episodiosData = take.map(x=>({ ...x }));
+                            window.episodiosCarousel.index = 0;
+                            if(typeof window.episodiosCarousel.showCarousel === 'function') window.episodiosCarousel.showCarousel();
+                            if(typeof window.episodiosCarousel.renderItems === 'function') window.episodiosCarousel.renderItems();
+                            return true;
+                        } else if(window.episodiosAnimesCarousel){
+                            if(!this._backupData.episodiosAnimes) this._backupData.episodiosAnimes = window.episodiosAnimesCarousel.episodiosData ? window.episodiosAnimesCarousel.episodiosData.slice() : null;
+                            window.episodiosAnimesCarousel.episodiosData = take.map(x=>({ ...x }));
+                            window.episodiosAnimesCarousel.index = 0;
+                            if(typeof window.episodiosAnimesCarousel.showCarousel === 'function') window.episodiosAnimesCarousel.showCarousel();
+                            if(typeof window.episodiosAnimesCarousel.renderItems === 'function') window.episodiosAnimesCarousel.renderItems();
+                            return true;
+                        }
+                    }
+                }catch(e){ console.warn('search.injectIntoCarousel error', e); }
+                return false;
+            }
+
+            // render into wrappers (fallback)
             function renderList(list, wrapperId){
                 const w = document.getElementById(wrapperId);
                 if(!w) return;
@@ -177,11 +250,13 @@
                 for(const it of take){ w.appendChild(createItemElement(it)); }
                 if(take.length === 0) w.innerHTML = '<div class="no-results">No se encontraron resultados</div>';
             }
-            renderList(movies,'search-movies-wrapper');
-            renderList(series,'search-series-wrapper');
-            renderList(animes,'search-animes-wrapper');
-            renderList(documentales,'search-documentales-wrapper');
-            renderList(episodios,'search-episodios-wrapper');
+
+            // Try injection first; if not available, render into local wrappers
+            if(!injectIntoCarousel.call(SearchModule, 'movies', movies)) renderList(movies,'search-movies-wrapper');
+            if(!injectIntoCarousel.call(SearchModule, 'series', series)) renderList(series,'search-series-wrapper');
+            if(!injectIntoCarousel.call(SearchModule, 'animes', animes)) renderList(animes,'search-animes-wrapper');
+            if(!injectIntoCarousel.call(SearchModule, 'documentales', documentales)) renderList(documentales,'search-documentales-wrapper');
+            if(!injectIntoCarousel.call(SearchModule, 'episodios', episodios)) renderList(episodios,'search-episodios-wrapper');
 
             // push search hash
             try{
