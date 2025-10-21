@@ -2,12 +2,6 @@
 (async function(){
     const CATALOG_HASH = '#catalogo';
 
-    function normalizeText(text){
-        if(!text) return '';
-        try{ return String(text).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,''); }
-        catch(e){ return String(text||'').toLowerCase().replace(/[^a-z0-9]+/g,'-'); }
-    }
-
     async function loadData(){
         if(window.sharedData) return window.sharedData;
         try{ const res = await fetch(DATA_URL); if(!res.ok) throw new Error('No se pudo cargar data.json'); const data = await res.json(); window.sharedData = data; return data; }
@@ -337,11 +331,14 @@
         try{ if(!window.detailsModal && typeof DetailsModal === 'function') window.detailsModal = new DetailsModal(); }catch(e){}
         try{ if(!window.videoModal && typeof VideoModal === 'function') window.videoModal = new VideoModal(); }catch(e){}
         try{ if(!window.shareModal && typeof ShareModal === 'function') window.shareModal = new ShareModal(); }catch(e){}
-        root.innerHTML = `\n            <div class="catalogo-page">\n                <div class="catalogo-page-header">\n                    <div class="catalogo-controls">\n                        <div class="catalogo-genre-dropdown" id="catalogo-genre-dropdown-page">\n                            <button id="catalogo-genre-button-page" aria-haspopup="true" aria-expanded="false">Todo el catálogo ▾</button>\n                            <div id="catalogo-genre-list-page" class="catalogo-genre-list" style="display:none" role="menu"></div>\n                        </div>\n                    </div>\n                    <div class="catalogo-tabs" id="catalogo-tabs-page">\n                        <button data-tab="Películas" class="catalogo-tab active">Películas</button>\n                        <button data-tab="Series" class="catalogo-tab">Series</button>\n                        <button data-tab="Documentales" class="catalogo-tab">Documentales</button>\n                        <button data-tab="Animes" class="catalogo-tab">Animes</button>\n                    </div>\n                </div>\n                <div class="catalogo-page-body">\n                    <div class="skeleton-catalogo" id="catalogo-skeleton-page" style="display:flex;gap:12px;flex-wrap:wrap;">\n                        <div class="skeleton-item-catalogo"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo"><div class="skeleton-spinner"></div></div>\n                    </div>\n                    <div class="catalogo-grid" id="catalogo-grid-page" role="list" aria-busy="false"></div>\n                </div>\n            </div>\n        `;
+        root.innerHTML = `\n            <div class="catalogo-page">\n                <div class="catalogo-page-header">\n                    <div class="catalogo-controls">\n                        <div class="catalogo-genre-dropdown" id="catalogo-genre-dropdown-page">\n                            <button id="catalogo-genre-button-page" aria-haspopup="true" aria-expanded="false"><span class="label">Todo el catálogo</span>\n                                <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>\n                            </button>\n                            <div id="catalogo-genre-list-page" class="catalogo-genre-list" style="display:none" role="menu"></div>\n                        </div>\n                    </div>\n                    <div class="catalogo-tabs" id="catalogo-tabs-page">\n                        <button data-tab="Películas" class="catalogo-tab active">Películas</button>\n                        <button data-tab="Series" class="catalogo-tab">Series</button>\n                        <button data-tab="Documentales" class="catalogo-tab">Documentales</button>\n                        <button data-tab="Animes" class="catalogo-tab">Animes</button>\n                    </div>\n                </div>\n                <div class="catalogo-page-body">\n                    <div class="skeleton-catalogo" id="catalogo-skeleton-page" style="display:flex;gap:12px;flex-wrap:wrap;">\n                        <div class="skeleton-item-catalogo"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo"><div class="skeleton-spinner"></div></div>\n                    </div>\n                    <div class="catalogo-grid" id="catalogo-grid-page" role="list" aria-busy="false"></div>\n                </div>\n            </div>\n        `;
 
-        const tabsContainer = document.getElementById('catalogo-tabs-page');
-        const genreBtn = document.getElementById('catalogo-genre-button-page');
-        const genreList = document.getElementById('catalogo-genre-list-page');
+    const tabsContainer = document.getElementById('catalogo-tabs-page');
+    const genreBtn = document.getElementById('catalogo-genre-button-page');
+    const genreList = document.getElementById('catalogo-genre-list-page');
+    // helpers to read/write the visible label inside the button (keeps chevron separate)
+    function getGenreLabel(){ try{ const lbl = genreBtn && genreBtn.querySelector && genreBtn.querySelector('.label'); return lbl ? lbl.textContent.trim() : (genreBtn ? genreBtn.textContent.replace(' ▾','').trim() : 'Todo el catálogo'); }catch(e){ return 'Todo el catálogo'; } }
+    function setGenreLabel(text){ try{ if(!genreBtn) return; const lbl = genreBtn.querySelector && genreBtn.querySelector('.label'); if(lbl) lbl.textContent = text; else genreBtn.textContent = text + ' ▾'; }catch(e){} }
     const grid = document.getElementById('catalogo-grid-page');
     if(grid){ grid.style.columnGap = grid.style.columnGap || getComputedStyle(document.documentElement).getPropertyValue('--catalogo-gap') || '18px'; grid.style.rowGap = grid.style.rowGap || getComputedStyle(document.documentElement).getPropertyValue('--catalogo-row-gap') || '48px'; }
 
@@ -362,7 +359,7 @@
         // currentGenre optional; if not provided, derive from the visible button text
         const gens = extractGenres(data, tab);
         genreList.innerHTML = '';
-        const inferred = (typeof currentGenre === 'string' && currentGenre) ? currentGenre : (genreBtn && genreBtn.textContent ? genreBtn.textContent.replace(' ▾','') : 'Todo el catálogo');
+    const inferred = (typeof currentGenre === 'string' && currentGenre) ? currentGenre : getGenreLabel();
 
         const allBtn = document.createElement('button');
         allBtn.textContent = 'Todo el catálogo';
@@ -372,7 +369,7 @@
             // remove selected from others
             genreList.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));
             allBtn.classList.add('selected');
-            genreBtn.textContent = 'Todo el catálogo ▾';
+            setGenreLabel('Todo el catálogo');
             genreList.style.display = 'none';
             updateCatalogHash(tab, 'Todo el catálogo');
             applyFiltersAndRender(grid, data, tab, 'Todo el catálogo');
@@ -387,7 +384,7 @@
             b.addEventListener('click', ()=>{
                 genreList.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));
                 b.classList.add('selected');
-                genreBtn.textContent = g + ' ▾';
+                setGenreLabel(g);
                 genreList.style.display = 'none';
                 updateCatalogHash(tab, g);
                 applyFiltersAndRender(grid, data, tab, g);
@@ -396,7 +393,7 @@
         });
     }
 
-        tabsContainer.querySelectorAll('.catalogo-tab').forEach(btn=>{ btn.addEventListener('click', ()=>{ tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); const tab = btn.dataset.tab; populateGenresForTabPage(tab); const currentGenre = genreBtn.textContent.replace(' ▾','') || 'Todo el catálogo'; updateCatalogHash(tab, currentGenre); applyFiltersAndRender(grid, data, tab, currentGenre); }); });
+    tabsContainer.querySelectorAll('.catalogo-tab').forEach(btn=>{ btn.addEventListener('click', ()=>{ tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); const tab = btn.dataset.tab; populateGenresForTabPage(tab); const currentGenre = getGenreLabel() || 'Todo el catálogo'; updateCatalogHash(tab, currentGenre); applyFiltersAndRender(grid, data, tab, currentGenre); }); });
 
         genreBtn.addEventListener('click', ()=>{
             const isHidden = genreList.style.display === 'none' || getComputedStyle(genreList).display === 'none';
@@ -405,7 +402,7 @@
                 try {
                     const activeTabBtn = tabsContainer.querySelector('.catalogo-tab.active');
                     const activeTab = activeTabBtn ? activeTabBtn.dataset.tab : 'Películas';
-                    const currentGenre = (genreBtn && genreBtn.textContent) ? genreBtn.textContent.replace(' ▾','') : 'Todo el catálogo';
+                    const currentGenre = getGenreLabel() || 'Todo el catálogo';
                     populateGenresForTabPage(activeTab, currentGenre);
                 } catch (e) { /* ignore and continue */ }
             }
@@ -443,7 +440,7 @@
 
         populateGenresForTabPage(tab);
         tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=> x.classList.toggle('active', x.dataset.tab===tab));
-        genreBtn.textContent = genre + ' ▾';
+    setGenreLabel(genre);
         applyFiltersAndRender(grid, data, tab, genre);
 
         // Helper: try to open details modal for an item id present in the hash.
@@ -510,7 +507,7 @@
                     const tab = parsed.tab || 'Películas';
                     const genre = parsed.genre || 'Todo el catálogo';
                     tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=> x.classList.toggle('active', x.dataset.tab===tab));
-                    genreBtn.textContent = genre + ' ▾';
+                    setGenreLabel(genre);
                     populateGenresForTabPage(tab);
                     applyFiltersAndRender(grid, data, tab, genre);
                 } else if(parsed.id && (!parsed.tab || parsed.tab === null)){
@@ -522,7 +519,7 @@
                             const tab = found.category || 'Películas';
                             const genre = 'Todo el catálogo';
                             tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=> x.classList.toggle('active', x.dataset.tab===tab));
-                            genreBtn.textContent = genre + ' ▾';
+                            setGenreLabel(genre);
                             populateGenresForTabPage(tab);
                             applyFiltersAndRender(grid, data, tab, genre);
                         }
