@@ -136,6 +136,15 @@
                 try {
                     const existing = findExistingItemById(it.id);
                     const itemToShow = existing || it;
+                    // Persist hash like carousels do so reloads/opening the URL re-open the modal
+                    try {
+                        const hash = `id=${encodeURIComponent(itemToShow.id)}&title=${encodeURIComponent(itemToShow.title)}`;
+                        if (window.location.hash !== `#${hash}`) {
+                            history.pushState(null, '', `#${hash}`);
+                        }
+                    } catch (hashErr) {
+                        console.warn('catalogo: fallo al setear hash para detalles', hashErr);
+                    }
                     const res = window.detailsModal.show(itemToShow, d);
                     if (res && typeof res.then === 'function') {
                         res.catch((err) => {
