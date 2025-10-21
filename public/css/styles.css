@@ -6749,6 +6749,21 @@ body {
         .details-modal-episode-synopsis{font-size:13px}
 }
 
+/* Defensive: force details modal overlay to be fixed on small devices to avoid
+   being positioned relative to transformed ancestors (common mobile issue). */
+@media (max-width: 900px) {
+    .details-modal-overlay {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        transform: none !important;
+    }
+}
+
 @media (max-width:600px) {
 .catalogo-header{padding:12px} .catalogo-body{padding:8px 12px 24px 12px} .catalogo-genre-list{position:static;grid-template-columns:repeat(2,1fr);margin-top:8px} .catalogo-controls{width:100%;display:flex;justify-content:flex-end}
 /* On mobile, don't let the closed dropdown take up layout space. Use display none unless .open on container */

@@ -355,6 +355,29 @@ class DetailsModal {
             </div>
         `;
         
+        // Ensure overlay is a direct child of document.body and has fixed viewport sizing.
+        // Some mobile browsers / layouts apply CSS transforms to ancestors which makes
+        // position:fixed behave like position:absolute relative to that ancestor.
+        // Reparenting here and forcing fixed inset/transform prevents the modal from
+        // appearing desplazado on mobile devices.
+        try {
+            if (this.detailsModalOverlay.parentNode !== document.body) {
+                document.body.appendChild(this.detailsModalOverlay);
+            }
+            Object.assign(this.detailsModalOverlay.style, {
+                position: 'fixed',
+                top: '0',
+                left: '0',
+                right: '0',
+                bottom: '0',
+                width: '100vw',
+                height: '100vh',
+                transform: 'none'
+            });
+        } catch (e) {
+            console.warn('DetailsModal: unable to reparent/force styles for overlay', e);
+        }
+
         this.detailsModalOverlay.style.display = 'block';
         this.detailsModalOverlay.classList.add('show');
         document.body.style.overflow = 'hidden';
