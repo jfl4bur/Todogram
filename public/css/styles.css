@@ -1977,6 +1977,11 @@ button:focus {
 
 .modal-header::after {
     width: 100%;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-6px);
+    transition: opacity 220ms ease, transform 220ms ease, visibility 220ms linear;
+    pointer-events: none;
     height: 100%;
     z-index: 1100;
     position: absolute;

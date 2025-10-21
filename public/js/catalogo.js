@@ -365,12 +365,15 @@
         allBtn.textContent = 'Todo el catálogo';
         allBtn.classList.add('genre-item');
         if (inferred === 'Todo el catálogo') allBtn.classList.add('selected');
-        allBtn.addEventListener('click', ()=>{
+    allBtn.addEventListener('click', ()=>{
             // remove selected from others
             genreList.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));
             allBtn.classList.add('selected');
             setGenreLabel('Todo el catálogo');
-            genreList.style.display = 'none';
+            // close dropdown via class so CSS animations run
+            const container = document.getElementById('catalogo-genre-dropdown-page');
+            if(container) container.classList.remove('open');
+            genreBtn.setAttribute('aria-expanded','false');
             updateCatalogHash(tab, 'Todo el catálogo');
             applyFiltersAndRender(grid, data, tab, 'Todo el catálogo');
         });
@@ -385,7 +388,10 @@
                 genreList.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));
                 b.classList.add('selected');
                 setGenreLabel(g);
-                genreList.style.display = 'none';
+                // close dropdown via class
+                const container = document.getElementById('catalogo-genre-dropdown-page');
+                if(container) container.classList.remove('open');
+                genreBtn.setAttribute('aria-expanded','false');
                 updateCatalogHash(tab, g);
                 applyFiltersAndRender(grid, data, tab, g);
             });
@@ -396,7 +402,8 @@
     tabsContainer.querySelectorAll('.catalogo-tab').forEach(btn=>{ btn.addEventListener('click', ()=>{ tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); const tab = btn.dataset.tab; populateGenresForTabPage(tab); const currentGenre = getGenreLabel() || 'Todo el catálogo'; updateCatalogHash(tab, currentGenre); applyFiltersAndRender(grid, data, tab, currentGenre); }); });
 
         genreBtn.addEventListener('click', ()=>{
-            const isHidden = genreList.style.display === 'none' || getComputedStyle(genreList).display === 'none';
+            const container = document.getElementById('catalogo-genre-dropdown-page');
+            const isHidden = !(container && container.classList && container.classList.contains('open'));
             if (isHidden) {
                 // Ensure list is populated and the current selection is applied when opening
                 try {
@@ -406,11 +413,9 @@
                     populateGenresForTabPage(activeTab, currentGenre);
                 } catch (e) { /* ignore and continue */ }
             }
-            genreList.style.display = isHidden ? 'grid' : 'none';
-            genreBtn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
-            // Also toggle a class on the container so CSS can style the open state
-            const container = document.getElementById('catalogo-genre-dropdown-page');
+            // toggle open class on container; CSS will handle showing/hiding with animation
             if (container) container.classList.toggle('open', isHidden);
+            genreBtn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
         });
 
         const initial = parseCatalogHash();
@@ -532,7 +537,7 @@
             }
         });
 
-    document.addEventListener('click', (e)=>{ if(!e.target.closest('.catalogo-genre-dropdown')){ genreList.style.display='none'; genreBtn.setAttribute('aria-expanded','false'); } });
+    document.addEventListener('click', (e)=>{ if(!e.target.closest('.catalogo-genre-dropdown')){ const container = document.getElementById('catalogo-genre-dropdown-page'); if(container) container.classList.remove('open'); genreBtn.setAttribute('aria-expanded','false'); } });
 
         // Wrap createCard so we can later replace behaviour if needed; keep it lightweight (no per-item hover listeners)
         const originalCreateCard = createCard;
