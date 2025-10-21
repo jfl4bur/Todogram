@@ -64,7 +64,14 @@ const headerHTML = `
 document.addEventListener('DOMContentLoaded', function() {
   const headerRoot = document.getElementById('header-root');
   if (headerRoot) {
-    headerRoot.innerHTML = headerHTML;
+    // evitar doble render si el script se ejecuta dos veces
+    if (!headerRoot.dataset.headerRendered) {
+      headerRoot.innerHTML = headerHTML;
+      headerRoot.dataset.headerRendered = '1';
+    } else {
+      // ya renderizado, no inyectar de nuevo
+      console.debug('header: ya renderizado, omitiendo segunda inyección');
+    }
   }
   
   // Elementos del header

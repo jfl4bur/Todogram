@@ -415,18 +415,20 @@ button:focus {
 
 /* Header search pill */
 .header-search { position: relative; display: flex; align-items: center; }
+.slider-header .header-search, .slider-header .header-search * { box-sizing: border-box; }
+.header-search { z-index:12010 }
 .header-search-input { 
     height: 36px; 
     border-radius: 999px; 
     padding: 0 14px 0 46px; /* espacio para icono */
-    border: 1px solid rgba(255,255,255,0.14); 
-    background-color: rgba(15,15,15,0.85); /* fondo oscuro, casi negro */
-    color: #ffffff; 
-    font-size: 15px;
-    outline: none;
-    -webkit-appearance: none;
-    appearance: none;
-    box-sizing: border-box;
+    border: 1px solid rgba(255,255,255,0.14) !important; 
+    background-color: rgba(15,15,15,0.95) !important; /* fondo oscuro, casi negro */
+    color: #ffffff !important; 
+    font-size: 15px !important;
+    outline: none !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    box-sizing: border-box !important;
 }
 .header-search-input::placeholder { color: rgba(255,255,255,0.55); }
 /* Remove native search decorations in WebKit */
