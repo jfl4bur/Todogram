@@ -136,6 +136,9 @@
                 try {
                     const existing = findExistingItemById(it.id);
                     const itemToShow = existing || it;
+                    // Instrumentación: log y asegurar window.activeItem antes de delegar
+                    try { window.activeItem = itemToShow; } catch(e){}
+                    try { console.debug && console.debug('catalogo.openDetails -> calling detailsModal.show', { source: 'catalogo', id: itemToShow.id, title: itemToShow.title }); } catch(e){}
                     const res = window.detailsModal.show(itemToShow, d);
                     if (res && typeof res.then === 'function') {
                         res.catch((err) => {
@@ -468,7 +471,11 @@
                     const globalItem = findExistingItemById(id) || state.allItems.find(x => String(x.id) === String(id));
                     if (globalItem && window.detailsModal && typeof window.detailsModal.show === 'function') {
                         const el = grid ? grid.querySelector(`.catalogo-item[data-item-id="${CSS.escape(id)}"]`) : null;
-                        try { window.detailsModal.show(globalItem, el); } catch(e){ console.error('catalogo openDetailsForId fallback error', e); }
+                        try { 
+                            try { window.activeItem = globalItem; } catch(e){}
+                            console.debug && console.debug('catalogo.openDetailsForId fallback -> calling detailsModal.show', { source: 'catalogo_fallback', id: globalItem.id, title: globalItem.title });
+                            window.detailsModal.show(globalItem, el);
+                        } catch(e){ console.error('catalogo openDetailsForId fallback error', e); }
                         return;
                     }
                 } catch (e) { /* continue to normal behavior */ }
