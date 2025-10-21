@@ -3358,7 +3358,7 @@ button:focus {
   position: fixed;
 
 /* Search box in header */
-.header-search{ display:flex; align-items:center; margin-left:16px; position:relative; /* responsive: allow header-search to grow but reserve space for logo and burger */ flex: 1 1 auto; width:auto; max-width: calc(100% - 120px); box-sizing:border-box; }
+.header-search{display:flex;align-items:center;margin-left: 0px;margin-right: 10px;position:relative; /* responsive: allow header-search to grow but reserve space for logo and burger */flex: 1 1 auto;width:auto;max-width: calc(100% - 120px);box-sizing:border-box;}
 
 /* Estado vacío: estilo inspirado en imagen 1 */
 .header-search input[type="search"]{
@@ -3380,7 +3380,7 @@ button:focus {
     /* ensure it overlays the input and not the header area to the right */
     z-index:3;
 }
-.header-search.has-value .search-clear{ opacity:1; pointer-events:auto; background:rgba(255,255,255,0.06); transform:scale(1); }
+.header-search.has-value .search-clear{opacity:1;pointer-events:auto;background:rgba(255,255,255,0.06);transform:scale(1);top: 4px;right: 4px;}
 .header-search .search-clear:focus{ box-shadow: 0 0 0 4px rgba(255,255,255,0.03); }
 .header-search .search-clear svg{ width:14px; height:14px; display:block; }
 
