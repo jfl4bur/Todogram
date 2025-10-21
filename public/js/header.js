@@ -23,7 +23,13 @@ const headerHTML = `
         <a href="#" class="slider-nav-link"><i class="fas fa-question-circle"></i><span>Ayuda</span></a>
       </nav>
       <div class="header-search" id="header-search">
-        <input id="global-search-input" type="search" placeholder="Buscar..." aria-label="Buscar" autocomplete="off">
+        <button class="header-search-icon" id="header-search-icon" aria-hidden="true"> 
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+            <circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle>
+          </svg>
+        </button>
+        <input id="global-search-input" class="header-search-input" type="search" placeholder="Buscar..." aria-label="Buscar" autocomplete="off">
       </div>
       <a href="#" class="slider-nav-login"><i class="fas fa-user"></i><span>Iniciar sesión</span></a>
       <button class="slider-header-burger" id="slider-header-burger">
@@ -227,7 +233,13 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function normalizeForSearch(s) {
-    try { return String(s || '').toLowerCase(); } catch(e){ return '' }
+    try {
+      let str = String(s || '');
+      // Normalizar acentos: NFD + remover diacríticos
+      str = str.normalize ? str.normalize('NFD').replace(/\p{Diacritic}/gu, '') : str;
+      // Lowercase y quitar caracteres extra (mantener letras y números y espacios)
+      return str.toLowerCase().replace(/[^\p{L}\p{N} ]+/gu, '').trim();
+    } catch(e){ return String(s || '').toLowerCase(); }
   }
 
   // Aplica filtrado y actualiza cada carousel correspondiente
@@ -258,10 +270,29 @@ document.addEventListener('DOMContentLoaded', function() {
     // Helper to filter a list by title/description/genre
     const filterList = (list) => {
       if(!Array.isArray(list)) return [];
-      return list.filter(it => {
-        const text = [it.title, it.description, it.genre, it.seria, it.serie, it.tmdbUrl, it.postersUrl].map(normalizeForSearch).join(' ');
-        return text.indexOf(qn) !== -1;
-      });
+      const scored = [];
+      for (const it of list) {
+        const title = normalizeForSearch(it.title || '');
+        const desc = normalizeForSearch(it.description || '');
+        const genre = normalizeForSearch(it.genre || '');
+        const others = normalizeForSearch([it.seria, it.serie, it.tmdbUrl, it.postersUrl].join(' '));
+        let score = 0;
+        if (!qn) score = 0;
+        // Exact title match -> strong
+        if (title === qn) score += 100;
+        // Title contains query
+        else if (title.indexOf(qn) !== -1) score += 30;
+        // Word-level matches in title (split)
+        else if (title.split(' ').some(t => t.indexOf(qn) === 0)) score += 15;
+        // Matches in description/genre/others
+        if (desc.indexOf(qn) !== -1) score += 10;
+        if (genre.indexOf(qn) !== -1) score += 8;
+        if (others.indexOf(qn) !== -1) score += 5;
+        if (score > 0) scored.push({item: it, score});
+      }
+      // Ordenar por score descendente y devolver solo items
+      scored.sort((a,b) => b.score - a.score);
+      return scored.map(s => s.item);
     };
 
     try {
@@ -306,6 +337,11 @@ document.addEventListener('DOMContentLoaded', function() {
       if (_searchTimer) clearTimeout(_searchTimer);
       _searchTimer = setTimeout(() => { applySearchQuery(q); _searchTimer = null; }, 260);
     });
+    // Focus input when clicking icon
+    const searchIconBtn = document.getElementById('header-search-icon');
+    if (searchIconBtn) {
+      searchIconBtn.addEventListener('click', (e) => { e.preventDefault(); searchInput.focus(); });
+    }
     // If page loaded with hash search, populate input
     try {
       const rawHash = window.location.hash || '';
