@@ -219,8 +219,8 @@ document.addEventListener('DOMContentLoaded', function() {
     try{
       await new Promise((resolve, reject) => {
         const s = document.createElement('script');
-        s.src = '/public/js/search.js';
-        s.onload = resolve;
+        s.src = '/public/js/search.fixed.js';
+        s.onload = function(){ resolve(); try{ if(window.SearchModule && typeof window.SearchModule.init === 'function') window.SearchModule.init(); }catch(e){} };
         s.onerror = reject;
         document.head.appendChild(s);
       });
