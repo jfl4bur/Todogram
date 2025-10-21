@@ -136,20 +136,12 @@
                 try {
                     const existing = findExistingItemById(it.id);
                     const itemToShow = existing || it;
-                    // Persist hash like carousels do so reloads/opening the URL re-open the modal
-                    try {
-                        const hash = `id=${encodeURIComponent(itemToShow.id)}&title=${encodeURIComponent(itemToShow.title)}`;
-                        if (window.location.hash !== `#${hash}`) {
-                            history.pushState(null, '', `#${hash}`);
-                        }
-                    } catch (hashErr) {
-                        console.warn('catalogo: fallo al setear hash para detalles', hashErr);
-                    }
-                    // Call DetailsModal.show and let it manage its own errors/lifecycle (same as carousel)
-                    try {
-                        window.detailsModal.show(itemToShow, d);
-                    } catch (err) {
-                        console.error('catalogo: detailsModal.show threw synchronously', err);
+                    const res = window.detailsModal.show(itemToShow, d);
+                    if (res && typeof res.then === 'function') {
+                        res.catch((err) => {
+                            console.error('detailsModal.show rejected', err);
+                            try { if (window.detailsModal && typeof window.detailsModal.close === 'function') window.detailsModal.close(); } catch (e) {}
+                        });
                     }
                 } catch (e) {
                     console.error('Error al abrir detailsModal', e);
@@ -469,7 +461,19 @@
                     } else { idx = i; break; }
                 }
             }
-            if(idx === -1) return;
+            if(idx === -1) {
+                // Fallback: item might be outside current filteredItems (different filters) or
+                // not yet present due to lazy loading. Try to find the item globally and open it directly.
+                try {
+                    const globalItem = findExistingItemById(id) || state.allItems.find(x => String(x.id) === String(id));
+                    if (globalItem && window.detailsModal && typeof window.detailsModal.show === 'function') {
+                        const el = grid ? grid.querySelector(`.catalogo-item[data-item-id="${CSS.escape(id)}"]`) : null;
+                        try { window.detailsModal.show(globalItem, el); } catch(e){ console.error('catalogo openDetailsForId fallback error', e); }
+                        return;
+                    }
+                } catch (e) { /* continue to normal behavior */ }
+                return;
+            }
 
             // ensure item is rendered (may require loading more batches)
             const tryOpen = () => {
@@ -493,10 +497,27 @@
             tryOpen();
         }
 
-        // If initial hash includes an id, attempt to open the details modal for it
-        if(initial && initial.id){
-            // slight delay to ensure initial batch has been appended
-            setTimeout(()=> openDetailsForId(initial.id, initial.title), 150);
+        // If initial hash includes an id, attempt to open the details modal for it.
+        // Use retries because the page may still be rendering items or modals may not be initialized yet.
+        if (initial && initial.id) {
+            const tryOpenFromHash = (attempt = 0, maxAttempts = 30) => {
+                // If detailsModal isn't ready yet, retry
+                if (!(window.detailsModal && typeof window.detailsModal.show === 'function')) {
+                    if (attempt < maxAttempts) setTimeout(() => tryOpenFromHash(attempt + 1, maxAttempts), 150);
+                    return;
+                }
+                // If data isn't loaded into catalog state yet, retry
+                if (!state.allItems || state.allItems.length === 0) {
+                    if (attempt < maxAttempts) setTimeout(() => tryOpenFromHash(attempt + 1, maxAttempts), 150);
+                    return;
+                }
+                try {
+                    openDetailsForId(initial.id, initial.title);
+                } catch (e) {
+                    if (attempt < maxAttempts) setTimeout(() => tryOpenFromHash(attempt + 1, maxAttempts), 150);
+                }
+            };
+            tryOpenFromHash();
         }
 
     // lazy load: listen to window scroll so long pages trigger loading

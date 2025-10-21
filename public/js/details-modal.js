@@ -868,7 +868,13 @@ class DetailsModal {
         }
         const newHash = newHashBase + extras;
         if (window.location.hash.substring(1) !== newHash) {
-            window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
+            // Use pushState so the modal hash becomes a persistent history entry
+            try {
+                window.history.pushState(null, null, `${window.location.pathname}#${newHash}`);
+            } catch (err) {
+                // fallback to replaceState if pushState is unavailable for any reason
+                window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
+            }
         }
         this.updateMetaTags(item);
     }
