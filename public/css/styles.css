@@ -6139,6 +6139,13 @@ body {
         }
 }
 
+@media (max-width: 888px) {
+    .catalogo-grid, #catalogo-grid-page {
+        column-gap: 4px !important;
+        row-gap: 10px !important;
+        margin: 50px;
+    }
+}
 @media (max-width: 844px) {
 .slider-section {
         height: 190px;
@@ -6253,6 +6260,11 @@ body {
 }
 
 @media (max-width: 843px) and (min-width: 769px) {
+        .catalogo-grid, #catalogo-grid-page {
+        column-gap: 4px !important;
+        row-gap: 10px !important;
+        margin: 50px;
+    }
 .slider-section {
         height: 180px;
         margin-top: 50px;
