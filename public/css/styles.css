@@ -7083,6 +7083,7 @@ body {
         /* max-height: -webkit-fill-available; */
         height: 120px !important;
         margin-left: 3px;
+        margin-right: 7px !important;
     }
     
     .slider-wrapper {
