@@ -23,18 +23,7 @@ const headerHTML = `
         <a href="#" class="slider-nav-link"><i class="fas fa-question-circle"></i><span>Ayuda</span></a>
       </nav>
       <div class="header-search" id="header-search">
-        <button class="header-search-icon" id="header-search-icon" aria-hidden="true"> 
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-            <circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle>
-          </svg>
-        </button>
-        <input id="global-search-input" class="header-search-input" type="search" placeholder="Buscar" aria-label="Buscar" autocomplete="off">
-        <button id="header-search-clear" class="header-search-clear" aria-label="Limpiar búsqueda" hidden>
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
+        <input id="global-search-input" type="search" placeholder="Buscar..." aria-label="Buscar" autocomplete="off">
       </div>
       <a href="#" class="slider-nav-login"><i class="fas fa-user"></i><span>Iniciar sesión</span></a>
       <button class="slider-header-burger" id="slider-header-burger">
@@ -64,14 +53,7 @@ const headerHTML = `
 document.addEventListener('DOMContentLoaded', function() {
   const headerRoot = document.getElementById('header-root');
   if (headerRoot) {
-    // evitar doble render si el script se ejecuta dos veces
-    if (!headerRoot.dataset.headerRendered) {
-      headerRoot.innerHTML = headerHTML;
-      headerRoot.dataset.headerRendered = '1';
-    } else {
-      // ya renderizado, no inyectar de nuevo
-      console.debug('header: ya renderizado, omitiendo segunda inyección');
-    }
+    headerRoot.innerHTML = headerHTML;
   }
   
   // Elementos del header
@@ -229,10 +211,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }, 1000);
 
-  // --- Búsqueda global en vivo (sencilla y funcional) ---
-  // Guarda copias de los datasets originales para poder restaurarlos
+  // --- Búsqueda global en vivo (mejorada) ---
+  window.__originalCarouselData = window.__originalCarouselData || {};
+
   function snapshotOriginalData() {
-    window.__originalCarouselData = window.__originalCarouselData || {};
     try {
       if (window.carousel && window.carousel.moviesData && !window.__originalCarouselData.peliculas) window.__originalCarouselData.peliculas = window.carousel.moviesData.slice();
       if (window.seriesCarousel && window.seriesCarousel.seriesData && !window.__originalCarouselData.series) window.__originalCarouselData.series = window.seriesCarousel.seriesData.slice();
@@ -244,147 +226,150 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch (e) { console.warn('snapshotOriginalData error', e); }
   }
 
-  function normalizeForSearch(s) {
-    try {
-      let str = String(s || '');
-      // Normalizar acentos: NFD + remover diacríticos
-      str = str.normalize ? str.normalize('NFD').replace(/\p{Diacritic}/gu, '') : str;
-      // Lowercase y quitar caracteres extra (mantener letras y números y espacios)
-      return str.toLowerCase().replace(/[^\p{L}\p{N} ]+/gu, '').trim();
-    } catch(e){ return String(s || '').toLowerCase(); }
+  function removeDiacritics(s){
+    try { return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,''); } catch(e){ return String(s||''); }
   }
 
-  // Aplica filtrado y actualiza cada carousel correspondiente
-  function applySearchQuery(q) {
-    const qn = normalizeForSearch(q).trim();
-    // update hash (use #search?q=... so it's visible in the address bar)
-    try { window.history.replaceState(null, null, `${window.location.pathname}#search?q=${encodeURIComponent(q)}`); } catch(e) {}
+  function tokenize(s){
+    return removeDiacritics(String(s||'')).toLowerCase().split(/[^a-z0-9]+/).filter(Boolean).map(t=>{
+      // basic stemming: remove plural endings and common suffixes
+      if(t.length>4 && t.endsWith('mente')) t = t.slice(0, -5);
+      if(t.length>3 && t.endsWith('es')) t = t.slice(0, -2);
+      if(t.length>2 && t.endsWith('s')) t = t.slice(0, -1);
+      return t;
+    });
+  }
 
-    // If empty -> restore originals
-    if (!qn) {
-      try {
-        if (window.__originalCarouselData) {
-          if (window.carousel && window.__originalCarouselData.peliculas) { window.carousel.moviesData = window.__originalCarouselData.peliculas.slice(); window.carousel.index = 0; window.carousel.renderItems(); }
-          if (window.seriesCarousel && window.__originalCarouselData.series) { window.seriesCarousel.seriesData = window.__originalCarouselData.series.slice(); window.seriesCarousel.index = 0; window.seriesCarousel.renderItems(); }
-          if (window.documentalesCarousel && window.__originalCarouselData.documentales) { window.documentalesCarousel.docuData = window.__originalCarouselData.documentales.slice(); window.documentalesCarousel.index = 0; window.documentalesCarousel.renderItems(); }
-          if (window.animesCarousel && window.__originalCarouselData.animes) { window.animesCarousel.animeData = window.__originalCarouselData.animes.slice(); window.animesCarousel.index = 0; window.animesCarousel.renderItems(); }
-          if (window.episodiosCarousel && window.__originalCarouselData.episodios) { window.episodiosCarousel.episodiosData = window.__originalCarouselData.episodios.slice(); window.episodiosCarousel.index = 0; window.episodiosCarousel.renderItems(); }
-          if (window.episodiosAnimesCarousel && window.__originalCarouselData.episodiosAnimes) { window.episodiosAnimesCarousel.episodiosData = window.__originalCarouselData.episodiosAnimes.slice(); window.episodiosAnimesCarousel.index = 0; window.episodiosAnimesCarousel.renderItems(); }
-          if (window.sliderIndependent && window.__originalCarouselData.slider) { window.sliderIndependent.renderSlider(window.__originalCarouselData.slider.slice()); }
+  function scoreItem(item, qTokens, qRaw){
+    let score = 0;
+    const title = removeDiacritics(item.title||'').toLowerCase();
+    const desc = removeDiacritics(item.description||'').toLowerCase();
+    const genre = removeDiacritics(item.genre||'').toLowerCase();
+    // exact title match
+    if(title === qRaw) score += 120;
+    // title contains raw
+    if(title.indexOf(qRaw) !== -1) score += 60;
+    // title tokens
+    const titleTokens = tokenize(item.title||'');
+    let matchedTitleTokens = 0;
+    for(const t of qTokens) if(titleTokens.includes(t)) matchedTitleTokens++;
+    score += matchedTitleTokens * 18;
+    // description tokens
+    const descTokens = tokenize(item.description||'');
+    let matchedDesc = 0; for(const t of qTokens) if(descTokens.includes(t)) matchedDesc++;
+    score += matchedDesc * 6;
+    // genre match
+    for(const t of qTokens) if(genre.indexOf(t)!==-1) score += 8;
+    return score;
+  }
+
+  function showNoResults(wrapperId, show){
+    try{
+      const wrapper = document.getElementById(wrapperId);
+      if(!wrapper) return;
+      let el = wrapper.querySelector('.carousel-no-results');
+      if(show){
+        if(!el){
+          el = document.createElement('div');
+          el.className = 'carousel-no-results';
+          el.textContent = 'No hay resultados';
+          el.setAttribute('aria-live','polite');
+          wrapper.appendChild(el);
         }
-      } catch (e) { console.warn('restore originals error', e); }
+      } else {
+        if(el) el.remove();
+      }
+    }catch(e){console.warn('showNoResults error',e)}
+  }
+
+  function applySearchQuery(q){
+    const qRaw = removeDiacritics(String(q||'')).toLowerCase().trim();
+    const qTokens = tokenize(qRaw).filter(Boolean);
+    try{ window.history.replaceState(null, null, `${window.location.pathname}#search?q=${encodeURIComponent(q||'')}`); }catch(e){}
+    if(!qTokens.length){
+      // restore originals
+      try{
+        if(window.__originalCarouselData){
+          if(window.carousel && window.__originalCarouselData.peliculas){ window.carousel.moviesData = window.__originalCarouselData.peliculas.slice(); window.carousel.index=0; window.carousel.wrapper && (window.carousel.wrapper.innerHTML=''); window.carousel.renderItems(); }
+          if(window.seriesCarousel && window.__originalCarouselData.series){ window.seriesCarousel.seriesData = window.__originalCarouselData.series.slice(); window.seriesCarousel.index=0; window.seriesCarousel.wrapper && (window.seriesCarousel.wrapper.innerHTML=''); window.seriesCarousel.renderItems(); }
+          if(window.documentalesCarousel && window.__originalCarouselData.documentales){ window.documentalesCarousel.docuData = window.__originalCarouselData.documentales.slice(); window.documentalesCarousel.index=0; window.documentalesCarousel.wrapper && (window.documentalesCarousel.wrapper.innerHTML=''); window.documentalesCarousel.renderItems(); }
+          if(window.animesCarousel && window.__originalCarouselData.animes){ window.animesCarousel.animeData = window.__originalCarouselData.animes.slice(); window.animesCarousel.index=0; window.animesCarousel.wrapper && (window.animesCarousel.wrapper.innerHTML=''); window.animesCarousel.renderItems(); }
+          if(window.episodiosCarousel && window.__originalCarouselData.episodios){ window.episodiosCarousel.episodiosData = window.__originalCarouselData.episodios.slice(); window.episodiosCarousel.index=0; window.episodiosCarousel.wrapper && (window.episodiosCarousel.wrapper.innerHTML=''); window.episodiosCarousel.renderItems(); }
+          if(window.episodiosAnimesCarousel && window.__originalCarouselData.episodiosAnimes){ window.episodiosAnimesCarousel.episodiosData = window.__originalCarouselData.episodiosAnimes.slice(); window.episodiosAnimesCarousel.index=0; window.episodiosAnimesCarousel.wrapper && (window.episodiosAnimesCarousel.wrapper.innerHTML=''); window.episodiosAnimesCarousel.renderItems(); }
+          if(window.sliderIndependent && window.__originalCarouselData.slider){ window.sliderIndependent.renderSlider(window.__originalCarouselData.slider.slice()); }
+        }
+      }catch(e){console.warn('restore error',e)}
+      // hide no results for all
+      ['carousel-wrapper','series-carousel-wrapper','documentales-carousel-wrapper','animes-carousel-wrapper','episodios-series-carousel-wrapper','episodios-animes-carousel-wrapper'].forEach(id=>showNoResults(id, false));
       return;
     }
 
-    // snapshot originals first time
     snapshotOriginalData();
 
-    // Helper to filter a list by title/description/genre
-    const filterList = (list) => {
-      if(!Array.isArray(list)) return [];
+    const filterAndScore = (items) => {
+      if(!Array.isArray(items)) return [];
       const scored = [];
-      for (const it of list) {
-        const title = normalizeForSearch(it.title || '');
-        const desc = normalizeForSearch(it.description || '');
-        const genre = normalizeForSearch(it.genre || '');
-        const others = normalizeForSearch([it.seria, it.serie, it.tmdbUrl, it.postersUrl].join(' '));
-        let score = 0;
-        if (!qn) score = 0;
-        // Exact title match -> strong
-        if (title === qn) score += 100;
-        // Title contains query
-        else if (title.indexOf(qn) !== -1) score += 30;
-        // Word-level matches in title (split)
-        else if (title.split(' ').some(t => t.indexOf(qn) === 0)) score += 15;
-        // Matches in description/genre/others
-        if (desc.indexOf(qn) !== -1) score += 10;
-        if (genre.indexOf(qn) !== -1) score += 8;
-        if (others.indexOf(qn) !== -1) score += 5;
-        if (score > 0) scored.push({item: it, score});
+      for(const it of items){
+        const s = scoreItem(it, qTokens, qRaw);
+        if(s>0) scored.push({it, s});
       }
-      // Ordenar por score descendente y devolver solo items
-      scored.sort((a,b) => b.score - a.score);
-      return scored.map(s => s.item);
+      scored.sort((a,b)=>b.s - a.s);
+      return scored.map(x=>x.it);
     };
 
-    try {
-      if (window.carousel && Array.isArray(window.__originalCarouselData.peliculas)) {
-        const filtered = filterList(window.__originalCarouselData.peliculas);
-        window.carousel.moviesData = filtered.slice(); window.carousel.index = 0; window.carousel.wrapper && (window.carousel.wrapper.innerHTML = ''); window.carousel.renderItems();
+    try{
+      if(window.__originalCarouselData.peliculas && window.carousel){
+        const filtered = filterAndScore(window.__originalCarouselData.peliculas);
+        window.carousel.moviesData = filtered.slice(); window.carousel.index=0; window.carousel.wrapper && (window.carousel.wrapper.innerHTML=''); window.carousel.renderItems();
+        showNoResults('carousel-wrapper', filtered.length===0);
       }
-      if (window.seriesCarousel && Array.isArray(window.__originalCarouselData.series)) {
-        const filtered = filterList(window.__originalCarouselData.series);
-        window.seriesCarousel.seriesData = filtered.slice(); window.seriesCarousel.index = 0; window.seriesCarousel.wrapper && (window.seriesCarousel.wrapper.innerHTML = ''); window.seriesCarousel.renderItems();
+      if(window.__originalCarouselData.series && window.seriesCarousel){
+        const filtered = filterAndScore(window.__originalCarouselData.series);
+        window.seriesCarousel.seriesData = filtered.slice(); window.seriesCarousel.index=0; window.seriesCarousel.wrapper && (window.seriesCarousel.wrapper.innerHTML=''); window.seriesCarousel.renderItems();
+        showNoResults('series-carousel-wrapper', filtered.length===0);
       }
-      if (window.documentalesCarousel && Array.isArray(window.__originalCarouselData.documentales)) {
-        const filtered = filterList(window.__originalCarouselData.documentales);
-        window.documentalesCarousel.docuData = filtered.slice(); window.documentalesCarousel.index = 0; window.documentalesCarousel.wrapper && (window.documentalesCarousel.wrapper.innerHTML = ''); window.documentalesCarousel.renderItems();
+      if(window.__originalCarouselData.documentales && window.documentalesCarousel){
+        const filtered = filterAndScore(window.__originalCarouselData.documentales);
+        window.documentalesCarousel.docuData = filtered.slice(); window.documentalesCarousel.index=0; window.documentalesCarousel.wrapper && (window.documentalesCarousel.wrapper.innerHTML=''); window.documentalesCarousel.renderItems();
+        showNoResults('documentales-carousel-wrapper', filtered.length===0);
       }
-      if (window.animesCarousel && Array.isArray(window.__originalCarouselData.animes)) {
-        const filtered = filterList(window.__originalCarouselData.animes);
-        window.animesCarousel.animeData = filtered.slice(); window.animesCarousel.index = 0; window.animesCarousel.wrapper && (window.animesCarousel.wrapper.innerHTML = ''); window.animesCarousel.renderItems();
+      if(window.__originalCarouselData.animes && window.animesCarousel){
+        const filtered = filterAndScore(window.__originalCarouselData.animes);
+        window.animesCarousel.animeData = filtered.slice(); window.animesCarousel.index=0; window.animesCarousel.wrapper && (window.animesCarousel.wrapper.innerHTML=''); window.animesCarousel.renderItems();
+        showNoResults('animes-carousel-wrapper', filtered.length===0);
       }
-      if (window.episodiosCarousel && Array.isArray(window.__originalCarouselData.episodios)) {
-        const filtered = filterList(window.__originalCarouselData.episodios);
-        window.episodiosCarousel.episodiosData = filtered.slice(); window.episodiosCarousel.index = 0; window.episodiosCarousel.wrapper && (window.episodiosCarousel.wrapper.innerHTML = ''); window.episodiosCarousel.renderItems();
+      if(window.__originalCarouselData.episodios && window.episodiosCarousel){
+        const filtered = filterAndScore(window.__originalCarouselData.episodios);
+        window.episodiosCarousel.episodiosData = filtered.slice(); window.episodiosCarousel.index=0; window.episodiosCarousel.wrapper && (window.episodiosCarousel.wrapper.innerHTML=''); window.episodiosCarousel.renderItems();
+        showNoResults('episodios-series-carousel-wrapper', filtered.length===0);
       }
-      if (window.episodiosAnimesCarousel && Array.isArray(window.__originalCarouselData.episodiosAnimes)) {
-        const filtered = filterList(window.__originalCarouselData.episodiosAnimes);
-        window.episodiosAnimesCarousel.episodiosData = filtered.slice(); window.episodiosAnimesCarousel.index = 0; window.episodiosAnimesCarousel.wrapper && (window.episodiosAnimesCarousel.wrapper.innerHTML = ''); window.episodiosAnimesCarousel.renderItems();
+      if(window.__originalCarouselData.episodiosAnimes && window.episodiosAnimesCarousel){
+        const filtered = filterAndScore(window.__originalCarouselData.episodiosAnimes);
+        window.episodiosAnimesCarousel.episodiosData = filtered.slice(); window.episodiosAnimesCarousel.index=0; window.episodiosAnimesCarousel.wrapper && (window.episodiosAnimesCarousel.wrapper.innerHTML=''); window.episodiosAnimesCarousel.renderItems();
+        showNoResults('episodios-animes-carousel-wrapper', filtered.length===0);
       }
-      if (window.sliderIndependent && typeof window.sliderIndependent.renderSlider === 'function' && Array.isArray(window.__originalCarouselData.slider)) {
-        const filtered = filterList(window.__originalCarouselData.slider);
+      if(window.__originalCarouselData.slider && window.sliderIndependent && typeof window.sliderIndependent.renderSlider === 'function'){
+        const filtered = filterAndScore(window.__originalCarouselData.slider);
         window.sliderIndependent.renderSlider(filtered.slice());
+        // slider wrapper no-results unknown; skip
       }
-    } catch (e) {
-      console.warn('applySearchQuery error', e);
-    }
+    }catch(e){ console.warn('applySearchQuery error', e); }
   }
 
   // Debounced handler
   let _searchTimer = null;
   if (searchInput) {
-    const clearBtn = document.getElementById('header-search-clear');
-    const searchIconBtn = document.getElementById('header-search-icon');
-
-    function updateClearVisibility() {
-      try {
-        if (!clearBtn) return;
-        if (searchInput.value && String(searchInput.value).trim().length > 0) clearBtn.hidden = false; else clearBtn.hidden = true;
-      } catch (e) { /* ignore */ }
-    }
-
     searchInput.addEventListener('input', (e) => {
       const q = e.target.value || '';
-      updateClearVisibility();
       if (_searchTimer) clearTimeout(_searchTimer);
-      _searchTimer = setTimeout(() => { applySearchQuery(q); _searchTimer = null; }, 260);
+      _searchTimer = setTimeout(() => { applySearchQuery(q); _searchTimer = null; }, 220);
     });
-    // Focus input when clicking icon
-    if (searchIconBtn) {
-      searchIconBtn.addEventListener('click', (e) => { e.preventDefault(); searchInput.focus(); });
-    }
-    // Clear button handler
-    if (clearBtn) {
-      clearBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        searchInput.value = '';
-        updateClearVisibility();
-        applySearchQuery('');
-        searchInput.focus();
-      });
-    }
-    // Ensure initial visibility of clear button
-    try { updateClearVisibility(); } catch (e) { /* ignore */ }
-
     // If page loaded with hash search, populate input
     try {
       const rawHash = window.location.hash || '';
       if (rawHash.startsWith('#search')) {
         const q = (new URLSearchParams(rawHash.replace(/^#search\?/, ''))).get('q') || '';
-        const decoded = decodeURIComponent(q);
-        searchInput.value = decoded;
-        updateClearVisibility();
+        searchInput.value = decodeURIComponent(q);
         if (q) applySearchQuery(q);
       }
     } catch (e) { /* ignore */ }
