@@ -336,6 +336,10 @@
     const tabsContainer = document.getElementById('catalogo-tabs-page');
     const genreBtn = document.getElementById('catalogo-genre-button-page');
     const genreList = document.getElementById('catalogo-genre-list-page');
+    // Remove any inline style that would block CSS transitions (templates might include display:none)
+    try{ if(genreList && genreList.getAttribute && genreList.getAttribute('style')) { genreList.removeAttribute('style'); } }catch(e){}
+    // ensure container classes are clean
+    try{ const containerInit = document.getElementById('catalogo-genre-dropdown-page'); if(containerInit) { containerInit.classList.remove('open','closing'); } }catch(e){}
     // helpers to read/write the visible label inside the button (keeps chevron separate)
     function getGenreLabel(){ try{ const lbl = genreBtn && genreBtn.querySelector && genreBtn.querySelector('.label'); return lbl ? lbl.textContent.trim() : (genreBtn ? genreBtn.textContent.replace(' ▾','').trim() : 'Todo el catálogo'); }catch(e){ return 'Todo el catálogo'; } }
     function setGenreLabel(text){ try{ if(!genreBtn) return; const lbl = genreBtn.querySelector && genreBtn.querySelector('.label'); if(lbl) lbl.textContent = text; else genreBtn.textContent = text + ' ▾'; }catch(e){} }
