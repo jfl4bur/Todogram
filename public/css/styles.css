@@ -3358,7 +3358,7 @@ button:focus {
   position: fixed;
 
 /* Search box in header */
-.header-search{ display:flex; align-items:center; margin-left:16px; position:relative; /* make the header-search the same width as the input so the clear button sits inside */ width:420px; max-width:68vw; box-sizing:border-box; }
+.header-search{ display:flex; align-items:center; margin-left:16px; position:relative; /* responsive: allow header-search to grow but reserve space for logo and burger */ flex: 1 1 auto; width:auto; max-width: calc(100% - 120px); box-sizing:border-box; }
 
 /* Estado vacío: estilo inspirado en imagen 1 */
 .header-search input[type="search"]{
