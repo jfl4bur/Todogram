@@ -48,7 +48,8 @@
         (data||[]).forEach(d=>{
             if(category && d['Categoría'] && d['Categoría']!==category) return;
             const gens = d['Géneros'] || '';
-            gens.split('·').map(g=>g.trim()).filter(Boolean).forEach(g=>s.add(g));
+            // split on common separators: middle dot, pipe, comma, slash, semicolon
+            gens.split(/·|\||,|\/|;/).map(g=>g.trim()).filter(Boolean).forEach(g=>s.add(g));
         });
         return Array.from(s).sort();
     }
@@ -295,7 +296,8 @@
             }
 
             if(genre && genre!=='Todo el catálogo'){
-                const gens = (it.genres||'').split('·').map(x=>x.trim()); if(!gens.includes(genre)) return false;
+                const gens = (it.genres||'').split(/·|\||,|\/|;/).map(x=>x.trim()).filter(Boolean);
+                if(!gens.includes(genre)) return false;
             }
             return true;
         });
