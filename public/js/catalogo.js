@@ -452,18 +452,38 @@
         function openDetailsForId(id, title){
             if(!id) return;
             const decodedTitle = title ? decodeURIComponent(title) : null;
-            const normalize = (t) => normalizeText(String(t||''));
+            // Use a safe local normalizer: prefer existing global normalizeText if available,
+            // otherwise apply a fallback that mirrors DetailsModal.normalizeText behavior.
+            const normalize = (t) => {
+                const s = String(t || '');
+                try {
+                    if (typeof normalizeText === 'function') return normalizeText(s);
+                } catch (e) { /* ignore and fallback */ }
+                try {
+                    return s.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                            .toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+                } catch (e) {
+                    return s.toLowerCase();
+                }
+            };
 
             // find index in filteredItems matching id and normalized title when possible
             let idx = -1;
-            for(let i=0;i<state.filteredItems.length;i++){
-                const it = state.filteredItems[i];
-                if(String(it.id) === String(id)){
-                    if(decodedTitle){
-                        if(normalize(it.title) === normalize(decodedTitle)) { idx = i; break; }
-                    } else { idx = i; break; }
+            try {
+                for(let i=0;i<state.filteredItems.length;i++){
+                    const it = state.filteredItems[i];
+                    if(String(it.id) === String(id)){
+                        if(decodedTitle){
+                            if(normalize(it.title) === normalize(decodedTitle)) { idx = i; break; }
+                        } else { idx = i; break; }
+                    }
                 }
+            } catch (err) {
+                // If something goes wrong during normalization/comparison, log and continue to fallback search
+                console.warn('catalogo.openDetailsForId: comparación de títulos falló, continuando con fallback', err);
+                idx = -1;
             }
+
             if(idx === -1) {
                 // Fallback: item might be outside current filteredItems (different filters) or
                 // not yet present due to lazy loading. Try to find the item globally and open it directly.
