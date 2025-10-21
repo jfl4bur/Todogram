@@ -3392,6 +3392,18 @@ button:focus {
 
 .header-search input[type="search"]:focus{ box-shadow: 0 8px 24px rgba(0,0,0,0.6); border-color: rgba(255,255,255,0.16); }
 
+/* Prevent iOS Safari from zooming on focus by ensuring font-size >= 16px on small screens */
+@media (max-width: 480px) {
+    .header-search { max-width: calc(100% - 96px); margin-left:8px; margin-right:8px; }
+    .header-search input[type="search"]{
+        font-size:16px; /* iOS won't zoom if font-size >= 16px */
+        height:40px; padding:8px 40px 8px 44px;
+    }
+    .header-search:before{ left:12px; width:18px; height:18px; background-size:18px 18px; }
+    .header-search .search-clear{ right:10px; width:30px; height:30px; }
+    html, body { -webkit-text-size-adjust:100%; }
+}
+
 /* Hide native clear/decoration in WebKit/Blink and IE/Edge so only custom clear button shows */
 .header-search input[type="search"]::-webkit-search-decoration,
 .header-search input[type="search"]::-webkit-search-cancel-button,
