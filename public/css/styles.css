@@ -1076,11 +1076,11 @@ button:focus {
 .catalogo-genre-dropdown{position:relative}
 /* Estilo del botón principal del dropdown del catálogo (ej: "Todo el catálogo ▾") */
 .catalogo-genre-dropdown > button,
-#catalogo-genre-button-page,
-#catalogo-genre-button {
-    background: rgba(20,20,20,0.95);
+
+#catalogo-genre-button-page {
+    background: transparent;
     color: var(--text-color);
-    border: 1px solid rgba(255,255,255,0.04);
+    border: 0px solid rgba(255,255,255,0.04);
     padding: 10px 16px;
     font-size: 1.6rem; /* tamaño similar a la imagen */
     font-weight: 700;
@@ -1090,6 +1090,15 @@ button:focus {
     align-items: center;
     gap: 10px;
     transition: box-shadow 180ms ease, transform 120ms ease;
+}
+
+#catalogo-genre-button-page:hover {
+    background: rgba(240, 240, 240, 0.1);
+    opacity: 0.9;
+}
+
+#catalogo-genre-button-page:active {
+    background: rgba(240, 240, 240, 0.25);
 }
 
 /* Flecha a la derecha dentro del mismo texto (se mantiene por JS con ▾) */
@@ -1162,6 +1171,9 @@ button:focus {
     transform:translateY(0) scale(1);
     pointer-events:auto;
     visibility:visible;
+    border-radius: 4px;
+    border: 2px solid rgb(46, 46, 46);
+    box-shadow: rgba(0, 0, 0, 0.28) 2px 2px 8px 0px;
 }
 
 /* closing state can be toggled by JS to run fade-out before hiding */
