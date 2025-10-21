@@ -1134,6 +1134,12 @@ button:focus {
     grid-template-columns:repeat(3,minmax(150px,1fr));
     gap:12px;
     border-radius:2px;
+    /* hidden by default via opacity/transform for fade animation */
+    opacity:0;
+    transform:translateY(-6px) scale(0.99);
+    pointer-events:none;
+    visibility:hidden;
+    transition:opacity .18s ease, transform .18s ease, visibility .18s ease;
 }
 .catalogo-genre-list button{
     display:flex;
@@ -1149,6 +1155,26 @@ button:focus {
     white-space:nowrap;
     position:relative;
 }
+
+/* open state: fade-in and allow interaction */
+.catalogo-genre-dropdown.open .catalogo-genre-list{
+    opacity:1;
+    transform:translateY(0) scale(1);
+    pointer-events:auto;
+    visibility:visible;
+}
+
+/* closing state can be toggled by JS to run fade-out before hiding */
+.catalogo-genre-dropdown.closing .catalogo-genre-list{
+    opacity:0;
+    transform:translateY(-6px) scale(0.99);
+    pointer-events:none;
+    visibility:hidden;
+}
+
+/* chevron rotation (ensure transition) */
+.catalogo-genre-dropdown > button .chev{ transition: transform .18s ease; }
+.catalogo-genre-dropdown.open > button .chev{ transform: rotate(180deg); }
 .catalogo-genre-list button:hover{ background: rgba(255,255,255,0.02); color: var(--text-color); }
 .catalogo-genre-list button.selected{color:var(--text-color);font-weight:700}
 /* use pseudo-element as check indicator so HTML does not need to include a span */
@@ -1977,11 +2003,6 @@ button:focus {
 
 .modal-header::after {
     width: 100%;
-    opacity: 0;
-    visibility: hidden;
-    transform: translateY(-6px);
-    transition: opacity 220ms ease, transform 220ms ease, visibility 220ms linear;
-    pointer-events: none;
     height: 100%;
     z-index: 1100;
     position: absolute;

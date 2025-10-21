@@ -331,7 +331,7 @@
         try{ if(!window.detailsModal && typeof DetailsModal === 'function') window.detailsModal = new DetailsModal(); }catch(e){}
         try{ if(!window.videoModal && typeof VideoModal === 'function') window.videoModal = new VideoModal(); }catch(e){}
         try{ if(!window.shareModal && typeof ShareModal === 'function') window.shareModal = new ShareModal(); }catch(e){}
-    root.innerHTML = `\n            <div class="catalogo-page">\n                <div class="catalogo-page-header">\n                    <div class="catalogo-controls">\n                        <div class="catalogo-genre-dropdown" id="catalogo-genre-dropdown-page">\n                            <button id="catalogo-genre-button-page" aria-haspopup="true" aria-expanded="false"><span class="label">Todo el catálogo</span>\n                                <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>\n                            </button>\n                            <div id="catalogo-genre-list-page" class="catalogo-genre-list" role="menu"></div>\n                        </div>\n                    </div>\n                    <div class="catalogo-tabs" id="catalogo-tabs-page">\n                        <button data-tab="Películas" class="catalogo-tab active">Películas</button>\n                        <button data-tab="Series" class="catalogo-tab">Series</button>\n                        <button data-tab="Documentales" class="catalogo-tab">Documentales</button>\n                        <button data-tab="Animes" class="catalogo-tab">Animes</button>\n                    </div>\n                </div>\n                <div class="catalogo-page-body">\n                    <div class="skeleton-catalogo" id="catalogo-skeleton-page" style="display:flex;gap:12px;flex-wrap:wrap;">\n                        <div class="skeleton-item-catalogo"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo"><div class="skeleton-spinner"></div></div>\n                    </div>\n                    <div class="catalogo-grid" id="catalogo-grid-page" role="list" aria-busy="false"></div>\n                </div>\n            </div>\n        `;
+        root.innerHTML = `\n            <div class="catalogo-page">\n                <div class="catalogo-page-header">\n                    <div class="catalogo-controls">\n                        <div class="catalogo-genre-dropdown" id="catalogo-genre-dropdown-page">\n                            <button id="catalogo-genre-button-page" aria-haspopup="true" aria-expanded="false"><span class="label">Todo el catálogo</span>\n                                <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>\n                            </button>\n                            <div id="catalogo-genre-list-page" class="catalogo-genre-list" style="display:none" role="menu"></div>\n                        </div>\n                    </div>\n                    <div class="catalogo-tabs" id="catalogo-tabs-page">\n                        <button data-tab="Películas" class="catalogo-tab active">Películas</button>\n                        <button data-tab="Series" class="catalogo-tab">Series</button>\n                        <button data-tab="Documentales" class="catalogo-tab">Documentales</button>\n                        <button data-tab="Animes" class="catalogo-tab">Animes</button>\n                    </div>\n                </div>\n                <div class="catalogo-page-body">\n                    <div class="skeleton-catalogo" id="catalogo-skeleton-page" style="display:flex;gap:12px;flex-wrap:wrap;">\n                        <div class="skeleton-item-catalogo"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo"><div class="skeleton-spinner"></div></div>\n                    </div>\n                    <div class="catalogo-grid" id="catalogo-grid-page" role="list" aria-busy="false"></div>\n                </div>\n            </div>\n        `;
 
     const tabsContainer = document.getElementById('catalogo-tabs-page');
     const genreBtn = document.getElementById('catalogo-genre-button-page');
@@ -365,15 +365,13 @@
         allBtn.textContent = 'Todo el catálogo';
         allBtn.classList.add('genre-item');
         if (inferred === 'Todo el catálogo') allBtn.classList.add('selected');
-    allBtn.addEventListener('click', ()=>{
+            allBtn.addEventListener('click', ()=>{
             // remove selected from others
             genreList.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));
             allBtn.classList.add('selected');
             setGenreLabel('Todo el catálogo');
-            // close dropdown via class so CSS animations run
-            const container = document.getElementById('catalogo-genre-dropdown-page');
-            if(container) container.classList.remove('open');
-            genreBtn.setAttribute('aria-expanded','false');
+            // close with animation
+            try{ const container = document.getElementById('catalogo-genre-dropdown-page'); if(container) closeDropdown(container); }catch(e){}
             updateCatalogHash(tab, 'Todo el catálogo');
             applyFiltersAndRender(grid, data, tab, 'Todo el catálogo');
         });
@@ -384,14 +382,11 @@
             b.textContent = g;
             b.classList.add('genre-item');
             if (inferred === g) b.classList.add('selected');
-            b.addEventListener('click', ()=>{
+                b.addEventListener('click', ()=>{
                 genreList.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));
                 b.classList.add('selected');
                 setGenreLabel(g);
-                // close dropdown via class
-                const container = document.getElementById('catalogo-genre-dropdown-page');
-                if(container) container.classList.remove('open');
-                genreBtn.setAttribute('aria-expanded','false');
+                try{ const container = document.getElementById('catalogo-genre-dropdown-page'); if(container) closeDropdown(container); }catch(e){}
                 updateCatalogHash(tab, g);
                 applyFiltersAndRender(grid, data, tab, g);
             });
@@ -401,21 +396,48 @@
 
     tabsContainer.querySelectorAll('.catalogo-tab').forEach(btn=>{ btn.addEventListener('click', ()=>{ tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); const tab = btn.dataset.tab; populateGenresForTabPage(tab); const currentGenre = getGenreLabel() || 'Todo el catálogo'; updateCatalogHash(tab, currentGenre); applyFiltersAndRender(grid, data, tab, currentGenre); }); });
 
+        // Helper to close dropdown with fade animation
+        function closeDropdown(container){
+            if(!container) return;
+            const list = container.querySelector('.catalogo-genre-list');
+            if(!list) return;
+            // if not open, nothing to do
+            if(!container.classList.contains('open')) return;
+            // add closing class to trigger CSS fade-out
+            container.classList.add('closing');
+            // when transition ends on the list, remove open/closing
+            const onEnd = (e)=>{
+                if(e.target !== list) return;
+                list.removeEventListener('transitionend', onEnd);
+                container.classList.remove('open');
+                container.classList.remove('closing');
+                const btn = container.querySelector('button'); if(btn) btn.setAttribute('aria-expanded','false');
+            };
+            list.addEventListener('transitionend', onEnd);
+            // also set aria-expanded immediately
+            const btn = container.querySelector('button'); if(btn) btn.setAttribute('aria-expanded','false');
+            // force reflow to ensure transition runs
+            list.getBoundingClientRect();
+            // trigger CSS (closing class already present)
+        }
+
         genreBtn.addEventListener('click', ()=>{
             const container = document.getElementById('catalogo-genre-dropdown-page');
-            const isHidden = !(container && container.classList && container.classList.contains('open'));
-            if (isHidden) {
-                // Ensure list is populated and the current selection is applied when opening
+            const isOpen = container && container.classList.contains('open');
+            if(!isOpen){
+                // opening: populate and set open
                 try {
                     const activeTabBtn = tabsContainer.querySelector('.catalogo-tab.active');
                     const activeTab = activeTabBtn ? activeTabBtn.dataset.tab : 'Películas';
                     const currentGenre = getGenreLabel() || 'Todo el catálogo';
                     populateGenresForTabPage(activeTab, currentGenre);
                 } catch (e) { /* ignore and continue */ }
+                if(container){ container.classList.add('open'); container.classList.remove('closing'); }
+                genreBtn.setAttribute('aria-expanded','true');
+            } else {
+                // closing with fade
+                closeDropdown(container);
             }
-            // toggle open class on container; CSS will handle showing/hiding with animation
-            if (container) container.classList.toggle('open', isHidden);
-            genreBtn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
         });
 
         const initial = parseCatalogHash();
@@ -537,7 +559,7 @@
             }
         });
 
-    document.addEventListener('click', (e)=>{ if(!e.target.closest('.catalogo-genre-dropdown')){ const container = document.getElementById('catalogo-genre-dropdown-page'); if(container) container.classList.remove('open'); genreBtn.setAttribute('aria-expanded','false'); } });
+    document.addEventListener('click', (e)=>{ if(!e.target.closest('.catalogo-genre-dropdown')){ try{ const container = document.getElementById('catalogo-genre-dropdown-page'); if(container) closeDropdown(container); }catch(e){} } });
 
         // Wrap createCard so we can later replace behaviour if needed; keep it lightweight (no per-item hover listeners)
         const originalCreateCard = createCard;
