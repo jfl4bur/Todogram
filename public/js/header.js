@@ -13,6 +13,9 @@ const headerHTML = `
         </svg>
         </a>
       </div>
+      <div class="slider-search" id="slider-search">
+        <input type="search" id="site-search-input" placeholder="Buscar películas, series, animes, episodios..." aria-label="Buscar" autocomplete="off">
+      </div>
       <nav class="slider-nav-menu">
         <a href="/" class="slider-nav-link"><i class="fas fa-home"></i><span>Inicio</span></a>
         <a href="/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Todo+el+cat%C3%A1logo" class="slider-nav-link"><i class="fas fa-film"></i><span>Películas</span></a>
@@ -208,4 +211,47 @@ document.addEventListener('DOMContentLoaded', function() {
   }, 1000);
   
   onScrollHeader(); // Ejecutar al cargar
+  // --- Búsqueda en vivo wiring ---
+  const searchInput = document.getElementById('site-search-input');
+  let searchDebounce = null;
+  async function ensureSearchModule(){
+    if(window.SearchModule) return;
+    try{
+      await new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = '/public/js/search.js';
+        s.onload = resolve;
+        s.onerror = reject;
+        document.head.appendChild(s);
+      });
+    }catch(e){ console.warn('No se pudo cargar search.js', e); }
+  }
+  if(searchInput){
+    searchInput.addEventListener('focus', (e)=>{
+      // add search hash placeholder
+      try{ history.replaceState(null, null, `${window.location.pathname}${window.location.search}#search`); }catch(e){}
+    });
+    searchInput.addEventListener('input', (e)=>{
+      const q = e.target.value || '';
+      if(searchDebounce) clearTimeout(searchDebounce);
+      searchDebounce = setTimeout(async ()=>{
+        await ensureSearchModule();
+        try{ if(window.SearchModule && typeof window.SearchModule.performSearch === 'function') window.SearchModule.performSearch(q); }
+        catch(err){ console.error('search perform failed', err); }
+      }, 200);
+    });
+    // Escape clears
+    searchInput.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape'){
+        searchInput.value = '';
+        if(window.SearchModule && typeof window.SearchModule.performSearch === 'function') window.SearchModule.performSearch('');
+        try{ history.replaceState(null, null, window.location.pathname + window.location.search); }catch(e){}
+      }
+      if(e.key === 'Enter'){
+        e.preventDefault();
+        // keep live behavior but ensure module loaded
+        ensureSearchModule().then(()=>{ if(window.SearchModule) window.SearchModule.performSearch(searchInput.value || ''); });
+      }
+    });
+  }
 }); 
