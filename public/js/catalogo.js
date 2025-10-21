@@ -422,7 +422,14 @@
             const btn = container.querySelector('button'); if(btn) btn.setAttribute('aria-expanded','false');
             // force reflow to ensure transition runs
             list.getBoundingClientRect();
-            // trigger CSS (closing class already present)
+            // fallback: if transitionend doesn't fire (some mobile browsers), clear after 250ms
+            const to = setTimeout(()=>{
+                try{ list.removeEventListener('transitionend', onEnd); }catch(e){}
+                container.classList.remove('open');
+                container.classList.remove('closing');
+                try{ const b2 = container.querySelector('button'); if(b2) b2.setAttribute('aria-expanded','false'); }catch(e){}
+                clearTimeout(to);
+            }, 250);
         }
 
         genreBtn.addEventListener('click', ()=>{

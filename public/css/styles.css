@@ -6750,7 +6750,10 @@ body {
 }
 
 @media (max-width:600px) {
-.catalogo-header{padding:12px} .catalogo-body{padding:8px 12px 24px 12px} .catalogo-genre-list{position:static;grid-template-columns:repeat(2,1fr);margin-top:8px} .catalogo-controls{width:100%;display:flex;justify-content:flex-end} 
+.catalogo-header{padding:12px} .catalogo-body{padding:8px 12px 24px 12px} .catalogo-genre-list{position:static;grid-template-columns:repeat(2,1fr);margin-top:8px} .catalogo-controls{width:100%;display:flex;justify-content:flex-end}
+/* On mobile, don't let the closed dropdown take up layout space. Use display none unless .open on container */
+.catalogo-genre-dropdown .catalogo-genre-list{display:none;opacity:0;visibility:hidden;transform:none}
+.catalogo-genre-dropdown.open .catalogo-genre-list{display:grid;opacity:1;visibility:visible}
 }
 
 @media (max-width: 480px) {
