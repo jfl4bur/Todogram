@@ -411,6 +411,9 @@
             }
             genreList.style.display = isHidden ? 'grid' : 'none';
             genreBtn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+            // Also toggle a class on the container so CSS can style the open state
+            const container = document.getElementById('catalogo-genre-dropdown-page');
+            if (container) container.classList.toggle('open', isHidden);
         });
 
         const initial = parseCatalogHash();

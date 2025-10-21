@@ -1074,6 +1074,51 @@ button:focus {
 .catalogo-tab.active{color:var(--text-color);border-bottom:2px solid var(--primary-color)}
 .catalogo-controls{margin-left:0}
 .catalogo-genre-dropdown{position:relative}
+/* Estilo del botón principal del dropdown del catálogo (ej: "Todo el catálogo ▾") */
+.catalogo-genre-dropdown > button,
+#catalogo-genre-button-page,
+#catalogo-genre-button {
+    background: rgba(20,20,20,0.95);
+    color: var(--text-color);
+    border: 1px solid rgba(255,255,255,0.04);
+    padding: 10px 16px;
+    font-size: 1.6rem; /* tamaño similar a la imagen */
+    font-weight: 700;
+    border-radius: 8px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: box-shadow 180ms ease, transform 120ms ease;
+}
+
+/* Flecha a la derecha dentro del mismo texto (se mantiene por JS con ▾) */
+.catalogo-genre-dropdown > button::after,
+#catalogo-genre-button-page::after,
+#catalogo-genre-button::after {
+    content: '';
+}
+
+/* Ajuste visual cuando la lista está abierta (JS setea display, usamos aria-expanded si necesario) */
+.catalogo-genre-dropdown[aria-expanded='true'] > button,
+.catalogo-genre-dropdown.open > button {
+    box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+    transform: translateY(-2px);
+}
+
+/* Ajustes para el listado: hacerlo más parecido al screenshot (fondo negro, bordes y padding) */
+.catalogo-genre-dropdown .catalogo-genre-list {
+    background: #0b0b0b;
+    border-radius: 6px;
+    padding: 18px 22px;
+    min-width: 320px;
+}
+
+/* Alineación y tamaño del texto dentro del botón cuando se muestre en la cabecera */
+.catalogo-page-header .catalogo-genre-dropdown > button {
+    font-size: 1.6rem;
+    padding: 12px 18px;
+}
 /* Dropdown aligned to left to match UI */
 .catalogo-genre-list{
     position:absolute;
