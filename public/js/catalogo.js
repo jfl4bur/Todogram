@@ -145,12 +145,11 @@
                     } catch (hashErr) {
                         console.warn('catalogo: fallo al setear hash para detalles', hashErr);
                     }
-                    const res = window.detailsModal.show(itemToShow, d);
-                    if (res && typeof res.then === 'function') {
-                        res.catch((err) => {
-                            console.error('detailsModal.show rejected', err);
-                            try { if (window.detailsModal && typeof window.detailsModal.close === 'function') window.detailsModal.close(); } catch (e) {}
-                        });
+                    // Call DetailsModal.show and let it manage its own errors/lifecycle (same as carousel)
+                    try {
+                        window.detailsModal.show(itemToShow, d);
+                    } catch (err) {
+                        console.error('catalogo: detailsModal.show threw synchronously', err);
                     }
                 } catch (e) {
                     console.error('Error al abrir detailsModal', e);
