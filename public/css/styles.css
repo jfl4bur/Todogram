@@ -2222,7 +2222,7 @@ button:focus {
     font-weight:700;
 }
 .catalogo-body{flex:1;overflow:auto;padding:8px 32px 48px 32px}
-.catalogo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--item-width),1fr));column-gap: 5px !important;row-gap: 90px !important;margin: 40px;}
+.catalogo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--item-width),1fr));column-gap: 5px !important;row-gap: 90px !important;margin: 25px;}
 .catalogo-item{background:transparent;padding:4px;border-radius:0;cursor:pointer;display:flex;flex-direction:column;align-items:center}
 .catalogo-item img{width:100%;height:auto;border-radius:0;object-fit:cover;background:#232323}
 .catalogo-item .title{margin-top:8px;font-size:14px;text-align:center;color:var(--text-color)}
@@ -5736,7 +5736,7 @@ html, body {
         grid-template-columns: repeat(auto-fill, minmax(var(--item-width), 1fr));
         column-gap: 4px !important;
         row-gap: 6px !important;
-        margin: 4px;
+        margin: 25px;
     }
 
     .skeleton-item {
