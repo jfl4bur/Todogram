@@ -3358,12 +3358,12 @@ button:focus {
   position: fixed;
 
 /* Search box in header */
-.header-search{ display:flex; align-items:center; margin-left:16px; position:relative; }
+.header-search{ display:flex; align-items:center; margin-left:16px; position:relative; /* make the header-search the same width as the input so the clear button sits inside */ width:420px; max-width:68vw; box-sizing:border-box; }
 
 /* Estado vacío: estilo inspirado en imagen 1 */
 .header-search input[type="search"]{
-    width:420px; max-width:68vw; height:44px; padding:10px 44px 10px 44px; border-radius:999px; border:1px solid rgba(255,255,255,0.12); background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); color:rgba(255,255,255,0.9); outline:none; transition:box-shadow .14s ease, border-color .14s ease, background .14s ease, transform .12s ease;
-    box-shadow: none; font-size:15px; -webkit-appearance:none;
+    width:100%; height:44px; padding:10px 44px 10px 44px; border-radius:999px; border:1px solid rgba(255,255,255,0.12); background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); color:rgba(255,255,255,0.9); outline:none; transition:box-shadow .14s ease, border-color .14s ease, background .14s ease, transform .12s ease;
+    box-sizing:border-box; box-shadow: none; font-size:15px; -webkit-appearance:none;
 }
 .header-search input[type="search"]::placeholder{ color:rgba(255,255,255,0.55); }
 
@@ -3377,6 +3377,8 @@ button:focus {
 /* Clear (X) button on the right - initially hidden, appears when input has text (JS toggles .has-value on .header-search) */
 .header-search .search-clear {
     position:absolute; right:12px; top:50%; transform:translateY(-50%); width:34px; height:34px; border-radius:999px; display:flex; align-items:center; justify-content:center; background:transparent; border:0; color:rgba(255,255,255,0.9); cursor:pointer; opacity:0; pointer-events:none; transition:opacity .12s ease, background .12s ease, transform .08s ease;
+    /* ensure it overlays the input and not the header area to the right */
+    z-index:3;
 }
 .header-search.has-value .search-clear{ opacity:1; pointer-events:auto; background:rgba(255,255,255,0.06); transform:scale(1); }
 .header-search .search-clear:focus{ box-shadow: 0 0 0 4px rgba(255,255,255,0.03); }
