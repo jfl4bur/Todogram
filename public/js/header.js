@@ -13,9 +13,6 @@ const headerHTML = `
         </svg>
         </a>
       </div>
-      <div class="slider-search" id="slider-search">
-        <input type="search" id="site-search-input" placeholder="Buscar películas, series, animes, episodios..." aria-label="Buscar" autocomplete="off">
-      </div>
       <nav class="slider-nav-menu">
         <a href="/" class="slider-nav-link"><i class="fas fa-home"></i><span>Inicio</span></a>
         <a href="/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Todo+el+cat%C3%A1logo" class="slider-nav-link"><i class="fas fa-film"></i><span>Películas</span></a>
@@ -25,6 +22,9 @@ const headerHTML = `
         <a href="/catalogo" class="slider-nav-link"><i class="fas fa-broadcast-tower"></i><span>Todo el catálogo</span></a>
         <a href="#" class="slider-nav-link"><i class="fas fa-question-circle"></i><span>Ayuda</span></a>
       </nav>
+      <div class="header-search" id="header-search">
+        <input id="global-search-input" type="search" placeholder="Buscar..." aria-label="Buscar" autocomplete="off">
+      </div>
       <a href="#" class="slider-nav-login"><i class="fas fa-user"></i><span>Iniciar sesión</span></a>
       <button class="slider-header-burger" id="slider-header-burger">
         <span></span>
@@ -58,6 +58,7 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Elementos del header
   const header = document.getElementById('slider-header');
+  const searchInput = document.getElementById('global-search-input');
   const burger = document.getElementById('slider-header-burger');
   const mobileMenu = document.getElementById('slider-mobile-menu');
   const mobileMenuBg = document.getElementById('slider-mobile-menu-bg');
@@ -209,49 +210,112 @@ document.addEventListener('DOMContentLoaded', function() {
       setupModalScroll();
     }
   }, 1000);
+
+  // --- Búsqueda global en vivo (sencilla y funcional) ---
+  // Guarda copias de los datasets originales para poder restaurarlos
+  function snapshotOriginalData() {
+    window.__originalCarouselData = window.__originalCarouselData || {};
+    try {
+      if (window.carousel && window.carousel.moviesData && !window.__originalCarouselData.peliculas) window.__originalCarouselData.peliculas = window.carousel.moviesData.slice();
+      if (window.seriesCarousel && window.seriesCarousel.seriesData && !window.__originalCarouselData.series) window.__originalCarouselData.series = window.seriesCarousel.seriesData.slice();
+      if (window.documentalesCarousel && window.documentalesCarousel.docuData && !window.__originalCarouselData.documentales) window.__originalCarouselData.documentales = window.documentalesCarousel.docuData.slice();
+      if (window.animesCarousel && window.animesCarousel.animeData && !window.__originalCarouselData.animes) window.__originalCarouselData.animes = window.animesCarousel.animeData.slice();
+      if (window.episodiosCarousel && window.episodiosCarousel.episodiosData && !window.__originalCarouselData.episodios) window.__originalCarouselData.episodios = window.episodiosCarousel.episodiosData.slice();
+      if (window.episodiosAnimesCarousel && window.episodiosAnimesCarousel.episodiosData && !window.__originalCarouselData.episodiosAnimes) window.__originalCarouselData.episodiosAnimes = window.episodiosAnimesCarousel.episodiosData.slice();
+      if (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function' && !window.__originalCarouselData.slider) window.__originalCarouselData.slider = window.sliderIndependent.getSlidesData().slice();
+    } catch (e) { console.warn('snapshotOriginalData error', e); }
+  }
+
+  function normalizeForSearch(s) {
+    try { return String(s || '').toLowerCase(); } catch(e){ return '' }
+  }
+
+  // Aplica filtrado y actualiza cada carousel correspondiente
+  function applySearchQuery(q) {
+    const qn = normalizeForSearch(q).trim();
+    // update hash (use #search?q=... so it's visible in the address bar)
+    try { window.history.replaceState(null, null, `${window.location.pathname}#search?q=${encodeURIComponent(q)}`); } catch(e) {}
+
+    // If empty -> restore originals
+    if (!qn) {
+      try {
+        if (window.__originalCarouselData) {
+          if (window.carousel && window.__originalCarouselData.peliculas) { window.carousel.moviesData = window.__originalCarouselData.peliculas.slice(); window.carousel.index = 0; window.carousel.renderItems(); }
+          if (window.seriesCarousel && window.__originalCarouselData.series) { window.seriesCarousel.seriesData = window.__originalCarouselData.series.slice(); window.seriesCarousel.index = 0; window.seriesCarousel.renderItems(); }
+          if (window.documentalesCarousel && window.__originalCarouselData.documentales) { window.documentalesCarousel.docuData = window.__originalCarouselData.documentales.slice(); window.documentalesCarousel.index = 0; window.documentalesCarousel.renderItems(); }
+          if (window.animesCarousel && window.__originalCarouselData.animes) { window.animesCarousel.animeData = window.__originalCarouselData.animes.slice(); window.animesCarousel.index = 0; window.animesCarousel.renderItems(); }
+          if (window.episodiosCarousel && window.__originalCarouselData.episodios) { window.episodiosCarousel.episodiosData = window.__originalCarouselData.episodios.slice(); window.episodiosCarousel.index = 0; window.episodiosCarousel.renderItems(); }
+          if (window.episodiosAnimesCarousel && window.__originalCarouselData.episodiosAnimes) { window.episodiosAnimesCarousel.episodiosData = window.__originalCarouselData.episodiosAnimes.slice(); window.episodiosAnimesCarousel.index = 0; window.episodiosAnimesCarousel.renderItems(); }
+          if (window.sliderIndependent && window.__originalCarouselData.slider) { window.sliderIndependent.renderSlider(window.__originalCarouselData.slider.slice()); }
+        }
+      } catch (e) { console.warn('restore originals error', e); }
+      return;
+    }
+
+    // snapshot originals first time
+    snapshotOriginalData();
+
+    // Helper to filter a list by title/description/genre
+    const filterList = (list) => {
+      if(!Array.isArray(list)) return [];
+      return list.filter(it => {
+        const text = [it.title, it.description, it.genre, it.seria, it.serie, it.tmdbUrl, it.postersUrl].map(normalizeForSearch).join(' ');
+        return text.indexOf(qn) !== -1;
+      });
+    };
+
+    try {
+      if (window.carousel && Array.isArray(window.__originalCarouselData.peliculas)) {
+        const filtered = filterList(window.__originalCarouselData.peliculas);
+        window.carousel.moviesData = filtered.slice(); window.carousel.index = 0; window.carousel.wrapper && (window.carousel.wrapper.innerHTML = ''); window.carousel.renderItems();
+      }
+      if (window.seriesCarousel && Array.isArray(window.__originalCarouselData.series)) {
+        const filtered = filterList(window.__originalCarouselData.series);
+        window.seriesCarousel.seriesData = filtered.slice(); window.seriesCarousel.index = 0; window.seriesCarousel.wrapper && (window.seriesCarousel.wrapper.innerHTML = ''); window.seriesCarousel.renderItems();
+      }
+      if (window.documentalesCarousel && Array.isArray(window.__originalCarouselData.documentales)) {
+        const filtered = filterList(window.__originalCarouselData.documentales);
+        window.documentalesCarousel.docuData = filtered.slice(); window.documentalesCarousel.index = 0; window.documentalesCarousel.wrapper && (window.documentalesCarousel.wrapper.innerHTML = ''); window.documentalesCarousel.renderItems();
+      }
+      if (window.animesCarousel && Array.isArray(window.__originalCarouselData.animes)) {
+        const filtered = filterList(window.__originalCarouselData.animes);
+        window.animesCarousel.animeData = filtered.slice(); window.animesCarousel.index = 0; window.animesCarousel.wrapper && (window.animesCarousel.wrapper.innerHTML = ''); window.animesCarousel.renderItems();
+      }
+      if (window.episodiosCarousel && Array.isArray(window.__originalCarouselData.episodios)) {
+        const filtered = filterList(window.__originalCarouselData.episodios);
+        window.episodiosCarousel.episodiosData = filtered.slice(); window.episodiosCarousel.index = 0; window.episodiosCarousel.wrapper && (window.episodiosCarousel.wrapper.innerHTML = ''); window.episodiosCarousel.renderItems();
+      }
+      if (window.episodiosAnimesCarousel && Array.isArray(window.__originalCarouselData.episodiosAnimes)) {
+        const filtered = filterList(window.__originalCarouselData.episodiosAnimes);
+        window.episodiosAnimesCarousel.episodiosData = filtered.slice(); window.episodiosAnimesCarousel.index = 0; window.episodiosAnimesCarousel.wrapper && (window.episodiosAnimesCarousel.wrapper.innerHTML = ''); window.episodiosAnimesCarousel.renderItems();
+      }
+      if (window.sliderIndependent && typeof window.sliderIndependent.renderSlider === 'function' && Array.isArray(window.__originalCarouselData.slider)) {
+        const filtered = filterList(window.__originalCarouselData.slider);
+        window.sliderIndependent.renderSlider(filtered.slice());
+      }
+    } catch (e) {
+      console.warn('applySearchQuery error', e);
+    }
+  }
+
+  // Debounced handler
+  let _searchTimer = null;
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      const q = e.target.value || '';
+      if (_searchTimer) clearTimeout(_searchTimer);
+      _searchTimer = setTimeout(() => { applySearchQuery(q); _searchTimer = null; }, 260);
+    });
+    // If page loaded with hash search, populate input
+    try {
+      const rawHash = window.location.hash || '';
+      if (rawHash.startsWith('#search')) {
+        const q = (new URLSearchParams(rawHash.replace(/^#search\?/, ''))).get('q') || '';
+        searchInput.value = decodeURIComponent(q);
+        if (q) applySearchQuery(q);
+      }
+    } catch (e) { /* ignore */ }
+  }
   
   onScrollHeader(); // Ejecutar al cargar
-  // --- Búsqueda en vivo wiring ---
-  const searchInput = document.getElementById('site-search-input');
-  let searchDebounce = null;
-  async function ensureSearchModule(){
-    if(window.SearchModule) return;
-    try{
-      await new Promise((resolve, reject) => {
-        const s = document.createElement('script');
-        s.src = '/public/js/search.fixed.js';
-        s.onload = function(){ resolve(); try{ if(window.SearchModule && typeof window.SearchModule.init === 'function') window.SearchModule.init(); }catch(e){} };
-        s.onerror = reject;
-        document.head.appendChild(s);
-      });
-    }catch(e){ console.warn('No se pudo cargar search.js', e); }
-  }
-  if(searchInput){
-    searchInput.addEventListener('focus', (e)=>{
-      // add search hash placeholder
-      try{ history.replaceState(null, null, `${window.location.pathname}${window.location.search}#search`); }catch(e){}
-    });
-    searchInput.addEventListener('input', (e)=>{
-      const q = e.target.value || '';
-      if(searchDebounce) clearTimeout(searchDebounce);
-      searchDebounce = setTimeout(async ()=>{
-        await ensureSearchModule();
-        try{ if(window.SearchModule && typeof window.SearchModule.performSearch === 'function') window.SearchModule.performSearch(q); }
-        catch(err){ console.error('search perform failed', err); }
-      }, 200);
-    });
-    // Escape clears
-    searchInput.addEventListener('keydown', (e)=>{
-      if(e.key === 'Escape'){
-        searchInput.value = '';
-        if(window.SearchModule && typeof window.SearchModule.performSearch === 'function') window.SearchModule.performSearch('');
-        try{ history.replaceState(null, null, window.location.pathname + window.location.search); }catch(e){}
-      }
-      if(e.key === 'Enter'){
-        e.preventDefault();
-        // keep live behavior but ensure module loaded
-        ensureSearchModule().then(()=>{ if(window.SearchModule) window.SearchModule.performSearch(searchInput.value || ''); });
-      }
-    });
-  }
 }); 
