@@ -359,8 +359,29 @@ document.addEventListener('DOMContentLoaded', function() {
   // Debounced handler
   let _searchTimer = null;
   if (searchInput) {
+    // create clear button if missing
+    try{
+      let hs = document.getElementById('header-search');
+      if(hs && !hs.querySelector('.search-clear')){
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'search-clear';
+        btn.setAttribute('aria-label','Limpiar búsqueda');
+        btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+        hs.appendChild(btn);
+        btn.addEventListener('click', ()=>{
+          searchInput.value = '';
+          hs.classList.remove('has-value');
+          applySearchQuery('');
+          searchInput.focus();
+        });
+      }
+    }catch(e){console.warn('crear clear button error',e)}
+
     searchInput.addEventListener('input', (e) => {
       const q = e.target.value || '';
+      // toggle visual class for clear button
+      try{ const hs = document.getElementById('header-search'); if(hs) { if(q && q.length>0) hs.classList.add('has-value'); else hs.classList.remove('has-value'); } }catch(e){}
       if (_searchTimer) clearTimeout(_searchTimer);
       _searchTimer = setTimeout(() => { applySearchQuery(q); _searchTimer = null; }, 220);
     });
