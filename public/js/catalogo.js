@@ -92,6 +92,25 @@
         return foundLocal || null;
     }
 
+    // Safe helper to find a rendered .catalogo-item by data-item-id without assuming CSS.escape exists
+    function querySelectorByDataId(container, id){
+        if(!container) return null;
+        try{
+            if(typeof CSS !== 'undefined' && typeof CSS.escape === 'function'){
+                const sel = `.catalogo-item[data-item-id="${CSS.escape(String(id))}"]`;
+                return container.querySelector(sel);
+            }
+            // Fallback: try naive escaping of double quotes and backslashes
+            const naive = String(id).replace(/\\/g,'\\\\').replace(/"/g,'\\"');
+            const sel2 = `.catalogo-item[data-item-id="${naive}"]`;
+            try { return container.querySelector(sel2); } catch(e) { /* continue to linear scan */ }
+        } catch(e) { /* continue to linear scan */ }
+        // Final fallback: linear scan by dataset
+        const items = container.querySelectorAll('.catalogo-item');
+        for(const it of items){ if(it.dataset && String(it.dataset.itemId) === String(id)) return it; }
+        return null;
+    }
+
     function createCard(it){
         const d = document.createElement('div');
         d.className='catalogo-item';
@@ -490,7 +509,7 @@
                 try {
                     const globalItem = findExistingItemById(id) || state.allItems.find(x => String(x.id) === String(id));
                     if (globalItem && window.detailsModal && typeof window.detailsModal.show === 'function') {
-                        const el = grid ? grid.querySelector(`.catalogo-item[data-item-id="${CSS.escape(id)}"]`) : null;
+                            const el = grid ? querySelectorByDataId(grid, id) : null;
                         try { 
                             try { window.activeItem = globalItem; } catch(e){}
                             console.debug && console.debug('catalogo.openDetailsForId fallback -> calling detailsModal.show', { source: 'catalogo_fallback', id: globalItem.id, title: globalItem.title });
