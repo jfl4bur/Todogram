@@ -380,6 +380,19 @@ class DetailsModal {
 
         this.detailsModalOverlay.style.display = 'block';
         this.detailsModalOverlay.classList.add('show');
+
+        // Defer origin-based positioning until the real modal content is rendered
+        // (we'll compute and apply it after we set the innerHTML below). For now
+        // ensure the content starts from a neutral state.
+        try {
+            this.detailsModalContent.style.position = '';
+            this.detailsModalContent.style.left = '';
+            this.detailsModalContent.style.top = '';
+            this.detailsModalContent.style.transform = 'translateY(20px)';
+            this.detailsModalContent.style.opacity = '0';
+        } catch (e) {
+            console.warn('DetailsModal: initial reset failed', e);
+        }
         document.body.style.overflow = 'hidden';
         console.log('DetailsModal: Modal overlay mostrado con clase show');
         
@@ -586,9 +599,54 @@ class DetailsModal {
         
         void this.detailsModalOverlay.offsetWidth;
         
-        this.detailsModalOverlay.style.opacity = '1';
-        this.detailsModalContent.style.transform = 'translateY(0)';
-        this.detailsModalContent.style.opacity = '1';
+        // Trigger entrance animation. Compute origin-based coordinates after the
+        // content is rendered so sizes are available. If an origin element was
+        // provided, position the modal content absolutely at the origin center and
+        // clamp horizontally against the carousel/catalog container similar to
+        // HoverModal.calculateModalPosition.
+        void this.detailsModalOverlay.offsetWidth;
+        try {
+            if (itemElement && itemElement instanceof HTMLElement) {
+                const rect = itemElement.getBoundingClientRect();
+                let centerX = rect.left + rect.width / 2;
+                let centerY = rect.top + rect.height / 2;
+
+                // choose container for clamping (prefer carousel-like containers)
+                const container = document.querySelector('.carousel-container') || document.querySelector('.catalogo-grid') || document.querySelector('#catalogo-grid-page') || document.body;
+                const containerRect = container ? container.getBoundingClientRect() : { left: 0, right: window.innerWidth };
+
+                const modalWidth = parseFloat(getComputedStyle(this.detailsModalContent).width) || this.detailsModalContent.offsetWidth || 300;
+
+                if (centerX - (modalWidth / 2) < containerRect.left) {
+                    centerX = containerRect.left + (modalWidth / 2);
+                }
+                if (centerX + (modalWidth / 2) > containerRect.right) {
+                    centerX = containerRect.right - (modalWidth / 2);
+                }
+
+                this.detailsModalContent.style.position = 'absolute';
+                this.detailsModalContent.style.left = `${centerX}px`;
+                this.detailsModalContent.style.top = `${centerY}px`;
+
+                const startTransform = 'translate(-50%, -50%) translateY(20px)';
+                this.detailsModalContent.style.transform = startTransform;
+                this.detailsModalContent.style.opacity = '0';
+                // force reflow then animate
+                void this.detailsModalContent.offsetWidth;
+                const newTransform = startTransform.replace(/translateY\([^)]*\)/, 'translateY(0)');
+                this.detailsModalContent.style.transform = newTransform;
+                this.detailsModalContent.style.opacity = '1';
+            } else {
+                this.detailsModalOverlay.style.opacity = '1';
+                this.detailsModalContent.style.transform = 'translateY(0)';
+                this.detailsModalContent.style.opacity = '1';
+            }
+        } catch (e) {
+            // fallback to default animation
+            this.detailsModalOverlay.style.opacity = '1';
+            this.detailsModalContent.style.transform = 'translateY(0)';
+            this.detailsModalContent.style.opacity = '1';
+        }
         
         setTimeout(() => {
             if (posters.length > 0) {
@@ -796,6 +854,12 @@ class DetailsModal {
         setTimeout(() => {
             this.detailsModalOverlay.style.display = 'none';
             this.detailsModalOverlay.classList.remove('show');
+            // cleanup any inline positioning styles applied when opening from an origin element
+            this.detailsModalContent.style.position = '';
+            this.detailsModalContent.style.left = '';
+            this.detailsModalContent.style.top = '';
+            this.detailsModalContent.style.transform = '';
+            this.detailsModalContent.style.opacity = '';
             document.body.style.overflow = 'auto';
             this.isDetailsModalOpen = false;
             window.activeItem = null;
