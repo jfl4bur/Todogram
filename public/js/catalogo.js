@@ -129,61 +129,23 @@
 
         // Helper to open details modal from any input (click, pointer, touch)
         const openDetails = () => {
-            if(window.detailsModal && typeof window.detailsModal.show==='function'){
-                const norm = normalizeText(it.title);
-                try{
+            // Use the same simple flow as carousels: find an existing canonical item if available
+            // and delegate entirely to DetailsModal.show so it performs normalization, URL updates
+            // and UI wiring. Avoid mutating global overlays or window.activeItem here.
+            if (window.detailsModal && typeof window.detailsModal.show === 'function') {
+                try {
                     const existing = findExistingItemById(it.id);
                     const itemToShow = existing || it;
-                    try { window.activeItem = itemToShow; } catch(e) { /* ignore */ }
-                    try { if(!window.videoModal && typeof VideoModal === 'function') window.videoModal = new VideoModal(); } catch(e) {}
-                    try {
-                        const raw = itemToShow && itemToShow.raw ? itemToShow.raw : {};
-                        const candidates = [
-                            itemToShow.videoUrl,
-                            itemToShow.videoIframe,
-                            itemToShow.videoIframe1,
-                            raw['Video iframe'],
-                            raw['Video iframe 1'],
-                            raw['Video'],
-                            raw['Ver Pel\u00edcula'],
-                            raw['Enlace']
-                        ].filter(Boolean);
-                        if (candidates.length) {
-                            const preferred = candidates[0];
-                            if (!itemToShow.videoUrl) itemToShow.videoUrl = preferred;
-                            if (!itemToShow.videoIframe) itemToShow.videoIframe = preferred;
-                        }
-                        if (!itemToShow.trailerUrl) itemToShow.trailerUrl = itemToShow.trailerUrl || raw['Trailer'] || raw['TrailerUrl'] || '';
-                        if (!itemToShow.shareUrl) {
-                            try { itemToShow.shareUrl = (typeof window.generateShareUrl === 'function') ? window.generateShareUrl(itemToShow, window.location.href) : null; } catch(e) { itemToShow.shareUrl = null; }
-                            if (!itemToShow.shareUrl) {
-                                try { const u = new URL(window.location.href); u.hash = `id=${encodeURIComponent(itemToShow.id)}`; itemToShow.shareUrl = u.toString(); } catch(e) { itemToShow.shareUrl = window.location.href; }
-                            }
-                        }
-                    } catch (e) { console.warn('catalogo: fallo al normalizar campos de video/share para item', e); }
-
-                    // Persist state using the same hash format that carousels use (#id=...&title=...)
-                    const detailHash = `id=${encodeURIComponent(itemToShow.id)}&title=${encodeURIComponent(norm)}`;
-                    if (window.location.hash !== `#${detailHash}`) history.pushState({}, '', `#${detailHash}`);
-                    try {
-                        if (window.hoverModal) {
-                            try { if (typeof window.hoverModal.cancelHide === 'function') window.hoverModal.cancelHide(); } catch(e){}
-                            try { if (window.hoverModal.modalOverlay) { window.hoverModal.modalOverlay.style.display = 'none'; window.hoverModal.modalOverlay.style.pointerEvents = 'none'; } } catch(e){}
-                        }
-                        const genericOverlay = document.getElementById('modal-overlay');
-                        if (genericOverlay) { genericOverlay.style.display = 'none'; genericOverlay.style.pointerEvents = 'none'; }
-                    } catch(err) { console.warn('catalogo: fallo al limpiar overlays antes de abrir detailsModal', err); }
-
                     const res = window.detailsModal.show(itemToShow, d);
-                    if(res && typeof res.then === 'function') {
+                    if (res && typeof res.then === 'function') {
                         res.catch((err) => {
                             console.error('detailsModal.show rejected', err);
-                            try { if(window.detailsModal && typeof window.detailsModal.close === 'function') window.detailsModal.close(); } catch(e){}
+                            try { if (window.detailsModal && typeof window.detailsModal.close === 'function') window.detailsModal.close(); } catch (e) {}
                         });
                     }
-                }catch(e){
+                } catch (e) {
                     console.error('Error al abrir detailsModal', e);
-                    try { if(window.detailsModal && typeof window.detailsModal.close === 'function') window.detailsModal.close(); } catch(e){}
+                    try { if (window.detailsModal && typeof window.detailsModal.close === 'function') window.detailsModal.close(); } catch (e) {}
                 }
             }
         };
