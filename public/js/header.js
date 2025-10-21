@@ -29,7 +29,12 @@ const headerHTML = `
             <circle cx="11" cy="11" r="6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></circle>
           </svg>
         </button>
-        <input id="global-search-input" class="header-search-input" type="search" placeholder="Buscar..." aria-label="Buscar" autocomplete="off">
+        <input id="global-search-input" class="header-search-input" type="search" placeholder="Buscar" aria-label="Buscar" autocomplete="off">
+        <button id="header-search-clear" class="header-search-clear" aria-label="Limpiar búsqueda" hidden>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
       </div>
       <a href="#" class="slider-nav-login"><i class="fas fa-user"></i><span>Iniciar sesión</span></a>
       <button class="slider-header-burger" id="slider-header-burger">
@@ -332,22 +337,44 @@ document.addEventListener('DOMContentLoaded', function() {
   // Debounced handler
   let _searchTimer = null;
   if (searchInput) {
+    const clearBtn = document.getElementById('header-search-clear');
+    const searchIconBtn = document.getElementById('header-search-icon');
+
+    function updateClearVisibility() {
+      try {
+        if (!clearBtn) return;
+        if (searchInput.value && String(searchInput.value).trim().length > 0) clearBtn.hidden = false; else clearBtn.hidden = true;
+      } catch (e) { /* ignore */ }
+    }
+
     searchInput.addEventListener('input', (e) => {
       const q = e.target.value || '';
+      updateClearVisibility();
       if (_searchTimer) clearTimeout(_searchTimer);
       _searchTimer = setTimeout(() => { applySearchQuery(q); _searchTimer = null; }, 260);
     });
     // Focus input when clicking icon
-    const searchIconBtn = document.getElementById('header-search-icon');
     if (searchIconBtn) {
       searchIconBtn.addEventListener('click', (e) => { e.preventDefault(); searchInput.focus(); });
+    }
+    // Clear button handler
+    if (clearBtn) {
+      clearBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        searchInput.value = '';
+        updateClearVisibility();
+        applySearchQuery('');
+        searchInput.focus();
+      });
     }
     // If page loaded with hash search, populate input
     try {
       const rawHash = window.location.hash || '';
       if (rawHash.startsWith('#search')) {
         const q = (new URLSearchParams(rawHash.replace(/^#search\?/, ''))).get('q') || '';
-        searchInput.value = decodeURIComponent(q);
+        const decoded = decodeURIComponent(q);
+        searchInput.value = decoded;
+        updateClearVisibility();
         if (q) applySearchQuery(q);
       }
     } catch (e) { /* ignore */ }
