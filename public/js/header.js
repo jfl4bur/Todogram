@@ -374,6 +374,9 @@ document.addEventListener('DOMContentLoaded', function() {
         searchInput.focus();
       });
     }
+    // Ensure initial visibility of clear button
+    try { updateClearVisibility(); } catch (e) { /* ignore */ }
+
     // If page loaded with hash search, populate input
     try {
       const rawHash = window.location.hash || '';

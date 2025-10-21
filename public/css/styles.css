@@ -431,39 +431,32 @@ button:focus {
     box-sizing: border-box !important;
 }
 .header-search-input::placeholder { color: rgba(255,255,255,0.55); }
-/* Remove native search decorations in WebKit */
+    display: flex !important; 
+/* Hide clear button when hidden attribute is present (works with JS setting hidden=true) */
+.header-search-clear[hidden] { display: none !important; }
 .header-search-input::-webkit-search-decoration,
 .header-search-input::-webkit-search-cancel-button,
 .header-search-input::-webkit-search-results-button,
 .header-search-input::-webkit-search-results-decoration { display: none; }
 .header-search-input::placeholder { color: rgba(242,242,242,0.5); }
 .header-search-icon { 
-    position: absolute; 
-    left: 10px; 
-    width: 20px; 
-    height: 20px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    background: transparent; 
-    border: none; 
-    color: #ffffff;
+.header-search-icon { 
+    position: static !important;
+    left: auto !important;
+    width: 26px !important;
+    height: 22px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: #ffffff !important;
+    border: 1px solid rgba(0,0,0,0.12) !important;
+    color: #333333 !important;
+    border-radius: 4px !important;
+    padding: 0 4px !important;
+    margin-right: 8px !important;
 }
-.header-search-icon svg { stroke: #ffffff; fill: none; }
-.header-search-clear { 
-    position: absolute; 
-    right: 8px; 
-    width: 26px; 
-    height: 26px; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    border: none; 
-    background: transparent; 
-    color: #ffffff;
-    padding: 0;
-}
-.header-search-clear svg { stroke: #ffffff; }
+.header-search-icon svg { stroke: #333333; }
+.header-search-clear { display: none !important; }
 .header-search-input:focus { box-shadow: 0 0 0 2px rgba(255,0,60,0.09); border-color: rgba(255,0,60,0.18); }
 .header-search-icon svg { display:block }
     height: var(--item-height);
@@ -523,6 +516,75 @@ button:focus {
 
     background: linear-gradient(90deg, rgba(255,255,255,0.08), rgba(255,255,255,0.03));
 }
+
+/* ===== Overrides específicos para la caja de búsqueda (forzar apariencia del mock) ===== */
+/* colocamos al final para asegurar prioridad sobre reglas previas */
+.slider-header .header-search {
+    position: relative !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    padding: 0 !important;
+    margin-left: auto !important; /* mantener a la derecha del header */
+}
+.slider-header .header-search .header-search-icon {
+    position: relative !important; /* inline element to the left of input */
+    left: 0 !important;
+    top: 0 !important;
+    width: 30px !important;
+    height: 30px !important;
+    border-radius: 50% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    border: 1px solid rgba(255,255,255,0.18) !important; /* recuadro claro */
+    color: rgba(255,255,255,0.95) !important;
+    padding: 4px !important;
+    box-sizing: border-box !important;
+}
+.slider-header .header-search .header-search-icon svg {
+    width: 16px !important;
+    height: 16px !important;
+    stroke: rgba(255,255,255,0.95) !important;
+}
+.slider-header .header-search .header-search-input {
+    height: 36px !important;
+    min-width: 220px !important;
+    max-width: 420px !important;
+    padding-left: 12px !important; /* small left padding because icon is separate */
+    padding-right: 12px !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(255,255,255,0.14) !important; /* thin light border */
+    background-color: rgba(20,20,20,0.85) !important; /* oscuro */
+    color: rgba(255,255,255,0.95) !important;
+    font-size: 14px !important;
+    line-height: 36px !important;
+    box-shadow: none !important;
+    outline: none !important;
+}
+.slider-header .header-search .header-search-input::placeholder { color: rgba(255,255,255,0.55) !important; }
+.slider-header .header-search .header-search-input::-webkit-search-decoration,
+.slider-header .header-search .header-search-input::-webkit-search-cancel-button,
+.slider-header .header-search .header-search-input::-webkit-search-results-button,
+.slider-header .header-search .header-search-input::-webkit-search-results-decoration { display: none !important; }
+
+/* Mostrar el icono dentro de una pequeña caja a la izquierda visualmente: usar margin para separar */
+.slider-header .header-search .header-search-icon { margin-left: 8px !important; margin-right: 6px !important; }
+
+/* Clear: oculto por defecto si tiene el atributo hidden (JS maneja su visibilidad) */
+.slider-header .header-search .header-search-clear { display: flex !important; margin-right: 8px !important; }
+.slider-header .header-search .header-search-clear[hidden] { display: none !important; }
+
+/* Forzar estilo cuando el input tenga foco (ligero efecto) */
+.slider-header .header-search .header-search-input:focus { box-shadow: 0 0 0 3px rgba(255,0,60,0.06) !important; border-color: rgba(255,255,255,0.22) !important; }
+
+/* En pantallas pequeñas reducimos ancho */
+@media (max-width: 700px) {
+    .slider-header .header-search .header-search-input { min-width: 140px !important; }
+}
+
+/* ===== fin overrides de búsqueda ===== */
 
 /* Catalog skeleton: make the carousel skeleton wrap inside the modal */
 #catalogo-skeleton {
