@@ -3390,6 +3390,22 @@ button:focus {
 
 .header-search input[type="search"]:focus{ box-shadow: 0 8px 24px rgba(0,0,0,0.6); border-color: rgba(255,255,255,0.16); }
 
+/* Hide native clear/decoration in WebKit/Blink and IE/Edge so only custom clear button shows */
+.header-search input[type="search"]::-webkit-search-decoration,
+.header-search input[type="search"]::-webkit-search-cancel-button,
+.header-search input[type="search"]::-webkit-search-results-button,
+.header-search input[type="search"]::-webkit-search-results-decoration {
+    -webkit-appearance: none;
+}
+.header-search input[type="search"]::-ms-clear, .header-search input[type="search"]::-ms-reveal {
+    display: none;
+    width: 0;
+    height: 0;
+}
+.header-search input[type="search"]::-webkit-input-placeholder { color: rgba(255,255,255,0.5); }
+.header-search input[type="search"]:-ms-input-placeholder { color: rgba(255,255,255,0.5); }
+.header-search input[type="search"]::placeholder { color: rgba(255,255,255,0.5); }
+
 /* No results message inside carousels */
 .carousel-no-results{ padding:18px; color:rgba(255,255,255,0.8); text-align:center; font-weight:600; font-size:16px; background:transparent; width:100%; }
   top: 0;
