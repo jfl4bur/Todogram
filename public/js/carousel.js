@@ -65,6 +65,37 @@ class EpisodiosSeriesCarousel {
         }
         this.init();
     }
+
+    // Helper shared: scroll to page aligning items to left using measured offsets
+    static carouselScrollToPage(wrapper, direction) {
+        if (!wrapper) return;
+        const items = Array.from(wrapper.querySelectorAll('.custom-carousel-item'));
+        if (!items.length) return;
+
+        const first = items[0];
+        const second = items[1];
+        const itemWidth = first.offsetWidth || first.getBoundingClientRect().width;
+        const gap = second ? Math.round(second.offsetLeft - (first.offsetLeft + first.offsetWidth)) : 0;
+        const step = itemWidth + Math.max(0, gap);
+
+        const containerWidth = wrapper.clientWidth || wrapper.getBoundingClientRect().width;
+        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / step));
+
+        const wrapperRect = wrapper.getBoundingClientRect();
+        let currentIndex = items.findIndex(it => it.getBoundingClientRect().left >= wrapperRect.left - 1);
+        if (currentIndex === -1) {
+            currentIndex = items.findIndex(it => it.getBoundingClientRect().right > wrapperRect.left + 1);
+            if (currentIndex === -1) currentIndex = 0;
+        }
+
+        let targetIndex = direction === 'prev' ? Math.max(0, currentIndex - itemsPerViewport) : currentIndex + itemsPerViewport;
+        const maxFirstIndex = Math.max(0, items.length - itemsPerViewport);
+        targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
+
+        const targetItem = items[targetIndex] || items[0];
+        const finalScroll = targetItem.offsetLeft;
+        wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+    }
     init() {
         if (this.wrapper) {
             this.progressBar = this.wrapper.parentElement.querySelector('.carousel-progress-bar');
@@ -393,51 +424,38 @@ class EpisodiosSeriesCarousel {
     }
     scrollToPage(direction) {
         if (!this.wrapper) return;
-        const containerWidth = this.wrapper.clientWidth;
 
-        // Determinar tamaño real del ítem y gap leyendo el DOM
-        const firstItem = this.wrapper.querySelector('.custom-carousel-item');
-        if (!firstItem) return;
-        const itemRect = firstItem.getBoundingClientRect();
-        const itemWidth = Math.round(itemRect.width);
+        const items = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
+        if (!items.length) return;
 
-        // Intentar estimar gap usando el segundo elemento
-        let gap = 0;
-        const secondItem = firstItem.nextElementSibling;
-        if (secondItem) {
-            const secondRect = secondItem.getBoundingClientRect();
-            gap = Math.round(secondRect.left - (itemRect.left + itemRect.width));
-            if (isNaN(gap) || gap < 0) gap = 0;
+        // Medir item y gap reales (usando offset para evitar problemas de transform/padding)
+        const first = items[0];
+        const second = items[1];
+        const itemWidth = first.offsetWidth || first.getBoundingClientRect().width;
+        const gap = second ? Math.round(second.offsetLeft - (first.offsetLeft + first.offsetWidth)) : 0;
+        const step = itemWidth + Math.max(0, gap);
+
+        const containerWidth = this.wrapper.clientWidth || this.wrapper.getBoundingClientRect().width;
+        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / step));
+
+        // Encontrar el primer ítem visible comparando bounding rects (más robusto)
+        const wrapperRect = this.wrapper.getBoundingClientRect();
+        let currentIndex = items.findIndex(it => it.getBoundingClientRect().left >= wrapperRect.left - 1);
+        if (currentIndex === -1) {
+            // fallback: encontrar el primer cuyo right > wrapper.left
+            currentIndex = items.findIndex(it => it.getBoundingClientRect().right > wrapperRect.left + 1);
+            if (currentIndex === -1) currentIndex = 0;
         }
 
-        const stepSize = itemWidth + gap;
+        let targetIndex = direction === 'prev' ? Math.max(0, currentIndex - itemsPerViewport) : currentIndex + itemsPerViewport;
 
-        // Calcular cuántos items completos caben en la vista
-        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
-
-    // Calcular índice del primer item visible actualmente (alinear a la izquierda)
-    const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
-
-        let targetIndex;
-        if (direction === 'prev') {
-            targetIndex = Math.max(0, currentIndex - itemsPerViewport);
-        } else {
-            targetIndex = currentIndex + itemsPerViewport;
-        }
-
-        // Evitar sobrepasar la cantidad de items
-        const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
-        const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
+        // Clamp targetIndex para que no se pase del contenido
+        const maxFirstIndex = Math.max(0, items.length - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
-        // Calcular el scroll objetivo usando el offset real del elemento para evitar problemas
-        const items = this.wrapper.querySelectorAll('.custom-carousel-item');
-        let finalScroll = 40;
-        if (items && items[targetIndex]) {
-            finalScroll = items[targetIndex].offsetLeft;
-        } else {
-            finalScroll = targetIndex * stepSize;
-        }
+        // Scroll hasta el offsetLeft del item objetivo para alinear exactamente a la izquierda
+        const targetItem = items[targetIndex] || items[0];
+        const finalScroll = targetItem.offsetLeft;
         this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 
@@ -714,31 +732,7 @@ class EpisodiosAnimesCarousel {
     scrollToPrevPage() { this.scrollToPage('prev'); }
     scrollToNextPage() { this.scrollToPage('next'); }
     scrollToPage(direction) {
-        if (!this.wrapper) return;
-        const containerWidth = this.wrapper.clientWidth;
-        const firstItem = this.wrapper.querySelector('.custom-carousel-item');
-        if (!firstItem) return;
-        const itemRect = firstItem.getBoundingClientRect();
-        const itemWidth = Math.round(itemRect.width);
-        let gap = 0;
-        const secondItem = firstItem.nextElementSibling;
-        if (secondItem) { const secondRect = secondItem.getBoundingClientRect(); gap = Math.round(secondRect.left - (itemRect.left + itemRect.width)); if (isNaN(gap) || gap < 0) gap = 0; }
-        const stepSize = itemWidth + gap;
-        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
-        const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
-        let targetIndex;
-        if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsPerViewport); else targetIndex = currentIndex + itemsPerViewport;
-        const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
-        const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
-        targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
-        const items = this.wrapper.querySelectorAll('.custom-carousel-item');
-        let finalScroll = 0;
-        if (items && items[targetIndex]) {
-            finalScroll = items[targetIndex].offsetLeft;
-        } else {
-            finalScroll = targetIndex * stepSize;
-        }
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+        EpisodiosSeriesCarousel.carouselScrollToPage(this.wrapper, direction);
     }
 }
 
@@ -1389,29 +1383,7 @@ class Carousel {
     }
 
     scrollToPage(direction) {
-        if (!this.wrapper) return;
-        const itemWidth = 194;
-        const gap = 4;
-        const containerWidth = this.wrapper.clientWidth;
-        const itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
-        const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
-
-        let currentScroll = this.wrapper.scrollLeft;
-        let targetScroll;
-        if (direction === 'prev') {
-            targetScroll = Math.max(0, currentScroll - actualScrollAmount);
-        } else {
-            targetScroll = currentScroll + actualScrollAmount;
-        }
-        // Alinear el scroll para que el item de la izquierda quede completo
-        const alignedScroll = Math.round(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
-        // Evitar sobrepasar los límites
-        const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
-        const finalScroll = Math.max(0, Math.min(alignedScroll, maxScroll));
-        this.wrapper.scrollTo({
-            left: finalScroll,
-            behavior: 'auto'
-        });
+        EpisodiosSeriesCarousel.carouselScrollToPage(this.wrapper, direction);
     }
 
     // Método para contar elementos realmente visibles
@@ -1868,62 +1840,7 @@ class SeriesCarousel {
     }
 
     scrollToPage(direction) {
-        if (!this.wrapper) return;
-        
-        const itemWidth = 194;
-        const gap = 4;
-        const containerWidth = this.wrapper.clientWidth;
-        
-        // Calcular cuántos items caben en la pantalla
-        const itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
-        const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
-        
-        console.log(`Carousel: Container width: ${containerWidth}px`);
-        console.log(`Carousel: Item width: ${itemWidth}px, Gap: ${gap}px`);
-        console.log(`Carousel: Items que caben en pantalla: ${itemsPerViewport}`);
-        console.log(`Carousel: Scroll amount: ${actualScrollAmount}px`);
-        
-        if (direction === 'prev') {
-            // Calcular la posición anterior
-            const currentScroll = this.wrapper.scrollLeft;
-            const targetScroll = Math.max(0, currentScroll - actualScrollAmount);
-            
-            // Alinear a los límites de los items para que el de la izquierda esté completo
-            const alignedScroll = Math.ceil(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
-            
-            console.log(`Carousel: Prev - Current: ${currentScroll}, Target: ${targetScroll}, Aligned: ${alignedScroll}`);
-            
-            this.wrapper.scrollTo({
-                left: alignedScroll,
-                behavior: 'auto'
-            });
-        } else {
-            // Calcular la posición siguiente
-            const currentScroll = this.wrapper.scrollLeft;
-            const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
-            
-            // Calcular cuántos items completos caben en la pantalla
-            // Usar un valor que funcione bien para la mayoría de pantallas
-            const itemsPerViewport = Math.max(4, Math.floor(containerWidth / (itemWidth + gap)));
-            
-            // Calcular la posición exacta del siguiente scroll
-            // Si es el primer clic (currentScroll = 0), usar un cálculo especial
-            let targetScroll;
-            if (currentScroll === 0) {
-                // Para el primer clic, mover exactamente por los items que caben
-                targetScroll = itemsPerViewport * (itemWidth + gap);
-            } else {
-                // Para los siguientes clics, usar el cálculo normal
-                targetScroll = currentScroll + (itemsPerViewport * (itemWidth + gap));
-            }
-            
-            console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}`);
-            
-            this.wrapper.scrollTo({
-                left: targetScroll,
-                behavior: 'auto'
-            });
-        }
+        EpisodiosSeriesCarousel.carouselScrollToPage(this.wrapper, direction);
     }
 
     // Método para contar elementos realmente visibles
