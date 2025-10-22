@@ -297,7 +297,7 @@
             const q = raw.substring(CATALOG_HASH.length);
             if(!q) return {};
             const p = new URLSearchParams(q.replace(/^\?/,''));
-            return { tab:p.get('tab')||null, genre:p.get('genre')||null, id:p.get('id')||null, title:p.get('title')||null };
+            return { tab:p.get('tab')||null, genre:p.get('genre')||null, id:p.get('id')||null, title:p.get('title')||null, q: p.get('q')||null };
         }
         // Case 2: plain hash used by carousels: '#id=...&title=...'
         const plain = raw.substring(1);
@@ -664,6 +664,8 @@
 
             // expose search function on global Catalogo object so header can call it
             try{ window.Catalogo = window.Catalogo || {}; window.Catalogo.search = applyCatalogSearch; }catch(e){}
+            // If the initial hash included a q parameter, apply it so search persists after reload
+            try{ if(initial && initial.q){ setTimeout(()=>{ try{ applyCatalogSearch(initial.q); }catch(e){console.warn('applyCatalogSearch initial error',e);} }, 80); } }catch(e){}
 
         // hash change: update filters and optionally open details if id present
         window.addEventListener('hashchange', ()=>{
