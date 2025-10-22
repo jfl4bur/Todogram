@@ -28,52 +28,56 @@
         // Calcular el ancho del slide para ocupar la mayor parte de la pantalla
         // dejando espacio para ver elementos adyacentes
         let slideWidth, slideHeight, slideGap, sideSpace;
-
-        // Reorder breakpoints from narrow -> wide so each range is reachable
+        
+        // Reordenar rangos para evitar que <=844 capture <=768 antes
         if (viewportWidth <= 480) {
-            // Móvil estrecho: dejar porciones laterales visibles
-            slideWidth = Math.floor(viewportWidth * 0.92);
-            // Altura proporcional al banner/imagen (ajustable)
-            slideHeight = Math.floor(slideWidth * 0.30);
-            slideGap = 6;
+           // Móvil pequeño: dejar espacio lateral pequeño para ver adyacentes
+            slideWidth = Math.floor(viewportWidth * 0.94);
+            slideHeight = Math.floor(slideWidth * 0.50); // más alto para móviles
+            slideGap = 8;
+            sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 768) {
-            // Tablet pequeño
+            // Tablet pequeña / móviles grandes
             slideWidth = Math.floor(viewportWidth * 0.92);
-            slideHeight = Math.floor(slideWidth * 0.28);
+            slideHeight = Math.floor(slideWidth * 0.45);
             slideGap = 10;
+            sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 844) {
-            // Tablet/mediano
+            // Tablet: más estrecho para elementos adyacentes visibles
             slideWidth = Math.floor(viewportWidth * 0.90);
             slideHeight = Math.floor(slideWidth * 0.18);
             slideGap = 12;
+            sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1024) {
-            // Desktop pequeño
+            // Desktop pequeño: mayor visibilidad de elementos adyacentes
             slideWidth = Math.floor(viewportWidth * 0.90);
             slideHeight = Math.floor(slideWidth * 0.18);
             slideGap = 16;
+            sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1400) {
-            // Desktop mediano
+            // Desktop mediano: muy ancho como Rakuten.tv
             slideWidth = Math.floor(viewportWidth * 0.88);
             slideHeight = Math.floor(slideWidth * 0.40);
             slideGap = 20;
+            sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else {
-            // Desktop grande
+            // Desktop grande: máximo ancho con elementos adyacentes
             slideWidth = Math.floor(viewportWidth * 0.90);
             slideHeight = Math.floor(slideWidth * 0.40);
             slideGap = 24;
+            sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         }
+        
+        // Límites mínimos y máximos
+    // Ajustes adaptativos: permitir sideSpace más pequeño en móviles para centrar mejor
+    const minSlideWidth = viewportWidth <= 480 ? 220 : 300;
+    const minSlideHeight = viewportWidth <= 480 ? 140 : 170;
+    const minSideSpace = viewportWidth <= 480 ? 12 : 20;
 
-        // Límites mínimos y máximos (aplicar clamp antes de calcular sideSpace)
-        slideWidth = Math.max(220, Math.min(slideWidth, viewportWidth - 40));
-        slideHeight = Math.max(120, Math.min(slideHeight, 400));
-
-        // Ajuste del gap mínimo según ancho de viewport (permitir gaps más pequeños en móvil)
-        const minGap = viewportWidth <= 480 ? 6 : 8;
-        slideGap = Math.max(minGap, slideGap);
-
-        // Calcular sideSpace después de aplicar clamps para centrar correctamente
-        sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
-        sideSpace = Math.max(12, sideSpace);
+    slideWidth = Math.max(minSlideWidth, Math.min(slideWidth, 2000));
+    slideHeight = Math.max(minSlideHeight, Math.min(slideHeight, 400)); // Máximo 400px para desktop
+    slideGap = Math.max(viewportWidth <= 480 ? 6 : 8, slideGap);
+    sideSpace = Math.max(minSideSpace, sideSpace);
         
         // Correcciones específicas para Safari
         if (isSafari) {
@@ -244,6 +248,14 @@
         // Reposicionar el wrapper correctamente
         wrapper.style.marginLeft = `${dimensions.sideSpace}px`;
         wrapper.style.left = '0px';
+
+        // Asegurar que el transform inicial esté limpio y sincronizado
+        const currentTranslate = getTranslateX(wrapper);
+        if (currentTranslate !== 0) {
+            // Recalcular para centrar en currentIndex
+            wrapper.style.transform = `translate3d(${-(dimensions.slideWidth + dimensions.slideGap) * currentIndex}px, 0, 0)`;
+            wrapper.style.webkitTransform = `translate3d(${-(dimensions.slideWidth + dimensions.slideGap) * currentIndex}px, 0, 0)`;
+        }
         
         // Correcciones específicas para Safari
         if (dimensions.isSafari) {
@@ -290,6 +302,33 @@
         updateBackgroundBlur(); // Actualizar fondo blur
         
         console.log('Slider: Recálculo completo finalizado');
+    }
+
+    // Helper para leer translateX real desde computedStyle (fallback seguro)
+    function getTranslateX(el) {
+        if (!el) return 0;
+        try {
+            const style = window.getComputedStyle(el);
+            const transform = style.transform || style.webkitTransform || el.style.transform;
+            if (!transform || transform === 'none') return 0;
+            // transform matrix(a, b, c, d, tx, ty) or matrix3d(...)
+            const matrix3d = transform.match(/^matrix3d\((.+)\)$/);
+            if (matrix3d) {
+                const values = matrix3d[1].split(',').map(v => parseFloat(v.trim()));
+                return values[12] || 0;
+            }
+            const matrix = transform.match(/^matrix\((.+)\)$/);
+            if (matrix) {
+                const values = matrix[1].split(',').map(v => parseFloat(v.trim()));
+                return values[4] || 0;
+            }
+            // fallback: try to parse translate3d directly
+            const t3 = transform.match(/translate3d\(([^,]+),/);
+            if (t3) return parseFloat(t3[1]) || 0;
+        } catch (e) {
+            console.warn('Slider: getTranslateX error', e);
+        }
+        return 0;
     }
 
     // Función mejorada para actualizar layout
@@ -594,16 +633,9 @@
                 isHorizontalSwipe = false;
                 isVerticalSwipe = false;
                 isDragging = true;
-                
-                // Obtener la posición actual del wrapper
-                const currentTransform = wrapper.style.transform;
-                if (currentTransform) {
-                    const match = currentTransform.match(/translate3d\(([^,]+),/);
-                    if (match) {
-                        initialTransformX = parseFloat(match[1]);
-                        currentTransformX = initialTransformX;
-                    }
-                }
+                // Obtener la posición actual del wrapper desde computedStyle para evitar valores inline vacíos
+                initialTransformX = getTranslateX(wrapper) || 0;
+                currentTransformX = initialTransformX;
                 
                 console.log('Slider: Touch start en', touchStartX, touchStartY, 'transform inicial:', initialTransformX);
             }, { passive: false });
