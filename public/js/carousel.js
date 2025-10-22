@@ -1,5 +1,4 @@
 // Carrusel de Episodios Series (solo episodios con Título episodio completo)
-console.log('[LOCAL JS] loaded public/js/carousel.js');
 class EpisodiosSeriesCarousel {
     // ...existing code...
     scrollToHash(retries = 10) {
@@ -416,20 +415,8 @@ class EpisodiosSeriesCarousel {
         // Calcular cuántos items completos caben en la vista
         const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
 
-        // Encontrar índice del primer item visible usando boundingClientRect (más robusto que dividir scrollLeft)
-        const allItems = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
-        const wrapperRectMain = this.wrapper.getBoundingClientRect();
-        let currentIndex = 0;
-        for (let i = 0; i < allItems.length; i++) {
-            const r = allItems[i].getBoundingClientRect();
-            // Si el borde izquierdo del item está dentro o a la derecha del borde visible del wrapper, lo consideramos el primero visible
-            if (Math.round(r.left) >= Math.round(wrapperRectMain.left) - 1) { currentIndex = i; break; }
-        }
-        // Fallback: si no se detectó, usar aproximación por scrollLeft
-        if (currentIndex === 0 && this.wrapper.scrollLeft > 0) {
-            currentIndex = Math.max(0, Math.floor(this.wrapper.scrollLeft / stepSize));
-        }
-        if (window.__CAROUSEL_DEBUG) console.log('carousel debug: itemsPerViewport/currentIndex', { itemsPerViewport, currentIndex, stepSize, containerWidth });
+    // Calcular índice del primer item visible actualmente (alinear a la izquierda)
+    const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
 
         let targetIndex;
         if (direction === 'prev') {
@@ -443,80 +430,8 @@ class EpisodiosSeriesCarousel {
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
-        // Alinear usando la posición real medida en pantalla para cubrir padding/offsets
-        const items = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
-        const targetItem = items[targetIndex];
-        let finalScroll;
-        if (targetItem) {
-            // Mejor enfoque: calcular delta entre rects (viewport) y ajustar el scroll actual
-            // Esto evita problemas cuando el wrapper tiene margin-left u otros offsets que hacen
-            // que offsetLeft no coincida con la posición visual.
-            try {
-                const wrapperRect = this.wrapper.getBoundingClientRect();
-                const itemRect = targetItem.getBoundingClientRect();
-                // misalignment en px entre el borde izquierdo visible del wrapper y el item
-                const misalignment = Math.round(itemRect.left - wrapperRect.left);
-                // finalScroll será el scrollLeft actual más la diferencia negativa (si el item está a la izquierda)
-                finalScroll = Math.max(0, Math.round(this.wrapper.scrollLeft + misalignment));
-
-                // Debug: información previa al scroll
-                if (window.__CAROUSEL_DEBUG) {
-                    console.log('carousel scroll debug: PRE-SCROLL', {
-                        direction,
-                        targetIndex,
-                        currentScrollLeft: this.wrapper.scrollLeft,
-                        wrapperRectLeft: wrapperRect.left,
-                        itemRectLeft: itemRect.left,
-                        itemOffsetLeft: targetItem.offsetLeft,
-                        misalignment,
-                        finalScroll
-                    });
-                }
-
-                // Si el desarrollador activó la opción de depuración inmediata, hacer scroll instantáneo para comprobar resultados
-                if (window.__CAROUSEL_DEBUG_IMMEDIATE) {
-                    // uso directo del scrollLeft para comportamiento determinista
-                    try { this.wrapper.scrollLeft = finalScroll; } catch (sErr) { this.wrapper.scrollTo({ left: finalScroll, behavior: 'auto' }); }
-                    if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: performed IMMEDIATE scroll to', finalScroll);
-                } else {
-                    // Ejecutar scroll suave
-                    this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
-                    if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: performed SMOOTH scroll to', finalScroll);
-                }
-
-                // Verificación posterior: algunos navegadores aplican sub-pixels o barras de scroll; corregir pequeños desajustes
-                setTimeout(() => {
-                    try {
-                        const wrapperRect2 = this.wrapper.getBoundingClientRect();
-                        const itemRect2 = targetItem.getBoundingClientRect();
-                        const afterMis = Math.round(itemRect2.left - wrapperRect2.left);
-                        const afterScrollLeft = this.wrapper.scrollLeft;
-                        if (window.__CAROUSEL_DEBUG) {
-                            console.log('carousel scroll debug: POST-SCROLL', { afterMis, afterScrollLeft, expectedFinalScroll: finalScroll, wrapperRect2Left: wrapperRect2.left, itemRect2Left: itemRect2.left });
-                        }
-                        if (Math.abs(afterMis) > 1) {
-                            const correction = Math.round(this.wrapper.scrollLeft + afterMis);
-                            if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: correcting after scroll', { afterMis, correction });
-                            this.wrapper.scrollTo({ left: correction, behavior: window.__CAROUSEL_DEBUG_IMMEDIATE ? 'auto' : 'smooth' });
-                        }
-                    } catch (innerErr) { if (window.__CAROUSEL_DEBUG) console.warn('carousel scroll debug: post-check failed', innerErr); }
-                }, 220);
-            } catch (e) {
-                // Si algo falla con getBoundingClientRect, intentar scrollIntoView como fallback
-                try {
-                    targetItem.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
-                    if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: used scrollIntoView fallback', { targetIndex });
-                } catch (svErr) {
-                    // Fallback final algebraico
-                    finalScroll = Math.max(0, Math.round(targetIndex * stepSize));
-                    this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
-                    if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: fallback algebraic finalScroll', { targetIndex, finalScroll });
-                }
-            }
-        } else {
-            finalScroll = targetIndex * stepSize;
-            this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
-        }
+        const finalScroll = targetIndex * stepSize;
+        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 
 // (Eliminados duplicados y métodos sobrantes)
@@ -803,59 +718,14 @@ class EpisodiosAnimesCarousel {
         if (secondItem) { const secondRect = secondItem.getBoundingClientRect(); gap = Math.round(secondRect.left - (itemRect.left + itemRect.width)); if (isNaN(gap) || gap < 0) gap = 0; }
         const stepSize = itemWidth + gap;
         const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
-        const allItems = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
-        const wrapperRectMain = this.wrapper.getBoundingClientRect();
-        let currentIndex = 0;
-        for (let i = 0; i < allItems.length; i++) {
-            const r = allItems[i].getBoundingClientRect();
-            if (Math.round(r.left) >= Math.round(wrapperRectMain.left) - 1) { currentIndex = i; break; }
-        }
-        if (currentIndex === 0 && this.wrapper.scrollLeft > 0) {
-            currentIndex = Math.max(0, Math.floor(this.wrapper.scrollLeft / stepSize));
-        }
-        if (window.__CAROUSEL_DEBUG) console.log('carousel debug: itemsPerViewport/currentIndex', { itemsPerViewport, currentIndex, stepSize, containerWidth });
+        const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
         let targetIndex;
         if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsPerViewport); else targetIndex = currentIndex + itemsPerViewport;
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
-        // Alinear usando la posición real medida en pantalla para cubrir padding/offsets
-        const items = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
-        const targetItem = items[targetIndex];
-        let finalScroll;
-        if (targetItem) {
-            try {
-                const style = getComputedStyle(this.wrapper);
-                const paddingLeft = parseFloat(style.paddingLeft) || 0;
-                const scrollPaddingLeft = parseFloat(style.scrollPaddingLeft) || 0;
-                const compensation = Math.max(paddingLeft, scrollPaddingLeft, 0);
-                finalScroll = Math.max(0, Math.round(targetItem.offsetLeft - compensation));
-                this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
-                if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: forced finalScroll', { targetIndex, finalScroll, offsetLeft: targetItem.offsetLeft, paddingLeft, scrollPaddingLeft });
-                setTimeout(() => {
-                    try {
-                        const wrapperRect2 = this.wrapper.getBoundingClientRect();
-                        const itemRect3 = targetItem.getBoundingClientRect();
-                        const misalignment = Math.round(itemRect3.left - wrapperRect2.left);
-                        if (Math.abs(misalignment) > 2) {
-                            const correction = Math.round(this.wrapper.scrollLeft + misalignment);
-                            if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: correcting misalignment', { misalignment, correction });
-                            this.wrapper.scrollTo({ left: correction, behavior: 'smooth' });
-                        }
-                    } catch (e) { if (window.__CAROUSEL_DEBUG) console.warn('carousel scroll debug: post-check failed', e); }
-                }, 220);
-            } catch (e) {
-                const wrapperRect = this.wrapper.getBoundingClientRect();
-                const itemRect2 = targetItem.getBoundingClientRect();
-                const delta = itemRect2.left - wrapperRect.left;
-                finalScroll = Math.max(0, Math.round(this.wrapper.scrollLeft + delta));
-                this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
-                if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: fallback finalScroll', { targetIndex, delta, finalScroll });
-            }
-        } else {
-            finalScroll = targetIndex * stepSize;
-            this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
-        }
+        const finalScroll = targetIndex * stepSize;
+        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 }
 

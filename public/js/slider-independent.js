@@ -1,6 +1,5 @@
 // Slider Independiente - Con detección automática de viewport mejorada (estilo Rakuten.tv)
 (function () {
-console.log('[LOCAL JS] loaded public/js/slider-independent.js');
     let currentIndex = 0;
     let totalSlides = 0;
     let isTransitioning = false;
