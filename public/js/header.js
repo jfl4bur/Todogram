@@ -295,6 +295,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if(!qTokens.length){
       // restore originals
       try{
+        // if non-catalog, remove any #search hash entirely
+        const isCatalog = window.location.pathname.includes('/catalogo') || (window.location.hash && window.location.hash.startsWith('#catalogo'));
+        if(!isCatalog){
+          try{ history.replaceState(null, null, window.location.pathname + window.location.search); }catch(e){}
+        }
         if(window.__originalCarouselData){
           if(window.carousel && window.__originalCarouselData.peliculas){ window.carousel.moviesData = window.__originalCarouselData.peliculas.slice(); window.carousel.index=0; window.carousel.wrapper && (window.carousel.wrapper.innerHTML=''); window.carousel.renderItems(); }
           if(window.seriesCarousel && window.__originalCarouselData.series){ window.seriesCarousel.seriesData = window.__originalCarouselData.series.slice(); window.seriesCarousel.index=0; window.seriesCarousel.wrapper && (window.seriesCarousel.wrapper.innerHTML=''); window.seriesCarousel.renderItems(); }
@@ -429,7 +434,10 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       // fallback to location.search
       if(!q){ const params2 = new URLSearchParams(window.location.search || ''); q = params2.get('q') || ''; }
-      if(q){ searchInput.value = decodeURIComponent(q); applySearchQuery(q); }
+      if(q){ searchInput.value = decodeURIComponent(q); // ensure clear button visible
+        try{ const hs = document.getElementById('header-search'); if(hs) hs.classList.add('has-value'); }catch(e){}
+        applySearchQuery(q);
+      }
     } catch (e) { /* ignore */ }
   }
   

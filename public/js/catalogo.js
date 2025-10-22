@@ -601,7 +601,21 @@
             function applyCatalogSearch(q){ try{
                 const qRaw = removeDiacriticsLocal(String(q||'')).toLowerCase().trim(); const qTokens = tokenizeLocal(qRaw).filter(Boolean);
                 // update URL when on catalog: add q param to catalog hash
-                try{ const parsed = (window.location.hash && window.location.hash.startsWith('#catalogo')) ? window.location.hash : '#catalogo'; const base = parsed.split('?')[0]||'#catalogo'; const params = new URLSearchParams(window.location.hash.replace(/^#catalogo\?/,'') || ''); if(q && q.length) params.set('q', q); else params.delete('q'); const newHash = `${base}?${params.toString()}`; history.replaceState(null,null,newHash); }catch(e){}
+                try{
+                    const hash = window.location.hash || '';
+                    const base = hash && hash.startsWith('#catalogo') ? (hash.split('?')[0] || '#catalogo') : '#catalogo';
+                    const query = (hash && hash.indexOf('?') !== -1) ? hash.split('?')[1] : '';
+                    const params = new URLSearchParams(query || '');
+                    if(q && q.length) params.set('q', q); else params.delete('q');
+                    const paramString = params.toString();
+                    // If there are no params left, remove the hash entirely (go back to /catalogo/)
+                    if(!paramString){
+                        history.replaceState(null, null, window.location.pathname + window.location.search);
+                    } else {
+                        const newHash = `${base}?${paramString}`;
+                        history.replaceState(null, null, newHash);
+                    }
+                }catch(e){}
 
                 if(!qTokens.length){ // restore current filters
                     showNoResultsInCatalog(false);
