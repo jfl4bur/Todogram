@@ -155,6 +155,8 @@ document.addEventListener('DOMContentLoaded', function() {
         isScrolling = false;
       });
     }
+    // mark when we applied a search so observers can avoid immediate loops
+    try { window.__lastHeaderSearchAppliedAt = Date.now(); } catch(e){}
   }
   
   // Event listeners
@@ -377,6 +379,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // slider wrapper no-results unknown; skip
       }
     }catch(e){ console.warn('applySearchQuery error', e); }
+    try { window.__lastHeaderSearchAppliedAt = Date.now(); } catch(e){}
   }
 
   // Debounced handler
@@ -558,4 +561,87 @@ document.addEventListener('DOMContentLoaded', function() {
     };
   } catch (e) { /* ignore */ }
 
+  // Observe carousel wrappers for re-renders and re-apply last search if necessary.
+  // If wrappers aren't present yet, use a body observer to attach when they appear.
+  try {
+    const observedIds = ['carousel-wrapper','series-carousel-wrapper','documentales-carousel-wrapper','animes-carousel-wrapper','episodios-series-carousel-wrapper','episodios-animes-carousel-wrapper'];
+    const cooldownMs = 600; // don't re-apply if we applied within this many ms
+
+    const attachObserverTo = (id) => {
+      const el = document.getElementById(id);
+      if (!el) return false;
+      let debounce = null;
+      const mo = new MutationObserver((mutations) => {
+        if (debounce) clearTimeout(debounce);
+        debounce = setTimeout(() => {
+          try {
+            const lastApplied = window.__lastHeaderSearchAppliedAt || 0;
+            const lastSearch = window.__lastHeaderSearch || '';
+            if (!lastSearch) return; // nothing to re-apply
+            if ((Date.now() - lastApplied) < cooldownMs) return; // avoid loop
+            console.log('Header: detected re-render on', id, '-> re-applying last search', lastSearch);
+            applySearchQuery(lastSearch);
+          } catch(e) { console.warn('carousel observer apply failed', e); }
+        }, 120);
+      });
+      mo.observe(el, { childList: true, subtree: true });
+      return true;
+    };
+
+    // Try attach immediately, collect remaining
+    const remaining = observedIds.filter(id => !attachObserverTo(id));
+
+    if (remaining.length > 0) {
+      const bodyMo = new MutationObserver((mutations, obs) => {
+        for (const id of remaining.slice()) {
+          if (attachObserverTo(id)) {
+            const idx = remaining.indexOf(id);
+            if (idx >= 0) remaining.splice(idx, 1);
+          }
+        }
+        if (remaining.length === 0) {
+          try { obs.disconnect(); } catch(e){}
+        }
+      });
+      bodyMo.observe(document.body, { childList: true, subtree: true });
+
+      // safety: disconnect body observer after 10s
+      setTimeout(() => {
+        try { bodyMo.disconnect(); } catch(e){}
+      }, 10000);
+    }
+  } catch(e) { /* ignore */ }
+
 }); 
+
+// After DOMContentLoaded handler, also ensure notifyDataLoaded is wrapped so every notification reapplies last search
+try {
+  const wrapNotify = () => {
+    if (window.notifyDataLoaded && !window.__notifyWrapped) {
+      window.__notifyWrapped = true;
+      const orig = window.notifyDataLoaded;
+      window.notifyDataLoaded = function(...args) {
+        try { orig.apply(this, args); } catch (err) { console.warn('notifyDataLoaded original failed', err); }
+        try {
+          if (window.__lastHeaderSearch) {
+            console.log('Header: notifyDataLoaded wrapper re-applying last search ->', window.__lastHeaderSearch);
+            applySearchQuery(window.__lastHeaderSearch);
+          }
+        } catch (e) { console.warn('notifyDataLoaded wrapper applySearch failed', e); }
+      };
+      return true;
+    }
+    return false;
+  };
+
+  if (!wrapNotify()) {
+    const waitInterval = setInterval(() => {
+      try {
+        if (wrapNotify()) {
+          clearInterval(waitInterval);
+        }
+      } catch (e) {}
+    }, 150);
+    setTimeout(() => { try { clearInterval(waitInterval); } catch(e) {} }, 8000);
+  }
+} catch(e) { /* ignore */ }
