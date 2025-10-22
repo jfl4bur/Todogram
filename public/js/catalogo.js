@@ -581,6 +581,21 @@
             function tokenizeLocal(s){ return removeDiacriticsLocal(String(s||'')).toLowerCase().split(/[^a-z0-9]+/).filter(Boolean).map(t=>{ if(t.length>4 && t.endsWith('mente')) t=t.slice(0,-5); if(t.length>3 && t.endsWith('es')) t=t.slice(0,-2); if(t.length>2 && t.endsWith('s')) t=t.slice(0,-1); return t; }); }
             function scoreCatalogItem(it, qTokens, qRaw){ let score=0; const title = removeDiacriticsLocal(it.title||'').toLowerCase(); const desc = removeDiacriticsLocal(it.description||'').toLowerCase(); const genre = removeDiacriticsLocal(it.genre||'').toLowerCase(); if(title===qRaw) score+=120; if(title.indexOf(qRaw)!==-1) score+=60; const titleTokens = tokenizeLocal(it.title||''); let mt=0; for(const t of qTokens) if(titleTokens.includes(t)) mt++; score += mt*18; const descTokens = tokenizeLocal(it.description||''); let md=0; for(const t of qTokens) if(descTokens.includes(t)) md++; score += md*6; for(const t of qTokens) if(genre.indexOf(t)!==-1) score+=8; return score; }
 
+            // If original removeDiacriticsLocal was corrupted (contains NUL in regex), override with a safe implementation
+            try{
+                // quick sanity test: does removeDiacriticsLocal produce expected ascii for 'á' ?
+                if(typeof removeDiacriticsLocal === 'function'){
+                    const out = removeDiacriticsLocal('á');
+                    if(typeof out !== 'string' || out.indexOf('a') === -1){
+                        removeDiacriticsLocal = function(s){ try{ return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,''); }catch(e){ return String(s||''); } };
+                    }
+                } else {
+                    removeDiacriticsLocal = function(s){ try{ return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,''); }catch(e){ return String(s||''); } };
+                }
+            }catch(e){
+                removeDiacriticsLocal = function(s){ try{ return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,''); }catch(e){ return String(s||''); } };
+            }
+
             function showNoResultsInCatalog(show){ try{ const existing = document.getElementById('catalogo-no-results'); if(show){ if(!existing){ const el = document.createElement('div'); el.id='catalogo-no-results'; el.className='catalog-no-results'; el.textContent='No hay resultados'; el.style.padding='18px'; el.style.color='rgba(255,255,255,0.85)'; el.style.fontWeight='600'; el.style.textAlign='center'; grid.parentNode.insertBefore(el, grid.nextSibling); } } else { if(existing) existing.remove(); } }catch(e){console.warn('showNoResultsInCatalog error',e);} }
 
             function applyCatalogSearch(q){ try{
