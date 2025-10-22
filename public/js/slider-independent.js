@@ -31,14 +31,15 @@
         
         if (viewportWidth <= 480) {
            // Tablet: más estrecho para elementos adyacentes visibles
-            slideWidth = Math.floor(viewportWidth * 0.90);
-            slideHeight = Math.floor(slideWidth * 0.40);
-            slideGap = 24;
+            slideWidth = Math.floor(viewportWidth * 0.95);
+            slideHeight = Math.floor(slideWidth * 0.10);
+            slideGap = 12;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 844) {
             // Tablet: más estrecho para elementos adyacentes visibles
             slideWidth = Math.floor(viewportWidth * 0.90);
-            slideHeight = Math.floor(slideWidth * 0.18);
+            slideHeight = Math.floor(slideWi
+                dth * 0.18);
             slideGap = 12;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 768) {
@@ -76,8 +77,8 @@
         // Correcciones específicas para Safari
         if (isSafari) {
             // Safari tiene problemas con el cálculo de porcentajes, usar valores más conservadores
-            slideWidth = Math.floor(slideWidth * 0.90); // Reducir ligeramente el ancho
-            slideHeight = Math.floor(slideHeight * 1); // Reducir ligeramente la altura
+            slideWidth = Math.floor(slideWidth * 0.95); // Reducir ligeramente el ancho
+            slideHeight = Math.floor(slideHeight * 0.10); // Reducir ligeramente la altura
             // Asegurar que el gap sea consistente
             slideGap = Math.max(slideGap, 10);
         }
