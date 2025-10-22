@@ -412,7 +412,51 @@ document.addEventListener('DOMContentLoaded', function() {
               }catch(e){}
               try{ if(window.Catalogo && typeof window.Catalogo.search === 'function') window.Catalogo.search(''); }catch(e){}
             } else {
-              applySearchQuery('');
+              // Non-catalog: try restore using snapshot; if missing, rebuild from sharedData as fallback
+              try {
+                const hasSnapshot = window.__originalCarouselData && Object.keys(window.__originalCarouselData).length > 0;
+                if (!hasSnapshot && window.sharedData && Array.isArray(window.sharedData) && window.sharedData.length>0) {
+                  // Rebuild core carousels from sharedData (minimal mapping)
+                  try {
+                    if (window.carousel) {
+                      window.carousel.moviesData = window.sharedData.filter(item=> item && item['Categoría'] === 'Películas').map((item, idx)=>({
+                        id: idx.toString(),
+                        title: item['Título'] || 'Sin título',
+                        description: item['Synopsis'] || 'Descripción no disponible',
+                        posterUrl: item['Portada'] || '',
+                        postersUrl: item['Carteles'] || '',
+                        backgroundUrl: item['Fondo'] || '',
+                        year: item['Año'] ? item['Año'].toString() : '',
+                        duration: item['Duración'] || '',
+                        genre: item['Géneros'] || '',
+                        rating: item['Puntuación 1-10'] ? item['Puntuación 1-10'].toString() : '',
+                        ageRating: item['Clasificación'] || '',
+                        link: item['Enlace'] || '#',
+                        trailerUrl: item['Trailer'] || '',
+                        videoUrl: item['Video iframe'] || '',
+                        tmdbUrl: item['TMDB'] || ''
+                      }));
+                      window.carousel.index = 0;
+                      if (window.carousel.wrapper) { window.carousel.wrapper.innerHTML = ''; }
+                      try { window.carousel.renderItems(); } catch(e){}
+                    }
+                    if (window.seriesCarousel) {
+                      window.seriesCarousel.seriesData = window.sharedData.filter(item=> item && item['Categoría'] === 'Series').map((item, idx)=>({ id: idx.toString(), title: item['Título'] || 'Sin título', description: item['Synopsis'] || 'Descripción no disponible', posterUrl: item['Portada'] || '' }));
+                      window.seriesCarousel.index = 0; if(window.seriesCarousel.wrapper) window.seriesCarousel.wrapper.innerHTML=''; try{ window.seriesCarousel.renderItems(); }catch(e){}
+                    }
+                    if (window.documentalesCarousel) {
+                      window.documentalesCarousel.docuData = window.sharedData.filter(item=> item && item['Categoría'] === 'Documentales').map((item, idx)=>({ id: idx.toString(), title: item['Título'] || 'Sin título', description: item['Synopsis'] || 'Descripción no disponible', posterUrl: item['Portada'] || '' }));
+                      window.documentalesCarousel.index = 0; if(window.documentalesCarousel.wrapper) window.documentalesCarousel.wrapper.innerHTML=''; try{ window.documentalesCarousel.renderItems(); }catch(e){}
+                    }
+                    if (window.animesCarousel) {
+                      window.animesCarousel.animeData = window.sharedData.filter(item=> item && item['Categoría'] === 'Animes').map((item, idx)=>({ id: idx.toString(), title: item['Título'] || 'Sin título', description: item['Synopsis'] || 'Descripción no disponible', posterUrl: item['Portada'] || '' }));
+                      window.animesCarousel.index = 0; if(window.animesCarousel.wrapper) window.animesCarousel.wrapper.innerHTML=''; try{ window.animesCarousel.renderItems(); }catch(e){}
+                    }
+                  } catch (e) { console.warn('restore from sharedData failed', e); }
+                }
+                // Ensure UI is consistent
+                applySearchQuery('');
+              } catch (e) { applySearchQuery(''); }
             }
           }catch(e){ applySearchQuery(''); }
           searchInput.focus();
