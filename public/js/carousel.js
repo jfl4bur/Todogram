@@ -430,22 +430,15 @@ class EpisodiosSeriesCarousel {
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
-        // Calcular scroll objetivo usando la posición real del item para evitar cortes
-        const items = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
-        const targetItem = items[targetIndex];
-        if (targetItem) {
-            const wrapperRect = this.wrapper.getBoundingClientRect();
-            const itemRect = targetItem.getBoundingClientRect();
-            // Distancia (en px) del left del item al left del contenedor visible
-            const deltaLeft = itemRect.left - wrapperRect.left;
-            // El nuevo scrollLeft debe ser el scrollLeft actual + deltaLeft
-            const finalScrollLeft = Math.round(this.wrapper.scrollLeft + deltaLeft);
-            this.wrapper.scrollTo({ left: finalScrollLeft, behavior: 'smooth' });
+        // Calcular el scroll objetivo usando el offset real del elemento para evitar problemas
+        const items = this.wrapper.querySelectorAll('.custom-carousel-item');
+        let finalScroll = 0;
+        if (items && items[targetIndex]) {
+            finalScroll = items[targetIndex].offsetLeft;
         } else {
-            // Fallback simple
-            const finalScroll = targetIndex * stepSize;
-            this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+            finalScroll = targetIndex * stepSize;
         }
+        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 
 // (Eliminados duplicados y métodos sobrantes)
@@ -738,19 +731,14 @@ class EpisodiosAnimesCarousel {
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
-        // Calcular scroll objetivo usando la posición real del item para evitar cortes
-        const items = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
-        const targetItem = items[targetIndex];
-        if (targetItem) {
-            const wrapperRect = this.wrapper.getBoundingClientRect();
-            const itemRect = targetItem.getBoundingClientRect();
-            const deltaLeft = itemRect.left - wrapperRect.left;
-            const finalScrollLeft = Math.round(this.wrapper.scrollLeft + deltaLeft);
-            this.wrapper.scrollTo({ left: finalScrollLeft, behavior: 'smooth' });
+        const items = this.wrapper.querySelectorAll('.custom-carousel-item');
+        let finalScroll = 0;
+        if (items && items[targetIndex]) {
+            finalScroll = items[targetIndex].offsetLeft;
         } else {
-            const finalScroll = targetIndex * stepSize;
-            this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+            finalScroll = targetIndex * stepSize;
         }
+        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 }
 
