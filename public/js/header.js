@@ -439,14 +439,13 @@ document.addEventListener('DOMContentLoaded', function() {
         try{ const hs = document.getElementById('header-search'); if(hs) hs.classList.add('has-value'); }catch(e){}
         // If carousels or catalog are not yet initialized, retry a few times before applying search
         const waitForDataAndApply = (attempt = 0, maxAttempts = 12) => {
-          const hasNonEmpty = (arr) => Array.isArray(arr) && arr.length > 0;
           const ready = (
-            (window.carousel && hasNonEmpty(window.carousel.moviesData)) ||
-            (window.seriesCarousel && hasNonEmpty(window.seriesCarousel.seriesData)) ||
-            (window.documentalesCarousel && hasNonEmpty(window.documentalesCarousel.docuData)) ||
-            (window.animesCarousel && hasNonEmpty(window.animesCarousel.animeData)) ||
+            (window.carousel && Array.isArray(window.carousel.moviesData)) ||
+            (window.seriesCarousel && Array.isArray(window.seriesCarousel.seriesData)) ||
+            (window.documentalesCarousel && Array.isArray(window.documentalesCarousel.docuData)) ||
+            (window.animesCarousel && Array.isArray(window.animesCarousel.animeData)) ||
             (window.Catalogo && typeof window.Catalogo.search === 'function') ||
-            (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function' && hasNonEmpty(window.sliderIndependent.getSlidesData()))
+            (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function')
           );
           if(ready || attempt >= maxAttempts){
             try{ applySearchQuery(q); }catch(e){ console.warn('applySearchQuery retry failed', e); }
