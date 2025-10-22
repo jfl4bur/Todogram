@@ -239,7 +239,19 @@ class DetailsModal {
                         if (newHashString) {
                             window.history.replaceState(null, null, `${window.location.pathname}#${newHashString}`);
                         } else {
-                            window.history.replaceState(null, null, window.location.pathname);
+                            // Preserve #search fragment if present to avoid wiping persistent header search
+                            try {
+                                const cur = window.location.hash || '';
+                                const searchIdx = cur.indexOf('#search');
+                                if (searchIdx !== -1) {
+                                    const searchFragment = cur.substring(searchIdx);
+                                    window.history.replaceState(null, null, window.location.pathname + window.location.search + searchFragment);
+                                } else {
+                                    window.history.replaceState(null, null, window.location.pathname);
+                                }
+                            } catch (err) {
+                                window.history.replaceState(null, null, window.location.pathname);
+                            }
                         }
                     }
                 }
@@ -906,7 +918,18 @@ class DetailsModal {
 
     restoreUrl() {
         if (window.location.hash) {
-            window.history.replaceState(null, null, window.location.pathname);
+            try {
+                const cur = window.location.hash || '';
+                const searchIdx = cur.indexOf('#search');
+                if (searchIdx !== -1) {
+                    const searchFragment = cur.substring(searchIdx);
+                    window.history.replaceState(null, null, window.location.pathname + window.location.search + searchFragment);
+                } else {
+                    window.history.replaceState(null, null, window.location.pathname);
+                }
+            } catch (err) {
+                window.history.replaceState(null, null, window.location.pathname);
+            }
         }
     }
 
