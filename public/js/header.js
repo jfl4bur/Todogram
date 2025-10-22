@@ -448,7 +448,13 @@ document.addEventListener('DOMContentLoaded', function() {
             (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function')
           );
           if(ready || attempt >= maxAttempts){
-            try{ applySearchQuery(q); }catch(e){ console.warn('applySearchQuery retry failed', e); }
+            try{
+              // Apply multiple times spaced out to avoid race conditions where carousels
+              // re-render after first application. This is defensive but effective.
+              applySearchQuery(q);
+              setTimeout(()=>{ try{ applySearchQuery(q); }catch(e){} }, 200);
+              setTimeout(()=>{ try{ applySearchQuery(q); }catch(e){} }, 600);
+            }catch(e){ console.warn('applySearchQuery retry failed', e); }
             return;
           }
           setTimeout(()=> waitForDataAndApply(attempt+1, maxAttempts), 150);
