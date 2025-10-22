@@ -386,7 +386,26 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.addEventListener('click', ()=>{
           searchInput.value = '';
           hs.classList.remove('has-value');
-          applySearchQuery('');
+          // If on catalog page, remove q param from #catalogo?... and notify catalog to restore
+          try{
+            const isCatalog = window.location.pathname.includes('/catalogo') || (window.location.hash && window.location.hash.startsWith('#catalogo'));
+            if(isCatalog){
+              try{
+                const hash = window.location.hash || '';
+                if(hash && hash.startsWith('#catalogo')){
+                  const parts = hash.split('?');
+                  const base = parts[0] || '#catalogo';
+                  const params = new URLSearchParams(parts[1] || '');
+                  params.delete('q');
+                  const newHash = params.toString() ? `${base}?${params.toString()}` : base;
+                  history.replaceState(null, null, newHash);
+                }
+              }catch(e){}
+              try{ if(window.Catalogo && typeof window.Catalogo.search === 'function') window.Catalogo.search(''); }catch(e){}
+            } else {
+              applySearchQuery('');
+            }
+          }catch(e){ applySearchQuery(''); }
           searchInput.focus();
         });
       }
