@@ -434,10 +434,10 @@ class EpisodiosSeriesCarousel {
         const items = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
         const targetEl = items[targetIndex];
         if (targetEl) {
-            const wrapperRect = this.wrapper.getBoundingClientRect();
-            const targetRect = targetEl.getBoundingClientRect();
-            const delta = targetRect.left - wrapperRect.left;
-            const finalScroll = Math.max(0, Math.round(this.wrapper.scrollLeft + delta));
+            // Use offsetLeft and wrapper padding to compute exact scroll target
+            const style = window.getComputedStyle(this.wrapper);
+            const paddingLeft = parseFloat(style.paddingLeft) || 0;
+            const finalScroll = Math.max(0, Math.round(targetEl.offsetLeft - paddingLeft));
             this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
         } else {
             const finalScroll = targetIndex * stepSize;
@@ -739,10 +739,10 @@ class EpisodiosAnimesCarousel {
         const items = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
         const targetEl = items[targetIndex];
         if (targetEl) {
-            const wrapperRect = this.wrapper.getBoundingClientRect();
-            const targetRect = targetEl.getBoundingClientRect();
-            const delta = targetRect.left - wrapperRect.left;
-            const finalScroll = Math.max(0, Math.round(this.wrapper.scrollLeft + delta));
+            // Use offsetLeft and wrapper padding to compute exact scroll target
+            const style = window.getComputedStyle(this.wrapper);
+            const paddingLeft = parseFloat(style.paddingLeft) || 0;
+            const finalScroll = Math.max(0, Math.round(targetEl.offsetLeft - paddingLeft));
             this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
         } else {
             const finalScroll = targetIndex * stepSize;
