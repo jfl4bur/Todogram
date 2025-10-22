@@ -306,6 +306,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     snapshotOriginalData();
 
+    // If we're on the catalog page, also call its search API (if available)
+    try{
+      const isCatalog = window.location.pathname.includes('/catalogo') || (window.location.hash && window.location.hash.startsWith('#catalogo'));
+      if(isCatalog && window.Catalogo && typeof window.Catalogo.search === 'function'){
+        try{ window.Catalogo.search(q); }catch(e){}
+      }
+    }catch(e){}
+
     const filterAndScore = (items) => {
       if(!Array.isArray(items)) return [];
       const scored = [];

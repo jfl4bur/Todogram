@@ -576,6 +576,47 @@
         let resizeTimer=null; function onCatalogResize(){ if(resizeTimer) clearTimeout(resizeTimer); resizeTimer = setTimeout(()=>{ state.itemsPerRow = computeItemsPerRow(grid); state.initialBatchSize = Math.max(1, state.itemsPerRow * state.initialRows); state.subsequentBatchSize = Math.max(1, state.itemsPerRow * state.subsequentRows); if(state.renderedCount < Math.min(state.filteredItems.length, state.initialBatchSize)) appendNextBatch(grid); }, 120); }
         window.addEventListener('resize', onCatalogResize);
 
+            // --- Expose search API for header global search ---
+            function removeDiacriticsLocal(s){ try{ return String(s||'').normalize('NFD').replace(/[ -\u036f]/g,''); }catch(e){ return String(s||''); } }
+            function tokenizeLocal(s){ return removeDiacriticsLocal(String(s||'')).toLowerCase().split(/[^a-z0-9]+/).filter(Boolean).map(t=>{ if(t.length>4 && t.endsWith('mente')) t=t.slice(0,-5); if(t.length>3 && t.endsWith('es')) t=t.slice(0,-2); if(t.length>2 && t.endsWith('s')) t=t.slice(0,-1); return t; }); }
+            function scoreCatalogItem(it, qTokens, qRaw){ let score=0; const title = removeDiacriticsLocal(it.title||'').toLowerCase(); const desc = removeDiacriticsLocal(it.description||'').toLowerCase(); const genre = removeDiacriticsLocal(it.genre||'').toLowerCase(); if(title===qRaw) score+=120; if(title.indexOf(qRaw)!==-1) score+=60; const titleTokens = tokenizeLocal(it.title||''); let mt=0; for(const t of qTokens) if(titleTokens.includes(t)) mt++; score += mt*18; const descTokens = tokenizeLocal(it.description||''); let md=0; for(const t of qTokens) if(descTokens.includes(t)) md++; score += md*6; for(const t of qTokens) if(genre.indexOf(t)!==-1) score+=8; return score; }
+
+            function showNoResultsInCatalog(show){ try{ const existing = document.getElementById('catalogo-no-results'); if(show){ if(!existing){ const el = document.createElement('div'); el.id='catalogo-no-results'; el.className='catalog-no-results'; el.textContent='No hay resultados'; el.style.padding='18px'; el.style.color='rgba(255,255,255,0.85)'; el.style.fontWeight='600'; el.style.textAlign='center'; grid.parentNode.insertBefore(el, grid.nextSibling); } } else { if(existing) existing.remove(); } }catch(e){console.warn('showNoResultsInCatalog error',e);} }
+
+            function applyCatalogSearch(q){ try{
+                const qRaw = removeDiacriticsLocal(String(q||'')).toLowerCase().trim(); const qTokens = tokenizeLocal(qRaw).filter(Boolean);
+                // update URL when on catalog: add q param to catalog hash
+                try{ const parsed = (window.location.hash && window.location.hash.startsWith('#catalogo')) ? window.location.hash : '#catalogo'; const base = parsed.split('?')[0]||'#catalogo'; const params = new URLSearchParams(window.location.hash.replace(/^#catalogo\?/,'') || ''); if(q && q.length) params.set('q', q); else params.delete('q'); const newHash = `${base}?${params.toString()}`; history.replaceState(null,null,newHash); }catch(e){}
+
+                if(!qTokens.length){ // restore current filters
+                    showNoResultsInCatalog(false);
+                    applyFiltersAndRender(grid, data, tab, genre);
+                    return;
+                }
+
+                // snapshot has been managed by state.allItems already
+                // filter candidates respecting current tab/genre
+                const candidates = state.allItems.filter(it=>{
+                    if(tab && it.category && it.category!==tab) return false;
+                    if(genre && genre!=='Todo el catálogo'){
+                        const gens = (it.genres||'').split(/·|\||,|\/|;/).map(x=>x.trim()).filter(Boolean);
+                        if(!gens.includes(genre)) return false;
+                    }
+                    return true;
+                });
+
+                const scored = [];
+                for(const it of candidates){ const s = scoreCatalogItem(it, qTokens, qRaw); if(s>0) scored.push({it,s}); }
+                scored.sort((a,b)=>b.s - a.s);
+                state.filteredItems = scored.map(x=>x.it);
+                resetPagination(grid);
+                appendNextBatch(grid);
+                showNoResultsInCatalog(state.filteredItems.length===0);
+            }catch(e){ console.warn('applyCatalogSearch error', e); } }
+
+            // expose search function on global Catalogo object so header can call it
+            try{ window.Catalogo = window.Catalogo || {}; window.Catalogo.search = applyCatalogSearch; }catch(e){}
+
         // hash change: update filters and optionally open details if id present
         window.addEventListener('hashchange', ()=>{
             const parsed = parseCatalogHash();
