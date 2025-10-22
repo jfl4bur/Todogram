@@ -435,12 +435,19 @@ class EpisodiosSeriesCarousel {
         const targetItem = items[targetIndex];
         let finalScroll;
         if (targetItem) {
-            const wrapperRect = this.wrapper.getBoundingClientRect();
-            const itemRect2 = targetItem.getBoundingClientRect();
-            // delta: cuánto hay que mover respecto a la posición actual del scroll
-            const delta = itemRect2.left - wrapperRect.left;
-            finalScroll = Math.max(0, Math.round(this.wrapper.scrollLeft + delta));
-            if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug', { targetIndex, delta, wrapperScrollLeft: this.wrapper.scrollLeft, itemOffsetLeft: targetItem.offsetLeft, wrapperRectLeft: wrapperRect.left, itemRectLeft: itemRect2.left, finalScroll, stepSize });
+            // Preferir scrollIntoView para alinear exactamente el inicio del item dentro del contenedor
+            try {
+                targetItem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+                if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: used scrollIntoView', { targetIndex, itemOffsetLeft: targetItem.offsetLeft });
+                return;
+            } catch (e) {
+                // Fallback a cálculo anterior si la API no está disponible
+                const wrapperRect = this.wrapper.getBoundingClientRect();
+                const itemRect2 = targetItem.getBoundingClientRect();
+                const delta = itemRect2.left - wrapperRect.left;
+                finalScroll = Math.max(0, Math.round(this.wrapper.scrollLeft + delta));
+                if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: fallback finalScroll', { targetIndex, delta, finalScroll });
+            }
         } else {
             finalScroll = targetIndex * stepSize;
         }
@@ -742,11 +749,17 @@ class EpisodiosAnimesCarousel {
         const targetItem = items[targetIndex];
         let finalScroll;
         if (targetItem) {
-            const wrapperRect = this.wrapper.getBoundingClientRect();
-            const itemRect2 = targetItem.getBoundingClientRect();
-            const delta = itemRect2.left - wrapperRect.left;
-            finalScroll = Math.max(0, Math.round(this.wrapper.scrollLeft + delta));
-            if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug', { targetIndex, delta, wrapperScrollLeft: this.wrapper.scrollLeft, itemOffsetLeft: targetItem.offsetLeft, wrapperRectLeft: wrapperRect.left, itemRectLeft: itemRect2.left, finalScroll, stepSize });
+            try {
+                targetItem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+                if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: used scrollIntoView', { targetIndex, itemOffsetLeft: targetItem.offsetLeft });
+                return;
+            } catch (e) {
+                const wrapperRect = this.wrapper.getBoundingClientRect();
+                const itemRect2 = targetItem.getBoundingClientRect();
+                const delta = itemRect2.left - wrapperRect.left;
+                finalScroll = Math.max(0, Math.round(this.wrapper.scrollLeft + delta));
+                if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: fallback finalScroll', { targetIndex, delta, finalScroll });
+            }
         } else {
             finalScroll = targetIndex * stepSize;
         }
