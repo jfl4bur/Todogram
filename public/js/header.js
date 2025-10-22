@@ -216,16 +216,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function snapshotOriginalData() {
     try {
-      if (window.carousel && Array.isArray(window.carousel.moviesData) && window.carousel.moviesData.length && !window.__originalCarouselData.peliculas) window.__originalCarouselData.peliculas = window.carousel.moviesData.slice();
-      if (window.seriesCarousel && Array.isArray(window.seriesCarousel.seriesData) && window.seriesCarousel.seriesData.length && !window.__originalCarouselData.series) window.__originalCarouselData.series = window.seriesCarousel.seriesData.slice();
-      if (window.documentalesCarousel && Array.isArray(window.documentalesCarousel.docuData) && window.documentalesCarousel.docuData.length && !window.__originalCarouselData.documentales) window.__originalCarouselData.documentales = window.documentalesCarousel.docuData.slice();
-      if (window.animesCarousel && Array.isArray(window.animesCarousel.animeData) && window.animesCarousel.animeData.length && !window.__originalCarouselData.animes) window.__originalCarouselData.animes = window.animesCarousel.animeData.slice();
-      if (window.episodiosCarousel && Array.isArray(window.episodiosCarousel.episodiosData) && window.episodiosCarousel.episodiosData.length && !window.__originalCarouselData.episodios) window.__originalCarouselData.episodios = window.episodiosCarousel.episodiosData.slice();
-      if (window.episodiosAnimesCarousel && Array.isArray(window.episodiosAnimesCarousel.episodiosData) && window.episodiosAnimesCarousel.episodiosData.length && !window.__originalCarouselData.episodiosAnimes) window.__originalCarouselData.episodiosAnimes = window.episodiosAnimesCarousel.episodiosData.slice();
-      if (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function'){
-        const s = window.sliderIndependent.getSlidesData();
-        if(Array.isArray(s) && s.length && !window.__originalCarouselData.slider) window.__originalCarouselData.slider = s.slice();
-      }
+      if (window.carousel && window.carousel.moviesData && !window.__originalCarouselData.peliculas) window.__originalCarouselData.peliculas = window.carousel.moviesData.slice();
+      if (window.seriesCarousel && window.seriesCarousel.seriesData && !window.__originalCarouselData.series) window.__originalCarouselData.series = window.seriesCarousel.seriesData.slice();
+      if (window.documentalesCarousel && window.documentalesCarousel.docuData && !window.__originalCarouselData.documentales) window.__originalCarouselData.documentales = window.documentalesCarousel.docuData.slice();
+      if (window.animesCarousel && window.animesCarousel.animeData && !window.__originalCarouselData.animes) window.__originalCarouselData.animes = window.animesCarousel.animeData.slice();
+      if (window.episodiosCarousel && window.episodiosCarousel.episodiosData && !window.__originalCarouselData.episodios) window.__originalCarouselData.episodios = window.episodiosCarousel.episodiosData.slice();
+      if (window.episodiosAnimesCarousel && window.episodiosAnimesCarousel.episodiosData && !window.__originalCarouselData.episodiosAnimes) window.__originalCarouselData.episodiosAnimes = window.episodiosAnimesCarousel.episodiosData.slice();
+      if (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function' && !window.__originalCarouselData.slider) window.__originalCarouselData.slider = window.sliderIndependent.getSlidesData().slice();
     } catch (e) { console.warn('snapshotOriginalData error', e); }
   }
 
@@ -303,9 +300,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if(!isCatalog){
           try{ history.replaceState(null, null, window.location.pathname + window.location.search); }catch(e){}
         }
-  // If __originalCarouselData is missing, attempt one last time to snapshot current data
-  try{ if(!window.__originalCarouselData || Object.keys(window.__originalCarouselData).length === 0) snapshotOriginalData(); }catch(e){}
-  if(window.__originalCarouselData){
+        if(window.__originalCarouselData){
           if(window.carousel && window.__originalCarouselData.peliculas){ window.carousel.moviesData = window.__originalCarouselData.peliculas.slice(); window.carousel.index=0; window.carousel.wrapper && (window.carousel.wrapper.innerHTML=''); window.carousel.renderItems(); }
           if(window.seriesCarousel && window.__originalCarouselData.series){ window.seriesCarousel.seriesData = window.__originalCarouselData.series.slice(); window.seriesCarousel.index=0; window.seriesCarousel.wrapper && (window.seriesCarousel.wrapper.innerHTML=''); window.seriesCarousel.renderItems(); }
           if(window.documentalesCarousel && window.__originalCarouselData.documentales){ window.documentalesCarousel.docuData = window.__originalCarouselData.documentales.slice(); window.documentalesCarousel.index=0; window.documentalesCarousel.wrapper && (window.documentalesCarousel.wrapper.innerHTML=''); window.documentalesCarousel.renderItems(); }
@@ -445,12 +440,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // If carousels or catalog are not yet initialized, retry a few times before applying search
         const waitForDataAndApply = (attempt = 0, maxAttempts = 12) => {
           const ready = (
-            (window.carousel && Array.isArray(window.carousel.moviesData) && window.carousel.moviesData.length>0) ||
-            (window.seriesCarousel && Array.isArray(window.seriesCarousel.seriesData) && window.seriesCarousel.seriesData.length>0) ||
-            (window.documentalesCarousel && Array.isArray(window.documentalesCarousel.docuData) && window.documentalesCarousel.docuData.length>0) ||
-            (window.animesCarousel && Array.isArray(window.animesCarousel.animeData) && window.animesCarousel.animeData.length>0) ||
+            (window.carousel && Array.isArray(window.carousel.moviesData)) ||
+            (window.seriesCarousel && Array.isArray(window.seriesCarousel.seriesData)) ||
+            (window.documentalesCarousel && Array.isArray(window.documentalesCarousel.docuData)) ||
+            (window.animesCarousel && Array.isArray(window.animesCarousel.animeData)) ||
             (window.Catalogo && typeof window.Catalogo.search === 'function') ||
-            (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function' && Array.isArray(window.sliderIndependent.getSlidesData()) && window.sliderIndependent.getSlidesData().length>0)
+            (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function')
           );
           if(ready || attempt >= maxAttempts){
             try{ applySearchQuery(q); }catch(e){ console.warn('applySearchQuery retry failed', e); }

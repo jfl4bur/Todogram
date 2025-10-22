@@ -368,21 +368,7 @@ class EpisodiosSeriesCarousel {
                 closeBtn._episodiosHashListener = true;
                 closeBtn.addEventListener('click', () => {
                     if (window.location.hash.startsWith('#id=')) {
-                        // Preserve a potential #search fragment (e.g. #search?q=...) when clearing modal id
-                        try {
-                            const currentHash = window.location.hash || '';
-                            const searchIdx = currentHash.indexOf('#search');
-                            if (searchIdx !== -1) {
-                                // keep everything from #search onwards
-                                const searchFragment = currentHash.substring(searchIdx);
-                                history.replaceState(null, '', window.location.pathname + window.location.search + searchFragment);
-                            } else {
-                                history.replaceState(null, '', window.location.pathname + window.location.search);
-                            }
-                        } catch (e) {
-                            // fallback: clear full hash
-                            history.replaceState(null, '', window.location.pathname + window.location.search);
-                        }
+                        history.replaceState(null, '', window.location.pathname + window.location.search);
                     }
                 });
             }
