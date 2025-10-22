@@ -430,7 +430,19 @@ class EpisodiosSeriesCarousel {
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
-        const finalScroll = targetIndex * stepSize;
+        // Calcular posición exacta del elemento objetivo para evitar cortes
+        const items = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
+        const targetEl = items[targetIndex];
+        let finalScroll = targetIndex * stepSize; // fallback
+        if (targetEl) {
+            // offsetLeft es relativo al offsetParent; aquí usamos offsetLeft directo
+            finalScroll = targetEl.offsetLeft - (parseInt(getComputedStyle(this.wrapper).paddingLeft, 10) || 0);
+        }
+
+        // Si estamos en el último grupo, posicionar al final exacto para evitar espacio en blanco
+        if (targetIndex >= maxFirstIndex) {
+            finalScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
+        }
         this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 
