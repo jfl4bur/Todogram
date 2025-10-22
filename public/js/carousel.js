@@ -447,6 +447,19 @@ class EpisodiosSeriesCarousel {
                 // Aplicar scroll de forma suave
                 this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
                 if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: forced finalScroll', { targetIndex, finalScroll, offsetLeft: targetItem.offsetLeft, paddingLeft, scrollPaddingLeft });
+                // Verificación posterior al scroll: asegurar alineación exacta y corregir micro-desajustes
+                setTimeout(() => {
+                    try {
+                        const wrapperRect2 = this.wrapper.getBoundingClientRect();
+                        const itemRect3 = targetItem.getBoundingClientRect();
+                        const misalignment = Math.round(itemRect3.left - wrapperRect2.left);
+                        if (Math.abs(misalignment) > 2) {
+                            const correction = Math.round(this.wrapper.scrollLeft + misalignment);
+                            if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: correcting misalignment', { misalignment, correction });
+                            this.wrapper.scrollTo({ left: correction, behavior: 'smooth' });
+                        }
+                    } catch (e) { if (window.__CAROUSEL_DEBUG) console.warn('carousel scroll debug: post-check failed', e); }
+                }, 220);
             } catch (e) {
                 // Ultimo recurso: fallback algebraico
                 const wrapperRect = this.wrapper.getBoundingClientRect();
@@ -765,6 +778,18 @@ class EpisodiosAnimesCarousel {
                 finalScroll = Math.max(0, Math.round(targetItem.offsetLeft - compensation));
                 this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
                 if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: forced finalScroll', { targetIndex, finalScroll, offsetLeft: targetItem.offsetLeft, paddingLeft, scrollPaddingLeft });
+                setTimeout(() => {
+                    try {
+                        const wrapperRect2 = this.wrapper.getBoundingClientRect();
+                        const itemRect3 = targetItem.getBoundingClientRect();
+                        const misalignment = Math.round(itemRect3.left - wrapperRect2.left);
+                        if (Math.abs(misalignment) > 2) {
+                            const correction = Math.round(this.wrapper.scrollLeft + misalignment);
+                            if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: correcting misalignment', { misalignment, correction });
+                            this.wrapper.scrollTo({ left: correction, behavior: 'smooth' });
+                        }
+                    } catch (e) { if (window.__CAROUSEL_DEBUG) console.warn('carousel scroll debug: post-check failed', e); }
+                }, 220);
             } catch (e) {
                 const wrapperRect = this.wrapper.getBoundingClientRect();
                 const itemRect2 = targetItem.getBoundingClientRect();
