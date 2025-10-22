@@ -430,7 +430,10 @@ class EpisodiosSeriesCarousel {
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
-        const finalScroll = targetIndex * stepSize;
+        // Alinear usando offsetLeft del item objetivo para evitar cortar el primer item
+        const items = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
+        const targetItem = items[targetIndex];
+        const finalScroll = targetItem ? Math.max(0, Math.floor(targetItem.offsetLeft)) : targetIndex * stepSize;
         this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 
@@ -724,7 +727,10 @@ class EpisodiosAnimesCarousel {
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
-        const finalScroll = targetIndex * stepSize;
+        // Alinear usando offsetLeft del item objetivo para evitar cortar el primer item
+        const items = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
+        const targetItem = items[targetIndex];
+        const finalScroll = targetItem ? Math.max(0, Math.floor(targetItem.offsetLeft)) : targetIndex * stepSize;
         this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 }
