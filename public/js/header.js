@@ -472,11 +472,18 @@ document.addEventListener('DOMContentLoaded', function() {
       _searchTimer = setTimeout(() => { applySearchQuery(q); _searchTimer = null; }, 220);
     });
     // If page loaded with a search in the URL (either #search?q=... or #catalogo?...&q=... or ?q=...)
-    try {
+      try {
       let q = '';
       const rawHash = window.location.hash || '';
       if (rawHash && rawHash.indexOf('?') !== -1) {
-        const query = rawHash.split('?')[1] || '';
+        // Accept alternate prefixes like #search, #file_search, #search_page produced by external agents
+        const hashHead = rawHash.split('?')[0].replace(/^#/, '');
+        const allowedPrefixes = ['search','file_search','search_page','file-search'];
+        let query = rawHash.split('?')[1] || '';
+        // If the hash head is not an allowed prefix but contains 'search' somewhere, still accept
+        if (!allowedPrefixes.includes(hashHead) && hashHead.indexOf('search') === -1 && !hashHead.startsWith('catalogo')) {
+          query = '';
+        }
         const params = new URLSearchParams(query);
         q = params.get('q') || '';
       }
@@ -485,18 +492,18 @@ document.addEventListener('DOMContentLoaded', function() {
       if(q){
         searchInput.value = decodeURIComponent(q);
         try{ const hs = document.getElementById('header-search'); if(hs) hs.classList.add('has-value'); }catch(e){}
-        // Guard to avoid applying persisted search multiple times
-        window.__headerSearchApplied = window.__headerSearchApplied || false;
+        // Remember the last requested search so we can re-apply it when carousels re-render.
+        // Use a string instead of a boolean so we don't permanently block re-applying after a later full-refresh.
+        window.__lastHeaderSearch = String(q || '');
 
         // Register a callback if the global dataLoaded system exists (main.js sets window.dataLoadedCallbacks)
         try {
           if (window.dataLoadedCallbacks && Array.isArray(window.dataLoadedCallbacks)) {
             window.dataLoadedCallbacks.push(() => {
               try {
-                if (!window.__headerSearchApplied) {
-                  console.log('Header: dataLoaded callback applying persisted search ->', q);
-                  applySearchQuery(q);
-                  window.__headerSearchApplied = true;
+                if (window.__lastHeaderSearch) {
+                  console.log('Header: dataLoaded callback re-applying persisted search ->', window.__lastHeaderSearch);
+                  applySearchQuery(window.__lastHeaderSearch);
                 }
               } catch (e) { console.warn('Header: applySearchQuery in dataLoaded callback failed', e); }
             });
@@ -505,7 +512,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Polling fallback: If carousels/slider are already ready, apply immediately; otherwise retry a few times
         const waitForDataAndApply = (attempt = 0, maxAttempts = 40) => {
-          const ready = (
+          const hasData = (
             (window.carousel && Array.isArray(window.carousel.moviesData) && window.carousel.moviesData.length>0) ||
             (window.seriesCarousel && Array.isArray(window.seriesCarousel.seriesData) && window.seriesCarousel.seriesData.length>0) ||
             (window.documentalesCarousel && Array.isArray(window.documentalesCarousel.docuData) && window.documentalesCarousel.docuData.length>0) ||
@@ -513,13 +520,17 @@ document.addEventListener('DOMContentLoaded', function() {
             (window.Catalogo && typeof window.Catalogo.search === 'function') ||
             (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function' && Array.isArray(window.sliderIndependent.getSlidesData()) && window.sliderIndependent.getSlidesData().length>0)
           );
-          if (window.__headerSearchApplied) return;
-          if (ready || attempt >= maxAttempts) {
+          // if we've already stored a last search and data is available, apply it
+          if (window.__lastHeaderSearch && hasData) {
             try {
-              console.log('Header: polling applying persisted search ->', q, 'attempt', attempt);
-              applySearchQuery(q);
-              window.__headerSearchApplied = true;
+              console.log('Header: polling found data, applying persisted search ->', window.__lastHeaderSearch, 'attempt', attempt);
+              applySearchQuery(window.__lastHeaderSearch);
             } catch(e) { console.warn('applySearchQuery retry failed', e); }
+            return;
+          }
+          if (attempt >= maxAttempts) {
+            // give up but still try once more with whatever state we have
+            try { applySearchQuery(window.__lastHeaderSearch || q); } catch(e) { console.warn('final applySearchQuery failed', e); }
             return;
           }
           setTimeout(()=> waitForDataAndApply(attempt+1, maxAttempts), 150);
@@ -531,15 +542,17 @@ document.addEventListener('DOMContentLoaded', function() {
   
   onScrollHeader(); // Ejecutar al cargar
   // Expose a safe global wrapper so other scripts (main.js) can request applying a search
-  try {
+    try {
     window.headerApplySearch = function(q) {
       try {
+        console.log('headerApplySearch called ->', q);
         if (typeof q === 'string') {
           // ensure input reflects value
           const si = document.getElementById('global-search-input');
           if (si) si.value = q;
+          // store last intended search so re-renders can re-apply it
+          window.__lastHeaderSearch = String(q || '');
           applySearchQuery(q);
-          window.__headerSearchApplied = true;
         }
       } catch (e) { console.warn('headerApplySearch failed', e); }
     };
