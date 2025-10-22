@@ -435,39 +435,44 @@ class EpisodiosSeriesCarousel {
         const targetItem = items[targetIndex];
         let finalScroll;
         if (targetItem) {
-            // Calcular finalScroll como offsetLeft relativo al wrapper y compensar padding/scroll-padding
+            // Mejor enfoque: calcular delta entre rects (viewport) y ajustar el scroll actual
+            // Esto evita problemas cuando el wrapper tiene margin-left u otros offsets que hacen
+            // que offsetLeft no coincida con la posición visual.
             try {
-                const style = getComputedStyle(this.wrapper);
-                const paddingLeft = parseFloat(style.paddingLeft) || 0;
-                // scrollPaddingLeft si está presente
-                const scrollPaddingLeft = parseFloat(style.scrollPaddingLeft) || 0;
-                const compensation = Math.max(paddingLeft, scrollPaddingLeft, 0);
-                // offsetLeft ya es relativo al offsetParent (normalmente el wrapper), usarlo directamente
-                finalScroll = Math.max(0, Math.round(targetItem.offsetLeft - compensation));
-                // Aplicar scroll de forma suave
+                const wrapperRect = this.wrapper.getBoundingClientRect();
+                const itemRect = targetItem.getBoundingClientRect();
+                // misalignment en px entre el borde izquierdo visible del wrapper y el item
+                const misalignment = Math.round(itemRect.left - wrapperRect.left);
+                // finalScroll será el scrollLeft actual más la diferencia negativa (si el item está a la izquierda)
+                finalScroll = Math.max(0, Math.round(this.wrapper.scrollLeft + misalignment));
+                // Ejecutar scroll suave
                 this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
-                if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: forced finalScroll', { targetIndex, finalScroll, offsetLeft: targetItem.offsetLeft, paddingLeft, scrollPaddingLeft });
-                // Verificación posterior al scroll: asegurar alineación exacta y corregir micro-desajustes
+                if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: rect-based finalScroll', { targetIndex, finalScroll, misalignment, wrapperScrollLeft: this.wrapper.scrollLeft, itemOffsetLeft: targetItem.offsetLeft });
+
+                // Verificación posterior: algunos navegadores aplican sub-pixels o barras de scroll; corregir pequeños desajustes
                 setTimeout(() => {
                     try {
                         const wrapperRect2 = this.wrapper.getBoundingClientRect();
-                        const itemRect3 = targetItem.getBoundingClientRect();
-                        const misalignment = Math.round(itemRect3.left - wrapperRect2.left);
-                        if (Math.abs(misalignment) > 2) {
-                            const correction = Math.round(this.wrapper.scrollLeft + misalignment);
-                            if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: correcting misalignment', { misalignment, correction });
+                        const itemRect2 = targetItem.getBoundingClientRect();
+                        const afterMis = Math.round(itemRect2.left - wrapperRect2.left);
+                        if (Math.abs(afterMis) > 1) {
+                            const correction = Math.round(this.wrapper.scrollLeft + afterMis);
+                            if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: correcting after scroll', { afterMis, correction });
                             this.wrapper.scrollTo({ left: correction, behavior: 'smooth' });
                         }
-                    } catch (e) { if (window.__CAROUSEL_DEBUG) console.warn('carousel scroll debug: post-check failed', e); }
+                    } catch (innerErr) { if (window.__CAROUSEL_DEBUG) console.warn('carousel scroll debug: post-check failed', innerErr); }
                 }, 220);
             } catch (e) {
-                // Ultimo recurso: fallback algebraico
-                const wrapperRect = this.wrapper.getBoundingClientRect();
-                const itemRect2 = targetItem.getBoundingClientRect();
-                const delta = itemRect2.left - wrapperRect.left;
-                finalScroll = Math.max(0, Math.round(this.wrapper.scrollLeft + delta));
-                this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
-                if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: fallback finalScroll', { targetIndex, delta, finalScroll });
+                // Si algo falla con getBoundingClientRect, intentar scrollIntoView como fallback
+                try {
+                    targetItem.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+                    if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: used scrollIntoView fallback', { targetIndex });
+                } catch (svErr) {
+                    // Fallback final algebraico
+                    finalScroll = Math.max(0, Math.round(targetIndex * stepSize));
+                    this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+                    if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: fallback algebraic finalScroll', { targetIndex, finalScroll });
+                }
             }
         } else {
             finalScroll = targetIndex * stepSize;
