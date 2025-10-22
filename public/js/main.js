@@ -35,6 +35,31 @@ document.addEventListener('DOMContentLoaded', function () {
         window.dataLoadedCallbacks = [];
         window.isDataLoaded = false;
         window.urlProcessed = false; // Evitar procesar URL múltiples veces
+                // If there's a persisted search query in the hash or search, capture it and register to apply after data load
+                try {
+                    let initialQ = '';
+                    const rawHash = window.location.hash || '';
+                    if (rawHash && rawHash.indexOf('?') !== -1) {
+                        const query = rawHash.split('?')[1] || '';
+                        const params = new URLSearchParams(query);
+                        initialQ = params.get('q') || '';
+                    }
+                    if (!initialQ) {
+                        const params2 = new URLSearchParams(window.location.search || '');
+                        initialQ = params2.get('q') || '';
+                    }
+                    if (initialQ) {
+                        // Enqueue callback so header receives it after dataLoadedCallbacks exist
+                        window.dataLoadedCallbacks.push(() => {
+                            try {
+                                if (window.headerApplySearch && typeof window.headerApplySearch === 'function') {
+                                    console.log('Main: applying initial search via headerApplySearch ->', initialQ);
+                                    window.headerApplySearch(initialQ);
+                                }
+                            } catch (e) { console.warn('Main: headerApplySearch failed', e); }
+                        });
+                    }
+                } catch (e) {}
         
         const carousel = new Carousel();
         

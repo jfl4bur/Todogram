@@ -530,4 +530,19 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   onScrollHeader(); // Ejecutar al cargar
+  // Expose a safe global wrapper so other scripts (main.js) can request applying a search
+  try {
+    window.headerApplySearch = function(q) {
+      try {
+        if (typeof q === 'string') {
+          // ensure input reflects value
+          const si = document.getElementById('global-search-input');
+          if (si) si.value = q;
+          applySearchQuery(q);
+          window.__headerSearchApplied = true;
+        }
+      } catch (e) { console.warn('headerApplySearch failed', e); }
+    };
+  } catch (e) { /* ignore */ }
+
 }); 
