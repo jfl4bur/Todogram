@@ -226,6 +226,16 @@ document.addEventListener('DOMContentLoaded', function() {
     } catch (e) { console.warn('snapshotOriginalData error', e); }
   }
 
+  // Asegurar que tomamos snapshot de los datos originales cuando `main.js` notifique
+  try{
+    if (Array.isArray(window.dataLoadedCallbacks)) {
+      window.dataLoadedCallbacks.push(() => { try{ snapshotOriginalData(); }catch(e){} });
+    }
+    if (window.isDataLoaded) {
+      try{ snapshotOriginalData(); } catch(e){}
+    }
+  }catch(e){}
+
   function removeDiacritics(s){
     try { return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,''); } catch(e){ return String(s||''); }
   }
@@ -437,29 +447,45 @@ document.addEventListener('DOMContentLoaded', function() {
       if(q){
         searchInput.value = decodeURIComponent(q);
         try{ const hs = document.getElementById('header-search'); if(hs) hs.classList.add('has-value'); }catch(e){}
-        // If carousels or catalog are not yet initialized, retry a few times before applying search
-        const waitForDataAndApply = (attempt = 0, maxAttempts = 12) => {
-          const ready = (
-            (window.carousel && Array.isArray(window.carousel.moviesData)) ||
-            (window.seriesCarousel && Array.isArray(window.seriesCarousel.seriesData)) ||
-            (window.documentalesCarousel && Array.isArray(window.documentalesCarousel.docuData)) ||
-            (window.animesCarousel && Array.isArray(window.animesCarousel.animeData)) ||
-            (window.Catalogo && typeof window.Catalogo.search === 'function') ||
-            (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function')
-          );
-          if(ready || attempt >= maxAttempts){
-            try{
-              // Apply multiple times spaced out to avoid race conditions where carousels
-              // re-render after first application. This is defensive but effective.
-              applySearchQuery(q);
-              setTimeout(()=>{ try{ applySearchQuery(q); }catch(e){} }, 200);
-              setTimeout(()=>{ try{ applySearchQuery(q); }catch(e){} }, 600);
-            }catch(e){ console.warn('applySearchQuery retry failed', e); }
-            return;
+
+        // Preferir usar el mecanismo de notificación de `main.js` si existe.
+        // `main.js` crea `window.dataLoadedCallbacks` y llama a `window.notifyDataLoaded()`
+        // cuando los carouseles / datos han sido cargados. Aprovechamos esto para
+        // asegurar que la búsqueda persistente se aplique solo después de la carga.
+        try{
+          if (Array.isArray(window.dataLoadedCallbacks)) {
+            // Añadir callback que tomará snapshot de los datos originales y aplicará la búsqueda
+            window.dataLoadedCallbacks.push(() => {
+              try { snapshotOriginalData(); applySearchQuery(q); } catch (e) { console.warn('applySearchQuery via dataLoadedCallbacks failed', e); }
+            });
+            // Si por alguna razón los datos ya están marcados como cargados, ejecutar de inmediato
+            if (window.isDataLoaded) {
+              try { snapshotOriginalData(); applySearchQuery(q); } catch (e) { console.warn('applySearchQuery immediate failed', e); }
+            }
+          } else {
+            // Fallback: polling como antes
+            const waitForDataAndApply = (attempt = 0, maxAttempts = 24) => {
+              const ready = (
+                (window.carousel && Array.isArray(window.carousel.moviesData)) ||
+                (window.seriesCarousel && Array.isArray(window.seriesCarousel.seriesData)) ||
+                (window.documentalesCarousel && Array.isArray(window.documentalesCarousel.docuData)) ||
+                (window.animesCarousel && Array.isArray(window.animesCarousel.animeData)) ||
+                (window.Catalogo && typeof window.Catalogo.search === 'function') ||
+                (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function') ||
+                Boolean(window.isDataLoaded)
+              );
+              if(ready || attempt >= maxAttempts){
+                try{ snapshotOriginalData(); applySearchQuery(q); }catch(e){ console.warn('applySearchQuery retry failed', e); }
+                return;
+              }
+              setTimeout(()=> waitForDataAndApply(attempt+1, maxAttempts), 150);
+            };
+            waitForDataAndApply();
           }
-          setTimeout(()=> waitForDataAndApply(attempt+1, maxAttempts), 150);
-        };
-        waitForDataAndApply();
+        }catch(e){
+          // En caso de fallo, intentar aplicar de todas formas después de un pequeño delay
+          setTimeout(()=>{ try{ snapshotOriginalData(); applySearchQuery(q); }catch(_){} }, 300);
+        }
       }
     } catch (e) { /* ignore */ }
   }

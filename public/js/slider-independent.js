@@ -31,7 +31,7 @@
         
         if (viewportWidth <= 480) {
            // Tablet: más estrecho para elementos adyacentes visibles
-            slideWidth = Math.floor(viewportWidth * 0.90);
+            slideWidth = Math.floor(viewportWidth * 0.93);
             slideHeight = Math.floor(slideWidth * 0.10);
             slideGap = 8;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
