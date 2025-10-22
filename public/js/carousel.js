@@ -93,7 +93,14 @@ class EpisodiosSeriesCarousel {
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
         const targetItem = items[targetIndex] || items[0];
-        const finalScroll = targetItem.offsetLeft;
+        // Restar el margin-left del wrapper (por ejemplo 40px) para alinear correctamente
+        let leftMargin = 0;
+        try {
+            const cs = window.getComputedStyle(wrapper);
+            leftMargin = parseFloat(cs.marginLeft) || 0;
+        } catch (e) { leftMargin = 0; }
+
+        const finalScroll = Math.max(0, Math.round(targetItem.offsetLeft - leftMargin));
         wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
     init() {
