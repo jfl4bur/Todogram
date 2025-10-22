@@ -1055,8 +1055,6 @@ class Carousel {
         this.moreAppended = false;
         this.moviesData = [];
         this.hoverTimeouts = {};
-    // Bandera para controlar el primer clic de paginación 'next'
-    this._firstNextClicked = false;
 
         if (!this.wrapper || !this.skeleton || !this.carouselContainer) {
             console.error("Elementos del carrusel no encontrados");
@@ -1461,7 +1459,6 @@ class SeriesCarousel {
         this.moreAppended = false;
         this.seriesData = [];
         this.hoverTimeouts = {};
-    this._firstNextClicked = false;
 
         console.log("SeriesCarousel: Elementos encontrados:", {
             wrapper: !!this.wrapper,
@@ -1888,27 +1885,31 @@ class SeriesCarousel {
                 behavior: 'auto'
             });
         } else {
-            // Calcular la posición siguiente usando items alineados
+            // Calcular la posición siguiente
             const currentScroll = this.wrapper.scrollLeft;
-            const step = itemWidth + gap;
-            const itemsPerViewport = Math.max(1, Math.floor(containerWidth / step));
-
-            // En el primer 'next' click avanzar un item extra para evitar corte
-            let extra = 0;
-            if (!this._firstNextClicked && currentScroll === 0) {
-                extra = 1;
-                this._firstNextClicked = true;
+            const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
+            
+            // Calcular cuántos items completos caben en la pantalla
+            // Usar un valor que funcione bien para la mayoría de pantallas
+            const itemsPerViewport = Math.max(4, Math.floor(containerWidth / (itemWidth + gap)));
+            
+            // Calcular la posición exacta del siguiente scroll
+            // Si es el primer clic (currentScroll = 0), usar un cálculo especial
+            let targetScroll;
+            if (currentScroll === 0) {
+                // Para el primer clic, mover exactamente por los items que caben
+                targetScroll = itemsPerViewport * (itemWidth + gap);
+            } else {
+                // Para los siguientes clics, usar el cálculo normal
+                targetScroll = currentScroll + (itemsPerViewport * (itemWidth + gap));
             }
-
-            const targetIndex = Math.floor(currentScroll / step) + itemsPerViewport + extra;
-            const totalItems = Math.max(0, this.wrapper.querySelectorAll('.custom-carousel-item').length - 1);
-            const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport + 1);
-            const boundedIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
-            const targetScroll = boundedIndex * step;
-
-            console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, extra: ${extra}, TargetIndex: ${boundedIndex}, TargetScroll: ${targetScroll}`);
-
-            this.wrapper.scrollTo({ left: targetScroll, behavior: 'auto' });
+            
+            console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}`);
+            
+            this.wrapper.scrollTo({
+                left: targetScroll,
+                behavior: 'auto'
+            });
         }
     }
 
@@ -2246,38 +2247,14 @@ class DocumentalesCarousel {
     }
 
     scrollToPrevPage() {
-        // Alinear scroll hacia la izquierda en múltiplos de itemWidth+gap
         if (!this.wrapper) return;
-        const itemWidth = 194;
-        const gap = 4;
-        const stepSize = itemWidth + gap;
-        const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
-        const itemsPerViewport = Math.max(1, this.itemsPerPage || Math.floor(this.wrapper.clientWidth / stepSize));
-        const targetIndex = Math.max(0, currentIndex - itemsPerViewport);
-        const finalScroll = targetIndex * stepSize;
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+        const scrollAmount = this.wrapper.clientWidth;
+        this.wrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
     }
     scrollToNextPage() {
         if (!this.wrapper) return;
-        const itemWidth = 194;
-        const gap = 4;
-        const stepSize = itemWidth + gap;
-        const itemsPerViewport = Math.max(1, this.itemsPerPage || Math.floor(this.wrapper.clientWidth / stepSize));
-        const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
-
-        // Primer clic: avanzar un item extra para evitar que el primer item quede cortado
-        let extra = 0;
-        if (!this._firstNextClicked) {
-            extra = 1;
-            this._firstNextClicked = true;
-        }
-
-        const targetIndex = currentIndex + itemsPerViewport + extra;
-        const totalItems = Math.max(0, this.wrapper.querySelectorAll('.custom-carousel-item').length - 1);
-        const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport + 1);
-        const boundedIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
-        const finalScroll = boundedIndex * stepSize;
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+        const scrollAmount = this.wrapper.clientWidth;
+        this.wrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
 }
 
