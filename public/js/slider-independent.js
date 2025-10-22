@@ -31,9 +31,9 @@
         
         if (viewportWidth <= 420) {
             // Mobile: más estrecho para mejor visibilidad de adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.95);
+            slideWidth = Math.floor(viewportWidth * 0.90);
             slideHeight = Math.floor(slideWidth * 0.10);
-            slideGap = 7;
+            slideGap = 6;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 480) {
             // Tablet: más estrecho para elementos adyacentes visibles
