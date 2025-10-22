@@ -787,55 +787,48 @@
         openDetailsModal(movie, slideDiv);
     }
 
-    // Función para iniciar autoplay
+    // Función para iniciar autoplay (estable, único interval)
     function startAutoPlay() {
-        if (autoPlayInterval) {
-            clearInterval(autoPlayInterval);
-        }
-        
-        // Usar requestAnimationFrame para mejor rendimiento
-        let lastTime = 0;
-        const interval = 7000; // 7 segundos
-        
-        function autoPlayTick(currentTime) {
-            if (currentTime - lastTime >= interval) {
-                if (!isTransitioning && !isDragging && totalSlides > 0) {
-                    // Usar requestAnimationFrame para la transición
-                    requestAnimationFrame(() => {
-                        goToSlide(currentIndex + 1);
-                    });
+        // Asegurar que no se creen múltiples intervalos
+        stopAutoPlay();
+
+        // Intervalo fijo en 7 segundos
+        const intervalMs = 7000;
+        autoPlayInterval = setInterval(() => {
+            try {
+                if (!isTransitioning && !isDragging && totalSlides > 0 && !isDestroyed) {
+                    goToSlide(currentIndex + 1);
                 }
-                lastTime = currentTime;
+            } catch (e) {
+                console.error('Slider: error en autoplay tick', e);
             }
-            if (!isDestroyed) {
-                autoPlayInterval = requestAnimationFrame(autoPlayTick);
-            }
-        }
-        
-        autoPlayInterval = requestAnimationFrame(autoPlayTick);
-        console.log('Slider: Autoplay iniciado cada 7 segundos (optimizado)');
+        }, intervalMs);
+
+        console.log('Slider: Autoplay iniciado cada', intervalMs, 'ms');
     }
 
     // Función para detener autoplay
     function stopAutoPlay() {
         if (autoPlayInterval) {
-            cancelAnimationFrame(autoPlayInterval);
+            try {
+                clearInterval(autoPlayInterval);
+            } catch (e) {
+                // En caso de que sea un requestAnimationFrame id antiguo
+                try { cancelAnimationFrame(autoPlayInterval); } catch (er) {}
+            }
             autoPlayInterval = null;
             console.log('Slider: Autoplay detenido');
         }
     }
 
-    // Función para pausar autoplay temporalmente
+    // Función para pausar autoplay temporalmente (alias a stop)
     function pauseAutoPlay() {
-        if (autoPlayInterval) {
-            cancelAnimationFrame(autoPlayInterval);
-            autoPlayInterval = null;
-        }
+        stopAutoPlay();
     }
 
     // Función para reanudar autoplay
     function resumeAutoPlay() {
-        if (!autoPlayInterval && totalSlides > 0) {
+        if (!autoPlayInterval && totalSlides > 0 && !isDestroyed) {
             startAutoPlay();
         }
     }
