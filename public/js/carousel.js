@@ -430,19 +430,8 @@ class EpisodiosSeriesCarousel {
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
-        // Calcular scroll final usando la posición real del elemento objetivo
-        const items = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
-        const targetEl = items[targetIndex];
-        if (targetEl) {
-            // Use offsetLeft and wrapper padding to compute exact scroll target
-            const style = window.getComputedStyle(this.wrapper);
-            const paddingLeft = parseFloat(style.paddingLeft) || 0;
-            const finalScroll = Math.max(0, Math.round(targetEl.offsetLeft - paddingLeft));
-            this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
-        } else {
-            const finalScroll = targetIndex * stepSize;
-            this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
-        }
+        const finalScroll = targetIndex * stepSize;
+        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 
 // (Eliminados duplicados y métodos sobrantes)
@@ -735,19 +724,8 @@ class EpisodiosAnimesCarousel {
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
-        // Calcular scroll final usando la posición real del elemento objetivo
-        const items = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
-        const targetEl = items[targetIndex];
-        if (targetEl) {
-            // Use offsetLeft and wrapper padding to compute exact scroll target
-            const style = window.getComputedStyle(this.wrapper);
-            const paddingLeft = parseFloat(style.paddingLeft) || 0;
-            const finalScroll = Math.max(0, Math.round(targetEl.offsetLeft - paddingLeft));
-            this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
-        } else {
-            const finalScroll = targetIndex * stepSize;
-            this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
-        }
+        const finalScroll = targetIndex * stepSize;
+        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 }
 
