@@ -248,14 +248,7 @@
         // Reposicionar el wrapper correctamente
         wrapper.style.marginLeft = `${dimensions.sideSpace}px`;
         wrapper.style.left = '0px';
-
-        // Asegurar que el transform inicial esté limpio y sincronizado
-        const currentTranslate = getTranslateX(wrapper);
-        if (currentTranslate !== 0) {
-            // Recalcular para centrar en currentIndex
-            wrapper.style.transform = `translate3d(${-(dimensions.slideWidth + dimensions.slideGap) * currentIndex}px, 0, 0)`;
-            wrapper.style.webkitTransform = `translate3d(${-(dimensions.slideWidth + dimensions.slideGap) * currentIndex}px, 0, 0)`;
-        }
+        // Nota: la posición exacta se aplicará con updateSliderPosition(true)
         
         // Correcciones específicas para Safari
         if (dimensions.isSafari) {
@@ -528,9 +521,15 @@
         
         // Obtener dimensiones actuales
         const dimensions = calculateResponsiveDimensions();
-        
-        // Calcular posición (estilo Rakuten.tv)
-        const translateX = -(dimensions.slideWidth + dimensions.slideGap) * currentIndex;
+    const viewportWidth = dimensions.viewportWidth || (document.documentElement.clientWidth || window.innerWidth);
+
+    // Calcular translateX para centrar el slide activo en el viewport
+    // left_of_slide = marginLeft + index*(w+g) + translateX
+    // queremos left_of_slide + w/2 = viewportWidth/2
+    // => translateX = viewportWidth/2 - w/2 - marginLeft - index*(w+g)
+    const marginLeft = dimensions.sideSpace || 0;
+    const slideTotal = dimensions.slideWidth + dimensions.slideGap;
+    const translateX = Math.round((viewportWidth / 2) - (dimensions.slideWidth / 2) - marginLeft - (currentIndex * slideTotal));
         
         // Aplicar transición más suave en móvil
         if (isMobile && !forceUpdate) {
