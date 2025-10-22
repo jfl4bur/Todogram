@@ -416,8 +416,20 @@ class EpisodiosSeriesCarousel {
         // Calcular cuántos items completos caben en la vista
         const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
 
-    // Calcular índice del primer item visible actualmente (alinear a la izquierda)
-    const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
+        // Encontrar índice del primer item visible usando boundingClientRect (más robusto que dividir scrollLeft)
+        const allItems = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
+        const wrapperRectMain = this.wrapper.getBoundingClientRect();
+        let currentIndex = 0;
+        for (let i = 0; i < allItems.length; i++) {
+            const r = allItems[i].getBoundingClientRect();
+            // Si el borde izquierdo del item está dentro o a la derecha del borde visible del wrapper, lo consideramos el primero visible
+            if (Math.round(r.left) >= Math.round(wrapperRectMain.left) - 1) { currentIndex = i; break; }
+        }
+        // Fallback: si no se detectó, usar aproximación por scrollLeft
+        if (currentIndex === 0 && this.wrapper.scrollLeft > 0) {
+            currentIndex = Math.max(0, Math.floor(this.wrapper.scrollLeft / stepSize));
+        }
+        if (window.__CAROUSEL_DEBUG) console.log('carousel debug: itemsPerViewport/currentIndex', { itemsPerViewport, currentIndex, stepSize, containerWidth });
 
         let targetIndex;
         if (direction === 'prev') {
@@ -791,7 +803,17 @@ class EpisodiosAnimesCarousel {
         if (secondItem) { const secondRect = secondItem.getBoundingClientRect(); gap = Math.round(secondRect.left - (itemRect.left + itemRect.width)); if (isNaN(gap) || gap < 0) gap = 0; }
         const stepSize = itemWidth + gap;
         const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
-        const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
+        const allItems = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
+        const wrapperRectMain = this.wrapper.getBoundingClientRect();
+        let currentIndex = 0;
+        for (let i = 0; i < allItems.length; i++) {
+            const r = allItems[i].getBoundingClientRect();
+            if (Math.round(r.left) >= Math.round(wrapperRectMain.left) - 1) { currentIndex = i; break; }
+        }
+        if (currentIndex === 0 && this.wrapper.scrollLeft > 0) {
+            currentIndex = Math.max(0, Math.floor(this.wrapper.scrollLeft / stepSize));
+        }
+        if (window.__CAROUSEL_DEBUG) console.log('carousel debug: itemsPerViewport/currentIndex', { itemsPerViewport, currentIndex, stepSize, containerWidth });
         let targetIndex;
         if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsPerViewport); else targetIndex = currentIndex + itemsPerViewport;
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
