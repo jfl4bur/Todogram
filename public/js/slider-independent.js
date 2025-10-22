@@ -789,7 +789,15 @@
 
     // Función para iniciar autoplay (estable, único interval)
     function startAutoPlay() {
-        // Asegurar que no se creen múltiples intervalos
+        // Protección global para evitar múltiples instancias (por inclusión doble o re-init)
+        try {
+            if (window.__TODOGRAM_SLIDER_AUTOPLAY_ACTIVE) {
+                console.log('Slider: autoplay ya activo - ignorando startAutoPlay()');
+                return;
+            }
+        } catch (e) { /* fallthrough */ }
+
+        // Asegurar que no haya intervalos previos
         stopAutoPlay();
 
         // Intervalo fijo en 7 segundos
@@ -804,6 +812,8 @@
             }
         }, intervalMs);
 
+        // Marcar indicador global
+        try { window.__TODOGRAM_SLIDER_AUTOPLAY_ACTIVE = true; } catch (e) {}
         console.log('Slider: Autoplay iniciado cada', intervalMs, 'ms');
     }
 
@@ -817,6 +827,7 @@
                 try { cancelAnimationFrame(autoPlayInterval); } catch (er) {}
             }
             autoPlayInterval = null;
+            try { window.__TODOGRAM_SLIDER_AUTOPLAY_ACTIVE = false; } catch (e) {}
             console.log('Slider: Autoplay detenido');
         }
     }
@@ -1199,11 +1210,15 @@
     // Aplicar ajuste exacto después de un pequeño delay para evitar drift
     setTimeout(() => applyExactPosition(currentIndex), 220);
         
-        // Reiniciar autoplay después de navegación manual
-        if (autoPlayInterval) {
-            clearInterval(autoPlayInterval);
-            startAutoPlay();
-        }
+        // Reiniciar autoplay después de navegación manual de forma segura
+        // Usar stop/start para evitar solapamiento de intervalos
+        try {
+            stopAutoPlay();
+            // Reiniciar ligeramente después para evitar reinicios simultáneos
+            setTimeout(() => {
+                if (!isDestroyed) startAutoPlay();
+            }, 50);
+        } catch (e) { console.warn('Slider: error reiniciando autoplay', e); }
     }
 
     // Actualizar paginación
