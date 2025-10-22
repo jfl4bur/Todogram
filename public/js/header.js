@@ -448,7 +448,15 @@ document.addEventListener('DOMContentLoaded', function() {
             (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function')
           );
           if(ready || attempt >= maxAttempts){
-            try{ applySearchQuery(q); }catch(e){ console.warn('applySearchQuery retry failed', e); }
+            try{ applySearchQuery(q);
+              // re-apply a few times to survive late carousel inits that re-render after this runs
+              let retries = 0;
+              const reapply = setInterval(()=>{
+                try{ applySearchQuery(q); }catch(e){}
+                retries++;
+                if(retries>4) clearInterval(reapply);
+              }, 180);
+            }catch(e){ console.warn('applySearchQuery retry failed', e); }
             return;
           }
           setTimeout(()=> waitForDataAndApply(attempt+1, maxAttempts), 150);
