@@ -435,23 +435,31 @@ class EpisodiosSeriesCarousel {
         const targetItem = items[targetIndex];
         let finalScroll;
         if (targetItem) {
-            // Preferir scrollIntoView para alinear exactamente el inicio del item dentro del contenedor
+            // Calcular finalScroll como offsetLeft relativo al wrapper y compensar padding/scroll-padding
             try {
-                targetItem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
-                if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: used scrollIntoView', { targetIndex, itemOffsetLeft: targetItem.offsetLeft });
-                return;
+                const style = getComputedStyle(this.wrapper);
+                const paddingLeft = parseFloat(style.paddingLeft) || 0;
+                // scrollPaddingLeft si está presente
+                const scrollPaddingLeft = parseFloat(style.scrollPaddingLeft) || 0;
+                const compensation = Math.max(paddingLeft, scrollPaddingLeft, 0);
+                // offsetLeft ya es relativo al offsetParent (normalmente el wrapper), usarlo directamente
+                finalScroll = Math.max(0, Math.round(targetItem.offsetLeft - compensation));
+                // Aplicar scroll de forma suave
+                this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+                if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: forced finalScroll', { targetIndex, finalScroll, offsetLeft: targetItem.offsetLeft, paddingLeft, scrollPaddingLeft });
             } catch (e) {
-                // Fallback a cálculo anterior si la API no está disponible
+                // Ultimo recurso: fallback algebraico
                 const wrapperRect = this.wrapper.getBoundingClientRect();
                 const itemRect2 = targetItem.getBoundingClientRect();
                 const delta = itemRect2.left - wrapperRect.left;
                 finalScroll = Math.max(0, Math.round(this.wrapper.scrollLeft + delta));
+                this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
                 if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: fallback finalScroll', { targetIndex, delta, finalScroll });
             }
         } else {
             finalScroll = targetIndex * stepSize;
+            this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
         }
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 
 // (Eliminados duplicados y métodos sobrantes)
@@ -750,20 +758,25 @@ class EpisodiosAnimesCarousel {
         let finalScroll;
         if (targetItem) {
             try {
-                targetItem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
-                if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: used scrollIntoView', { targetIndex, itemOffsetLeft: targetItem.offsetLeft });
-                return;
+                const style = getComputedStyle(this.wrapper);
+                const paddingLeft = parseFloat(style.paddingLeft) || 0;
+                const scrollPaddingLeft = parseFloat(style.scrollPaddingLeft) || 0;
+                const compensation = Math.max(paddingLeft, scrollPaddingLeft, 0);
+                finalScroll = Math.max(0, Math.round(targetItem.offsetLeft - compensation));
+                this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+                if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: forced finalScroll', { targetIndex, finalScroll, offsetLeft: targetItem.offsetLeft, paddingLeft, scrollPaddingLeft });
             } catch (e) {
                 const wrapperRect = this.wrapper.getBoundingClientRect();
                 const itemRect2 = targetItem.getBoundingClientRect();
                 const delta = itemRect2.left - wrapperRect.left;
                 finalScroll = Math.max(0, Math.round(this.wrapper.scrollLeft + delta));
+                this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
                 if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: fallback finalScroll', { targetIndex, delta, finalScroll });
             }
         } else {
             finalScroll = targetIndex * stepSize;
+            this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
         }
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 }
 
