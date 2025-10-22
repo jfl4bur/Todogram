@@ -398,20 +398,40 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.addEventListener('click', ()=>{
           searchInput.value = '';
           hs.classList.remove('has-value');
-          // If on catalog page, remove q param from #catalogo?... and notify catalog to restore
+          // If on catalog page, remove only the 'q' param from the #catalogo hash but preserve tab and genre
           try{
             const isCatalog = window.location.pathname.includes('/catalogo') || (window.location.hash && window.location.hash.startsWith('#catalogo'));
             if(isCatalog){
               try{
                 const hash = window.location.hash || '';
+                let base = '#catalogo';
+                let params = new URLSearchParams();
                 if(hash && hash.startsWith('#catalogo')){
                   const parts = hash.split('?');
-                  const base = parts[0] || '#catalogo';
-                  const params = new URLSearchParams(parts[1] || '');
-                  params.delete('q');
-                  const newHash = params.toString() ? `${base}?${params.toString()}` : base;
-                  history.replaceState(null, null, newHash);
+                  base = parts[0] || '#catalogo';
+                  params = new URLSearchParams(parts[1] || '');
                 }
+                // remove q only
+                params.delete('q');
+                // Ensure tab is present in the new hash: prefer existing param, otherwise derive from DOM
+                if(!params.has('tab')){
+                  try{
+                    const tabsEl = document.getElementById('catalogo-tabs-page');
+                    const activeBtn = tabsEl && tabsEl.querySelector && tabsEl.querySelector('.catalogo-tab.active');
+                    const tabName = activeBtn && activeBtn.dataset && activeBtn.dataset.tab ? activeBtn.dataset.tab : null;
+                    if(tabName) params.set('tab', tabName);
+                  }catch(e){}
+                }
+                // Ensure genre is present: prefer existing param, otherwise derive from DOM
+                if(!params.has('genre')){
+                  try{
+                    const gb = document.getElementById('catalogo-genre-button-page');
+                    const label = gb && gb.querySelector && gb.querySelector('.label') ? gb.querySelector('.label').textContent.trim() : null;
+                    if(label) params.set('genre', label);
+                  }catch(e){}
+                }
+                const newHash = params.toString() ? `${base}?${params.toString()}` : base;
+                history.replaceState(null, null, newHash);
               }catch(e){}
               try{ if(window.Catalogo && typeof window.Catalogo.search === 'function') window.Catalogo.search(''); }catch(e){}
             } else {

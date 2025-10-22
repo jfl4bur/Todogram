@@ -55,7 +55,11 @@
     }
 
     // state
-    const state = { allItems: [], filteredItems: [], renderedCount:0, initialRows:5, subsequentRows:3, itemsPerRow:0, initialBatchSize:0, subsequentBatchSize:0, loading:false };
+    const state = { allItems: [], filteredItems: [], renderedCount:0, initialRows:5, subsequentRows:3, itemsPerRow:0, initialBatchSize:0, subsequentBatchSize:0, loading:false,
+        // catalog search cache: last query string and ordered results (items)
+        catalogLastQuery: '',
+        catalogLastScored: null
+    };
 
     function computeItemsPerRow(grid){
         if(!grid) return 6;
@@ -289,6 +293,41 @@
         appendNextBatch(grid);
     }
 
+    // Render results from the last catalog search (state.catalogLastScored) for a specific tab/genre
+    function renderFromLastSearch(grid, tabName, genreName){
+        try{
+            if(!state.catalogLastScored || !Array.isArray(state.catalogLastScored)){
+                // nothing cached -> fallback to normal filters
+                applyFiltersAndRender(grid, window.sharedData || [], tabName, genreName);
+                return;
+            }
+            const activeTab = tabName || 'Películas';
+            const activeGenre = genreName || 'Todo el catálogo';
+            const filtered = state.catalogLastScored.filter(it=>{
+                if(activeTab && it.category && it.category !== activeTab) return false;
+                if(activeGenre && activeGenre !== 'Todo el catálogo'){
+                    const gens = (it.genres||'').split(/·|\||,|\/|;/).map(x=>x.trim()).filter(Boolean);
+                    if(!gens.includes(activeGenre)) return false;
+                }
+                // Exclude episode rows for relevant tabs
+                try{
+                    const episodeTabs = ['Series','Animes','Documentales'];
+                    if(episodeTabs.includes(activeTab)){
+                        const raw = it.raw || {};
+                        const episodeKeys = ['Título episodio','Título episodio completo','Título episodio 1','Episodio','Título episodio (completo)'];
+                        const hasEpisode = episodeKeys.some(k => raw[k] && String(raw[k]).trim() !== '');
+                        if(hasEpisode) return false;
+                    }
+                }catch(e){}
+                return true;
+            });
+            state.filteredItems = filtered.slice();
+            resetPagination(grid);
+            appendNextBatch(grid);
+            showNoResultsInCatalog(state.filteredItems.length===0);
+        }catch(e){ console.warn('renderFromLastSearch error', e); applyFiltersAndRender(grid, window.sharedData || [], tabName, genreName); }
+    }
+
     function parseCatalogHash(){
         const raw = window.location.hash || '';
         if(!raw) return null;
@@ -384,7 +423,20 @@
         });
     }
 
-    tabsContainer.querySelectorAll('.catalogo-tab').forEach(btn=>{ btn.addEventListener('click', ()=>{ tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); const tab = btn.dataset.tab; populateGenresForTabPage(tab); const currentGenre = getGenreLabel() || 'Todo el catálogo'; updateCatalogHash(tab, currentGenre); applyFiltersAndRender(grid, data, tab, currentGenre); }); });
+    tabsContainer.querySelectorAll('.catalogo-tab').forEach(btn=>{ btn.addEventListener('click', ()=>{
+        tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=>x.classList.remove('active'));
+        btn.classList.add('active');
+        const tabName = btn.dataset.tab;
+        populateGenresForTabPage(tabName);
+        const currentGenre = getGenreLabel() || 'Todo el catálogo';
+        updateCatalogHash(tabName, currentGenre);
+        // If a catalog search is active, render its filtered results for this tab; otherwise apply normal filters
+        if(state.catalogLastQuery && state.catalogLastQuery.length>0){
+            renderFromLastSearch(grid, tabName, currentGenre);
+        } else {
+            applyFiltersAndRender(grid, data, tabName, currentGenre);
+        }
+    }); });
 
         // Helper to close dropdown with fade animation
         function closeDropdown(container){
@@ -617,11 +669,23 @@
                     }
                 }catch(e){}
 
-                if(!qTokens.length){ // restore current filters
-                    showNoResultsInCatalog(false);
-                    applyFiltersAndRender(grid, data, tab, genre);
-                    return;
-                }
+                if(!qTokens.length){ // restore current filters (read current active tab/genre)
+                        showNoResultsInCatalog(false);
+                        // determine active tab and genre from DOM
+                        let activeTab = tab;
+                        let activeGenre = genre;
+                        try{
+                            const tabsEl = document.getElementById('catalogo-tabs-page');
+                            const activeBtn = tabsEl && tabsEl.querySelector && tabsEl.querySelector('.catalogo-tab.active');
+                            if(activeBtn && activeBtn.dataset && activeBtn.dataset.tab) activeTab = activeBtn.dataset.tab;
+                        }catch(e){}
+                        try{ if(typeof getGenreLabel === 'function') activeGenre = getGenreLabel() || activeGenre; }catch(e){}
+                        // clear cached search
+                        state.catalogLastQuery = '';
+                        state.catalogLastScored = null;
+                        applyFiltersAndRender(grid, data, activeTab, activeGenre);
+                        return;
+                    }
 
                 // snapshot has been managed by state.allItems already
                 // Determine the currently active tab and genre from the DOM (do not rely on outer closure vars)
@@ -634,32 +698,18 @@
                 }catch(e){}
                 try{ if(typeof getGenreLabel === 'function') activeGenre = getGenreLabel() || activeGenre; }catch(e){}
 
-                const candidates = state.allItems.filter(it=>{
-                    if(activeTab && it.category && it.category!==activeTab) return false;
-                    if(activeGenre && activeGenre!=='Todo el catálogo'){
-                        const gens = (it.genres||'').split(/·|\||,|\/|;/).map(x=>x.trim()).filter(Boolean);
-                        if(!gens.includes(activeGenre)) return false;
-                    }
-                    // Exclude rows that are actually episode entries when viewing series/animes/documentales
-                    try{
-                        const episodeTabs = ['Series','Animes','Documentales'];
-                        if(episodeTabs.includes(activeTab)){
-                            const raw = it.raw || {};
-                            const episodeKeys = ['Título episodio','Título episodio completo','Título episodio 1','Episodio','Título episodio (completo)'];
-                            const hasEpisode = episodeKeys.some(k => raw[k] && String(raw[k]).trim() !== '');
-                            if(hasEpisode) return false;
-                        }
-                    }catch(e){ /* ignore */ }
-                    return true;
-                });
+                // For search we score across ALL items (so results exist per-category). We'll cache the ordered list
+                const candidatesAll = state.allItems.slice();
+                const candidates = candidatesAll; // will score all
 
                 const scored = [];
                 for(const it of candidates){ const s = scoreCatalogItem(it, qTokens, qRaw); if(s>0) scored.push({it,s}); }
                 scored.sort((a,b)=>b.s - a.s);
-                state.filteredItems = scored.map(x=>x.it);
-                resetPagination(grid);
-                appendNextBatch(grid);
-                showNoResultsInCatalog(state.filteredItems.length===0);
+                // cache full ordered results
+                state.catalogLastQuery = q;
+                state.catalogLastScored = scored.map(x=>x.it);
+                // Now render only for the active tab/genre
+                renderFromLastSearch(grid, activeTab, activeGenre);
             }catch(e){ console.warn('applyCatalogSearch error', e); } }
 
             // expose search function on global Catalogo object so header can call it
@@ -677,7 +727,12 @@
                     tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=> x.classList.toggle('active', x.dataset.tab===tab));
                     setGenreLabel(genre);
                     populateGenresForTabPage(tab);
-                    applyFiltersAndRender(grid, data, tab, genre);
+                    // If a catalog search is active, render its results for this tab; otherwise render normal filters
+                    if(state.catalogLastQuery && state.catalogLastQuery.length>0){
+                        renderFromLastSearch(grid, tab, genre);
+                    } else {
+                        applyFiltersAndRender(grid, data, tab, genre);
+                    }
                 } else if(parsed.id && (!parsed.tab || parsed.tab === null)){
                     // infer category from data for this id
                     try {
@@ -699,6 +754,9 @@
                 }
             }
         });
+
+        // When user clicks tabs, prefer to re-render from last search if present
+        tabsContainer.querySelectorAll('.catalogo-tab').forEach(btn=>{ btn.addEventListener('click', ()=>{ tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); const tabName = btn.dataset.tab; const currentGenre = getGenreLabel() || 'Todo el catálogo'; updateCatalogHash(tabName, currentGenre); if(state.catalogLastQuery && state.catalogLastQuery.length>0){ renderFromLastSearch(grid, tabName, currentGenre); } else { applyFiltersAndRender(grid, data, tabName, currentGenre); } }); });
 
     document.addEventListener('click', (e)=>{ if(!e.target.closest('.catalogo-genre-dropdown')){ try{ const container = document.getElementById('catalogo-genre-dropdown-page'); if(container) closeDropdown(container); }catch(e){} } });
 
