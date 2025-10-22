@@ -432,7 +432,7 @@ class EpisodiosSeriesCarousel {
 
         // Calcular el scroll objetivo usando el offset real del elemento para evitar problemas
         const items = this.wrapper.querySelectorAll('.custom-carousel-item');
-        let finalScroll = 0;
+        let finalScroll = 40;
         if (items && items[targetIndex]) {
             finalScroll = items[targetIndex].offsetLeft;
         } else {
