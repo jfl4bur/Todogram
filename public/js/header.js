@@ -285,7 +285,13 @@ document.addEventListener('DOMContentLoaded', function() {
   function applySearchQuery(q){
     const qRaw = removeDiacritics(String(q||'')).toLowerCase().trim();
     const qTokens = tokenize(qRaw).filter(Boolean);
-    try{ window.history.replaceState(null, null, `${window.location.pathname}#search?q=${encodeURIComponent(q||'')}`); }catch(e){}
+    try{
+      // If we're on the catalog page, let the catalog handler manage the hash (it stores q into #catalogo?...)
+      const isCatalog = window.location.pathname.includes('/catalogo') || (window.location.hash && window.location.hash.startsWith('#catalogo'));
+      if(!isCatalog){
+        window.history.replaceState(null, null, `${window.location.pathname}#search?q=${encodeURIComponent(q||'')}`);
+      }
+    }catch(e){}
     if(!qTokens.length){
       // restore originals
       try{
@@ -393,14 +399,18 @@ document.addEventListener('DOMContentLoaded', function() {
       if (_searchTimer) clearTimeout(_searchTimer);
       _searchTimer = setTimeout(() => { applySearchQuery(q); _searchTimer = null; }, 220);
     });
-    // If page loaded with hash search, populate input
+    // If page loaded with a search in the URL (either #search?q=... or #catalogo?...&q=... or ?q=...)
     try {
+      let q = '';
       const rawHash = window.location.hash || '';
-      if (rawHash.startsWith('#search')) {
-        const q = (new URLSearchParams(rawHash.replace(/^#search\?/, ''))).get('q') || '';
-        searchInput.value = decodeURIComponent(q);
-        if (q) applySearchQuery(q);
+      if (rawHash && rawHash.indexOf('?') !== -1) {
+        const query = rawHash.split('?')[1] || '';
+        const params = new URLSearchParams(query);
+        q = params.get('q') || '';
       }
+      // fallback to location.search
+      if(!q){ const params2 = new URLSearchParams(window.location.search || ''); q = params2.get('q') || ''; }
+      if(q){ searchInput.value = decodeURIComponent(q); applySearchQuery(q); }
     } catch (e) { /* ignore */ }
   }
   
