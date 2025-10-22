@@ -445,9 +445,31 @@ class EpisodiosSeriesCarousel {
                 const misalignment = Math.round(itemRect.left - wrapperRect.left);
                 // finalScroll será el scrollLeft actual más la diferencia negativa (si el item está a la izquierda)
                 finalScroll = Math.max(0, Math.round(this.wrapper.scrollLeft + misalignment));
-                // Ejecutar scroll suave
-                this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
-                if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: rect-based finalScroll', { targetIndex, finalScroll, misalignment, wrapperScrollLeft: this.wrapper.scrollLeft, itemOffsetLeft: targetItem.offsetLeft });
+
+                // Debug: información previa al scroll
+                if (window.__CAROUSEL_DEBUG) {
+                    console.log('carousel scroll debug: PRE-SCROLL', {
+                        direction,
+                        targetIndex,
+                        currentScrollLeft: this.wrapper.scrollLeft,
+                        wrapperRectLeft: wrapperRect.left,
+                        itemRectLeft: itemRect.left,
+                        itemOffsetLeft: targetItem.offsetLeft,
+                        misalignment,
+                        finalScroll
+                    });
+                }
+
+                // Si el desarrollador activó la opción de depuración inmediata, hacer scroll instantáneo para comprobar resultados
+                if (window.__CAROUSEL_DEBUG_IMMEDIATE) {
+                    // uso directo del scrollLeft para comportamiento determinista
+                    try { this.wrapper.scrollLeft = finalScroll; } catch (sErr) { this.wrapper.scrollTo({ left: finalScroll, behavior: 'auto' }); }
+                    if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: performed IMMEDIATE scroll to', finalScroll);
+                } else {
+                    // Ejecutar scroll suave
+                    this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+                    if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: performed SMOOTH scroll to', finalScroll);
+                }
 
                 // Verificación posterior: algunos navegadores aplican sub-pixels o barras de scroll; corregir pequeños desajustes
                 setTimeout(() => {
@@ -455,10 +477,14 @@ class EpisodiosSeriesCarousel {
                         const wrapperRect2 = this.wrapper.getBoundingClientRect();
                         const itemRect2 = targetItem.getBoundingClientRect();
                         const afterMis = Math.round(itemRect2.left - wrapperRect2.left);
+                        const afterScrollLeft = this.wrapper.scrollLeft;
+                        if (window.__CAROUSEL_DEBUG) {
+                            console.log('carousel scroll debug: POST-SCROLL', { afterMis, afterScrollLeft, expectedFinalScroll: finalScroll, wrapperRect2Left: wrapperRect2.left, itemRect2Left: itemRect2.left });
+                        }
                         if (Math.abs(afterMis) > 1) {
                             const correction = Math.round(this.wrapper.scrollLeft + afterMis);
                             if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug: correcting after scroll', { afterMis, correction });
-                            this.wrapper.scrollTo({ left: correction, behavior: 'smooth' });
+                            this.wrapper.scrollTo({ left: correction, behavior: window.__CAROUSEL_DEBUG_IMMEDIATE ? 'auto' : 'smooth' });
                         }
                     } catch (innerErr) { if (window.__CAROUSEL_DEBUG) console.warn('carousel scroll debug: post-check failed', innerErr); }
                 }, 220);
