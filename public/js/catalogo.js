@@ -626,6 +626,16 @@
                         const gens = (it.genres||'').split(/·|\||,|\/|;/).map(x=>x.trim()).filter(Boolean);
                         if(!gens.includes(activeGenre)) return false;
                     }
+                    // Exclude rows that are actually episode entries when viewing series/animes/documentales
+                    try{
+                        const episodeTabs = ['Series','Animes','Documentales'];
+                        if(episodeTabs.includes(activeTab)){
+                            const raw = it.raw || {};
+                            const episodeKeys = ['Título episodio','Título episodio completo','Título episodio 1','Episodio','Título episodio (completo)'];
+                            const hasEpisode = episodeKeys.some(k => raw[k] && String(raw[k]).trim() !== '');
+                            if(hasEpisode) return false;
+                        }
+                    }catch(e){ /* ignore */ }
                     return true;
                 });
 
