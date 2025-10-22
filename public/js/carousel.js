@@ -398,15 +398,15 @@ class EpisodiosSeriesCarousel {
         // Determinar tamaño real del ítem y gap leyendo el DOM
         const firstItem = this.wrapper.querySelector('.custom-carousel-item');
         if (!firstItem) return;
-    const firstItemRect = firstItem.getBoundingClientRect();
-    const itemWidth = Math.round(firstItemRect.width);
+        const itemRect = firstItem.getBoundingClientRect();
+        const itemWidth = Math.round(itemRect.width);
 
         // Intentar estimar gap usando el segundo elemento
         let gap = 0;
         const secondItem = firstItem.nextElementSibling;
         if (secondItem) {
             const secondRect = secondItem.getBoundingClientRect();
-            gap = Math.round(secondRect.left - (firstItemRect.left + firstItemRect.width));
+            gap = Math.round(secondRect.left - (itemRect.left + itemRect.width));
             if (isNaN(gap) || gap < 0) gap = 0;
         }
 
@@ -426,17 +426,11 @@ class EpisodiosSeriesCarousel {
         }
 
         // Evitar sobrepasar la cantidad de items
-        const items = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
-        const totalItems = items.length;
+        const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
-        // Calcular scroll final usando posicionamiento real del item objetivo (más robusto)
-        const targetItem = items[targetIndex];
-        if (!targetItem) return;
-        const wrapperRect = this.wrapper.getBoundingClientRect();
-    const targetItemRect = targetItem.getBoundingClientRect();
-    const finalScroll = Math.round(this.wrapper.scrollLeft + (targetItemRect.left - wrapperRect.left));
+        const finalScroll = targetIndex * stepSize;
         this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 
@@ -1061,6 +1055,8 @@ class Carousel {
         this.moreAppended = false;
         this.moviesData = [];
         this.hoverTimeouts = {};
+    // Bandera para controlar el primer clic de paginación 'next'
+    this._firstNextClicked = false;
 
         if (!this.wrapper || !this.skeleton || !this.carouselContainer) {
             console.error("Elementos del carrusel no encontrados");
@@ -1396,20 +1392,15 @@ class Carousel {
         } else {
             targetScroll = currentScroll + actualScrollAmount;
         }
-        // Calculamos el índice objetivo y alineramos al item real
-        const items = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
-        if (items.length === 0) return;
-        const step = itemWidth + gap;
-        const currentIndex = Math.floor(this.wrapper.scrollLeft / step);
-        let targetIndex = (direction === 'prev') ? Math.max(0, currentIndex - Math.max(1, Math.floor(this.wrapper.clientWidth / step))) : currentIndex + Math.max(1, Math.floor(this.wrapper.clientWidth / step));
-        targetIndex = Math.max(0, Math.min(targetIndex, Math.max(0, items.length - 1)));
-
-        const targetItem = items[targetIndex];
-        if (!targetItem) return;
-        const wrapperRect = this.wrapper.getBoundingClientRect();
-        const itemRect = targetItem.getBoundingClientRect();
-        const finalScroll = Math.round(this.wrapper.scrollLeft + (itemRect.left - wrapperRect.left));
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'auto' });
+        // Alinear el scroll para que el item de la izquierda quede completo
+        const alignedScroll = Math.round(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
+        // Evitar sobrepasar los límites
+        const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
+        const finalScroll = Math.max(0, Math.min(alignedScroll, maxScroll));
+        this.wrapper.scrollTo({
+            left: finalScroll,
+            behavior: 'auto'
+        });
     }
 
     // Método para contar elementos realmente visibles
@@ -1470,6 +1461,7 @@ class SeriesCarousel {
         this.moreAppended = false;
         this.seriesData = [];
         this.hoverTimeouts = {};
+    this._firstNextClicked = false;
 
         console.log("SeriesCarousel: Elementos encontrados:", {
             wrapper: !!this.wrapper,
@@ -1872,30 +1864,52 @@ class SeriesCarousel {
         const gap = 4;
         const containerWidth = this.wrapper.clientWidth;
         
-    // Calcular cuántos items caben en la pantalla
-    let itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
-    const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
+        // Calcular cuántos items caben en la pantalla
+        const itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
+        const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
         
         console.log(`Carousel: Container width: ${containerWidth}px`);
         console.log(`Carousel: Item width: ${itemWidth}px, Gap: ${gap}px`);
         console.log(`Carousel: Items que caben en pantalla: ${itemsPerViewport}`);
         console.log(`Carousel: Scroll amount: ${actualScrollAmount}px`);
         
-        // Calcular utilizando el item objetivo y su bounding rect para alinear a la izquierda
-        const items = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
-        if (items.length === 0) return;
-    const step = itemWidth + gap;
-    const currentIndex = Math.floor(this.wrapper.scrollLeft / step);
-    itemsPerViewport = Math.max(1, Math.floor(containerWidth / step));
-        let targetIndex = (direction === 'prev') ? Math.max(0, currentIndex - itemsPerViewport) : Math.min(items.length - 1, currentIndex + itemsPerViewport);
+        if (direction === 'prev') {
+            // Calcular la posición anterior
+            const currentScroll = this.wrapper.scrollLeft;
+            const targetScroll = Math.max(0, currentScroll - actualScrollAmount);
+            
+            // Alinear a los límites de los items para que el de la izquierda esté completo
+            const alignedScroll = Math.ceil(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
+            
+            console.log(`Carousel: Prev - Current: ${currentScroll}, Target: ${targetScroll}, Aligned: ${alignedScroll}`);
+            
+            this.wrapper.scrollTo({
+                left: alignedScroll,
+                behavior: 'auto'
+            });
+        } else {
+            // Calcular la posición siguiente usando items alineados
+            const currentScroll = this.wrapper.scrollLeft;
+            const step = itemWidth + gap;
+            const itemsPerViewport = Math.max(1, Math.floor(containerWidth / step));
 
-        const targetItem = items[targetIndex];
-        if (!targetItem) return;
-        const wrapperRect = this.wrapper.getBoundingClientRect();
-        const itemRect = targetItem.getBoundingClientRect();
-        const finalScroll = Math.round(this.wrapper.scrollLeft + (itemRect.left - wrapperRect.left));
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'auto' });
-        
+            // En el primer 'next' click avanzar un item extra para evitar corte
+            let extra = 0;
+            if (!this._firstNextClicked && currentScroll === 0) {
+                extra = 1;
+                this._firstNextClicked = true;
+            }
+
+            const targetIndex = Math.floor(currentScroll / step) + itemsPerViewport + extra;
+            const totalItems = Math.max(0, this.wrapper.querySelectorAll('.custom-carousel-item').length - 1);
+            const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport + 1);
+            const boundedIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
+            const targetScroll = boundedIndex * step;
+
+            console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, extra: ${extra}, TargetIndex: ${boundedIndex}, TargetScroll: ${targetScroll}`);
+
+            this.wrapper.scrollTo({ left: targetScroll, behavior: 'auto' });
+        }
     }
 
     // Método para contar elementos realmente visibles
@@ -2232,14 +2246,38 @@ class DocumentalesCarousel {
     }
 
     scrollToPrevPage() {
+        // Alinear scroll hacia la izquierda en múltiplos de itemWidth+gap
         if (!this.wrapper) return;
-        const scrollAmount = this.wrapper.clientWidth;
-        this.wrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        const itemWidth = 194;
+        const gap = 4;
+        const stepSize = itemWidth + gap;
+        const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
+        const itemsPerViewport = Math.max(1, this.itemsPerPage || Math.floor(this.wrapper.clientWidth / stepSize));
+        const targetIndex = Math.max(0, currentIndex - itemsPerViewport);
+        const finalScroll = targetIndex * stepSize;
+        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
     scrollToNextPage() {
         if (!this.wrapper) return;
-        const scrollAmount = this.wrapper.clientWidth;
-        this.wrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        const itemWidth = 194;
+        const gap = 4;
+        const stepSize = itemWidth + gap;
+        const itemsPerViewport = Math.max(1, this.itemsPerPage || Math.floor(this.wrapper.clientWidth / stepSize));
+        const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
+
+        // Primer clic: avanzar un item extra para evitar que el primer item quede cortado
+        let extra = 0;
+        if (!this._firstNextClicked) {
+            extra = 1;
+            this._firstNextClicked = true;
+        }
+
+        const targetIndex = currentIndex + itemsPerViewport + extra;
+        const totalItems = Math.max(0, this.wrapper.querySelectorAll('.custom-carousel-item').length - 1);
+        const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport + 1);
+        const boundedIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
+        const finalScroll = boundedIndex * stepSize;
+        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 }
 
