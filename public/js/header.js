@@ -216,13 +216,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function snapshotOriginalData() {
     try {
-      if (window.carousel && window.carousel.moviesData && !window.__originalCarouselData.peliculas) window.__originalCarouselData.peliculas = window.carousel.moviesData.slice();
-      if (window.seriesCarousel && window.seriesCarousel.seriesData && !window.__originalCarouselData.series) window.__originalCarouselData.series = window.seriesCarousel.seriesData.slice();
-      if (window.documentalesCarousel && window.documentalesCarousel.docuData && !window.__originalCarouselData.documentales) window.__originalCarouselData.documentales = window.documentalesCarousel.docuData.slice();
-      if (window.animesCarousel && window.animesCarousel.animeData && !window.__originalCarouselData.animes) window.__originalCarouselData.animes = window.animesCarousel.animeData.slice();
-      if (window.episodiosCarousel && window.episodiosCarousel.episodiosData && !window.__originalCarouselData.episodios) window.__originalCarouselData.episodios = window.episodiosCarousel.episodiosData.slice();
-      if (window.episodiosAnimesCarousel && window.episodiosAnimesCarousel.episodiosData && !window.__originalCarouselData.episodiosAnimes) window.__originalCarouselData.episodiosAnimes = window.episodiosAnimesCarousel.episodiosData.slice();
-      if (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function' && !window.__originalCarouselData.slider) window.__originalCarouselData.slider = window.sliderIndependent.getSlidesData().slice();
+      // Only capture originals when source arrays have items (avoid capturing empty arrays before data loads)
+      if (window.carousel && Array.isArray(window.carousel.moviesData) && window.carousel.moviesData.length > 0 && !window.__originalCarouselData.peliculas) window.__originalCarouselData.peliculas = window.carousel.moviesData.slice();
+      if (window.seriesCarousel && Array.isArray(window.seriesCarousel.seriesData) && window.seriesCarousel.seriesData.length > 0 && !window.__originalCarouselData.series) window.__originalCarouselData.series = window.seriesCarousel.seriesData.slice();
+      if (window.documentalesCarousel && Array.isArray(window.documentalesCarousel.docuData) && window.documentalesCarousel.docuData.length > 0 && !window.__originalCarouselData.documentales) window.__originalCarouselData.documentales = window.documentalesCarousel.docuData.slice();
+      if (window.animesCarousel && Array.isArray(window.animesCarousel.animeData) && window.animesCarousel.animeData.length > 0 && !window.__originalCarouselData.animes) window.__originalCarouselData.animes = window.animesCarousel.animeData.slice();
+      if (window.episodiosCarousel && Array.isArray(window.episodiosCarousel.episodiosData) && window.episodiosCarousel.episodiosData.length > 0 && !window.__originalCarouselData.episodios) window.__originalCarouselData.episodios = window.episodiosCarousel.episodiosData.slice();
+      if (window.episodiosAnimesCarousel && Array.isArray(window.episodiosAnimesCarousel.episodiosData) && window.episodiosAnimesCarousel.episodiosData.length > 0 && !window.__originalCarouselData.episodiosAnimes) window.__originalCarouselData.episodiosAnimes = window.episodiosAnimesCarousel.episodiosData.slice();
+      if (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function') {
+        const slides = window.sliderIndependent.getSlidesData();
+        if (Array.isArray(slides) && slides.length > 0 && !window.__originalCarouselData.slider) window.__originalCarouselData.slider = slides.slice();
+      }
     } catch (e) { console.warn('snapshotOriginalData error', e); }
   }
 
@@ -311,13 +315,42 @@ document.addEventListener('DOMContentLoaded', function() {
           try{ history.replaceState(null, null, window.location.pathname + window.location.search); }catch(e){}
         }
         if(window.__originalCarouselData){
-          if(window.carousel && window.__originalCarouselData.peliculas){ window.carousel.moviesData = window.__originalCarouselData.peliculas.slice(); window.carousel.index=0; window.carousel.wrapper && (window.carousel.wrapper.innerHTML=''); window.carousel.renderItems(); }
-          if(window.seriesCarousel && window.__originalCarouselData.series){ window.seriesCarousel.seriesData = window.__originalCarouselData.series.slice(); window.seriesCarousel.index=0; window.seriesCarousel.wrapper && (window.seriesCarousel.wrapper.innerHTML=''); window.seriesCarousel.renderItems(); }
-          if(window.documentalesCarousel && window.__originalCarouselData.documentales){ window.documentalesCarousel.docuData = window.__originalCarouselData.documentales.slice(); window.documentalesCarousel.index=0; window.documentalesCarousel.wrapper && (window.documentalesCarousel.wrapper.innerHTML=''); window.documentalesCarousel.renderItems(); }
-          if(window.animesCarousel && window.__originalCarouselData.animes){ window.animesCarousel.animeData = window.__originalCarouselData.animes.slice(); window.animesCarousel.index=0; window.animesCarousel.wrapper && (window.animesCarousel.wrapper.innerHTML=''); window.animesCarousel.renderItems(); }
-          if(window.episodiosCarousel && window.__originalCarouselData.episodios){ window.episodiosCarousel.episodiosData = window.__originalCarouselData.episodios.slice(); window.episodiosCarousel.index=0; window.episodiosCarousel.wrapper && (window.episodiosCarousel.wrapper.innerHTML=''); window.episodiosCarousel.renderItems(); }
-          if(window.episodiosAnimesCarousel && window.__originalCarouselData.episodiosAnimes){ window.episodiosAnimesCarousel.episodiosData = window.__originalCarouselData.episodiosAnimes.slice(); window.episodiosAnimesCarousel.index=0; window.episodiosAnimesCarousel.wrapper && (window.episodiosAnimesCarousel.wrapper.innerHTML=''); window.episodiosAnimesCarousel.renderItems(); }
-          if(window.sliderIndependent && window.__originalCarouselData.slider){ window.sliderIndependent.renderSlider(window.__originalCarouselData.slider.slice()); }
+          // Helper para restaurar con fallback
+          const restoreArray = (targetObj, targetKey, snapshotKey, renderFnName, wrapperClear=true) => {
+            try{
+              const snapshot = window.__originalCarouselData[snapshotKey];
+              if (Array.isArray(snapshot) && snapshot.length>0) {
+                targetObj[targetKey] = snapshot.slice();
+              } else if (Array.isArray(targetObj[targetKey]) && targetObj[targetKey].length>0) {
+                // keep existing (avoid overwriting with empty)
+              } else {
+                // nothing to restore
+              }
+              if (typeof targetObj.index !== 'undefined') targetObj.index = 0;
+              if (wrapperClear && targetObj.wrapper) targetObj.wrapper.innerHTML = '';
+              if (renderFnName && typeof targetObj[renderFnName] === 'function') targetObj[renderFnName]();
+            }catch(e){console.warn('restoreArray error',e)}
+          };
+
+          if(window.carousel){ restoreArray(window.carousel, 'moviesData', 'peliculas', 'renderItems'); }
+          if(window.seriesCarousel){ restoreArray(window.seriesCarousel, 'seriesData', 'series', 'renderItems'); }
+          if(window.documentalesCarousel){ restoreArray(window.documentalesCarousel, 'docuData', 'documentales', 'renderItems'); }
+          if(window.animesCarousel){ restoreArray(window.animesCarousel, 'animeData', 'animes', 'renderItems'); }
+          if(window.episodiosCarousel){ restoreArray(window.episodiosCarousel, 'episodiosData', 'episodios', 'renderItems'); }
+          if(window.episodiosAnimesCarousel){ restoreArray(window.episodiosAnimesCarousel, 'episodiosData', 'episodiosAnimes', 'renderItems'); }
+          if(window.sliderIndependent){
+            try{
+              const snap = window.__originalCarouselData.slider;
+              if (Array.isArray(snap) && snap.length>0) window.sliderIndependent.renderSlider(snap.slice());
+              else {
+                // if current slides exist, re-render them; otherwise skip
+                if (typeof window.sliderIndependent.getSlidesData === 'function') {
+                  const cur = window.sliderIndependent.getSlidesData();
+                  if (Array.isArray(cur) && cur.length>0) window.sliderIndependent.renderSlider(cur.slice());
+                }
+              }
+            }catch(e){console.warn('restore slider error',e)}
+          }
         }
       }catch(e){console.warn('restore error',e)}
       // hide no results for all
