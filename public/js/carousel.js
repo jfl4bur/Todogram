@@ -430,10 +430,20 @@ class EpisodiosSeriesCarousel {
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
-        // Alinear usando offsetLeft del item objetivo para evitar cortar el primer item
+        // Alinear usando la posición real medida en pantalla para cubrir padding/offsets
         const items = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
         const targetItem = items[targetIndex];
-        const finalScroll = targetItem ? Math.max(0, Math.floor(targetItem.offsetLeft)) : targetIndex * stepSize;
+        let finalScroll;
+        if (targetItem) {
+            const wrapperRect = this.wrapper.getBoundingClientRect();
+            const itemRect2 = targetItem.getBoundingClientRect();
+            // delta: cuánto hay que mover respecto a la posición actual del scroll
+            const delta = itemRect2.left - wrapperRect.left;
+            finalScroll = Math.max(0, Math.round(this.wrapper.scrollLeft + delta));
+            if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug', { targetIndex, delta, wrapperScrollLeft: this.wrapper.scrollLeft, itemOffsetLeft: targetItem.offsetLeft, wrapperRectLeft: wrapperRect.left, itemRectLeft: itemRect2.left, finalScroll, stepSize });
+        } else {
+            finalScroll = targetIndex * stepSize;
+        }
         this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 
@@ -727,10 +737,19 @@ class EpisodiosAnimesCarousel {
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
-        // Alinear usando offsetLeft del item objetivo para evitar cortar el primer item
+        // Alinear usando la posición real medida en pantalla para cubrir padding/offsets
         const items = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
         const targetItem = items[targetIndex];
-        const finalScroll = targetItem ? Math.max(0, Math.floor(targetItem.offsetLeft)) : targetIndex * stepSize;
+        let finalScroll;
+        if (targetItem) {
+            const wrapperRect = this.wrapper.getBoundingClientRect();
+            const itemRect2 = targetItem.getBoundingClientRect();
+            const delta = itemRect2.left - wrapperRect.left;
+            finalScroll = Math.max(0, Math.round(this.wrapper.scrollLeft + delta));
+            if (window.__CAROUSEL_DEBUG) console.log('carousel scroll debug', { targetIndex, delta, wrapperScrollLeft: this.wrapper.scrollLeft, itemOffsetLeft: targetItem.offsetLeft, wrapperRectLeft: wrapperRect.left, itemRectLeft: itemRect2.left, finalScroll, stepSize });
+        } else {
+            finalScroll = targetIndex * stepSize;
+        }
         this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 }
