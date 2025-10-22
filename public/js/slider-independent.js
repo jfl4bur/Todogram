@@ -505,86 +505,56 @@
     // Función mejorada para actualizar posición
     function updateSliderPosition(forceUpdate = false) {
         if (isDestroyed) return;
-        
-        const wrapper = document.getElementById('slider-wrapper');
-        if (!wrapper) {
-            console.warn('Slider: Wrapper no encontrado para actualizar posición');
-            return;
-        }
-        
-        // Detectar si es móvil para ajustar transiciones
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        if (!forceUpdate) {
-            isTransitioning = true;
-        }
-        
-        // Obtener dimensiones actuales
-        const dimensions = calculateResponsiveDimensions();
-    const viewportWidth = dimensions.viewportWidth || (document.documentElement.clientWidth || window.innerWidth);
 
-    // Calcular translateX para centrar el slide activo en el viewport
-    // left_of_slide = marginLeft + index*(w+g) + translateX
-    // queremos left_of_slide + w/2 = viewportWidth/2
-    // => translateX = viewportWidth/2 - w/2 - marginLeft - index*(w+g)
-    const marginLeft = dimensions.sideSpace || 0;
-    const slideTotal = dimensions.slideWidth + dimensions.slideGap;
-    const translateX = Math.round((viewportWidth / 2) - (dimensions.slideWidth / 2) - marginLeft - (currentIndex * slideTotal));
-        
-        // Aplicar transición más suave en móvil
-        if (isMobile && !forceUpdate) {
-            // Si es un retorno (forceUpdate), usar transición más rápida
-            const transitionTime = forceUpdate ? '0.15s' : '0.4s';
-            wrapper.style.transition = `transform ${transitionTime} cubic-bezier(0.25, 0.46, 0.45, 0.94)`;
-        }
-        
-        wrapper.style.transform = `translate3d(${translateX}px, 0, 0)`;
-        wrapper.style.webkitTransform = `translate3d(${translateX}px, 0, 0)`;
-        
-        console.log('Slider: Posición actualizada -', {
-            index: currentIndex,
-            translateX,
-            slideWidth: dimensions.slideWidth,
-            slideGap: dimensions.slideGap,
-            forceUpdate,
-            isMobile
-        });
-        
-        if (!forceUpdate) {
-            const transitionTime = isMobile ? (forceUpdate ? 150 : 400) : 800;
-            // Usar requestAnimationFrame para mejor rendimiento
-            requestAnimationFrame(() => {
-                setTimeout(() => {
-                    isTransitioning = false;
-                }, transitionTime);
-            });
-        }
+        // Centrar usando boundingClientRect para evitar asumir offsets (más robusto)
+        centerSlideByIndex(currentIndex, !forceUpdate);
     }
 
     // Aplicar posición exacta sin transición para evitar errores de redondeo acumulativos
     function applyExactPosition(index) {
+        // Reutilizar la función de centrado sin animación
+        centerSlideByIndex(index, false);
+    }
+
+    // Centrar slide usando boundingClientRect (más robusto que fórmulas manuales)
+    function centerSlideByIndex(index, animate = true) {
         if (isDestroyed) return;
         const wrapper = document.getElementById('slider-wrapper');
-        const dimensions = calculateResponsiveDimensions();
-        if (!wrapper || !dimensions) return;
+        const slides = document.querySelectorAll('.slider-slide');
+        if (!wrapper || slides.length === 0) return;
+        if (index < 0) index = 0;
+        if (index >= slides.length) index = slides.length - 1;
 
-        const viewportWidth = dimensions.viewportWidth || (document.documentElement.clientWidth || window.innerWidth);
-        const marginLeft = dimensions.sideSpace || 0;
-        const slideTotal = dimensions.slideWidth + dimensions.slideGap;
-        const exactTranslate = Math.round((viewportWidth / 2) - (dimensions.slideWidth / 2) - marginLeft - (index * slideTotal));
+        const slide = slides[index];
+        const slideRect = slide.getBoundingClientRect();
+        const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+        const viewportCenter = viewportWidth / 2;
 
-        // Aplicar sin transición y forzar reflow
-        const prevTransition = wrapper.style.transition;
-        wrapper.style.transition = 'none';
-        wrapper.style.transform = `translate3d(${exactTranslate}px, 0, 0)`;
-        wrapper.style.webkitTransform = `translate3d(${exactTranslate}px, 0, 0)`;
-        // Forzar reflow
-        wrapper.offsetHeight;
-        // Restaurar transición (en el próximo frame)
-        requestAnimationFrame(() => {
-            wrapper.style.transition = prevTransition || 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-        });
-        console.log('Slider: applyExactPosition ejecutado', { index, exactTranslate });
+        const slideCenter = slideRect.left + (slideRect.width / 2);
+        const delta = Math.round(viewportCenter - slideCenter);
+
+        const currentTranslate = getTranslateX(wrapper) || 0;
+        const newTranslate = Math.round(currentTranslate + delta);
+
+        if (!animate) {
+            const prev = wrapper.style.transition;
+            wrapper.style.transition = 'none';
+            wrapper.style.transform = `translate3d(${newTranslate}px, 0, 0)`;
+            wrapper.style.webkitTransform = `translate3d(${newTranslate}px, 0, 0)`;
+            // Forzar reflow
+            wrapper.offsetHeight;
+            // Restaurar transición
+            requestAnimationFrame(() => {
+                wrapper.style.transition = prev || 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            });
+        } else {
+            // Animar hacia la posición
+            wrapper.style.transition = 'transform 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+            wrapper.style.transform = `translate3d(${newTranslate}px, 0, 0)`;
+            wrapper.style.webkitTransform = `translate3d(${newTranslate}px, 0, 0)`;
+        }
+
+        console.log('Slider: centerSlideByIndex', { index, currentTranslate, newTranslate, delta });
     }
 
     // Funciones para manejo de touch/swipe (comentadas - ahora se manejan en setupTouchCompatibility)
