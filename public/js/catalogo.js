@@ -610,12 +610,21 @@
                 }
 
                 // snapshot has been managed by state.allItems already
-                // filter candidates respecting current tab/genre
+                // Determine the currently active tab and genre from the DOM (do not rely on outer closure vars)
+                let activeTab = tab;
+                let activeGenre = genre;
+                try{
+                    const tabsEl = document.getElementById('catalogo-tabs-page');
+                    const activeBtn = tabsEl && tabsEl.querySelector && tabsEl.querySelector('.catalogo-tab.active');
+                    if(activeBtn && activeBtn.dataset && activeBtn.dataset.tab) activeTab = activeBtn.dataset.tab;
+                }catch(e){}
+                try{ if(typeof getGenreLabel === 'function') activeGenre = getGenreLabel() || activeGenre; }catch(e){}
+
                 const candidates = state.allItems.filter(it=>{
-                    if(tab && it.category && it.category!==tab) return false;
-                    if(genre && genre!=='Todo el catálogo'){
+                    if(activeTab && it.category && it.category!==activeTab) return false;
+                    if(activeGenre && activeGenre!=='Todo el catálogo'){
                         const gens = (it.genres||'').split(/·|\||,|\/|;/).map(x=>x.trim()).filter(Boolean);
-                        if(!gens.includes(genre)) return false;
+                        if(!gens.includes(activeGenre)) return false;
                     }
                     return true;
                 });
