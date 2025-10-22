@@ -485,9 +485,26 @@ document.addEventListener('DOMContentLoaded', function() {
       if(q){
         searchInput.value = decodeURIComponent(q);
         try{ const hs = document.getElementById('header-search'); if(hs) hs.classList.add('has-value'); }catch(e){}
-        // If carousels or catalog are not yet initialized, retry a few times before applying search
-        const waitForDataAndApply = (attempt = 0, maxAttempts = 12) => {
-          // Require that carousels actually have items (length>0) to consider ready.
+        // Guard to avoid applying persisted search multiple times
+        window.__headerSearchApplied = window.__headerSearchApplied || false;
+
+        // Register a callback if the global dataLoaded system exists (main.js sets window.dataLoadedCallbacks)
+        try {
+          if (window.dataLoadedCallbacks && Array.isArray(window.dataLoadedCallbacks)) {
+            window.dataLoadedCallbacks.push(() => {
+              try {
+                if (!window.__headerSearchApplied) {
+                  console.log('Header: dataLoaded callback applying persisted search ->', q);
+                  applySearchQuery(q);
+                  window.__headerSearchApplied = true;
+                }
+              } catch (e) { console.warn('Header: applySearchQuery in dataLoaded callback failed', e); }
+            });
+          }
+        } catch (e) {}
+
+        // Polling fallback: If carousels/slider are already ready, apply immediately; otherwise retry a few times
+        const waitForDataAndApply = (attempt = 0, maxAttempts = 40) => {
           const ready = (
             (window.carousel && Array.isArray(window.carousel.moviesData) && window.carousel.moviesData.length>0) ||
             (window.seriesCarousel && Array.isArray(window.seriesCarousel.seriesData) && window.seriesCarousel.seriesData.length>0) ||
@@ -496,8 +513,13 @@ document.addEventListener('DOMContentLoaded', function() {
             (window.Catalogo && typeof window.Catalogo.search === 'function') ||
             (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function' && Array.isArray(window.sliderIndependent.getSlidesData()) && window.sliderIndependent.getSlidesData().length>0)
           );
-          if(ready || attempt >= maxAttempts){
-            try{ applySearchQuery(q); }catch(e){ console.warn('applySearchQuery retry failed', e); }
+          if (window.__headerSearchApplied) return;
+          if (ready || attempt >= maxAttempts) {
+            try {
+              console.log('Header: polling applying persisted search ->', q, 'attempt', attempt);
+              applySearchQuery(q);
+              window.__headerSearchApplied = true;
+            } catch(e) { console.warn('applySearchQuery retry failed', e); }
             return;
           }
           setTimeout(()=> waitForDataAndApply(attempt+1, maxAttempts), 150);
