@@ -1,4 +1,5 @@
 // Carrusel de Episodios Series (solo episodios con Título episodio completo)
+console.log('[LOCAL JS] loaded public/js/carousel.js');
 class EpisodiosSeriesCarousel {
     // ...existing code...
     scrollToHash(retries = 10) {
