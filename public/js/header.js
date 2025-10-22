@@ -459,6 +459,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 // Ensure UI is consistent
                 applySearchQuery('');
+                // Clear remembered persistent search so notifyDataLoaded / observers don't re-apply it
+                try { window.__lastHeaderSearch = ''; window.__lastHeaderSearchAppliedAt = Date.now(); } catch(e){}
+                // Explicitly remove the #search fragment if present
+                try { history.replaceState(null, null, window.location.pathname + window.location.search); } catch(e){}
               } catch (e) { applySearchQuery(''); }
             }
           }catch(e){ applySearchQuery(''); }
@@ -617,7 +621,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // After DOMContentLoaded handler, also ensure notifyDataLoaded is wrapped so every notification reapplies last search
 try {
   const wrapNotify = () => {
-    if (window.notifyDataLoaded && !window.__notifyWrapped) {
+      if (window.notifyDataLoaded && !window.__notifyWrapped) {
       window.__notifyWrapped = true;
       const orig = window.notifyDataLoaded;
       window.notifyDataLoaded = function(...args) {
@@ -625,7 +629,12 @@ try {
         try {
           if (window.__lastHeaderSearch) {
             console.log('Header: notifyDataLoaded wrapper re-applying last search ->', window.__lastHeaderSearch);
-            applySearchQuery(window.__lastHeaderSearch);
+            if (window.headerApplySearch && typeof window.headerApplySearch === 'function') {
+              window.headerApplySearch(window.__lastHeaderSearch);
+            } else if (typeof applySearchQuery === 'function') {
+              // fallback if applySearchQuery somehow became globally available
+              try { applySearchQuery(window.__lastHeaderSearch); } catch(e){}
+            }
           }
         } catch (e) { console.warn('notifyDataLoaded wrapper applySearch failed', e); }
       };
