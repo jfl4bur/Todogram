@@ -216,13 +216,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function snapshotOriginalData() {
     try {
-      if (window.carousel && window.carousel.moviesData && !window.__originalCarouselData.peliculas) window.__originalCarouselData.peliculas = window.carousel.moviesData.slice();
-      if (window.seriesCarousel && window.seriesCarousel.seriesData && !window.__originalCarouselData.series) window.__originalCarouselData.series = window.seriesCarousel.seriesData.slice();
-      if (window.documentalesCarousel && window.documentalesCarousel.docuData && !window.__originalCarouselData.documentales) window.__originalCarouselData.documentales = window.documentalesCarousel.docuData.slice();
-      if (window.animesCarousel && window.animesCarousel.animeData && !window.__originalCarouselData.animes) window.__originalCarouselData.animes = window.animesCarousel.animeData.slice();
-      if (window.episodiosCarousel && window.episodiosCarousel.episodiosData && !window.__originalCarouselData.episodios) window.__originalCarouselData.episodios = window.episodiosCarousel.episodiosData.slice();
-      if (window.episodiosAnimesCarousel && window.episodiosAnimesCarousel.episodiosData && !window.__originalCarouselData.episodiosAnimes) window.__originalCarouselData.episodiosAnimes = window.episodiosAnimesCarousel.episodiosData.slice();
-      if (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function' && !window.__originalCarouselData.slider) window.__originalCarouselData.slider = window.sliderIndependent.getSlidesData().slice();
+      // Only snapshot when the data arrays are populated (length>0).
+      if (window.carousel && Array.isArray(window.carousel.moviesData) && window.carousel.moviesData.length > 0 && !window.__originalCarouselData.peliculas) window.__originalCarouselData.peliculas = window.carousel.moviesData.slice();
+      if (window.seriesCarousel && Array.isArray(window.seriesCarousel.seriesData) && window.seriesCarousel.seriesData.length > 0 && !window.__originalCarouselData.series) window.__originalCarouselData.series = window.seriesCarousel.seriesData.slice();
+      if (window.documentalesCarousel && Array.isArray(window.documentalesCarousel.docuData) && window.documentalesCarousel.docuData.length > 0 && !window.__originalCarouselData.documentales) window.__originalCarouselData.documentales = window.documentalesCarousel.docuData.slice();
+      if (window.animesCarousel && Array.isArray(window.animesCarousel.animeData) && window.animesCarousel.animeData.length > 0 && !window.__originalCarouselData.animes) window.__originalCarouselData.animes = window.animesCarousel.animeData.slice();
+      if (window.episodiosCarousel && Array.isArray(window.episodiosCarousel.episodiosData) && window.episodiosCarousel.episodiosData.length > 0 && !window.__originalCarouselData.episodios) window.__originalCarouselData.episodios = window.episodiosCarousel.episodiosData.slice();
+      if (window.episodiosAnimesCarousel && Array.isArray(window.episodiosAnimesCarousel.episodiosData) && window.episodiosAnimesCarousel.episodiosData.length > 0 && !window.__originalCarouselData.episodiosAnimes) window.__originalCarouselData.episodiosAnimes = window.episodiosAnimesCarousel.episodiosData.slice();
+      if (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function') {
+        const s = window.sliderIndependent.getSlidesData();
+        if (Array.isArray(s) && s.length > 0 && !window.__originalCarouselData.slider) window.__originalCarouselData.slider = s.slice();
+      }
     } catch (e) { console.warn('snapshotOriginalData error', e); }
   }
 
@@ -439,13 +443,14 @@ document.addEventListener('DOMContentLoaded', function() {
         try{ const hs = document.getElementById('header-search'); if(hs) hs.classList.add('has-value'); }catch(e){}
         // If carousels or catalog are not yet initialized, retry a few times before applying search
         const waitForDataAndApply = (attempt = 0, maxAttempts = 12) => {
+          // Require that carousels actually have items (length>0) to consider ready.
           const ready = (
-            (window.carousel && Array.isArray(window.carousel.moviesData)) ||
-            (window.seriesCarousel && Array.isArray(window.seriesCarousel.seriesData)) ||
-            (window.documentalesCarousel && Array.isArray(window.documentalesCarousel.docuData)) ||
-            (window.animesCarousel && Array.isArray(window.animesCarousel.animeData)) ||
+            (window.carousel && Array.isArray(window.carousel.moviesData) && window.carousel.moviesData.length>0) ||
+            (window.seriesCarousel && Array.isArray(window.seriesCarousel.seriesData) && window.seriesCarousel.seriesData.length>0) ||
+            (window.documentalesCarousel && Array.isArray(window.documentalesCarousel.docuData) && window.documentalesCarousel.docuData.length>0) ||
+            (window.animesCarousel && Array.isArray(window.animesCarousel.animeData) && window.animesCarousel.animeData.length>0) ||
             (window.Catalogo && typeof window.Catalogo.search === 'function') ||
-            (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function')
+            (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function' && Array.isArray(window.sliderIndependent.getSlidesData()) && window.sliderIndependent.getSlidesData().length>0)
           );
           if(ready || attempt >= maxAttempts){
             try{ applySearchQuery(q); }catch(e){ console.warn('applySearchQuery retry failed', e); }
