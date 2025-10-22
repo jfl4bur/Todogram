@@ -561,6 +561,32 @@
         }
     }
 
+    // Aplicar posición exacta sin transición para evitar errores de redondeo acumulativos
+    function applyExactPosition(index) {
+        if (isDestroyed) return;
+        const wrapper = document.getElementById('slider-wrapper');
+        const dimensions = calculateResponsiveDimensions();
+        if (!wrapper || !dimensions) return;
+
+        const viewportWidth = dimensions.viewportWidth || (document.documentElement.clientWidth || window.innerWidth);
+        const marginLeft = dimensions.sideSpace || 0;
+        const slideTotal = dimensions.slideWidth + dimensions.slideGap;
+        const exactTranslate = Math.round((viewportWidth / 2) - (dimensions.slideWidth / 2) - marginLeft - (index * slideTotal));
+
+        // Aplicar sin transición y forzar reflow
+        const prevTransition = wrapper.style.transition;
+        wrapper.style.transition = 'none';
+        wrapper.style.transform = `translate3d(${exactTranslate}px, 0, 0)`;
+        wrapper.style.webkitTransform = `translate3d(${exactTranslate}px, 0, 0)`;
+        // Forzar reflow
+        wrapper.offsetHeight;
+        // Restaurar transición (en el próximo frame)
+        requestAnimationFrame(() => {
+            wrapper.style.transition = prevTransition || 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+        });
+        console.log('Slider: applyExactPosition ejecutado', { index, exactTranslate });
+    }
+
     // Funciones para manejo de touch/swipe (comentadas - ahora se manejan en setupTouchCompatibility)
     /*
     function handleTouchStart(e) {
@@ -984,6 +1010,19 @@
         
         // Configurar compatibilidad touch
         setupTouchCompatibility();
+
+        // Agregar listener transitionend al wrapper para asegurar snap final
+        (function attachTransitionEnd() {
+            try {
+                sliderWrapper.removeEventListener('transitionend', sliderWrapper._transitionEndHandler);
+            } catch (e) {}
+            const handler = function (e) {
+                if (e.propertyName && e.propertyName.indexOf('transform') === -1) return;
+                applyExactPosition(currentIndex);
+            };
+            sliderWrapper._transitionEndHandler = handler;
+            sliderWrapper.addEventListener('transitionend', handler, { passive: true });
+        })();
         
         console.log('Slider: Creando slides con dimensiones:', dimensions);
         
@@ -1194,6 +1233,8 @@
         updateSliderPosition();
         updatePagination();
         updateBackgroundBlur();
+    // Aplicar ajuste exacto después de un pequeño delay para evitar drift
+    setTimeout(() => applyExactPosition(currentIndex), 220);
         
         // Reiniciar autoplay después de navegación manual
         if (autoPlayInterval) {
