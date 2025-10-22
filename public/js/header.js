@@ -434,9 +434,26 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       // fallback to location.search
       if(!q){ const params2 = new URLSearchParams(window.location.search || ''); q = params2.get('q') || ''; }
-      if(q){ searchInput.value = decodeURIComponent(q); // ensure clear button visible
+      if(q){
+        searchInput.value = decodeURIComponent(q);
         try{ const hs = document.getElementById('header-search'); if(hs) hs.classList.add('has-value'); }catch(e){}
-        applySearchQuery(q);
+        // If carousels or catalog are not yet initialized, retry a few times before applying search
+        const waitForDataAndApply = (attempt = 0, maxAttempts = 12) => {
+          const ready = (
+            (window.carousel && Array.isArray(window.carousel.moviesData)) ||
+            (window.seriesCarousel && Array.isArray(window.seriesCarousel.seriesData)) ||
+            (window.documentalesCarousel && Array.isArray(window.documentalesCarousel.docuData)) ||
+            (window.animesCarousel && Array.isArray(window.animesCarousel.animeData)) ||
+            (window.Catalogo && typeof window.Catalogo.search === 'function') ||
+            (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function')
+          );
+          if(ready || attempt >= maxAttempts){
+            try{ applySearchQuery(q); }catch(e){ console.warn('applySearchQuery retry failed', e); }
+            return;
+          }
+          setTimeout(()=> waitForDataAndApply(attempt+1, maxAttempts), 150);
+        };
+        waitForDataAndApply();
       }
     } catch (e) { /* ignore */ }
   }
