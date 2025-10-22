@@ -453,38 +453,69 @@ document.addEventListener('DOMContentLoaded', function() {
         // cuando los carouseles / datos han sido cargados. Aprovechamos esto para
         // asegurar que la búsqueda persistente se aplique solo después de la carga.
         try{
-          if (Array.isArray(window.dataLoadedCallbacks)) {
-            // Añadir callback que tomará snapshot de los datos originales y aplicará la búsqueda
-            window.dataLoadedCallbacks.push(() => {
-              try { snapshotOriginalData(); applySearchQuery(q); } catch (e) { console.warn('applySearchQuery via dataLoadedCallbacks failed', e); }
-            });
-            // Si por alguna razón los datos ya están marcados como cargados, ejecutar de inmediato
-            if (window.isDataLoaded) {
-              try { snapshotOriginalData(); applySearchQuery(q); } catch (e) { console.warn('applySearchQuery immediate failed', e); }
+          // Siempre encolar en una cola propia para el header. Esto es necesario porque
+          // `main.js` define `window.dataLoadedCallbacks` más tarde; si creamos aquí
+          // la cola propia y envolvemos `notifyDataLoaded` cuando exista, nos aseguramos
+          // de que nuestras callbacks se ejecuten incluso si `header.js` se cargó antes.
+          window.__headerPendingDataLoadedCallbacks = window.__headerPendingDataLoadedCallbacks || [];
+          window.__headerPendingDataLoadedCallbacks.push(() => { try{ snapshotOriginalData(); applySearchQuery(q); }catch(e){ console.warn('applySearchQuery pending failed', e); } });
+
+          // Si ya existe notifyDataLoaded definido por main, envolverlo para ejecutar
+          // nuestras callbacks justo después de su ejecución.
+          const wrapNotifyIfExists = () => {
+            if (typeof window.notifyDataLoaded === 'function' && !window.__headerNotifyWrapped) {
+              const orig = window.notifyDataLoaded;
+              window.notifyDataLoaded = function() {
+                try { orig.apply(this, arguments); } catch (e) { console.warn('notifyDataLoaded original failed', e); }
+                try {
+                  (window.__headerPendingDataLoadedCallbacks || []).forEach(cb=>{ try{ cb(); }catch(e){} });
+                  window.__headerPendingDataLoadedCallbacks = [];
+                } catch (e) { console.warn('header pending callbacks failed', e); }
+              };
+              window.__headerNotifyWrapped = true;
             }
-          } else {
-            // Fallback: polling como antes
-            const waitForDataAndApply = (attempt = 0, maxAttempts = 24) => {
-              const ready = (
-                (window.carousel && Array.isArray(window.carousel.moviesData)) ||
-                (window.seriesCarousel && Array.isArray(window.seriesCarousel.seriesData)) ||
-                (window.documentalesCarousel && Array.isArray(window.documentalesCarousel.docuData)) ||
-                (window.animesCarousel && Array.isArray(window.animesCarousel.animeData)) ||
-                (window.Catalogo && typeof window.Catalogo.search === 'function') ||
-                (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function') ||
-                Boolean(window.isDataLoaded)
-              );
-              if(ready || attempt >= maxAttempts){
-                try{ snapshotOriginalData(); applySearchQuery(q); }catch(e){ console.warn('applySearchQuery retry failed', e); }
-                return;
-              }
-              setTimeout(()=> waitForDataAndApply(attempt+1, maxAttempts), 150);
-            };
-            waitForDataAndApply();
+          };
+
+          // Intentar envolver inmediatamente si ya existe
+          wrapNotifyIfExists();
+
+          // Si ya está marcado como cargado, ejecutar inmediatamente las callbacks
+          if (window.isDataLoaded) {
+            try{ (window.__headerPendingDataLoadedCallbacks||[]).forEach(cb=>{try{cb()}catch(e){}}); window.__headerPendingDataLoadedCallbacks = []; }catch(e){}
           }
+
+          // Si `notifyDataLoaded` no está aún definido, iniciar un watcher que lo envolverá cuando aparezca.
+          if (!window.__headerNotifyWatcher) {
+            window.__headerNotifyWatcher = setInterval(() => {
+              wrapNotifyIfExists();
+              if (window.__headerNotifyWrapped || window.isDataLoaded) {
+                clearInterval(window.__headerNotifyWatcher);
+                window.__headerNotifyWatcher = null;
+              }
+            }, 200);
+          }
+
+          // Fallback: polling adicional (más largo) por si algo no dispara notifyDataLoaded
+          const waitForDataAndApply = (attempt = 0, maxAttempts = 80) => {
+            const ready = (
+              (window.carousel && Array.isArray(window.carousel.moviesData) && window.carousel.moviesData.length>0) ||
+              (window.seriesCarousel && Array.isArray(window.seriesCarousel.seriesData) && window.seriesCarousel.seriesData.length>0) ||
+              (window.documentalesCarousel && Array.isArray(window.documentalesCarousel.docuData) && window.documentalesCarousel.docuData.length>0) ||
+              (window.animesCarousel && Array.isArray(window.animesCarousel.animeData) && window.animesCarousel.animeData.length>0) ||
+              (window.Catalogo && typeof window.Catalogo.search === 'function') ||
+              (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function') ||
+              Boolean(window.isDataLoaded)
+            );
+            if(ready || attempt >= maxAttempts){
+              try{ snapshotOriginalData(); applySearchQuery(q); }catch(e){ console.warn('applySearchQuery retry failed', e); }
+              return;
+            }
+            setTimeout(()=> waitForDataAndApply(attempt+1, maxAttempts), 200);
+          };
+          waitForDataAndApply();
         }catch(e){
           // En caso de fallo, intentar aplicar de todas formas después de un pequeño delay
-          setTimeout(()=>{ try{ snapshotOriginalData(); applySearchQuery(q); }catch(_){} }, 300);
+          setTimeout(()=>{ try{ snapshotOriginalData(); applySearchQuery(q); }catch(_){} }, 500);
         }
       }
     } catch (e) { /* ignore */ }
