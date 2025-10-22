@@ -55,11 +55,7 @@
     }
 
     // state
-    const state = { allItems: [], filteredItems: [], renderedCount:0, initialRows:5, subsequentRows:3, itemsPerRow:0, initialBatchSize:0, subsequentBatchSize:0, loading:false,
-        // catalog search cache: last query string and ordered results (items)
-        catalogLastQuery: '',
-        catalogLastScored: null
-    };
+    const state = { allItems: [], filteredItems: [], renderedCount:0, initialRows:5, subsequentRows:3, itemsPerRow:0, initialBatchSize:0, subsequentBatchSize:0, loading:false, currentQuery: '' };
 
     function computeItemsPerRow(grid){
         if(!grid) return 6;
@@ -293,41 +289,6 @@
         appendNextBatch(grid);
     }
 
-    // Render results from the last catalog search (state.catalogLastScored) for a specific tab/genre
-    function renderFromLastSearch(grid, tabName, genreName){
-        try{
-            if(!state.catalogLastScored || !Array.isArray(state.catalogLastScored)){
-                // nothing cached -> fallback to normal filters
-                applyFiltersAndRender(grid, window.sharedData || [], tabName, genreName);
-                return;
-            }
-            const activeTab = tabName || 'Películas';
-            const activeGenre = genreName || 'Todo el catálogo';
-            const filtered = state.catalogLastScored.filter(it=>{
-                if(activeTab && it.category && it.category !== activeTab) return false;
-                if(activeGenre && activeGenre !== 'Todo el catálogo'){
-                    const gens = (it.genres||'').split(/·|\||,|\/|;/).map(x=>x.trim()).filter(Boolean);
-                    if(!gens.includes(activeGenre)) return false;
-                }
-                // Exclude episode rows for relevant tabs
-                try{
-                    const episodeTabs = ['Series','Animes','Documentales'];
-                    if(episodeTabs.includes(activeTab)){
-                        const raw = it.raw || {};
-                        const episodeKeys = ['Título episodio','Título episodio completo','Título episodio 1','Episodio','Título episodio (completo)'];
-                        const hasEpisode = episodeKeys.some(k => raw[k] && String(raw[k]).trim() !== '');
-                        if(hasEpisode) return false;
-                    }
-                }catch(e){}
-                return true;
-            });
-            state.filteredItems = filtered.slice();
-            resetPagination(grid);
-            appendNextBatch(grid);
-            showNoResultsInCatalog(state.filteredItems.length===0);
-        }catch(e){ console.warn('renderFromLastSearch error', e); applyFiltersAndRender(grid, window.sharedData || [], tabName, genreName); }
-    }
-
     function parseCatalogHash(){
         const raw = window.location.hash || '';
         if(!raw) return null;
@@ -347,7 +308,7 @@
         return null;
     }
 
-    function updateCatalogHash(tab, genre, preserve=false){ const params = new URLSearchParams(); if(tab) params.set('tab', tab); if(genre) params.set('genre', genre); const newHash = `${CATALOG_HASH}?${params.toString()}`; if(preserve) history.replaceState({}, '', newHash); else history.pushState({}, '', newHash); }
+    function updateCatalogHash(tab, genre, q, preserve=false){ const params = new URLSearchParams(); if(tab) params.set('tab', tab); if(genre) params.set('genre', genre); if(q) params.set('q', q); const paramString = params.toString(); const newHash = paramString ? `${CATALOG_HASH}?${paramString}` : `${CATALOG_HASH}`; if(preserve) history.replaceState({}, '', newHash); else history.pushState({}, '', newHash); }
 
     async function initPage(rootSelector='#catalogo-page-root'){
         const root = document.querySelector(rootSelector); if(!root){ console.error('Catalogo: root no encontrado', rootSelector); return; }
@@ -401,8 +362,8 @@
             setGenreLabel('Todo el catálogo');
             // close with animation
             try{ const container = document.getElementById('catalogo-genre-dropdown-page'); if(container) closeDropdown(container); }catch(e){}
-            updateCatalogHash(tab, 'Todo el catálogo');
-            applyFiltersAndRender(grid, data, tab, 'Todo el catálogo');
+                updateCatalogHash(tab, 'Todo el catálogo', state.currentQuery);
+                applyFiltersAndRender(grid, data, tab, 'Todo el catálogo');
         });
         genreList.appendChild(allBtn);
 
@@ -416,27 +377,15 @@
                 b.classList.add('selected');
                 setGenreLabel(g);
                 try{ const container = document.getElementById('catalogo-genre-dropdown-page'); if(container) closeDropdown(container); }catch(e){}
-                updateCatalogHash(tab, g);
+                updateCatalogHash(tab, g, state.currentQuery);
                 applyFiltersAndRender(grid, data, tab, g);
             });
             genreList.appendChild(b);
         });
     }
 
-    tabsContainer.querySelectorAll('.catalogo-tab').forEach(btn=>{ btn.addEventListener('click', ()=>{
-        tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=>x.classList.remove('active'));
-        btn.classList.add('active');
-        const tabName = btn.dataset.tab;
-        populateGenresForTabPage(tabName);
-        const currentGenre = getGenreLabel() || 'Todo el catálogo';
-        updateCatalogHash(tabName, currentGenre);
-        // If a catalog search is active, render its filtered results for this tab; otherwise apply normal filters
-        if(state.catalogLastQuery && state.catalogLastQuery.length>0){
-            renderFromLastSearch(grid, tabName, currentGenre);
-        } else {
-            applyFiltersAndRender(grid, data, tabName, currentGenre);
-        }
-    }); });
+    tabsContainer.querySelectorAll('.catalogo-tab').forEach(btn=>{ btn.addEventListener('click', ()=>{ tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); const tab = btn.dataset.tab; populateGenresForTabPage(tab); const currentGenre = getGenreLabel() || 'Todo el catálogo'; updateCatalogHash(tab, currentGenre, state.currentQuery); applyFiltersAndRender(grid, data, tab, currentGenre); // if there is an active search, reapply it so results reflect tab
+        try{ if(state.currentQuery && state.currentQuery.length) { applyCatalogSearch(state.currentQuery); } } catch(e){} }); });
 
         // Helper to close dropdown with fade animation
         function closeDropdown(container){
@@ -651,44 +600,55 @@
             function showNoResultsInCatalog(show){ try{ const existing = document.getElementById('catalogo-no-results'); if(show){ if(!existing){ const el = document.createElement('div'); el.id='catalogo-no-results'; el.className='catalog-no-results'; el.textContent='No hay resultados'; el.style.padding='18px'; el.style.color='rgba(255,255,255,0.85)'; el.style.fontWeight='600'; el.style.textAlign='center'; grid.parentNode.insertBefore(el, grid.nextSibling); } } else { if(existing) existing.remove(); } }catch(e){console.warn('showNoResultsInCatalog error',e);} }
 
             function applyCatalogSearch(q){ try{
+                // store current query so tab/genre changes can preserve it
+                state.currentQuery = String(q || '');
                 const qRaw = removeDiacriticsLocal(String(q||'')).toLowerCase().trim(); const qTokens = tokenizeLocal(qRaw).filter(Boolean);
                 // update URL when on catalog: add q param to catalog hash
                 try{
                     const hash = window.location.hash || '';
-                    const base = hash && hash.startsWith('#catalogo') ? (hash.split('?')[0] || '#catalogo') : '#catalogo';
-                    const query = (hash && hash.indexOf('?') !== -1) ? hash.split('?')[1] : '';
-                    const params = new URLSearchParams(query || '');
-                    if(q && q.length) params.set('q', q); else params.delete('q');
-                    const paramString = params.toString();
-                    // If there are no params left, remove the hash entirely (go back to /catalogo/)
-                    if(!paramString){
-                        history.replaceState(null, null, window.location.pathname + window.location.search);
-                    } else {
-                        const newHash = `${base}?${paramString}`;
-                        history.replaceState(null, null, newHash);
-                    }
+                    // Preserve tab & genre if present while updating q
+                    const parsed = parseCatalogHash() || {};
+                    const curTab = parsed.tab || parsed.tab === null ? parsed.tab : null;
+                    const curGenre = parsed.genre || parsed.genre === null ? parsed.genre : null;
+                    updateCatalogHash(curTab || tab, curGenre || genre, state.currentQuery || '', true);
                 }catch(e){}
 
-                if(!qTokens.length){ // restore current filters (read current active tab/genre)
-                        showNoResultsInCatalog(false);
-                        // determine active tab and genre from DOM
-                        let activeTab = tab;
-                        let activeGenre = genre;
-                        try{
-                            const tabsEl = document.getElementById('catalogo-tabs-page');
-                            const activeBtn = tabsEl && tabsEl.querySelector && tabsEl.querySelector('.catalogo-tab.active');
-                            if(activeBtn && activeBtn.dataset && activeBtn.dataset.tab) activeTab = activeBtn.dataset.tab;
-                        }catch(e){}
-                        try{ if(typeof getGenreLabel === 'function') activeGenre = getGenreLabel() || activeGenre; }catch(e){}
-                        // clear cached search
-                        state.catalogLastQuery = '';
-                        state.catalogLastScored = null;
-                        applyFiltersAndRender(grid, data, activeTab, activeGenre);
-                        return;
-                    }
+                if(!qTokens.length){ // restore current filters (preserve active tab & genre and clear q)
+                    state.currentQuery = '';
+                    showNoResultsInCatalog(false);
+                    updateCatalogHash(tab, genre, '', true);
+                    applyFiltersAndRender(grid, data, tab, genre);
+                    return;
+                }
 
                 // snapshot has been managed by state.allItems already
-                // Determine the currently active tab and genre from the DOM (do not rely on outer closure vars)
+                // Build search candidates across ALL categories so switching tabs shows matching items per category
+                const allCandidates = state.allItems.slice();
+                const scored = [];
+                for(const it of allCandidates){ const s = scoreCatalogItem(it, qTokens, qRaw); if(s>0) scored.push({it,s}); }
+                scored.sort((a,b)=>b.s - a.s);
+
+                // Partition results per category and apply genre & episode-exclusion per-category
+                const byCat = { 'Películas': [], 'Series': [], 'Documentales': [], 'Animes': [] };
+                const episodeTabs = ['Series','Animes','Documentales'];
+                for(const pair of scored){
+                    const it = pair.it;
+                    const cat = it.category || 'Películas';
+                    // Apply episode exclusion if needed
+                    if(episodeTabs.includes(cat)){
+                        try{
+                            const raw = it.raw || {};
+                            const episodeKeys = ['Título episodio','Título episodio completo','Título episodio 1','Episodio','Título episodio (completo)'];
+                            const hasEpisode = episodeKeys.some(k => raw[k] && String(raw[k]).trim() !== '');
+                            if(hasEpisode) continue; // skip episode rows for these categories
+                        }catch(e){}
+                    }
+                    // Keep in appropriate category bucket
+                    if(!byCat[cat]) byCat[cat] = [];
+                    byCat[cat].push(it);
+                }
+
+                // Determine active tab and genre from DOM (don't rely on closure variables)
                 let activeTab = tab;
                 let activeGenre = genre;
                 try{
@@ -698,18 +658,28 @@
                 }catch(e){}
                 try{ if(typeof getGenreLabel === 'function') activeGenre = getGenreLabel() || activeGenre; }catch(e){}
 
-                // For search we score across ALL items (so results exist per-category). We'll cache the ordered list
-                const candidatesAll = state.allItems.slice();
-                const candidates = candidatesAll; // will score all
+                // Apply genre filter on the chosen category results
+                const filterByGenre = (items, g) => {
+                    if(!g || g === 'Todo el catálogo') return items.slice();
+                    return items.filter(it => {
+                        const gens = (it.genres||'').split(/·|\||,|\/|;/).map(x=>x.trim()).filter(Boolean);
+                        return gens.includes(g);
+                    });
+                };
 
-                const scored = [];
-                for(const it of candidates){ const s = scoreCatalogItem(it, qTokens, qRaw); if(s>0) scored.push({it,s}); }
-                scored.sort((a,b)=>b.s - a.s);
-                // cache full ordered results
-                state.catalogLastQuery = q;
-                state.catalogLastScored = scored.map(x=>x.it);
-                // Now render only for the active tab/genre
-                renderFromLastSearch(grid, activeTab, activeGenre);
+                // store the per-category search results on state for quick tab switches
+                state._searchResultsByCategory = {};
+                for(const c of Object.keys(byCat)){
+                    state._searchResultsByCategory[c] = filterByGenre(byCat[c], activeGenre);
+                }
+
+                // Use the activeTab bucket as filteredItems
+                state.filteredItems = state._searchResultsByCategory[activeTab] ? state._searchResultsByCategory[activeTab].slice() : [];
+                // update URL to include q and preserve tab/genre
+                updateCatalogHash(activeTab, activeGenre, state.currentQuery, true);
+                resetPagination(grid);
+                appendNextBatch(grid);
+                showNoResultsInCatalog(state.filteredItems.length===0);
             }catch(e){ console.warn('applyCatalogSearch error', e); } }
 
             // expose search function on global Catalogo object so header can call it
@@ -727,12 +697,7 @@
                     tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=> x.classList.toggle('active', x.dataset.tab===tab));
                     setGenreLabel(genre);
                     populateGenresForTabPage(tab);
-                    // If a catalog search is active, render its results for this tab; otherwise render normal filters
-                    if(state.catalogLastQuery && state.catalogLastQuery.length>0){
-                        renderFromLastSearch(grid, tab, genre);
-                    } else {
-                        applyFiltersAndRender(grid, data, tab, genre);
-                    }
+                    applyFiltersAndRender(grid, data, tab, genre);
                 } else if(parsed.id && (!parsed.tab || parsed.tab === null)){
                     // infer category from data for this id
                     try {
@@ -754,9 +719,6 @@
                 }
             }
         });
-
-        // When user clicks tabs, prefer to re-render from last search if present
-        tabsContainer.querySelectorAll('.catalogo-tab').forEach(btn=>{ btn.addEventListener('click', ()=>{ tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); const tabName = btn.dataset.tab; const currentGenre = getGenreLabel() || 'Todo el catálogo'; updateCatalogHash(tabName, currentGenre); if(state.catalogLastQuery && state.catalogLastQuery.length>0){ renderFromLastSearch(grid, tabName, currentGenre); } else { applyFiltersAndRender(grid, data, tabName, currentGenre); } }); });
 
     document.addEventListener('click', (e)=>{ if(!e.target.closest('.catalogo-genre-dropdown')){ try{ const container = document.getElementById('catalogo-genre-dropdown-page'); if(container) closeDropdown(container); }catch(e){} } });
 
