@@ -28,50 +28,52 @@
         // Calcular el ancho del slide para ocupar la mayor parte de la pantalla
         // dejando espacio para ver elementos adyacentes
         let slideWidth, slideHeight, slideGap, sideSpace;
-        
+
+        // Reorder breakpoints from narrow -> wide so each range is reachable
         if (viewportWidth <= 480) {
-           // Tablet: más estrecho para elementos adyacentes visibles
-            slideWidth = Math.floor(viewportWidth * 0.97);
-            slideHeight = Math.floor(slideWidth * 0.10);
-            slideGap = 1;
-            sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
+            // Móvil estrecho: dejar porciones laterales visibles
+            slideWidth = Math.floor(viewportWidth * 0.92);
+            // Altura proporcional al banner/imagen (ajustable)
+            slideHeight = Math.floor(slideWidth * 0.30);
+            slideGap = 6;
+        } else if (viewportWidth <= 768) {
+            // Tablet pequeño
+            slideWidth = Math.floor(viewportWidth * 0.92);
+            slideHeight = Math.floor(slideWidth * 0.28);
+            slideGap = 10;
         } else if (viewportWidth <= 844) {
-            // Tablet: más estrecho para elementos adyacentes visibles
+            // Tablet/mediano
             slideWidth = Math.floor(viewportWidth * 0.90);
             slideHeight = Math.floor(slideWidth * 0.18);
             slideGap = 12;
-            sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
-        } else if (viewportWidth <= 768) {
-            // Tablet: más estrecho para elementos adyacentes visibles
-            slideWidth = Math.floor(viewportWidth * 0.95);
-            slideHeight = Math.floor(slideWidth * 0.17);
-            slideGap = 12;
-            sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1024) {
-            // Desktop pequeño: mayor visibilidad de elementos adyacentes
+            // Desktop pequeño
             slideWidth = Math.floor(viewportWidth * 0.90);
             slideHeight = Math.floor(slideWidth * 0.18);
             slideGap = 16;
-            sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 1400) {
-            // Desktop mediano: muy ancho como Rakuten.tv
+            // Desktop mediano
             slideWidth = Math.floor(viewportWidth * 0.88);
             slideHeight = Math.floor(slideWidth * 0.40);
             slideGap = 20;
-            sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else {
-            // Desktop grande: máximo ancho con elementos adyacentes
+            // Desktop grande
             slideWidth = Math.floor(viewportWidth * 0.90);
             slideHeight = Math.floor(slideWidth * 0.40);
             slideGap = 24;
-            sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         }
-        
-        // Límites mínimos y máximos
-        slideWidth = Math.max(300, Math.min(slideWidth, 2000));
-        slideHeight = Math.max(170, Math.min(slideHeight, 400)); // Máximo 400px para desktop
-        slideGap = Math.max(8, slideGap);
-        sideSpace = Math.max(20, sideSpace);
+
+        // Límites mínimos y máximos (aplicar clamp antes de calcular sideSpace)
+        slideWidth = Math.max(220, Math.min(slideWidth, viewportWidth - 40));
+        slideHeight = Math.max(120, Math.min(slideHeight, 400));
+
+        // Ajuste del gap mínimo según ancho de viewport (permitir gaps más pequeños en móvil)
+        const minGap = viewportWidth <= 480 ? 6 : 8;
+        slideGap = Math.max(minGap, slideGap);
+
+        // Calcular sideSpace después de aplicar clamps para centrar correctamente
+        sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
+        sideSpace = Math.max(12, sideSpace);
         
         // Correcciones específicas para Safari
         if (isSafari) {
