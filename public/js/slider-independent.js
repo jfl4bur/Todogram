@@ -711,10 +711,15 @@
                     // Determinar dirección del swipe
                     const finalDeltaX = currentTransformX - initialTransformX;
                     const dimensions = calculateResponsiveDimensions();
-                    const slideWidth = dimensions.slideWidth + dimensions.slideGap;
-                    
+                    const slideTotal = dimensions.slideWidth + dimensions.slideGap;
+                    const viewportWidth = dimensions.viewportWidth || (document.documentElement.clientWidth || window.innerWidth);
+                    const marginLeft = dimensions.sideSpace || 0;
+
+                    // Obtener la posición real del wrapper (por si hay diferencias)
+                    const currentTranslate = getTranslateX(wrapper);
+
                     if (Math.abs(finalDeltaX) > swipeThreshold && touchDuration < maxDuration) {
-                        // Swipe válido - aplicar transición suave
+                        // Swipe válido - aplicar transición suave hacia siguiente/previo
                         wrapper.style.transition = 'transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
                         
                         if (finalDeltaX < 0) {
@@ -727,10 +732,12 @@
                             goToSlide(currentIndex - 1);
                         }
                     } else {
-                        // Swipe insuficiente - volver a posición original con transición rápida
-                        console.log('Slider: Volviendo a posición original - transición rápida');
-                        wrapper.style.transition = 'transform 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
-                        updateSliderPosition(true);
+                        // Swipe insuficiente o soltado: snap al índice más cercano
+                        const rawIndex = ((viewportWidth / 2) - (dimensions.slideWidth / 2) - marginLeft - currentTranslate) / slideTotal;
+                        const nearestIndex = Math.min(Math.max(0, Math.round(rawIndex)), totalSlides - 1);
+                        console.log('Slider: Snap post-drag al índice más cercano', { rawIndex, nearestIndex, currentTranslate });
+                        wrapper.style.transition = 'transform 0.18s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+                        goToSlide(nearestIndex);
                     }
                 }
                 
