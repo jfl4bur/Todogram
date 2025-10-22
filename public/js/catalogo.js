@@ -384,8 +384,29 @@
         });
     }
 
-    tabsContainer.querySelectorAll('.catalogo-tab').forEach(btn=>{ btn.addEventListener('click', ()=>{ tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=>x.classList.remove('active')); btn.classList.add('active'); const tab = btn.dataset.tab; populateGenresForTabPage(tab); const currentGenre = getGenreLabel() || 'Todo el catálogo'; updateCatalogHash(tab, currentGenre, state.currentQuery); applyFiltersAndRender(grid, data, tab, currentGenre); // if there is an active search, reapply it so results reflect tab
-        try{ if(state.currentQuery && state.currentQuery.length) { applyCatalogSearch(state.currentQuery); } } catch(e){} }); });
+    tabsContainer.querySelectorAll('.catalogo-tab').forEach(btn=>{ btn.addEventListener('click', ()=>{
+            tabsContainer.querySelectorAll('.catalogo-tab').forEach(x=>x.classList.remove('active'));
+            btn.classList.add('active');
+            const tab = btn.dataset.tab;
+            populateGenresForTabPage(tab);
+            const currentGenre = getGenreLabel() || 'Todo el catálogo';
+            updateCatalogHash(tab, currentGenre, state.currentQuery);
+            // If a catalog search is active and we have cached results, use them
+            if(state.currentQuery && state._searchResultsByCategory){
+                // ensure genre filter applied to this category
+                const bucket = state._searchResultsByCategory[tab] || [];
+                // If genre changed, apply genre filter now
+                const final = (currentGenre && currentGenre!=='Todo el catálogo') ? bucket.filter(it=> (it.genres||'').split(/·|\||,|\/|;/).map(x=>x.trim()).filter(Boolean).includes(currentGenre)) : bucket.slice();
+                state.filteredItems = final.slice();
+                resetPagination(grid);
+                appendNextBatch(grid);
+                showNoResultsInCatalog(state.filteredItems.length===0);
+            } else {
+                applyFiltersAndRender(grid, data, tab, currentGenre);
+                try{ if(state.currentQuery && state.currentQuery.length) { applyCatalogSearch(state.currentQuery); } } catch(e){}
+            }
+        });
+    });
 
         // Helper to close dropdown with fade animation
         function closeDropdown(container){
