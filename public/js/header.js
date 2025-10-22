@@ -439,24 +439,17 @@ document.addEventListener('DOMContentLoaded', function() {
         try{ const hs = document.getElementById('header-search'); if(hs) hs.classList.add('has-value'); }catch(e){}
         // If carousels or catalog are not yet initialized, retry a few times before applying search
         const waitForDataAndApply = (attempt = 0, maxAttempts = 12) => {
+          const hasNonEmpty = (arr) => Array.isArray(arr) && arr.length > 0;
           const ready = (
-            (window.carousel && Array.isArray(window.carousel.moviesData)) ||
-            (window.seriesCarousel && Array.isArray(window.seriesCarousel.seriesData)) ||
-            (window.documentalesCarousel && Array.isArray(window.documentalesCarousel.docuData)) ||
-            (window.animesCarousel && Array.isArray(window.animesCarousel.animeData)) ||
+            (window.carousel && hasNonEmpty(window.carousel.moviesData)) ||
+            (window.seriesCarousel && hasNonEmpty(window.seriesCarousel.seriesData)) ||
+            (window.documentalesCarousel && hasNonEmpty(window.documentalesCarousel.docuData)) ||
+            (window.animesCarousel && hasNonEmpty(window.animesCarousel.animeData)) ||
             (window.Catalogo && typeof window.Catalogo.search === 'function') ||
-            (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function')
+            (window.sliderIndependent && typeof window.sliderIndependent.getSlidesData === 'function' && hasNonEmpty(window.sliderIndependent.getSlidesData()))
           );
           if(ready || attempt >= maxAttempts){
-            try{ applySearchQuery(q);
-              // re-apply a few times to survive late carousel inits that re-render after this runs
-              let retries = 0;
-              const reapply = setInterval(()=>{
-                try{ applySearchQuery(q); }catch(e){}
-                retries++;
-                if(retries>4) clearInterval(reapply);
-              }, 180);
-            }catch(e){ console.warn('applySearchQuery retry failed', e); }
+            try{ applySearchQuery(q); }catch(e){ console.warn('applySearchQuery retry failed', e); }
             return;
           }
           setTimeout(()=> waitForDataAndApply(attempt+1, maxAttempts), 150);
