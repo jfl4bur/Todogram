@@ -636,10 +636,22 @@
 
                 if(!qTokens.length){ // restore current filters (preserve active tab & genre and clear q)
                     state.currentQuery = '';
-                    console.log('Catalogo: applyCatalogSearch received empty query -> restoring tab/genre filters', { tab, genre });
                     showNoResultsInCatalog(false);
-                    updateCatalogHash(tab, genre, '', true);
-                    applyFiltersAndRender(grid, data, tab, genre);
+                    // Determine the active tab and genre from the DOM or from the current hash
+                    let activeTab = 'Películas';
+                    let activeGenre = 'Todo el catálogo';
+                    try{
+                        const tabsEl = document.getElementById('catalogo-tabs-page');
+                        const activeBtn = tabsEl && tabsEl.querySelector && tabsEl.querySelector('.catalogo-tab.active');
+                        if(activeBtn && activeBtn.dataset && activeBtn.dataset.tab) activeTab = activeBtn.dataset.tab;
+                    }catch(e){}
+                    try{ activeGenre = (typeof getGenreLabel === 'function' && getGenreLabel()) || activeGenre; }catch(e){}
+
+                    // Update the hash and UI to the active tab/genre and re-apply filters
+                    updateCatalogHash(activeTab, activeGenre, '', true);
+                    // Ensure genre list is populated for this tab
+                    populateGenresForTabPage(activeTab, activeGenre);
+                    applyFiltersAndRender(grid, data, activeTab, activeGenre);
                     return;
                 }
 
@@ -795,13 +807,6 @@
     }
 
     // expose a minimal API to allow manual init if needed
-    // Preserve any existing members (such as Catalogo.search added earlier) instead of overwriting the object
-    try {
-        window.Catalogo = window.Catalogo || {};
-        window.Catalogo.initPage = initPage;
-    } catch (e) {
-        // fallback to safe assignment
-        try { window.Catalogo = { initPage }; } catch (er) { /* ignore */ }
-    }
+    window.Catalogo = { initPage };
 
 })();
