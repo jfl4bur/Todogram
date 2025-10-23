@@ -837,6 +837,15 @@ button:focus {
     opacity: 1;
 }
 
+/* Force hover modal to be fixed to the viewport so it doesn't move with page scroll.
+   Target only modal content that is a direct child of .modal-overlay to avoid
+   affecting other modals that may rely on absolute positioning. */
+.modal-overlay > .modal-content {
+    position: fixed !important;
+    /* keep centering transform behavior */
+    transform: translate(-50%, -50%) translateY(0);
+}
+
 .modal-header {
     position: relative;
     height: 0;
