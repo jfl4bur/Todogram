@@ -2051,6 +2051,17 @@ class DocumentalesCarousel {
             let docuIndex = 0;
             for (const item of data) {
                 if (item && typeof item === 'object' && item['Categoría'] === 'Documentales') {
+                    // Excluir filas que correspondan a episodios: si tienen título de episodio u otros campos de episodio
+                    try {
+                        const episodeKeys = ['Título episodio', 'Título episodio completo', 'Título episodio 1', 'Episodio', 'Título episodio (completo)'];
+                        const hasEpisodeTitle = episodeKeys.some(k => item[k] && String(item[k]).trim() !== '');
+                        if (hasEpisodeTitle) {
+                            // Saltar esta entrada: es un episodio, no un documental independiente
+                            continue;
+                        }
+                    } catch (e) {
+                        // si algo falla, no bloqueramos la carga
+                    }
                     this.docuData.push({
                         id: `docu_${docuIndex}`,
                         title: item['Título'] || 'Sin título',
