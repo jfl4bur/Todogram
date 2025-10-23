@@ -636,6 +636,7 @@
 
                 if(!qTokens.length){ // restore current filters (preserve active tab & genre and clear q)
                     state.currentQuery = '';
+                    console.log('Catalogo: applyCatalogSearch received empty query -> restoring tab/genre filters', { tab, genre });
                     showNoResultsInCatalog(false);
                     updateCatalogHash(tab, genre, '', true);
                     applyFiltersAndRender(grid, data, tab, genre);
@@ -794,6 +795,13 @@
     }
 
     // expose a minimal API to allow manual init if needed
-    window.Catalogo = { initPage };
+    // Preserve any existing members (such as Catalogo.search added earlier) instead of overwriting the object
+    try {
+        window.Catalogo = window.Catalogo || {};
+        window.Catalogo.initPage = initPage;
+    } catch (e) {
+        // fallback to safe assignment
+        try { window.Catalogo = { initPage }; } catch (er) { /* ignore */ }
+    }
 
 })();
