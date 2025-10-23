@@ -163,6 +163,17 @@ document.addEventListener('DOMContentLoaded', function() {
   burger.addEventListener('click', toggleMobileMenu);
   mobileMenuBg.addEventListener('click', closeMobileMenu);
   window.addEventListener('scroll', onScrollHeader);
+
+  // Cerrar el menú móvil al hacer click en cualquier enlace del menú (comportamiento esperado en móviles)
+  try {
+    const mobileLinks = mobileMenu.querySelectorAll('a.slider-nav-link');
+    mobileLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        // cerrar el menú inmediatamente; permitir que la navegación por href ocurra
+        closeMobileMenu();
+      }, { passive: true });
+    });
+  } catch (e) { /* no bloquear si algo falla */ }
   
   // Función para configurar el scroll del modal
   function setupModalScroll() {
