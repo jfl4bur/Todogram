@@ -16,6 +16,16 @@ class HoverModal {
             console.error("Elementos del hover modal no encontrados");
             return;
         }
+        // Ensure the overlay is a direct child of document.body so that
+        // `position: fixed` behaves relative to the viewport and is not
+        // affected by ancestor transforms/filters which create containing blocks.
+        try {
+            if (this.modalOverlay && this.modalOverlay.parentNode !== document.body) {
+                document.body.appendChild(this.modalOverlay);
+            }
+        } catch (e) {
+            // ignore if append fails for any reason
+        }
         if (!this.carouselContainer) {
             console.warn('HoverModal: carousel container no encontrado — usando document.body como fallback');
             this.carouselContainer = document.body;
@@ -149,6 +159,7 @@ class HoverModal {
         this.modalContent.style.top = `${position.top}px`;
 
         // Recalculate on window resize to keep modal within viewport bounds
+        // (optional; does not run on scroll so modal stays fixed once opened)
         if (!this._onWindowResize) {
             this._onWindowResize = () => {
                 if (!this.isVisible) return;
@@ -157,25 +168,6 @@ class HoverModal {
                 this.modalContent.style.top = `${pos.top}px`;
             };
             window.addEventListener('resize', this._onWindowResize);
-        }
-
-        // Add optimized scroll handler so the modal can follow the item while
-        // the user scrolls (option 1). We throttle with requestAnimationFrame.
-        if (!this._onScroll) {
-            this._onScroll = () => {
-                if (!this.isVisible) return;
-                if (this._scrollRaf) return; // already scheduled
-                this._scrollRaf = window.requestAnimationFrame(() => {
-                    this._scrollRaf = null;
-                    // Recompute position based on origin element (may move with scroll)
-                    const origin = this._currentOrigin || itemElement;
-                    if (!origin) return;
-                    const pos = this.calculateModalPosition(origin);
-                    this.modalContent.style.left = `${pos.left}px`;
-                    this.modalContent.style.top = `${pos.top}px`;
-                });
-            };
-            window.addEventListener('scroll', this._onScroll, { passive: true });
         }
 
         // then add 'show' class to trigger CSS transition
@@ -207,13 +199,13 @@ class HoverModal {
                 window.removeEventListener('resize', this._onWindowResize);
                 this._onWindowResize = null;
             }
-            // remove scroll handler
+            // remove scroll handler (if present) and any RAF scheduled
             if (this._onScroll) {
-                window.removeEventListener('scroll', this._onScroll);
+                try { window.removeEventListener('scroll', this._onScroll); } catch(e){}
                 this._onScroll = null;
             }
             if (this._scrollRaf) {
-                window.cancelAnimationFrame(this._scrollRaf);
+                try { window.cancelAnimationFrame(this._scrollRaf); } catch(e){}
                 this._scrollRaf = null;
             }
         }, 320); // match CSS transition duration
