@@ -148,6 +148,17 @@ class HoverModal {
         this.modalContent.style.left = `${position.left}px`;
         this.modalContent.style.top = `${position.top}px`;
 
+        // Recalculate on window resize to keep modal within viewport bounds
+        if (!this._onWindowResize) {
+            this._onWindowResize = () => {
+                if (!this.isVisible) return;
+                const pos = this.calculateModalPosition(this._currentOrigin || itemElement);
+                this.modalContent.style.left = `${pos.left}px`;
+                this.modalContent.style.top = `${pos.top}px`;
+            };
+            window.addEventListener('resize', this._onWindowResize);
+        }
+
         // then add 'show' class to trigger CSS transition
         this.modalContent.classList.add('show');
 
@@ -172,6 +183,11 @@ class HoverModal {
             window.hoverModalItem = null;
             this._currentItem = null;
             this._currentOrigin = null;
+            // remove resize handler when modal fully closed
+            if (this._onWindowResize) {
+                window.removeEventListener('resize', this._onWindowResize);
+                this._onWindowResize = null;
+            }
         }, 320); // match CSS transition duration
     }
 
@@ -256,22 +272,33 @@ class HoverModal {
             return { top: 0, left: 0 };
         }
 
+        // Use viewport coordinates (getBoundingClientRect) and position with
+        // `position: fixed` so the modal stays in the same place while the
+        // page is scrolled. Clamp to viewport edges to avoid overflow.
         const rect = itemElement.getBoundingClientRect();
-        const carouselRect = this.carouselContainer.getBoundingClientRect();
-        const modalWidth = parseFloat(getComputedStyle(this.modalContent).width);
-        
+        const modalStyle = getComputedStyle(this.modalContent);
+        const modalWidth = parseFloat(modalStyle.width) || this.modalContent.offsetWidth;
+        const modalHeight = parseFloat(modalStyle.height) || this.modalContent.offsetHeight;
+
+        // Center the modal horizontally on the item's center in the viewport
         let leftPosition = rect.left + (rect.width / 2);
-        
-        if (leftPosition - (modalWidth / 2) < carouselRect.left) {
-            leftPosition = carouselRect.left + (modalWidth / 2);
-        }
-        
-        if (leftPosition + (modalWidth / 2) > carouselRect.right) {
-            leftPosition = carouselRect.right - (modalWidth / 2);
-        }
-        
-        const topPosition = rect.top + (rect.height / 2);
-        
+        // Because CSS uses transform: translate(-50%, -50%), we set left/top to
+        // the center point (in viewport coordinates). We must clamp to viewport
+        // so the modal doesn't go off-screen.
+        const vpWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
+        const vpHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+
+        // Clamp horizontal center so modal stays fully inside viewport
+        const minCenterX = modalWidth / 2 + 8; // 8px margin
+        const maxCenterX = vpWidth - (modalWidth / 2) - 8;
+        leftPosition = Math.min(Math.max(leftPosition, minCenterX), maxCenterX);
+
+        // Vertical center
+        let topPosition = rect.top + (rect.height / 2);
+        const minCenterY = modalHeight / 2 + 8;
+        const maxCenterY = vpHeight - (modalHeight / 2) - 8;
+        topPosition = Math.min(Math.max(topPosition, minCenterY), maxCenterY);
+
         return {
             top: topPosition,
             left: leftPosition
