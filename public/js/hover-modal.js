@@ -159,6 +159,25 @@ class HoverModal {
             window.addEventListener('resize', this._onWindowResize);
         }
 
+        // Add optimized scroll handler so the modal can follow the item while
+        // the user scrolls (option 1). We throttle with requestAnimationFrame.
+        if (!this._onScroll) {
+            this._onScroll = () => {
+                if (!this.isVisible) return;
+                if (this._scrollRaf) return; // already scheduled
+                this._scrollRaf = window.requestAnimationFrame(() => {
+                    this._scrollRaf = null;
+                    // Recompute position based on origin element (may move with scroll)
+                    const origin = this._currentOrigin || itemElement;
+                    if (!origin) return;
+                    const pos = this.calculateModalPosition(origin);
+                    this.modalContent.style.left = `${pos.left}px`;
+                    this.modalContent.style.top = `${pos.top}px`;
+                });
+            };
+            window.addEventListener('scroll', this._onScroll, { passive: true });
+        }
+
         // then add 'show' class to trigger CSS transition
         this.modalContent.classList.add('show');
 
@@ -187,6 +206,15 @@ class HoverModal {
             if (this._onWindowResize) {
                 window.removeEventListener('resize', this._onWindowResize);
                 this._onWindowResize = null;
+            }
+            // remove scroll handler
+            if (this._onScroll) {
+                window.removeEventListener('scroll', this._onScroll);
+                this._onScroll = null;
+            }
+            if (this._scrollRaf) {
+                window.cancelAnimationFrame(this._scrollRaf);
+                this._scrollRaf = null;
             }
         }, 320); // match CSS transition duration
     }
