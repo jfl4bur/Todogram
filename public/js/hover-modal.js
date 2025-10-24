@@ -15,7 +15,9 @@ class HoverModal {
             try {
                 const ov = document.createElement('div');
                 ov.id = AUTO_IDS.overlay;
-                ov.className = 'modal-overlay hover-modal-auto';
+                // include the generic modal class so existing CSS applies, but keep our
+                // namespaced class so we can still target it uniquely if needed
+                ov.className = 'modal-overlay hover-modal-overlay-auto';
                 ov.style.display = 'none';
                 ov.style.pointerEvents = 'none';
                 // ensure on-top
@@ -23,20 +25,20 @@ class HoverModal {
 
                 const cont = document.createElement('div');
                 cont.id = AUTO_IDS.content;
-                cont.className = 'modal-content hover-modal-auto';
+                cont.className = 'modal-content hover-modal-content-auto';
                 // content will be positioned by JS; keep pointer-events enabled when shown
 
                 const header = document.createElement('div');
                 header.className = 'modal-header';
                 const img = document.createElement('img');
                 img.id = AUTO_IDS.backdrop;
-                img.className = 'modal-backdrop hover-modal-auto';
+                img.className = 'modal-backdrop hover-modal-backdrop-auto';
                 img.src = '';
                 header.appendChild(img);
 
                 const body = document.createElement('div');
                 body.id = AUTO_IDS.body;
-                body.className = 'modal-body hover-modal-auto';
+                body.className = 'modal-body hover-modal-body-auto';
 
                 cont.appendChild(header);
                 cont.appendChild(body);
@@ -47,11 +49,12 @@ class HoverModal {
             }
         }
 
-        // Use the auto overlay when possible; fall back to existing IDs for compatibility
-        this.modalOverlay = document.getElementById(AUTO_IDS.overlay) || document.getElementById('modal-overlay');
-        this.modalContent = document.getElementById(AUTO_IDS.content) || document.getElementById('modal-content');
-        this.modalBackdrop = document.getElementById(AUTO_IDS.backdrop) || document.getElementById('modal-backdrop');
-        this.modalBody = document.getElementById(AUTO_IDS.body) || document.getElementById('modal-body');
+    // Prefer our auto-created elements. Do NOT fall back to generic IDs
+    // such as '#modal-content' to avoid interference from other scripts.
+    this.modalOverlay = document.getElementById(AUTO_IDS.overlay);
+    this.modalContent = document.getElementById(AUTO_IDS.content);
+    this.modalBackdrop = document.getElementById(AUTO_IDS.backdrop);
+    this.modalBody = document.getElementById(AUTO_IDS.body);
     // Try common carousel/container selectors; fallback to body so positioning still works
     this.carouselContainer = document.querySelector('.carousel-container') || document.querySelector('.catalogo-grid') || document.querySelector('#catalogo-grid-page') || document.body;
         this.activeItem = null;
@@ -315,6 +318,15 @@ class HoverModal {
             window.activeItem = item;
             // ensure 'show' class is present so it remains visible
             this.modalContent.classList.add('show');
+                // If the same origin is already shown, do not recompute position
+                // (prevents the modal following the pointer when the page scrolls
+                // and show() is called repeatedly). Preserve the existing fixed
+                // left/top values and bail out early.
+                if (this._currentOrigin === itemElement) {
+                    this._fixedLeft = this._fixedLeft || getComputedStyle(this.modalContent).left || this.modalContent.style.left;
+                    this._fixedTop = this._fixedTop || getComputedStyle(this.modalContent).top || this.modalContent.style.top;
+                    return;
+                }
             return;
         }
 
