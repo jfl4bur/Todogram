@@ -801,8 +801,9 @@ button:focus {
     overflow: hidden;
     transform-origin: center;
     opacity: 0;
-    /* include centering translate so JS doesn't need to overwrite transform */
-    transform: translate(-50%, -50%) translateY(20px);
+    /* include centering translate and an initial scale variable so JS can set the start scale */
+    /* JS sets --modal-start-scale before adding .show; default is 1 */
+    transform: translate(-50%, -50%) scale(var(--modal-start-scale, 1)) translateY(20px);
     transition: opacity 300ms ease, transform 300ms ease;
     pointer-events: auto;
     z-index: 1001;
@@ -815,7 +816,7 @@ button:focus {
 
 .modal-content.show {
     opacity: 1;
-    transform: translate(-50%, -50%) translateY(0);
+    transform: translate(-50%, -50%) scale(1) translateY(0);
 }
 
 /* Backdrop fade for hover modal (subtle) */
