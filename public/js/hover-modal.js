@@ -151,9 +151,10 @@ class HoverModal {
         // force reflow so computed sizes are correct
         void this.modalContent.offsetWidth;
 
-        // Determine the best scroll container for this item (nearest ancestor that scrolls)
+        // Determine the best container for this item: prefer motion (transform) containers
+        // then scrollable containers, then fallbacks.
         try {
-            const targetScroll = this.findScrollContainer(itemElement) || this.carouselContainer || document.body;
+            const targetScroll = this.findMotionContainer(itemElement) || this.findScrollContainer(itemElement) || this.carouselContainer || document.body;
             this._activeScrollContainer = targetScroll;
             if (this._activeScrollContainer && this.modalContent.parentElement !== this._activeScrollContainer && this._activeScrollContainer !== document.body) {
                 const cs = getComputedStyle(this._activeScrollContainer);
@@ -300,18 +301,27 @@ class HoverModal {
             try {
                 const cs = getComputedStyle(node);
                 const overflowY = cs.overflowY;
-                const overflowX = cs.overflowX;
-                const canScrollY = (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay');
-                const canScrollX = (overflowX === 'auto' || overflowX === 'scroll' || overflowX === 'overlay');
-                // consider it scrollable if it allows overflow and has scrollable content
-                if ((canScrollY && node.scrollHeight > node.clientHeight) || (canScrollX && node.scrollWidth > node.clientWidth)) return node;
+                const canScroll = (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay');
+                if (canScroll && node.scrollHeight > node.clientHeight) return node;
             } catch (e) {}
             node = node.parentElement;
         }
-        // fallback: known catalog containers that may be scroll roots
-        const fallbacks = [document.querySelector('.catalogo-body'), document.querySelector('#catalogo-grid-page'), document.querySelector('.catalogo-grid')];
-        for (const elF of fallbacks) {
-            if (elF) return elF;
+        return null;
+    }
+
+    // Find nearest ancestor that applies transforms (translate/translate3d) or will-change: transform
+    // Used for carousels/catalogs that move items via CSS transform instead of native scrolling.
+    findMotionContainer(el) {
+        let node = el;
+        while (node && node !== document.body && node !== document.documentElement) {
+            try {
+                const cs = getComputedStyle(node);
+                const transform = cs.transform || '';
+                const will = cs.willChange || '';
+                if (transform && transform !== 'none') return node;
+                if (will.indexOf('transform') !== -1) return node;
+            } catch (e) {}
+            node = node.parentElement;
         }
         return null;
     }
