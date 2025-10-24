@@ -300,10 +300,18 @@ class HoverModal {
             try {
                 const cs = getComputedStyle(node);
                 const overflowY = cs.overflowY;
-                const canScroll = (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay');
-                if (canScroll && node.scrollHeight > node.clientHeight) return node;
+                const overflowX = cs.overflowX;
+                const canScrollY = (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay');
+                const canScrollX = (overflowX === 'auto' || overflowX === 'scroll' || overflowX === 'overlay');
+                // consider it scrollable if it allows overflow and has scrollable content
+                if ((canScrollY && node.scrollHeight > node.clientHeight) || (canScrollX && node.scrollWidth > node.clientWidth)) return node;
             } catch (e) {}
             node = node.parentElement;
+        }
+        // fallback: known catalog containers that may be scroll roots
+        const fallbacks = [document.querySelector('.catalogo-body'), document.querySelector('#catalogo-grid-page'), document.querySelector('.catalogo-grid')];
+        for (const elF of fallbacks) {
+            if (elF) return elF;
         }
         return null;
     }
