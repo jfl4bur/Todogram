@@ -1215,6 +1215,26 @@ button:focus {
 .catalogo-item img{width:100%;height:auto;border-radius:0;object-fit:cover;background:#232323}
 .catalogo-item .title{margin-top:8px;font-size:14px;text-align:center;color:var(--text-color)}
 
+/* Hover zoom: scale item and bring above siblings but keep below modal */
+.catalogo-item.hover-zoom,
+.custom-carousel-item.hover-zoom {
+    transform: scale(1.3);
+    transition: transform 220ms cubic-bezier(.2,.9,.2,1);
+    z-index: 10900; /* below modal which uses 11000+ */
+    position: relative; /* ensure z-index applies */
+    will-change: transform;
+}
+
+/* Prevent items from being clipped vertically when scaled inside carousel */
+#carousel-wrapper, #series-carousel-wrapper {
+    overflow-x: auto;
+    overflow-y: visible;
+}
+
+.carousel-container {
+    overflow: visible; /* allow scaled item to overflow without being cut */
+}
+
 /* Responsive gaps for catalog grid on tablets and mobile: columns 6px, rows 4px */
 
 /* iPhone / small mobile specific queries */
@@ -2041,7 +2061,7 @@ button:focus {
     padding: 15px;
     color: white;
     height: calc(100% - 42.25%);
-    overflow-y: hidden;
+    overflow-y: auto;
 }
 
 .modal-body h2 {
@@ -7399,23 +7419,15 @@ body {
 }
 
 @media (hover: hover) and (pointer: fine) {
-.catalogo-item:hover {
+    /* Only apply the small lift effect when NOT using the hover-zoom scale */
+    .catalogo-item:not(.hover-zoom):hover {
         transform: translateY(-4px);
         box-shadow: 0 8px 16px rgba(0,0,0,0.6);
         z-index: 10;
     }
 
-    /* Scaled state when an item is hovered and should remain enlarged while hover-modal is visible */
-    .hover-item-scaled {
-        transform: scale(1.3, 2.5) !important;
-        transition: transform 200ms ease, z-index 0s;
-        z-index: 10999 !important; /* below modal (11000) but above other items */
-        transform-origin: center center;
-        will-change: transform;
-    }
 
-
-    .custom-carousel-item:hover {
+    .custom-carousel-item:not(.hover-zoom):hover {
         transform: translateY(-4px);
         box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
         z-index: 10;

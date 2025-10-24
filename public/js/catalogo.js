@@ -776,8 +776,6 @@
                 try { if (itemEl._hoverTimer) { clearTimeout(itemEl._hoverTimer); itemEl._hoverTimer = null; } } catch(e){}
                 if (item && window.hoverModal && typeof window.hoverModal.show === 'function') {
                     // schedule showing the hover modal after a short delay to match carousel behaviour
-                    // Immediately apply scaled class so the item enlarges before modal appears
-                    try { itemEl.classList.add('hover-item-scaled'); } catch (e) {}
                     itemEl._hoverTimer = setTimeout(() => {
                         try { window.hoverModal.show(item, itemEl); if(window.hoverModal.cancelHide) window.hoverModal.cancelHide(); } catch(err) { console.error('hoverModal.show error', err); }
                         itemEl._hoverTimer = null;
@@ -788,7 +786,7 @@
             grid.addEventListener('mouseout', (e) => {
                 const itemEl = e.target.closest('.catalogo-item');
                 // clear any scheduled show timer for the element we left
-                try { if (itemEl && itemEl._hoverTimer) { clearTimeout(itemEl._hoverTimer); itemEl._hoverTimer = null; /* remove immediate scale since modal won't open */ try { itemEl.classList.remove('hover-item-scaled'); } catch(e){} } } catch(e){}
+                try { if (itemEl && itemEl._hoverTimer) { clearTimeout(itemEl._hoverTimer); itemEl._hoverTimer = null; } } catch(e){}
                 const related = e.relatedTarget;
                 // If the mouse moved into another catalog item, keep the hover logic active
                 if (related && related.closest && related.closest('.catalogo-item')) return;
