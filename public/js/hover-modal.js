@@ -557,12 +557,37 @@ class HoverModal {
 
         // data-video-url button -> pass the full item when available so VideoModal can build candidates
         const videoUrl = actionEl.getAttribute('data-video-url');
-        if (window.videoModal) {
-            const item = this._currentItem || window.activeItem;
-            // Prefer passing the item object so the video modal can inspect videoIframe/videoIframe1/videoUrl
-            if (item) window.videoModal.play(item);
-            else if (videoUrl) window.videoModal.play(videoUrl);
+        try {
+            // Ensure a VideoModal exists (some pages may not have initialized it)
+            if (!window.videoModal && typeof VideoModal === 'function') {
+                try { window.videoModal = new VideoModal(); } catch (e) { console.warn('hover-modal: failed to init VideoModal', e); }
+            }
+
+            if (window.videoModal && typeof window.videoModal.play === 'function') {
+                const item = this._currentItem || window.activeItem;
+                // Prefer passing the item object so the video modal can inspect videoIframe/videoIframe1/videoUrl
+                if (item) {
+                    try { window.videoModal.play(item); return; } catch (err) { console.warn('hover-modal: videoModal.play(item) failed', err); }
+                }
+                if (videoUrl) {
+                    try { window.videoModal.play(videoUrl); return; } catch (err) { console.warn('hover-modal: videoModal.play(url) failed', err); }
+                }
+            }
+        } catch (e) {
+            console.warn('hover-modal: error handling data-video-url click', e);
         }
+
+        // fallback: if video modal couldn't open, try opening the URL in a new window or open details as last resort
+        if (videoUrl) {
+            try { window.open(videoUrl, '_blank'); return; } catch (e) {}
+        }
+        try {
+            const item = this._currentItem || window.activeItem;
+            if (item && window.detailsModal && typeof window.detailsModal.show === 'function') {
+                this.close();
+                window.detailsModal.show(item, this._currentOrigin);
+            }
+        } catch (e) {}
     }
 
     calculateModalPosition(itemElement) {
