@@ -309,7 +309,7 @@ class HoverModal {
                 } catch (e) {}
 
                 // small micro-pause before scaling the origin back (in ms) - symbolic/minimal
-                const MICRO_PAUSE = 40;
+                const MICRO_PAUSE = 16;
 
                 // start origin scale-down after micro-pause
                 setTimeout(() => {
