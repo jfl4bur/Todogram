@@ -28,6 +28,9 @@ class HoverModal {
         this._onScroll = this._onScroll.bind(this);
         this._onResize = this._onResize.bind(this);
         this._pendingRAF = false;
+    this._modalWidth = null; // cache to avoid getComputedStyle on every frame
+    this._carouselRect = null; // cache carousel rect between frames
+    this._scrollOptions = { capture: true, passive: true };
         // track the currently shown item and its origin element
         this._currentItem = null;
         this._currentOrigin = null;
@@ -146,7 +149,11 @@ class HoverModal {
         // force reflow so computed sizes are correct
         void this.modalContent.offsetWidth;
 
-        const position = this.calculateModalPosition(itemElement);
+    // Cache modal width and carousel rect to avoid expensive style reads during scroll
+    this._modalWidth = this.modalContent.offsetWidth;
+    this._carouselRect = this.carouselContainer.getBoundingClientRect();
+
+    const position = this.calculateModalPosition(itemElement);
 
         // position modal (keep transform for centering in CSS)
         this.modalContent.style.left = `${position.left}px`;
@@ -157,7 +164,7 @@ class HoverModal {
 
     // Attach scroll/resize listeners so the modal follows the origin while visible
     // Use capture on scroll so we catch scrolls in any ancestor scrolling container
-    window.addEventListener('scroll', this._onScroll, true);
+    window.addEventListener('scroll', this._onScroll, this._scrollOptions);
     window.addEventListener('resize', this._onResize);
 
         // Store current item and origin for use by delegated handlers
@@ -183,7 +190,7 @@ class HoverModal {
             this._currentOrigin = null;
             // remove scroll/resize listeners when modal fully closed
             try {
-                window.removeEventListener('scroll', this._onScroll, true);
+                window.removeEventListener('scroll', this._onScroll, this._scrollOptions);
                 window.removeEventListener('resize', this._onResize);
             } catch (e) {}
         }, 320); // match CSS transition duration
@@ -233,6 +240,11 @@ class HoverModal {
 
     _onResize() {
         if (!this.isVisible) return;
+        // Recalculate cached measurements on resize (modal size may change)
+        try {
+            this._modalWidth = this.modalContent.offsetWidth;
+            this._carouselRect = this.carouselContainer.getBoundingClientRect();
+        } catch (e) {}
         this.updatePosition();
     }
 
@@ -296,8 +308,9 @@ class HoverModal {
         }
 
         const rect = itemElement.getBoundingClientRect();
-        const carouselRect = this.carouselContainer.getBoundingClientRect();
-        const modalWidth = parseFloat(getComputedStyle(this.modalContent).width);
+    // Use cached values when available to avoid forcing style/layout during scroll
+    const carouselRect = this._carouselRect || this.carouselContainer.getBoundingClientRect();
+    const modalWidth = (this._modalWidth != null) ? this._modalWidth : this.modalContent.offsetWidth;
         
         let leftPosition = rect.left + (rect.width / 2);
         
