@@ -130,7 +130,9 @@ class HoverModal {
         `;
         
         this.modalBody.innerHTML = `
-            <h2>${item.title}</h2>
+            <div class="hover-title-wrapper">
+                <span class="hover-title">${item.title}</span>
+            </div>
             <div class="meta-info">
                 ${metaItems.join('')}
             </div>

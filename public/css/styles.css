@@ -197,32 +197,23 @@
     font-weight: 600;
 }
 
-.modal-body {
-    padding: 15px;
-    color: white;
-    /* Use flex column-reverse so the title sits at the bottom and, when it grows,
-       it expands upward instead of pushing content downwards. This applies to
-       the hover modal where the title should occupy space toward the top of
-       the content area when wrapping. */
-    display: flex;
-    flex-direction: column-reverse;
-    gap: 8px;
-    /* height: calc(100% - 42.25%); */
-    overflow-y: auto;
+.font-bold {
+    font-weight: 700;
+}
+button:focus {
+    outline: 0px !important;
+    outline: 0px auto -webkit-focus-ring-color !important;
+}
+.container {
+    padding-right: 0px !important;
 }
 
-.modal-body h2 {
-    font-family: 'Slider Sans UI', sans-serif;
-    font-size: 1.2rem;
-    margin: 0 0 10px 0;
-    /* allow full title to wrap rather than truncating with ellipsis */
-    white-space: normal;
-    overflow: visible;
-    text-overflow: clip;
-    word-break: break-word;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    text-rendering: optimizeLegibility;
+.secondary-actions-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
 /* Estilos personalizados para los scrollbars */
@@ -878,13 +869,6 @@
 .modal-body {
     padding: 15px;
     color: white;
-    /* Use flex column-reverse so the title sits at the bottom and, when it grows,
-       it expands upward instead of pushing content downwards. This applies to
-       the hover modal where the title should occupy space toward the top of
-       the content area when wrapping. */
-    display: flex;
-    flex-direction: column-reverse;
-    gap: 8px;
     /* height: calc(100% - 42.25%); */
     overflow-y: auto;
 }
@@ -892,15 +876,32 @@
 .modal-body h2 {
     font-family: 'Slider Sans UI', sans-serif;
     font-size: 1.2rem;
-    margin: 0 0 10px 0;
-    /* allow full title to wrap rather than truncating with ellipsis */
-    white-space: normal;
-    overflow: visible;
-    text-overflow: clip;
-    word-break: break-word;
+    margin-bottom: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+}
+
+/* New hover title wrapper: allow wrapping and custom styling for hover modal titles */
+.modal-body .hover-title-wrapper {
+    margin-bottom: 10px;
+}
+.modal-body .hover-title {
+    font-family: 'Slider Sans UI', sans-serif;
+    font-size: 1.2rem;
+    line-height: 1.1;
+    display: block;
+    white-space: normal; /* allow wrapping */
+    overflow: visible;
+    text-overflow: clip;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
 .modal-body .meta-info {
