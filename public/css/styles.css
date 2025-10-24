@@ -805,7 +805,7 @@ button:focus {
     /* JS sets --modal-start-scale before adding .show; default is 1 */
     transform: translate(-50%, -50%) scale(var(--modal-start-scale, 1)) translateY(20px);
     /* faster, smoother transitions */
-    transition: opacity 180ms cubic-bezier(.2,.8,.2,1), transform 180ms cubic-bezier(.2,.8,.2,1);
+    transition: opacity 140ms cubic-bezier(.2,.8,.2,1), transform 140ms cubic-bezier(.2,.8,.2,1);
     pointer-events: auto;
     z-index: 1001;
     will-change: transform, opacity;
@@ -1248,8 +1248,8 @@ button:focus {
 /* While scaling down, keep the high z-index until the transform transition ends */
 .hover-zoom.hover-zoom-closing {
     transform: translateX(0) scale(1);
-    /* faster closing transition so item returns to scale(1) quicker */
-    transition: transform 80ms cubic-bezier(.2,.8,.2,1);
+    /* slightly faster closing transition so item returns to scale(1) quicker */
+    transition: transform 70ms cubic-bezier(.2,.8,.2,1);
     /* keep z-index until fully scaled down */
     z-index: 10900;
     transform-origin: var(--hover-transform-origin, center center);
@@ -2017,7 +2017,7 @@ button:focus {
     /* include centering translate so JS doesn't need to overwrite transform */
     transform: translate(-50%, -50%) translateY(20px);
     /* faster, smoother transitions */
-    transition: opacity 180ms cubic-bezier(.2,.8,.2,1), transform 180ms cubic-bezier(.2,.8,.2,1);
+    transition: opacity 140ms cubic-bezier(.2,.8,.2,1), transform 140ms cubic-bezier(.2,.8,.2,1);
     pointer-events: auto;
     z-index: 1001;
     will-change: transform, opacity;

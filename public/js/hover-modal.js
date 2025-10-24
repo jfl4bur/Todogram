@@ -327,69 +327,12 @@ class HoverModal {
         // remove show class to trigger hide transition
         this.modalContent.classList.remove('show');
 
-        // Start origin scale-down immediately so item and modal animations can run in parallel
-        try {
-            const origin = this._currentOrigin;
-            if (origin && origin.classList) {
-                // remove any previous scale-down handler on origin
-                try { if (this._scaleDownHandler && origin._scaleDownHandlerAttached) { origin.removeEventListener('transitionend', this._scaleDownHandler); origin._scaleDownHandlerAttached = false; } } catch(e){}
-
-                // handler to run once origin transform ends
-                this._scaleDownHandler = (e2) => {
-                    if (e2 && e2.propertyName && e2.propertyName.indexOf('transform') === -1) return;
-                    try {
-                        origin.classList.remove('hover-zoom');
-                        origin.classList.remove('hover-zoom-closing');
-                        try { origin.style.removeProperty('--hover-transform-origin'); } catch(e){}
-                        try { origin.style.removeProperty('--hover-translate-x'); } catch(e){}
-                    } catch (e) {}
-                    // restore wrapper clipping behaviour
-                    try {
-                        if (this._currentWrapper && this._currentWrapper.classList) this._currentWrapper.classList.remove('hover-no-clip');
-                        if (this._currentSection && this._currentSection.classList) this._currentSection.classList.remove('hover-no-clip');
-                    } catch (e) {}
-                    // cleanup
-                    try { origin.removeEventListener('transitionend', this._scaleDownHandler); origin._scaleDownHandlerAttached = false; } catch(e){}
-                    this._scaleDownHandler = null;
-                    this._currentWrapper = null;
-                    this._currentSection = null;
-                    this._currentItem = null;
-                    this._currentOrigin = null;
-                };
-
-                origin.addEventListener('transitionend', this._scaleDownHandler);
-                origin._scaleDownHandlerAttached = true;
-                // trigger scale down while keeping z-index
-                origin.classList.add('hover-zoom-closing');
-
-                // fallback: if transitionend doesn't fire, force cleanup after shorter timeout for snappier UX
-                // adjusted to match faster closing transition (80ms) -> use 160ms as safety window
-                setTimeout(() => {
-                    try {
-                        if (this._scaleDownHandler) {
-                            try { origin.removeEventListener('transitionend', this._scaleDownHandler); } catch(e){}
-                            origin.classList.remove('hover-zoom');
-                            origin.classList.remove('hover-zoom-closing');
-                            try { origin.style.removeProperty('--hover-transform-origin'); } catch(e){}
-                            try { origin.style.removeProperty('--hover-translate-x'); } catch(e){}
-                            if (this._currentWrapper && this._currentWrapper.classList) this._currentWrapper.classList.remove('hover-no-clip');
-                            if (this._currentSection && this._currentSection.classList) this._currentSection.classList.remove('hover-no-clip');
-                        }
-                    } catch (e) {}
-                    this._scaleDownHandler = null;
-                    this._currentWrapper = null;
-                    this._currentSection = null;
-                    this._currentItem = null;
-                    this._currentOrigin = null;
-                }, 160);
-            }
-        } catch(e) {}
-
-        // Wait for the modal's hide transition to finish to perform modal-specific cleanup
+        // Wait for the modal's hide transition to finish, then scale the origin back after a small pause
         try {
             const modal = this.modalContent;
             // cleanup any previous handler
             try { if (this._modalCloseHandler) { modal.removeEventListener('transitionend', this._modalCloseHandler); this._modalCloseHandler = null; } } catch(e){}
+
             this._modalCloseHandler = (ev) => {
                 // only react to opacity/transform endings
                 if (ev && ev.propertyName && ev.propertyName.indexOf('opacity') === -1 && ev.propertyName.indexOf('transform') === -1) return;
@@ -401,6 +344,79 @@ class HoverModal {
                     window.activeItem = null;
                     window.hoverModalItem = null;
                 } catch (e) {}
+
+                // small micro-pause before scaling the origin back (in ms) - set to 0 for instant handoff
+                const MICRO_PAUSE = 0;
+
+                // start origin scale-down after micro-pause
+                setTimeout(() => {
+                    try {
+                        const origin = this._currentOrigin;
+                        if (origin && origin.classList) {
+                            // remove any previous scale-down handler on origin
+                            try { if (this._scaleDownHandler && origin._scaleDownHandlerAttached) { origin.removeEventListener('transitionend', this._scaleDownHandler); origin._scaleDownHandlerAttached = false; } } catch(e){}
+
+                            // handler to run once origin transform ends
+                            this._scaleDownHandler = (e2) => {
+                                if (e2 && e2.propertyName && e2.propertyName.indexOf('transform') === -1) return;
+                                try {
+                                    origin.classList.remove('hover-zoom');
+                                    origin.classList.remove('hover-zoom-closing');
+                                    try { origin.style.removeProperty('--hover-transform-origin'); } catch(e){}
+                                    try { origin.style.removeProperty('--hover-translate-x'); } catch(e){}
+                                } catch (e) {}
+                                // restore wrapper clipping behaviour
+                                try {
+                                    if (this._currentWrapper && this._currentWrapper.classList) this._currentWrapper.classList.remove('hover-no-clip');
+                                    if (this._currentSection && this._currentSection.classList) this._currentSection.classList.remove('hover-no-clip');
+                                } catch (e) {}
+                                // cleanup
+                                try { origin.removeEventListener('transitionend', this._scaleDownHandler); origin._scaleDownHandlerAttached = false; } catch(e){}
+                                this._scaleDownHandler = null;
+                                this._currentWrapper = null;
+                                this._currentSection = null;
+                                this._currentItem = null;
+                                this._currentOrigin = null;
+                            };
+
+                            origin.addEventListener('transitionend', this._scaleDownHandler);
+                            origin._scaleDownHandlerAttached = true;
+                            // trigger scale down while keeping z-index
+                            origin.classList.add('hover-zoom-closing');
+
+                            // fallback: if transitionend doesn't fire, force cleanup after shorter timeout for snappier UX
+                            // adjusted to match faster closing transition (70ms) -> use 120ms as safety window
+                            setTimeout(() => {
+                                try {
+                                    if (this._scaleDownHandler) {
+                                        try { origin.removeEventListener('transitionend', this._scaleDownHandler); } catch(e){}
+                                        origin.classList.remove('hover-zoom');
+                                        origin.classList.remove('hover-zoom-closing');
+                                        try { origin.style.removeProperty('--hover-transform-origin'); } catch(e){}
+                                        try { origin.style.removeProperty('--hover-translate-x'); } catch(e){}
+                                        if (this._currentWrapper && this._currentWrapper.classList) this._currentWrapper.classList.remove('hover-no-clip');
+                                        if (this._currentSection && this._currentSection.classList) this._currentSection.classList.remove('hover-no-clip');
+                                    }
+                                } catch (e) {}
+                                this._scaleDownHandler = null;
+                                this._currentWrapper = null;
+                                this._currentSection = null;
+                                this._currentItem = null;
+                                this._currentOrigin = null;
+                            }, 120);
+                        } else {
+                            // no origin — just clear wrapper/state
+                            try {
+                                if (this._currentWrapper && this._currentWrapper.classList) this._currentWrapper.classList.remove('hover-no-clip');
+                                if (this._currentSection && this._currentSection.classList) this._currentSection.classList.remove('hover-no-clip');
+                            } catch (e) {}
+                            this._currentWrapper = null;
+                            this._currentSection = null;
+                            this._currentItem = null;
+                            this._currentOrigin = null;
+                        }
+                    } catch(e) {}
+                }, MICRO_PAUSE);
 
                 // cleanup modal close handler
                 try { modal.removeEventListener('transitionend', this._modalCloseHandler); } catch(e){}
@@ -430,7 +446,7 @@ class HoverModal {
             // fallback: if transitionend doesn't fire, run handler after timeout roughly matching CSS transition
             this._modalCloseTimeout = setTimeout(() => {
                 try { if (this._modalCloseHandler) this._modalCloseHandler({ propertyName: 'transform' }); } catch(e){}
-            }, 360);
+            }, 200);
         } catch(e) {
             // if anything fails, ensure we at least attempt to restore state
             try {
