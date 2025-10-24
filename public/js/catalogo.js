@@ -181,21 +181,37 @@
             }
         });
 
-        // Tap vs scroll detection using pointer events
-        // We record pointerdown coords, if pointer moves more than threshold we cancel the tap.
+        // Tap vs scroll detection using pointer events with long-press suppression
+        // We record pointerdown coords, cancel the tap if move threshold exceeded or long-press detected.
         let tapCancelled = false;
         let pointerId = null;
         let startX = 0, startY = 0;
         const MOVE_THRESHOLD = 8; // pixels
+        let longPressTimer = null;
+        let longPressed = false;
+        const LONG_PRESS_MS = 500; // long-press threshold
+        let lastPointerType = null;
+
+        function clearLongPress() {
+            if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+            longPressed = false;
+        }
 
         d.addEventListener('pointerdown', (ev) => {
             if (ev.isPrimary === false) return;
             tapCancelled = false;
+            longPressed = false;
+            lastPointerType = ev.pointerType || null;
             pointerId = ev.pointerId;
             startX = ev.clientX;
             startY = ev.clientY;
             // capture pointer to continue receiving move/up even if finger leaves element
             try { d.setPointerCapture(pointerId); } catch (e) {}
+            // start long-press timer to suppress long-press taps and context menu
+            try {
+                clearLongPress();
+                longPressTimer = setTimeout(() => { longPressed = true; tapCancelled = true; }, LONG_PRESS_MS);
+            } catch (e) {}
         }, { passive: true });
 
         d.addEventListener('pointermove', (ev) => {
@@ -204,6 +220,7 @@
             const dy = Math.abs(ev.clientY - startY);
             if (dx > MOVE_THRESHOLD || dy > MOVE_THRESHOLD) {
                 tapCancelled = true;
+                clearLongPress();
             }
         }, { passive: true });
 
@@ -211,19 +228,40 @@
             if (ev.pointerId !== pointerId) return;
             try { d.releasePointerCapture(pointerId); } catch (e) {}
             pointerId = null;
-            if (!tapCancelled) {
+            clearLongPress();
+            if (!tapCancelled && !longPressed) {
                 // Treat as tap
-                openDetails();
+                // debounce per element to avoid duplicate opens across events
+                try {
+                    const now = Date.now();
+                    if (!d._lastOpenTime || (now - d._lastOpenTime) > 400) {
+                        d._lastOpenTime = now;
+                        openDetails();
+                    }
+                } catch (e) { openDetails(); }
             }
         }, { passive: true });
 
-        // Fallback for older touch-only browsers: use touchstart/touchmove/touchend
+        d.addEventListener('pointercancel', (ev) => {
+            if (ev.pointerId === pointerId) {
+                try { d.releasePointerCapture(pointerId); } catch (e) {}
+                pointerId = null;
+            }
+            tapCancelled = true;
+            clearLongPress();
+        });
+
+        // Fallback for older touch-only browsers: use touchstart/touchmove/touchend/touchcancel
         d.addEventListener('touchstart', (ev) => {
             const t = ev.touches && ev.touches[0];
             if (!t) return;
             tapCancelled = false;
+            longPressed = false;
             startX = t.clientX;
             startY = t.clientY;
+            // start long-press timer
+            clearLongPress();
+            longPressTimer = setTimeout(() => { longPressed = true; tapCancelled = true; }, LONG_PRESS_MS);
         }, { passive: true });
 
         d.addEventListener('touchmove', (ev) => {
@@ -231,12 +269,36 @@
             if (!t) return;
             const dx = Math.abs(t.clientX - startX);
             const dy = Math.abs(t.clientY - startY);
-            if (dx > MOVE_THRESHOLD || dy > MOVE_THRESHOLD) tapCancelled = true;
+            if (dx > MOVE_THRESHOLD || dy > MOVE_THRESHOLD) {
+                tapCancelled = true;
+                clearLongPress();
+            }
         }, { passive: true });
 
         d.addEventListener('touchend', (ev) => {
-            if (!tapCancelled) openDetails();
+            clearLongPress();
+            if (!tapCancelled && !longPressed) {
+                try {
+                    const now = Date.now();
+                    if (!d._lastOpenTime || (now - d._lastOpenTime) > 400) {
+                        d._lastOpenTime = now;
+                        openDetails();
+                    }
+                } catch (e) { openDetails(); }
+            }
         }, { passive: true });
+
+        d.addEventListener('touchcancel', (ev) => { tapCancelled = true; clearLongPress(); });
+
+        // Prevent default contextmenu on touch long-press environments to avoid blocking UI
+        d.addEventListener('contextmenu', (ev) => {
+            try {
+                // if lastPointerType indicates touch, or device likely touch-only, prevent contextmenu
+                if (lastPointerType === 'touch' || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0 && window.matchMedia && window.matchMedia('(hover: none)').matches)) {
+                    ev.preventDefault();
+                }
+            } catch (e) {}
+        });
 
         return d;
     }
