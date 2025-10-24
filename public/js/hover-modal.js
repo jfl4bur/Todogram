@@ -385,8 +385,7 @@ class HoverModal {
                             origin.classList.add('hover-zoom-closing');
 
                             // fallback: if transitionend doesn't fire, force cleanup after shorter timeout for snappier UX
-                            // adjusted to match faster transitions
-                            // fallback: if transitionend doesn't fire, force cleanup after 300ms
+                            // adjusted to match faster closing transition (80ms) -> use 160ms as safety window
                             setTimeout(() => {
                                 try {
                                     if (this._scaleDownHandler) {
@@ -404,7 +403,7 @@ class HoverModal {
                                 this._currentSection = null;
                                 this._currentItem = null;
                                 this._currentOrigin = null;
-                            }, 300);
+                            }, 160);
                         } else {
                             // no origin — just clear wrapper/state
                             try {

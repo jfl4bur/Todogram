@@ -1248,8 +1248,8 @@ button:focus {
 /* While scaling down, keep the high z-index until the transform transition ends */
 .hover-zoom.hover-zoom-closing {
     transform: translateX(0) scale(1);
-    /* match faster closing transition */
-    transition: transform 140ms cubic-bezier(.2,.8,.2,1);
+    /* faster closing transition so item returns to scale(1) quicker */
+    transition: transform 80ms cubic-bezier(.2,.8,.2,1);
     /* keep z-index until fully scaled down */
     z-index: 10900;
     transform-origin: var(--hover-transform-origin, center center);
