@@ -142,6 +142,8 @@ class HoverModal {
         this._fixedLeft = null;
         this._fixedTop = null;
         this._lastOverrideLogTime = 0;
+        this._scrollRaf = null;
+        this._onScroll = null;
     }
 
     show(item, itemElement) {
@@ -305,6 +307,40 @@ class HoverModal {
             this.modalContent.style.transform = 'translateY(0)';
         } catch (e) {
             // ignore if inline style setting fails
+        }
+
+        // Ensure modal uses fixed positioning (inline) so ancestor rules can't
+        // change its positioning behavior. Also ensure no centering translate
+        // interferes by setting transform explicitly (we use left/top).
+        try {
+            this.modalContent.style.position = 'fixed';
+            this.modalOverlay.style.position = 'fixed';
+            // Remove CSS centering transform to avoid double offsets; we keep
+            // a translateY animation only.
+            // Note: we do not set translate(-50%,-50%) so left/top represent
+            // the modal's top-left corner.
+            // Keep pointer events enabled for interaction.
+            this.modalContent.style.pointerEvents = 'auto';
+        } catch (e) {}
+
+        // Scroll enforcement: during scroll, re-apply the fixed left/top values
+        // using RAF to prevent the modal from being moved by other scripts or
+        // by layout changes. This is throttled and removed on close.
+        if (!this._onScroll) {
+            this._onScroll = () => {
+                if (!this.isVisible) return;
+                if (this._scrollRaf) return;
+                this._scrollRaf = window.requestAnimationFrame(() => {
+                    try {
+                        if (this._fixedLeft != null && this._fixedTop != null) {
+                            this.modalContent.style.left = this._fixedLeft;
+                            this.modalContent.style.top = this._fixedTop;
+                        }
+                    } catch (e) {}
+                    this._scrollRaf = null;
+                });
+            };
+            try { window.addEventListener('scroll', this._onScroll, { passive: true }); } catch(e){}
         }
 
         // Recalculate on window resize to keep modal within viewport bounds
