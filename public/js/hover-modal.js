@@ -248,6 +248,7 @@ class HoverModal {
                     if (el !== this._currentOrigin && el !== itemElement) {
                         el.classList.remove('hover-zoom');
                         el.classList.remove('hover-zoom-closing');
+                        try { el.style.removeProperty('--hover-transform-origin'); } catch(e){}
                         if (el._scaleDownHandlerAttached && this._scaleDownHandler) {
                             try { el.removeEventListener('transitionend', this._scaleDownHandler); } catch(e){}
                             el._scaleDownHandlerAttached = false;
@@ -268,7 +269,26 @@ class HoverModal {
         this._currentItem = item;
         this._currentOrigin = itemElement;
         // add hover-zoom class to keep the item scaled while hover modal is visible
-        try { if (this._currentOrigin && this._currentOrigin.classList) this._currentOrigin.classList.add('hover-zoom'); } catch(e){}
+        try {
+            if (this._currentOrigin && this._currentOrigin.classList) {
+                // determine if the item is near the left or right edge of its scroll container
+                try {
+                    const container = itemElement.closest('.catalogo-grid, .carousel-container, #carousel-wrapper') || this.carouselContainer || document.body;
+                    const cRect = container.getBoundingClientRect();
+                    const iRect = itemElement.getBoundingClientRect();
+                    const itemWidth = iRect.width || (iRect.right - iRect.left);
+                    const leftDist = iRect.left - cRect.left;
+                    const rightDist = cRect.right - iRect.right;
+                    // choose threshold as 25% of item width to detect items at edges
+                    const threshold = Math.max(8, itemWidth * 0.25);
+                    let originVal = 'center center';
+                    if (leftDist < threshold) originVal = 'left center';
+                    else if (rightDist < threshold) originVal = 'right center';
+                    this._currentOrigin.style.setProperty('--hover-transform-origin', originVal);
+                } catch (er) {}
+                this._currentOrigin.classList.add('hover-zoom');
+            }
+        } catch(e){}
         // Attempt to find a carousel wrapper ancestor to disable clipping while scaled
         try {
             const wrapper = itemElement.closest('#carousel-wrapper, [id$="-carousel-wrapper"], .carousel-wrapper');
@@ -325,6 +345,7 @@ class HoverModal {
                                 try {
                                     origin.classList.remove('hover-zoom');
                                     origin.classList.remove('hover-zoom-closing');
+                                    try { origin.style.removeProperty('--hover-transform-origin'); } catch(e){}
                                 } catch (e) {}
                                 // restore wrapper clipping behaviour
                                 try {
@@ -354,6 +375,7 @@ class HoverModal {
                                         try { origin.removeEventListener('transitionend', this._scaleDownHandler); } catch(e){}
                                         origin.classList.remove('hover-zoom');
                                         origin.classList.remove('hover-zoom-closing');
+                                        try { origin.style.removeProperty('--hover-transform-origin'); } catch(e){}
                                         if (this._currentWrapper && this._currentWrapper.classList) this._currentWrapper.classList.remove('hover-no-clip');
                                         if (this._currentSection && this._currentSection.classList) this._currentSection.classList.remove('hover-no-clip');
                                     }

@@ -1226,6 +1226,8 @@ button:focus {
     z-index: 10900; /* below modal which uses 11000+ */
     position: relative; /* ensure z-index applies */
     will-change: transform;
+    /* allow JS to change transform-origin for edge items */
+    transform-origin: var(--hover-transform-origin, center center);
 }
 
 /* Prevent items from being clipped vertically when scaled inside carousel */
@@ -1250,6 +1252,7 @@ button:focus {
     transition: transform 140ms cubic-bezier(.2,.8,.2,1);
     /* keep z-index until fully scaled down */
     z-index: 10900;
+    transform-origin: var(--hover-transform-origin, center center);
 }
 
 /* Responsive gaps for catalog grid on tablets and mobile: columns 6px, rows 4px */
