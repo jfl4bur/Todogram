@@ -20,7 +20,6 @@ const headerHTML = `
         <a href="/catalogo/#catalogo?tab=Documentales&genre=Todo+el+catálogo" class="slider-nav-link"><i class="fas fa-child"></i><span>Documentales</span></a>
         <a href="/catalogo/#catalogo?tab=Animes&genre=Todo+el+catálogo" class="slider-nav-link"><i class="fas fa-crown"></i><span>Animes</span></a>
         <a href="/catalogo" class="slider-nav-link"><i class="fas fa-broadcast-tower"></i><span>Todo el catálogo</span></a>
-        <a href="#" class="slider-nav-link"><i class="fas fa-question-circle"></i><span>Ayuda</span></a>
       </nav>
       <div class="header-search" id="header-search">
         <input id="global-search-input" type="search" placeholder="Buscar..." aria-label="Buscar" autocomplete="off">
@@ -45,7 +44,6 @@ const headerHTML = `
     <a href="/catalogo/#catalogo?tab=Documentales&genre=Todo+el+catálogo" class="slider-nav-link"><i class="fas fa-child"></i><span>Documentales</span></a>
     <a href="/catalogo/#catalogo?tab=Animes&genre=Todo+el+catálogo" class="slider-nav-link"><i class="fas fa-crown"></i><span>Animes</span></a>
     <a href="/catalogo" class="slider-nav-link"><i class="fas fa-broadcast-tower"></i><span>Todo el catálogo</span></a>
-    <a href="#" class="slider-nav-link"><i class="fas fa-question-circle"></i><span>Ayuda</span></a>
   </div>
 `;
 
