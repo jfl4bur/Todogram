@@ -454,8 +454,8 @@ class HoverModal {
         }
     }
 
-    // Schedule hide with a small delay to allow transitions between item -> modal without flicker
-    hide(delay = 300){
+    // Schedule hide; default 0 so transition starts immediately on mouseleave
+    hide(delay = 0){
         this.cancelHide();
         this.hoverModalTimeout = setTimeout(()=>{
             this.close();

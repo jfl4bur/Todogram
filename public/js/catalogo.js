@@ -793,7 +793,7 @@
                 // If the mouse moved into the hover modal itself (or any of its children), do not hide
                 if (related && related.closest && (related.closest('#modal-content') || related.closest('.modal-content'))) return;
                 if (window.hoverModal && (typeof window.hoverModal.hide === 'function' || typeof window.hoverModal.close === 'function')) {
-                    try { if(window.hoverModal.hide) window.hoverModal.hide(250); else window.hoverModal.close(); } catch(err) { console.error('hoverModal.hide error', err); }
+                    try { if(window.hoverModal.hide) window.hoverModal.hide(0); else window.hoverModal.close(); } catch(err) { console.error('hoverModal.hide error', err); }
                 }
             });
             grid.__hover_delegation_installed = true;
