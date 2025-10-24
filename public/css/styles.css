@@ -794,7 +794,7 @@ button:focus {
     position: absolute;
     background: linear-gradient(rgb(0, 0, 0) 72.64%, rgb(20, 20, 20) 100%);
     width: calc(var(--item-width) * var(--modal-scale));
-    height: calc(var(--item-height) * var(--modal-scale));
+    /* height: calc(var(--item-height) * var(--modal-scale)); */
     border-radius: 2px;
     /* softer shadow to match carousel feel */
     box-shadow: 0 10px 30px rgba(0,0,0,0.6);
@@ -869,7 +869,7 @@ button:focus {
 .modal-body {
     padding: 15px;
     color: white;
-    height: calc(100% - 42.25%);
+    /* height: calc(100% - 42.25%); */
     overflow-y: auto;
 }
 
@@ -2007,11 +2007,11 @@ button:focus {
     position: absolute;
     background: linear-gradient(rgb(0, 0, 0) 72.64%, rgb(20, 20, 20) 100%);
     width: calc(var(--item-width) * var(--modal-scale));
-    height: calc(var(--item-height) * var(--modal-scale));
+    /* height: calc(var(--item-height) * var(--modal-scale)); */
     border-radius: 2px;
     /* softer shadow to match carousel feel */
     box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-    overflow: hidden;
+    /* overflow: hidden; */
     transform-origin: center;
     opacity: 0;
     /* include centering translate so JS doesn't need to overwrite transform */
@@ -2079,9 +2079,9 @@ button:focus {
 }
 
 .modal-body {
-    padding: 15px;
+    padding: 0px 15px;
     color: white;
-    height: calc(100% - 42.25%);
+    /* height: calc(100% - 42.25%); */
     overflow-y: auto;
 }
 
