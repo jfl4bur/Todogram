@@ -52,13 +52,35 @@ class HoverModal {
                     if (m.type === 'attributes' && (m.attributeName === 'style' || m.attributeName === 'class')) {
                         const left = this.modalContent.style.left;
                         const top = this.modalContent.style.top;
-                        // Si detectamos un cambio en left/top, loggear con traza breve
-                        if (left || top) {
-                            try {
-                                // Construir una traza de stack mínima para localizar el origen
-                                const err = new Error('hover-modal: detected style change on modal-content');
-                                console.warn('hover-modal: style changed while visible ->', { left, top }, err.stack.split('\n').slice(0,4).join('\n'));
-                            } catch (e) { console.warn('hover-modal: style change detected', { left, top }); }
+                        // Si detectamos un cambio en left/top, revertirlo a la posición
+                        // fija calculada en show(), y loggear con traza breve (throttle).
+                        if ((left || top) && this._fixedLeft != null && this._fixedTop != null) {
+                            const curLeft = left || getComputedStyle(this.modalContent).left;
+                            const curTop = top || getComputedStyle(this.modalContent).top;
+                            if (curLeft !== this._fixedLeft || curTop !== this._fixedTop) {
+                                try {
+                                    this.modalContent.style.left = this._fixedLeft;
+                                    this.modalContent.style.top = this._fixedTop;
+                                } catch (e) {}
+                                const now = Date.now();
+                                if (!this._lastOverrideLogTime || now - this._lastOverrideLogTime > 500) {
+                                    this._lastOverrideLogTime = now;
+                                    try {
+                                        const err = new Error('hover-modal: reverted external style change on modal-content');
+                                        console.warn('hover-modal: reverted external style change ->', { fromLeft: curLeft, fromTop: curTop, toLeft: this._fixedLeft, toTop: this._fixedTop }, err.stack.split('\n').slice(0,4).join('\n'));
+                                    } catch (e) {
+                                        console.warn('hover-modal: reverted external style change', { fromLeft: curLeft, fromTop: curTop, toLeft: this._fixedLeft, toTop: this._fixedTop });
+                                    }
+                                }
+                            }
+                        } else {
+                            // Si no tenemos una posición fija registrada, solo loguear la detección
+                            if (left || top) {
+                                try {
+                                    const err = new Error('hover-modal: detected style change on modal-content');
+                                    console.warn('hover-modal: style changed while visible ->', { left, top }, err.stack.split('\n').slice(0,4).join('\n'));
+                                } catch (e) { console.warn('hover-modal: style change detected', { left, top }); }
+                            }
                         }
                     }
                 }
@@ -67,6 +89,11 @@ class HoverModal {
         } catch (e) {
             // ignore if MutationObserver unsupported or fails
         }
+
+        // Estado para mantener posición fija cuando el modal está visible
+        this._fixedLeft = null;
+        this._fixedTop = null;
+        this._lastOverrideLogTime = 0;
     }
 
     show(item, itemElement) {
@@ -214,6 +241,10 @@ class HoverModal {
         this.modalContent.style.left = `${leftPx}px`;
         this.modalContent.style.top = `${topPx}px`;
 
+    // Record fixed position so MutationObserver can revert external changes
+    this._fixedLeft = this.modalContent.style.left;
+    this._fixedTop = this.modalContent.style.top;
+
         // Use inline transform/opacity for the show animation so it's controlled
         // by JS and not by stylesheet transforms that may be overridden.
         try {
@@ -241,6 +272,9 @@ class HoverModal {
                 const ty = Math.round(pos.top - (mh / 2));
                 this.modalContent.style.left = `${lx}px`;
                 this.modalContent.style.top = `${ty}px`;
+                // Update fixed values on resize
+                this._fixedLeft = this.modalContent.style.left;
+                this._fixedTop = this.modalContent.style.top;
             };
             window.addEventListener('resize', this._onWindowResize);
         }
@@ -269,6 +303,9 @@ class HoverModal {
             window.hoverModalItem = null;
             this._currentItem = null;
             this._currentOrigin = null;
+            // clear fixed position state
+            this._fixedLeft = null;
+            this._fixedTop = null;
             // remove resize handler when modal fully closed
             if (this._onWindowResize) {
                 window.removeEventListener('resize', this._onWindowResize);
