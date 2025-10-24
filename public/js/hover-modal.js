@@ -143,13 +143,13 @@ class HoverModal {
         `;
         
         // show overlay first so computed styles (width) are available for accurate positioning
-    // Allow pointer events on overlay so modalContent can receive mouseenter/mouseleave reliably
-    this.modalOverlay.style.display = 'block';
-    this.modalOverlay.style.pointerEvents = 'auto';
+        // Do not decide pointer-events until we know whether the modalContent will
+        // remain inside the overlay or be moved into the carousel container.
+        this.modalOverlay.style.display = 'block';
         // force reflow so computed sizes are correct
         void this.modalContent.offsetWidth;
 
-        // If possible, move the modalContent into the carouselContainer so the browser
+    // If possible, move the modalContent into the carouselContainer so the browser
         // will move it synchronously with container scrolling (no JS lag).
         try {
             if (this.carouselContainer && this.modalContent.parentElement !== this.carouselContainer && this.carouselContainer !== document.body) {
@@ -182,6 +182,19 @@ class HoverModal {
             window.addEventListener('scroll', this._onScroll, true);
             window.addEventListener('resize', this._onResize);
         }
+
+        // Decide whether overlay should accept pointer events. If modalContent
+        // is inside the overlay (original behavior), let the overlay receive
+        // pointer events so mouseenter/mouseleave on modal work. If we moved
+        // the modal out, disable pointer events on the overlay so it doesn't
+        // block clicks to the page (modalContent itself will receive events).
+        try {
+            if (this.modalContent.parentElement === this._originalParent) {
+                this.modalOverlay.style.pointerEvents = 'auto';
+            } else {
+                this.modalOverlay.style.pointerEvents = 'none';
+            }
+        } catch (e) {}
 
         // Store current item and origin for use by delegated handlers
         this._currentItem = item;
@@ -341,12 +354,19 @@ class HoverModal {
             leftPosition = rect.left + (rect.width / 2);
         }
         
-        if (leftPosition - (modalWidth / 2) < carouselRect.left) {
-            leftPosition = carouselRect.left + (modalWidth / 2);
-        }
-        
-        if (leftPosition + (modalWidth / 2) > carouselRect.right) {
-            leftPosition = carouselRect.right - (modalWidth / 2);
+        // Compute boundaries differently depending on coordinate space
+        if (this.modalContent.parentElement === this.carouselContainer) {
+            const minLeft = (modalWidth / 2);
+            const maxLeft = (carouselRect.width - (modalWidth / 2));
+            if (leftPosition < minLeft) leftPosition = minLeft;
+            if (leftPosition > maxLeft) leftPosition = maxLeft;
+        } else {
+            if (leftPosition - (modalWidth / 2) < carouselRect.left) {
+                leftPosition = carouselRect.left + (modalWidth / 2);
+            }
+            if (leftPosition + (modalWidth / 2) > carouselRect.right) {
+                leftPosition = carouselRect.right - (modalWidth / 2);
+            }
         }
         
         let topPosition;
