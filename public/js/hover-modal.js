@@ -154,15 +154,37 @@ class HoverModal {
         // Determine the best container for this item: prefer motion (transform) containers
         // then scrollable containers, then fallbacks.
         try {
-            const targetScroll = this.findMotionContainer(itemElement) || this.findScrollContainer(itemElement) || this.carouselContainer || document.body;
+            const motionContainer = this.findMotionContainer(itemElement);
+            const scrollContainer = this.findScrollContainer(itemElement);
+            const targetScroll = motionContainer || scrollContainer || this.carouselContainer || document.body;
             this._activeScrollContainer = targetScroll;
-            if (this._activeScrollContainer && this.modalContent.parentElement !== this._activeScrollContainer && this._activeScrollContainer !== document.body) {
-                const cs = getComputedStyle(this._activeScrollContainer);
-                if (cs.position === 'static') {
+
+            // Decide whether we should append the modal into the container.
+            // - If it's a motion container (uses transforms) we append so modal moves natively.
+            // - If it's a scroll container, only append if its overflow allows visible overflow
+            //   (otherwise the modal will be clipped). If it would be clipped, keep modal
+            //   in the overlay and listen to that container's scroll events to update position.
+            let shouldAppend = false;
+            if (motionContainer) {
+                shouldAppend = true;
+            } else if (scrollContainer) {
+                const cs = getComputedStyle(scrollContainer);
+                const overflowY = cs.overflowY || cs.overflow;
+                if (overflowY === 'visible') shouldAppend = true;
+            }
+
+            if (shouldAppend && this._activeScrollContainer && this.modalContent.parentElement !== this._activeScrollContainer && this._activeScrollContainer !== document.body) {
+                const cs2 = getComputedStyle(this._activeScrollContainer);
+                if (cs2.position === 'static') {
                     this._activeScrollContainer.style.position = 'relative';
                     this._carouselPositionChanged = true;
                 }
                 this._activeScrollContainer.appendChild(this.modalContent);
+            } else {
+                // Ensure modal remains in original parent (overlay) so it can overflow freely
+                if (this.modalContent.parentElement !== this._originalParent) {
+                    this._originalParent.appendChild(this.modalContent);
+                }
             }
         } catch (e) {}
 
@@ -179,13 +201,21 @@ class HoverModal {
         // If modalContent is inside the same scroll container as the item, the
         // browser will move it natively during scroll and we don't need a window
         // scroll handler (avoids JS-driven lag). Otherwise keep listeners.
-        if (this._activeScrollContainer && this.modalContent.parentElement === this._activeScrollContainer && this._activeScrollContainer !== document.body) {
-            // no global scroll listener needed
+        // Attach listeners depending on where the modal is placed.
+        // If modalContent is appended into the active container, we don't need a global scroll listener.
+        // If not appended (modal sits in overlay) but the active container scrolls/moves, listen to that container.
+        try {
             window.addEventListener('resize', this._onResize);
-        } else {
-            window.addEventListener('scroll', this._onScroll, true);
-            window.addEventListener('resize', this._onResize);
-        }
+            if (this._activeScrollContainer && this.modalContent.parentElement === this._activeScrollContainer && this._activeScrollContainer !== document.body) {
+                // appended inside container: no extra scroll handler
+            } else if (this._activeScrollContainer && this._activeScrollContainer !== document.body) {
+                // listen to the actual container's scroll events for immediate updates
+                this._activeScrollContainer.addEventListener('scroll', this._onScroll, { passive: true });
+            } else {
+                // fallback to window-level scroll capture
+                window.addEventListener('scroll', this._onScroll, true);
+            }
+        } catch (e) {}
 
         // Decide whether overlay should accept pointer events. If modalContent
         // is inside the overlay (original behavior), let the overlay receive
@@ -225,6 +255,12 @@ class HoverModal {
             try {
                 window.removeEventListener('scroll', this._onScroll, true);
                 window.removeEventListener('resize', this._onResize);
+            } catch (e) {}
+            // Remove any scroll listener attached to the active scroll container
+            try {
+                if (this._activeScrollContainer && this._activeScrollContainer !== document.body) {
+                    this._activeScrollContainer.removeEventListener('scroll', this._onScroll);
+                }
             } catch (e) {}
             // restore modalContent to its original parent if we moved it
             try {
