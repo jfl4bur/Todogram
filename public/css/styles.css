@@ -791,11 +791,7 @@ button:focus {
 }
 
 .modal-content {
-    /* Use fixed positioning so the hover modal stays fixed in the viewport
-       even when the page is scrolled. JS will compute top/left in viewport
-       coordinates (getBoundingClientRect) so the modal stays anchored to
-       the hovered item visually. */
-    position: fixed;
+    position: absolute;
     background: linear-gradient(rgb(0, 0, 0) 72.64%, rgb(20, 20, 20) 100%);
     width: calc(var(--item-width) * var(--modal-scale));
     height: calc(var(--item-height) * var(--modal-scale));
@@ -835,15 +831,6 @@ button:focus {
 
 .modal-content.show .modal-backdrop {
     opacity: 1;
-}
-
-/* Force hover modal to be fixed to the viewport so it doesn't move with page scroll.
-   Target only modal content that is a direct child of .modal-overlay to avoid
-   affecting other modals that may rely on absolute positioning. */
-.modal-overlay > .modal-content {
-    position: fixed !important;
-    /* keep centering transform behavior */
-    transform: translate(-50%, -50%) translateY(0);
 }
 
 .modal-header {

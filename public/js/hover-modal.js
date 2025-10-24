@@ -1,60 +1,9 @@
 class HoverModal {
     constructor() {
-        // Prefer a unique, runtime-created overlay to avoid interference from
-        // other scripts or duplicated markup. We'll create elements with
-        // stable but unique IDs and classes so existing CSS applies.
-        const AUTO_IDS = {
-            overlay: 'hover-modal-overlay-auto',
-            content: 'hover-modal-content-auto',
-            backdrop: 'hover-modal-backdrop-auto',
-            body: 'hover-modal-body-auto'
-        };
-
-        // If not already present, create the auto overlay elements and append to body
-        if (!document.getElementById(AUTO_IDS.overlay)) {
-            try {
-                const ov = document.createElement('div');
-                ov.id = AUTO_IDS.overlay;
-                // include the generic modal class so existing CSS applies, but keep our
-                // namespaced class so we can still target it uniquely if needed
-                ov.className = 'modal-overlay hover-modal-overlay-auto';
-                ov.style.display = 'none';
-                ov.style.pointerEvents = 'none';
-                // ensure on-top
-                ov.style.zIndex = '12001';
-
-                const cont = document.createElement('div');
-                cont.id = AUTO_IDS.content;
-                cont.className = 'modal-content hover-modal-content-auto';
-                // content will be positioned by JS; keep pointer-events enabled when shown
-
-                const header = document.createElement('div');
-                header.className = 'modal-header';
-                const img = document.createElement('img');
-                img.id = AUTO_IDS.backdrop;
-                img.className = 'modal-backdrop hover-modal-backdrop-auto';
-                img.src = '';
-                header.appendChild(img);
-
-                const body = document.createElement('div');
-                body.id = AUTO_IDS.body;
-                body.className = 'modal-body hover-modal-body-auto';
-
-                cont.appendChild(header);
-                cont.appendChild(body);
-                ov.appendChild(cont);
-                document.body.appendChild(ov);
-            } catch (e) {
-                // ignore creation errors and fall back to existing DOM
-            }
-        }
-
-    // Prefer our auto-created elements. Do NOT fall back to generic IDs
-    // such as '#modal-content' to avoid interference from other scripts.
-    this.modalOverlay = document.getElementById(AUTO_IDS.overlay);
-    this.modalContent = document.getElementById(AUTO_IDS.content);
-    this.modalBackdrop = document.getElementById(AUTO_IDS.backdrop);
-    this.modalBody = document.getElementById(AUTO_IDS.body);
+        this.modalOverlay = document.getElementById('modal-overlay');
+        this.modalContent = document.getElementById('modal-content');
+        this.modalBackdrop = document.getElementById('modal-backdrop');
+        this.modalBody = document.getElementById('modal-body');
     // Try common carousel/container selectors; fallback to body so positioning still works
     this.carouselContainer = document.querySelector('.carousel-container') || document.querySelector('.catalogo-grid') || document.querySelector('#catalogo-grid-page') || document.body;
         this.activeItem = null;
@@ -67,16 +16,6 @@ class HoverModal {
             console.error("Elementos del hover modal no encontrados");
             return;
         }
-        // Ensure the overlay is a direct child of document.body so that
-        // `position: fixed` behaves relative to the viewport and is not
-        // affected by ancestor transforms/filters which create containing blocks.
-        try {
-            if (this.modalOverlay && this.modalOverlay.parentNode !== document.body) {
-                document.body.appendChild(this.modalOverlay);
-            }
-        } catch (e) {
-            // ignore if append fails for any reason
-        }
         if (!this.carouselContainer) {
             console.warn('HoverModal: carousel container no encontrado — usando document.body como fallback');
             this.carouselContainer = document.body;
@@ -88,109 +27,14 @@ class HoverModal {
         // track the currently shown item and its origin element
         this._currentItem = null;
         this._currentOrigin = null;
+        // Bound handlers for origin item (so we can add/remove them per-item)
+        this._originMouseEnterBound = null;
+        this._originMouseLeaveBound = null;
 
         // Attach delegated listeners once
         this.modalContent.addEventListener('mouseenter', this._onMouseEnter);
         this.modalContent.addEventListener('mouseleave', this._onMouseLeave);
         this.modalContent.addEventListener('click', this._onContentClick);
-
-        // Instrumentación: observar cambios en atributos style para detectar
-        // si otro script actualiza left/top continuamente (causa 'pegado' al puntero)
-        try {
-            this._mutationObserver = new MutationObserver((mutations) => {
-                if (!this.isVisible) return; // solo interesan cambios mientras está visible
-                for (const m of mutations) {
-                    if (m.type === 'attributes' && (m.attributeName === 'style' || m.attributeName === 'class')) {
-                        const left = this.modalContent.style.left;
-                        const top = this.modalContent.style.top;
-                        // Si detectamos un cambio en style o class, comprobaremos
-                        // el estilo computado y forzaremos left/top/position/transform
-                        // con prioridad !important para neutralizar cambios externos
-                        const comp = getComputedStyle(this.modalContent);
-                        const compLeft = comp.left;
-                        const compTop = comp.top;
-                        const compPos = comp.position;
-                        const compTransform = comp.transform;
-
-                        const needFix = (this._fixedLeft != null && this._fixedTop != null) && (
-                            compLeft !== this._fixedLeft || compTop !== this._fixedTop || compPos !== 'fixed' || (compTransform && compTransform !== 'none' && compTransform.indexOf('translateY') === -1)
-                        );
-
-                        if (needFix) {
-                            try {
-                                // force left/top/position with important priority
-                                this.modalContent.style.setProperty('position', 'fixed', 'important');
-                                this.modalOverlay && this.modalOverlay.style && this.modalOverlay.style.setProperty && this.modalOverlay.style.setProperty('position', 'fixed', 'important');
-                                this.modalContent.style.setProperty('left', this._fixedLeft, 'important');
-                                this.modalContent.style.setProperty('top', this._fixedTop, 'important');
-                                // ensure transform is our animation-only value
-                                this.modalContent.style.setProperty('transform', 'translateY(0)', 'important');
-                            } catch (e) {}
-                            const now2 = Date.now();
-                            if (!this._lastOverrideLogTime || now2 - this._lastOverrideLogTime > 500) {
-                                this._lastOverrideLogTime = now2;
-                                try {
-                                    const err2 = new Error('hover-modal: forced important override');
-                                    console.warn('hover-modal: forced important override ->', { left: this._fixedLeft, top: this._fixedTop, pos: 'fixed' }, err2.stack.split('\n').slice(0,4).join('\n'));
-                                } catch (e) { console.warn('hover-modal: forced important override', { left: this._fixedLeft, top: this._fixedTop }); }
-                            }
-                        } else {
-                            // If not needFix but style/class mutated, optionally log for diagnosis
-                            if (left || top) {
-                                try {
-                                    const err = new Error('hover-modal: detected style/class mutation on modal-content');
-                                    console.warn('hover-modal: mutation detected ->', { left, top, compLeft, compTop, compPos, compTransform }, err.stack.split('\n').slice(0,4).join('\n'));
-                                } catch (e) { console.warn('hover-modal: mutation detected', { left, top, compLeft, compTop, compPos, compTransform }); }
-                            }
-                        }
-                    }
-                }
-            });
-            this._mutationObserver.observe(this.modalContent, { attributes: true, attributeFilter: ['style','class'] });
-        } catch (e) {
-            // ignore if MutationObserver unsupported or fails
-        }
-
-        // Debug hooks: intercept style writes to detect who is changing our modal's styles.
-        // We wrap CSSStyleDeclaration.prototype.setProperty and Element.prototype.setAttribute
-        // while the modal instance exists, and restore them on close(). This is temporary
-        // instrumentation to help trace external writers.
-        try {
-            this._debugHooksInstalled = false;
-            this._originalSetProperty = CSSStyleDeclaration.prototype.setProperty;
-            this._originalSetAttribute = Element.prototype.setAttribute;
-            const self = this;
-            CSSStyleDeclaration.prototype.setProperty = function(name, value, priority) {
-                try {
-                    // 'this' is the CSSStyleDeclaration; check if it's the style of our modal
-                    if ((self.modalContent && this === self.modalContent.style) || (self.modalOverlay && this === self.modalOverlay.style)) {
-                        const st = (new Error()).stack;
-                        console.warn('hover-modal: CSSStyleDeclaration.setProperty called on modal style', { name, value, priority }, st.split('\n').slice(0,6).join('\n'));
-                    }
-                } catch (e) {}
-                return self._originalSetProperty.apply(this, arguments);
-            };
-            Element.prototype.setAttribute = function(attrName, val) {
-                try {
-                    if ((self.modalContent && this === self.modalContent && attrName === 'style') || (self.modalOverlay && this === self.modalOverlay && attrName === 'style')) {
-                        const st = (new Error()).stack;
-                        console.warn('hover-modal: Element.setAttribute(style) called on modal element', { attrName, val }, st.split('\n').slice(0,6).join('\n'));
-                    }
-                } catch (e) {}
-                return self._originalSetAttribute.apply(this, arguments);
-            };
-            this._debugHooksInstalled = true;
-        } catch (e) {
-            // If wrapping fails (very old browsers or CSP), ignore
-            this._debugHooksInstalled = false;
-        }
-
-        // Estado para mantener posición fija cuando el modal está visible
-        this._fixedLeft = null;
-        this._fixedTop = null;
-        this._lastOverrideLogTime = 0;
-        this._scrollRaf = null;
-        this._onScroll = null;
     }
 
     show(item, itemElement) {
@@ -213,9 +57,6 @@ class HoverModal {
 
     // cancel any pending hide
     this.cancelHide();
-    // remember whether the modal was visible BEFORE this call —
-    // we must not early-return for the first show() invocation.
-    const alreadyVisible = !!this.isVisible;
     window.isModalOpen = true;
     this.isVisible = true;
         
@@ -297,164 +138,41 @@ class HoverModal {
             <p class="description">${item.description}</p>
         `;
         
-        // show overlay first so computed styles (width) are available for accurate positioning
+        // show overlay first so computed styles (width/height) are available for accurate positioning
     // Allow pointer events on overlay so modalContent can receive mouseenter/mouseleave reliably
     this.modalOverlay.style.display = 'block';
     this.modalOverlay.style.pointerEvents = 'auto';
+        // Ensure the modal uses fixed positioning so it stays in the same viewport spot
+        // (we compute coordinates from the item's boundingClientRect)
+        this.modalContent.style.position = 'fixed';
         // force reflow so computed sizes are correct
         void this.modalContent.offsetWidth;
 
+        const position = this.calculateModalPosition(itemElement);
 
-        // If modal was already visible BEFORE this call, update content but keep
-        // its current position (do not recompute left/top). This prevents the
-        // modal from 'siguiendo' al ratón si show() es invocado repetidamente
-        // por re-renders/autoplay/etc. IMPORTANT: use alreadyVisible (the
-        // previous state) so the initial show() still computes position.
-        if (alreadyVisible) {
-            this.cancelHide();
-            this._currentItem = item;
-            // keep existing origin so position stays fixed; only update if not set
-            this._currentOrigin = this._currentOrigin || itemElement;
-            window.activeItem = item;
-            // ensure 'show' class is present so it remains visible
-            this.modalContent.classList.add('show');
-                // If the same origin is already shown, do not recompute position
-                // (prevents the modal following the pointer when the page scrolls
-                // and show() is called repeatedly). Preserve the existing fixed
-                // left/top values and bail out early.
-                if (this._currentOrigin === itemElement) {
-                    this._fixedLeft = this._fixedLeft || getComputedStyle(this.modalContent).left || this.modalContent.style.left;
-                    this._fixedTop = this._fixedTop || getComputedStyle(this.modalContent).top || this.modalContent.style.top;
-                    return;
-                }
-            return;
-        }
+        // position modal (keep transform for centering in CSS)
+        this.modalContent.style.left = `${position.left}px`;
+        this.modalContent.style.top = `${position.top}px`;
 
-        // If the origin element provided a cached hover coordinates (dataset),
-        // prefer those stable coordinates. This prevents jumps when the
-        // carousel/layout moves between mouseenter and the delayed show().
-        let position;
+        // Attach origin item listeners so leaving the item hides the modal and re-enter cancels hide
         try {
-            if (itemElement && itemElement.dataset && itemElement.dataset.hoverLeft && itemElement.dataset.hoverTop) {
-                const left = Number(itemElement.dataset.hoverLeft);
-                const top = Number(itemElement.dataset.hoverTop);
-                if (!Number.isNaN(left) && !Number.isNaN(top)) {
-                    position = { left: left, top: top };
-                    // remove the cached coords to avoid stale reuse
-                    try { delete itemElement.dataset.hoverLeft; delete itemElement.dataset.hoverTop; } catch (e) {}
-                }
+            // remove any previous origin listeners
+            if (this._currentOrigin && this._originMouseLeaveBound) {
+                this._currentOrigin.removeEventListener('mouseleave', this._originMouseLeaveBound);
+                this._currentOrigin.removeEventListener('mouseenter', this._originMouseEnterBound);
             }
-        } catch (e) { position = undefined; }
-        if (!position) position = this.calculateModalPosition(itemElement);
+        } catch (e) { /* ignore */ }
 
-        // Compute modal size and position the top-left corner explicitly so we
-        // avoid relying on CSS translate(-50%,-50%) which can behave oddly when
-        // ancestor elements have transforms or when other scripts override styles.
-        const computed = getComputedStyle(this.modalContent);
-        const modalWidth = parseFloat(computed.width) || this.modalContent.offsetWidth;
-        const modalHeight = parseFloat(computed.height) || this.modalContent.offsetHeight;
-
-        // position.left/top returned are the center coordinates (viewport-based).
-        const leftPx = Math.round(position.left - (modalWidth / 2));
-        const topPx = Math.round(position.top - (modalHeight / 2));
-
-        // Apply explicit left/top (viewport coordinates) using important to
-        // make it harder for other styles/scripts to override.
-        try {
-            this.modalContent.style.setProperty('left', `${leftPx}px`, 'important');
-            this.modalContent.style.setProperty('top', `${topPx}px`, 'important');
-            this.modalContent.style.setProperty('position', 'fixed', 'important');
-        } catch (e) {
-            // fallback
-            this.modalContent.style.left = `${leftPx}px`;
-            this.modalContent.style.top = `${topPx}px`;
-            try { this.modalContent.style.position = 'fixed'; } catch (e) {}
-        }
-
-    // Record fixed position so MutationObserver can revert external changes
-    this._fixedLeft = getComputedStyle(this.modalContent).left || this.modalContent.style.left;
-    this._fixedTop = getComputedStyle(this.modalContent).top || this.modalContent.style.top;
-
-        // Use inline transform/opacity for the show animation so it's controlled
-        // by JS and not by stylesheet transforms that may be overridden.
-        try {
-            this.modalContent.style.transition = 'opacity 300ms ease, transform 300ms ease';
-            this.modalContent.style.transform = 'translateY(20px)';
-            this.modalContent.style.opacity = '0';
-            // force reflow
-            void this.modalContent.offsetWidth;
-            this.modalContent.style.opacity = '1';
-            this.modalContent.style.transform = 'translateY(0)';
-        } catch (e) {
-            // ignore if inline style setting fails
-        }
-
-        // Ensure modal uses fixed positioning (inline) so ancestor rules can't
-        // change its positioning behavior. Also ensure no centering translate
-        // interferes by setting transform explicitly (we use left/top).
-        try {
-            this.modalContent.style.position = 'fixed';
-            this.modalOverlay.style.position = 'fixed';
-            // Remove CSS centering transform to avoid double offsets; we keep
-            // a translateY animation only.
-            // Note: we do not set translate(-50%,-50%) so left/top represent
-            // the modal's top-left corner.
-            // Keep pointer events enabled for interaction.
-            this.modalContent.style.pointerEvents = 'auto';
-        } catch (e) {}
-
-        // Scroll enforcement: during scroll, re-apply the fixed left/top values
-        // using RAF to prevent the modal from being moved by other scripts or
-        // by layout changes. This is throttled and removed on close.
-        if (!this._onScroll) {
-            this._onScroll = () => {
-                if (!this.isVisible) return;
-                if (this._scrollRaf) return;
-                this._scrollRaf = window.requestAnimationFrame(() => {
-                    try {
-                            if (this._fixedLeft != null && this._fixedTop != null) {
-                            try {
-                                this.modalContent.style.setProperty('left', this._fixedLeft, 'important');
-                                this.modalContent.style.setProperty('top', this._fixedTop, 'important');
-                                this.modalContent.style.setProperty('position', 'fixed', 'important');
-                            } catch (e) {
-                                this.modalContent.style.left = this._fixedLeft;
-                                this.modalContent.style.top = this._fixedTop;
-                                try { this.modalContent.style.position = 'fixed'; } catch (e) {}
-                            }
-                        }
-                    } catch (e) {}
-                    this._scrollRaf = null;
-                });
+        if (itemElement && itemElement instanceof HTMLElement) {
+            this._originMouseLeaveBound = (e) => {
+                // schedule hide when leaving origin; if pointer moves into modal this.modalContent, modal's mouseenter will cancel
+                this.hide();
             };
-            try { window.addEventListener('scroll', this._onScroll, { passive: true }); } catch(e){}
-        }
-
-        // Recalculate on window resize to keep modal within viewport bounds
-        // (optional; does not run on scroll so modal stays fixed once opened)
-        if (!this._onWindowResize) {
-            this._onWindowResize = () => {
-                if (!this.isVisible) return;
-                const pos = this.calculateModalPosition(this._currentOrigin || itemElement);
-                const computed2 = getComputedStyle(this.modalContent);
-                const mw = parseFloat(computed2.width) || this.modalContent.offsetWidth;
-                const mh = parseFloat(computed2.height) || this.modalContent.offsetHeight;
-                const lx = Math.round(pos.left - (mw / 2));
-                const ty = Math.round(pos.top - (mh / 2));
-                try {
-                    this.modalContent.style.setProperty('left', `${lx}px`, 'important');
-                    this.modalContent.style.setProperty('top', `${ty}px`, 'important');
-                    this.modalContent.style.setProperty('position', 'fixed', 'important');
-                } catch (e) {
-                    this.modalContent.style.left = `${lx}px`;
-                    this.modalContent.style.top = `${ty}px`;
-                    try { this.modalContent.style.position = 'fixed'; } catch (e) {}
-                }
-                // Update fixed values on resize
-                this._fixedLeft = getComputedStyle(this.modalContent).left || this.modalContent.style.left;
-                this._fixedTop = getComputedStyle(this.modalContent).top || this.modalContent.style.top;
+            this._originMouseEnterBound = (e) => {
+                this.cancelHide();
             };
-            window.addEventListener('resize', this._onWindowResize);
+            itemElement.addEventListener('mouseleave', this._originMouseLeaveBound);
+            itemElement.addEventListener('mouseenter', this._originMouseEnterBound);
         }
 
         // then add 'show' class to trigger CSS transition
@@ -481,33 +199,18 @@ class HoverModal {
             window.hoverModalItem = null;
             this._currentItem = null;
             this._currentOrigin = null;
-            // clear fixed position state
-            this._fixedLeft = null;
-            this._fixedTop = null;
-            // remove resize handler when modal fully closed
-            if (this._onWindowResize) {
-                window.removeEventListener('resize', this._onWindowResize);
-                this._onWindowResize = null;
-            }
-            // remove scroll handler (if present) and any RAF scheduled
-            if (this._onScroll) {
-                try { window.removeEventListener('scroll', this._onScroll); } catch(e){}
-                this._onScroll = null;
-            }
-            if (this._scrollRaf) {
-                try { window.cancelAnimationFrame(this._scrollRaf); } catch(e){}
-                this._scrollRaf = null;
-            }
-            // Restore any debug hooks we installed to avoid leaking prototype wrappers
+            // remove any origin listeners we attached
             try {
-                if (this._debugHooksInstalled) {
-                    if (this._originalSetProperty) CSSStyleDeclaration.prototype.setProperty = this._originalSetProperty;
-                    if (this._originalSetAttribute) Element.prototype.setAttribute = this._originalSetAttribute;
-                    this._debugHooksInstalled = false;
+                if (this._currentOrigin && this._originMouseLeaveBound) {
+                    this._currentOrigin.removeEventListener('mouseleave', this._originMouseLeaveBound);
+                    this._currentOrigin.removeEventListener('mouseenter', this._originMouseEnterBound);
                 }
-            } catch (e) {
-                // silently ignore restore errors
-            }
+            } catch (e) {}
+
+            // reset inline positioning
+            this.modalContent.style.position = '';
+            this.modalContent.style.left = '';
+            this.modalContent.style.top = '';
         }, 320); // match CSS transition duration
     }
 
@@ -592,36 +295,30 @@ class HoverModal {
             return { top: 0, left: 0 };
         }
 
-        // Use viewport coordinates (getBoundingClientRect) and position with
-        // `position: fixed` so the modal stays in the same place while the
-        // page is scrolled. Clamp to viewport edges to avoid overflow.
+        // Use viewport coordinates (getBoundingClientRect gives viewport-relative values)
         const rect = itemElement.getBoundingClientRect();
         const modalStyle = getComputedStyle(this.modalContent);
         const modalWidth = parseFloat(modalStyle.width) || this.modalContent.offsetWidth;
         const modalHeight = parseFloat(modalStyle.height) || this.modalContent.offsetHeight;
 
-        // Center the modal horizontally on the item's center in the viewport
-        let leftPosition = rect.left + (rect.width / 2);
-        // Because CSS uses transform: translate(-50%, -50%), we set left/top to
-        // the center point (in viewport coordinates). We must clamp to viewport
-        // so the modal doesn't go off-screen.
-        const vpWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-        const vpHeight = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
+        // center horizontally on the item's center
+        let leftPosition = rect.left + (rect.width / 2) - (modalWidth / 2);
+        // clamp to viewport
+        const viewportLeft = 0;
+        const viewportRight = window.innerWidth || document.documentElement.clientWidth;
+        if (leftPosition < viewportLeft + 8) leftPosition = viewportLeft + 8; // small padding
+        if (leftPosition + modalWidth > viewportRight - 8) leftPosition = viewportRight - modalWidth - 8;
 
-        // Clamp horizontal center so modal stays fully inside viewport
-        const minCenterX = modalWidth / 2 + 8; // 8px margin
-        const maxCenterX = vpWidth - (modalWidth / 2) - 8;
-        leftPosition = Math.min(Math.max(leftPosition, minCenterX), maxCenterX);
-
-        // Vertical center
-        let topPosition = rect.top + (rect.height / 2);
-        const minCenterY = modalHeight / 2 + 8;
-        const maxCenterY = vpHeight - (modalHeight / 2) - 8;
-        topPosition = Math.min(Math.max(topPosition, minCenterY), maxCenterY);
+        // position vertically so modal is vertically centered on the item's center by default
+        let topPosition = rect.top + (rect.height / 2) - (modalHeight / 2);
+        const viewportTop = 0;
+        const viewportBottom = window.innerHeight || document.documentElement.clientHeight;
+        if (topPosition < viewportTop + 8) topPosition = viewportTop + 8;
+        if (topPosition + modalHeight > viewportBottom - 8) topPosition = viewportBottom - modalHeight - 8;
 
         return {
-            top: topPosition,
-            left: leftPosition
+            top: Math.round(topPosition),
+            left: Math.round(leftPosition)
         };
     }
 
