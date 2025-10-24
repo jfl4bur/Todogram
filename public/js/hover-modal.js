@@ -559,9 +559,19 @@ class HoverModal {
         const videoUrl = actionEl.getAttribute('data-video-url');
         if (window.videoModal) {
             const item = this._currentItem || window.activeItem;
-            // Prefer passing the item object so the video modal can inspect videoIframe/videoIframe1/videoUrl
-            if (item) window.videoModal.play(item);
-            else if (videoUrl) window.videoModal.play(videoUrl);
+            // If the clicked button is the primary action (play movie), prefer the item so VideoModal
+            // can select the best candidate. If it's a secondary button (e.g. trailer), prefer the
+            // explicit data-video-url on the button so the trailer is played instead of any iframe
+            // listed on the item.
+            const isPrimary = actionEl.classList && (actionEl.classList.contains('primary') || (actionEl.closest && actionEl.closest('.primary-action-row')));
+            if (!isPrimary && videoUrl) {
+                // Play the explicit URL (trailer)
+                window.videoModal.play(videoUrl);
+            } else if (item) {
+                window.videoModal.play(item);
+            } else if (videoUrl) {
+                window.videoModal.play(videoUrl);
+            }
         }
     }
 

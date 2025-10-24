@@ -594,11 +594,16 @@ class DetailsModal {
                     } catch (err) { /* ignore */ }
 
                     if (window.videoModal) {
-                        // Prefer passing the full item so video-modal can select candidate urls.
-                        // If item is missing or doesn't contain candidates, fall back to the data attribute.
+                        // If the clicked button is primary (play movie), prefer the item so VideoModal
+                        // can select the best candidate. If it's a secondary button (trailer), prefer
+                        // the explicit data-video-url so the trailer is played instead of any iframe
+                        // listed on the item.
                         try {
+                            const isPrimary = btn.classList && btn.classList.contains('primary');
                             const tried = (item && (item.videoUrl || item.videoIframe || item.videoIframe1));
-                            if (item && tried) {
+                            if (!isPrimary && dataVideo) {
+                                window.videoModal.play(dataVideo);
+                            } else if (item && tried) {
                                 window.videoModal.play(item);
                             } else if (dataVideo) {
                                 window.videoModal.play(dataVideo);
