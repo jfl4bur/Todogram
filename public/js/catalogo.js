@@ -766,31 +766,6 @@
         if (grid && !grid.__hover_delegation_installed) {
             // Show hover with a delay (match carousels behaviour)
             const HOVER_SHOW_DELAY = 900; // ms - same delay used in carousels
-            // Short hide debounce to avoid rapid hide/show when the pointer jitters
-            const HOVER_HIDE_DELAY = 140; // ms - short debounce to avoid toggles
-            let _gridHoverHideTimer = null;
-
-            // Helper: force scale-down on an element (remove hover-zoom, add hover-zoom-closing and cleanup)
-            function _forceScaleDown(el){
-                if(!el || !el.classList) return;
-                try{
-                    // If it's already closing, leave it
-                    el.classList.remove('hover-zoom');
-                    // trigger closing style
-                    el.classList.add('hover-zoom-closing');
-                    // Ensure we remove the closing class after transition
-                    const onEnd = function(ev){
-                        if(ev && ev.target !== el) return;
-                        try{ el.removeEventListener('transitionend', onEnd); }catch(e){}
-                        try{ el.classList.remove('hover-zoom-closing'); }catch(e){}
-                    };
-                    // attach listener once
-                    try{ el.addEventListener('transitionend', onEnd); }catch(e){}
-                    // fallback cleanup in case transitionend doesn't fire
-                    setTimeout(()=>{ try{ el.removeEventListener('transitionend', onEnd); el.classList.remove('hover-zoom-closing'); }catch(e){} }, 420);
-                }catch(e){/* ignore */}
-            }
-
             grid.addEventListener('mouseover', (e) => {
                 const itemEl = e.target.closest('.catalogo-item');
                 if (!itemEl || !grid.contains(itemEl)) return;
@@ -799,16 +774,6 @@
                 const item = findExistingItemById(itemId) || state.allItems.find(x => String(x.id) === String(itemId));
                 // clear any previous timer on this element
                 try { if (itemEl._hoverTimer) { clearTimeout(itemEl._hoverTimer); itemEl._hoverTimer = null; } } catch(e){}
-                // If a hide was scheduled for the grid, cancel it - user moved back quickly
-                try { if(_gridHoverHideTimer) { clearTimeout(_gridHoverHideTimer); _gridHoverHideTimer = null; if(window.hoverModal && window.hoverModal.cancelHide) { try { window.hoverModal.cancelHide(); }catch(_e){} } } } catch(e){}
-                // If another item is currently scaled, ensure it starts scaling down immediately
-                try{
-                    const otherScaled = grid.querySelectorAll('.catalogo-item.hover-zoom, .catalogo-item.hover-zoom-closing');
-                    if(otherScaled && otherScaled.length){
-                        otherScaled.forEach(o=>{ if(o !== itemEl) _forceScaleDown(o); });
-                    }
-                }catch(e){}
-
                 if (item && window.hoverModal && typeof window.hoverModal.show === 'function') {
                     // schedule showing the hover modal after a short delay to match carousel behaviour
                     itemEl._hoverTimer = setTimeout(() => {
@@ -827,21 +792,9 @@
                 if (related && related.closest && related.closest('.catalogo-item')) return;
                 // If the mouse moved into the hover modal itself (or any of its children), do not hide
                 if (related && related.closest && (related.closest('#modal-content') || related.closest('.modal-content'))) return;
-                // Force immediate scale-down on the element we left so it doesn't stay at partial scale
-                try { if(itemEl) _forceScaleDown(itemEl); } catch(e){}
-
-                // Schedule a short hide to avoid rapid toggles when the pointer briefly leaves items
-                try {
-                    if(_gridHoverHideTimer) { clearTimeout(_gridHoverHideTimer); _gridHoverHideTimer = null; }
-                    _gridHoverHideTimer = setTimeout(() => {
-                        try {
-                            if (window.hoverModal && (typeof window.hoverModal.hide === 'function' || typeof window.hoverModal.close === 'function')) {
-                                if(window.hoverModal.hide) window.hoverModal.hide(); else window.hoverModal.close();
-                            }
-                        } catch(err) { console.error('hoverModal.hide error', err); }
-                        _gridHoverHideTimer = null;
-                    }, HOVER_HIDE_DELAY);
-                } catch(e) { console.error('schedule hide error', e); }
+                if (window.hoverModal && (typeof window.hoverModal.hide === 'function' || typeof window.hoverModal.close === 'function')) {
+                    try { if(window.hoverModal.hide) window.hoverModal.hide(250); else window.hoverModal.close(); } catch(err) { console.error('hoverModal.hide error', err); }
+                }
             });
             grid.__hover_delegation_installed = true;
         }
