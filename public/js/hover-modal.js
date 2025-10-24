@@ -148,6 +148,40 @@ class HoverModal {
             // ignore if MutationObserver unsupported or fails
         }
 
+        // Debug hooks: intercept style writes to detect who is changing our modal's styles.
+        // We wrap CSSStyleDeclaration.prototype.setProperty and Element.prototype.setAttribute
+        // while the modal instance exists, and restore them on close(). This is temporary
+        // instrumentation to help trace external writers.
+        try {
+            this._debugHooksInstalled = false;
+            this._originalSetProperty = CSSStyleDeclaration.prototype.setProperty;
+            this._originalSetAttribute = Element.prototype.setAttribute;
+            const self = this;
+            CSSStyleDeclaration.prototype.setProperty = function(name, value, priority) {
+                try {
+                    // 'this' is the CSSStyleDeclaration; check if it's the style of our modal
+                    if ((self.modalContent && this === self.modalContent.style) || (self.modalOverlay && this === self.modalOverlay.style)) {
+                        const st = (new Error()).stack;
+                        console.warn('hover-modal: CSSStyleDeclaration.setProperty called on modal style', { name, value, priority }, st.split('\n').slice(0,6).join('\n'));
+                    }
+                } catch (e) {}
+                return self._originalSetProperty.apply(this, arguments);
+            };
+            Element.prototype.setAttribute = function(attrName, val) {
+                try {
+                    if ((self.modalContent && this === self.modalContent && attrName === 'style') || (self.modalOverlay && this === self.modalOverlay && attrName === 'style')) {
+                        const st = (new Error()).stack;
+                        console.warn('hover-modal: Element.setAttribute(style) called on modal element', { attrName, val }, st.split('\n').slice(0,6).join('\n'));
+                    }
+                } catch (e) {}
+                return self._originalSetAttribute.apply(this, arguments);
+            };
+            this._debugHooksInstalled = true;
+        } catch (e) {
+            // If wrapping fails (very old browsers or CSP), ignore
+            this._debugHooksInstalled = false;
+        }
+
         // Estado para mantener posición fija cuando el modal está visible
         this._fixedLeft = null;
         this._fixedTop = null;
@@ -436,6 +470,16 @@ class HoverModal {
             if (this._scrollRaf) {
                 try { window.cancelAnimationFrame(this._scrollRaf); } catch(e){}
                 this._scrollRaf = null;
+            }
+            // Restore any debug hooks we installed to avoid leaking prototype wrappers
+            try {
+                if (this._debugHooksInstalled) {
+                    if (this._originalSetProperty) CSSStyleDeclaration.prototype.setProperty = this._originalSetProperty;
+                    if (this._originalSetAttribute) Element.prototype.setAttribute = this._originalSetAttribute;
+                    this._debugHooksInstalled = false;
+                }
+            } catch (e) {
+                // silently ignore restore errors
             }
         }, 320); // match CSS transition duration
     }
