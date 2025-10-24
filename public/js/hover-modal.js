@@ -1,9 +1,57 @@
 class HoverModal {
     constructor() {
-        this.modalOverlay = document.getElementById('modal-overlay');
-        this.modalContent = document.getElementById('modal-content');
-        this.modalBackdrop = document.getElementById('modal-backdrop');
-        this.modalBody = document.getElementById('modal-body');
+        // Prefer a unique, runtime-created overlay to avoid interference from
+        // other scripts or duplicated markup. We'll create elements with
+        // stable but unique IDs and classes so existing CSS applies.
+        const AUTO_IDS = {
+            overlay: 'hover-modal-overlay-auto',
+            content: 'hover-modal-content-auto',
+            backdrop: 'hover-modal-backdrop-auto',
+            body: 'hover-modal-body-auto'
+        };
+
+        // If not already present, create the auto overlay elements and append to body
+        if (!document.getElementById(AUTO_IDS.overlay)) {
+            try {
+                const ov = document.createElement('div');
+                ov.id = AUTO_IDS.overlay;
+                ov.className = 'modal-overlay hover-modal-auto';
+                ov.style.display = 'none';
+                ov.style.pointerEvents = 'none';
+                // ensure on-top
+                ov.style.zIndex = '12001';
+
+                const cont = document.createElement('div');
+                cont.id = AUTO_IDS.content;
+                cont.className = 'modal-content hover-modal-auto';
+                // content will be positioned by JS; keep pointer-events enabled when shown
+
+                const header = document.createElement('div');
+                header.className = 'modal-header';
+                const img = document.createElement('img');
+                img.id = AUTO_IDS.backdrop;
+                img.className = 'modal-backdrop hover-modal-auto';
+                img.src = '';
+                header.appendChild(img);
+
+                const body = document.createElement('div');
+                body.id = AUTO_IDS.body;
+                body.className = 'modal-body hover-modal-auto';
+
+                cont.appendChild(header);
+                cont.appendChild(body);
+                ov.appendChild(cont);
+                document.body.appendChild(ov);
+            } catch (e) {
+                // ignore creation errors and fall back to existing DOM
+            }
+        }
+
+        // Use the auto overlay when possible; fall back to existing IDs for compatibility
+        this.modalOverlay = document.getElementById(AUTO_IDS.overlay) || document.getElementById('modal-overlay');
+        this.modalContent = document.getElementById(AUTO_IDS.content) || document.getElementById('modal-content');
+        this.modalBackdrop = document.getElementById(AUTO_IDS.backdrop) || document.getElementById('modal-backdrop');
+        this.modalBody = document.getElementById(AUTO_IDS.body) || document.getElementById('modal-body');
     // Try common carousel/container selectors; fallback to body so positioning still works
     this.carouselContainer = document.querySelector('.carousel-container') || document.querySelector('.catalogo-grid') || document.querySelector('#catalogo-grid-page') || document.body;
         this.activeItem = null;
