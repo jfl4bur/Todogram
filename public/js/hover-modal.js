@@ -177,6 +177,21 @@ class HoverModal {
         // force reflow so computed sizes are correct
         void this.modalContent.offsetWidth;
 
+        // If modal is already visible, update content but keep its current
+        // position (do not recompute left/top). This prevents the modal from
+        // 'siguiendo' al ratón o a re-renders del carrusel que llamen a show()
+        // repetidamente mientras el hover sigue activo.
+        if (this.isVisible) {
+            this.cancelHide();
+            this._currentItem = item;
+            // keep existing origin so position stays fixed; only update if not set
+            this._currentOrigin = this._currentOrigin || itemElement;
+            window.activeItem = item;
+            // ensure 'show' class is present so it remains visible
+            this.modalContent.classList.add('show');
+            return;
+        }
+
         const position = this.calculateModalPosition(itemElement);
 
         // Compute modal size and position the top-left corner explicitly so we
