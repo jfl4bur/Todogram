@@ -20,10 +20,6 @@ class HoverModal {
             console.warn('HoverModal: carousel container no encontrado — usando document.body como fallback');
             this.carouselContainer = document.body;
         }
-        // Keep reference to original parent so we can move modalContent back when closing
-        this._originalParent = this.modalContent.parentElement;
-        this._originalCarouselPosition = null;
-        this._movedToContainer = false;
         // Bind handlers once to avoid multiple attachments when show() is called repeatedly
         this._onMouseLeave = this._onMouseLeave.bind(this);
         this._onContentClick = this._onContentClick.bind(this);
@@ -32,9 +28,12 @@ class HoverModal {
         this._onScroll = this._onScroll.bind(this);
         this._onResize = this._onResize.bind(this);
         this._pendingRAF = false;
-        // track the currently shown item and its origin element
+    // track the currently shown item and its origin element
         this._currentItem = null;
         this._currentOrigin = null;
+    // remember original parent so we can restore DOM position
+    this._originalParent = this.modalContent.parentElement;
+    this._carouselPositionChanged = false;
 
         // Attach delegated listeners once
         this.modalContent.addEventListener('mouseenter', this._onMouseEnter);
@@ -150,23 +149,18 @@ class HoverModal {
         // force reflow so computed sizes are correct
         void this.modalContent.offsetWidth;
 
-        // If the carousel/container is not the body, move the modal into the same container
-        // so it naturally moves with that container's scroll (no JS updates required).
+        // If possible, move the modalContent into the carouselContainer so the browser
+        // will move it synchronously with container scrolling (no JS lag).
         try {
-            if (this.carouselContainer && this.carouselContainer !== document.body && this._originalParent !== this.carouselContainer) {
+            if (this.carouselContainer && this.modalContent.parentElement !== this.carouselContainer && this.carouselContainer !== document.body) {
                 const cs = getComputedStyle(this.carouselContainer);
-                if (cs.position === 'static' || !cs.position) {
-                    // save original so we can restore later
-                    this._originalCarouselPosition = this.carouselContainer.style.position || '';
+                if (cs.position === 'static') {
                     this.carouselContainer.style.position = 'relative';
+                    this._carouselPositionChanged = true;
                 }
                 this.carouselContainer.appendChild(this.modalContent);
-                this._movedToContainer = true;
             }
-        } catch (e) {
-            // if anything fails, fall back to existing behavior (modal remains in overlay)
-            this._movedToContainer = false;
-        }
+        } catch (e) {}
 
         const position = this.calculateModalPosition(itemElement);
 
@@ -177,13 +171,17 @@ class HoverModal {
         // then add 'show' class to trigger CSS transition
         this.modalContent.classList.add('show');
 
-        // Attach scroll/resize listeners only if we didn't move the modal into the scrolling container.
-        // If the modal lives in the same scroller as the item, the browser will move both together without JS.
-        if (!this._movedToContainer) {
-            // Use capture on scroll so we catch scrolls in any ancestor scrolling container
+        // Attach scroll/resize listeners only when necessary.
+        // If modalContent is inside the same scroll container as the item, the
+        // browser will move it natively during scroll and we don't need a window
+        // scroll handler (avoids JS-driven lag). Otherwise keep listeners.
+        if (this.modalContent.parentElement === this.carouselContainer && this.carouselContainer !== document.body) {
+            // no global scroll listener needed
+            window.addEventListener('resize', this._onResize);
+        } else {
             window.addEventListener('scroll', this._onScroll, true);
+            window.addEventListener('resize', this._onResize);
         }
-        window.addEventListener('resize', this._onResize);
 
         // Store current item and origin for use by delegated handlers
         this._currentItem = item;
@@ -211,16 +209,14 @@ class HoverModal {
                 window.removeEventListener('scroll', this._onScroll, true);
                 window.removeEventListener('resize', this._onResize);
             } catch (e) {}
-
-            // If we moved the modal into the carousel container, move it back and restore styles
+            // restore modalContent to its original parent if we moved it
             try {
-                if (this._movedToContainer && this._originalParent) {
+                if (this._originalParent && this.modalContent.parentElement !== this._originalParent) {
                     this._originalParent.appendChild(this.modalContent);
-                    this._movedToContainer = false;
-                    if (this._originalCarouselPosition !== null) {
-                        this.carouselContainer.style.position = this._originalCarouselPosition || '';
-                        this._originalCarouselPosition = null;
-                    }
+                }
+                if (this._carouselPositionChanged && this.carouselContainer) {
+                    this.carouselContainer.style.position = '';
+                    this._carouselPositionChanged = false;
                 }
             } catch (e) {}
         }, 320); // match CSS transition duration
@@ -335,35 +331,28 @@ class HoverModal {
         const rect = itemElement.getBoundingClientRect();
         const carouselRect = this.carouselContainer.getBoundingClientRect();
         const modalWidth = parseFloat(getComputedStyle(this.modalContent).width);
-        // If modalContent was moved inside the carouselContainer, compute coordinates
-        // relative to that container so the modal remains glued to the item during scroll.
-        let leftPosition, topPosition;
-        if (this._movedToContainer) {
-            // left/top relative to container's padding box
+        
+        // If modalContent is a child of the carousel container, we should compute
+        // coordinates relative to that container so the modal moves natively with it.
+        let leftPosition;
+        if (this.modalContent.parentElement === this.carouselContainer) {
             leftPosition = (rect.left - carouselRect.left) + (rect.width / 2);
-
-            // clamp within container bounds
-            if (leftPosition - (modalWidth / 2) < 0) {
-                leftPosition = (modalWidth / 2);
-            }
-
-            if (leftPosition + (modalWidth / 2) > (carouselRect.width)) {
-                leftPosition = (carouselRect.width) - (modalWidth / 2);
-            }
-
+        } else {
+            leftPosition = rect.left + (rect.width / 2);
+        }
+        
+        if (leftPosition - (modalWidth / 2) < carouselRect.left) {
+            leftPosition = carouselRect.left + (modalWidth / 2);
+        }
+        
+        if (leftPosition + (modalWidth / 2) > carouselRect.right) {
+            leftPosition = carouselRect.right - (modalWidth / 2);
+        }
+        
+        let topPosition;
+        if (this.modalContent.parentElement === this.carouselContainer) {
             topPosition = (rect.top - carouselRect.top) + (rect.height / 2);
         } else {
-            // default: coordinates relative to viewport (overlay is fixed)
-            leftPosition = rect.left + (rect.width / 2);
-
-            if (leftPosition - (modalWidth / 2) < carouselRect.left) {
-                leftPosition = carouselRect.left + (modalWidth / 2);
-            }
-
-            if (leftPosition + (modalWidth / 2) > carouselRect.right) {
-                leftPosition = carouselRect.right - (modalWidth / 2);
-            }
-
             topPosition = rect.top + (rect.height / 2);
         }
         
