@@ -318,7 +318,22 @@ class HoverModal {
             return;
         }
 
-        const position = this.calculateModalPosition(itemElement);
+        // If the origin element provided a cached hover coordinates (dataset),
+        // prefer those stable coordinates. This prevents jumps when the
+        // carousel/layout moves between mouseenter and the delayed show().
+        let position;
+        try {
+            if (itemElement && itemElement.dataset && itemElement.dataset.hoverLeft && itemElement.dataset.hoverTop) {
+                const left = Number(itemElement.dataset.hoverLeft);
+                const top = Number(itemElement.dataset.hoverTop);
+                if (!Number.isNaN(left) && !Number.isNaN(top)) {
+                    position = { left: left, top: top };
+                    // remove the cached coords to avoid stale reuse
+                    try { delete itemElement.dataset.hoverLeft; delete itemElement.dataset.hoverTop; } catch (e) {}
+                }
+            }
+        } catch (e) { position = undefined; }
+        if (!position) position = this.calculateModalPosition(itemElement);
 
         // Compute modal size and position the top-left corner explicitly so we
         // avoid relying on CSS translate(-50%,-50%) which can behave oddly when

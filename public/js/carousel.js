@@ -295,6 +295,12 @@ class EpisodiosSeriesCarousel {
                         x: rect.left + rect.width / 2,
                         y: rect.top + rect.height / 2
                     };
+                    // Store stable hover coordinates on the element so delayed show() calls
+                    // can use the original hover position even if the carousel moves later.
+                    try {
+                        div.dataset.hoverLeft = String(Math.round(rect.left + rect.width / 2));
+                        div.dataset.hoverTop = String(Math.round(rect.top + rect.height / 2));
+                    } catch (e) {}
                     this.hoverTimeouts[itemId] = {
                         details: setTimeout(() => {
                             const background = div.querySelector('.detail-background');
