@@ -100,34 +100,44 @@ class HoverModal {
                     if (m.type === 'attributes' && (m.attributeName === 'style' || m.attributeName === 'class')) {
                         const left = this.modalContent.style.left;
                         const top = this.modalContent.style.top;
-                        // Si detectamos un cambio en left/top, revertirlo a la posición
-                        // fija calculada en show(), y loggear con traza breve (throttle).
-                        if ((left || top) && this._fixedLeft != null && this._fixedTop != null) {
-                            const curLeft = left || getComputedStyle(this.modalContent).left;
-                            const curTop = top || getComputedStyle(this.modalContent).top;
-                            if (curLeft !== this._fixedLeft || curTop !== this._fixedTop) {
+                        // Si detectamos un cambio en style o class, comprobaremos
+                        // el estilo computado y forzaremos left/top/position/transform
+                        // con prioridad !important para neutralizar cambios externos
+                        const comp = getComputedStyle(this.modalContent);
+                        const compLeft = comp.left;
+                        const compTop = comp.top;
+                        const compPos = comp.position;
+                        const compTransform = comp.transform;
+
+                        const needFix = (this._fixedLeft != null && this._fixedTop != null) && (
+                            compLeft !== this._fixedLeft || compTop !== this._fixedTop || compPos !== 'fixed' || (compTransform && compTransform !== 'none' && compTransform.indexOf('translateY') === -1)
+                        );
+
+                        if (needFix) {
+                            try {
+                                // force left/top/position with important priority
+                                this.modalContent.style.setProperty('position', 'fixed', 'important');
+                                this.modalOverlay && this.modalOverlay.style && this.modalOverlay.style.setProperty && this.modalOverlay.style.setProperty('position', 'fixed', 'important');
+                                this.modalContent.style.setProperty('left', this._fixedLeft, 'important');
+                                this.modalContent.style.setProperty('top', this._fixedTop, 'important');
+                                // ensure transform is our animation-only value
+                                this.modalContent.style.setProperty('transform', 'translateY(0)', 'important');
+                            } catch (e) {}
+                            const now2 = Date.now();
+                            if (!this._lastOverrideLogTime || now2 - this._lastOverrideLogTime > 500) {
+                                this._lastOverrideLogTime = now2;
                                 try {
-                                    this.modalContent.style.left = this._fixedLeft;
-                                    this.modalContent.style.top = this._fixedTop;
-                                } catch (e) {}
-                                const now = Date.now();
-                                if (!this._lastOverrideLogTime || now - this._lastOverrideLogTime > 500) {
-                                    this._lastOverrideLogTime = now;
-                                    try {
-                                        const err = new Error('hover-modal: reverted external style change on modal-content');
-                                        console.warn('hover-modal: reverted external style change ->', { fromLeft: curLeft, fromTop: curTop, toLeft: this._fixedLeft, toTop: this._fixedTop }, err.stack.split('\n').slice(0,4).join('\n'));
-                                    } catch (e) {
-                                        console.warn('hover-modal: reverted external style change', { fromLeft: curLeft, fromTop: curTop, toLeft: this._fixedLeft, toTop: this._fixedTop });
-                                    }
-                                }
+                                    const err2 = new Error('hover-modal: forced important override');
+                                    console.warn('hover-modal: forced important override ->', { left: this._fixedLeft, top: this._fixedTop, pos: 'fixed' }, err2.stack.split('\n').slice(0,4).join('\n'));
+                                } catch (e) { console.warn('hover-modal: forced important override', { left: this._fixedLeft, top: this._fixedTop }); }
                             }
                         } else {
-                            // Si no tenemos una posición fija registrada, solo loguear la detección
+                            // If not needFix but style/class mutated, optionally log for diagnosis
                             if (left || top) {
                                 try {
-                                    const err = new Error('hover-modal: detected style change on modal-content');
-                                    console.warn('hover-modal: style changed while visible ->', { left, top }, err.stack.split('\n').slice(0,4).join('\n'));
-                                } catch (e) { console.warn('hover-modal: style change detected', { left, top }); }
+                                    const err = new Error('hover-modal: detected style/class mutation on modal-content');
+                                    console.warn('hover-modal: mutation detected ->', { left, top, compLeft, compTop, compPos, compTransform }, err.stack.split('\n').slice(0,4).join('\n'));
+                                } catch (e) { console.warn('hover-modal: mutation detected', { left, top, compLeft, compTop, compPos, compTransform }); }
                             }
                         }
                     }
@@ -287,13 +297,22 @@ class HoverModal {
         const leftPx = Math.round(position.left - (modalWidth / 2));
         const topPx = Math.round(position.top - (modalHeight / 2));
 
-        // Apply explicit left/top (viewport coordinates)
-        this.modalContent.style.left = `${leftPx}px`;
-        this.modalContent.style.top = `${topPx}px`;
+        // Apply explicit left/top (viewport coordinates) using important to
+        // make it harder for other styles/scripts to override.
+        try {
+            this.modalContent.style.setProperty('left', `${leftPx}px`, 'important');
+            this.modalContent.style.setProperty('top', `${topPx}px`, 'important');
+            this.modalContent.style.setProperty('position', 'fixed', 'important');
+        } catch (e) {
+            // fallback
+            this.modalContent.style.left = `${leftPx}px`;
+            this.modalContent.style.top = `${topPx}px`;
+            try { this.modalContent.style.position = 'fixed'; } catch (e) {}
+        }
 
     // Record fixed position so MutationObserver can revert external changes
-    this._fixedLeft = this.modalContent.style.left;
-    this._fixedTop = this.modalContent.style.top;
+    this._fixedLeft = getComputedStyle(this.modalContent).left || this.modalContent.style.left;
+    this._fixedTop = getComputedStyle(this.modalContent).top || this.modalContent.style.top;
 
         // Use inline transform/opacity for the show animation so it's controlled
         // by JS and not by stylesheet transforms that may be overridden.
@@ -332,9 +351,16 @@ class HoverModal {
                 if (this._scrollRaf) return;
                 this._scrollRaf = window.requestAnimationFrame(() => {
                     try {
-                        if (this._fixedLeft != null && this._fixedTop != null) {
-                            this.modalContent.style.left = this._fixedLeft;
-                            this.modalContent.style.top = this._fixedTop;
+                            if (this._fixedLeft != null && this._fixedTop != null) {
+                            try {
+                                this.modalContent.style.setProperty('left', this._fixedLeft, 'important');
+                                this.modalContent.style.setProperty('top', this._fixedTop, 'important');
+                                this.modalContent.style.setProperty('position', 'fixed', 'important');
+                            } catch (e) {
+                                this.modalContent.style.left = this._fixedLeft;
+                                this.modalContent.style.top = this._fixedTop;
+                                try { this.modalContent.style.position = 'fixed'; } catch (e) {}
+                            }
                         }
                     } catch (e) {}
                     this._scrollRaf = null;
@@ -354,11 +380,18 @@ class HoverModal {
                 const mh = parseFloat(computed2.height) || this.modalContent.offsetHeight;
                 const lx = Math.round(pos.left - (mw / 2));
                 const ty = Math.round(pos.top - (mh / 2));
-                this.modalContent.style.left = `${lx}px`;
-                this.modalContent.style.top = `${ty}px`;
+                try {
+                    this.modalContent.style.setProperty('left', `${lx}px`, 'important');
+                    this.modalContent.style.setProperty('top', `${ty}px`, 'important');
+                    this.modalContent.style.setProperty('position', 'fixed', 'important');
+                } catch (e) {
+                    this.modalContent.style.left = `${lx}px`;
+                    this.modalContent.style.top = `${ty}px`;
+                    try { this.modalContent.style.position = 'fixed'; } catch (e) {}
+                }
                 // Update fixed values on resize
-                this._fixedLeft = this.modalContent.style.left;
-                this._fixedTop = this.modalContent.style.top;
+                this._fixedLeft = getComputedStyle(this.modalContent).left || this.modalContent.style.left;
+                this._fixedTop = getComputedStyle(this.modalContent).top || this.modalContent.style.top;
             };
             window.addEventListener('resize', this._onWindowResize);
         }
