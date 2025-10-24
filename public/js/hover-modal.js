@@ -377,22 +377,22 @@ class HoverModal {
         if (!itemElement || !this.carouselContainer) {
             return { top: 0, left: 0 };
         }
-
         const rect = itemElement.getBoundingClientRect();
-        const carouselRect = this.carouselContainer.getBoundingClientRect();
+        const container = this._activeScrollContainer || this.carouselContainer || document.body;
+        const carouselRect = container.getBoundingClientRect();
         const modalWidth = parseFloat(getComputedStyle(this.modalContent).width);
         
-        // If modalContent is a child of the carousel container, we should compute
-        // coordinates relative to that container so the modal moves natively with it.
+        // If modalContent is a child of the chosen container, compute coordinates
+        // relative to that container so the modal moves natively with it.
         let leftPosition;
-        if (this.modalContent.parentElement === this.carouselContainer) {
+        if (this.modalContent.parentElement === container) {
             leftPosition = (rect.left - carouselRect.left) + (rect.width / 2);
         } else {
             leftPosition = rect.left + (rect.width / 2);
         }
         
         // Compute boundaries differently depending on coordinate space
-        if (this.modalContent.parentElement === this.carouselContainer) {
+        if (this.modalContent.parentElement === container) {
             const minLeft = (modalWidth / 2);
             const maxLeft = (carouselRect.width - (modalWidth / 2));
             if (leftPosition < minLeft) leftPosition = minLeft;
@@ -407,7 +407,7 @@ class HoverModal {
         }
         
         let topPosition;
-        if (this.modalContent.parentElement === this.carouselContainer) {
+        if (this.modalContent.parentElement === container) {
             topPosition = (rect.top - carouselRect.top) + (rect.height / 2);
         } else {
             topPosition = rect.top + (rect.height / 2);
