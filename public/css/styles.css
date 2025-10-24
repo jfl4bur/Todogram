@@ -2041,7 +2041,7 @@ button:focus {
     padding: 15px;
     color: white;
     height: calc(100% - 42.25%);
-    overflow-y: auto;
+    overflow-y: hidden;
 }
 
 .modal-body h2 {
