@@ -788,7 +788,10 @@
                 // clear any scheduled show timer for the element we left
                 try { if (itemEl && itemEl._hoverTimer) { clearTimeout(itemEl._hoverTimer); itemEl._hoverTimer = null; } } catch(e){}
                 const related = e.relatedTarget;
+                // If the mouse moved into another catalog item, keep the hover logic active
                 if (related && related.closest && related.closest('.catalogo-item')) return;
+                // If the mouse moved into the hover modal itself (or any of its children), do not hide
+                if (related && related.closest && (related.closest('#modal-content') || related.closest('.modal-content'))) return;
                 if (window.hoverModal && (typeof window.hoverModal.hide === 'function' || typeof window.hoverModal.close === 'function')) {
                     try { if(window.hoverModal.hide) window.hoverModal.hide(250); else window.hoverModal.close(); } catch(err) { console.error('hoverModal.hide error', err); }
                 }
