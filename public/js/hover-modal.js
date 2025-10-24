@@ -179,9 +179,34 @@ class HoverModal {
 
         const position = this.calculateModalPosition(itemElement);
 
-        // position modal (keep transform for centering in CSS)
-        this.modalContent.style.left = `${position.left}px`;
-        this.modalContent.style.top = `${position.top}px`;
+        // Compute modal size and position the top-left corner explicitly so we
+        // avoid relying on CSS translate(-50%,-50%) which can behave oddly when
+        // ancestor elements have transforms or when other scripts override styles.
+        const computed = getComputedStyle(this.modalContent);
+        const modalWidth = parseFloat(computed.width) || this.modalContent.offsetWidth;
+        const modalHeight = parseFloat(computed.height) || this.modalContent.offsetHeight;
+
+        // position.left/top returned are the center coordinates (viewport-based).
+        const leftPx = Math.round(position.left - (modalWidth / 2));
+        const topPx = Math.round(position.top - (modalHeight / 2));
+
+        // Apply explicit left/top (viewport coordinates)
+        this.modalContent.style.left = `${leftPx}px`;
+        this.modalContent.style.top = `${topPx}px`;
+
+        // Use inline transform/opacity for the show animation so it's controlled
+        // by JS and not by stylesheet transforms that may be overridden.
+        try {
+            this.modalContent.style.transition = 'opacity 300ms ease, transform 300ms ease';
+            this.modalContent.style.transform = 'translateY(20px)';
+            this.modalContent.style.opacity = '0';
+            // force reflow
+            void this.modalContent.offsetWidth;
+            this.modalContent.style.opacity = '1';
+            this.modalContent.style.transform = 'translateY(0)';
+        } catch (e) {
+            // ignore if inline style setting fails
+        }
 
         // Recalculate on window resize to keep modal within viewport bounds
         // (optional; does not run on scroll so modal stays fixed once opened)
@@ -189,8 +214,13 @@ class HoverModal {
             this._onWindowResize = () => {
                 if (!this.isVisible) return;
                 const pos = this.calculateModalPosition(this._currentOrigin || itemElement);
-                this.modalContent.style.left = `${pos.left}px`;
-                this.modalContent.style.top = `${pos.top}px`;
+                const computed2 = getComputedStyle(this.modalContent);
+                const mw = parseFloat(computed2.width) || this.modalContent.offsetWidth;
+                const mh = parseFloat(computed2.height) || this.modalContent.offsetHeight;
+                const lx = Math.round(pos.left - (mw / 2));
+                const ty = Math.round(pos.top - (mh / 2));
+                this.modalContent.style.left = `${lx}px`;
+                this.modalContent.style.top = `${ty}px`;
             };
             window.addEventListener('resize', this._onWindowResize);
         }
