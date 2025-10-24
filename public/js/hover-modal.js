@@ -42,6 +42,31 @@ class HoverModal {
         this.modalContent.addEventListener('mouseenter', this._onMouseEnter);
         this.modalContent.addEventListener('mouseleave', this._onMouseLeave);
         this.modalContent.addEventListener('click', this._onContentClick);
+
+        // Instrumentación: observar cambios en atributos style para detectar
+        // si otro script actualiza left/top continuamente (causa 'pegado' al puntero)
+        try {
+            this._mutationObserver = new MutationObserver((mutations) => {
+                if (!this.isVisible) return; // solo interesan cambios mientras está visible
+                for (const m of mutations) {
+                    if (m.type === 'attributes' && (m.attributeName === 'style' || m.attributeName === 'class')) {
+                        const left = this.modalContent.style.left;
+                        const top = this.modalContent.style.top;
+                        // Si detectamos un cambio en left/top, loggear con traza breve
+                        if (left || top) {
+                            try {
+                                // Construir una traza de stack mínima para localizar el origen
+                                const err = new Error('hover-modal: detected style change on modal-content');
+                                console.warn('hover-modal: style changed while visible ->', { left, top }, err.stack.split('\n').slice(0,4).join('\n'));
+                            } catch (e) { console.warn('hover-modal: style change detected', { left, top }); }
+                        }
+                    }
+                }
+            });
+            this._mutationObserver.observe(this.modalContent, { attributes: true, attributeFilter: ['style','class'] });
+        } catch (e) {
+            // ignore if MutationObserver unsupported or fails
+        }
     }
 
     show(item, itemElement) {
