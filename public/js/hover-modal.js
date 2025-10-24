@@ -24,12 +24,13 @@ class HoverModal {
         this._onMouseLeave = this._onMouseLeave.bind(this);
         this._onContentClick = this._onContentClick.bind(this);
     this._onMouseEnter = this._onMouseEnter.bind(this);
+        // scroll/resize handlers to keep modal aligned with its origin while visible
+        this._onScroll = this._onScroll.bind(this);
+        this._onResize = this._onResize.bind(this);
+        this._pendingRAF = false;
         // track the currently shown item and its origin element
         this._currentItem = null;
         this._currentOrigin = null;
-        // Bound handlers for origin item (so we can add/remove them per-item)
-        this._originMouseEnterBound = null;
-        this._originMouseLeaveBound = null;
 
         // Attach delegated listeners once
         this.modalContent.addEventListener('mouseenter', this._onMouseEnter);
@@ -138,13 +139,10 @@ class HoverModal {
             <p class="description">${item.description}</p>
         `;
         
-        // show overlay first so computed styles (width/height) are available for accurate positioning
+        // show overlay first so computed styles (width) are available for accurate positioning
     // Allow pointer events on overlay so modalContent can receive mouseenter/mouseleave reliably
     this.modalOverlay.style.display = 'block';
     this.modalOverlay.style.pointerEvents = 'auto';
-        // Ensure the modal uses fixed positioning so it stays in the same viewport spot
-        // (we compute coordinates from the item's boundingClientRect)
-        this.modalContent.style.position = 'fixed';
         // force reflow so computed sizes are correct
         void this.modalContent.offsetWidth;
 
@@ -154,29 +152,13 @@ class HoverModal {
         this.modalContent.style.left = `${position.left}px`;
         this.modalContent.style.top = `${position.top}px`;
 
-        // Attach origin item listeners so leaving the item hides the modal and re-enter cancels hide
-        try {
-            // remove any previous origin listeners
-            if (this._currentOrigin && this._originMouseLeaveBound) {
-                this._currentOrigin.removeEventListener('mouseleave', this._originMouseLeaveBound);
-                this._currentOrigin.removeEventListener('mouseenter', this._originMouseEnterBound);
-            }
-        } catch (e) { /* ignore */ }
-
-        if (itemElement && itemElement instanceof HTMLElement) {
-            this._originMouseLeaveBound = (e) => {
-                // schedule hide when leaving origin; if pointer moves into modal this.modalContent, modal's mouseenter will cancel
-                this.hide();
-            };
-            this._originMouseEnterBound = (e) => {
-                this.cancelHide();
-            };
-            itemElement.addEventListener('mouseleave', this._originMouseLeaveBound);
-            itemElement.addEventListener('mouseenter', this._originMouseEnterBound);
-        }
-
         // then add 'show' class to trigger CSS transition
         this.modalContent.classList.add('show');
+
+    // Attach scroll/resize listeners so the modal follows the origin while visible
+    // Use capture on scroll so we catch scrolls in any ancestor scrolling container
+    window.addEventListener('scroll', this._onScroll, true);
+    window.addEventListener('resize', this._onResize);
 
         // Store current item and origin for use by delegated handlers
         this._currentItem = item;
@@ -199,18 +181,11 @@ class HoverModal {
             window.hoverModalItem = null;
             this._currentItem = null;
             this._currentOrigin = null;
-            // remove any origin listeners we attached
+            // remove scroll/resize listeners when modal fully closed
             try {
-                if (this._currentOrigin && this._originMouseLeaveBound) {
-                    this._currentOrigin.removeEventListener('mouseleave', this._originMouseLeaveBound);
-                    this._currentOrigin.removeEventListener('mouseenter', this._originMouseEnterBound);
-                }
+                window.removeEventListener('scroll', this._onScroll, true);
+                window.removeEventListener('resize', this._onResize);
             } catch (e) {}
-
-            // reset inline positioning
-            this.modalContent.style.position = '';
-            this.modalContent.style.left = '';
-            this.modalContent.style.top = '';
         }, 320); // match CSS transition duration
     }
 
@@ -241,6 +216,31 @@ class HoverModal {
     _onMouseEnter(e){
         // cancel any scheduled hide so modal remains visible when cursor moves into it
         this.cancelHide();
+    }
+
+    // Keep modal aligned with origin while visible. Throttle with rAF.
+    _onScroll() {
+        if (!this.isVisible) return;
+        if (this._pendingRAF) return;
+        this._pendingRAF = true;
+        requestAnimationFrame(() => {
+            try {
+                this.updatePosition();
+            } catch (e) {}
+            this._pendingRAF = false;
+        });
+    }
+
+    _onResize() {
+        if (!this.isVisible) return;
+        this.updatePosition();
+    }
+
+    updatePosition() {
+        if (!this._currentOrigin) return;
+        const position = this.calculateModalPosition(this._currentOrigin);
+        this.modalContent.style.left = `${position.left}px`;
+        this.modalContent.style.top = `${position.top}px`;
     }
 
     // Delegated click handler for modal content (attached once in constructor)
@@ -295,30 +295,25 @@ class HoverModal {
             return { top: 0, left: 0 };
         }
 
-        // Use viewport coordinates (getBoundingClientRect gives viewport-relative values)
         const rect = itemElement.getBoundingClientRect();
-        const modalStyle = getComputedStyle(this.modalContent);
-        const modalWidth = parseFloat(modalStyle.width) || this.modalContent.offsetWidth;
-        const modalHeight = parseFloat(modalStyle.height) || this.modalContent.offsetHeight;
-
-        // center horizontally on the item's center
-        let leftPosition = rect.left + (rect.width / 2) - (modalWidth / 2);
-        // clamp to viewport
-        const viewportLeft = 0;
-        const viewportRight = window.innerWidth || document.documentElement.clientWidth;
-        if (leftPosition < viewportLeft + 8) leftPosition = viewportLeft + 8; // small padding
-        if (leftPosition + modalWidth > viewportRight - 8) leftPosition = viewportRight - modalWidth - 8;
-
-        // position vertically so modal is vertically centered on the item's center by default
-        let topPosition = rect.top + (rect.height / 2) - (modalHeight / 2);
-        const viewportTop = 0;
-        const viewportBottom = window.innerHeight || document.documentElement.clientHeight;
-        if (topPosition < viewportTop + 8) topPosition = viewportTop + 8;
-        if (topPosition + modalHeight > viewportBottom - 8) topPosition = viewportBottom - modalHeight - 8;
-
+        const carouselRect = this.carouselContainer.getBoundingClientRect();
+        const modalWidth = parseFloat(getComputedStyle(this.modalContent).width);
+        
+        let leftPosition = rect.left + (rect.width / 2);
+        
+        if (leftPosition - (modalWidth / 2) < carouselRect.left) {
+            leftPosition = carouselRect.left + (modalWidth / 2);
+        }
+        
+        if (leftPosition + (modalWidth / 2) > carouselRect.right) {
+            leftPosition = carouselRect.right - (modalWidth / 2);
+        }
+        
+        const topPosition = rect.top + (rect.height / 2);
+        
         return {
-            top: Math.round(topPosition),
-            left: Math.round(leftPosition)
+            top: topPosition,
+            left: leftPosition
         };
     }
 
