@@ -203,7 +203,7 @@ class HoverModal {
                 };
                 // attach handler and also fallback in case transitionend doesn't fire
                 try { origin.addEventListener('transitionend', onEnd); } catch(e){}
-                setTimeout(() => { if (!waited) { waited = true; try { origin.removeEventListener('transitionend', onEnd); } catch(e){} showModalNow(); } }, 220);
+                setTimeout(() => { if (!waited) { waited = true; try { origin.removeEventListener('transitionend', onEnd); } catch(e){} showModalNow(); } }, 160);
             } else {
                 // no origin or already scaled — show immediately
                 showModalNow();
@@ -308,8 +308,8 @@ class HoverModal {
                     window.hoverModalItem = null;
                 } catch (e) {}
 
-                // small micro-pause before scaling the origin back (in ms) - symbolic/minimal
-                const MICRO_PAUSE = 16;
+                // small micro-pause before scaling the origin back (in ms) - set to 0 for instant handoff
+                const MICRO_PAUSE = 0;
 
                 // start origin scale-down after micro-pause
                 setTimeout(() => {
@@ -345,7 +345,9 @@ class HoverModal {
                             // trigger scale down while keeping z-index
                             origin.classList.add('hover-zoom-closing');
 
-                            // fallback: if transitionend doesn't fire, force cleanup after 420ms
+                            // fallback: if transitionend doesn't fire, force cleanup after shorter timeout for snappier UX
+                            // adjusted to match faster transitions
+                            // fallback: if transitionend doesn't fire, force cleanup after 300ms
                             setTimeout(() => {
                                 try {
                                     if (this._scaleDownHandler) {
@@ -361,7 +363,7 @@ class HoverModal {
                                 this._currentSection = null;
                                 this._currentItem = null;
                                 this._currentOrigin = null;
-                            }, 420);
+                            }, 300);
                         } else {
                             // no origin — just clear wrapper/state
                             try {
