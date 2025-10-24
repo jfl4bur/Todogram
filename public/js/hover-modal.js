@@ -34,6 +34,8 @@ class HoverModal {
     // remember original parent so we can restore DOM position
     this._originalParent = this.modalContent.parentElement;
     this._carouselPositionChanged = false;
+        // active scroll container for the currently shown item (e.g. catalog grid)
+        this._activeScrollContainer = null;
 
         // Attach delegated listeners once
         this.modalContent.addEventListener('mouseenter', this._onMouseEnter);
@@ -149,20 +151,21 @@ class HoverModal {
         // force reflow so computed sizes are correct
         void this.modalContent.offsetWidth;
 
-    // If possible, move the modalContent into the carouselContainer so the browser
-        // will move it synchronously with container scrolling (no JS lag).
+        // Determine the best scroll container for this item (nearest ancestor that scrolls)
         try {
-            if (this.carouselContainer && this.modalContent.parentElement !== this.carouselContainer && this.carouselContainer !== document.body) {
-                const cs = getComputedStyle(this.carouselContainer);
+            const targetScroll = this.findScrollContainer(itemElement) || this.carouselContainer || document.body;
+            this._activeScrollContainer = targetScroll;
+            if (this._activeScrollContainer && this.modalContent.parentElement !== this._activeScrollContainer && this._activeScrollContainer !== document.body) {
+                const cs = getComputedStyle(this._activeScrollContainer);
                 if (cs.position === 'static') {
-                    this.carouselContainer.style.position = 'relative';
+                    this._activeScrollContainer.style.position = 'relative';
                     this._carouselPositionChanged = true;
                 }
-                this.carouselContainer.appendChild(this.modalContent);
+                this._activeScrollContainer.appendChild(this.modalContent);
             }
         } catch (e) {}
 
-        const position = this.calculateModalPosition(itemElement);
+    const position = this.calculateModalPosition(itemElement);
 
         // position modal (keep transform for centering in CSS)
         this.modalContent.style.left = `${position.left}px`;
@@ -175,7 +178,7 @@ class HoverModal {
         // If modalContent is inside the same scroll container as the item, the
         // browser will move it natively during scroll and we don't need a window
         // scroll handler (avoids JS-driven lag). Otherwise keep listeners.
-        if (this.modalContent.parentElement === this.carouselContainer && this.carouselContainer !== document.body) {
+        if (this._activeScrollContainer && this.modalContent.parentElement === this._activeScrollContainer && this._activeScrollContainer !== document.body) {
             // no global scroll listener needed
             window.addEventListener('resize', this._onResize);
         } else {
@@ -227,10 +230,11 @@ class HoverModal {
                 if (this._originalParent && this.modalContent.parentElement !== this._originalParent) {
                     this._originalParent.appendChild(this.modalContent);
                 }
-                if (this._carouselPositionChanged && this.carouselContainer) {
-                    this.carouselContainer.style.position = '';
+                if (this._carouselPositionChanged && this._activeScrollContainer) {
+                    this._activeScrollContainer.style.position = '';
                     this._carouselPositionChanged = false;
                 }
+                this._activeScrollContainer = null;
             } catch (e) {}
         }, 320); // match CSS transition duration
     }
@@ -287,6 +291,21 @@ class HoverModal {
         const position = this.calculateModalPosition(this._currentOrigin);
         this.modalContent.style.left = `${position.left}px`;
         this.modalContent.style.top = `${position.top}px`;
+    }
+
+    // Find the nearest ancestor that can scroll (overflow auto/scroll and scrollable area)
+    findScrollContainer(el) {
+        let node = el;
+        while (node && node !== document.body && node !== document.documentElement) {
+            try {
+                const cs = getComputedStyle(node);
+                const overflowY = cs.overflowY;
+                const canScroll = (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay');
+                if (canScroll && node.scrollHeight > node.clientHeight) return node;
+            } catch (e) {}
+            node = node.parentElement;
+        }
+        return null;
     }
 
     // Delegated click handler for modal content (attached once in constructor)
