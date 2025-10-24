@@ -172,8 +172,10 @@
             }
         };
 
-        // Click handler (desktop)
-        d.addEventListener('click', ()=>{
+        // Click handler (desktop) - ignore non-left clicks (right-click/contextmenu)
+        d.addEventListener('click', (e) => {
+            // If the event has a button property and it's not the primary (0), ignore
+            try { if (typeof e.button !== 'undefined' && e.button !== 0) return; } catch (err) {}
             if(window.detailsModal && typeof window.detailsModal.show==='function'){
                 openDetails();
             }

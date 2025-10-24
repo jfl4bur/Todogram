@@ -1236,6 +1236,11 @@ button:focus {
 .catalogo-item img{width:100%;height:auto;border-radius:0;object-fit:cover;background:#232323}
 .catalogo-item .title{margin-top:8px;font-size:14px;text-align:center;color:var(--text-color)}
 
+/* Improve touch responsiveness on mobile: eliminate delay/gesture ambiguity */
+.catalogo-item, .catalogo-item .poster-container {
+    touch-action: manipulation;
+}
+
 /* Hover zoom: scale item and bring above siblings but keep below modal */
 .catalogo-item.hover-zoom,
 .custom-carousel-item.hover-zoom {
