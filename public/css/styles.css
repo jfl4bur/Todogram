@@ -1235,6 +1235,11 @@ button:focus {
     overflow: visible; /* allow scaled item to overflow without being cut */
 }
 
+/* Temporary class applied by JS to allow scaled item to overflow wrapper/section */
+.hover-no-clip {
+    overflow: visible !important;
+}
+
 /* Responsive gaps for catalog grid on tablets and mobile: columns 6px, rows 4px */
 
 /* iPhone / small mobile specific queries */

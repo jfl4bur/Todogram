@@ -209,6 +209,17 @@ class HoverModal {
         this._currentOrigin = itemElement;
         // add hover-zoom class to keep the item scaled while hover modal is visible
         try { if (this._currentOrigin && this._currentOrigin.classList) this._currentOrigin.classList.add('hover-zoom'); } catch(e){}
+        // Attempt to find a carousel wrapper ancestor to disable clipping while scaled
+        try {
+            const wrapper = itemElement.closest('#carousel-wrapper, [id$="-carousel-wrapper"], .carousel-wrapper');
+            if (wrapper) {
+                this._currentWrapper = wrapper;
+                wrapper.classList.add('hover-no-clip');
+                // also ensure parent section allows visible overflow
+                const section = wrapper.closest('.carousel-section');
+                if (section) { section.classList.add('hover-no-clip'); this._currentSection = section; }
+            }
+        } catch (e) {}
         window.activeItem = item;
     }
 
@@ -243,6 +254,11 @@ class HoverModal {
                     this.carouselContainer.style.position = '';
                     this._carouselPositionChanged = false;
                 }
+                // restore wrapper clipping behaviour
+                try {
+                    if (this._currentWrapper && this._currentWrapper.classList) this._currentWrapper.classList.remove('hover-no-clip');
+                    if (this._currentSection && this._currentSection.classList) this._currentSection.classList.remove('hover-no-clip');
+                } catch (e) {}
             } catch (e) {}
         }, 320); // match CSS transition duration
     }
