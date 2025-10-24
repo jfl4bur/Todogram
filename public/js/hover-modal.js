@@ -203,7 +203,7 @@ class HoverModal {
                 };
                 // attach handler and also fallback in case transitionend doesn't fire
                 try { origin.addEventListener('transitionend', onEnd); } catch(e){}
-                setTimeout(() => { if (!waited) { waited = true; try { origin.removeEventListener('transitionend', onEnd); } catch(e){} showModalNow(); } }, 260);
+                setTimeout(() => { if (!waited) { waited = true; try { origin.removeEventListener('transitionend', onEnd); } catch(e){} showModalNow(); } }, 220);
             } else {
                 // no origin or already scaled — show immediately
                 showModalNow();
@@ -241,8 +241,22 @@ class HoverModal {
         // Store current item and origin for use by delegated handlers
         // remove hover class from previous origin (if any) and cancel any pending scale-down handlers
         try {
+            // clean any leftover hover classes on elements other than the new origin
+            const leftovers = document.querySelectorAll('.hover-zoom, .hover-zoom-closing');
+            leftovers.forEach(el => {
+                try {
+                    if (el !== this._currentOrigin && el !== itemElement) {
+                        el.classList.remove('hover-zoom');
+                        el.classList.remove('hover-zoom-closing');
+                        if (el._scaleDownHandlerAttached && this._scaleDownHandler) {
+                            try { el.removeEventListener('transitionend', this._scaleDownHandler); } catch(e){}
+                            el._scaleDownHandlerAttached = false;
+                        }
+                    }
+                } catch (e) {}
+            });
+
             if (this._currentOrigin && this._currentOrigin.classList) {
-                try { this._currentOrigin.classList.remove('hover-zoom'); } catch(e){}
                 try { this._currentOrigin.classList.remove('hover-zoom-closing'); } catch(e){}
                 if (this._scaleDownHandler && this._currentOrigin._scaleDownHandlerAttached) {
                     try { this._currentOrigin.removeEventListener('transitionend', this._scaleDownHandler); } catch(e){}
@@ -294,8 +308,8 @@ class HoverModal {
                     window.hoverModalItem = null;
                 } catch (e) {}
 
-                // small micro-pause before scaling the origin back (in ms)
-                const MICRO_PAUSE = 120;
+                // small micro-pause before scaling the origin back (in ms) - symbolic/minimal
+                const MICRO_PAUSE = 40;
 
                 // start origin scale-down after micro-pause
                 setTimeout(() => {
@@ -331,7 +345,7 @@ class HoverModal {
                             // trigger scale down while keeping z-index
                             origin.classList.add('hover-zoom-closing');
 
-                            // fallback: if transitionend doesn't fire, force cleanup after 700ms
+                            // fallback: if transitionend doesn't fire, force cleanup after 420ms
                             setTimeout(() => {
                                 try {
                                     if (this._scaleDownHandler) {
@@ -347,7 +361,7 @@ class HoverModal {
                                 this._currentSection = null;
                                 this._currentItem = null;
                                 this._currentOrigin = null;
-                            }, 700);
+                            }, 420);
                         } else {
                             // no origin — just clear wrapper/state
                             try {
