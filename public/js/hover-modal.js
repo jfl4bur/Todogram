@@ -89,6 +89,9 @@ class HoverModal {
 
     // cancel any pending hide
     this.cancelHide();
+    // remember whether the modal was visible BEFORE this call —
+    // we must not early-return for the first show() invocation.
+    const alreadyVisible = !!this.isVisible;
     window.isModalOpen = true;
     this.isVisible = true;
         
@@ -177,11 +180,13 @@ class HoverModal {
         // force reflow so computed sizes are correct
         void this.modalContent.offsetWidth;
 
-        // If modal is already visible, update content but keep its current
-        // position (do not recompute left/top). This prevents the modal from
-        // 'siguiendo' al ratón o a re-renders del carrusel que llamen a show()
-        // repetidamente mientras el hover sigue activo.
-        if (this.isVisible) {
+
+        // If modal was already visible BEFORE this call, update content but keep
+        // its current position (do not recompute left/top). This prevents the
+        // modal from 'siguiendo' al ratón si show() es invocado repetidamente
+        // por re-renders/autoplay/etc. IMPORTANT: use alreadyVisible (the
+        // previous state) so the initial show() still computes position.
+        if (alreadyVisible) {
             this.cancelHide();
             this._currentItem = item;
             // keep existing origin so position stays fixed; only update if not set
