@@ -1220,7 +1220,7 @@ button:focus {
 /* Hover zoom: scale item and bring above siblings but keep below modal */
 .catalogo-item.hover-zoom,
 .custom-carousel-item.hover-zoom {
-    transform: scale(1.3);
+    transform: translateX(var(--hover-translate-x, 0)) scale(1.3);
     /* faster, smoother scale for hover */
     transition: transform 140ms cubic-bezier(.2,.8,.2,1);
     z-index: 10900; /* below modal which uses 11000+ */
@@ -1247,7 +1247,7 @@ button:focus {
 
 /* While scaling down, keep the high z-index until the transform transition ends */
 .hover-zoom.hover-zoom-closing {
-    transform: scale(1);
+    transform: translateX(0) scale(1);
     /* match faster closing transition */
     transition: transform 140ms cubic-bezier(.2,.8,.2,1);
     /* keep z-index until fully scaled down */

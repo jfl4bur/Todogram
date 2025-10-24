@@ -249,6 +249,7 @@ class HoverModal {
                         el.classList.remove('hover-zoom');
                         el.classList.remove('hover-zoom-closing');
                         try { el.style.removeProperty('--hover-transform-origin'); } catch(e){}
+                        try { el.style.removeProperty('--hover-translate-x'); } catch(e){}
                         if (el._scaleDownHandlerAttached && this._scaleDownHandler) {
                             try { el.removeEventListener('transitionend', this._scaleDownHandler); } catch(e){}
                             el._scaleDownHandlerAttached = false;
@@ -285,6 +286,13 @@ class HoverModal {
                     if (leftDist < threshold) originVal = 'left center';
                     else if (rightDist < threshold) originVal = 'right center';
                     this._currentOrigin.style.setProperty('--hover-transform-origin', originVal);
+                    // small inward shift so scaled item keeps margin when near edges
+                    try {
+                        const translateAmt = `${Math.max(12, Math.round(itemWidth * 0.06))}px`;
+                        if (originVal.indexOf('left') === 0) this._currentOrigin.style.setProperty('--hover-translate-x', translateAmt);
+                        else if (originVal.indexOf('right') === 0) this._currentOrigin.style.setProperty('--hover-translate-x', `-${translateAmt}`);
+                        else this._currentOrigin.style.setProperty('--hover-translate-x', '0px');
+                    } catch (er2) {}
                 } catch (er) {}
                 this._currentOrigin.classList.add('hover-zoom');
             }
@@ -346,6 +354,7 @@ class HoverModal {
                                     origin.classList.remove('hover-zoom');
                                     origin.classList.remove('hover-zoom-closing');
                                     try { origin.style.removeProperty('--hover-transform-origin'); } catch(e){}
+                                    try { origin.style.removeProperty('--hover-translate-x'); } catch(e){}
                                 } catch (e) {}
                                 // restore wrapper clipping behaviour
                                 try {
@@ -376,6 +385,7 @@ class HoverModal {
                                         origin.classList.remove('hover-zoom');
                                         origin.classList.remove('hover-zoom-closing');
                                         try { origin.style.removeProperty('--hover-transform-origin'); } catch(e){}
+                                        try { origin.style.removeProperty('--hover-translate-x'); } catch(e){}
                                         if (this._currentWrapper && this._currentWrapper.classList) this._currentWrapper.classList.remove('hover-no-clip');
                                         if (this._currentSection && this._currentSection.classList) this._currentSection.classList.remove('hover-no-clip');
                                     }
