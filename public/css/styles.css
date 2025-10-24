@@ -7405,6 +7405,15 @@ body {
         z-index: 10;
     }
 
+    /* Scaled state when an item is hovered and should remain enlarged while hover-modal is visible */
+    .hover-item-scaled {
+        transform: scale(1.3, 2.5) !important;
+        transition: transform 200ms ease, z-index 0s;
+        z-index: 10999 !important; /* below modal (11000) but above other items */
+        transform-origin: center center;
+        will-change: transform;
+    }
+
 
     .custom-carousel-item:hover {
         transform: translateY(-4px);

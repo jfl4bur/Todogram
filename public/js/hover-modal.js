@@ -205,6 +205,13 @@ class HoverModal {
         // Store current item and origin for use by delegated handlers
         this._currentItem = item;
         this._currentOrigin = itemElement;
+        // Mark origin element as scaled so it stays enlarged while hover modal is visible
+        try {
+            if (itemElement && itemElement.classList) {
+                itemElement.classList.add('hover-item-scaled');
+                this._scaledOrigin = itemElement;
+            }
+        } catch (e) {}
         window.activeItem = item;
     }
 
@@ -237,6 +244,11 @@ class HoverModal {
                     this.carouselContainer.style.position = '';
                     this._carouselPositionChanged = false;
                 }
+                // remove scaling class from the origin element when modal closed
+                try {
+                    if (this._scaledOrigin && this._scaledOrigin.classList) this._scaledOrigin.classList.remove('hover-item-scaled');
+                } catch (e) {}
+                this._scaledOrigin = null;
             } catch (e) {}
         }, 320); // match CSS transition duration
     }
