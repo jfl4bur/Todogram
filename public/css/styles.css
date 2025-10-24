@@ -197,23 +197,32 @@
     font-weight: 600;
 }
 
-.font-bold {
-    font-weight: 700;
-}
-button:focus {
-    outline: 0px !important;
-    outline: 0px auto -webkit-focus-ring-color !important;
-}
-.container {
-    padding-right: 0px !important;
+.modal-body {
+    padding: 15px;
+    color: white;
+    /* Use flex column-reverse so the title sits at the bottom and, when it grows,
+       it expands upward instead of pushing content downwards. This applies to
+       the hover modal where the title should occupy space toward the top of
+       the content area when wrapping. */
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 8px;
+    /* height: calc(100% - 42.25%); */
+    overflow-y: auto;
 }
 
-.secondary-actions-row {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
+.modal-body h2 {
+    font-family: 'Slider Sans UI', sans-serif;
+    font-size: 1.2rem;
+    margin: 0 0 10px 0;
+    /* allow full title to wrap rather than truncating with ellipsis */
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    word-break: break-word;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
 /* Estilos personalizados para los scrollbars */
@@ -869,6 +878,13 @@ button:focus {
 .modal-body {
     padding: 15px;
     color: white;
+    /* Use flex column-reverse so the title sits at the bottom and, when it grows,
+       it expands upward instead of pushing content downwards. This applies to
+       the hover modal where the title should occupy space toward the top of
+       the content area when wrapping. */
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 8px;
     /* height: calc(100% - 42.25%); */
     overflow-y: auto;
 }
@@ -876,10 +892,12 @@ button:focus {
 .modal-body h2 {
     font-family: 'Slider Sans UI', sans-serif;
     font-size: 1.2rem;
-    margin-bottom: 10px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    margin: 0 0 10px 0;
+    /* allow full title to wrap rather than truncating with ellipsis */
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    word-break: break-word;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
