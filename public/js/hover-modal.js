@@ -272,29 +272,38 @@ class HoverModal {
         // add hover-zoom class to keep the item scaled while hover modal is visible
         try {
             if (this._currentOrigin && this._currentOrigin.classList) {
-                // determine if the item is near the left or right edge of its scroll container
-                try {
-                    const container = itemElement.closest('.catalogo-grid, .carousel-container, #carousel-wrapper') || this.carouselContainer || document.body;
-                    const cRect = container.getBoundingClientRect();
-                    const iRect = itemElement.getBoundingClientRect();
-                    const itemWidth = iRect.width || (iRect.right - iRect.left);
-                    const leftDist = iRect.left - cRect.left;
-                    const rightDist = cRect.right - iRect.right;
-                    // choose threshold as 25% of item width to detect items at edges
-                    const threshold = Math.max(8, itemWidth * 0.25);
-                    let originVal = 'center center';
-                    if (leftDist < threshold) originVal = 'left center';
-                    else if (rightDist < threshold) originVal = 'right center';
-                    this._currentOrigin.style.setProperty('--hover-transform-origin', originVal);
-                    // small inward shift so scaled item keeps margin when near edges
+                // detect if this item belongs to an "episodios" carousel where scaling causes layout issues
+                const isEpisodios = !!itemElement.closest('#episodios-series-carousel-wrapper, #episodios-animes-carousel-wrapper, .episodios-series-item, .episodios-animes-item');
+
+                if (!isEpisodios) {
+                    // determine if the item is near the left or right edge of its scroll container
                     try {
-                        const translateAmt = `${Math.max(12, Math.round(itemWidth * 0.06))}px`;
-                        if (originVal.indexOf('left') === 0) this._currentOrigin.style.setProperty('--hover-translate-x', translateAmt);
-                        else if (originVal.indexOf('right') === 0) this._currentOrigin.style.setProperty('--hover-translate-x', `-${translateAmt}`);
-                        else this._currentOrigin.style.setProperty('--hover-translate-x', '0px');
-                    } catch (er2) {}
-                } catch (er) {}
-                this._currentOrigin.classList.add('hover-zoom');
+                        const container = itemElement.closest('.catalogo-grid, .carousel-container, #carousel-wrapper') || this.carouselContainer || document.body;
+                        const cRect = container.getBoundingClientRect();
+                        const iRect = itemElement.getBoundingClientRect();
+                        const itemWidth = iRect.width || (iRect.right - iRect.left);
+                        const leftDist = iRect.left - cRect.left;
+                        const rightDist = cRect.right - iRect.right;
+                        // choose threshold as 25% of item width to detect items at edges
+                        const threshold = Math.max(8, itemWidth * 0.25);
+                        let originVal = 'center center';
+                        if (leftDist < threshold) originVal = 'left center';
+                        else if (rightDist < threshold) originVal = 'right center';
+                        this._currentOrigin.style.setProperty('--hover-transform-origin', originVal);
+                        // small inward shift so scaled item keeps margin when near edges
+                        try {
+                            const translateAmt = `${Math.max(12, Math.round(itemWidth * 0.06))}px`;
+                            if (originVal.indexOf('left') === 0) this._currentOrigin.style.setProperty('--hover-translate-x', translateAmt);
+                            else if (originVal.indexOf('right') === 0) this._currentOrigin.style.setProperty('--hover-translate-x', `-${translateAmt}`);
+                            else this._currentOrigin.style.setProperty('--hover-translate-x', '0px');
+                        } catch (er2) {}
+                    } catch (er) {}
+                    this._currentOrigin.classList.add('hover-zoom');
+                } else {
+                    // ensure any residual variables are cleared for episodios items
+                    try { this._currentOrigin.style.removeProperty('--hover-transform-origin'); } catch(e){}
+                    try { this._currentOrigin.style.removeProperty('--hover-translate-x'); } catch(e){}
+                }
             }
         } catch(e){}
         // Attempt to find a carousel wrapper ancestor to disable clipping while scaled
