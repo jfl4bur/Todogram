@@ -6008,8 +6008,9 @@ html, body {
     .slider-slide {
         width: 88vw;
         margin-right: 2.5vw;
-        height: 429px !important;
+        height: 421px !important;
         margin-left: 0px;
+        padding-top: 8px;
     }
     
     .slider-wrapper {
@@ -6134,8 +6135,9 @@ html, body {
     .slider-slide {
         width: 88vw;
         margin-right: 2vw;
-        height: 400px !important;
+        height: 392px !important;
         margin-left: 0px;
+        padding-top: 8px;
     }
     
     .slider-wrapper {
