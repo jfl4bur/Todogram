@@ -111,6 +111,12 @@
   // set global peek (how much of adjacent items is visible)
   peek = Math.min(Math.round(vw * 0.08), arrowW + arrowPadding);
 
+  // Ensure gap isn't so large that the right-side peek disappears.
+  // Compute a maximum sensible gap so itemsPerView of minimum width still fit with peeks.
+  const minGapAllowed = 8;
+  const maxGapAllowed = Math.max(minGapAllowed, Math.floor((vw - (peek * 2) - (itemsPerView * minItemWidth)) / Math.max(1, itemsPerView - 1)));
+  if(gap > maxGapAllowed) gap = maxGapAllowed;
+
     // compute itemWidth to fit itemsPerView inside available area
     const available = vw - (peek * 2) - ((itemsPerView - 1) * gap);
     let w = Math.floor(available / itemsPerView);
