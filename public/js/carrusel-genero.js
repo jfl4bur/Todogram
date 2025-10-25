@@ -134,6 +134,17 @@
 
   itemWidth = w;
 
+  // After itemWidth is known, ensure gap is small enough so right-side peek remains visible.
+  // Compute remaining space for gaps: viewport minus peeks and items.
+  const availableForGaps = vw - (peek * 2) - (itemWidth * itemsPerView);
+  const maxGapBasedOnWidth = Math.floor(availableForGaps / Math.max(1, itemsPerView - 1));
+  const minGapAllowed = 6;
+  if(!isNaN(maxGapBasedOnWidth) && maxGapBasedOnWidth > 0){
+    if(gap > maxGapBasedOnWidth){
+      gap = Math.max(minGapAllowed, maxGapBasedOnWidth);
+    }
+  }
+
   // debug log to inspect values in console (pages computed here)
   const pages = Math.max(1, Math.ceil(items.length / itemsPerView));
   try{ console.info('carrusel-genero layout', { vw, itemsPerView, itemWidth, gap, peek, pages }); }catch(e){}
@@ -149,10 +160,10 @@
 
   // remove any inline padding on viewport (avoid runtime style conflicts)
   try{ viewport.style.removeProperty('padding-left'); viewport.style.removeProperty('padding-right'); }catch(e){}
-  // use track margins to create visible peek on both sides (avoids modifying viewport inline styles)
+  // ensure track has no margins; we position via translate with a peek offset so items overflow visibly
   if(track) {
-    track.style.marginLeft = peek + 'px';
-    track.style.marginRight = peek + 'px';
+    track.style.marginLeft = '0px';
+    track.style.marginRight = '0px';
   }
 
   // update pagination
@@ -196,8 +207,8 @@
     const viewport = q('.carrusel-generos-viewport');
     if(!track || !viewport) return;
 
-  // Translate based on item widths; track margins provide the visible peek
-  const translate = currentIndex * (itemWidth + gap);
+  // Translate based on item widths; subtract peek so items overflow left and right appropriately
+  const translate = currentIndex * (itemWidth + gap) - peek;
     if(skipAnim){
       track.style.transition = 'none';
       track.style.transform = `translateX(${-translate}px)`;
@@ -249,9 +260,9 @@
     dragDelta = x - dragStartX;
     const track = q('#carrusel-generos-track');
     if(track){
-  // account for peek via track margin; drag base uses same formula as translate
-  const base = currentIndex * (itemWidth + gap);
-  track.style.transform = `translateX(${-(base) + dragDelta}px)`;
+      // account for peek via translate offset; drag base uses same formula as translate
+      const base = currentIndex * (itemWidth + gap) - peek;
+      track.style.transform = `translateX(${-(base) + dragDelta}px)`;
     }
   }
   function onPointerUp(e){
