@@ -1964,7 +1964,7 @@ button:focus {
 }
 
 .carousel-title-overlay {
-    font-size: 1.8rem;
+    font-size: 1rem;
     font-weight: 600;
     margin-bottom: 1px;
     white-space: nowrap;
@@ -1973,7 +1973,7 @@ button:focus {
 }
 
 .carousel-title {
-    font-size: 1rem;
+    font-size: 1.8rem;
     font-weight: 600;
     margin-bottom: 1px;
     white-space: nowrap;
