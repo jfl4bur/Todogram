@@ -1319,10 +1319,10 @@ button:focus {
 #genero-carousel-wrapper {
     display: flex;
     gap: 12px;
-    overflow: hidden;
+    overflow-x: auto;
     align-items: flex-start;
     scroll-behavior: smooth;
-    padding: 8px 4px 12px 0; /* primer item al borde izquierdo */
+    /* margin-left se aplica desde JS para mostrar trozos adyacentes */
 }
 
 .genero-item {
@@ -1357,9 +1357,20 @@ button:focus {
     max-width: 160px;
 }
 
-/* Botones de navegación (reusar estilos existentes en proyecto) */
-#genero-carousel-nav { position: relative; margin-top: -8px; }
-#genero-carousel-nav .carousel-nav-btn { background: rgba(0,0,0,0.6); border: none; color: #fff; padding: 8px 10px; border-radius: 6px; }
+/* Botones de navegación posicionados sobre los trozos adyacentes */
+.carousel-container { position: relative; }
+#genero-carousel-nav { position: absolute; top: 50%; left: 0; right: 0; pointer-events: none; z-index: 50; }
+#genero-carousel-nav .carousel-nav-btn { background: rgba(0,0,0,0.6); border: none; color: #fff; padding: 12px 14px; border-radius: 50%; pointer-events: auto; opacity: 0; transition: opacity 200ms ease; display: flex; align-items: center; justify-content: center; }
+
+/* Posición lateral basada en --genero-side-space (setear por JS) */
+#genero-carousel-nav .prev { position: absolute; left: calc(var(--genero-side-space, 20px) - 24px); transform: translateY(-50%); }
+#genero-carousel-nav .next { position: absolute; right: calc(var(--genero-side-space, 20px) - 24px); transform: translateY(-50%); }
+
+/* Mostrar botones al hover (desktop); en móviles siempre visibles */
+.carousel-container:hover #genero-carousel-nav .carousel-nav-btn { opacity: 1; }
+@media (max-width: 768px) {
+    #genero-carousel-nav .carousel-nav-btn { opacity: 1; }
+}
 
 /* Responsive: ajustar tamaño de items según ancho */
 @media (min-width: 1200px) {
@@ -1411,6 +1422,12 @@ button:focus {
     .genero-skeleton-image { width: 96px; height: 96px; }
     .genero-skeleton-label { width: 80px; height: 10px; }
 }
+/* Scroll snap y alineación precisa para el carrusel de géneros */
+#genero-carousel-wrapper { scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch; }
+.genero-item { scroll-snap-align: center; }
+
+/* Asegurar que el contenedor del carrusel tenga overflow oculto en el eje Y para que los botones floten sobre él */
+.carousel-container { overflow: hidden; }
 .episodios-series-item .poster-container {
     width: 100%;
     aspect-ratio: 16/9;

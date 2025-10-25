@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (!wrapper) return;
 
-    const dataPath = 'https://jfl4bur.github.io/Todogram/public/carrucat.json';
+    const dataPath = 'public/carrucat.json';
 
     function extractName(entry) {
         const url = entry.urlCat || '';
@@ -62,10 +62,11 @@ document.addEventListener('DOMContentLoaded', function () {
     function setupNavigation(wrapper, items) {
         // compute item width from actual DOM (prefer image width)
         let itemWidth = 0;
+        let gap = 12;
 
         function updateLayout() {
             const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
-            // try to read from an item or skeleton image
+            // sample dimension from existing elements
             const sampleImg = wrapper.querySelector('.genero-image') || document.querySelector('.genero-skeleton-image');
             if (sampleImg) {
                 const rect = sampleImg.getBoundingClientRect();
@@ -76,23 +77,49 @@ document.addEventListener('DOMContentLoaded', function () {
                 itemWidth = 120;
             }
 
+            // choose gap based on viewport (similar to slider independent)
+            if (viewportWidth > 1400) gap = 24;
+            else if (viewportWidth > 1024) gap = 20;
+            else if (viewportWidth > 768) gap = 16;
+            else if (viewportWidth > 480) gap = 12;
+            else gap = 8;
+
             // side space to show partial adjacent items (center first visible item)
             let sideSpace = Math.floor((viewportWidth - itemWidth) / 2);
             if (sideSpace < 8) sideSpace = 8;
 
-            // apply padding so first item sits at left edge and adjacent items are visible
-            wrapper.style.paddingLeft = sideSpace + 'px';
+            // apply margin-left so first item appears with adjacent partial items
+            wrapper.style.marginLeft = sideSpace + 'px';
+            // add right padding so last item can show partially
             wrapper.style.paddingRight = sideSpace + 'px';
-            wrapper.style.boxSizing = 'content-box';
+
+            // set CSS variable for nav button positioning
+            document.documentElement.style.setProperty('--genero-side-space', sideSpace + 'px');
+            document.documentElement.style.setProperty('--genero-item-width', itemWidth + 'px');
+
+            // apply sizes and gaps to items explicitly for precise alignment
+            items.forEach((it, idx) => {
+                it.style.width = itemWidth + 'px';
+                it.style.flexBasis = itemWidth + 'px';
+                it.style.marginRight = idx < items.length - 1 ? gap + 'px' : '0px';
+                const img = it.querySelector('.genero-image');
+                if (img) {
+                    img.style.width = '100%';
+                    img.style.height = '100%';
+                    img.style.objectFit = 'cover';
+                }
+            });
+
+            // ensure wrapper scroll behaves smoothly and shows scrollbar only when needed
             wrapper.style.overflowX = 'auto';
             wrapper.style.scrollBehavior = 'smooth';
         }
 
         function computeStep() {
-            const visible = Math.floor(wrapper.clientWidth / itemWidth) || 1;
-            // move by half of visible items to keep partial items visible
+            // step includes gap
+            const visible = Math.floor(wrapper.clientWidth / (itemWidth + gap)) || 1;
             const stepItems = Math.max(1, Math.floor(visible / 2));
-            return stepItems * itemWidth;
+            return stepItems * (itemWidth + gap);
         }
 
         // init layout
@@ -106,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function () {
             wrapper.scrollBy({ left: computeStep(), behavior: 'smooth' });
         });
 
-        // adjust on resize
+        // adjust on resize with debounce
         let resizeTimer = null;
         window.addEventListener('resize', () => {
             clearTimeout(resizeTimer);
