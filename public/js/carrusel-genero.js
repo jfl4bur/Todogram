@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (!wrapper) return;
 
-    const dataPath = './public/carrucat.json';
+    const dataPath = 'public/carrucat.json';
 
     function extractName(entry) {
         const url = entry.urlCat || '';
@@ -60,32 +60,59 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function setupNavigation(wrapper, items) {
-        let itemWidth = items[0] ? items[0].getBoundingClientRect().width : 120;
+        // compute item width from actual DOM (prefer image width)
+        let itemWidth = 0;
+
+        function updateLayout() {
+            const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
+            // try to read from an item or skeleton image
+            const sampleImg = wrapper.querySelector('.genero-image') || document.querySelector('.genero-skeleton-image');
+            if (sampleImg) {
+                const rect = sampleImg.getBoundingClientRect();
+                itemWidth = rect.width || rect.height || 120;
+            } else if (items[0]) {
+                itemWidth = items[0].getBoundingClientRect().width || 120;
+            } else {
+                itemWidth = 120;
+            }
+
+            // side space to show partial adjacent items (center first visible item)
+            let sideSpace = Math.floor((viewportWidth - itemWidth) / 2);
+            if (sideSpace < 8) sideSpace = 8;
+
+            // apply padding so first item sits at left edge and adjacent items are visible
+            wrapper.style.paddingLeft = sideSpace + 'px';
+            wrapper.style.paddingRight = sideSpace + 'px';
+            wrapper.style.boxSizing = 'content-box';
+            wrapper.style.overflowX = 'auto';
+            wrapper.style.scrollBehavior = 'smooth';
+        }
 
         function computeStep() {
             const visible = Math.floor(wrapper.clientWidth / itemWidth) || 1;
-            // step move by half of visible items so that partial items appear
+            // move by half of visible items to keep partial items visible
             const stepItems = Math.max(1, Math.floor(visible / 2));
             return stepItems * itemWidth;
         }
 
-        function updateItemWidth() {
-            if (items[0]) itemWidth = items[0].getBoundingClientRect().width;
-        }
+        // init layout
+        updateLayout();
 
         prevBtn && prevBtn.addEventListener('click', () => {
-            updateItemWidth();
             wrapper.scrollBy({ left: -computeStep(), behavior: 'smooth' });
         });
 
         nextBtn && nextBtn.addEventListener('click', () => {
-            updateItemWidth();
             wrapper.scrollBy({ left: computeStep(), behavior: 'smooth' });
         });
 
-        // allow swipe/drag native scroll; adjust on resize
+        // adjust on resize
+        let resizeTimer = null;
         window.addEventListener('resize', () => {
-            updateItemWidth();
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                updateLayout();
+            }, 120);
         });
     }
 

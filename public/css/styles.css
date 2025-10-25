@@ -1375,6 +1375,42 @@ button:focus {
     .genero-item, .genero-image { width: 96px; height: 96px; }
     .genero-label { font-size: 12px; }
 }
+
+/* Skeleton styles para carrusel de géneros (deben coincidir con .genero-image) */
+.genero-skeleton-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+}
+.genero-skeleton-image {
+    width: 144px;
+    height: 144px;
+    border-radius: 50%;
+    background: linear-gradient(90deg, rgba(255,255,255,0.03), rgba(255,255,255,0.06));
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.02);
+}
+.genero-skeleton-label {
+    width: 110px;
+    height: 12px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+    border-radius: 6px;
+}
+
+@media (min-width: 1200px) {
+    .genero-skeleton-image { width: 144px; height: 144px; }
+}
+@media (min-width: 900px) and (max-width:1199px) {
+    .genero-skeleton-image { width: 128px; height: 128px; }
+}
+@media (min-width: 600px) and (max-width:899px) {
+    .genero-skeleton-image { width: 120px; height: 120px; }
+}
+@media (max-width:599px) {
+    .genero-skeleton-image { width: 96px; height: 96px; }
+    .genero-skeleton-label { width: 80px; height: 10px; }
+}
 .episodios-series-item .poster-container {
     width: 100%;
     aspect-ratio: 16/9;
