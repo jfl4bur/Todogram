@@ -1,0 +1,86 @@
+[
+  {
+    "PortadaCat": "https://jfl4bur.github.io/Todogram/public/images/todo.png",
+    "urlCat": "/catalogo/"
+  },
+  {
+    "PortadaCat": "https://jfl4bur.github.io/Todogram/public/images/Acción.png",
+    "urlCat": "/catalogo/#catalogo?tab=Películas&genre=Acción"
+  },
+  {
+    "PortadaCat": "https://jfl4bur.github.io/Todogram/public/images/Animación.png",
+    "urlCat": "/catalogo/#catalogo?tab=Películas&genre=Animación"
+  },
+  {
+    "PortadaCat": "https://jfl4bur.github.io/Todogram/public/images/Animes.png",
+    "urlCat": "/catalogo/#catalogo?tab=Animes&genre=Todo+el+cat%C3%A1logo"
+  },
+  {
+    "PortadaCat": "https://jfl4bur.github.io/Todogram/public/images/Aventura.png",
+    "urlCat": "/catalogo/#catalogo?tab=Películas&genre=Aventura"
+  },
+  {
+    "PortadaCat": "https://jfl4bur.github.io/Todogram/public/images/Bélica.png",
+    "urlCat": "/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=B%C3%A9lica"
+  },
+  {
+    "PortadaCat": "https://jfl4bur.github.io/Todogram/public/images/CienciaFiccion.png",
+    "urlCat": "/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Ciencia+Ficci%C3%B3n"
+  },
+  {
+    "PortadaCat": "https://jfl4bur.github.io/Todogram/public/images/Comedia.png",
+    "urlCat": "/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Comedia"
+  },
+  {
+    "PortadaCat": "https://jfl4bur.github.io/Todogram/public/images/Crimen.png",
+    "urlCat": "/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Crimen"
+  },
+  {
+    "PortadaCat": "https://jfl4bur.github.io/Todogram/public/images/Documentales.png",
+    "urlCat": "/catalogo/#catalogo?tab=Documentales&genre=Todo+el+cat%C3%A1logo"
+  },
+  {
+    "PortadaCat": "https://jfl4bur.github.io/Todogram/public/images/Drama.png",
+    "urlCat": "/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Drama"
+  },
+  {
+    "PortadaCat": "https://jfl4bur.github.io/Todogram/public/images/Familia.png",
+    "urlCat": "/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Familia"
+  },
+  {
+    "PortadaCat": "https://jfl4bur.github.io/Todogram/public/images/Fantasía.png",
+    "urlCat": "/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Fantas%C3%ADa"
+  },
+  {
+    "PortadaCat": "https://jfl4bur.github.io/Todogram/public/images/Historia.png",
+    "urlCat": "/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Historia"
+  },
+  {
+    "PortadaCat": "https://jfl4bur.github.io/Todogram/public/images/Misterio.png",
+    "urlCat": "/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Misterio"
+  },
+  {
+    "PortadaCat": "https://jfl4bur.github.io/Todogram/public/images/Música.png",
+    "urlCat": "/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=M%C3%BAsica"
+  },
+  {
+    "PortadaCat": "https://jfl4bur.github.io/Todogram/public/images/PelículasTV.png",
+    "urlCat": "/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Pel%C3%ADculas+TV"
+  },
+  {
+    "PortadaCat": "https://jfl4bur.github.io/Todogram/public/images/Romance.png",
+    "urlCat": "/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Romance"
+  },
+  {
+    "PortadaCat": "https://jfl4bur.github.io/Todogram/public/images/Suspense.png",
+    "urlCat": "/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Suspense"
+  },
+  {
+    "PortadaCat": "https://jfl4bur.github.io/Todogram/public/images/Terror.png",
+    "urlCat": "/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Terror"
+  },
+  {
+    "PortadaCat": "https://jfl4bur.github.io/Todogram/public/images/Western.png",
+    "urlCat": "/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Western"
+  }
+]
