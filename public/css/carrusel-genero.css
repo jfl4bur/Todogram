@@ -1,0 +1,110 @@
+/* Estilos para el carrusel de géneros (redondo, con peeking lateral y paginación) */
+.carrusel-generos-section{
+  margin: 28px auto;
+  padding: 24px 12px;
+  max-width: 1200px;
+}
+.carrusel-generos-title{
+  color: #fff;
+  font-size: 20px;
+  margin: 6px 16px 18px 16px;
+  font-weight: 500;
+}
+.carrusel-generos-viewport{
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+.carrusel-generos-track{
+  display:flex;
+  align-items:flex-start;
+  gap:16px;
+  transition:transform 0.6s cubic-bezier(.25,.46,.45,.94);
+  will-change:transform;
+  padding: 12px 0; /* espacio vertical */
+}
+.carrusel-generos-item{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-decoration:none;
+  color:#eaeaea;
+  flex:0 0 auto;
+  min-width:80px;
+}
+.carrusel-generos-img{
+  width:140px;
+  height:140px;
+  border-radius:50%;
+  overflow:hidden;
+  background:#222;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+}
+.carrusel-generos-img img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+  border-radius:50%;
+}
+.carrusel-generos-label{
+  margin-top:10px;
+  font-size:14px;
+  text-align:center;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:140px;
+}
+.carrusel-generos-nav{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  margin-top:12px;
+}
+.carrusel-nav-btn{
+  background:transparent;
+  border:0;
+  color:#fff;
+  font-size:28px;
+  cursor:pointer;
+  padding:6px 12px;
+}
+.carrusel-generos-pagination{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.carrusel-dot{
+  width:12px;
+  height:8px;
+  background:rgba(255,255,255,0.15);
+  border-radius:6px;
+  cursor:pointer;
+}
+.carrusel-dot.active{
+  background:rgba(255,255,255,0.95);
+}
+/* Responsive tweaks */
+@media (max-width: 768px){
+  .carrusel-generos-img{ width:110px; height:110px; }
+  .carrusel-generos-label{ max-width:110px; font-size:13px }
+}
+@media (max-width: 420px){
+  .carrusel-generos-img{ width:92px; height:92px; }
+  .carrusel-generos-label{ max-width:92px; font-size:12px }
+}
+
+/* Asegurar que los controls no tapen completamente las porciones vistas del lado */
+.carrusel-nav-btn{ z-index:3 }
+.carrusel-generos-track a{ z-index:2 }
+
+/* Hacer que el viewport deje ver parcialmente los elementos adyacentes */
+.carrusel-generos-viewport{ padding-left:0; padding-right:0 }
+
+/* Pequeña transición cuando se cambia de página */
+.carrusel-generos-track.moving{ transition: transform 0.5s cubic-bezier(.22,.9,.32,1) }

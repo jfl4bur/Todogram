@@ -6,6 +6,7 @@
     <title>Todogram - Series y Películas</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://jfl4bur.github.io/Todogram/public/css/styles.css">
+    <link rel="stylesheet" href="https://jfl4bur.github.io/Todogram/public/css/carrusel-genero.css">
     
     <!-- Metatags dinámicos para compartir -->
     <div id="dynamic-meta-tags" style="display:none;">
@@ -339,45 +340,21 @@
         </div>
     </div>
     </div>
-
-    <!-- Modales -->
-    <!-- Carrusel de Géneros (nuevo) -->
-    <div class="carousel-section">
-        <h1 class="carousel-title">Géneros</h1>
-        <div class="carousel-container">
-            <div class="carousel-skeleton" id="genero-carousel-skeleton">
-                <!-- skeletons redondos que coinciden con el tamaño de las imágenes -->
-                <div class="genero-skeleton-item">
-                    <div class="genero-skeleton-image"></div>
-                    <div class="genero-skeleton-label"></div>
-                </div>
-                <div class="genero-skeleton-item">
-                    <div class="genero-skeleton-image"></div>
-                    <div class="genero-skeleton-label"></div>
-                </div>
-                <div class="genero-skeleton-item">
-                    <div class="genero-skeleton-image"></div>
-                    <div class="genero-skeleton-label"></div>
-                </div>
-                <div class="genero-skeleton-item">
-                    <div class="genero-skeleton-image"></div>
-                    <div class="genero-skeleton-label"></div>
-                </div>
-                <div class="genero-skeleton-item">
-                    <div class="genero-skeleton-image"></div>
-                    <div class="genero-skeleton-label"></div>
-                </div>
-            </div>
-            <div id="genero-carousel-wrapper" style="display:none;"></div>
-            <div class="carousel-progress">
-                <div class="carousel-progress-bar"></div>
-            </div>
-            <div class="carousel-nav" id="genero-carousel-nav">
-                <button class="carousel-nav-btn prev" id="genero-carousel-prev"><i class="fas fa-chevron-left"></i></button>
-                <button class="carousel-nav-btn next" id="genero-carousel-next"><i class="fas fa-chevron-right"></i></button>
-            </div>
+    
+    <!-- Carrusel de Géneros (añadido por carrusel-genero.js) -->
+    <div class="carrusel-generos-section">
+        <h1 class="carrusel-generos-title">Géneros</h1>
+        <div class="carrusel-generos-viewport">
+            <div class="carrusel-generos-track" id="carrusel-generos-track" aria-live="polite"></div>
+        </div>
+        <div class="carrusel-generos-nav">
+            <button class="carrusel-nav-btn carrusel-prev" id="carrusel-prev" aria-label="Anterior">‹</button>
+            <div class="carrusel-generos-pagination" id="carrusel-generos-pagination" role="tablist"></div>
+            <button class="carrusel-nav-btn carrusel-next" id="carrusel-next" aria-label="Siguiente">›</button>
         </div>
     </div>
+
+    <!-- Modales -->
     <div class="modal-overlay" id="modal-overlay">
         <div class="modal-content" id="modal-content">
             <div class="modal-header">
@@ -482,6 +459,7 @@
         window.peliculas = []; // Se llenará con los datos cargados
     </script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/slider-independent.js"></script>
+    <script src="https://jfl4bur.github.io/Todogram/public/js/carrusel-genero.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/carousel.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/hover-modal.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/details-modal.js"></script>
@@ -491,7 +469,6 @@
     <script src="https://jfl4bur.github.io/Todogram/public/js/catalogo.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/footer.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/main.js"></script>
-    <script src="https://jfl4bur.github.io/Todogram/public/js/carrusel-genero.js"></script>
     
     <!-- Script para asegurar la inicialización del slider independiente -->
     <script>

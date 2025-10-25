@@ -1,242 +1,220 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const wrapper = document.getElementById('genero-carousel-wrapper');
-    const skeleton = document.getElementById('genero-carousel-skeleton');
-    const prevBtn = document.getElementById('genero-carousel-prev');
-    const nextBtn = document.getElementById('genero-carousel-next');
-    const carouselNav = document.getElementById('genero-carousel-nav');
-    let progressBar = null;
+(function(){
+  // Carrusel de géneros. Carga public/carrucat.json y crea un slider circular con peeking lateral.
+  const DATA_PATHS = ['public/carrucat.json','/public/carrucat.json','https://jfl4bur.github.io/Todogram/public/carrucat.json'];
+  let items = [];
+  let currentPage = 0;
+  let itemsPerPage = 1;
+  let itemWidth = 140;
+  const gap = 16;
+  const minItemWidth = 92;
+  const maxItemWidth = 240;
 
-    if (!wrapper) return;
+  function q(sel, ctx){ return (ctx||document).querySelector(sel); }
+  function qa(sel, ctx){ return Array.from((ctx||document).querySelectorAll(sel)); }
 
-    // Prefer relative path when serving locally
-    const dataPath = 'https://jfl4bur.github.io/Todogram/public/carrucat.json';
+  function extractName(entry){
+    // Prefer genre param if exists
+    try{
+      const u = entry.urlCat || '';
+      if(u.includes('genre=')){
+        const m = u.match(/[?&]genre=([^&]+)/);
+        if(m && m[1]) return decodeURIComponent(m[1]).replace(/\+/g,' ');
+      }
+      // fallback for common labels
+      if(u.endsWith('/catalogo/') || u.endsWith('/catalogo')) return 'Todo el catálogo';
+      // fallback to filename from PortadaCat
+      if(entry.PortadaCat){
+        const seg = entry.PortadaCat.split('/').pop();
+        if(seg){
+          const name = seg.replace(/\.[^/.]+$/,'').replace(/[-_]/g,' ');
+          return name;
+        }
+      }
+    }catch(e){ }
+    return 'Género';
+  }
 
-    function extractName(entry) {
-        const url = entry.urlCat || '';
-        // try genre param
-        const genreMatch = url.match(/[?&]genre=([^&]+)/i);
-        if (genreMatch && genreMatch[1]) {
-            try { return decodeURIComponent(genreMatch[1]).replace(/\+/g, ' '); } catch(e) { return genreMatch[1].replace(/\+/g,' '); }
-        }
-        const tabMatch = url.match(/[?&]tab=([^&]+)/i);
-        if (tabMatch && tabMatch[1]) {
-            try { return decodeURIComponent(tabMatch[1]).replace(/\+/g,' '); } catch(e) { return tabMatch[1].replace(/\+/g,' '); }
-        }
-        // fallback to image filename
-        if (entry.PortadaCat) {
-            const parts = entry.PortadaCat.split('/');
-            let name = parts[parts.length - 1] || entry.PortadaCat;
-            name = name.replace(/\.[a-zA-Z0-9]+$/, '');
-            name = name.replace(/[-_]/g, ' ');
-            name = decodeURIComponent(name);
-            if (/^todo/i.test(name)) return 'Todo el catálogo';
-            // capitalize
-            return name.charAt(0).toUpperCase() + name.slice(1);
-        }
-        return 'Categoría';
+  async function fetchJson(){
+    for(const p of DATA_PATHS){
+      try{
+        const res = await fetch(p, {cache:'no-cache'});
+        if(!res.ok) continue;
+        const data = await res.json();
+        if(Array.isArray(data)) return data;
+      }catch(e){/* ignore and try next */}
     }
+    return [];
+  }
 
-    function createItem(entry) {
-        const a = document.createElement('a');
-        a.href = entry.urlCat || '#';
-        a.className = 'genero-link';
-        // ensure not opening in new tab
-
-        const item = document.createElement('div');
-        item.className = 'genero-item';
-
-        const img = document.createElement('img');
-        img.className = 'genero-image';
-        img.loading = 'lazy';
-        img.src = entry.PortadaCat || '';
-        img.alt = extractName(entry);
-
-        const label = document.createElement('div');
-        label.className = 'genero-label';
-        label.textContent = extractName(entry);
-
-        a.appendChild(img);
-        a.appendChild(label);
-        item.appendChild(a);
-
-        return item;
-    }
-
-    function setupNavigation(wrapper, items) {
-        // compute item width from actual DOM (prefer image width)
-        let itemWidth = 0;
-        let gap = 12;
-        let itemsPerViewport = 1;
-        let resizeObserver = null;
-
-        function updateLayout() {
-            const viewportWidth = document.documentElement.clientWidth || window.innerWidth;
-            // sample dimension from existing elements
-            const sampleImg = wrapper.querySelector('.genero-image') || document.querySelector('.genero-skeleton-image');
-            if (sampleImg) {
-                const rect = sampleImg.getBoundingClientRect();
-                itemWidth = rect.width || rect.height || 120;
-            } else if (items[0]) {
-                itemWidth = items[0].getBoundingClientRect().width || 120;
-            } else {
-                itemWidth = 120;
-            }
-
-            // choose gap based on viewport (similar to slider independent)
-            if (viewportWidth > 1400) gap = 24;
-            else if (viewportWidth > 1024) gap = 20;
-            else if (viewportWidth > 768) gap = 16;
-            else if (viewportWidth > 480) gap = 12;
-            else gap = 8;
-
-            // side space to show partial adjacent items (center first visible item)
-            let sideSpace = Math.floor((viewportWidth - itemWidth) / 2);
-            if (sideSpace < 8) sideSpace = 8;
-
-            // apply margin-left so first item appears with adjacent partial items
-                wrapper.style.marginLeft = sideSpace + 'px';
-                // add right padding so last item can show partially
-                wrapper.style.paddingRight = sideSpace + 'px';
-
-                // also align the skeleton (if present) so skeleton and items match exactly
-                if (skeleton) {
-                    skeleton.style.display = 'flex';
-                    skeleton.style.gap = gap + 'px';
-                    skeleton.style.marginLeft = sideSpace + 'px';
-                    skeleton.style.paddingRight = sideSpace + 'px';
-                    // size skeleton children to match itemWidth
-                    const skImgs = skeleton.querySelectorAll('.genero-skeleton-image');
-                    skImgs.forEach(img => {
-                        img.style.width = itemWidth + 'px';
-                        img.style.height = itemWidth + 'px';
-                        img.style.borderRadius = '50%';
-                    });
-                    const skLabels = skeleton.querySelectorAll('.genero-skeleton-label');
-                    skLabels.forEach(l => {
-                        l.style.width = Math.max(72, Math.min(120, Math.floor(itemWidth * 0.75))) + 'px';
-                    });
-                }
-
-            // set CSS variable for nav button positioning
-            document.documentElement.style.setProperty('--genero-side-space', sideSpace + 'px');
-            document.documentElement.style.setProperty('--genero-item-width', itemWidth + 'px');
-
-            // apply sizes and gaps to items explicitly for precise alignment
-            items.forEach((it, idx) => {
-                it.style.width = itemWidth + 'px';
-                it.style.flexBasis = itemWidth + 'px';
-                it.style.marginRight = idx < items.length - 1 ? gap + 'px' : '0px';
-                const img = it.querySelector('.genero-image');
-                if (img) {
-                    img.style.width = '100%';
-                    img.style.height = '100%';
-                    img.style.objectFit = 'cover';
-                }
-            });
-
-            // ensure wrapper scroll behaves smoothly and shows scrollbar only when needed
-            wrapper.style.overflowX = 'auto';
-            wrapper.style.scrollBehavior = 'smooth';
-        }
-
-        function computeStepSize() {
-            const stepSize = itemWidth + gap;
-            return stepSize;
-        }
-
-        function calculateItemsPerViewport() {
-            const stepSize = computeStepSize();
-            const containerWidth = wrapper.clientWidth || wrapper.getBoundingClientRect().width;
-            itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
-            return itemsPerViewport;
-        }
-
-        function scrollToPage(direction) {
-            const containerWidth = wrapper.clientWidth;
-            const firstItem = wrapper.querySelector('.genero-item');
-            if (!firstItem) return;
-            const itemRect = firstItem.getBoundingClientRect();
-            const actualItemWidth = Math.round(itemRect.width);
-            let actualGap = gap;
-            const secondItem = firstItem.nextElementSibling;
-            if (secondItem) {
-                const secondRect = secondItem.getBoundingClientRect();
-                actualGap = Math.round(secondRect.left - (itemRect.left + itemRect.width));
-                if (isNaN(actualGap) || actualGap < 0) actualGap = gap;
-            }
-            const stepSize = actualItemWidth + actualGap;
-            const itemsThatFit = Math.max(1, Math.floor(containerWidth / stepSize));
-            const currentIndex = Math.floor(wrapper.scrollLeft / stepSize);
-            let targetIndex;
-            if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsThatFit);
-            else targetIndex = currentIndex + itemsThatFit;
-            const totalItems = wrapper.querySelectorAll('.genero-item').length;
-            const maxFirstIndex = Math.max(0, totalItems - itemsThatFit);
-            targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
-            const finalScroll = targetIndex * stepSize;
-            wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
-        }
-
-        // init layout
-        updateLayout();
-
-        // wire pagination using page-sized steps (same behaviour as other carousels)
-        prevBtn && prevBtn.addEventListener('click', (e) => { e.preventDefault(); scrollToPage('prev'); });
-        nextBtn && nextBtn.addEventListener('click', (e) => { e.preventDefault(); scrollToPage('next'); });
-
-        // update progress bar on scroll if available
-        wrapper.addEventListener('scroll', () => {
-            if (progressBar) {
-                if (wrapper.scrollWidth > wrapper.clientWidth) {
-                    const scrollPercentage = (wrapper.scrollLeft / (wrapper.scrollWidth - wrapper.clientWidth)) * 100;
-                    progressBar.style.width = `${scrollPercentage}%`;
-                } else {
-                    progressBar.style.width = '100%';
-                }
-            }
-        });
-
-        // adjust on resize with debounce and ResizeObserver for the wrapper
-        let resizeTimer = null;
-        window.addEventListener('resize', () => {
-            clearTimeout(resizeTimer);
-            resizeTimer = setTimeout(() => { updateLayout(); }, 120);
-        });
-        if ('ResizeObserver' in window) {
-            resizeObserver = new ResizeObserver(() => { updateLayout(); });
-            resizeObserver.observe(wrapper);
-        }
-    }
-
-    fetch(dataPath).then(res => res.json()).then(data => {
-        // data expected as array
-        if (!Array.isArray(data)) return;
-        // clear skeleton and prepare wrapper
-        if (skeleton) skeleton.style.display = 'none';
-        wrapper.style.display = 'flex';
-
-        // progress bar ref (if present)
-        const progressContainer = wrapper.parentElement ? wrapper.parentElement.querySelector('.carousel-progress-bar') : null;
-        if (progressContainer) progressBar = progressContainer;
-
-        const fragment = document.createDocumentFragment();
-        data.forEach(entry => { fragment.appendChild(createItem(entry)); });
-        wrapper.appendChild(fragment);
-
-        const items = Array.from(wrapper.querySelectorAll('.genero-item'));
-        if (items.length) setupNavigation(wrapper, items);
-
-        // show nav buttons on hover-capable devices similar to other carousels
-        if (carouselNav) {
-            if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
-                carouselNav.style.display = 'flex';
-            } else {
-                // on touch devices keep nav visible
-                carouselNav.style.display = 'flex';
-            }
-        }
-
-    }).catch(err => {
-        console.error('Error cargando carrusel de géneros:', err);
+  function buildItems(container){
+    container.innerHTML = '';
+    items.forEach((it, idx)=>{
+      const a = document.createElement('a');
+      a.className = 'carrusel-generos-item';
+      a.href = it.urlCat || '#';
+      a.setAttribute('data-index', idx);
+      // accessibility: link should open in same tab per request
+      a.setAttribute('role','link');
+      const imgWrap = document.createElement('div');
+      imgWrap.className = 'carrusel-generos-img';
+      const img = document.createElement('img');
+      img.src = it.PortadaCat || '';
+      img.alt = extractName(it);
+      img.loading = 'lazy';
+      imgWrap.appendChild(img);
+      const label = document.createElement('div');
+      label.className = 'carrusel-generos-label';
+      label.textContent = extractName(it);
+      a.appendChild(imgWrap);
+      a.appendChild(label);
+      container.appendChild(a);
     });
-});
+  }
+
+  function computeLayout(){
+    const viewport = q('.carrusel-generos-viewport');
+    const track = q('#carrusel-generos-track');
+    if(!viewport || !track) return;
+    const containerWidth = Math.max(320, viewport.clientWidth || viewport.getBoundingClientRect().width);
+    // desired peek to show partial items on both sides
+    const desiredPeek = Math.round(containerWidth * 0.06);
+    const available = containerWidth - (2*desiredPeek);
+
+    // maximum possible items trying to use minItemWidth
+    const maxPossible = Math.min(items.length, Math.max(1, Math.floor((available + gap) / (minItemWidth + gap))));
+    let chosenN = 1;
+    let chosenW = Math.max(minItemWidth, Math.min(maxItemWidth, Math.floor((available - (1-1)*gap)/1)));
+
+    for(let n = maxPossible; n>=1; n--){
+      const w = Math.floor((available - (n-1)*gap)/n);
+      if(w >= minItemWidth && w <= maxItemWidth){
+        chosenN = n;
+        chosenW = w;
+        break;
+      }
+      // if w > maxItemWidth try to increase n (already iterating downwards) else if w < min continue
+      if(n===1){
+        // last fallback: clamp
+        chosenN = 1;
+        chosenW = Math.max(minItemWidth, Math.min(maxItemWidth, Math.floor(available)));
+      }
+    }
+
+    itemsPerPage = chosenN;
+    itemWidth = chosenW;
+
+    // Apply sizes
+    const itemEls = qa('.carrusel-generos-item');
+    itemEls.forEach((el, i)=>{
+      el.style.width = itemWidth + 'px';
+      el.style.flexBasis = itemWidth + 'px';
+    });
+    track.style.gap = gap + 'px';
+    // Use padding on the track wrapper to show peek
+    viewport.style.paddingLeft = desiredPeek + 'px';
+    viewport.style.paddingRight = desiredPeek + 'px';
+
+    // recompute pages
+    const pages = Math.max(1, Math.ceil(items.length / itemsPerPage));
+    if(currentPage >= pages) currentPage = pages-1;
+    renderPagination(pages);
+    updatePosition();
+  }
+
+  function renderPagination(pages){
+    const pag = q('#carrusel-generos-pagination');
+    if(!pag) return;
+    pag.innerHTML = '';
+    for(let i=0;i<pages;i++){
+      const dot = document.createElement('div');
+      dot.className = 'carrusel-dot' + (i===currentPage? ' active':'');
+      dot.setAttribute('data-page', i);
+      dot.title = 'Página ' + (i+1);
+      dot.addEventListener('click', ()=>{
+        currentPage = i; updatePosition();
+      });
+      pag.appendChild(dot);
+    }
+  }
+
+  function updatePosition(){
+    const track = q('#carrusel-generos-track');
+    const viewport = q('.carrusel-generos-viewport');
+    if(!track || !viewport) return;
+    const totalItems = items.length;
+    const fullStep = itemsPerPage * (itemWidth + gap);
+    let desired = currentPage * fullStep;
+
+    // compute maximum translate so last page doesn't leave blank space
+    const totalWidth = totalItems * (itemWidth + gap) - gap; // total width of items
+    const visibleWidth = viewport.clientWidth;
+    const maxTranslate = Math.max(0, totalWidth - visibleWidth + 0); // clamp
+    if(desired > maxTranslate) desired = maxTranslate;
+    if(desired < 0) desired = 0;
+
+    track.style.transform = `translateX(${-desired}px)`;
+    // update active dot
+    qa('.carrusel-dot').forEach(d=>d.classList.remove('active'));
+    const active = q(`.carrusel-dot[data-page="${currentPage}"]`);
+    if(active) active.classList.add('active');
+  }
+
+  function prev(){
+    currentPage = Math.max(0, currentPage-1);
+    updatePosition();
+  }
+  function next(){
+    const pages = Math.max(1, Math.ceil(items.length / itemsPerPage));
+    currentPage = Math.min(pages-1, currentPage+1);
+    updatePosition();
+  }
+
+  function attachControls(){
+    const prevBtn = q('#carrusel-prev');
+    const nextBtn = q('#carrusel-next');
+    if(prevBtn) prevBtn.addEventListener('click', prev);
+    if(nextBtn) nextBtn.addEventListener('click', next);
+    // keyboard support: left/right when focus inside section
+    const section = q('.carrusel-generos-section');
+    if(section){
+      section.tabIndex = 0;
+      section.addEventListener('keydown', (e)=>{
+        if(e.key === 'ArrowLeft') prev();
+        if(e.key === 'ArrowRight') next();
+      });
+    }
+  }
+
+  function observeResize(){
+    let t;
+    window.addEventListener('resize', ()=>{
+      clearTimeout(t);
+      t = setTimeout(()=>{
+        computeLayout();
+      },120);
+    });
+  }
+
+  async function init(){
+    const track = q('#carrusel-generos-track');
+    if(!track) return;
+    items = await fetchJson();
+    if(!items || items.length===0){
+      track.innerHTML = '<div style="color:#fff;padding:12px">No hay géneros</div>';
+      return;
+    }
+    buildItems(track);
+    attachControls();
+    computeLayout();
+    observeResize();
+  }
+
+  // Auto init
+  document.addEventListener('DOMContentLoaded', ()=>{
+    // Defer slightly to ensure DOM insertion
+    setTimeout(()=>{ init(); }, 80);
+  });
+
+  // Expose for debugging
+  window.carruselGenero = { init };
+})();
