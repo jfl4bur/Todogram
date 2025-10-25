@@ -17,6 +17,8 @@
   /* Allow nav buttons to overflow the viewport so they remain visible even when JS sets padding */
   overflow: visible;
   width: 100%;
+  /* allow vertical page scroll while enabling horizontal pointer handling */
+  touch-action: pan-y;
 }
 .carrusel-generos-track{
   display:flex;

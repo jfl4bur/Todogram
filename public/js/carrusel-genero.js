@@ -281,15 +281,21 @@
   }
 
   function onPointerDown(e){
+    // support PointerEvent, TouchEvent and MouseEvent
     isDragging = true;
-    dragStartX = e.clientX || e.touches && e.touches[0].clientX || 0;
+    dragStartX = (e.clientX !== undefined) ? e.clientX : (e.touches && e.touches[0] && e.touches[0].clientX) || 0;
     dragDelta = 0;
     const track = q('#carrusel-generos-track');
     if(track) track.style.transition = 'none';
+    // attempt pointer capture on the viewport for consistent move/up events
+    try{
+      const vp = q('.carrusel-generos-viewport');
+      if(vp && e.pointerId && vp.setPointerCapture) vp.setPointerCapture(e.pointerId);
+    }catch(ex){}
   }
   function onPointerMove(e){
     if(!isDragging) return;
-    const x = e.clientX || e.touches && e.touches[0].clientX || 0;
+    const x = (e.clientX !== undefined) ? e.clientX : (e.touches && e.touches[0] && e.touches[0].clientX) || 0;
     dragDelta = x - dragStartX;
     const track = q('#carrusel-generos-track');
     if(track){
@@ -301,7 +307,8 @@
   function onPointerUp(e){
     if(!isDragging) return;
     isDragging = false;
-    const threshold = Math.max(10, itemWidth * 0.25);
+    // smaller threshold on touch devices for snappier behavior
+    const threshold = Math.max(8, itemWidth * 0.18);
     if(dragDelta < -threshold){
       currentIndex = clampIndex(currentIndex + itemsPerView);
     } else if(dragDelta > threshold){
@@ -309,6 +316,11 @@
     }
     const track = q('#carrusel-generos-track');
     if(track) track.style.transition = '';
+    // release pointer capture if present
+    try{
+      const vp = q('.carrusel-generos-viewport');
+      if(vp && e.pointerId && vp.releasePointerCapture) vp.releasePointerCapture(e.pointerId);
+    }catch(ex){}
     updatePosition();
   }
 
@@ -337,12 +349,14 @@
     // attach pointer events for drag
     const viewport = q('.carrusel-generos-viewport');
     if(viewport){
+      // Use Pointer Events for smoother unified handling on touch/mouse
+      viewport.addEventListener('pointerdown', onPointerDown, {passive:false});
+      window.addEventListener('pointermove', onPointerMove, {passive:true});
+      window.addEventListener('pointerup', onPointerUp, {passive:true});
+      // legacy fallback for environments without Pointer Events
       viewport.addEventListener('mousedown', onPointerDown);
-      viewport.addEventListener('touchstart', onPointerDown, {passive:true});
       window.addEventListener('mousemove', onPointerMove);
-      window.addEventListener('touchmove', onPointerMove, {passive:true});
       window.addEventListener('mouseup', onPointerUp);
-      window.addEventListener('touchend', onPointerUp);
     }
 
     calculateLayout();
