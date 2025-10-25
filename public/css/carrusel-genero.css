@@ -5,7 +5,7 @@
 .carrusel-genero #generos-carousel-wrapper::-webkit-scrollbar { display: none; height: 0; }
 .carrusel-genero #generos-carousel-wrapper { -ms-overflow-style: none; scrollbar-width: none; }
 .genero-item { display: inline-flex; flex-direction: column; align-items: center; text-align: center; color: #ddd; text-decoration: none; flex: 0 0 auto; }
-.genero-item .genero-img { width: 160px; height: 160px; border-radius: 50%; object-fit: cover; display: block; box-shadow: 0 6px 18px rgba(0,0,0,0.6); border: none; }
+.genero-item .genero-img {width: 160px;height: 160px;border-radius: 50%;object-fit: cover;display: block;box-shadow: 0 6px 18px rgba(0,0,0,0.6);border: none;overflow: visible;}
 .genero-item .genero-title { margin-top: 12px; font-size: 15px; color: #f1f1f1; max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Navegación (botones) */
