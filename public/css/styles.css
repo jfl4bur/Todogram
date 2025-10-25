@@ -1325,6 +1325,9 @@ button:focus {
     /* margin-left se aplica desde JS para mostrar trozos adyacentes */
 }
 
+#genero-carousel-wrapper::-webkit-scrollbar { display: none; height: 8px; }
+#genero-carousel-wrapper { scrollbar-width: none; -ms-overflow-style: none; }
+
 .genero-item {
     flex: 0 0 auto;
     display: flex;
@@ -1343,7 +1346,9 @@ button:focus {
     object-fit: cover;
     background: #232323;
     display: block;
-    box-shadow: 0 6px 18px rgba(0,0,0,0.6);
+    /* sombreado y anillo exterior para coincidir con referencia */
+    box-shadow: 0 12px 30px rgba(0,0,0,0.6), 0 0 0 6px rgba(0,0,0,0.45) inset;
+    border: 6px solid rgba(0,0,0,0.35);
 }
 
 .genero-label {
