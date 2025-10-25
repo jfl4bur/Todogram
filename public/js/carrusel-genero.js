@@ -138,9 +138,13 @@
     });
     if(track) track.style.gap = gap + 'px';
 
-  // set viewport padding to show peek on both sides (always show adjacent pieces)
-  viewport.style.paddingLeft = peek + 'px';
-  viewport.style.paddingRight = peek + 'px';
+  // remove any inline padding on viewport (avoid runtime style conflicts)
+  try{ viewport.style.removeProperty('padding-left'); viewport.style.removeProperty('padding-right'); }catch(e){}
+  // use track margins to create visible peek on both sides (avoids modifying viewport inline styles)
+  if(track) {
+    track.style.marginLeft = peek + 'px';
+    track.style.marginRight = peek + 'px';
+  }
 
   // update pagination
   renderPagination(pages);
@@ -183,8 +187,8 @@
     const viewport = q('.carrusel-generos-viewport');
     if(!track || !viewport) return;
 
-  // Always subtract peek so items are positioned with partial adjacent items visible
-  const translate = currentIndex * (itemWidth + gap) - peek;
+  // Translate based on item widths; track margins provide the visible peek
+  const translate = currentIndex * (itemWidth + gap);
     if(skipAnim){
       track.style.transition = 'none';
       track.style.transform = `translateX(${-translate}px)`;
@@ -236,9 +240,9 @@
     dragDelta = x - dragStartX;
     const track = q('#carrusel-generos-track');
     if(track){
-      // account for peek when dragging so visual matches final position
-      const base = currentIndex * (itemWidth + gap) - peek;
-      track.style.transform = `translateX(${-(base) + dragDelta}px)`;
+  // account for peek via track margin; drag base uses same formula as translate
+  const base = currentIndex * (itemWidth + gap);
+  track.style.transform = `translateX(${-(base) + dragDelta}px)`;
     }
   }
   function onPointerUp(e){
