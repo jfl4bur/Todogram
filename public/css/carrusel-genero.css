@@ -1,8 +1,7 @@
 /* Estilos para el carrusel de géneros */
 .carrusel-genero { position: relative; padding: 22px 10px 48px; }
-.carrusel-genero #generos-carousel-wrapper { overflow: hidden; }
-.genero-track { display: flex; gap: 18px; transition: transform 400ms cubic-bezier(.22,.9,.25,1); will-change: transform; align-items: flex-start; padding-left: 6px; }
-.genero-item { display: inline-flex; flex-direction: column; align-items: center; text-align: center; color: #ddd; text-decoration: none; }
+.carrusel-genero #generos-carousel-wrapper { overflow-x: auto; display: flex; gap: 18px; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; padding: 6px 6px 0; }
+.genero-item { display: inline-flex; flex-direction: column; align-items: center; text-align: center; color: #ddd; text-decoration: none; flex: 0 0 auto; }
 .genero-item .genero-img { width: 160px; height: 160px; border-radius: 50%; object-fit: cover; display: block; box-shadow: 0 6px 18px rgba(0,0,0,0.6); border: 4px solid rgba(255,255,255,0.02); }
 .genero-item .genero-title { margin-top: 12px; font-size: 15px; color: #f1f1f1; max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 

@@ -2,14 +2,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const wrapper = document.getElementById('generos-carousel-wrapper');
     const prevBtn = document.getElementById('generos-carousel-prev');
     const nextBtn = document.getElementById('generos-carousel-next');
-    const paginationRoot = document.getElementById('generos-pagination');
     const skeleton = document.getElementById('generos-skeleton');
     const GAP = 18; // debe coincidir con CSS gap
 
     if (!wrapper) return;
 
     let items = [];
-    let track, currentPage = 0, itemsPerPage = 1, itemWidth = 160, totalPages = 1;
+    let currentPage = 0;
+    let itemsPerPage = 1;
+    let itemWidth = 160;
 
     // mostrar skeleton mientras carga
     if (skeleton) skeleton.style.display = 'flex';
@@ -24,30 +25,24 @@ document.addEventListener('DOMContentLoaded', () => {
             name = name.replace(/[-_+]/g, ' ');
             // Capitalizar primeras letras
             name = name.split(' ').map(s => s.charAt(0).toUpperCase() + s.slice(1)).join(' ');
-            // map simple
             if (/^todo$/i.test(name)) return 'Todo el catálogo';
             return name;
         } catch (e) { return ''; }
     }
 
-    // usar ruta local por defecto
+    // cargar JSON desde ruta local
     fetch('https://jfl4bur.github.io/Todogram/public/carrucat.json').then(r => r.json()).then(data => {
         items = data || [];
         render();
         window.addEventListener('resize', debounce(onResize, 120));
     }).catch(err => {
         console.error('Error cargando carrucat.json', err);
-        // ocultar skeleton si hay error
         if (skeleton) skeleton.style.display = 'none';
         wrapper.style.display = 'block';
     });
 
     function render() {
-        // limpiar
         wrapper.innerHTML = '';
-        track = document.createElement('div');
-        track.className = 'genero-track';
-        wrapper.appendChild(track);
 
         items.forEach((it, idx) => {
             const a = document.createElement('a');
@@ -67,107 +62,101 @@ document.addEventListener('DOMContentLoaded', () => {
 
             a.appendChild(img);
             a.appendChild(title);
-            track.appendChild(a);
+            wrapper.appendChild(a);
         });
 
-        // build pagination dots
-        paginationRoot.innerHTML = '';
-
+        // una vez renderizados, calcular layout y añadir listeners
         calculateLayout();
         attachNav();
 
         // ocultar skeleton y mostrar wrapper
         if (skeleton) skeleton.style.display = 'none';
-        wrapper.style.display = 'block';
+        wrapper.style.display = 'flex';
     }
 
     function calculateLayout() {
         const containerWidth = wrapper.clientWidth || wrapper.getBoundingClientRect().width;
 
-        // tamaño base para decidir cuántos items caben
-        const minBase = 220; // valor mayor para items más grandes
-        itemsPerPage = Math.max(1, Math.floor(containerWidth / minBase));
+        // intentar leer el ancho real del primer item
+        const firstItem = wrapper.querySelector('.genero-item');
+        const measured = firstItem ? Math.round(firstItem.getBoundingClientRect().width) : 160;
+        itemWidth = measured || 160;
 
-        // calcular itemWidth exacto con gap
-        itemWidth = Math.floor((containerWidth - GAP * (itemsPerPage - 1)) / itemsPerPage);
-        if (itemWidth < 100) itemWidth = 100;
+        // calcular cuántos ítems caben
+        itemsPerPage = Math.max(1, Math.floor(containerWidth / (itemWidth + GAP)));
+        if (itemsPerPage < 1) itemsPerPage = 1;
 
-        // asignar ancho a cada item (track debe existir)
-        if (!track) return;
-        const itemElements = track.querySelectorAll('.genero-item');
+        // asegurar que cada item tenga ancho correcto
+        const itemElements = wrapper.querySelectorAll('.genero-item');
         itemElements.forEach((el) => {
-            el.style.width = itemWidth + 'px';
             el.style.flex = `0 0 ${itemWidth}px`;
+            el.style.width = itemWidth + 'px';
         });
 
-        // calcular páginas
-        totalPages = Math.max(1, Math.ceil(items.length / itemsPerPage));
-
-        // construir dots
-        paginationRoot.innerHTML = '';
-        for (let i = 0; i < totalPages; i++) {
-            const d = document.createElement('div');
-            d.className = 'dot' + (i === currentPage ? ' active' : '');
-            d.dataset.page = i;
-            d.addEventListener('click', () => goToPage(i));
-            paginationRoot.appendChild(d);
-        }
-
-        // reset page if overflow
-        if (currentPage >= totalPages) currentPage = totalPages - 1;
-
-        applyTransform();
-    }
-
-    function applyTransform() {
-        const pageStep = itemsPerPage * (itemWidth + GAP);
-
-        // side peek para todas las páginas excepto la primera
-        const sidePeek = Math.round(itemWidth * 0.35);
-
-        let offset = currentPage * pageStep;
-        // if first page, no left peek
-        if (currentPage > 0) offset = offset - sidePeek;
-        // cap max offset so last page shows items to the right
-        const maxOffset = Math.max(0, (items.length * (itemWidth + GAP)) - wrapper.clientWidth + GAP);
-        if (offset > maxOffset) offset = maxOffset;
-
-        track.style.transform = `translateX(${-offset}px)`;
-
-        // update dots
-        const dots = paginationRoot.querySelectorAll('.dot');
-        dots.forEach(d => d.classList.remove('active'));
-        const activeDot = paginationRoot.querySelector(`.dot[data-page="${currentPage}"]`);
-        if (activeDot) activeDot.classList.add('active');
+        // actualizar barra de progreso inicial
+        updateProgressBar();
     }
 
     function attachNav() {
-        if (prevBtn && nextBtn) {
-            prevBtn.addEventListener('click', () => {
-                currentPage = Math.max(0, currentPage - 1);
-                applyTransform();
-            });
-            nextBtn.addEventListener('click', () => {
-                currentPage = Math.min(totalPages - 1, currentPage + 1);
-                applyTransform();
-            });
+        const progressBar = wrapper.parentElement ? wrapper.parentElement.querySelector('.carousel-progress-bar') : null;
+        // show/hide nav depending on pointer capabilities (same behavior que otros carruseles)
+        const carouselNav = document.getElementById('generos-carousel-nav');
+        if (carouselNav) {
+            if (window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+                carouselNav.style.display = 'flex';
+            } else {
+                carouselNav.style.display = 'none';
+            }
+        }
+
+        if (prevBtn) prevBtn.addEventListener('click', (e) => { e.preventDefault(); scrollToPrevPage(); });
+        if (nextBtn) nextBtn.addEventListener('click', (e) => { e.preventDefault(); scrollToNextPage(); });
+
+        wrapper.addEventListener('scroll', () => { updateProgressBar(); });
+
+        // ResizeObserver para recalcular itemsPerPage cuando cambie el ancho
+        try {
+            const ro = new ResizeObserver(() => { calculateLayout(); });
+            ro.observe(wrapper);
+        } catch (e) {
+            window.addEventListener('resize', debounce(calculateLayout, 120));
         }
     }
 
-    function goToPage(p) {
-        currentPage = Math.max(0, Math.min(totalPages - 1, p));
-        applyTransform();
+    function updateProgressBar() {
+        const progressBar = wrapper.parentElement ? wrapper.parentElement.querySelector('.carousel-progress-bar') : null;
+        if (!progressBar) return;
+        if (wrapper.scrollWidth > wrapper.clientWidth) {
+            const scrollPercentage = (wrapper.scrollLeft / (wrapper.scrollWidth - wrapper.clientWidth)) * 100;
+            progressBar.style.width = `${scrollPercentage}%`;
+        } else {
+            progressBar.style.width = '100%';
+        }
     }
 
-    function onResize() {
-        calculateLayout();
+    function scrollToPrevPage() {
+        if (!wrapper) return;
+        const firstItem = wrapper.querySelector('.genero-item');
+        const step = (firstItem ? firstItem.getBoundingClientRect().width : itemWidth) + GAP;
+        const pageStep = itemsPerPage * step;
+        const target = Math.max(0, wrapper.scrollLeft - pageStep);
+        wrapper.scrollTo({ left: target, behavior: 'smooth' });
     }
+
+    function scrollToNextPage() {
+        if (!wrapper) return;
+        const firstItem = wrapper.querySelector('.genero-item');
+        const step = (firstItem ? firstItem.getBoundingClientRect().width : itemWidth) + GAP;
+        const pageStep = itemsPerPage * step;
+        const maxScroll = wrapper.scrollWidth - wrapper.clientWidth;
+        const target = Math.min(maxScroll, wrapper.scrollLeft + pageStep);
+        wrapper.scrollTo({ left: target, behavior: 'smooth' });
+    }
+
+    function onResize() { calculateLayout(); }
 
     function debounce(fn, wait) {
         let t;
-        return function (...args) {
-            clearTimeout(t);
-            t = setTimeout(() => fn.apply(this, args), wait);
-        };
+        return function (...args) { clearTimeout(t); t = setTimeout(() => fn.apply(this, args), wait); };
     }
 });
