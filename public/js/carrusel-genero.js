@@ -191,9 +191,9 @@
     });
     if(track) track.style.gap = gap + 'px';
 
-  // set viewport padding to show peek on both sides (using inline styles so it's precise)
-  try{ viewport.style.paddingLeft = peek + 'px'; viewport.style.paddingRight = peek + 'px'; }catch(e){}
-  // ensure track has no margins
+  // remove any inline padding on viewport (avoid runtime style conflicts)
+  try{ viewport.style.removeProperty('padding-left'); viewport.style.removeProperty('padding-right'); }catch(e){}
+  // ensure track has no margins; we position via translate with a peek offset so items overflow visibly
   if(track) {
     track.style.marginLeft = '0px';
     track.style.marginRight = '0px';
@@ -240,8 +240,8 @@
     const viewport = q('.carrusel-generos-viewport');
     if(!track || !viewport) return;
 
-  // Translate based on item widths; viewport padding provides the visible peek
-  const translate = currentIndex * (itemWidth + gap);
+  // Translate based on item widths; subtract peek so items overflow left and right appropriately
+  const translate = currentIndex * (itemWidth + gap) - peek;
     if(skipAnim){
       track.style.transition = 'none';
       track.style.transform = `translateX(${-translate}px)`;
@@ -293,8 +293,8 @@
     dragDelta = x - dragStartX;
     const track = q('#carrusel-generos-track');
     if(track){
-      // drag base matches translate (viewport padding provides the peek)
-      const base = currentIndex * (itemWidth + gap);
+      // account for peek via translate offset; drag base uses same formula as translate
+      const base = currentIndex * (itemWidth + gap) - peek;
       track.style.transform = `translateX(${-(base) + dragDelta}px)`;
     }
   }
