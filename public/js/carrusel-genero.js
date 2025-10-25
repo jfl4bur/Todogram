@@ -6,6 +6,7 @@
   let itemsPerView = 1;
   let itemWidth = 160;
   let gap = 20;
+  let peek = 0;
   const minItemWidth = 92;
   const maxItemWidth = 260;
   let isDragging = false;
@@ -89,9 +90,10 @@
     else { itemsPerView = 2; gap = 12; }
 
     // measure arrow width for peek calculation
-    const arrowW = prevBtn && prevBtn.getBoundingClientRect ? Math.round(prevBtn.getBoundingClientRect().width) : 44;
-    const arrowPadding = 12;
-    const peek = Math.min(Math.round(vw * 0.08), arrowW + arrowPadding);
+  const arrowW = prevBtn && prevBtn.getBoundingClientRect ? Math.round(prevBtn.getBoundingClientRect().width) : 44;
+  const arrowPadding = 12;
+  // set global peek (how much of adjacent items is visible)
+  peek = Math.min(Math.round(vw * 0.08), arrowW + arrowPadding);
 
     // compute itemWidth to fit itemsPerView inside available area
     const available = vw - (peek * 2) - ((itemsPerView - 1) * gap);
@@ -105,9 +107,13 @@
       w = Math.max(minItemWidth, Math.min(maxItemWidth, w));
     }
 
-    itemWidth = w;
+  itemWidth = w;
 
-    // Apply sizes to DOM items
+  // debug log to inspect values in console (pages computed here)
+  const pages = Math.max(1, Math.ceil(items.length / itemsPerView));
+  try{ console.info('carrusel-genero layout', { vw, itemsPerView, itemWidth, gap, peek, pages }); }catch(e){}
+
+  // Apply sizes to DOM items
     const track = q('#carrusel-generos-track');
     const itemEls = qa('.carrusel-generos-item');
     itemEls.forEach(el => {
@@ -116,14 +122,15 @@
     });
     if(track) track.style.gap = gap + 'px';
 
-    // set viewport padding to show peek; first item flush left
-    const leftPeek = (currentIndex === 0) ? 0 : peek;
-    viewport.style.paddingLeft = leftPeek + 'px';
-    viewport.style.paddingRight = peek + 'px';
+  // set viewport padding to show peek; first item flush left
+  const leftPeek = (currentIndex === 0) ? 0 : peek;
+  viewport.style.paddingLeft = leftPeek + 'px';
+  viewport.style.paddingRight = peek + 'px';
 
-    // update pagination
-    const pages = Math.max(1, Math.ceil(items.length / itemsPerView));
-    renderPagination(pages);
+  // update pagination
+  renderPagination(pages);
+  // debug info
+  console.log('CarruselGenero: layout', { vw, itemsPerView, itemWidth, gap, peek, pages });
   }
 
   function renderPagination(pages){
@@ -161,7 +168,9 @@
     const viewport = q('.carrusel-generos-viewport');
     if(!track || !viewport) return;
 
-    const translate = currentIndex * (itemWidth + gap);
+  // If not on the first page subtract left peek so items align under the arrow
+  const leftPeek = (currentIndex === 0) ? 0 : peek;
+  const translate = currentIndex * (itemWidth + gap) - leftPeek;
     if(skipAnim){
       track.style.transition = 'none';
       track.style.transform = `translateX(${-translate}px)`;
@@ -175,11 +184,13 @@
   }
 
   function prev(){
-    currentIndex = clampIndex(currentIndex - 1);
+    // advance by a full page (itemsPerView)
+    currentIndex = clampIndex(currentIndex - itemsPerView);
     updatePosition();
   }
   function next(){
-    currentIndex = clampIndex(currentIndex + 1);
+    // advance by a full page (itemsPerView)
+    currentIndex = clampIndex(currentIndex + itemsPerView);
     updatePosition();
   }
 
@@ -211,7 +222,9 @@
     dragDelta = x - dragStartX;
     const track = q('#carrusel-generos-track');
     if(track){
-      const base = currentIndex * (itemWidth + gap);
+      // account for left peek when dragging so visual matches final position
+      const leftPeek = (currentIndex === 0) ? 0 : peek;
+      const base = currentIndex * (itemWidth + gap) - leftPeek;
       track.style.transform = `translateX(${-(base) + dragDelta}px)`;
     }
   }
@@ -220,9 +233,9 @@
     isDragging = false;
     const threshold = Math.max(10, itemWidth * 0.25);
     if(dragDelta < -threshold){
-      currentIndex = clampIndex(currentIndex + 1);
+      currentIndex = clampIndex(currentIndex + itemsPerView);
     } else if(dragDelta > threshold){
-      currentIndex = clampIndex(currentIndex - 1);
+      currentIndex = clampIndex(currentIndex - itemsPerView);
     }
     const track = q('#carrusel-generos-track');
     if(track) track.style.transition = '';
