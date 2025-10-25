@@ -59,7 +59,22 @@
       const imgWrap = document.createElement('div');
       imgWrap.className = 'carrusel-generos-img';
       const img = document.createElement('img');
-      img.src = it.PortadaCat || '';
+      // normalize and protect image src: encodeURI to handle non-ASCII filenames
+      try{
+        img.src = it.PortadaCat ? encodeURI(it.PortadaCat) : '';
+      }catch(e){
+        img.src = it.PortadaCat || '';
+      }
+      // debug: log src for troubleshooting and fallback on error
+      img.addEventListener('error', ()=>{
+        console.error('carrusel-genero: imagen no cargada:', img.src, it);
+        // fallback to local todo.png if available
+        try{ img.src = '/public/images/todo.png'; }catch(e){}
+      });
+      img.addEventListener('load', ()=>{
+        // small debug to confirm load
+        // console.log('carrusel-genero: imagen cargada', img.src);
+      });
       img.alt = extractName(it);
       img.loading = 'lazy';
       imgWrap.appendChild(img);
