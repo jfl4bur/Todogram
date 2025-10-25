@@ -62,6 +62,21 @@
     display: none;
 }
 
+/* Carrusel de Episodios Documentales (wrapper) - same behavior as series/animes */
+#episodios-documentales-carousel-wrapper {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 10px;
+    padding-top: 4px;
+    gap: 4px;
+}
+#episodios-documentales-carousel-wrapper::-webkit-scrollbar {
+    display: none;
+}
+
 /* Skeleton 16:9 para Episodios Series */
 .carousel-skeleton-16x9 {
     display: flex;
