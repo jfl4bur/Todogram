@@ -39,13 +39,46 @@
   async function fetchJson(){
     for(const p of DATA_PATHS){
       try{
+        // prefer absolute github URL if current origin seems to be a hosting that redirects
         const res = await fetch(p, {cache:'no-cache'});
-        if(!res.ok) continue;
+        if(!res.ok){
+          console.warn('carrusel-genero: fetch no ok for', p, res.status);
+          continue;
+        }
         const data = await res.json();
         if(Array.isArray(data)) return data;
-      }catch(e){ }
+      }catch(e){
+        console.warn('carrusel-genero: fetch error for', p, e && e.message ? e.message : e);
+      }
     }
-    return [];
+
+    // Fallback: if JSON couldn't be fetched (CORS/hosting issues), build a local default list
+    console.warn('carrusel-genero: usando fallback local para carrucat.json');
+    const base = '/public/images/';
+    const fallback = [
+      { PortadaCat: base + 'todo.png', urlCat: '/catalogo/' },
+      { PortadaCat: base + 'Acción.png', urlCat: '/catalogo/#catalogo?tab=Películas&genre=Acción' },
+      { PortadaCat: base + 'Animación.png', urlCat: '/catalogo/#catalogo?tab=Películas&genre=Animación' },
+      { PortadaCat: base + 'Animes.png', urlCat: '/catalogo/#catalogo?tab=Animes&genre=Todo+el+cat%C3%A1logo' },
+      { PortadaCat: base + 'Aventura.png', urlCat: '/catalogo/#catalogo?tab=Películas&genre=Aventura' },
+      { PortadaCat: base + 'Bélica.png', urlCat: '/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=B%C3%A9lica' },
+      { PortadaCat: base + 'CienciaFiccion.png', urlCat: '/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Ciencia+Ficci%C3%B3n' },
+      { PortadaCat: base + 'Comedia.png', urlCat: '/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Comedia' },
+      { PortadaCat: base + 'Crimen.png', urlCat: '/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Crimen' },
+      { PortadaCat: base + 'Documentales.png', urlCat: '/catalogo/#catalogo?tab=Documentales&genre=Todo+el+cat%C3%A1logo' },
+      { PortadaCat: base + 'Drama.png', urlCat: '/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Drama' },
+      { PortadaCat: base + 'Familia.png', urlCat: '/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Familia' },
+      { PortadaCat: base + 'Fantasía.png', urlCat: '/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Fantas%C3%ADa' },
+      { PortadaCat: base + 'Historia.png', urlCat: '/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Historia' },
+      { PortadaCat: base + 'Misterio.png', urlCat: '/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Misterio' },
+      { PortadaCat: base + 'Música.png', urlCat: '/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=M%C3%BAsica' },
+      { PortadaCat: base + 'PelículasTV.png', urlCat: '/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Pel%C3%ADculas+TV' },
+      { PortadaCat: base + 'Romance.png', urlCat: '/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Romance' },
+      { PortadaCat: base + 'Suspense.png', urlCat: '/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Suspense' },
+      { PortadaCat: base + 'Terror.png', urlCat: '/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Terror' },
+      { PortadaCat: base + 'Western.png', urlCat: '/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Western' }
+    ];
+    return fallback;
   }
 
   function buildItems(container){
