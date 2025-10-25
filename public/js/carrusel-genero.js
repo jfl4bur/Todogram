@@ -5,7 +5,7 @@
   let currentPage = 0;
   let itemsPerPage = 1;
   let itemWidth = 140;
-  const gap = 16;
+  let gap = 24; // default gap, will be adjusted per breakpoint
   const minItemWidth = 92;
   const maxItemWidth = 240;
 
@@ -79,43 +79,52 @@
     if(!viewport || !track) return;
     const containerWidth = Math.max(320, viewport.clientWidth || viewport.getBoundingClientRect().width);
 
-    // Measure arrow width to calculate peek so arrows overlay the peeking items
+    // Choose gap and target items per breakpoint to match the reference design
+    if(containerWidth >= 1400){ gap = 28; }
+    else if(containerWidth >= 1100){ gap = 26; }
+    else if(containerWidth >= 900){ gap = 22; }
+    else if(containerWidth >= 600){ gap = 20; }
+    else { gap = 14; }
+
+    // Desired peek: approximate space for arrows overlay
     const arrowW = (prevBtn && prevBtn.getBoundingClientRect) ? Math.round(prevBtn.getBoundingClientRect().width) : 44;
-    // leave a small gap between arrow and item
     const arrowPadding = 12;
-    // desired peek is arrow width plus padding, clamped to a percent as well
-    let desiredPeek = Math.min(Math.round(containerWidth * 0.12), arrowW + arrowPadding);
+    let desiredPeek = Math.min(Math.round(containerWidth * 0.10), arrowW + arrowPadding);
     desiredPeek = Math.max(12, desiredPeek);
 
-    // available space excluding peek on both sides
+    // Target visible items heuristic (matches image 2 feel)
+    let targetVisible = 7; // desktop large
+    if(containerWidth < 1400) targetVisible = 6;
+    if(containerWidth < 1100) targetVisible = 5;
+    if(containerWidth < 900) targetVisible = 4;
+    if(containerWidth < 600) targetVisible = 3;
+    if(containerWidth < 420) targetVisible = 2;
+
+    // available space excluding peek both sides
     const available = containerWidth - (2*desiredPeek);
 
-    // maximum possible items trying to use minItemWidth
-    const maxPossible = Math.min(items.length, Math.max(1, Math.floor((available + gap) / (minItemWidth + gap))));
-    let chosenN = 1;
-    let chosenW = Math.max(minItemWidth, Math.min(maxItemWidth, Math.floor((available - (1-1)*gap)/1)));
-
-    for(let n = maxPossible; n>=1; n--){
-      const w = Math.floor((available - (n-1)*gap)/n);
-      if(w >= minItemWidth && w <= maxItemWidth){
-        chosenN = n;
-        chosenW = w;
-        break;
-      }
-      if(n===1){
-        chosenN = 1;
-        chosenW = Math.max(minItemWidth, Math.min(maxItemWidth, Math.floor(available)));
-      }
+    // Compute item width so approx targetVisible fit, then clamp
+    let chosenW = Math.floor((available - (targetVisible-1)*gap) / targetVisible);
+    if(chosenW > maxItemWidth){
+      // if too large reduce to max and increase items per page
+      chosenW = maxItemWidth;
+    }
+    if(chosenW < minItemWidth){
+      chosenW = minItemWidth;
     }
 
-    itemsPerPage = chosenN;
-    itemWidth = chosenW;
+    // Deduce how many items actually fit with chosenW
+    const chosenN = Math.max(1, Math.min(items.length, Math.floor((available + gap) / (chosenW + gap))));
+
+  itemsPerPage = chosenN;
+  itemWidth = chosenW;
 
     // Apply sizes
     const itemEls = qa('.carrusel-generos-item');
     itemEls.forEach((el, i)=>{
       el.style.width = itemWidth + 'px';
       el.style.flexBasis = itemWidth + 'px';
+      el.style.height = (itemWidth + 24) + 'px'; // leave space for label
     });
     track.style.gap = gap + 'px';
 

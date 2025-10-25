@@ -30,34 +30,35 @@
   text-decoration:none;
   color:#eaeaea;
   flex:0 0 auto;
-  min-width:80px;
+  min-width:72px;
 }
 .carrusel-generos-img{
-  width:140px;
-  height:140px;
+  width:100%;
+  height:0;
+  padding-bottom:100%; /* cuadrado responsivo, JS controlará el ancho del padre */
   border-radius:50%;
   overflow:hidden;
-  background:#222;
+  background:#111;
   display:flex;
   align-items:center;
   justify-content:center;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.6);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+  border:6px solid rgba(0,0,0,0.45); /* anillo oscuro alrededor para efecto */
 }
 .carrusel-generos-img img{
   width:100%;
   height:100%;
   object-fit:cover;
   display:block;
-  border-radius:50%;
 }
 .carrusel-generos-label{
-  margin-top:10px;
+  margin-top:12px;
   font-size:14px;
   text-align:center;
   white-space:nowrap;
   overflow:hidden;
   text-overflow:ellipsis;
-  max-width:140px;
+  max-width:100%;
 }
 .carrusel-generos-nav{
   display:flex;
