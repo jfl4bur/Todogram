@@ -67,13 +67,26 @@
   margin-top:12px;
 }
 .carrusel-nav-btn{
-  background:transparent;
+  background:rgba(0,0,0,0.45);
   border:0;
   color:#fff;
-  font-size:28px;
+  font-size:22px;
   cursor:pointer;
-  padding:6px 12px;
+  padding:8px 10px;
+  width:44px;
+  height:44px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:50%;
+  box-shadow:0 6px 18px rgba(0,0,0,0.6);
+  position:absolute; /* overlay sobre el viewport */
+  top:50%;
+  transform:translateY(-50%);
+  z-index:5;
 }
+.carrusel-prev{ left:6px; }
+.carrusel-next{ right:6px; }
 .carrusel-generos-pagination{
   display:flex;
   align-items:center;

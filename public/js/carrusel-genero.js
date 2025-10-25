@@ -74,10 +74,20 @@
   function computeLayout(){
     const viewport = q('.carrusel-generos-viewport');
     const track = q('#carrusel-generos-track');
+    const prevBtn = q('#carrusel-prev');
+    const nextBtn = q('#carrusel-next');
     if(!viewport || !track) return;
     const containerWidth = Math.max(320, viewport.clientWidth || viewport.getBoundingClientRect().width);
-    // desired peek to show partial items on both sides
-    const desiredPeek = Math.round(containerWidth * 0.06);
+
+    // Measure arrow width to calculate peek so arrows overlay the peeking items
+    const arrowW = (prevBtn && prevBtn.getBoundingClientRect) ? Math.round(prevBtn.getBoundingClientRect().width) : 44;
+    // leave a small gap between arrow and item
+    const arrowPadding = 12;
+    // desired peek is arrow width plus padding, clamped to a percent as well
+    let desiredPeek = Math.min(Math.round(containerWidth * 0.12), arrowW + arrowPadding);
+    desiredPeek = Math.max(12, desiredPeek);
+
+    // available space excluding peek on both sides
     const available = containerWidth - (2*desiredPeek);
 
     // maximum possible items trying to use minItemWidth
@@ -92,9 +102,7 @@
         chosenW = w;
         break;
       }
-      // if w > maxItemWidth try to increase n (already iterating downwards) else if w < min continue
       if(n===1){
-        // last fallback: clamp
         chosenN = 1;
         chosenW = Math.max(minItemWidth, Math.min(maxItemWidth, Math.floor(available)));
       }
@@ -110,8 +118,10 @@
       el.style.flexBasis = itemWidth + 'px';
     });
     track.style.gap = gap + 'px';
-    // Use padding on the track wrapper to show peek
-    viewport.style.paddingLeft = desiredPeek + 'px';
+
+    // If first page we don't want left peek (primer enlace flush), otherwise show peek both sides
+    const leftPeek = (currentPage === 0) ? 0 : desiredPeek;
+    viewport.style.paddingLeft = leftPeek + 'px';
     viewport.style.paddingRight = desiredPeek + 'px';
 
     // recompute pages
@@ -142,17 +152,22 @@
     const viewport = q('.carrusel-generos-viewport');
     if(!track || !viewport) return;
     const totalItems = items.length;
-    const fullStep = itemsPerPage * (itemWidth + gap);
-    let desired = currentPage * fullStep;
+  const fullStep = itemsPerPage * (itemWidth + gap);
 
-    // compute maximum translate so last page doesn't leave blank space
-    const totalWidth = totalItems * (itemWidth + gap) - gap; // total width of items
-    const visibleWidth = viewport.clientWidth;
-    const maxTranslate = Math.max(0, totalWidth - visibleWidth + 0); // clamp
-    if(desired > maxTranslate) desired = maxTranslate;
-    if(desired < 0) desired = 0;
+  // When there is no left peek (first page), desired = 0
+  // Otherwise we offset by desiredPeek so arrows overlay the peeking items
+  const viewportRect = viewport.getBoundingClientRect();
+  const desiredPeek = parseInt(window.getComputedStyle(viewport).paddingRight) || 0;
+  let desired = currentPage * fullStep - ((currentPage === 0) ? 0 : desiredPeek);
 
-    track.style.transform = `translateX(${-desired}px)`;
+  // compute maximum translate so last page doesn't leave blank space
+  const totalWidth = totalItems * (itemWidth + gap) - gap; // total width of items
+  const visibleWidth = viewport.clientWidth;
+  const maxTranslate = Math.max(0, totalWidth - visibleWidth + 0); // clamp
+  if(desired > maxTranslate) desired = maxTranslate;
+  if(desired < 0) desired = 0;
+
+  track.style.transform = `translateX(${-desired}px)`;
     // update active dot
     qa('.carrusel-dot').forEach(d=>d.classList.remove('active'));
     const active = q(`.carrusel-dot[data-page="${currentPage}"]`);

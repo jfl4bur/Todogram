@@ -344,14 +344,15 @@
     <!-- Carrusel de Géneros (añadido por carrusel-genero.js) -->
     <div class="carrusel-generos-section">
         <h1 class="carrusel-generos-title">Géneros</h1>
-        <div class="carrusel-generos-viewport">
-            <div class="carrusel-generos-track" id="carrusel-generos-track" aria-live="polite"></div>
-        </div>
-        <div class="carrusel-generos-nav">
-            <button class="carrusel-nav-btn carrusel-prev" id="carrusel-prev" aria-label="Anterior">‹</button>
-            <div class="carrusel-generos-pagination" id="carrusel-generos-pagination" role="tablist"></div>
-            <button class="carrusel-nav-btn carrusel-next" id="carrusel-next" aria-label="Siguiente">›</button>
-        </div>
+            <div class="carrusel-generos-viewport">
+                <div class="carrusel-generos-track" id="carrusel-generos-track" aria-live="polite"></div>
+                <!-- Flechas sobre la vista para superponer sobre items cortados -->
+                <button class="carrusel-nav-btn carrusel-prev" id="carrusel-prev" aria-label="Anterior">‹</button>
+                <button class="carrusel-nav-btn carrusel-next" id="carrusel-next" aria-label="Siguiente">›</button>
+            </div>
+            <div class="carrusel-generos-nav">
+                <div class="carrusel-generos-pagination" id="carrusel-generos-pagination" role="tablist"></div>
+            </div>
     </div>
 
     <!-- Modales -->
