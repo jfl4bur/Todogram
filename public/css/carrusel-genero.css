@@ -1,10 +1,10 @@
 /* Estilos para el carrusel de géneros */
-.carrusel-genero { position: relative; padding: 18px 10px 30px; }
+.carrusel-genero { position: relative; padding: 22px 10px 48px; }
 .carrusel-genero #generos-carousel-wrapper { overflow: hidden; }
-.genero-track { display: flex; gap: 18px; transition: transform 400ms cubic-bezier(.22,.9,.25,1); will-change: transform; align-items: flex-start; }
+.genero-track { display: flex; gap: 18px; transition: transform 400ms cubic-bezier(.22,.9,.25,1); will-change: transform; align-items: flex-start; padding-left: 6px; }
 .genero-item { display: inline-flex; flex-direction: column; align-items: center; text-align: center; color: #ddd; text-decoration: none; }
-.genero-item .genero-img { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; display: block; box-shadow: 0 2px 10px rgba(0,0,0,0.6); border: 4px solid rgba(255,255,255,0.02); }
-.genero-item .genero-title { margin-top: 12px; font-size: 14px; color: #f1f1f1; max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.genero-item .genero-img { width: 160px; height: 160px; border-radius: 50%; object-fit: cover; display: block; box-shadow: 0 6px 18px rgba(0,0,0,0.6); border: 4px solid rgba(255,255,255,0.02); }
+.genero-item .genero-title { margin-top: 12px; font-size: 15px; color: #f1f1f1; max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* Navegación (botones) */
 .carrusel-genero .carousel-nav { position: absolute; top: 50%; right: 8px; transform: translateY(-50%); display: flex; gap: 8px; z-index: 10; }
@@ -17,16 +17,29 @@
 .generos-pagination .dot.active { background: #ffffff; }
 
 /* Responsive adjustments */
+@media (max-width: 1200px) {
+    .genero-item .genero-img { width: 140px; height: 140px; }
+    .genero-item .genero-title { font-size: 14px; }
+}
 @media (max-width: 900px) {
-    .genero-item .genero-img { width: 100px; height: 100px; }
+    .genero-item .genero-img { width: 120px; height: 120px; }
     .genero-item .genero-title { font-size: 13px; }
 }
 @media (max-width: 600px) {
-    .carrusel-genero { padding-bottom: 50px; }
-    .genero-item .genero-img { width: 84px; height: 84px; }
+    .carrusel-genero { padding-bottom: 64px; }
+    .genero-item .genero-img { width: 110px; height: 110px; }
     .genero-item .genero-title { font-size: 12px; }
     .carrusel-genero .carousel-nav { right: 4px; }
 }
 
 /* Asegurar que el primer elemento en la pista se alinee al borde izquierdo (sin peek) */
 .genero-track.first-page-offset { padding-left: 0; }
+
+/* Skeleton styles */
+.generos-skeleton { display:flex; gap:18px; align-items:flex-start; padding: 6px 6px 0; }
+.genero-skel-item { display:flex; flex-direction:column; align-items:center; width:160px; }
+.skel-circle { width:160px; height:160px; border-radius:50%; background:linear-gradient(90deg,#2a2a2a 25%,#3a3a3a 50%,#2a2a2a 75%); background-size:200% 100%; animation: shimmer 1.2s linear infinite; }
+.skel-title { width:120px; height:14px; margin-top:12px; border-radius:6px; background:linear-gradient(90deg,#2a2a2a 25%,#3a3a3a 50%,#2a2a2a 75%); background-size:200% 100%; animation: shimmer 1.2s linear infinite; }
+
+@keyframes shimmer { 0% { background-position:200% 0 } 100% { background-position:-200% 0 } }
+

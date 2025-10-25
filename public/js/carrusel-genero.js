@@ -3,12 +3,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const prevBtn = document.getElementById('generos-carousel-prev');
     const nextBtn = document.getElementById('generos-carousel-next');
     const paginationRoot = document.getElementById('generos-pagination');
+    const skeleton = document.getElementById('generos-skeleton');
     const GAP = 18; // debe coincidir con CSS gap
 
     if (!wrapper) return;
 
     let items = [];
-    let track, currentPage = 0, itemsPerPage = 1, itemWidth = 120, totalPages = 1;
+    let track, currentPage = 0, itemsPerPage = 1, itemWidth = 160, totalPages = 1;
+
+    // mostrar skeleton mientras carga
+    if (skeleton) skeleton.style.display = 'flex';
+    wrapper.style.display = 'none';
 
     function deriveTitleFromPortada(url) {
         try {
@@ -25,12 +30,16 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) { return ''; }
     }
 
+    // usar ruta local por defecto
     fetch('https://jfl4bur.github.io/Todogram/public/carrucat.json').then(r => r.json()).then(data => {
         items = data || [];
         render();
         window.addEventListener('resize', debounce(onResize, 120));
     }).catch(err => {
         console.error('Error cargando carrucat.json', err);
+        // ocultar skeleton si hay error
+        if (skeleton) skeleton.style.display = 'none';
+        wrapper.style.display = 'block';
     });
 
     function render() {
@@ -66,20 +75,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
         calculateLayout();
         attachNav();
+
+        // ocultar skeleton y mostrar wrapper
+        if (skeleton) skeleton.style.display = 'none';
+        wrapper.style.display = 'block';
     }
 
     function calculateLayout() {
         const containerWidth = wrapper.clientWidth || wrapper.getBoundingClientRect().width;
 
-        // calcular items por pantalla en base a tamaño mínimo aproximado
-        const minBase = 140; // tamaño base recomendado
+        // tamaño base para decidir cuántos items caben
+        const minBase = 220; // valor mayor para items más grandes
         itemsPerPage = Math.max(1, Math.floor(containerWidth / minBase));
 
-        // ajustar para móviles: si sólo cabe 1 y container es muy estrecho, reducir imagen
-        itemWidth = Math.floor((containerWidth - 2 * Math.round(containerWidth * 0.06)) / itemsPerPage) - GAP;
-        if (itemWidth < 70) itemWidth = 70;
+        // calcular itemWidth exacto con gap
+        itemWidth = Math.floor((containerWidth - GAP * (itemsPerPage - 1)) / itemsPerPage);
+        if (itemWidth < 100) itemWidth = 100;
 
-        // asignar ancho a cada item
+        // asignar ancho a cada item (track debe existir)
+        if (!track) return;
         const itemElements = track.querySelectorAll('.genero-item');
         itemElements.forEach((el) => {
             el.style.width = itemWidth + 'px';
@@ -106,7 +120,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function applyTransform() {
-        const gapTotal = GAP * (itemsPerPage - 1);
         const pageStep = itemsPerPage * (itemWidth + GAP);
 
         // side peek para todas las páginas excepto la primera
