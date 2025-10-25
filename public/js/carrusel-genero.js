@@ -7,8 +7,9 @@
   let itemWidth = 160;
   let gap = 20;
   let peek = 0;
-  const minItemWidth = 92;
-  const maxItemWidth = 260;
+  // Reduce min/max item width to make carousel items smaller by default
+  const minItemWidth = 64;
+  const maxItemWidth = 180;
   let isDragging = false;
   let dragStartX = 0;
   let dragDelta = 0;
