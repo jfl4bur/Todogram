@@ -191,13 +191,13 @@
     });
     if(track) track.style.gap = gap + 'px';
 
-  // remove any inline padding on viewport (avoid runtime style conflicts)
-  try{ viewport.style.removeProperty('padding-left'); viewport.style.removeProperty('padding-right'); }catch(e){}
-  // ensure track has no margins; we position via translate with a peek offset so items overflow visibly
-  if(track) {
-    track.style.marginLeft = '0px';
-    track.style.marginRight = '0px';
-  }
+  // set viewport padding so the left/right "peek" is visible and native scrolling can be used
+  try{
+    viewport.style.paddingLeft = peek + 'px';
+    viewport.style.paddingRight = peek + 'px';
+  }catch(e){}
+  // ensure track has no explicit margins; sizes/gap control spacing
+  if(track){ track.style.marginLeft = '0px'; track.style.marginRight = '0px'; }
 
   // update pagination
   renderPagination(pages);
@@ -240,30 +240,55 @@
     const viewport = q('.carrusel-generos-viewport');
     if(!track || !viewport) return;
 
-  // Translate based on item widths; subtract peek so items overflow left and right appropriately
-  const translate = currentIndex * (itemWidth + gap) - peek;
-    if(skipAnim){
-      track.style.transition = 'none';
-      track.style.transform = `translateX(${-translate}px)`;
-      // force reflow
-      track.offsetHeight;
-      track.style.transition = '';
-    } else {
-      track.style.transform = `translateX(${-translate}px)`;
+    // Calculate final scroll position based on currentIndex and step size
+    const step = itemWidth + gap;
+    const finalScroll = currentIndex * step;
+    try{
+      viewport.scrollTo({ left: finalScroll, behavior: skipAnim ? 'auto' : 'smooth' });
+    }catch(e){
+      viewport.scrollLeft = finalScroll;
     }
     updatePaginationActive();
   }
 
-  function prev(){
-    // advance by a full page (itemsPerView)
-    currentIndex = clampIndex(currentIndex - itemsPerView);
-    updatePosition();
+  function scrollToPage(direction){
+    const viewport = q('.carrusel-generos-viewport');
+    const track = q('#carrusel-generos-track');
+    if(!viewport || !track) return;
+
+    const containerWidth = viewport.clientWidth;
+    const firstItem = track.querySelector('.carrusel-generos-item');
+    if(!firstItem) return;
+    const itemRect = firstItem.getBoundingClientRect();
+    const itemW = Math.round(itemRect.width);
+
+    // estimate gap using second element
+    let gapEst = gap;
+    const second = firstItem.nextElementSibling;
+    if(second){
+      const secondRect = second.getBoundingClientRect();
+      gapEst = Math.round(secondRect.left - (itemRect.left + itemRect.width));
+      if(isNaN(gapEst) || gapEst < 0) gapEst = gap;
+    }
+
+    const stepSize = itemW + gapEst;
+    const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
+    const currentFirst = Math.floor(viewport.scrollLeft / stepSize);
+
+    let targetIndex;
+    if(direction === 'prev') targetIndex = Math.max(0, currentFirst - itemsPerViewport);
+    else targetIndex = currentFirst + itemsPerViewport;
+
+    const totalItems = track.querySelectorAll('.carrusel-generos-item').length;
+    const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
+    targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
+
+    currentIndex = targetIndex;
+    updatePosition(false);
   }
-  function next(){
-    // advance by a full page (itemsPerView)
-    currentIndex = clampIndex(currentIndex + itemsPerView);
-    updatePosition();
-  }
+
+  function prev(){ scrollToPage('prev'); }
+  function next(){ scrollToPage('next'); }
 
   function attachControls(){
     const prevBtn = q('#carrusel-prev');
@@ -280,48 +305,19 @@
     }
   }
 
-  function onPointerDown(e){
-    // support PointerEvent, TouchEvent and MouseEvent
-    isDragging = true;
-    dragStartX = (e.clientX !== undefined) ? e.clientX : (e.touches && e.touches[0] && e.touches[0].clientX) || 0;
-    dragDelta = 0;
-    const track = q('#carrusel-generos-track');
-    if(track) track.style.transition = 'none';
-    // attempt pointer capture on the viewport for consistent move/up events
-    try{
-      const vp = q('.carrusel-generos-viewport');
-      if(vp && e.pointerId && vp.setPointerCapture) vp.setPointerCapture(e.pointerId);
-    }catch(ex){}
-  }
-  function onPointerMove(e){
-    if(!isDragging) return;
-    const x = (e.clientX !== undefined) ? e.clientX : (e.touches && e.touches[0] && e.touches[0].clientX) || 0;
-    dragDelta = x - dragStartX;
-    const track = q('#carrusel-generos-track');
-    if(track){
-      // account for peek via translate offset; drag base uses same formula as translate
-      const base = currentIndex * (itemWidth + gap) - peek;
-      track.style.transform = `translateX(${-(base) + dragDelta}px)`;
-    }
-  }
-  function onPointerUp(e){
-    if(!isDragging) return;
-    isDragging = false;
-    // smaller threshold on touch devices for snappier behavior
-    const threshold = Math.max(8, itemWidth * 0.18);
-    if(dragDelta < -threshold){
-      currentIndex = clampIndex(currentIndex + itemsPerView);
-    } else if(dragDelta > threshold){
-      currentIndex = clampIndex(currentIndex - itemsPerView);
-    }
-    const track = q('#carrusel-generos-track');
-    if(track) track.style.transition = '';
-    // release pointer capture if present
-    try{
-      const vp = q('.carrusel-generos-viewport');
-      if(vp && e.pointerId && vp.releasePointerCapture) vp.releasePointerCapture(e.pointerId);
-    }catch(ex){}
-    updatePosition();
+  // Use native scrolling for drag/touch. Listen scroll to update pagination and currentIndex.
+  let scrollDebounce;
+  function onViewportScroll(){
+    const viewport = q('.carrusel-generos-viewport');
+    if(!viewport) return;
+    // debounce updates while scrolling
+    clearTimeout(scrollDebounce);
+    scrollDebounce = setTimeout(()=>{
+      const step = itemWidth + gap;
+      const idx = Math.round((viewport.scrollLeft || 0) / step);
+      currentIndex = clampIndex(idx);
+      updatePaginationActive();
+    }, 80);
   }
 
   function observeResize(){
@@ -346,17 +342,10 @@
     buildItems(track);
     attachControls();
 
-    // attach pointer events for drag
+    // attach native scroll handling so touch/drag feels like other carousels
     const viewport = q('.carrusel-generos-viewport');
     if(viewport){
-      // Use Pointer Events for smoother unified handling on touch/mouse
-      viewport.addEventListener('pointerdown', onPointerDown, {passive:false});
-      window.addEventListener('pointermove', onPointerMove, {passive:true});
-      window.addEventListener('pointerup', onPointerUp, {passive:true});
-      // legacy fallback for environments without Pointer Events
-      viewport.addEventListener('mousedown', onPointerDown);
-      window.addEventListener('mousemove', onPointerMove);
-      window.addEventListener('mouseup', onPointerUp);
+      viewport.addEventListener('scroll', onViewportScroll, {passive:true});
     }
 
     calculateLayout();

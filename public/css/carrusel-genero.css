@@ -14,9 +14,12 @@
 }
 .carrusel-generos-viewport{
   position: relative;
-  /* Allow nav buttons to overflow the viewport so they remain visible even when JS sets padding */
-  overflow: visible;
+  /* Use native horizontal scrolling for carousel behavior (peek provided by inline padding) */
+  overflow-x: auto;
+  overflow-y: visible;
   width: 100%;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
   /* allow vertical page scroll while enabling horizontal pointer handling */
   touch-action: pan-y;
 }
