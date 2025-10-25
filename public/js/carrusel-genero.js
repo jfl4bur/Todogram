@@ -110,6 +110,9 @@
   const arrowPadding = 12;
   // set global peek (how much of adjacent items is visible)
   peek = Math.min(Math.round(vw * 0.08), arrowW + arrowPadding);
+  // ensure a minimum peek so that the buttons always sit above a visible piece of the adjacent item
+  // guarantee at least ~55% of the arrow width is visible as peek
+  try{ peek = Math.max(peek, Math.round(arrowW * 0.55)); }catch(e){}
 
   // Ensure gap isn't so large that the right-side peek disappears.
   // Compute a maximum sensible gap so itemsPerView of minimum width still fit with peeks.
