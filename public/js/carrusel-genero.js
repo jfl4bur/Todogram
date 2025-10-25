@@ -138,9 +138,8 @@
     });
     if(track) track.style.gap = gap + 'px';
 
-  // set viewport padding to show peek; first item flush left
-  const leftPeek = (currentIndex === 0) ? 0 : peek;
-  viewport.style.paddingLeft = leftPeek + 'px';
+  // set viewport padding to show peek on both sides (always show adjacent pieces)
+  viewport.style.paddingLeft = peek + 'px';
   viewport.style.paddingRight = peek + 'px';
 
   // update pagination
@@ -184,9 +183,8 @@
     const viewport = q('.carrusel-generos-viewport');
     if(!track || !viewport) return;
 
-  // If not on the first page subtract left peek so items align under the arrow
-  const leftPeek = (currentIndex === 0) ? 0 : peek;
-  const translate = currentIndex * (itemWidth + gap) - leftPeek;
+  // Always subtract peek so items are positioned with partial adjacent items visible
+  const translate = currentIndex * (itemWidth + gap) - peek;
     if(skipAnim){
       track.style.transition = 'none';
       track.style.transform = `translateX(${-translate}px)`;
@@ -238,9 +236,8 @@
     dragDelta = x - dragStartX;
     const track = q('#carrusel-generos-track');
     if(track){
-      // account for left peek when dragging so visual matches final position
-      const leftPeek = (currentIndex === 0) ? 0 : peek;
-      const base = currentIndex * (itemWidth + gap) - leftPeek;
+      // account for peek when dragging so visual matches final position
+      const base = currentIndex * (itemWidth + gap) - peek;
       track.style.transform = `translateX(${-(base) + dragDelta}px)`;
     }
   }

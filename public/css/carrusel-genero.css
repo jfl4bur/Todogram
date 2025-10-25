@@ -1,9 +1,10 @@
 /* Estilos para el carrusel de géneros (redondo, con peeking lateral y paginación) */
 .carrusel-generos-section{
-  /* margin: 18px 0; */ /* reducir margen para encajar mejor en la página */
-  /* padding: 16px 6px; */
-  /* width: 100%; */
-  /* box-sizing: border-box; */
+  margin: 12px 0;
+  padding: 8px 6px;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative; /* para posicionar botones a la altura de la sección */
 }
 .carrusel-generos-title{
   color: #fff;
@@ -18,16 +19,15 @@
 }
 .carrusel-generos-track{
   display:flex;
-  /* align-items:flex-start; */
-  /* gap:24px; */
-  transition:transform 0.6s cubic-bezier(.25,.46,.45,.94);
+  align-items:flex-start;
+  transition:transform 0.45s cubic-bezier(.22,.9,.32,1);
   will-change:transform;
-  /* padding: 12px 0; */ /* espacio vertical */
+  padding: 12px 0; /* espacio vertical */
 }
 .carrusel-generos-item{
-  /* display:flex; */
+  display:flex;
   flex-direction:column;
-  /* align-items:center; */
+  align-items:center;
   text-decoration:none;
   color:#eaeaea;
   flex:0 0 auto;
@@ -35,21 +35,21 @@
 }
 .carrusel-generos-img{
   width:100%;
-  height: 10px;
+  height:0;
   padding-bottom:100%; /* cuadrado responsivo, JS controlará el ancho del padre */
   border-radius:50%;
-  /* overflow:hidden; */
-  /* background:#111; */
-  /* display:flex; */
-  /* box-shadow: 0 4px 14px rgba(0,0,0,0.6); */
-  /* border:4px solid rgba(0,0,0,0.45); */ /* anillo oscuro alrededor para efecto (ajustada) */
-  flex-direction: row;
-  /* align-items: flex-start; */
+  overflow:hidden;
+  background:#111;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+  border:4px solid rgba(0,0,0,0.45); /* anillo oscuro alrededor para efecto */
 }
 .carrusel-generos-img img{
   width:100%;
-  /* height:100%; */
-  object-fit: fill;
+  height:100%;
+  object-fit:cover;
   display:block;
 }
 .carrusel-generos-label{
@@ -60,6 +60,12 @@
   overflow:hidden;
   text-overflow:ellipsis;
   max-width:100%;
+}
+
+/* Make label bolder and a bit larger when hovering the item */
+.carrusel-generos-item:hover .carrusel-generos-label{
+  font-weight:700;
+  font-size:15px;
 }
 .carrusel-generos-nav{
   display:flex;
@@ -76,19 +82,19 @@
   cursor:pointer;
   padding:10px 12px;
   width:52px;
-  height:52px;
+  /* botones estarán ocultos hasta hover (ver más abajo) */
+  height:100%;
   display:flex;
   align-items:center;
   justify-content:center;
-  border-radius:50%;
+  border-radius:0;
   box-shadow:0 6px 18px rgba(0,0,0,0.6);
   position:absolute; /* overlay sobre el viewport */
-  top:50%;
-  transform:translateY(-50%);
+  top:0;
   z-index:5;
 }
-.carrusel-prev{ left:12px; }
-.carrusel-next{ right:12px; }
+.carrusel-prev{ left:0; }
+.carrusel-next{ right:0; }
 .carrusel-generos-pagination{
   display:flex;
   align-items:center;
@@ -114,12 +120,23 @@
   .carrusel-generos-label{ max-width:92px; font-size:12px }
 }
 
-/* Asegurar que los controls no tapen completamente las porciones vistas del lado */
-.carrusel-nav-btn{ z-index:3 }
+/* Controls: ocultos por defecto, se muestran al hacer hover sobre la sección (como slider-independent) */
+.carrusel-generos-section .carrusel-nav-btn{
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .18s ease-in-out;
+}
+.carrusel-generos-section:hover .carrusel-nav-btn{
+  opacity:1;
+  pointer-events:auto;
+}
+
+/* Asegurar que los controls estén por encima de los items y que los items queden debajo del botón */
+.carrusel-nav-btn{ z-index:6 }
 .carrusel-generos-track a{ z-index:2 }
 
-/* Hacer que el viewport deje ver parcialmente los elementos adyacentes */
-.carrusel-generos-viewport{ padding-left:0; padding-right:0 }
+/* Allow JS to set padding (peek) via inline styles */
+.carrusel-generos-viewport{ padding-left: initial; padding-right: initial }
 
 /* Pequeña transición cuando se cambia de página */
 .carrusel-generos-track.moving{ transition: transform 0.5s cubic-bezier(.22,.9,.32,1) }
