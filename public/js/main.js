@@ -84,6 +84,14 @@ document.addEventListener('DOMContentLoaded', function () {
             } catch (e) {
                 console.error('Error inicializando EpisodiosAnimesCarousel:', e);
             }
+            // Inicializar el carrusel de episodios para Documentales
+            console.log("Main: Inicializando carrusel de episodios (Documentales)...");
+            try {
+                const episodiosDocumentalesCarousel = new EpisodiosDocumentalesCarousel();
+                window.episodiosDocumentalesCarousel = episodiosDocumentalesCarousel;
+            } catch (e) {
+                console.error('Error inicializando EpisodiosDocumentalesCarousel:', e);
+            }
         
         // Verificar que el carrusel de series se inicializó correctamente
         setTimeout(() => {
@@ -244,6 +252,17 @@ document.addEventListener('DOMContentLoaded', function () {
                         itemSource = 'episodios_animes';
                         console.log('Episodio (anime) encontrado en carrusel de episodios animes:', item);
                         console.log('Elemento DOM encontrado para episodio (anime):', itemElement);
+                    }
+                }
+
+                // Buscar en el carrusel de episodios (Episodios Documentales)
+                if (!item && window.episodiosDocumentalesCarousel && window.episodiosDocumentalesCarousel.episodiosData && window.episodiosDocumentalesCarousel.episodiosData.length > 0) {
+                    item = window.episodiosDocumentalesCarousel.episodiosData.find(ep => ep.id === urlParams.id);
+                    if (item) {
+                        itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
+                        itemSource = 'episodios_documentales';
+                        console.log('Episodio (documental) encontrado en carrusel de episodios documentales:', item);
+                        console.log('Elemento DOM encontrado para episodio (documental):', itemElement);
                     }
                 }
 

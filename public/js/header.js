@@ -577,7 +577,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Observe carousel wrappers for re-renders and re-apply last search if necessary.
   // If wrappers aren't present yet, use a body observer to attach when they appear.
   try {
-    const observedIds = ['carousel-wrapper','series-carousel-wrapper','documentales-carousel-wrapper','animes-carousel-wrapper','episodios-series-carousel-wrapper','episodios-animes-carousel-wrapper'];
+  const observedIds = ['carousel-wrapper','series-carousel-wrapper','documentales-carousel-wrapper','animes-carousel-wrapper','episodios-series-carousel-wrapper','episodios-animes-carousel-wrapper','episodios-documentales-carousel-wrapper'];
     const cooldownMs = 600; // don't re-apply if we applied within this many ms
 
     const attachObserverTo = (id) => {

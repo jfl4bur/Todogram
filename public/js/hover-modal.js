@@ -275,7 +275,7 @@ class HoverModal {
         try {
             if (this._currentOrigin && this._currentOrigin.classList) {
                 // detect if this item belongs to an "episodios" carousel where scaling causes layout issues
-                const isEpisodios = !!itemElement.closest('#episodios-series-carousel-wrapper, #episodios-animes-carousel-wrapper, .episodios-series-item, .episodios-animes-item');
+                const isEpisodios = !!itemElement.closest('#episodios-series-carousel-wrapper, #episodios-animes-carousel-wrapper, #episodios-documentales-carousel-wrapper, .episodios-series-item, .episodios-animes-item, .episodios-documentales-item');
 
                 if (!isEpisodios) {
                     // determine if the item is near the left or right edge of its scroll container
