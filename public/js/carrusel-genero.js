@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!wrapper) return;
 
     // Prefer relative path when serving locally
-    const dataPath = 'public/carrucat.json';
+    const dataPath = 'https://jfl4bur.github.io/Todogram/public/carrucat.json';
 
     function extractName(entry) {
         const url = entry.urlCat || '';
