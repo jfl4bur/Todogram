@@ -340,19 +340,23 @@
         </div>
     </div>
     </div>
-    
-    <!-- Carrusel de Géneros (añadido por carrusel-genero.js) -->
-    <div class="carrusel-generos-section">
-        <h1 class="carrusel-generos-title">Géneros</h1>
-            <div class="carrusel-generos-viewport">
-                <div class="carrusel-generos-track" id="carrusel-generos-track" aria-live="polite"></div>
-                <!-- Flechas sobre la vista para superponer sobre items cortados -->
-                <button class="carrusel-nav-btn carrusel-prev" id="carrusel-prev" aria-label="Anterior">‹</button>
-                <button class="carrusel-nav-btn carrusel-next" id="carrusel-next" aria-label="Siguiente">›</button>
+
+    <!-- Carrusel de Géneros (nuevo) -->
+    <div class="carousel-section">
+        <h1 class="carousel-title">Géneros</h1>
+        <div class="carousel-container carrusel-genero">
+            <div class="generos-skeleton" id="generos-skeleton">
+                <!-- skeleton placeholders opcionales -->
             </div>
-            <div class="carrusel-generos-nav">
-                <div class="carrusel-generos-pagination" id="carrusel-generos-pagination" role="tablist"></div>
+            <div id="generos-carousel-wrapper" style="display:block; position:relative;">
+                <!-- track se generará por JS -->
             </div>
+            <div class="carousel-nav" id="generos-carousel-nav">
+                <button class="carousel-nav-btn prev" id="generos-carousel-prev"><i class="fas fa-chevron-left"></i></button>
+                <button class="carousel-nav-btn next" id="generos-carousel-next"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="generos-pagination" id="generos-pagination"></div>
+        </div>
     </div>
 
     <!-- Modales -->
@@ -460,7 +464,6 @@
         window.peliculas = []; // Se llenará con los datos cargados
     </script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/slider-independent.js"></script>
-    <script src="https://jfl4bur.github.io/Todogram/public/js/carrusel-genero.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/carousel.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/hover-modal.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/details-modal.js"></script>
@@ -469,6 +472,7 @@
     <script src="https://jfl4bur.github.io/Todogram/public/js/header.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/catalogo.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/footer.js"></script>
+    <script src="https://jfl4bur.github.io/Todogram/public/js/carrusel-genero.js"></script>
     <script src="https://jfl4bur.github.io/Todogram/public/js/main.js"></script>
     
     <!-- Script para asegurar la inicialización del slider independiente -->
