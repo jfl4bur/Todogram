@@ -1950,7 +1950,7 @@ button:focus {
 
 .carousel-overlay {
     position: absolute;
-    top: 60%;
+    top: 25%;
     left: 0;
     right: 0;
     bottom: 0;
@@ -1961,6 +1961,15 @@ button:focus {
     transition: transform 0.3s ease, opacity 0.3s ease;
     opacity: 0;
     z-index: 2;
+}
+
+.carousel-title-overlay {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin-bottom: 1px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .carousel-title {

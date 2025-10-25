@@ -1229,7 +1229,7 @@ class AnimesCarousel {
                 </div>
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none">
                 <div class="carousel-overlay">
-                    <div class="carousel-title">${item.title}</div>
+                    <div class="carousel-title-overlay">${item.title}</div>
                     ${metaInfo.length ? `<div class="carousel-meta">${metaInfo.join('')}</div>` : ''}
                     ${item.description ? `<div class="carousel-description">${item.description}</div>` : ''}
                 </div>
@@ -1565,7 +1565,7 @@ class Carousel {
                 </div>
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none">
                             <div class="carousel-overlay">
-                <div class="carousel-title">${item.title}</div>
+                <div class="carousel-title-overlay">${item.title}</div>
                 ${metaInfo.length ? `<div class="carousel-meta">${metaInfo.join('')}</div>` : ''}
                 ${item.description ? `<div class="carousel-description">${item.description}</div>` : ''}
             </div>
@@ -2461,7 +2461,7 @@ class DocumentalesCarousel {
                 </div>
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none">
                 <div class="carousel-overlay">
-                    <div class="carousel-title">${item.title}</div>
+                    <div class="carousel-title-overlay">${item.title}</div>
                     ${metaInfo.length ? `<div class="carousel-meta">${metaInfo.join('')}</div>` : ''}
                     ${item.description ? `<div class="carousel-description">${item.description}</div>` : ''}
                 </div>
