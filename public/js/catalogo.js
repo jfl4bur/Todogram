@@ -722,6 +722,76 @@
         }, { passive:true });
     })();
 
+    // Capture-phase probe: run early in event flow to catch touches/clicks even when
+    // an overlay consumes events. This is a stronger fallback for stubborn cases
+    // on small screens (<=480px). It inspects pointer coordinates and opens the
+    // underlying catalog item if any.
+    (function installCaptureProbe(){
+        const MAX_WIDTH = 480;
+        if(typeof window === 'undefined' || !grid) return;
+        if(window.innerWidth > MAX_WIDTH) return;
+        if(document._catalogo_capture_installed) return;
+        document._catalogo_capture_installed = true;
+
+        const tryOpenAtPoint = (clientX, clientY) => {
+            try{
+                const top = document.elementFromPoint(clientX, clientY);
+                if(!top) return false;
+                // if target is already the item, nothing to do
+                if(top.closest && top.closest('.catalogo-item')) return false;
+                // Temporarily make top element pointer-events none to probe behind
+                const prev = top.style && top.style.pointerEvents;
+                try{
+                    top.style.pointerEvents = 'none';
+                    const behind = document.elementFromPoint(clientX, clientY);
+                    if(behind && behind.closest){
+                        const itemEl = behind.closest('.catalogo-item');
+                        if(itemEl && itemEl.dataset && itemEl.dataset.itemId){
+                            const id = itemEl.dataset.itemId;
+                            const now = Date.now();
+                            if(!document._catalogo_lastOpenTime || (now - document._catalogo_lastOpenTime) > 500){
+                                document._catalogo_lastOpenTime = now;
+                                const itemObj = findExistingItemById(id) || state.allItems.find(x=>String(x.id)===String(id));
+                                if(itemObj && window.detailsModal && typeof window.detailsModal.show === 'function'){
+                                    try{ window.detailsModal.show(itemObj, itemEl); }catch(e){ console.error('catalogo capture open error', e); }
+                                }
+                                return true;
+                            }
+                        }
+                    }
+                }catch(e){}
+                finally{ try{ if(top && top.style) top.style.pointerEvents = prev || ''; }catch(e){} }
+            }catch(e){}
+            return false;
+        };
+
+        // Prefer pointerup in capture phase
+        window.addEventListener('pointerup', function onPointerUp(ev){
+            try{
+                if(!ev || ev.isPrimary === false) return;
+                if(typeof ev.clientX === 'number' && typeof ev.clientY === 'number'){
+                    tryOpenAtPoint(ev.clientX, ev.clientY);
+                }
+            }catch(e){}
+        }, true);
+
+        // Fallbacks for environments without PointerEvent
+        window.addEventListener('touchend', function onTouchEnd(ev){
+            try{
+                const t = ev.changedTouches && ev.changedTouches[0]; if(!t) return;
+                tryOpenAtPoint(t.clientX, t.clientY);
+            }catch(e){}
+        }, { passive: true, capture: true });
+
+        window.addEventListener('click', function onClick(ev){
+            try{
+                if(typeof ev.clientX === 'number' && typeof ev.clientY === 'number'){
+                    tryOpenAtPoint(ev.clientX, ev.clientY);
+                }
+            }catch(e){}
+        }, true);
+    })();
+
         // resize
         let resizeTimer=null; function onCatalogResize(){ if(resizeTimer) clearTimeout(resizeTimer); resizeTimer = setTimeout(()=>{ state.itemsPerRow = computeItemsPerRow(grid); state.initialBatchSize = Math.max(1, state.itemsPerRow * state.initialRows); state.subsequentBatchSize = Math.max(1, state.itemsPerRow * state.subsequentRows); if(state.renderedCount < Math.min(state.filteredItems.length, state.initialBatchSize)) appendNextBatch(grid); }, 120); }
         window.addEventListener('resize', onCatalogResize);
