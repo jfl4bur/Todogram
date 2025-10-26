@@ -146,46 +146,169 @@
             }
         } catch (e) { console.warn('catalogo: error wiring image loader', e); }
 
-        // Store a reference to the original item on the element so delegated handlers can open it.
-        try { d._catalogoItem = it; } catch(e) {}
+        // Helper to open details modal from any input (click, pointer, touch)
+        const openDetails = () => {
+            // Use the same simple flow as carousels: find an existing canonical item if available
+            // and delegate entirely to DetailsModal.show so it performs normalization, URL updates
+            // and UI wiring. Avoid mutating global overlays or window.activeItem here.
+            if (window.detailsModal && typeof window.detailsModal.show === 'function') {
+                try {
+                    const existing = findExistingItemById(it.id);
+                    const itemToShow = existing || it;
+                    // Instrumentación: log y asegurar window.activeItem antes de delegar
+                    try { window.activeItem = itemToShow; } catch(e){}
+                    try { console.debug && console.debug('catalogo.openDetails -> calling detailsModal.show', { source: 'catalogo', id: itemToShow.id, title: itemToShow.title }); } catch(e){}
+                    const res = window.detailsModal.show(itemToShow, d);
+                    if (res && typeof res.then === 'function') {
+                        res.catch((err) => {
+                            console.error('detailsModal.show rejected', err);
+                            try { if (window.detailsModal && typeof window.detailsModal.close === 'function') window.detailsModal.close(); } catch (e) {}
+                        });
+                    }
+                } catch (e) {
+                    console.error('Error al abrir detailsModal', e);
+                    try { if (window.detailsModal && typeof window.detailsModal.close === 'function') window.detailsModal.close(); } catch (e) {}
+                }
+            }
+        };
 
-    // NOTE: interaction handlers (pointer/touch/contextmenu) are delegated at the grid level
-    // to improve consistency across devices and avoid duplicated listeners per item.
+        // Click handler (desktop) - ignore non-left clicks (right-click/contextmenu)
+        d.addEventListener('click', (e) => {
+            // If the event has a button property and it's not the primary (0), ignore
+            try { if (typeof e.button !== 'undefined' && e.button !== 0) return; } catch (err) {}
+            if(window.detailsModal && typeof window.detailsModal.show==='function'){
+                openDetails();
+            }
+        });
 
-            // Interactions (pointer/touch/contextmenu) are handled by delegated listeners on the grid.
-            // Initialize per-element state container for delegation handlers.
-            try { d._lastOpenTime = 0; d._lastPointerType = null; } catch(e) {}
+    // Tap vs scroll detection using pointer events with long-press suppression
+    // We record pointerdown coords, cancel the tap if move threshold exceeded or long-press detected.
+    // NOTE: on some mobile browsers both pointer and touch events may fire and conflict.
+    // Prefer PointerEvent when available and use touch* handlers only as a fallback.
+    let tapCancelled = false;
+    let pointerId = null;
+    let startX = 0, startY = 0;
+    // Increase threshold slightly on touch devices to avoid accidental small movements cancelling taps.
+    const MOVE_THRESHOLD = 12; // pixels
+    let longPressTimer = null;
+    let longPressed = false;
+    const LONG_PRESS_MS = 500; // long-press threshold
+    let lastPointerType = null;
+    const SUPPORTS_POINTER = (typeof window !== 'undefined' && typeof window.PointerEvent === 'function');
+
+        function clearLongPress() {
+            if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+            longPressed = false;
+        }
+
+        d.addEventListener('pointerdown', (ev) => {
+            if (ev.isPrimary === false) return;
+            tapCancelled = false;
+            longPressed = false;
+            lastPointerType = ev.pointerType || null;
+            pointerId = ev.pointerId;
+            startX = ev.clientX;
+            startY = ev.clientY;
+            // capture pointer to continue receiving move/up even if finger leaves element
+            try { d.setPointerCapture(pointerId); } catch (e) {}
+            // start long-press timer to suppress long-press taps and context menu
+            try {
+                clearLongPress();
+                longPressTimer = setTimeout(() => { longPressed = true; tapCancelled = true; }, LONG_PRESS_MS);
+            } catch (e) {}
+        }, { passive: true });
+
+        d.addEventListener('pointermove', (ev) => {
+            if (ev.pointerId !== pointerId) return;
+            const dx = Math.abs(ev.clientX - startX);
+            const dy = Math.abs(ev.clientY - startY);
+            if (dx > MOVE_THRESHOLD || dy > MOVE_THRESHOLD) {
+                tapCancelled = true;
+                clearLongPress();
+            }
+        }, { passive: true });
+
+        d.addEventListener('pointerup', (ev) => {
+            if (ev.pointerId !== pointerId) return;
+            try { d.releasePointerCapture(pointerId); } catch (e) {}
+            pointerId = null;
+            clearLongPress();
+            if (!tapCancelled && !longPressed) {
+                // Treat as tap
+                // debounce per element to avoid duplicate opens across events
+                try {
+                    const now = Date.now();
+                    if (!d._lastOpenTime || (now - d._lastOpenTime) > 400) {
+                        d._lastOpenTime = now;
+                        openDetails();
+                    }
+                } catch (e) { openDetails(); }
+            }
+        }, { passive: true });
+
+        d.addEventListener('pointercancel', (ev) => {
+            if (ev.pointerId === pointerId) {
+                try { d.releasePointerCapture(pointerId); } catch (e) {}
+                pointerId = null;
+            }
+            tapCancelled = true;
+            clearLongPress();
+        });
+
+        // Fallback for older touch-only browsers: use touchstart/touchmove/touchend/touchcancel
+        // Attach touch handlers only if PointerEvent is not supported to avoid duplicated/competing events
+        if (!SUPPORTS_POINTER) {
+            d.addEventListener('touchstart', (ev) => {
+                const t = ev.touches && ev.touches[0];
+                if (!t) return;
+                tapCancelled = false;
+                longPressed = false;
+                startX = t.clientX;
+                startY = t.clientY;
+                // start long-press timer
+                clearLongPress();
+                longPressTimer = setTimeout(() => { longPressed = true; tapCancelled = true; }, LONG_PRESS_MS);
+            }, { passive: true });
+
+            d.addEventListener('touchmove', (ev) => {
+                const t = ev.touches && ev.touches[0];
+                if (!t) return;
+                const dx = Math.abs(t.clientX - startX);
+                const dy = Math.abs(t.clientY - startY);
+                if (dx > MOVE_THRESHOLD || dy > MOVE_THRESHOLD) {
+                    tapCancelled = true;
+                    clearLongPress();
+                }
+            }, { passive: true });
+
+            d.addEventListener('touchend', (ev) => {
+                clearLongPress();
+                if (!tapCancelled && !longPressed) {
+                    try {
+                        const now = Date.now();
+                        if (!d._lastOpenTime || (now - d._lastOpenTime) > 400) {
+                            d._lastOpenTime = now;
+                            openDetails();
+                        }
+                    } catch (e) { openDetails(); }
+                }
+            }, { passive: true });
+
+            d.addEventListener('touchcancel', (ev) => { tapCancelled = true; clearLongPress(); });
+        }
+
+        // Prevent default contextmenu on touch long-press environments to avoid blocking UI
+        d.addEventListener('contextmenu', (ev) => {
+            try {
+                // if lastPointerType indicates touch, or device likely touch-only, prevent contextmenu
+                if (lastPointerType === 'touch' || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0 && window.matchMedia && window.matchMedia('(hover: none)').matches)) {
+                    ev.preventDefault();
+                }
+            } catch (e) {}
+        });
 
         return d;
     }
-
-        // Delegation constants used by grid-level interaction handlers
-        const DELEGATION_MOVE_THRESHOLD = 8; // px
-        const DELEGATION_LONG_PRESS_MS = 500; // ms
-
-        function clearElementLongPress(el){ try{ if(el && el._longPressTimer){ clearTimeout(el._longPressTimer); el._longPressTimer = null; } if(el) el._longPressed = false; }catch(e){}
-        }
-
-        // Shared opener used by delegated handlers
-        function openDetailsFromElement(el){
-            if(!el) return;
-            const item = el._catalogoItem || findExistingItemById(el.dataset && el.dataset.itemId);
-            if(!item) return;
-            try { window.activeItem = item; } catch(e) {}
-            try {
-                console.debug && console.debug('catalogo.delegated.openDetails', { id: item.id, title: item.title });
-                const res = window.detailsModal && typeof window.detailsModal.show === 'function' ? window.detailsModal.show(item, el) : null;
-                if (res && typeof res.then === 'function') {
-                    res.catch((err) => {
-                        console.error('detailsModal.show rejected', err);
-                        try { if (window.detailsModal && typeof window.detailsModal.close === 'function') window.detailsModal.close(); } catch (e) {}
-                    });
-                }
-            } catch (e) {
-                console.error('openDetailsFromElement error', e);
-                try { if (window.detailsModal && typeof window.detailsModal.close === 'function') window.detailsModal.close(); } catch (ee) {}
-            }
-        }
 
     function resetPagination(grid){ state.itemsPerRow = computeItemsPerRow(grid); state.initialBatchSize = Math.max(1, state.itemsPerRow * state.initialRows); state.subsequentBatchSize = Math.max(1, state.itemsPerRow * state.subsequentRows); state.renderedCount = 0; grid.innerHTML=''; }
 
@@ -745,146 +868,6 @@
                 }
             });
             grid.__hover_delegation_installed = true;
-        }
-        // Delegated pointer/touch handlers to manage taps consistently across devices
-        if (grid && !grid.__interaction_delegation_installed) {
-            const MOVE_THRESHOLD = DELEGATION_MOVE_THRESHOLD;
-            const LONG_PRESS_MS = DELEGATION_LONG_PRESS_MS;
-
-            function findElementByPointerId(pid){
-                try{
-                    const items = grid.querySelectorAll('.catalogo-item');
-                    for(const it of items){ if(it._pointerId === pid) return it; }
-                }catch(e){}
-                return null;
-            }
-
-            grid.addEventListener('pointerdown', (ev) => {
-                const itemEl = ev.target && ev.target.closest ? ev.target.closest('.catalogo-item') : null;
-                if(!itemEl || !grid.contains(itemEl)) return;
-                if(ev.isPrimary === false) return;
-                try{
-                    itemEl._tapCancelled = false;
-                    itemEl._longPressed = false;
-                    itemEl._lastPointerType = ev.pointerType || null;
-                    itemEl._pointerId = ev.pointerId;
-                    itemEl._startX = ev.clientX;
-                    itemEl._startY = ev.clientY;
-                    try{ itemEl.setPointerCapture && itemEl.setPointerCapture(ev.pointerId); }catch(e){}
-                    clearElementLongPress(itemEl);
-                    itemEl._longPressTimer = setTimeout(()=>{ itemEl._longPressed = true; itemEl._tapCancelled = true; }, LONG_PRESS_MS);
-                }catch(e){}
-            }, { passive: true });
-
-            grid.addEventListener('pointermove', (ev) => {
-                // prefer to find the element via pointerId
-                let itemEl = ev.target && ev.target.closest ? ev.target.closest('.catalogo-item') : null;
-                if(!itemEl) itemEl = findElementByPointerId(ev.pointerId);
-                if(!itemEl) return;
-                if(ev.pointerId !== itemEl._pointerId) return;
-                try{
-                    const dx = Math.abs(ev.clientX - (itemEl._startX || 0));
-                    const dy = Math.abs(ev.clientY - (itemEl._startY || 0));
-                    if(dx > MOVE_THRESHOLD || dy > MOVE_THRESHOLD){ itemEl._tapCancelled = true; clearElementLongPress(itemEl); }
-                }catch(e){}
-            }, { passive: true });
-
-            grid.addEventListener('pointerup', (ev) => {
-                // find element by closest or by stored pointerId
-                let itemEl = ev.target && ev.target.closest ? ev.target.closest('.catalogo-item') : null;
-                if(!itemEl) itemEl = findElementByPointerId(ev.pointerId);
-                if(!itemEl) return;
-                if(ev.pointerId !== itemEl._pointerId) return;
-                try{ itemEl.releasePointerCapture && itemEl.releasePointerCapture(ev.pointerId); }catch(e){}
-                itemEl._pointerId = null;
-                clearElementLongPress(itemEl);
-                if(!itemEl._tapCancelled && !itemEl._longPressed){
-                    try{
-                        const now = Date.now();
-                        if(!itemEl._lastOpenTime || (now - itemEl._lastOpenTime) > 400){ itemEl._lastOpenTime = now; openDetailsFromElement(itemEl); }
-                    }catch(e){ openDetailsFromElement(itemEl); }
-                }
-            }, { passive: true });
-
-            grid.addEventListener('pointercancel', (ev) => {
-                let itemEl = ev.target && ev.target.closest ? ev.target.closest('.catalogo-item') : null;
-                if(!itemEl) itemEl = findElementByPointerId(ev.pointerId);
-                if(!itemEl) return;
-                try{ if(ev.pointerId === itemEl._pointerId){ itemEl.releasePointerCapture && itemEl.releasePointerCapture(ev.pointerId); itemEl._pointerId = null; } }catch(e){}
-                itemEl._tapCancelled = true;
-                clearElementLongPress(itemEl);
-            }, { passive: true });
-
-            // If Pointer Events are not supported, fall back to touch handlers
-            if(!window.PointerEvent){
-                grid.addEventListener('touchstart', (ev) => {
-                    const t = ev.touches && ev.touches[0];
-                    if(!t) return;
-                    const itemEl = ev.target && ev.target.closest ? ev.target.closest('.catalogo-item') : null;
-                    if(!itemEl || !grid.contains(itemEl)) return;
-                    try{
-                        itemEl._tapCancelled = false;
-                        itemEl._longPressed = false;
-                        itemEl._lastPointerType = 'touch';
-                        itemEl._touchId = t.identifier;
-                        itemEl._startX = t.clientX; itemEl._startY = t.clientY;
-                        clearElementLongPress(itemEl);
-                        itemEl._longPressTimer = setTimeout(()=>{ itemEl._longPressed = true; itemEl._tapCancelled = true; }, LONG_PRESS_MS);
-                    }catch(e){}
-                }, { passive: true });
-
-                grid.addEventListener('touchmove', (ev) => {
-                    const t = ev.touches && ev.touches[0]; if(!t) return;
-                    const itemEl = ev.target && ev.target.closest ? ev.target.closest('.catalogo-item') : null;
-                    if(!itemEl) return;
-                    try{
-                        const dx = Math.abs(t.clientX - (itemEl._startX || 0));
-                        const dy = Math.abs(t.clientY - (itemEl._startY || 0));
-                        if(dx > MOVE_THRESHOLD || dy > MOVE_THRESHOLD){ itemEl._tapCancelled = true; clearElementLongPress(itemEl); }
-                    }catch(e){}
-                }, { passive: true });
-
-                grid.addEventListener('touchend', (ev) => {
-                    const t = ev.changedTouches && ev.changedTouches[0]; if(!t) return;
-                    let itemEl = ev.target && ev.target.closest ? ev.target.closest('.catalogo-item') : null;
-                    if(!itemEl){
-                        // try to find by touchId
-                        try{
-                            const items = grid.querySelectorAll('.catalogo-item');
-                            for(const it of items){ if(it._touchId === t.identifier) { itemEl = it; break; } }
-                        }catch(e){}
-                    }
-                    if(!itemEl) return;
-                    clearElementLongPress(itemEl);
-                    if(!itemEl._tapCancelled && !itemEl._longPressed){
-                        try{ const now = Date.now(); if(!itemEl._lastOpenTime || (now - itemEl._lastOpenTime) > 400){ itemEl._lastOpenTime = now; openDetailsFromElement(itemEl); } }catch(e){ openDetailsFromElement(itemEl); }
-                    }
-                }, { passive: true });
-
-                grid.addEventListener('touchcancel', (ev) => {
-                    const t = ev.changedTouches && ev.changedTouches[0]; if(!t) return;
-                    let itemEl = ev.target && ev.target.closest ? ev.target.closest('.catalogo-item') : null;
-                    if(!itemEl){
-                        try{ const items = grid.querySelectorAll('.catalogo-item'); for(const it of items){ if(it._touchId === t.identifier) { itemEl = it; break; } } }catch(e){}
-                    }
-                    if(!itemEl) return;
-                    itemEl._tapCancelled = true;
-                    clearElementLongPress(itemEl);
-                }, { passive: true });
-            }
-
-            // Prevent contextmenu caused by long-press on touch devices for catalog items
-            grid.addEventListener('contextmenu', (ev) => {
-                const itemEl = ev.target && ev.target.closest ? ev.target.closest('.catalogo-item') : null;
-                if(!itemEl) return;
-                try{
-                    if (itemEl._lastPointerType === 'touch' || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0 && window.matchMedia && window.matchMedia('(hover: none)').matches)) {
-                        ev.preventDefault();
-                    }
-                }catch(e){}
-            });
-
-            grid.__interaction_delegation_installed = true;
         }
     }
 
