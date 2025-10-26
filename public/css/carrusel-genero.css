@@ -51,11 +51,11 @@
         flex: 0 0 calc((100% - 36px) / 3);
         max-width: calc((100% - 36px) / 3);
     }
-    .genero-item .genero-img { width: 84px; height: 84px; }
-    .genero-item .genero-title { font-size: 11px; line-height: 1.1; }
+    .genero-item .genero-img { width: 92px; height: 92px; }
+    .genero-item .genero-title { font-size: 12px; line-height: 1.1; }
     /* Ajustar skeleton para coincidir */
     .genero-skel-item { width: calc((100% - 36px) / 3); }
-    .skel-circle { width: 84px; height: 84px; }
+    .skel-circle { width: 92px; height: 92px; }
     .skel-title { width: calc(((100% - 36px) / 3) - 24px); }
 }
 
