@@ -46,6 +46,8 @@ class DetailsModal {
         this.isDetailsModalOpen = false;
     // Small guard to prevent race-condition closes that happen immediately after opening
     this._preventImmediateClose = false;
+        // Evita reentradas concurrentes en show()
+        this._opening = false;
         // Diagnostic helper: store last global user/event to help debug accidental closes
         try {
             if (!window.__detailsModalDebug) {
@@ -341,6 +343,12 @@ class DetailsModal {
     }
 
     async show(item, itemElement) {
+        // Evitar reentradas: si ya está abierto o en proceso de abrir, ignorar
+        if (this.isDetailsModalOpen || this._opening) {
+            try { console.debug && console.debug('DetailsModal: show() ignorado porque ya está abierto/abriendo', { title: item && item.title }); } catch(e){}
+            return;
+        }
+        this._opening = true;
         // Normalize: if catalogo passed a 'raw' original row, copy common local fields so this modal can use them
         try {
             const raw = item && item.raw ? item.raw : null;
@@ -793,6 +801,8 @@ class DetailsModal {
             this._preventImmediateClose = true;
             setTimeout(() => { try { this._preventImmediateClose = false; } catch(e){} }, 420);
         } catch (e) { /* ignore */ }
+        // limpiar flag de apertura
+        try { this._opening = false; } catch(e){}
     }
 
     close() {
