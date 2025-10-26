@@ -46,6 +46,23 @@ class DetailsModal {
         this.isDetailsModalOpen = false;
     // Small guard to prevent race-condition closes that happen immediately after opening
     this._preventImmediateClose = false;
+        // Diagnostic helper: store last global user/event to help debug accidental closes
+        try {
+            if (!window.__detailsModalDebug) {
+                window.__detailsModalDebug = { lastEvent: null };
+                const track = (e) => {
+                    try {
+                        window.__detailsModalDebug.lastEvent = {
+                            type: e && e.type ? e.type : String(e),
+                            time: Date.now(),
+                            target: (e && e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : (e && e.target ? String(e.target) : null),
+                            stack: (new Error()).stack
+                        };
+                    } catch (err) {}
+                };
+                ['click','touchend','pointerup','pointerdown','touchstart','mousedown','hashchange','popstate'].forEach(evt => window.addEventListener(evt, track, { passive: true }));
+            }
+        } catch (e) {}
         this.TMDB_API_KEY = 'f28077ae6a89b54c86be927ea88d64d9';
         this.domCache = {}; // Cache para elementos DOM frecuentemente usados
 
@@ -781,9 +798,16 @@ class DetailsModal {
     close() {
         // If a close is requested right after opening due to race conditions (hashchange/popstate/click), ignore it
         if (this._preventImmediateClose) {
-            try { console.debug && console.debug('DetailsModal: close suppressed due to recent open'); } catch(e){}
+            try {
+                console.debug && console.debug('DetailsModal: close suppressed due to recent open');
+                try {
+                    const dbg = window.__detailsModalDebug && window.__detailsModalDebug.lastEvent ? window.__detailsModalDebug.lastEvent : null;
+                    console.warn('DetailsModal: suppressed close — lastEvent=', dbg);
+                } catch (e) {}
+            } catch(e){}
             return;
         }
+        // Normal close continues
         this.detailsModalContent.style.transform = 'translateY(20px)';
         this.detailsModalContent.style.opacity = '0';
         this.detailsModalOverlay.style.opacity = '0';
