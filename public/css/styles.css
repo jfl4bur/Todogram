@@ -2433,7 +2433,8 @@ button:focus {
     right: 0;
     bottom: 0;
     background-color: rgba(0, 0, 0, 0.7);
-    z-index: 1001;
+    /* Ensure overlay appears above header and other overlays on mobile (fixes catalog tap-only issue) */
+    z-index: 12005 !important;
     display: none;
     overflow-y: auto;
     transition: opacity 0.3s ease;
