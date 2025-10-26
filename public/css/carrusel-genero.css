@@ -41,16 +41,27 @@
     .carrusel-genero .carousel-nav { right: 4px; }
 }
 
-/* Small phones: forzar 3 items centrados y más pequeños */
+/* Ajustes para móviles pequeños <= 480px y más pequeños */
 @media (max-width: 480px) {
-    .carrusel-genero #generos-carousel-wrapper { justify-content: center; }
-    .genero-item { flex: 0 0 auto; }
-    /* let JS control exact widths, provide sensible defaults */
-    .genero-item .genero-img { width: 72px; height: 72px; }
-    .genero-item .genero-title { font-size: 11px; max-width: 86px; }
-    .generos-skeleton .genero-skel-item, .genero-skel-item { width: 72px; }
-    .skel-circle { width:72px; height:72px; }
-    .skel-title { width:56px; }
+    .carrusel-genero { padding: 14px 8px 78px; }
+    .carrusel-genero #generos-carousel-wrapper { gap: 12px; padding: 6px 6px 0; }
+    .genero-item .genero-img { width: 92px; height: 92px; box-shadow: 0 4px 10px rgba(0,0,0,0.45); }
+    .genero-item .genero-title { font-size: 11px; line-height: 18px; max-width: 92px; }
+    .genero-skel-item, .genero-skel-item .skel-circle { width: 92px; height: 92px; }
+    .skel-title { width: 76px; }
+    /* Ocultar los botones de navegación en pantallas muy pequeñas (touch) */
+    .carrusel-genero .carousel-nav { display: none; }
+    /* Aumentar el padding inferior para que los controles virtuales no tapen el carrusel */
+    .carrusel-genero { padding-bottom: 100px; }
+}
+
+/* Extra pequeño para móviles muy estrechos (<=360px) */
+@media (max-width: 360px) {
+    .genero-item .genero-img { width: 80px; height: 80px; }
+    .genero-item .genero-title { font-size: 10px; max-width: 80px; }
+    .genero-skel-item, .genero-skel-item .skel-circle { width: 80px; height: 80px; }
+    .skel-title { width: 64px; }
+    .carrusel-genero { padding-bottom: 110px; }
 }
 
 /* Asegurar que el primer elemento en la pista se alinee al borde izquierdo (sin peek) */

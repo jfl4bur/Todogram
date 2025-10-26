@@ -77,48 +77,21 @@ document.addEventListener('DOMContentLoaded', () => {
     function calculateLayout() {
         const containerWidth = wrapper.clientWidth || wrapper.getBoundingClientRect().width;
 
-        // Small screens (<=480px): forzar 3 items centrados y calcular itemWidth para que quepan
-        if (containerWidth <= 480) {
-            itemsPerPage = 3;
-            itemWidth = Math.floor((containerWidth - GAP * (itemsPerPage - 1)) / itemsPerPage);
-            if (itemWidth < 56) itemWidth = 56;
-            // aplicar anchuras y ajustar tamaño de la imagen dentro del item
-            const itemElements = wrapper.querySelectorAll('.genero-item');
-            itemElements.forEach((el) => {
-                el.style.flex = `0 0 ${itemWidth}px`;
-                el.style.width = itemWidth + 'px';
-                const img = el.querySelector('.genero-img');
-                if (img) {
-                    const imgSize = Math.max(48, Math.floor(itemWidth * 0.72));
-                    img.style.width = imgSize + 'px';
-                    img.style.height = imgSize + 'px';
-                }
-            });
-            // centrar contenido si cabe
-            try { wrapper.style.justifyContent = 'center'; } catch (e) {}
-        } else {
-            // intentar leer el ancho real del primer item
-            const firstItem = wrapper.querySelector('.genero-item');
-            const measured = firstItem ? Math.round(firstItem.getBoundingClientRect().width) : 160;
-            itemWidth = measured || 160;
+        // intentar leer el ancho real del primer item
+        const firstItem = wrapper.querySelector('.genero-item');
+        const measured = firstItem ? Math.round(firstItem.getBoundingClientRect().width) : 160;
+        itemWidth = measured || 160;
 
-            // calcular cuántos ítems caben
-            itemsPerPage = Math.max(1, Math.floor(containerWidth / (itemWidth + GAP)));
-            if (itemsPerPage < 1) itemsPerPage = 1;
+        // calcular cuántos ítems caben
+        itemsPerPage = Math.max(1, Math.floor(containerWidth / (itemWidth + GAP)));
+        if (itemsPerPage < 1) itemsPerPage = 1;
 
-            // asegurar que cada item tenga ancho correcto
-            const itemElements = wrapper.querySelectorAll('.genero-item');
-            itemElements.forEach((el) => {
-                el.style.flex = `0 0 ${itemWidth}px`;
-                el.style.width = itemWidth + 'px';
-                const img = el.querySelector('.genero-img');
-                if (img) {
-                    img.style.width = '';
-                    img.style.height = '';
-                }
-            });
-            try { wrapper.style.justifyContent = ''; } catch (e) {}
-        }
+        // asegurar que cada item tenga ancho correcto
+        const itemElements = wrapper.querySelectorAll('.genero-item');
+        itemElements.forEach((el) => {
+            el.style.flex = `0 0 ${itemWidth}px`;
+            el.style.width = itemWidth + 'px';
+        });
 
         // actualizar barra de progreso inicial
         updateProgressBar();
