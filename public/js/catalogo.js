@@ -172,31 +172,9 @@
             }
         };
 
-        // Click handler (desktop) - ignore non-left clicks (right-click/contextmenu)
-        // Also ignore click events that are immediately preceded by pointer/touch handling
-        // to avoid double-calls or race conditions on mobile browsers that synthesize mouse events.
-        d.addEventListener('click', (e) => {
-            // If the event has a button property and it's not the primary (0), ignore
-            try { if (typeof e.button !== 'undefined' && e.button !== 0) return; } catch (err) {}
-            try {
-                const now = Date.now();
-                // If a pointer/touch handler already opened the details recently, skip this click
-                if (d._lastOpenTime && (now - d._lastOpenTime) < 500) {
-                    try { e.preventDefault && e.preventDefault(); } catch (ee) {}
-                    return;
-                }
-                // On devices where lastPointerType indicates touch, be conservative and ignore
-                // clicks that happen very close to a touch event (helps older browsers).
-                if (lastPointerType === 'touch' && d._lastOpenTime && (now - d._lastOpenTime) < 800) {
-                    try { e.preventDefault && e.preventDefault(); } catch (ee) {}
-                    return;
-                }
-            } catch (err) { /* swallow and continue */ }
-
-            if(window.detailsModal && typeof window.detailsModal.show==='function'){
-                openDetails();
-            }
-        });
+        // Click handler intentionally removed: use pointer/touch events (pointerdown/pointerup, touch*)
+        // Pointer events cover mouse, pen and touch where supported. Removing `click` avoids
+        // synthesized mouse/click events on mobile that can conflict with touch/pointer logic.
 
         // Tap vs scroll detection using pointer events with long-press suppression
         // We record pointerdown coords, cancel the tap if move threshold exceeded or long-press detected.
