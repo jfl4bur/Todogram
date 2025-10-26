@@ -72,50 +72,26 @@ document.addEventListener('DOMContentLoaded', () => {
         // ocultar skeleton y mostrar wrapper
         if (skeleton) skeleton.style.display = 'none';
         wrapper.style.display = 'flex';
-
-        // Asegurar que el scroll inicia en el primer item (primer elemento: Todo el catálogo)
-        // uso setTimeout corto para esperar a que el browser aplique layout
-        setTimeout(() => {
-            try { wrapper.scrollTo({ left: 0, behavior: 'auto' }); updateProgressBar(); } catch (e) { wrapper.scrollLeft = 0; }
-        }, 50);
     }
 
     function calculateLayout() {
         const containerWidth = wrapper.clientWidth || wrapper.getBoundingClientRect().width;
-
-        // detectar móvil muy pequeño: forzar 3 items centrados (<=480px)
-        const isSmallMobile = window.matchMedia && window.matchMedia('(max-width: 480px)').matches;
 
         // intentar leer el ancho real del primer item
         const firstItem = wrapper.querySelector('.genero-item');
         const measured = firstItem ? Math.round(firstItem.getBoundingClientRect().width) : 160;
         itemWidth = measured || 160;
 
-        if (isSmallMobile) {
-            // Forzar 3 items visibles
-            itemsPerPage = 3;
-            // No sobrescribimos los estilos inline (dejar que CSS calc() gestione el ancho)
-            // pero actualizar itemWidth con la medida real para cálculos de scroll
-            // Quitar inline width/flex si existieran
-            const itemElements = wrapper.querySelectorAll('.genero-item');
-            itemElements.forEach((el) => {
-                el.style.flex = '';
-                el.style.width = '';
-            });
-        } else {
-            // calcular cuántos ítems caben
-            itemsPerPage = Math.max(1, Math.floor(containerWidth / (itemWidth + GAP)));
-            if (itemsPerPage < 1) itemsPerPage = 1;
+        // calcular cuántos ítems caben
+        itemsPerPage = Math.max(1, Math.floor(containerWidth / (itemWidth + GAP)));
+        if (itemsPerPage < 1) itemsPerPage = 1;
 
-            // asegurar que cada item tenga ancho correcto (solo fuera de small mobile)
-            const itemElements = wrapper.querySelectorAll('.genero-item');
-            itemElements.forEach((el) => {
-                el.style.flex = `0 0 ${itemWidth}px`;
-                el.style.width = itemWidth + 'px';
-            });
-            // al recacular en small mobile, asegurar scrollLeft=0 para ver el primer item centrado a la izquierda
-            setTimeout(() => { try { wrapper.scrollTo({ left: 0, behavior: 'auto' }); updateProgressBar(); } catch (e) { wrapper.scrollLeft = 0; } }, 20);
-        }
+        // asegurar que cada item tenga ancho correcto
+        const itemElements = wrapper.querySelectorAll('.genero-item');
+        itemElements.forEach((el) => {
+            el.style.flex = `0 0 ${itemWidth}px`;
+            el.style.width = itemWidth + 'px';
+        });
 
         // actualizar barra de progreso inicial
         updateProgressBar();

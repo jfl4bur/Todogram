@@ -41,24 +41,6 @@
     .carrusel-genero .carousel-nav { right: 4px; }
 }
 
-/* Mobile small: forzar 3 items centrados y más pequeños en pantallas muy estrechas */
-@media (max-width: 480px) {
-    .carrusel-genero { padding-bottom: 56px; }
-    /* Hacer que el wrapper centre los items y calcule 3 items visibles */
-    .carrusel-genero #generos-carousel-wrapper { justify-content: center; }
-    /* Cada item ocupa un tercio del ancho disponible menos gaps (2 * 18px = 36px) */
-    .carrusel-genero #generos-carousel-wrapper .genero-item {
-        flex: 0 0 calc((100% - 36px) / 3);
-        max-width: calc((100% - 36px) / 3);
-    }
-    .genero-item .genero-img { width: 92px; height: 92px; }
-    .genero-item .genero-title { font-size: 12px; line-height: 1.1; }
-    /* Ajustar skeleton para coincidir */
-    .genero-skel-item { width: calc((100% - 36px) / 3); }
-    .skel-circle { width: 92px; height: 92px; }
-    .skel-title { width: calc(((100% - 36px) / 3) - 24px); }
-}
-
 /* Asegurar que el primer elemento en la pista se alinee al borde izquierdo (sin peek) */
 .genero-track.first-page-offset { padding-left: 0; }
 
