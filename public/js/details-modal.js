@@ -346,7 +346,9 @@ class DetailsModal {
             trailerUrl: item.trailerUrl,
             tmdbUrl: item.tmdbUrl
         });
-        this.isDetailsModalOpen = true;
+    this.isDetailsModalOpen = true;
+    // Instrumentación temporal: marcar timestamp de apertura para depuración
+    try { this._openedAt = Date.now(); console.log('DetailsModal: show() timestamp', this._openedAt); } catch(e){}
         this.updateUrlForModal(item);
         
         this.detailsModalBody.innerHTML = `
@@ -771,6 +773,12 @@ class DetailsModal {
     }
 
     close() {
+        // Diagnostic trace: log stack and time since opened to find who triggers close()
+        try {
+            const since = this._openedAt ? (Date.now() - this._openedAt) : null;
+            console.warn('DetailsModal.close() called; ms since open:', since);
+            console.trace();
+        } catch (e) {}
         this.detailsModalContent.style.transform = 'translateY(20px)';
         this.detailsModalContent.style.opacity = '0';
         this.detailsModalOverlay.style.opacity = '0';
@@ -781,6 +789,7 @@ class DetailsModal {
             document.body.style.overflow = 'auto';
             this.isDetailsModalOpen = false;
             window.activeItem = null;
+            try { console.log('DetailsModal.close(): calling restoreUrl()'); } catch(e){}
             this.restoreUrl();
         }, 300);
     }
