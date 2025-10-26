@@ -1,6 +1,6 @@
 /* Estilos para el carrusel de géneros */
 .carrusel-genero { position: relative; padding: 22px 10px 48px; }
-.carrusel-genero #generos-carousel-wrapper { overflow-x: auto; display: flex; gap: 18px; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; padding: 6px 6px 0; }
+.carrusel-genero #generos-carousel-wrapper {overflow-x: auto;display: flex;gap: 33px;scroll-behavior: smooth;-webkit-overflow-scrolling: touch;padding: 6px 6px 0;}
 /* Ocultar scrollbar horizontal (todos los navegadores principales) */
 .carrusel-genero #generos-carousel-wrapper::-webkit-scrollbar { display: none; height: 0; }
 .carrusel-genero #generos-carousel-wrapper { -ms-overflow-style: none; scrollbar-width: none; }
@@ -43,16 +43,17 @@
 
 /* Ajustes para móviles pequeños <= 480px y más pequeños */
 @media (max-width: 480px) {
-    .carrusel-genero { padding: 14px 8px 78px; }
-    .carrusel-genero #generos-carousel-wrapper { gap: 12px; padding: 6px 6px 0; }
-    .genero-item .genero-img { width: 92px; height: 92px; box-shadow: 0 4px 10px rgba(0,0,0,0.45); }
+    .carrusel-genero {padding: 0;}
+    .carrusel-genero #generos-carousel-wrapper {gap: 1px;padding: 0;margin-right: 0px;}
+    .genero-item {display: inline-flex;flex-direction: column;text-align: center;text-decoration: none;flex: 0 0 auto;transition: transform 0.15s ease-out;color: rgb(198, 197, 197);align-items: center;flex: 0 0 130px !important;width: 130px !important;}
+    .genero-item .genero-img {width: 100px;height: 100px;box-shadow: 0 4px 10px rgba(0,0,0,0.45);}
     .genero-item .genero-title { font-size: 11px; line-height: 18px; max-width: 92px; }
     .genero-skel-item, .genero-skel-item .skel-circle { width: 92px; height: 92px; }
     .skel-title { width: 76px; }
     /* Ocultar los botones de navegación en pantallas muy pequeñas (touch) */
     .carrusel-genero .carousel-nav { display: none; }
     /* Aumentar el padding inferior para que los controles virtuales no tapen el carrusel */
-    .carrusel-genero { padding-bottom: 100px; }
+    .carrusel-genero {padding-bottom: 0px;margin-left: -20px;}
 }
 
 /* Extra pequeño para móviles muy estrechos (<=360px) */
