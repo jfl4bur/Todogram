@@ -14,7 +14,7 @@
 .genero-item:focus-within .genero-title {
     color: rgb(240, 240, 240);
 }
-.genero-item:hover {transform: translateY(-1.5%);color: rgb(217 50 50);}
+.genero-item:hover {transform: translateY(-1.5%);/* color: rgb(217 50 50); */}
 /* Navegación (botones) */
 .carrusel-genero .carousel-nav { position: absolute; top: 50%; right: 8px; transform: translateY(-50%); display: flex; gap: 8px; z-index: 10; }
 .carrusel-genero .carousel-nav .carousel-nav-btn { width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.45); border: none; color: #fff; display:flex; align-items:center; justify-content:center; box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
@@ -46,8 +46,8 @@
     .carrusel-genero {padding: 0;}
     .carrusel-genero #generos-carousel-wrapper {gap: 1px;padding: 0;margin-right: 0px;}
     .genero-item {display: inline-flex;flex-direction: column;text-align: center;text-decoration: none;flex: 0 0 auto;transition: transform 0.15s ease-out;color: rgb(198, 197, 197);align-items: center;flex: 0 0 130px !important;width: 130px !important;}
-    .genero-item .genero-img {width: 100px;height: 100px;box-shadow: 0 4px 10px rgba(0,0,0,0.45);}
-    .genero-item .genero-title { font-size: 11px; line-height: 18px; max-width: 92px; }
+    .genero-item .genero-img {width: 110px;height: 110px;box-shadow: 0 4px 10px rgba(0,0,0,0.45);}
+    .genero-item .genero-title {font-size: 14px;line-height: 18px;max-width: 92px;white-space: normal;font-weight: normal;color: rgb(198, 197, 197);text-align: center;line-height: 24px;word-break: keep-all;/* width: 100%; */margin: 0;padding: 0;}
     .genero-skel-item, .genero-skel-item .skel-circle { width: 92px; height: 92px; }
     .skel-title { width: 76px; }
     /* Ocultar los botones de navegación en pantallas muy pequeñas (touch) */
