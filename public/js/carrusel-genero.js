@@ -77,39 +77,37 @@ document.addEventListener('DOMContentLoaded', () => {
     function calculateLayout() {
         const containerWidth = wrapper.clientWidth || wrapper.getBoundingClientRect().width;
 
-        // intentar optimizar para pantallas pequeñas: permitir que quepan 3 items
-        // si el containerWidth es pequeño (<=480) intentamos 3 items reduciendo el itemWidth
-        if (containerWidth <= 480) {
-            const target = 3;
-            const minMobileItem = 70; // ancho mínimo aceptable para móvil
-            const candidateWidth = Math.floor((containerWidth - GAP * (target - 1)) / target);
-            if (candidateWidth >= minMobileItem) {
-                itemWidth = candidateWidth;
-                itemsPerPage = target;
-            } else {
-                // no cabe 3 con ancho razonable: usar 2
-                const target2 = 2;
-                const candidate2 = Math.floor((containerWidth - GAP * (target2 - 1)) / target2);
-                itemWidth = Math.max(minMobileItem, candidate2);
-                itemsPerPage = 2;
-            }
-        } else {
-            // intentar leer el ancho real del primer item (desktop/tablet)
-            const firstItem = wrapper.querySelector('.genero-item');
-            const measured = firstItem ? Math.round(firstItem.getBoundingClientRect().width) : 160;
-            itemWidth = measured || 160;
+        // detectar móvil muy pequeño: forzar 3 items centrados (<=480px)
+        const isSmallMobile = window.matchMedia && window.matchMedia('(max-width: 480px)').matches;
 
+        // intentar leer el ancho real del primer item
+        const firstItem = wrapper.querySelector('.genero-item');
+        const measured = firstItem ? Math.round(firstItem.getBoundingClientRect().width) : 160;
+        itemWidth = measured || 160;
+
+        if (isSmallMobile) {
+            // Forzar 3 items visibles
+            itemsPerPage = 3;
+            // No sobrescribimos los estilos inline (dejar que CSS calc() gestione el ancho)
+            // pero actualizar itemWidth con la medida real para cálculos de scroll
+            // Quitar inline width/flex si existieran
+            const itemElements = wrapper.querySelectorAll('.genero-item');
+            itemElements.forEach((el) => {
+                el.style.flex = '';
+                el.style.width = '';
+            });
+        } else {
             // calcular cuántos ítems caben
             itemsPerPage = Math.max(1, Math.floor(containerWidth / (itemWidth + GAP)));
             if (itemsPerPage < 1) itemsPerPage = 1;
-        }
 
-        // asegurar que cada item tenga ancho correcto
-        const itemElements = wrapper.querySelectorAll('.genero-item');
-        itemElements.forEach((el) => {
-            el.style.flex = `0 0 ${itemWidth}px`;
-            el.style.width = itemWidth + 'px';
-        });
+            // asegurar que cada item tenga ancho correcto (solo fuera de small mobile)
+            const itemElements = wrapper.querySelectorAll('.genero-item');
+            itemElements.forEach((el) => {
+                el.style.flex = `0 0 ${itemWidth}px`;
+                el.style.width = itemWidth + 'px';
+            });
+        }
 
         // actualizar barra de progreso inicial
         updateProgressBar();

@@ -30,9 +30,6 @@
     .genero-item .genero-img { width: 140px; height: 140px; }
     .genero-item .genero-title { font-size: 14px; }
 }
-
-/* Mantener estilos de escritorio originales. Cualquier ajuste fino de gap/peek
-   se hará con reglas específicas y sin !important si es necesario. */
 @media (max-width: 900px) {
     .genero-item .genero-img { width: 120px; height: 120px; }
     .genero-item .genero-title { font-size: 13px; }
@@ -44,34 +41,22 @@
     .carrusel-genero .carousel-nav { right: 4px; }
 }
 
-/* Small mobile adjustments: desde 480px y más pequeños */
+/* Mobile small: forzar 3 items centrados y más pequeños en pantallas muy estrechas */
 @media (max-width: 480px) {
-    .carrusel-genero {padding: 10px 0px 10px;}
-    /* Reducir gap y paddings para que los items estén más juntos sin solaparse */
-    .carrusel-genero #generos-carousel-wrapper { gap: 6px; padding: 4px 6px 0; }
-    .genero-item { margin: 0 4px; padding: 0; box-sizing: border-box; }
-    .genero-item .genero-img { width: 99px; height: 99px; box-shadow: 0 4px 12px rgba(0,0,0,0.45); }
-    .genero-item .genero-title {font-size: 16px;max-width: 88px;line-height: 16px;white-space: normal;color: rgb(198, 197, 197);text-align: center;line-height: 24px;}
-    .genero-skel-item { width: 99px; margin: 0 4px; }
-    .skel-circle { width: 99px; height: 99px; }
-    .skel-title { width: 68px; height: 12px; margin-top: 8px; }
-    /* Ocultar botones de navegación en pantallas muy pequeñas (usar swipe/scroll táctil) */
-    .carrusel-genero .carousel-nav { display: none; }
-    /* Hacer scroll snapping para mejorar la experiencia táctil */
-    .carrusel-genero #generos-carousel-wrapper {scroll-snap-type: x mandatory;margin-right: 20px;}
-    .genero-item { scroll-snap-align: center; }
-}
-
-/* Muy pequeños (ej. 360px y menos) */
-@media (max-width: 360px) {
-    .carrusel-genero { padding-bottom: 90px; }
-    .carrusel-genero #generos-carousel-wrapper { gap: 6px; padding: 4px 6px 0; }
-    .genero-item { margin: 0 3px; padding: 0; }
-    .genero-item .genero-img { width: 76px; height: 76px; }
-    .genero-item .genero-title { font-size: 10px; max-width: 76px; }
-    .genero-skel-item { width: 76px; margin: 0 3px; }
-    .skel-circle { width: 76px; height: 76px; }
-    .skel-title { width: 56px; height: 10px; }
+    .carrusel-genero { padding-bottom: 56px; }
+    /* Hacer que el wrapper centre los items y calcule 3 items visibles */
+    .carrusel-genero #generos-carousel-wrapper { justify-content: center; }
+    /* Cada item ocupa un tercio del ancho disponible menos gaps (2 * 18px = 36px) */
+    .carrusel-genero #generos-carousel-wrapper .genero-item {
+        flex: 0 0 calc((100% - 36px) / 3);
+        max-width: calc((100% - 36px) / 3);
+    }
+    .genero-item .genero-img { width: 84px; height: 84px; }
+    .genero-item .genero-title { font-size: 11px; line-height: 1.1; }
+    /* Ajustar skeleton para coincidir */
+    .genero-skel-item { width: calc((100% - 36px) / 3); }
+    .skel-circle { width: 84px; height: 84px; }
+    .skel-title { width: calc(((100% - 36px) / 3) - 24px); }
 }
 
 /* Asegurar que el primer elemento en la pista se alinee al borde izquierdo (sin peek) */
