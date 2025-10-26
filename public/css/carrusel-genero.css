@@ -4,10 +4,11 @@
 /* Ocultar scrollbar horizontal (todos los navegadores principales) */
 .carrusel-genero #generos-carousel-wrapper::-webkit-scrollbar { display: none; height: 0; }
 .carrusel-genero #generos-carousel-wrapper { -ms-overflow-style: none; scrollbar-width: none; }
-.genero-item { display: inline-flex; flex-direction: column; align-items: center; text-align: center; color: #ddd; text-decoration: none; flex: 0 0 auto; }
-.genero-item .genero-img {width: 160px;height: 160px;border-radius: 50%;object-fit: cover;display: block;/* box-shadow: 0 6px 18px rgba(0,0,0,0.6); */border: none;overflow: visible;}
-.genero-item .genero-title { margin-top: 12px; font-size: 15px; color: #f1f1f1; max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-
+.genero-item {display: inline-flex;flex-direction: column;align-items: center;text-align: center;text-decoration: none;flex: 0 0 auto;transition: transform 0.15s ease-out;color: rgb(198, 197, 197);}
+.genero-item .genero-img {width: 160px;height: 160px;border-radius: 50%;object-fit: cover;display: block;box-shadow: 0 6px 18px rgba(0,0,0,0.6);border: none;overflow: unset;}
+.genero-item .genero-title {margin-top: 12px;max-width: 170px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;transition: color 0.15s ease-out;display: block;word-break: break-word;font-size: 1.2rem;font-family: RakutenSans, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Oxygen, Cantarell, sans-serif;font-weight: normal;color: rgb(198, 197, 197);text-align: center;line-height: 24px;}
+.genero-item .genero-title:hover {color: rgb(240, 240, 240);}
+.genero-item:hover {transform: translateY(-1.5%);color: rgb(217 50 50);}
 /* Navegación (botones) */
 .carrusel-genero .carousel-nav { position: absolute; top: 50%; right: 8px; transform: translateY(-50%); display: flex; gap: 8px; z-index: 10; }
 .carrusel-genero .carousel-nav .carousel-nav-btn { width: 44px; height: 44px; border-radius: 50%; background: rgba(0,0,0,0.45); border: none; color: #fff; display:flex; align-items:center; justify-content:center; box-shadow: 0 2px 8px rgba(0,0,0,0.5); }
@@ -29,7 +30,7 @@
 }
 @media (max-width: 600px) {
     .carrusel-genero { padding-bottom: 64px; }
-    .genero-item .genero-img { width: 110px; height: 110px; }
+    .genero-item .genero-img {width: 110px;height: 110px;overflow: initial;}
     .genero-item .genero-title { font-size: 12px; }
     .carrusel-genero .carousel-nav { right: 4px; }
 }
