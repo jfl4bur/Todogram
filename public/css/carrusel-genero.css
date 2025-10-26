@@ -1,6 +1,6 @@
 /* Estilos para el carrusel de géneros */
 .carrusel-genero { position: relative; padding: 22px 10px 48px; }
-.carrusel-genero #generos-carousel-wrapper {overflow-x: auto;display: flex;gap: 33px;scroll-behavior: smooth;-webkit-overflow-scrolling: touch;padding: 6px 6px 0;}
+.carrusel-genero #generos-carousel-wrapper {overflow-x: auto;display: flex;gap: 18px;scroll-behavior: smooth;-webkit-overflow-scrolling: touch;padding: 6px 6px 0;}
 /* Ocultar scrollbar horizontal (todos los navegadores principales) */
 .carrusel-genero #generos-carousel-wrapper::-webkit-scrollbar { display: none; height: 0; }
 .carrusel-genero #generos-carousel-wrapper { -ms-overflow-style: none; scrollbar-width: none; }
