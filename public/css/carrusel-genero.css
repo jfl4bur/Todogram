@@ -30,6 +30,22 @@
     .genero-item .genero-img { width: 140px; height: 140px; }
     .genero-item .genero-title { font-size: 14px; }
 }
+
+/* Desktop / laptop spacing improvements: más espacio lateral y mayor separacion entre items */
+@media (min-width: 901px) {
+    /* aumentar padding lateral para que los botones puedan superponerse dejando 'peek' de los items */
+    .carrusel-genero { padding: 28px 56px 56px; }
+    /* aumentar el gap entre items en pantallas de escritorio */
+    .carrusel-genero #generos-carousel-wrapper { gap: 32px; padding: 10px 28px 0; }
+    /* agrandar ligeramente las imágenes para pantallas grandes (opcional) */
+    .genero-item .genero-img { width: 180px; height: 180px; }
+    .genero-item .genero-title { font-size: 1.05rem; max-width: 190px; }
+    /* ajustar tamaño y posicion de los botones para que queden centrados sobre el peek */
+    .carrusel-genero .carousel-nav { right: 28px; }
+    .carrusel-genero .carousel-nav .carousel-nav-btn { width: 52px; height: 52px; }
+    /* skeleton coherente con el nuevo gap */
+    .generos-skeleton { gap: 32px; padding: 10px 28px 0; }
+}
 @media (max-width: 900px) {
     .genero-item .genero-img { width: 120px; height: 120px; }
     .genero-item .genero-title { font-size: 13px; }
