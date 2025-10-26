@@ -43,11 +43,13 @@
 
 /* Small mobile adjustments: desde 480px y más pequeños */
 @media (max-width: 480px) {
-    .carrusel-genero { padding: 14px 6px 84px; }
-    .carrusel-genero #generos-carousel-wrapper { gap: 12px; padding: 6px 8px 0; }
+    .carrusel-genero { padding: 12px 4px 72px; }
+    /* Reducir gap y paddings para que los items estén más juntos sin solaparse */
+    .carrusel-genero #generos-carousel-wrapper { gap: 6px; padding: 4px 6px 0; }
+    .genero-item { margin: 0 4px; padding: 0; box-sizing: border-box; }
     .genero-item .genero-img { width: 92px; height: 92px; box-shadow: 0 4px 12px rgba(0,0,0,0.45); }
-    .genero-item .genero-title { font-size: 11px; max-width: 92px; line-height: 16px; }
-    .genero-skel-item { width: 92px; }
+    .genero-item .genero-title { font-size: 11px; max-width: 88px; line-height: 16px; }
+    .genero-skel-item { width: 92px; margin: 0 4px; }
     .skel-circle { width: 92px; height: 92px; }
     .skel-title { width: 68px; height: 12px; margin-top: 8px; }
     /* Ocultar botones de navegación en pantallas muy pequeñas (usar swipe/scroll táctil) */
@@ -60,12 +62,13 @@
 /* Muy pequeños (ej. 360px y menos) */
 @media (max-width: 360px) {
     .carrusel-genero { padding-bottom: 90px; }
-    .genero-item .genero-img { width: 80px; height: 80px; }
-    .genero-item .genero-title { font-size: 10px; max-width: 80px; }
-    .genero-skel-item { width: 80px; }
-    .skel-circle { width: 80px; height: 80px; }
-    .skel-title { width: 60px; height: 10px; }
-    .carrusel-genero #generos-carousel-wrapper { gap: 10px; }
+    .carrusel-genero #generos-carousel-wrapper { gap: 6px; padding: 4px 6px 0; }
+    .genero-item { margin: 0 3px; padding: 0; }
+    .genero-item .genero-img { width: 76px; height: 76px; }
+    .genero-item .genero-title { font-size: 10px; max-width: 76px; }
+    .genero-skel-item { width: 76px; margin: 0 3px; }
+    .skel-circle { width: 76px; height: 76px; }
+    .skel-title { width: 56px; height: 10px; }
 }
 
 /* Asegurar que el primer elemento en la pista se alinee al borde izquierdo (sin peek) */
