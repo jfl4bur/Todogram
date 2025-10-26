@@ -43,19 +43,19 @@
 
 /* Small mobile adjustments: desde 480px y más pequeños */
 @media (max-width: 480px) {
-    .carrusel-genero { padding: 12px 4px 72px; }
+    .carrusel-genero {padding: 10px 0px 10px;}
     /* Reducir gap y paddings para que los items estén más juntos sin solaparse */
     .carrusel-genero #generos-carousel-wrapper { gap: 6px; padding: 4px 6px 0; }
     .genero-item { margin: 0 4px; padding: 0; box-sizing: border-box; }
-    .genero-item .genero-img { width: 92px; height: 92px; box-shadow: 0 4px 12px rgba(0,0,0,0.45); }
-    .genero-item .genero-title { font-size: 11px; max-width: 88px; line-height: 16px; }
-    .genero-skel-item { width: 92px; margin: 0 4px; }
-    .skel-circle { width: 92px; height: 92px; }
+    .genero-item .genero-img { width: 99px; height: 99px; box-shadow: 0 4px 12px rgba(0,0,0,0.45); }
+    .genero-item .genero-title {font-size: 16px;max-width: 88px;line-height: 16px;white-space: normal;color: rgb(198, 197, 197);text-align: center;line-height: 24px;}
+    .genero-skel-item { width: 99px; margin: 0 4px; }
+    .skel-circle { width: 99px; height: 99px; }
     .skel-title { width: 68px; height: 12px; margin-top: 8px; }
     /* Ocultar botones de navegación en pantallas muy pequeñas (usar swipe/scroll táctil) */
     .carrusel-genero .carousel-nav { display: none !important; }
     /* Hacer scroll snapping para mejorar la experiencia táctil */
-    .carrusel-genero #generos-carousel-wrapper { scroll-snap-type: x mandatory; }
+    .carrusel-genero #generos-carousel-wrapper {scroll-snap-type: x mandatory;margin-right: 20px;}
     .genero-item { scroll-snap-align: center; }
 }
 
