@@ -311,6 +311,14 @@ class DetailsModal {
         });
         
         this.detailsModalOverlay.addEventListener('click', (e) => {
+            // Evitar que el mismo tap/click que abrió el modal lo cierre de inmediato.
+            // Algunos navegadores/reproducciones de eventos en móviles pueden reenfocar
+            // el evento hacia el overlay si el modal se muestra sin esperar al siguiente
+            // ciclo de evento. Ignoramos clicks en el overlay durante un breve intervalo
+            // tras abrir el modal.
+            try {
+                if (this._suppressOverlayClickUntil && Date.now() < this._suppressOverlayClickUntil) return;
+            } catch (err) {}
             if (e.target === this.detailsModalOverlay) {
                 this.close();
             }
@@ -359,6 +367,9 @@ class DetailsModal {
         
         this.detailsModalOverlay.style.display = 'block';
         this.detailsModalOverlay.classList.add('show');
+    // Evitar que el click/tap original que abrió el modal (mismo evento)
+    // se propague a overlay y cierre el modal inmediatamente.
+    try { this._suppressOverlayClickUntil = Date.now() + 350; } catch (e) {}
         document.body.style.overflow = 'hidden';
         console.log('DetailsModal: Modal overlay mostrado con clase show');
         
