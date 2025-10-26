@@ -300,35 +300,6 @@
             } catch (e) {}
         });
 
-        // Mobile fallback: algunos móviles pequeños (<=480px) pueden ignorar los handlers pointer/touch
-        // en ciertas condiciones hasta que se realiza un scroll. Añadimos un touchend extra en esos
-        // dispositivos para forzar la apertura del modal. Protegemos contra aperturas duplicadas.
-        try {
-            const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0);
-            if (isTouch && window.innerWidth <= 480) {
-                d.addEventListener('touchend', (ev) => {
-                    // Si el tap ya fue cancelado por movimiento/longpress, no abrir
-                    if (tapCancelled || longPressed) return;
-                    // Protegemos contra multi-touch
-                    if (ev.changedTouches && ev.changedTouches.length > 1) return;
-                    try {
-                        const now = Date.now();
-                        if (!d._lastOpenTime || (now - d._lastOpenTime) > 400) {
-                            d._lastOpenTime = now;
-                            // evitar doble manejo por otros listeners: bloquear inmediatamente otros handlers
-                            try { ev.stopImmediatePropagation && ev.stopImmediatePropagation(); } catch(e){}
-                            try { ev.stopPropagation && ev.stopPropagation(); } catch(e){}
-                            if (ev.preventDefault) try { ev.preventDefault(); } catch(e){}
-                            // abrir con un pequeño delay para dejar que el navegador estabilice estado (hash/url etc.)
-                            setTimeout(() => {
-                                try { openDetails(); } catch(e) { console.error('catalogo touch fallback openDetails error', e); }
-                            }, 10);
-                        }
-                    } catch (e) { /* silent */ }
-                }, { passive: false });
-            }
-        } catch (e) { /* ignore if environment doesn't support features used */ }
-
         return d;
     }
 

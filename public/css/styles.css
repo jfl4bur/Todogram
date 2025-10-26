@@ -673,6 +673,8 @@ button:focus {
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 4;
     aspect-ratio: 16 / 9 !important;
+    /* permitir que toques/gestos pasen al elemento debajo (no bloquear interacción) */
+    pointer-events: none;
 }
 
 .loader_episodios i {
@@ -694,6 +696,8 @@ button:focus {
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 4;
     aspect-ratio: 16 / 9 !important;
+    /* permitir que toques/gestos pasen al elemento debajo (no bloquear interacción) */
+    pointer-events: none;
 }
 
 .loader_episodios_animes i {
@@ -3093,6 +3097,9 @@ button:focus {
     justify-content: center;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 4;
+    /* No bloquear los eventos pointer/touch: dejar pasar toques al elemento debajo
+       (evita que el spinner impida abrir el modal en móviles antes de que la imagen cargue) */
+    pointer-events: none;
 
 }
 

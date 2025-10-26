@@ -44,27 +44,6 @@ class DetailsModal {
         this.detailsModalClose = document.getElementById('details-modal-close');
         this.activeItem = null;
         this.isDetailsModalOpen = false;
-    // Small guard to prevent race-condition closes that happen immediately after opening
-    this._preventImmediateClose = false;
-        // Evita reentradas concurrentes en show()
-        this._opening = false;
-        // Diagnostic helper: store last global user/event to help debug accidental closes
-        try {
-            if (!window.__detailsModalDebug) {
-                window.__detailsModalDebug = { lastEvent: null };
-                const track = (e) => {
-                    try {
-                        window.__detailsModalDebug.lastEvent = {
-                            type: e && e.type ? e.type : String(e),
-                            time: Date.now(),
-                            target: (e && e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : (e && e.target ? String(e.target) : null),
-                            stack: (new Error()).stack
-                        };
-                    } catch (err) {}
-                };
-                ['click','touchend','pointerup','pointerdown','touchstart','mousedown','hashchange','popstate'].forEach(evt => window.addEventListener(evt, track, { passive: true }));
-            }
-        } catch (e) {}
         this.TMDB_API_KEY = 'f28077ae6a89b54c86be927ea88d64d9';
         this.domCache = {}; // Cache para elementos DOM frecuentemente usados
 
@@ -343,12 +322,6 @@ class DetailsModal {
     }
 
     async show(item, itemElement) {
-        // Evitar reentradas: si ya está abierto o en proceso de abrir, ignorar
-        if (this.isDetailsModalOpen || this._opening) {
-            try { console.debug && console.debug('DetailsModal: show() ignorado porque ya está abierto/abriendo', { title: item && item.title }); } catch(e){}
-            return;
-        }
-        this._opening = true;
         // Normalize: if catalogo passed a 'raw' original row, copy common local fields so this modal can use them
         try {
             const raw = item && item.raw ? item.raw : null;
@@ -795,29 +768,9 @@ class DetailsModal {
 
         window.activeItem = item;
         console.log('DetailsModal: Modal completado para:', item.title);
-
-        // Prevent accidental immediate closes triggered by other global handlers
-        try {
-            this._preventImmediateClose = true;
-            setTimeout(() => { try { this._preventImmediateClose = false; } catch(e){} }, 420);
-        } catch (e) { /* ignore */ }
-        // limpiar flag de apertura
-        try { this._opening = false; } catch(e){}
     }
 
     close() {
-        // If a close is requested right after opening due to race conditions (hashchange/popstate/click), ignore it
-        if (this._preventImmediateClose) {
-            try {
-                console.debug && console.debug('DetailsModal: close suppressed due to recent open');
-                try {
-                    const dbg = window.__detailsModalDebug && window.__detailsModalDebug.lastEvent ? window.__detailsModalDebug.lastEvent : null;
-                    console.warn('DetailsModal: suppressed close — lastEvent=', dbg);
-                } catch (e) {}
-            } catch(e){}
-            return;
-        }
-        // Normal close continues
         this.detailsModalContent.style.transform = 'translateY(20px)';
         this.detailsModalContent.style.opacity = '0';
         this.detailsModalOverlay.style.opacity = '0';
