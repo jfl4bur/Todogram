@@ -44,6 +44,8 @@ class DetailsModal {
         this.detailsModalClose = document.getElementById('details-modal-close');
         this.activeItem = null;
         this.isDetailsModalOpen = false;
+    // Small guard to prevent race-condition closes that happen immediately after opening
+    this._preventImmediateClose = false;
         this.TMDB_API_KEY = 'f28077ae6a89b54c86be927ea88d64d9';
         this.domCache = {}; // Cache para elementos DOM frecuentemente usados
 
@@ -768,9 +770,20 @@ class DetailsModal {
 
         window.activeItem = item;
         console.log('DetailsModal: Modal completado para:', item.title);
+
+        // Prevent accidental immediate closes triggered by other global handlers
+        try {
+            this._preventImmediateClose = true;
+            setTimeout(() => { try { this._preventImmediateClose = false; } catch(e){} }, 420);
+        } catch (e) { /* ignore */ }
     }
 
     close() {
+        // If a close is requested right after opening due to race conditions (hashchange/popstate/click), ignore it
+        if (this._preventImmediateClose) {
+            try { console.debug && console.debug('DetailsModal: close suppressed due to recent open'); } catch(e){}
+            return;
+        }
         this.detailsModalContent.style.transform = 'translateY(20px)';
         this.detailsModalContent.style.opacity = '0';
         this.detailsModalOverlay.style.opacity = '0';
