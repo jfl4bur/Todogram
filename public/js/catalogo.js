@@ -181,12 +181,13 @@
             }
         });
 
-        // Tap vs scroll detection using pointer events with long-press suppression
-        // We record pointerdown coords, cancel the tap if move threshold exceeded or long-press detected.
+        // Tap vs scroll detection using pointer/touch events with long-press suppression
+        // Use Pointer Events when supported; otherwise fallback to touch events. Registering
+        // both can cause duplicated or cancelled interactions on some mobile browsers.
         let tapCancelled = false;
         let pointerId = null;
         let startX = 0, startY = 0;
-    const MOVE_THRESHOLD = 12; // pixels (aumentado para tolerar pequeños deslizamientos en tap)
+        const MOVE_THRESHOLD = 8; // pixels
         let longPressTimer = null;
         let longPressed = false;
         const LONG_PRESS_MS = 500; // long-press threshold
@@ -197,73 +198,64 @@
             longPressed = false;
         }
 
-        d.addEventListener('pointerdown', (ev) => {
-            if (ev.isPrimary === false) return;
-            tapCancelled = false;
-            longPressed = false;
-            lastPointerType = ev.pointerType || null;
-            pointerId = ev.pointerId;
-            startX = ev.clientX;
-            startY = ev.clientY;
-            // capture pointer to continue receiving move/up even if finger leaves element
-            try { d.setPointerCapture(pointerId); } catch (e) {}
-            // start long-press timer to suppress long-press taps and context menu
-            try {
-                clearLongPress();
-                longPressTimer = setTimeout(() => { longPressed = true; tapCancelled = true; }, LONG_PRESS_MS);
-            } catch (e) {}
-        }, { passive: true });
+        if (window.PointerEvent) {
+            // Pointer events supported: prefer these and do NOT register touch listeners
+            d.addEventListener('pointerdown', (ev) => {
+                if (ev.isPrimary === false) return;
+                tapCancelled = false;
+                longPressed = false;
+                lastPointerType = ev.pointerType || null;
+                pointerId = ev.pointerId;
+                startX = ev.clientX;
+                startY = ev.clientY;
+                try { d.setPointerCapture(pointerId); } catch (e) {}
+                try { clearLongPress(); longPressTimer = setTimeout(() => { longPressed = true; tapCancelled = true; }, LONG_PRESS_MS); } catch (e) {}
+            }, { passive: true });
 
-        d.addEventListener('pointermove', (ev) => {
-            if (ev.pointerId !== pointerId) return;
-            const dx = Math.abs(ev.clientX - startX);
-            const dy = Math.abs(ev.clientY - startY);
-            if (dx > MOVE_THRESHOLD || dy > MOVE_THRESHOLD) {
-                tapCancelled = true;
-                clearLongPress();
-            }
-        }, { passive: true });
+            d.addEventListener('pointermove', (ev) => {
+                if (ev.pointerId !== pointerId) return;
+                const dx = Math.abs(ev.clientX - startX);
+                const dy = Math.abs(ev.clientY - startY);
+                if (dx > MOVE_THRESHOLD || dy > MOVE_THRESHOLD) {
+                    tapCancelled = true;
+                    clearLongPress();
+                }
+            }, { passive: true });
 
-        d.addEventListener('pointerup', (ev) => {
-            if (ev.pointerId !== pointerId) return;
-            try { d.releasePointerCapture(pointerId); } catch (e) {}
-            pointerId = null;
-            clearLongPress();
-            if (!tapCancelled && !longPressed) {
-                // Treat as tap
-                // debounce per element to avoid duplicate opens across events
-                try {
-                    const now = Date.now();
-                    if (!d._lastOpenTime || (now - d._lastOpenTime) > 400) {
-                        d._lastOpenTime = now;
-                        openDetails();
-                    }
-                } catch (e) { openDetails(); }
-            }
-        }, { passive: true });
-
-        d.addEventListener('pointercancel', (ev) => {
-            if (ev.pointerId === pointerId) {
+            d.addEventListener('pointerup', (ev) => {
+                if (ev.pointerId !== pointerId) return;
                 try { d.releasePointerCapture(pointerId); } catch (e) {}
                 pointerId = null;
-            }
-            tapCancelled = true;
-            clearLongPress();
-        });
+                clearLongPress();
+                if (!tapCancelled && !longPressed) {
+                    try {
+                        const now = Date.now();
+                        if (!d._lastOpenTime || (now - d._lastOpenTime) > 400) {
+                            d._lastOpenTime = now;
+                            openDetails();
+                        }
+                    } catch (e) { openDetails(); }
+                }
+            }, { passive: true });
 
-        // Fallback for older touch-only browsers: use touchstart/touchmove/touchend/touchcancel
-        // NOTE: on modern browsers that support PointerEvent we avoid registering
-        // the touch* handlers to prevent duplicate/inconsistent events between
-        // pointer and touch listeners which can cause intermittent misses on tap.
-        if (typeof window.PointerEvent === 'undefined') {
+            d.addEventListener('pointercancel', (ev) => {
+                if (ev.pointerId === pointerId) {
+                    try { d.releasePointerCapture(pointerId); } catch (e) {}
+                    pointerId = null;
+                }
+                tapCancelled = true;
+                clearLongPress();
+            });
+        } else {
+            // Fallback for older touch-only browsers
             d.addEventListener('touchstart', (ev) => {
                 const t = ev.touches && ev.touches[0];
                 if (!t) return;
                 tapCancelled = false;
                 longPressed = false;
+                lastPointerType = 'touch';
                 startX = t.clientX;
                 startY = t.clientY;
-                // start long-press timer
                 clearLongPress();
                 longPressTimer = setTimeout(() => { longPressed = true; tapCancelled = true; }, LONG_PRESS_MS);
             }, { passive: true });
@@ -290,7 +282,7 @@
                         }
                     } catch (e) { openDetails(); }
                 }
-            }, { passive: true });
+            });
 
             d.addEventListener('touchcancel', (ev) => { tapCancelled = true; clearLongPress(); });
         }
