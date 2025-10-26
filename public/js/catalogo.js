@@ -398,13 +398,20 @@
 
         const data = await loadData();
 
-        // Global fallback: si alguna promesa sin catch provoca un rejection, intentar limpiar modales abiertos
+        // Global fallback: registrar promesas rechazadas para debugging.
+        // NO cerrar automáticamente los modales aquí — hacerlo provoca que
+        // cualquier rejection no relacionado cierre el modal de detalles
+        // inmediatamente después de abrirse. Si necesitas cerrar el modal en
+        // casos concretos, implementa comprobaciones específicas sobre ev.reason.
         if (!window.__catalogo_unhandledrejection_installed) {
             window.addEventListener('unhandledrejection', (ev) => {
-                console.error('Unhandled rejection capturado en catálogo:', ev.reason);
-                try { if (window.detailsModal && typeof window.detailsModal.close === 'function') window.detailsModal.close(); } catch(e){}
-                try { if (window.shareModal && typeof window.shareModal.close === 'function') window.shareModal.close(); } catch(e){}
-                document.body.style.overflow = 'auto';
+                try {
+                    console.error('Unhandled rejection capturado en catálogo:', ev.reason, ev);
+                } catch (e) {
+                    try { console.error('Unhandled rejection (log fallo):', e); } catch (_) {}
+                }
+                // Asegurar que la página no quede con scroll bloqueado
+                try { document.body.style.overflow = 'auto'; } catch (e) {}
             });
             window.__catalogo_unhandledrejection_installed = true;
         }
