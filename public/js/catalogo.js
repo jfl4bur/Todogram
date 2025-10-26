@@ -665,6 +665,63 @@
     window.addEventListener('scroll', onCatalogScrollWindow, { passive:true });
     if(grid) grid.addEventListener('scroll', ()=> onCatalogScrollWindow());
 
+    // Fallback detector for mobile small screens where an overlay may intercept taps
+    // Behavior: on touchstart record position/time; on touchend, if the topmost element
+    // at the touch point is NOT a .catalogo-item but the grid is beneath, temporarily
+    // disable pointer-events on the top element to probe what's underneath. If we find
+    // a .catalogo-item underneath, open its details. This runs only on small viewports
+    // (<=480px) to avoid interfering with desktop behavior.
+    (function installMobileTapFallback(){
+        const MAX_WIDTH = 480;
+        if(typeof window === 'undefined' || !grid) return;
+        if(window.innerWidth > MAX_WIDTH) return; // only small screens
+        let touchStartX = 0, touchStartY = 0, touchStartTime = 0;
+        const MOVE_LIMIT = 12;
+        document.addEventListener('touchstart', (ev)=>{
+            const t = ev.touches && ev.touches[0]; if(!t) return;
+            touchStartX = t.clientX; touchStartY = t.clientY; touchStartTime = Date.now();
+        }, { passive: true });
+
+        document.addEventListener('touchend', (ev)=>{
+            try{
+                const t = ev.changedTouches && ev.changedTouches[0]; if(!t) return;
+                const dx = Math.abs(t.clientX - touchStartX); const dy = Math.abs(t.clientY - touchStartY);
+                if(dx > MOVE_LIMIT || dy > MOVE_LIMIT) return; // treated as scroll/gesture
+                if((Date.now() - touchStartTime) > 800) return; // long press ignored
+
+                let topEl = document.elementFromPoint(t.clientX, t.clientY);
+                if(!topEl) return;
+                // If the topEl is an item or inside one, nothing to do
+                if(topEl.closest && topEl.closest('.catalogo-item')) return;
+
+                // If the touch is inside the grid area, attempt to probe underneath the topmost element
+                const gridEl = grid;
+                if(!gridEl.contains(topEl) && !topEl.closest('.catalogo-page') && !topEl.closest('#catalogo-grid-page')) return;
+
+                // Temporarily disable pointer-events on the topEl to get the element behind it
+                const prevPointer = topEl.style && topEl.style.pointerEvents;
+                try{
+                    topEl.style.pointerEvents = 'none';
+                    const behind = document.elementFromPoint(t.clientX, t.clientY);
+                    if(behind && behind.closest){
+                        const itemEl = behind.closest('.catalogo-item');
+                        if(itemEl && itemEl.dataset && itemEl.dataset.itemId){
+                            // Debounce duplicate opens
+                            const id = itemEl.dataset.itemId;
+                            const now = Date.now();
+                            if(!document._catalogo_lastOpenTime || (now - document._catalogo_lastOpenTime) > 500){
+                                document._catalogo_lastOpenTime = now;
+                                const itemObj = findExistingItemById(id) || state.allItems.find(x=>String(x.id)===String(id));
+                                try{ if(itemObj && window.detailsModal && typeof window.detailsModal.show==='function'){ window.detailsModal.show(itemObj, itemEl); } }catch(e){ console.error('catalogo fallback open error', e); }
+                            }
+                        }
+                    }
+                }catch(e){ /* ignore probe errors */ }
+                finally{ try{ if(topEl && topEl.style) topEl.style.pointerEvents = prevPointer || ''; }catch(e){} }
+            }catch(e){ /* ignore */ }
+        }, { passive:true });
+    })();
+
         // resize
         let resizeTimer=null; function onCatalogResize(){ if(resizeTimer) clearTimeout(resizeTimer); resizeTimer = setTimeout(()=>{ state.itemsPerRow = computeItemsPerRow(grid); state.initialBatchSize = Math.max(1, state.itemsPerRow * state.initialRows); state.subsequentBatchSize = Math.max(1, state.itemsPerRow * state.subsequentRows); if(state.renderedCount < Math.min(state.filteredItems.length, state.initialBatchSize)) appendNextBatch(grid); }, 120); }
         window.addEventListener('resize', onCatalogResize);
