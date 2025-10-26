@@ -1260,6 +1260,17 @@ button:focus {
     touch-action: manipulation;
 }
 
+/* En el grid de catálogo, el poster debe participar en el flujo (no absolute)
+   para que cada tarjeta tenga su propia altura y no solape filas posteriores.
+   Esto evita que elementos absolutos cubran tarjetas de filas inferiores y bloqueen
+   los eventos táctiles. No aplica a carruseles que usan otras clases. */
+#catalogo-grid-page .catalogo-item .poster-container,
+.catalogo-grid .catalogo-item .poster-container {
+    position: relative !important;
+    width: 100%;
+    height: auto !important;
+}
+
 /* Hover zoom: scale item and bring above siblings but keep below modal */
 .catalogo-item.hover-zoom,
 .custom-carousel-item.hover-zoom {
