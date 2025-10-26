@@ -72,6 +72,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // ocultar skeleton y mostrar wrapper
         if (skeleton) skeleton.style.display = 'none';
         wrapper.style.display = 'flex';
+
+        // Asegurar que el scroll inicia en el primer item (primer elemento: Todo el catálogo)
+        // uso setTimeout corto para esperar a que el browser aplique layout
+        setTimeout(() => {
+            try { wrapper.scrollTo({ left: 0, behavior: 'auto' }); updateProgressBar(); } catch (e) { wrapper.scrollLeft = 0; }
+        }, 50);
     }
 
     function calculateLayout() {
@@ -107,6 +113,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 el.style.flex = `0 0 ${itemWidth}px`;
                 el.style.width = itemWidth + 'px';
             });
+            // al recacular en small mobile, asegurar scrollLeft=0 para ver el primer item centrado a la izquierda
+            setTimeout(() => { try { wrapper.scrollTo({ left: 0, behavior: 'auto' }); updateProgressBar(); } catch (e) { wrapper.scrollLeft = 0; } }, 20);
         }
 
         // actualizar barra de progreso inicial
