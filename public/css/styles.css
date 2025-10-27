@@ -484,9 +484,28 @@ button:focus {
     overflow: visible; /* let items wrap instead of scrolling */
 }
 
-#catalogo-skeleton .skeleton-item {
-    /* allow variable width depending on container columns */
+/* Skeleton items inside the catalog page should match real item sizing so
+   the loading placeholders mirror the final layout. Use the same CSS vars
+   the real items use so catalogo-resize.js controls both. */
+#catalogo-skeleton .skeleton-item,
+#catalogo-skeleton .skeleton-item-catalogo,
+.skeleton-item-catalogo {
+    flex: 0 0 auto;
     width: var(--item-width);
+    height: var(--item-height);
+    background-color: var(--secondary-color);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Keep a compact skeleton style (no rounded corners by default) */
+.skeleton-item-catalogo .skeleton-spinner {
+    width: 28px;
+    height: 28px;
+    border-width: 3px;
 }
 
 @keyframes spin {
