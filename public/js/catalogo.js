@@ -194,6 +194,9 @@
         d.addEventListener('click', (e) => {
             // If the event has a button property and it's not the primary (0), ignore
             try { if (typeof e.button !== 'undefined' && e.button !== 0) return; } catch (err) {}
+            // Ignore clicks that were produced by a long-press or where the tap was cancelled
+            try { if (typeof tapCancelled !== 'undefined' && tapCancelled) return; } catch(e){}
+            try { if (typeof longPressed !== 'undefined' && longPressed) return; } catch(e){}
             if(window.detailsModal && typeof window.detailsModal.show==='function'){
                 openDetails();
             }
