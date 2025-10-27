@@ -83,7 +83,7 @@
     gap: 4px;
 }
 .skeleton-item.skeleton-16x9 {
-    width: 300px;
+    width: var(--item-width);
     /* height removed to allow poster + two lines to size naturally */
     background: transparent;
     position: relative;
@@ -672,46 +672,21 @@ button:focus {
     display: block;
 }
 
-/* Loader específico para el carrusel de Episodios Series */
-.loader_episodios {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 4;
-    aspect-ratio: 16 / 9 !important;
-    /* permitir que toques/gestos pasen al elemento debajo (no bloquear interacción) */
-    pointer-events: none;
-}
-
-.loader_episodios i {
-    font-size: 2rem;
-    color: var(--text-color);
-    animation: spin 1s linear infinite;
-}
-
-/* Loader específico para el carrusel de Episodios Animes (mismo comportamiento que loader_episodios) */
+/* Loader específico para el carrusel de Episodios Series y Animes - usar inset para cubrir solo el área del poster */
+.loader_episodios,
 .loader_episodios_animes {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    inset: 0; /* top:0; left:0; right:0; bottom:0; */
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 4;
-    aspect-ratio: 16 / 9 !important;
     /* permitir que toques/gestos pasen al elemento debajo (no bloquear interacción) */
     pointer-events: none;
 }
 
+.loader_episodios i,
 .loader_episodios_animes i {
     font-size: 2rem;
     color: var(--text-color);
@@ -1330,9 +1305,9 @@ button:focus {
 .details-modal-overlay { z-index: 11001 !important; }
 
 .episodios-series-item {
-    width: 300px;
-    min-width: 300px;
-    max-width: 300px;
+    width: var(--item-width);
+    min-width: var(--item-width);
+    max-width: var(--item-width);
     display: flex;
     flex-direction: column;
     background: transparent;
@@ -1398,7 +1373,7 @@ button:focus {
     gap: 4px;
 }
 .skeleton-item.skeleton-16x9 {
-    width: 300px;
+    width: var(--item-width);
     /* height removed to allow poster + two lines to size naturally */
     background: transparent;
     position: relative;
@@ -1862,9 +1837,9 @@ button:focus {
 /* Specific overrides for Episodios carousel items: keep poster 16:9 and labels below it */
 .episodios-series-item.custom-carousel-item {
     box-shadow: none;
-    width: 300px; /* explicit width for episodios */
-    min-width: 300px;
-    max-width: 300px;
+    width: var(--item-width); /* explicit width for episodios */
+    min-width: var(--item-width);
+    max-width: var(--item-width);
     height: auto !important; /* allow height to grow to fit labels */
     display: flex;
     flex-direction: column;
@@ -1911,8 +1886,8 @@ button:focus {
 
 /* Make skeleton items match episodios card sizes */
 .skeleton-item.skeleton-16x9 {
-    width: 300px;
-    height: 210px; /* poster (169) + labels space */
+    width: var(--item-width);
+    height: auto; /* poster (16:9) + labels space handled by inner elements */
 }
 
 /* Ensure real poster image fills the poster container and does not stretch the item */
@@ -7590,9 +7565,9 @@ body {
 }
 
 .episodios-series-item {
-    width: 300px;
-    min-width: 300px;
-    max-width: 300px;
+    width: var(--item-width);
+    min-width: var(--item-width);
+    max-width: var(--item-width);
     display: flex;
     flex-direction: column;
     background: transparent;
@@ -7600,4 +7575,20 @@ body {
     position: relative;
     margin: 0;
     padding: 0;
+}
+
+/* Strong overrides placed at the end to prevent legacy duplicated rules from
+   forcing fixed sizes or misplacing loaders. These target poster loaders so
+   they always cover the poster area (inset:0) and do not cover labels. */
+.poster-container .loader_episodios,
+.poster-container .loader_episodios_animes,
+.poster-container .loader {
+    position: absolute !important;
+    inset: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background-color: rgba(0,0,0,0.45) !important;
+    z-index: 4 !important;
+    pointer-events: none !important;
 }
