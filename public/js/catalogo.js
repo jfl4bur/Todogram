@@ -194,8 +194,6 @@
         d.addEventListener('click', (e) => {
             // If the event has a button property and it's not the primary (0), ignore
             try { if (typeof e.button !== 'undefined' && e.button !== 0) return; } catch (err) {}
-            // If a long-press just occurred, suppress this click (long-press should not open details)
-            try { if (longPressed) { /* consume and ignore click */ longPressed = false; return; } } catch (err) {}
             if(window.detailsModal && typeof window.detailsModal.show==='function'){
                 openDetails();
             }
@@ -213,9 +211,8 @@
         let lastPointerType = null;
 
         function clearLongPress() {
-            // Only clear the pending timer. Keep `longPressed` value so we can
-            // suppress the subsequent click event when a long-press happened.
             if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+            longPressed = false;
         }
 
         d.addEventListener('pointerdown', (ev) => {
@@ -249,11 +246,9 @@
             if (ev.pointerId !== pointerId) return;
             try { d.releasePointerCapture(pointerId); } catch (e) {}
             pointerId = null;
-            // Capture whether a long-press was active before clearing timers
-            const wasLong = longPressed;
-            clearLongPress();
-            // If it was a long-press, suppress opening details. If not, treat as tap.
-            if (!tapCancelled && !wasLong) {
+            // Check whether this was a long-press BEFORE clearing the long-press state.
+            const wasLongPressed = !!longPressed;
+            if (!tapCancelled && !wasLongPressed) {
                 // Treat as tap
                 // debounce per element to avoid duplicate opens across events
                 try {
@@ -264,8 +259,8 @@
                     }
                 } catch (e) { openDetails(); }
             }
-            // Reset longPressed shortly after to allow future interactions
-            try { setTimeout(() => { longPressed = false; }, 50); } catch(e) {}
+            // Now clear long-press tracking state
+            clearLongPress();
         }, { passive: true });
 
         d.addEventListener('pointercancel', (ev) => {
@@ -275,7 +270,6 @@
             }
             tapCancelled = true;
             clearLongPress();
-            try { setTimeout(() => { longPressed = false; }, 50); } catch(e) {}
         });
 
         // Fallback for older touch-only browsers: use touchstart/touchmove/touchend/touchcancel
@@ -303,9 +297,9 @@
         }, { passive: true });
 
         d.addEventListener('touchend', (ev) => {
-            const wasLong = longPressed;
-            clearLongPress();
-            if (!tapCancelled && !wasLong) {
+            // Check whether this was a long-press BEFORE clearing the long-press state.
+            const wasLongPressedTouch = !!longPressed;
+            if (!tapCancelled && !wasLongPressedTouch) {
                 try {
                     const now = Date.now();
                     if (!d._lastOpenTime || (now - d._lastOpenTime) > 400) {
@@ -314,10 +308,11 @@
                     }
                 } catch (e) { openDetails(); }
             }
-            try { setTimeout(() => { longPressed = false; }, 50); } catch(e) {}
+            // Finally clear long-press state
+            clearLongPress();
         }, { passive: true });
 
-    d.addEventListener('touchcancel', (ev) => { tapCancelled = true; clearLongPress(); try { setTimeout(() => { longPressed = false; }, 50); } catch(e) {} });
+        d.addEventListener('touchcancel', (ev) => { tapCancelled = true; clearLongPress(); });
 
         // Prevent default contextmenu on touch long-press environments to avoid blocking UI
         d.addEventListener('contextmenu', (ev) => {
