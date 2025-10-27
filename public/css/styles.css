@@ -164,9 +164,6 @@
     /* Catalog grid gaps used by JS to compute items per row and pagination */
     --catalogo-gap: 4px;
     --catalogo-row-gap: 48px;
-    /* Límites para resize automático del catálogo (puedes ajustarlos) */
-    --catalogo-min-item-width: 120px;
-    --catalogo-max-item-width: 380px; /* restaurado a valor amplio para tamaños de escritorio */
 }
 
 /* Definiciones de fuentes */
@@ -1255,7 +1252,7 @@ button:focus {
 .catalogo-body{flex:1;overflow:auto;padding:8px 32px 48px 32px}
 .catalogo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--item-width),1fr));column-gap:4px;row-gap:75px}
 .catalogo-item{background:transparent;padding:4px;border-radius:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;position:relative}
-.catalogo-item img{width:100%;height:auto;border-radius:0;object-fit: fill;background:#232323}
+.catalogo-item img{width:100%;height:auto;border-radius:0;object-fit:cover;background:#232323}
 .catalogo-item .title{margin-top:8px;font-size:14px;text-align:center;color:var(--text-color)}
 
 /* Improve touch responsiveness on mobile: eliminate delay/gesture ambiguity */
@@ -1332,116 +1329,6 @@ button:focus {
     margin: 0;
     padding: 0;
 }
-
-/* ===== TEMPORARY OVERRIDES: ensure catalog items and skeletons follow the computed CSS variables
-   These rules are intentionally specific and limited to the catalog page to avoid breaking other components.
-   They are reversible and meant as a targeted hotfix while the stylesheet is cleaned. */
-#catalogo-page-root .catalogo-item,
-#catalogo-grid-page .catalogo-item,
-#catalogo-skeleton .skeleton-item,
-.catalogo-item,
-.skeleton-item,
-.custom-carousel-item {
-    width: var(--item-width) !important;
-    height: var(--item-height) !important;
-}
-
-/* Ensure skeleton poster area respects the var-driven size */
-#catalogo-page-root .skeleton-item .skeleton-poster,
-.skeleton-item .skeleton-poster {
-    width: 100% !important;
-    aspect-ratio: auto !important;
-}
-
-/* LIMIT: restore modal sizes for desktop in case they were affected */
-.details-modal-content,
-.modal-content,
-.video-modal-content,
-.video-modal-overlay .video-modal-content,
-.hover-modal,
-.details-modal-body {
-    width: auto !important;
-    max-width: 1100px !important;
-}
-
-/* Ensure catalog loaders are centered but do not force display blocking */
-.catalogo-item .loader,
-.catalogo-item .loader_episodios {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-}
-
-/* End temporary overrides */
-
-/* ===== Catalog / carousel override to follow runtime variables =====
-   This block is placed late in the file so it can override older
-   fixed-width rules (many legacy 300px rules). It forces catalog
-   items, skeletons and poster containers to use the computed
-   --item-width / --item-height set by catalogo-resize.js.
-   Using !important here is intentional to beat scattered overrides
-   across many @media blocks without refactoring the whole stylesheet.
-*/
-.catalogo-item,
-.custom-carousel-item,
-.episodios-series-item,
-.episodios-series-item.custom-carousel-item,
-.skeleton-item,
-.skeleton-item-catalogo {
-    width: var(--item-width) !important;
-    min-width: var(--item-width) !important;
-    max-width: var(--item-width) !important;
-    height: var(--item-height) !important;
-    box-sizing: border-box;
-}
-
-/* Ensure poster containers and images fill the item area */
-.catalogo-item .poster-container,
-.custom-carousel-item .poster-container,
-.episodios-series-item .poster-container,
-.skeleton-item .poster-container {
-    width: 100% !important;
-    height: 100% !important;
-    position: relative !important;
-    overflow: hidden !important;
-}
-
-.catalogo-item img,
-.custom-carousel-item img,
-.episodios-series-item img,
-.skeleton-item img {
-    width: 100%;
-    height: 100%;
-    object-fit: fill;
-    display: block !important;
-}
-
-/* Loader/spinner should always center and fill the poster area
-   NOTE: do NOT force display with !important here because JS toggles
-   inline `display` to hide the loader when the image loads. Keeping
-   display without !important lets scripts set `style.display='none'`.
-*/
-.catalogo-item .loader_episodios,
-.catalogo-item .loader,
-.skeleton-item .loader_episodios,
-.skeleton-item .loader,
-.custom-carousel-item .loader_episodios,
-.custom-carousel-item .loader {
-    position: absolute !important;
-    inset: 0 !important;
-    display: flex; /* allow JS to override via inline style */
-    align-items: center !important;
-    justify-content: center !important;
-    background: transparent !important;
-    z-index: 5 !important;
-}
-
-/* Keep carousel labels and overlays relative to the item width */
-.carousel-labels,
-.carousel-overlay {
-    max-width: var(--item-width) !important;
-}
-
 .episodios-series-item .poster-container {
     width: 100%;
     aspect-ratio: 16/9;
@@ -7049,25 +6936,7 @@ body {
         width: 170px;
         /* height removed so poster aspect-ratio controls height */
     }
-    .catalogo-page-header {
-        display: flex;
-        flex-direction: column;
-        margin: -38px 0 0 0;
-    }
-        .catalogo-tabs {
-        display: flex;
-        gap: 2px;
-        margin: 15px;
-        flex-direction: row;
-        flex-wrap: nowrap;
-    }
 
-    .catalogo-controls {
-        width: 100%;
-        display: flex;
-        justify-content: flex-start;
-        margin-left: 10px;
-    }
 
     .episodios-series-item .poster-container {
         aspect-ratio: 16/9;

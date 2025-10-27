@@ -122,45 +122,27 @@
                 <img class="catalogo-card-image" loading="lazy" src="${it.posterUrl||'https://via.placeholder.com/194x271'}" alt="${it.title}">
                 <div class="loader"><i class="fas fa-spinner"></i></div>
             </div>
+            <div class="catalogo-item-title" style="display:none;">${it.title}</div>
         `;
 
         // Wire image load to hide loader and reveal title/image
         try {
             const imgEl = d.querySelector('.catalogo-card-image');
             const loaderEl = d.querySelector('.loader');
+            const titleEl = d.querySelector('.catalogo-item-title');
             if (imgEl) {
-                // start hidden to allow fade-in
-                try { imgEl.style.opacity = '0'; } catch(e){}
-
-                const hideLoader = () => { try { if (loaderEl) loaderEl.style.display = 'none'; } catch(e){} };
-                const showImage = () => { try { imgEl.style.opacity = '1'; } catch(e){} };
-
-                const onImageLoaded = function() {
-                    showImage();
-                    hideLoader();
+                imgEl.style.opacity = '0';
+                imgEl.onload = function() {
+                    try { imgEl.style.opacity = '1'; } catch(e){}
+                    try { if (loaderEl) loaderEl.style.display = 'none'; } catch(e){}
+                    try { if (titleEl) titleEl.style.display = ''; } catch(e){}
                 };
-
-                const onImageError = function() {
-                    // hide loader on error
-                    hideLoader();
+                imgEl.onerror = function() {
+                    // hide loader on error and still show title
+                    try { if (loaderEl) loaderEl.style.display = 'none'; } catch(e){}
+                    try { if (titleEl) titleEl.style.display = ''; } catch(e){}
+                    imgEl.src = imgEl.src; // no-op but keeps behavior
                 };
-
-                imgEl.addEventListener('load', onImageLoaded);
-                imgEl.addEventListener('error', onImageError);
-
-                // If the image was already cached/loaded before handlers were attached,
-                // call the load handler immediately when appropriate.
-                try {
-                    if (imgEl.complete && imgEl.naturalWidth && imgEl.naturalWidth > 0) {
-                        // already loaded
-                        onImageLoaded();
-                    }
-                } catch(e){}
-
-                // Failsafe: if load events never fire (rare), hide loader after 5s
-                try {
-                    setTimeout(() => { try { if (loaderEl && loaderEl.style && loaderEl.style.display !== 'none') loaderEl.style.display = 'none'; } catch(e){} }, 5000);
-                } catch(e){}
             }
         } catch (e) { console.warn('catalogo: error wiring image loader', e); }
 
@@ -199,21 +181,37 @@
             }
         });
 
-        // Tap vs scroll detection using pointer events (no long-press handling)
-        // We record pointer/touch coords and cancel the tap if move threshold exceeded.
+        // Tap vs scroll detection using pointer events with long-press suppression
+        // We record pointerdown coords, cancel the tap if move threshold exceeded or long-press detected.
         let tapCancelled = false;
         let pointerId = null;
         let startX = 0, startY = 0;
         const MOVE_THRESHOLD = 8; // pixels
+        let longPressTimer = null;
+        let longPressed = false;
+        const LONG_PRESS_MS = 500; // long-press threshold
+        let lastPointerType = null;
+
+        function clearLongPress() {
+            if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
+            longPressed = false;
+        }
 
         d.addEventListener('pointerdown', (ev) => {
             if (ev.isPrimary === false) return;
             tapCancelled = false;
+            longPressed = false;
+            lastPointerType = ev.pointerType || null;
             pointerId = ev.pointerId;
             startX = ev.clientX;
             startY = ev.clientY;
             // capture pointer to continue receiving move/up even if finger leaves element
             try { d.setPointerCapture(pointerId); } catch (e) {}
+            // start long-press timer to suppress long-press taps and context menu
+            try {
+                clearLongPress();
+                longPressTimer = setTimeout(() => { longPressed = true; tapCancelled = true; }, LONG_PRESS_MS);
+            } catch (e) {}
         }, { passive: true });
 
         d.addEventListener('pointermove', (ev) => {
@@ -222,6 +220,7 @@
             const dy = Math.abs(ev.clientY - startY);
             if (dx > MOVE_THRESHOLD || dy > MOVE_THRESHOLD) {
                 tapCancelled = true;
+                clearLongPress();
             }
         }, { passive: true });
 
@@ -229,8 +228,10 @@
             if (ev.pointerId !== pointerId) return;
             try { d.releasePointerCapture(pointerId); } catch (e) {}
             pointerId = null;
-            if (!tapCancelled) {
+            clearLongPress();
+            if (!tapCancelled && !longPressed) {
                 // Treat as tap
+                // debounce per element to avoid duplicate opens across events
                 try {
                     const now = Date.now();
                     if (!d._lastOpenTime || (now - d._lastOpenTime) > 400) {
@@ -247,6 +248,7 @@
                 pointerId = null;
             }
             tapCancelled = true;
+            clearLongPress();
         });
 
         // Fallback for older touch-only browsers: use touchstart/touchmove/touchend/touchcancel
@@ -254,8 +256,12 @@
             const t = ev.touches && ev.touches[0];
             if (!t) return;
             tapCancelled = false;
+            longPressed = false;
             startX = t.clientX;
             startY = t.clientY;
+            // start long-press timer
+            clearLongPress();
+            longPressTimer = setTimeout(() => { longPressed = true; tapCancelled = true; }, LONG_PRESS_MS);
         }, { passive: true });
 
         d.addEventListener('touchmove', (ev) => {
@@ -265,11 +271,13 @@
             const dy = Math.abs(t.clientY - startY);
             if (dx > MOVE_THRESHOLD || dy > MOVE_THRESHOLD) {
                 tapCancelled = true;
+                clearLongPress();
             }
         }, { passive: true });
 
         d.addEventListener('touchend', (ev) => {
-            if (!tapCancelled) {
+            clearLongPress();
+            if (!tapCancelled && !longPressed) {
                 try {
                     const now = Date.now();
                     if (!d._lastOpenTime || (now - d._lastOpenTime) > 400) {
@@ -280,7 +288,17 @@
             }
         }, { passive: true });
 
-        d.addEventListener('touchcancel', (ev) => { tapCancelled = true; });
+        d.addEventListener('touchcancel', (ev) => { tapCancelled = true; clearLongPress(); });
+
+        // Prevent default contextmenu on touch long-press environments to avoid blocking UI
+        d.addEventListener('contextmenu', (ev) => {
+            try {
+                // if lastPointerType indicates touch, or device likely touch-only, prevent contextmenu
+                if (lastPointerType === 'touch' || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0 && window.matchMedia && window.matchMedia('(hover: none)').matches)) {
+                    ev.preventDefault();
+                }
+            } catch (e) {}
+        });
 
         return d;
     }
@@ -818,16 +836,7 @@
         // Delegated hover handlers: funcionan para items ya renderizados y para elementos que se agreguen posteriormente
         if (grid && !grid.__hover_delegation_installed) {
             // Show hover with a delay (match carousels behaviour)
-                const HOVER_SHOW_DELAY = 900; // ms - same delay used in carousels
-                // Protect against touch / long-press triggering hover modal: record recent touch/pointer events
-                // and ignore subsequent mouseover events that are synthesized after touches.
-                let __lastTouchTime = 0;
-                try {
-                    grid.addEventListener('pointerdown', (ev) => {
-                        try { if (ev.pointerType && ev.pointerType !== 'mouse') __lastTouchTime = Date.now(); } catch(e){}
-                    }, { passive: true });
-                } catch(e) {}
-                try { grid.addEventListener('touchstart', () => { __lastTouchTime = Date.now(); }, { passive: true }); } catch(e) {}
+            const HOVER_SHOW_DELAY = 900; // ms - same delay used in carousels
             grid.addEventListener('mouseover', (e) => {
                 const itemEl = e.target.closest('.catalogo-item');
                 if (!itemEl || !grid.contains(itemEl)) return;
@@ -836,9 +845,6 @@
                 const item = findExistingItemById(itemId) || state.allItems.find(x => String(x.id) === String(itemId));
                 // clear any previous timer on this element
                 try { if (itemEl._hoverTimer) { clearTimeout(itemEl._hoverTimer); itemEl._hoverTimer = null; } } catch(e){}
-                // If there was a recent touch/pointer event, ignore the synthesized mouseover to avoid
-                // opening the hover modal from a long-press on touch devices.
-                if (Date.now() - __lastTouchTime < 800) return;
                 if (item && window.hoverModal && typeof window.hoverModal.show === 'function') {
                     // schedule showing the hover modal after a short delay to match carousel behaviour
                     itemEl._hoverTimer = setTimeout(() => {

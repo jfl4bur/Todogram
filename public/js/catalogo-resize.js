@@ -12,21 +12,10 @@
 */
 (function(){
     const ROOT = document.documentElement;
-    // Buscar tanto el grid como los skeletons del catálogo (diferentes páginas usan ids distintos)
-    // Prefer skeleton containers first (when present) so the computed sizes
-    // match the skeleton preview size that the user expects during load.
-    const CONTAINER_SELECTORS = [
-        '#catalogo-skeleton-page',  // skeleton usado durante carga en la página de catálogo
-        '#catalogo-skeleton',       // nombre alternativo usado en otros lugares
-        '#catalogo-grid-page',      // grid en la página de catálogo
-        '#catalogo-grid'            // fallback alternativo
-    ];
-    const DEFAULT_MIN_ITEM = 180; // px — aumentado para evitar tamaños demasiado pequeños en desktop
+    const GRID_SELECTOR = '#catalogo-grid-page';
+    const DEFAULT_MIN_ITEM = 140; // px
     const DEFAULT_MAX_ITEM = 380; // px
     const DEBOUNCE_MS = 80;
-    // DEBUG mode: set true temporarily to print diagnostic info in the browser console
-    // Disabled now to avoid noisy logs for the user
-    const DEBUG = false;
 
     function getNumericCssVar(name, fallback){
         try{
@@ -49,10 +38,10 @@
 
     function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 
-    function computeAndApply(container){
-        if(!container) return;
-        const containerWidth = container.clientWidth || document.documentElement.clientWidth;
-        const gap = getGridGap(container);
+    function computeAndApply(grid){
+        if(!grid) return;
+        const containerWidth = grid.clientWidth || document.documentElement.clientWidth;
+        const gap = getGridGap(grid);
 
         // Determine current aspect ratio from CSS vars (height / width)
         const curW = getNumericCssVar('--item-width', 194);
@@ -63,38 +52,7 @@
         const minItem = getNumericCssVar('--catalogo-min-item-width', DEFAULT_MIN_ITEM);
         const maxItem = getNumericCssVar('--catalogo-max-item-width', DEFAULT_MAX_ITEM);
 
-        // --- NEW: If there's a visible skeleton item, use its measured box as the source of truth
-        // This ensures final items exactly match the skeleton size (fixes desktop mismatch).
-        try{
-            // selectors observed in the codebase for skeletons
-            const skeletonSelectors = [
-                '#catalogo-skeleton .skeleton-item',
-                '.skeleton-item-catalogo',
-                '.skeleton-item',
-                '#catalogo-skeleton .skeleton-item-catalogo'
-            ];
-            let skeletonEl = null;
-            for(const sel of skeletonSelectors){ const found = document.querySelector(sel); if(found){ skeletonEl = found; break; } }
-            if(skeletonEl){
-                const rect = skeletonEl.getBoundingClientRect();
-                // only accept measured sizes that look reasonable and not full-width artifacts
-                if(rect.width > 10 && rect.height > 10 && rect.width < containerWidth + 4){
-                    const measuredWidth = Math.round(rect.width);
-                    const measuredHeight = Math.round(rect.height);
-                    // Apply measured skeleton size directly (do not force it down to minItem)
-                    ROOT.style.setProperty('--item-width', measuredWidth + 'px');
-                    ROOT.style.setProperty('--item-height', measuredHeight + 'px');
-                    // approximate columns (informational)
-                    const approxCols = Math.max(1, Math.round((containerWidth + gap) / (measuredWidth + gap)));
-                    ROOT.style.setProperty('--catalogo-computed-cols', String(approxCols));
-                    if(DEBUG) console.debug('catalogo-resize: applied skeleton measure', {measuredWidth, measuredHeight, approxCols, containerWidth, gap});
-                    return; // done — skeleton wins
-                }
-            }
-        }catch(e){ /* non-fatal — fallback to computed algorithm below */ }
-
-    if(DEBUG) console.debug('catalogo-resize: fallback compute (no usable skeleton)', {containerWidth, gap, minItem, maxItem});
-    // conservative columns calculation (fallback path)
+        // conservative columns calculation
         let cols = Math.max(1, Math.floor((containerWidth + gap) / (minItem + gap)));
 
         // recompute item width to perfectly fill the container (accounting gaps)
@@ -115,42 +73,29 @@
             ROOT.style.setProperty('--item-height', itemHeight + 'px');
             // expose computed columns for debugging if needed
             ROOT.style.setProperty('--catalogo-computed-cols', String(cols));
-            if(DEBUG) console.debug('catalogo-resize: applied computed', {itemWidth, itemHeight, cols, containerWidth, gap});
         }catch(e){ console.warn('catalogo-resize: no se pudo escribir variables CSS', e); }
     }
 
     function init(){
-        // Buscar el primer contenedor disponible entre las opciones
-        const findContainer = ()=>{
-            for(const s of CONTAINER_SELECTORS){ const el = document.querySelector(s); if(el) return el; } return null;
-        };
-
-        let container = findContainer();
-        if(!container){
-            // Retry a few times while DOM initializes (covers skeleton created later)
+        const grid = document.querySelector(GRID_SELECTOR);
+        if(!grid){
+            // Retry after DOM ready a couple times if not present yet
             let attempts = 0;
             const t = setInterval(()=>{
                 attempts++;
-                container = findContainer();
-                if(container){ clearInterval(t); setup(container); }
-                if(attempts > 60) clearInterval(t);
-            }, 120);
+                const g = document.querySelector(GRID_SELECTOR);
+                if(g){ clearInterval(t); setup(g); }
+                if(attempts > 30) clearInterval(t);
+            }, 150);
             return;
         }
-        setup(container);
+        setup(grid);
     }
 
     function setup(grid){
         let timer = null;
-        // debounced compute that uses the first available container each time
-        const debounced = ()=>{ if(timer) clearTimeout(timer); timer = setTimeout(()=>{
-            // prefer grid but fall back to any selector found
-            let target = null;
-            for(const s of CONTAINER_SELECTORS){ const el = document.querySelector(s); if(el){ target = el; break; } }
-            computeAndApply(target);
-            timer = null; // trigger a resize event so catalogo.js recomputes batches
-            try{ window.dispatchEvent(new Event('resize')); }catch(e){}
-        }, DEBOUNCE_MS); };
+        const debounced = ()=>{ if(timer) clearTimeout(timer); timer = setTimeout(()=>{ computeAndApply(grid); timer = null; // trigger a resize event so catalogo.js recomputes batches
+            try{ window.dispatchEvent(new Event('resize')); }catch(e){} }, DEBOUNCE_MS); };
 
         // Run once immediately
         debounced();
@@ -158,29 +103,14 @@
         if(window.ResizeObserver){
             try{
                 const ro = new ResizeObserver(debounced);
-                // Observe all potential containers so skeleton or grid events trigger the same logic
-                for(const s of CONTAINER_SELECTORS){ const el = document.querySelector(s); if(el) ro.observe(el); }
-                // Also observe documentElement as a fallback
-                ro.observe(document.documentElement);
+                ro.observe(grid);
+                // Also observe the grid's parent in case padding/margins change layout
+                if(grid.parentElement) ro.observe(grid.parentElement);
             }catch(e){ window.addEventListener('resize', debounced); }
         } else {
             // fallback
             window.addEventListener('resize', debounced);
         }
-
-        // MutationObserver: si los skeletons se insertan dinámicamente, detectarlos y recomputar
-        try{
-            const skeletonWatchSelectors = ['.skeleton-item-catalogo', '.skeleton-item', '#catalogo-skeleton .skeleton-item', '#catalogo-skeleton-page .skeleton-item'];
-            const mo = new MutationObserver((mutations)=>{
-                for(const m of mutations){
-                    if(m.addedNodes && m.addedNodes.length){
-                        for(const sel of skeletonWatchSelectors){ if(document.querySelector(sel)){ if(DEBUG) console.debug('catalogo-resize: skeleton added -> debounced'); debounced(); return; } }
-                    }
-                }
-            });
-            mo.observe(document.body, { childList: true, subtree: true });
-            if(DEBUG) console.debug('catalogo-resize: mutation observer attached');
-        }catch(e){ if(DEBUG) console.warn('catalogo-resize: MutationObserver failed', e); }
     }
 
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
