@@ -484,28 +484,9 @@ button:focus {
     overflow: visible; /* let items wrap instead of scrolling */
 }
 
-/* Skeleton items inside the catalog page should match real item sizing so
-   the loading placeholders mirror the final layout. Use the same CSS vars
-   the real items use so catalogo-resize.js controls both. */
-#catalogo-skeleton .skeleton-item,
-#catalogo-skeleton .skeleton-item-catalogo,
-.skeleton-item-catalogo {
-    flex: 0 0 auto;
+#catalogo-skeleton .skeleton-item {
+    /* allow variable width depending on container columns */
     width: var(--item-width);
-    height: var(--item-height);
-    background-color: var(--secondary-color);
-    position: relative;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-/* Keep a compact skeleton style (no rounded corners by default) */
-.skeleton-item-catalogo .skeleton-spinner {
-    width: 28px;
-    height: 28px;
-    border-width: 3px;
 }
 
 @keyframes spin {
@@ -603,27 +584,9 @@ button:focus {
     overflow: hidden;
     position: relative;
     cursor: pointer;
-.catalogo-item {
-    flex: 0 0 auto;
-    width: var(--item-width);
-    height: var(--item-height);
-    border-radius: 0;
-    overflow: hidden;
-    position: relative;
-    cursor: pointer;
-}
-
-/* Skeleton container: behave like the final catalog grid */
-#catalogo-skeleton,
-#catalogo-skeleton-page {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--catalogo-gap, 12px);
-    column-gap: var(--catalogo-gap, 12px);
-    row-gap: var(--catalogo-row-gap, 48px);
-    justify-content: flex-start;
-    align-items: flex-start;
-    overflow: visible;
+    transition: transform 0.1s ease, box-shadow 0.3s ease;
+    background-color: var(--secondary-color);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
 }
 
 .poster-container {
@@ -634,23 +597,11 @@ button:focus {
     height: 100%;
     z-index: 1;
 }
-.skeleton-item-catalogo .skeleton-spinner {
-    width: 28px;
-    height: 28px;
-    border-width: 3px;
-}
 
-/* Fallback spacing for environments where flex gap isn't applied reliably */
-.skeleton-item-catalogo {
-    box-sizing: border-box;
-    margin-right: var(--catalogo-gap, 12px);
-    margin-bottom: var(--catalogo-row-gap, 48px);
-}
-
-/* Prevent extra right margin on wrapped rows (visual nicety) */
-.skeleton-item-catalogo:nth-child(var(--catalogo-computed-cols)) {
-    margin-right: 0;
-}
+/* Specific overrides for Episodios carousel items: keep poster 16:9 and labels below it */
+.episodios-series-item.custom-carousel-item {
+    box-shadow: none;
+    width: 300px; /* explicit width for episodios */
     min-width: 300px;
     max-width: 300px;
     height: auto !important; /* allow height to grow to fit labels */
@@ -3515,15 +3466,6 @@ button:focus {
   background: transparent;
   box-shadow: none;
   position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 2000;
-    min-height: 64px;
-    display: flex;
-    align-items: center;
-    transition: background 0.3s, backdrop-filter 0.3s, transform 0.3s ease;
-    transform: translateY(0);
 
 /* Search box in header */
 .header-search{display:flex;align-items:center;margin-left: 0px;margin-right: 10px;position:relative; /* responsive: allow header-search to grow but reserve space for logo and burger *//* flex: 1 1 auto; */width:auto;max-width: calc(100% - 120px);box-sizing:border-box;}
@@ -3531,7 +3473,7 @@ button:focus {
 /* Estado vacío: estilo inspirado en imagen 1 */
 .header-search input[type="search"]{
     width:100%; height:44px; padding:10px 44px 10px 44px; border-radius:999px; border:1px solid rgba(255,255,255,0.12); background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01)); color:rgba(255,255,255,0.9); outline:none; transition:box-shadow .14s ease, border-color .14s ease, background .14s ease, transform .12s ease;
-    box-sizing:border-box; box-shadow: none; font-size:15px; -webkit-appearance:none; appearance: none;
+    box-sizing:border-box; box-shadow: none; font-size:15px; -webkit-appearance:none;
 }
 .header-search input[type="search"]::placeholder{ color:rgba(255,255,255,0.55); }
 

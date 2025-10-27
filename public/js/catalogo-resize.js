@@ -106,11 +106,6 @@
                 ro.observe(grid);
                 // Also observe the grid's parent in case padding/margins change layout
                 if(grid.parentElement) ro.observe(grid.parentElement);
-                // Also observe the catalog skeleton if present so placeholders resize equally
-                try{
-                    const sk = document.querySelector('#catalogo-skeleton-page');
-                    if(sk) ro.observe(sk);
-                }catch(e){}
             }catch(e){ window.addEventListener('resize', debounced); }
         } else {
             // fallback
