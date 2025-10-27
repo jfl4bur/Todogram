@@ -83,7 +83,7 @@
     gap: 4px;
 }
 .skeleton-item.skeleton-16x9 {
-    width: var(--item-width);
+    width: 300px;
     /* height removed to allow poster + two lines to size naturally */
     background: transparent;
     position: relative;
@@ -166,7 +166,7 @@
     --catalogo-row-gap: 48px;
     /* Límites para resize automático del catálogo (puedes ajustarlos) */
     --catalogo-min-item-width: 120px;
-    --catalogo-max-item-width: 220px;
+    --catalogo-max-item-width: 180px; /* reducido para items más pequeños por defecto */
 }
 
 /* Definiciones de fuentes */
@@ -601,9 +601,9 @@ button:focus {
 /* Specific overrides for Episodios carousel items: keep poster 16:9 and labels below it */
 .episodios-series-item.custom-carousel-item {
     box-shadow: none;
-    width: var(--item-width);
-    min-width: var(--item-width);
-    max-width: var(--item-width);
+    width: 300px; /* explicit width for episodios */
+    min-width: 300px;
+    max-width: 300px;
     height: auto !important; /* allow height to grow to fit labels */
     display: flex;
     flex-direction: column;
@@ -650,17 +650,8 @@ button:focus {
 
 /* Make skeleton items match episodios card sizes */
 .skeleton-item.skeleton-16x9 {
-    width: var(--item-width);
-    height: auto; /* poster (16:9) + labels space handled by inner elements */
-}
-
-/* Make skeleton poster respect 16:9 inside the skeleton item */
-.skeleton-item.skeleton-16x9 .skeleton-poster {
-    width: 100%;
-    aspect-ratio: 16/9;
-    background: #232323;
-    display: block;
-    overflow: hidden;
+    width: 300px;
+    height: 210px; /* poster (169) + labels space */
 }
 
 /* Ensure real poster image fills the poster container and does not stretch the item */
@@ -672,21 +663,46 @@ button:focus {
     display: block;
 }
 
-/* Loader específico para el carrusel de Episodios Series y Animes - usar inset para cubrir solo el área del poster */
-.loader_episodios,
-.loader_episodios_animes {
+/* Loader específico para el carrusel de Episodios Series */
+.loader_episodios {
     position: absolute;
-    inset: 0; /* top:0; left:0; right:0; bottom:0; */
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 4;
+    aspect-ratio: 16 / 9 !important;
     /* permitir que toques/gestos pasen al elemento debajo (no bloquear interacción) */
     pointer-events: none;
 }
 
-.loader_episodios i,
+.loader_episodios i {
+    font-size: 2rem;
+    color: var(--text-color);
+    animation: spin 1s linear infinite;
+}
+
+/* Loader específico para el carrusel de Episodios Animes (mismo comportamiento que loader_episodios) */
+.loader_episodios_animes {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 4;
+    aspect-ratio: 16 / 9 !important;
+    /* permitir que toques/gestos pasen al elemento debajo (no bloquear interacción) */
+    pointer-events: none;
+}
+
 .loader_episodios_animes i {
     font-size: 2rem;
     color: var(--text-color);
@@ -1305,9 +1321,9 @@ button:focus {
 .details-modal-overlay { z-index: 11001 !important; }
 
 .episodios-series-item {
-    width: var(--item-width);
-    min-width: var(--item-width);
-    max-width: var(--item-width);
+    width: 300px;
+    min-width: 300px;
+    max-width: 300px;
     display: flex;
     flex-direction: column;
     background: transparent;
@@ -1316,6 +1332,71 @@ button:focus {
     margin: 0;
     padding: 0;
 }
+
+/* ===== Catalog / carousel override to follow runtime variables =====
+   This block is placed late in the file so it can override older
+   fixed-width rules (many legacy 300px rules). It forces catalog
+   items, skeletons and poster containers to use the computed
+   --item-width / --item-height set by catalogo-resize.js.
+   Using !important here is intentional to beat scattered overrides
+   across many @media blocks without refactoring the whole stylesheet.
+*/
+.catalogo-item,
+.custom-carousel-item,
+.episodios-series-item,
+.episodios-series-item.custom-carousel-item,
+.skeleton-item,
+.skeleton-item-catalogo {
+    width: var(--item-width) !important;
+    min-width: var(--item-width) !important;
+    max-width: var(--item-width) !important;
+    height: var(--item-height) !important;
+    box-sizing: border-box;
+}
+
+/* Ensure poster containers and images fill the item area */
+.catalogo-item .poster-container,
+.custom-carousel-item .poster-container,
+.episodios-series-item .poster-container,
+.skeleton-item .poster-container {
+    width: 100% !important;
+    height: 100% !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+.catalogo-item img,
+.custom-carousel-item img,
+.episodios-series-item img,
+.skeleton-item img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    display: block !important;
+}
+
+/* Loader/spinner should always center and fill the poster area */
+.catalogo-item .loader_episodios,
+.catalogo-item .loader,
+.skeleton-item .loader_episodios,
+.skeleton-item .loader,
+.custom-carousel-item .loader_episodios,
+.custom-carousel-item .loader {
+    position: absolute !important;
+    inset: 0 !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    background: transparent !important;
+    z-index: 5 !important;
+}
+
+/* Keep carousel labels and overlays relative to the item width */
+.carousel-labels,
+.carousel-overlay {
+    max-width: var(--item-width) !important;
+}
+
 .episodios-series-item .poster-container {
     width: 100%;
     aspect-ratio: 16/9;
@@ -1373,7 +1454,7 @@ button:focus {
     gap: 4px;
 }
 .skeleton-item.skeleton-16x9 {
-    width: var(--item-width);
+    width: 300px;
     /* height removed to allow poster + two lines to size naturally */
     background: transparent;
     position: relative;
@@ -1837,9 +1918,9 @@ button:focus {
 /* Specific overrides for Episodios carousel items: keep poster 16:9 and labels below it */
 .episodios-series-item.custom-carousel-item {
     box-shadow: none;
-    width: var(--item-width); /* explicit width for episodios */
-    min-width: var(--item-width);
-    max-width: var(--item-width);
+    width: 300px; /* explicit width for episodios */
+    min-width: 300px;
+    max-width: 300px;
     height: auto !important; /* allow height to grow to fit labels */
     display: flex;
     flex-direction: column;
@@ -1886,8 +1967,8 @@ button:focus {
 
 /* Make skeleton items match episodios card sizes */
 .skeleton-item.skeleton-16x9 {
-    width: var(--item-width);
-    height: auto; /* poster (16:9) + labels space handled by inner elements */
+    width: 300px;
+    height: 210px; /* poster (169) + labels space */
 }
 
 /* Ensure real poster image fills the poster container and does not stretch the item */
@@ -3099,18 +3180,6 @@ button:focus {
        (evita que el spinner impida abrir el modal en móviles antes de que la imagen cargue) */
     pointer-events: none;
 
-}
-
-/* Ensure loaders inside poster containers align and size to poster area */
-.poster-container .loader {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(0,0,0,0.45);
-    z-index: 4;
-    pointer-events: none;
 }
 
 .loader i {
@@ -7506,30 +7575,6 @@ body {
     }
 }
 
-/* Strong overrides to prevent legacy fixed-px rules from breaking the resize logic.
-   These apply only to the catalog page and skeleton wrappers so they don't interfere
-   with other carousel-specific layouts (e.g., episodios which keep height:auto). */
-#catalogo-grid-page .catalogo-item,
-.skeleton-catalogo .skeleton-item,
-.skeleton-catalogo .skeleton-item-catalogo,
-.skeleton-item-catalogo,
-#catalogo-skeleton .skeleton-item {
-    width: var(--item-width) !important;
-    height: var(--item-height) !important;
-    min-width: unset !important;
-    max-width: unset !important;
-}
-
-/* Ensure catalog poster loader covers the poster area correctly */
-#catalogo-grid-page .catalogo-item .poster-container .loader,
-.skeleton-catalogo .skeleton-item .skeleton-poster .skeleton-spinner {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 @media (hover: hover) and (pointer: fine) {
     /* Only apply the small lift effect when NOT using the hover-zoom scale */
     .catalogo-item:not(.hover-zoom):hover {
@@ -7565,9 +7610,9 @@ body {
 }
 
 .episodios-series-item {
-    width: var(--item-width);
-    min-width: var(--item-width);
-    max-width: var(--item-width);
+    width: 300px;
+    min-width: 300px;
+    max-width: 300px;
     display: flex;
     flex-direction: column;
     background: transparent;
@@ -7575,20 +7620,4 @@ body {
     position: relative;
     margin: 0;
     padding: 0;
-}
-
-/* Strong overrides placed at the end to prevent legacy duplicated rules from
-   forcing fixed sizes or misplacing loaders. These target poster loaders so
-   they always cover the poster area (inset:0) and do not cover labels. */
-.poster-container .loader_episodios,
-.poster-container .loader_episodios_animes,
-.poster-container .loader {
-    position: absolute !important;
-    inset: 0 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    background-color: rgba(0,0,0,0.45) !important;
-    z-index: 4 !important;
-    pointer-events: none !important;
 }
