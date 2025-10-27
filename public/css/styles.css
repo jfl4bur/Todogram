@@ -1375,7 +1375,11 @@ button:focus {
     display: block !important;
 }
 
-/* Loader/spinner should always center and fill the poster area */
+/* Loader/spinner should always center and fill the poster area
+   NOTE: do NOT force display with !important here because JS toggles
+   inline `display` to hide the loader when the image loads. Keeping
+   display without !important lets scripts set `style.display='none'`.
+*/
 .catalogo-item .loader_episodios,
 .catalogo-item .loader,
 .skeleton-item .loader_episodios,
@@ -1384,7 +1388,7 @@ button:focus {
 .custom-carousel-item .loader {
     position: absolute !important;
     inset: 0 !important;
-    display: flex !important;
+    display: flex; /* allow JS to override via inline style */
     align-items: center !important;
     justify-content: center !important;
     background: transparent !important;
