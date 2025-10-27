@@ -116,20 +116,6 @@
         d.className='catalogo-item';
         d.dataset.itemId = it.id;
         d.setAttribute('role','listitem');
-        // Capture-phase click suppressor: if a long-press occurred recently on this element,
-        // stop the click from propagating to other handlers (some handlers may open the modal).
-        try {
-            d.addEventListener('click', function(evt){
-                try {
-                    if (d._lastLongPressed && (Date.now() - d._lastLongPressed) < 1500) {
-                        // suppress the click entirely
-                        try { evt.stopImmediatePropagation(); } catch(e){}
-                        try { evt.preventDefault(); } catch(e){}
-                        return;
-                    }
-                } catch(e){}
-            }, true);
-        } catch(e){}
         // Use poster-sized loader while image loads (same loader used in peliculas carousel)
         d.innerHTML = `
             <div class="poster-container">
@@ -185,8 +171,6 @@
             // and UI wiring. Avoid mutating global overlays or window.activeItem here.
             if (window.detailsModal && typeof window.detailsModal.show === 'function') {
                 try {
-                    // Respect global suppression set by long-press detection
-                    try { if (window.__suppressDetailsModalUntil && Date.now() < window.__suppressDetailsModalUntil) { console.log('catalogo.openDetails: supressing open due to long-press flag', window.__suppressDetailsModalUntil); return; } } catch(e){}
                     const existing = findExistingItemById(it.id);
                     const itemToShow = existing || it;
                     // Instrumentación: log y asegurar window.activeItem antes de delegar
@@ -210,10 +194,8 @@
         d.addEventListener('click', (e) => {
             // If the event has a button property and it's not the primary (0), ignore
             try { if (typeof e.button !== 'undefined' && e.button !== 0) return; } catch (err) {}
-            // Ignore clicks that were produced by a long-press or where the tap was cancelled
-            try { if (typeof tapCancelled !== 'undefined' && tapCancelled) return; } catch(e){}
-            // If a long-press recently occurred on this element, suppress the click
-            try { if (d._lastLongPressed && (Date.now() - d._lastLongPressed) < 800) return; } catch(e){}
+            // If a long-press just occurred, suppress this click (long-press should not open details)
+            try { if (longPressed) { /* consume and ignore click */ longPressed = false; return; } } catch (err) {}
             if(window.detailsModal && typeof window.detailsModal.show==='function'){
                 openDetails();
             }
@@ -231,8 +213,9 @@
         let lastPointerType = null;
 
         function clearLongPress() {
+            // Only clear the pending timer. Keep `longPressed` value so we can
+            // suppress the subsequent click event when a long-press happened.
             if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
-            longPressed = false;
         }
 
         d.addEventListener('pointerdown', (ev) => {
@@ -248,12 +231,7 @@
             // start long-press timer to suppress long-press taps and context menu
             try {
                 clearLongPress();
-                longPressTimer = setTimeout(() => { 
-                    longPressed = true; 
-                    tapCancelled = true; 
-                    try{ d._lastLongPressed = Date.now(); }catch(e){}
-                    try{ window.__suppressDetailsModalUntil = Date.now() + 1500; } catch(e){}
-                }, LONG_PRESS_MS);
+                longPressTimer = setTimeout(() => { longPressed = true; tapCancelled = true; }, LONG_PRESS_MS);
             } catch (e) {}
         }, { passive: true });
 
@@ -271,9 +249,23 @@
             if (ev.pointerId !== pointerId) return;
             try { d.releasePointerCapture(pointerId); } catch (e) {}
             pointerId = null;
-            // Clear long-press timers/state. Do NOT open details here: opening is handled by the click handler
-            // which will be suppressed if a long-press recently occurred.
+            // Capture whether a long-press was active before clearing timers
+            const wasLong = longPressed;
             clearLongPress();
+            // If it was a long-press, suppress opening details. If not, treat as tap.
+            if (!tapCancelled && !wasLong) {
+                // Treat as tap
+                // debounce per element to avoid duplicate opens across events
+                try {
+                    const now = Date.now();
+                    if (!d._lastOpenTime || (now - d._lastOpenTime) > 400) {
+                        d._lastOpenTime = now;
+                        openDetails();
+                    }
+                } catch (e) { openDetails(); }
+            }
+            // Reset longPressed shortly after to allow future interactions
+            try { setTimeout(() => { longPressed = false; }, 50); } catch(e) {}
         }, { passive: true });
 
         d.addEventListener('pointercancel', (ev) => {
@@ -283,6 +275,7 @@
             }
             tapCancelled = true;
             clearLongPress();
+            try { setTimeout(() => { longPressed = false; }, 50); } catch(e) {}
         });
 
         // Fallback for older touch-only browsers: use touchstart/touchmove/touchend/touchcancel
@@ -295,12 +288,7 @@
             startY = t.clientY;
             // start long-press timer
             clearLongPress();
-                longPressTimer = setTimeout(() => { 
-                    longPressed = true; 
-                    tapCancelled = true; 
-                    try{ d._lastLongPressed = Date.now(); }catch(e){}
-                    try{ window.__suppressDetailsModalUntil = Date.now() + 1500; } catch(e){}
-                }, LONG_PRESS_MS);
+            longPressTimer = setTimeout(() => { longPressed = true; tapCancelled = true; }, LONG_PRESS_MS);
         }, { passive: true });
 
         d.addEventListener('touchmove', (ev) => {
@@ -315,11 +303,21 @@
         }, { passive: true });
 
         d.addEventListener('touchend', (ev) => {
-            // Do not open details here; rely on click handler. Clear long-press state.
+            const wasLong = longPressed;
             clearLongPress();
+            if (!tapCancelled && !wasLong) {
+                try {
+                    const now = Date.now();
+                    if (!d._lastOpenTime || (now - d._lastOpenTime) > 400) {
+                        d._lastOpenTime = now;
+                        openDetails();
+                    }
+                } catch (e) { openDetails(); }
+            }
+            try { setTimeout(() => { longPressed = false; }, 50); } catch(e) {}
         }, { passive: true });
 
-        d.addEventListener('touchcancel', (ev) => { tapCancelled = true; clearLongPress(); });
+    d.addEventListener('touchcancel', (ev) => { tapCancelled = true; clearLongPress(); try { setTimeout(() => { longPressed = false; }, 50); } catch(e) {} });
 
         // Prevent default contextmenu on touch long-press environments to avoid blocking UI
         d.addEventListener('contextmenu', (ev) => {
@@ -634,9 +632,7 @@
                     const globalItem = findExistingItemById(id) || state.allItems.find(x => String(x.id) === String(id));
                     if (globalItem && window.detailsModal && typeof window.detailsModal.show === 'function') {
                             const el = grid ? querySelectorByDataId(grid, id) : null;
-                        try {
-                            // Respect global suppression
-                            try { if (window.__suppressDetailsModalUntil && Date.now() < window.__suppressDetailsModalUntil) { console.log('catalogo.openDetailsForId: supressing fallback open due to long-press flag', window.__suppressDetailsModalUntil); return; } } catch(e){}
+                        try { 
                             try { window.activeItem = globalItem; } catch(e){}
                             console.debug && console.debug('catalogo.openDetailsForId fallback -> calling detailsModal.show', { source: 'catalogo_fallback', id: globalItem.id, title: globalItem.title });
                             window.detailsModal.show(globalItem, el);
@@ -656,10 +652,7 @@
                         try { el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); } catch(e){}
                     }
                     if((el || !grid) && item && window.detailsModal && typeof window.detailsModal.show === 'function'){
-                        try {
-                            try { if (window.__suppressDetailsModalUntil && Date.now() < window.__suppressDetailsModalUntil) { console.log('catalogo.tryOpen: supressing open due to long-press flag', window.__suppressDetailsModalUntil); return; } } catch(e){}
-                            try { window.detailsModal.show(item, el); } catch(e){ console.error('catalogo openDetailsForId error', e); }
-                        } catch(e){ console.error('catalogo.tryOpen unexpected error', e); }
+                        try { window.detailsModal.show(item, el); } catch(e){ console.error('catalogo openDetailsForId error', e); }
                     }
                     return;
                 }

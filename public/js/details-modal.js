@@ -1,10 +1,7 @@
 // Permitir que otros scripts llamen a detailsModal.show mediante window.openDetailsModal
 document.addEventListener('DOMContentLoaded', function() {
     if (window.detailsModal) {
-        window.openDetailsModal = (item, origen) => {
-            try { if (window.__suppressDetailsModalUntil && Date.now() < window.__suppressDetailsModalUntil) { console.log('openDetailsModal: supressing due to long-press flag', window.__suppressDetailsModalUntil); return false; } } catch(e){}
-            try { return window.detailsModal.show(item); } catch(e) { console.warn('openDetailsModal: error calling detailsModal.show', e); return false; }
-        };
+        window.openDetailsModal = (item, origen) => window.detailsModal.show(item);
     }
     // Helper to open the share modal consistently from any context
     window.openShareModal = function(item) {
@@ -333,24 +330,6 @@ class DetailsModal {
     }
 
     async show(item, itemElement) {
-        // Global suppression: if any component recently detected a long-press,
-        // avoid opening the details modal for a short grace period.
-        try {
-            if (window.__suppressDetailsModalUntil && Date.now() < window.__suppressDetailsModalUntil) {
-                console.log('DetailsModal: apertura suprimida por bandera global hasta', window.__suppressDetailsModalUntil);
-                return false;
-            }
-        } catch (e) { /* ignore */ }
-        // Debug: report caller and suppression flag for troubleshooting long-press opens
-        try {
-            // Expose last call info in a global so it can be inspected from DevTools
-            try { window.__lastDetailsModalCall = Date.now(); window.__lastDetailsModalStack = (new Error()).stack; } catch(e){}
-            // Use error-level logging to make it prominent in the console
-            try { console.error('DetailsModal.show invoked. suppressUntil=', window.__suppressDetailsModalUntil || null, ' itemElement=', itemElement); } catch(e){}
-            // Include a lightweight stack trace to identify the caller
-            try { console.trace(); } catch(e) {}
-        } catch(e) {}
-
         // Normalize: if catalogo passed a 'raw' original row, copy common local fields so this modal can use them
         try {
             const raw = item && item.raw ? item.raw : null;

@@ -123,35 +123,6 @@ document.addEventListener('DOMContentLoaded', function () {
         window.activeItem = null;
         window.hoverModalItem = null;
 
-        // Global capture-phase click suppressor: when a long-press sets the global flag,
-        // prevent clicks on likely item elements from propagating and opening the modal.
-        try {
-            document.addEventListener('click', function(e){
-                try {
-                    if (window.__suppressDetailsModalUntil && Date.now() < window.__suppressDetailsModalUntil) {
-                        let el = e.target;
-                        while (el && el !== document) {
-                            try {
-                                if (el.classList && (el.classList.contains('catalogo-item') || el.classList.contains('slider-slide') || el.classList.contains('carousel-item') || el.classList.contains('hover-modal-content'))) {
-                                    try { e.stopImmediatePropagation(); } catch(_){}
-                                    try { e.preventDefault(); } catch(_){}
-                                    console.log('Global click suppressor: blocked click on', el);
-                                    return;
-                                }
-                                if (el.dataset && el.dataset.itemId) {
-                                    try { e.stopImmediatePropagation(); } catch(_){}
-                                    try { e.preventDefault(); } catch(_){}
-                                    console.log('Global click suppressor: blocked click on data-item element', el);
-                                    return;
-                                }
-                            } catch(_){}
-                            el = el.parentNode;
-                        }
-                    }
-                } catch(e) { /* ignore suppression errors */ }
-            }, true);
-        } catch(e) {}
-
                 // El slider independiente se inicializa automáticamente
         // No necesitamos delays ni polling
 
@@ -323,31 +294,24 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                     
                     // Abrir el modal independientemente de si existe el elemento DOM
-                    // Guardar contra aperturas inmediatamente después de un long-press
-                    try {
-                        if (window.__suppressDetailsModalUntil && Date.now() < window.__suppressDetailsModalUntil) {
-                            console.log('main: supressing detailsModal.show debido a bandera global de long-press');
-                        } else {
-                            // detailsModal.show es async; ejecutar openEpisodeByNumber después si la URL incluye ep
-                            detailsModal.show(item, itemElement).then(async () => {
-                                window.activeItem = item;
-                                if (urlParams.ep) {
-                                    try {
-                                        console.log('Intentando abrir episodio desde hash ep=', urlParams.ep);
-                                        const ok = await detailsModal.openEpisodeByNumber(item, urlParams.ep);
-                                        console.log('Resultado openEpisodeByNumber:', ok);
-                                        if (!ok) {
-                                            console.warn('No se pudo reproducir episodio desde hash: puede que no exista o no tenga video.');
-                                        }
-                                    } catch (err) {
-                                        console.error('Error intentando abrir episodio desde hash:', err);
-                                    }
+                    // detailsModal.show es async; ejecutar openEpisodeByNumber después si la URL incluye ep
+                    detailsModal.show(item, itemElement).then(async () => {
+                        window.activeItem = item;
+                        if (urlParams.ep) {
+                            try {
+                                console.log('Intentando abrir episodio desde hash ep=', urlParams.ep);
+                                const ok = await detailsModal.openEpisodeByNumber(item, urlParams.ep);
+                                console.log('Resultado openEpisodeByNumber:', ok);
+                                if (!ok) {
+                                    console.warn('No se pudo reproducir episodio desde hash: puede que no exista o no tenga video.');
                                 }
-                            }).catch(err => {
-                                console.error('Error mostrando detailsModal desde processUrlParams:', err);
-                            });
+                            } catch (err) {
+                                console.error('Error intentando abrir episodio desde hash:', err);
+                            }
                         }
-                    } catch(e) { console.warn('main: error al intentar abrir detailsModal', e); }
+                    }).catch(err => {
+                        console.error('Error mostrando detailsModal desde processUrlParams:', err);
+                    });
                 } else {
                     console.error('❌ Item no encontrado para id:', urlParams.id);
                     console.log('Verificando datos disponibles:');
