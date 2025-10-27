@@ -12,7 +12,13 @@
 */
 (function(){
     const ROOT = document.documentElement;
-    const GRID_SELECTOR = '#catalogo-grid-page';
+    // Buscar tanto el grid como los skeletons del catálogo (diferentes páginas usan ids distintos)
+    const CONTAINER_SELECTORS = [
+        '#catalogo-grid-page',      // grid en la página de catálogo
+        '#catalogo-skeleton-page',  // skeleton usado durante carga en la página de catálogo
+        '#catalogo-skeleton',       // nombre alternativo usado en otros lugares
+        '#catalogo-grid'            // fallback alternativo
+    ];
     const DEFAULT_MIN_ITEM = 140; // px
     const DEFAULT_MAX_ITEM = 380; // px
     const DEBOUNCE_MS = 80;
@@ -38,10 +44,10 @@
 
     function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 
-    function computeAndApply(grid){
-        if(!grid) return;
-        const containerWidth = grid.clientWidth || document.documentElement.clientWidth;
-        const gap = getGridGap(grid);
+    function computeAndApply(container){
+        if(!container) return;
+        const containerWidth = container.clientWidth || document.documentElement.clientWidth;
+        const gap = getGridGap(container);
 
         // Determine current aspect ratio from CSS vars (height / width)
         const curW = getNumericCssVar('--item-width', 194);
@@ -77,25 +83,37 @@
     }
 
     function init(){
-        const grid = document.querySelector(GRID_SELECTOR);
-        if(!grid){
-            // Retry after DOM ready a couple times if not present yet
+        // Buscar el primer contenedor disponible entre las opciones
+        const findContainer = ()=>{
+            for(const s of CONTAINER_SELECTORS){ const el = document.querySelector(s); if(el) return el; } return null;
+        };
+
+        let container = findContainer();
+        if(!container){
+            // Retry a few times while DOM initializes (covers skeleton created later)
             let attempts = 0;
             const t = setInterval(()=>{
                 attempts++;
-                const g = document.querySelector(GRID_SELECTOR);
-                if(g){ clearInterval(t); setup(g); }
-                if(attempts > 30) clearInterval(t);
-            }, 150);
+                container = findContainer();
+                if(container){ clearInterval(t); setup(container); }
+                if(attempts > 60) clearInterval(t);
+            }, 120);
             return;
         }
-        setup(grid);
+        setup(container);
     }
 
     function setup(grid){
         let timer = null;
-        const debounced = ()=>{ if(timer) clearTimeout(timer); timer = setTimeout(()=>{ computeAndApply(grid); timer = null; // trigger a resize event so catalogo.js recomputes batches
-            try{ window.dispatchEvent(new Event('resize')); }catch(e){} }, DEBOUNCE_MS); };
+        // debounced compute that uses the first available container each time
+        const debounced = ()=>{ if(timer) clearTimeout(timer); timer = setTimeout(()=>{
+            // prefer grid but fall back to any selector found
+            let target = null;
+            for(const s of CONTAINER_SELECTORS){ const el = document.querySelector(s); if(el){ target = el; break; } }
+            computeAndApply(target);
+            timer = null; // trigger a resize event so catalogo.js recomputes batches
+            try{ window.dispatchEvent(new Event('resize')); }catch(e){}
+        }, DEBOUNCE_MS); };
 
         // Run once immediately
         debounced();
@@ -103,9 +121,10 @@
         if(window.ResizeObserver){
             try{
                 const ro = new ResizeObserver(debounced);
-                ro.observe(grid);
-                // Also observe the grid's parent in case padding/margins change layout
-                if(grid.parentElement) ro.observe(grid.parentElement);
+                // Observe all potential containers so skeleton or grid events trigger the same logic
+                for(const s of CONTAINER_SELECTORS){ const el = document.querySelector(s); if(el) ro.observe(el); }
+                // Also observe documentElement as a fallback
+                ro.observe(document.documentElement);
             }catch(e){ window.addEventListener('resize', debounced); }
         } else {
             // fallback
