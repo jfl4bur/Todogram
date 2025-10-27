@@ -60,7 +60,36 @@
         const minItem = getNumericCssVar('--catalogo-min-item-width', DEFAULT_MIN_ITEM);
         const maxItem = getNumericCssVar('--catalogo-max-item-width', DEFAULT_MAX_ITEM);
 
-        // conservative columns calculation
+        // --- NEW: If there's a visible skeleton item, use its measured box as the source of truth
+        // This ensures final items exactly match the skeleton size (fixes desktop mismatch).
+        try{
+            // selectors observed in the codebase for skeletons
+            const skeletonSelectors = [
+                '#catalogo-skeleton .skeleton-item',
+                '.skeleton-item-catalogo',
+                '.skeleton-item',
+                '#catalogo-skeleton .skeleton-item-catalogo'
+            ];
+            let skeletonEl = null;
+            for(const sel of skeletonSelectors){ const found = document.querySelector(sel); if(found){ skeletonEl = found; break; } }
+            if(skeletonEl){
+                const rect = skeletonEl.getBoundingClientRect();
+                // only accept measured sizes that look reasonable and not full-width artifacts
+                if(rect.width > 10 && rect.height > 10 && rect.width < containerWidth + 4){
+                    const measuredWidth = Math.round(rect.width);
+                    const measuredHeight = Math.round(rect.height);
+                    // Apply measured skeleton size directly (do not force it down to minItem)
+                    ROOT.style.setProperty('--item-width', measuredWidth + 'px');
+                    ROOT.style.setProperty('--item-height', measuredHeight + 'px');
+                    // approximate columns (informational)
+                    const approxCols = Math.max(1, Math.round((containerWidth + gap) / (measuredWidth + gap)));
+                    ROOT.style.setProperty('--catalogo-computed-cols', String(approxCols));
+                    return; // done — skeleton wins
+                }
+            }
+        }catch(e){ /* non-fatal — fallback to computed algorithm below */ }
+
+        // conservative columns calculation (fallback path)
         let cols = Math.max(1, Math.floor((containerWidth + gap) / (minItem + gap)));
 
         // recompute item width to perfectly fill the container (accounting gaps)
