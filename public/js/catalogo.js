@@ -131,16 +131,33 @@
             if (imgEl) {
                 // start hidden to allow fade-in
                 try { imgEl.style.opacity = '0'; } catch(e){}
-                imgEl.onload = function() {
-                    try { imgEl.style.opacity = '1'; } catch(e){}
-                    try { if (loaderEl) loaderEl.style.display = 'none'; } catch(e){}
+
+                const hideLoader = () => { try { if (loaderEl) loaderEl.style.display = 'none'; } catch(e){} };
+                const showImage = () => { try { imgEl.style.opacity = '1'; } catch(e){} };
+
+                const onImageLoaded = function() {
+                    showImage();
+                    hideLoader();
                 };
-                imgEl.onerror = function() {
+
+                const onImageError = function() {
                     // hide loader on error
-                    try { if (loaderEl) loaderEl.style.display = 'none'; } catch(e){}
-                    // keep the broken image as-is; avoid infinite loop
+                    hideLoader();
                 };
-                // Failsafe: if load events never fire (browser quirk), hide loader after 5s
+
+                imgEl.addEventListener('load', onImageLoaded);
+                imgEl.addEventListener('error', onImageError);
+
+                // If the image was already cached/loaded before handlers were attached,
+                // call the load handler immediately when appropriate.
+                try {
+                    if (imgEl.complete && imgEl.naturalWidth && imgEl.naturalWidth > 0) {
+                        // already loaded
+                        onImageLoaded();
+                    }
+                } catch(e){}
+
+                // Failsafe: if load events never fire (rare), hide loader after 5s
                 try {
                     setTimeout(() => { try { if (loaderEl && loaderEl.style && loaderEl.style.display !== 'none') loaderEl.style.display = 'none'; } catch(e){} }, 5000);
                 } catch(e){}
