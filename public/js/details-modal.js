@@ -330,6 +330,14 @@ class DetailsModal {
     }
 
     async show(item, itemElement) {
+        // Global suppression: if any component recently detected a long-press,
+        // avoid opening the details modal for a short grace period.
+        try {
+            if (window.__suppressDetailsModalUntil && Date.now() < window.__suppressDetailsModalUntil) {
+                console.log('DetailsModal: apertura suprimida por bandera global hasta', window.__suppressDetailsModalUntil);
+                return false;
+            }
+        } catch (e) { /* ignore */ }
         // Normalize: if catalogo passed a 'raw' original row, copy common local fields so this modal can use them
         try {
             const raw = item && item.raw ? item.raw : null;

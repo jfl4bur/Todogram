@@ -246,7 +246,12 @@
             // start long-press timer to suppress long-press taps and context menu
             try {
                 clearLongPress();
-                longPressTimer = setTimeout(() => { longPressed = true; tapCancelled = true; try{ d._lastLongPressed = Date.now(); }catch(e){} }, LONG_PRESS_MS);
+                longPressTimer = setTimeout(() => { 
+                    longPressed = true; 
+                    tapCancelled = true; 
+                    try{ d._lastLongPressed = Date.now(); }catch(e){}
+                    try{ window.__suppressDetailsModalUntil = Date.now() + 1500; } catch(e){}
+                }, LONG_PRESS_MS);
             } catch (e) {}
         }, { passive: true });
 
@@ -288,7 +293,12 @@
             startY = t.clientY;
             // start long-press timer
             clearLongPress();
-            longPressTimer = setTimeout(() => { longPressed = true; tapCancelled = true; try{ d._lastLongPressed = Date.now(); }catch(e){} }, LONG_PRESS_MS);
+                longPressTimer = setTimeout(() => { 
+                    longPressed = true; 
+                    tapCancelled = true; 
+                    try{ d._lastLongPressed = Date.now(); }catch(e){}
+                    try{ window.__suppressDetailsModalUntil = Date.now() + 1500; } catch(e){}
+                }, LONG_PRESS_MS);
         }, { passive: true });
 
         d.addEventListener('touchmove', (ev) => {
