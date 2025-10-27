@@ -24,7 +24,8 @@
     const DEFAULT_MIN_ITEM = 180; // px — aumentado para evitar tamaños demasiado pequeños en desktop
     const DEFAULT_MAX_ITEM = 380; // px
     const DEBOUNCE_MS = 80;
-    const DEBUG = false;
+    // DEBUG mode: set true temporarily to print diagnostic info in the browser console
+    const DEBUG = true;
 
     function getNumericCssVar(name, fallback){
         try{
@@ -85,12 +86,14 @@
                     // approximate columns (informational)
                     const approxCols = Math.max(1, Math.round((containerWidth + gap) / (measuredWidth + gap)));
                     ROOT.style.setProperty('--catalogo-computed-cols', String(approxCols));
+                    if(DEBUG) console.debug('catalogo-resize: applied skeleton measure', {measuredWidth, measuredHeight, approxCols, containerWidth, gap});
                     return; // done — skeleton wins
                 }
             }
         }catch(e){ /* non-fatal — fallback to computed algorithm below */ }
 
-        // conservative columns calculation (fallback path)
+    if(DEBUG) console.debug('catalogo-resize: fallback compute (no usable skeleton)', {containerWidth, gap, minItem, maxItem});
+    // conservative columns calculation (fallback path)
         let cols = Math.max(1, Math.floor((containerWidth + gap) / (minItem + gap)));
 
         // recompute item width to perfectly fill the container (accounting gaps)
@@ -111,6 +114,7 @@
             ROOT.style.setProperty('--item-height', itemHeight + 'px');
             // expose computed columns for debugging if needed
             ROOT.style.setProperty('--catalogo-computed-cols', String(cols));
+            if(DEBUG) console.debug('catalogo-resize: applied computed', {itemWidth, itemHeight, cols, containerWidth, gap});
         }catch(e){ console.warn('catalogo-resize: no se pudo escribir variables CSS', e); }
     }
 
