@@ -166,7 +166,7 @@
     --catalogo-row-gap: 48px;
     /* Límites para resize automático del catálogo (puedes ajustarlos) */
     --catalogo-min-item-width: 120px;
-    --catalogo-max-item-width: 180px; /* reducido para items más pequeños por defecto */
+    --catalogo-max-item-width: 380px; /* restaurado a valor amplio para tamaños de escritorio */
 }
 
 /* Definiciones de fuentes */
