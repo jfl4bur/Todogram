@@ -246,9 +246,8 @@
             if (ev.pointerId !== pointerId) return;
             try { d.releasePointerCapture(pointerId); } catch (e) {}
             pointerId = null;
-            // Check whether this was a long-press BEFORE clearing the long-press state.
-            const wasLongPressed = !!longPressed;
-            if (!tapCancelled && !wasLongPressed) {
+            clearLongPress();
+            if (!tapCancelled && !longPressed) {
                 // Treat as tap
                 // debounce per element to avoid duplicate opens across events
                 try {
@@ -259,8 +258,6 @@
                     }
                 } catch (e) { openDetails(); }
             }
-            // Now clear long-press tracking state
-            clearLongPress();
         }, { passive: true });
 
         d.addEventListener('pointercancel', (ev) => {
@@ -297,9 +294,8 @@
         }, { passive: true });
 
         d.addEventListener('touchend', (ev) => {
-            // Check whether this was a long-press BEFORE clearing the long-press state.
-            const wasLongPressedTouch = !!longPressed;
-            if (!tapCancelled && !wasLongPressedTouch) {
+            clearLongPress();
+            if (!tapCancelled && !longPressed) {
                 try {
                     const now = Date.now();
                     if (!d._lastOpenTime || (now - d._lastOpenTime) > 400) {
@@ -308,8 +304,6 @@
                     }
                 } catch (e) { openDetails(); }
             }
-            // Finally clear long-press state
-            clearLongPress();
         }, { passive: true });
 
         d.addEventListener('touchcancel', (ev) => { tapCancelled = true; clearLongPress(); });
@@ -860,7 +854,16 @@
         // Delegated hover handlers: funcionan para items ya renderizados y para elementos que se agreguen posteriormente
         if (grid && !grid.__hover_delegation_installed) {
             // Show hover with a delay (match carousels behaviour)
-            const HOVER_SHOW_DELAY = 900; // ms - same delay used in carousels
+                const HOVER_SHOW_DELAY = 900; // ms - same delay used in carousels
+                // Protect against touch / long-press triggering hover modal: record recent touch/pointer events
+                // and ignore subsequent mouseover events that are synthesized after touches.
+                let __lastTouchTime = 0;
+                try {
+                    grid.addEventListener('pointerdown', (ev) => {
+                        try { if (ev.pointerType && ev.pointerType !== 'mouse') __lastTouchTime = Date.now(); } catch(e){}
+                    }, { passive: true });
+                } catch(e) {}
+                try { grid.addEventListener('touchstart', () => { __lastTouchTime = Date.now(); }, { passive: true }); } catch(e) {}
             grid.addEventListener('mouseover', (e) => {
                 const itemEl = e.target.closest('.catalogo-item');
                 if (!itemEl || !grid.contains(itemEl)) return;
@@ -869,6 +872,9 @@
                 const item = findExistingItemById(itemId) || state.allItems.find(x => String(x.id) === String(itemId));
                 // clear any previous timer on this element
                 try { if (itemEl._hoverTimer) { clearTimeout(itemEl._hoverTimer); itemEl._hoverTimer = null; } } catch(e){}
+                // If there was a recent touch/pointer event, ignore the synthesized mouseover to avoid
+                // opening the hover modal from a long-press on touch devices.
+                if (Date.now() - __lastTouchTime < 800) return;
                 if (item && window.hoverModal && typeof window.hoverModal.show === 'function') {
                     // schedule showing the hover modal after a short delay to match carousel behaviour
                     itemEl._hoverTimer = setTimeout(() => {
