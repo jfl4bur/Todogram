@@ -13,10 +13,12 @@
 (function(){
     const ROOT = document.documentElement;
     // Buscar tanto el grid como los skeletons del catálogo (diferentes páginas usan ids distintos)
+    // Prefer skeleton containers first (when present) so the computed sizes
+    // match the skeleton preview size that the user expects during load.
     const CONTAINER_SELECTORS = [
-        '#catalogo-grid-page',      // grid en la página de catálogo
         '#catalogo-skeleton-page',  // skeleton usado durante carga en la página de catálogo
         '#catalogo-skeleton',       // nombre alternativo usado en otros lugares
+        '#catalogo-grid-page',      // grid en la página de catálogo
         '#catalogo-grid'            // fallback alternativo
     ];
     const DEFAULT_MIN_ITEM = 140; // px
