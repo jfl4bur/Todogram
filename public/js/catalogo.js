@@ -176,6 +176,14 @@
         d.addEventListener('click', (e) => {
             // If the event has a button property and it's not the primary (0), ignore
             try { if (typeof e.button !== 'undefined' && e.button !== 0) return; } catch (err) {}
+            // If a long-press was detected recently, suppress this click (some browsers emit a click after long-press)
+            try {
+                if (d._suppressClick) {
+                    // clear suppression shortly after to not block future legitimate clicks
+                    setTimeout(() => { try { d._suppressClick = false; } catch (e) {} }, 600);
+                    return;
+                }
+            } catch (e) {}
             if(window.detailsModal && typeof window.detailsModal.show==='function'){
                 openDetails();
             }
@@ -195,6 +203,8 @@
         function clearLongPress() {
             if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
             longPressed = false;
+            // ensure we don't keep suppressing clicks indefinitely
+            try { if (d && d._suppressClick) { setTimeout(()=>{ try{ d._suppressClick = false; }catch(e){} }, 600); } } catch(e){}
         }
 
         d.addEventListener('pointerdown', (ev) => {
@@ -210,7 +220,7 @@
             // start long-press timer to suppress long-press taps and context menu
             try {
                 clearLongPress();
-                longPressTimer = setTimeout(() => { longPressed = true; tapCancelled = true; }, LONG_PRESS_MS);
+                longPressTimer = setTimeout(() => { longPressed = true; tapCancelled = true; try{ d._suppressClick = true; }catch(e){} }, LONG_PRESS_MS);
             } catch (e) {}
         }, { passive: true });
 
@@ -261,7 +271,7 @@
             startY = t.clientY;
             // start long-press timer
             clearLongPress();
-            longPressTimer = setTimeout(() => { longPressed = true; tapCancelled = true; }, LONG_PRESS_MS);
+            longPressTimer = setTimeout(() => { longPressed = true; tapCancelled = true; try{ d._suppressClick = true; }catch(e){} }, LONG_PRESS_MS);
         }, { passive: true });
 
         d.addEventListener('touchmove', (ev) => {
