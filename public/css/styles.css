@@ -601,9 +601,9 @@ button:focus {
 /* Specific overrides for Episodios carousel items: keep poster 16:9 and labels below it */
 .episodios-series-item.custom-carousel-item {
     box-shadow: none;
-    width: 300px; /* explicit width for episodios */
-    min-width: 300px;
-    max-width: 300px;
+    width: var(--item-width);
+    min-width: var(--item-width);
+    max-width: var(--item-width);
     height: auto !important; /* allow height to grow to fit labels */
     display: flex;
     flex-direction: column;
@@ -650,8 +650,17 @@ button:focus {
 
 /* Make skeleton items match episodios card sizes */
 .skeleton-item.skeleton-16x9 {
-    width: 300px;
-    height: 210px; /* poster (169) + labels space */
+    width: var(--item-width);
+    height: auto; /* poster (16:9) + labels space handled by inner elements */
+}
+
+/* Make skeleton poster respect 16:9 inside the skeleton item */
+.skeleton-item.skeleton-16x9 .skeleton-poster {
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: #232323;
+    display: block;
+    overflow: hidden;
 }
 
 /* Ensure real poster image fills the poster container and does not stretch the item */
@@ -3115,6 +3124,18 @@ button:focus {
        (evita que el spinner impida abrir el modal en móviles antes de que la imagen cargue) */
     pointer-events: none;
 
+}
+
+/* Ensure loaders inside poster containers align and size to poster area */
+.poster-container .loader {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0,0,0,0.45);
+    z-index: 4;
+    pointer-events: none;
 }
 
 .loader i {
@@ -7508,6 +7529,30 @@ body {
         align-items: center;
         justify-content: center;
     }
+}
+
+/* Strong overrides to prevent legacy fixed-px rules from breaking the resize logic.
+   These apply only to the catalog page and skeleton wrappers so they don't interfere
+   with other carousel-specific layouts (e.g., episodios which keep height:auto). */
+#catalogo-grid-page .catalogo-item,
+.skeleton-catalogo .skeleton-item,
+.skeleton-catalogo .skeleton-item-catalogo,
+.skeleton-item-catalogo,
+#catalogo-skeleton .skeleton-item {
+    width: var(--item-width) !important;
+    height: var(--item-height) !important;
+    min-width: unset !important;
+    max-width: unset !important;
+}
+
+/* Ensure catalog poster loader covers the poster area correctly */
+#catalogo-grid-page .catalogo-item .poster-container .loader,
+.skeleton-catalogo .skeleton-item .skeleton-poster .skeleton-spinner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 @media (hover: hover) and (pointer: fine) {
