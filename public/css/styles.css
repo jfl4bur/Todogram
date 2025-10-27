@@ -7008,7 +7008,25 @@ body {
         width: 170px;
         /* height removed so poster aspect-ratio controls height */
     }
+    .catalogo-page-header {
+        display: flex;
+        flex-direction: column;
+        margin: -38px 0 0 0;
+    }
+        .catalogo-tabs {
+        display: flex;
+        gap: 2px;
+        margin: 15px;
+        flex-direction: row;
+        flex-wrap: nowrap;
+    }
 
+    .catalogo-controls {
+        width: 100%;
+        display: flex;
+        justify-content: flex-start;
+        margin-left: 10px;
+    }
 
     .episodios-series-item .poster-container {
         aspect-ratio: 16/9;
