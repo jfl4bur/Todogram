@@ -122,27 +122,28 @@
                 <img class="catalogo-card-image" loading="lazy" src="${it.posterUrl||'https://via.placeholder.com/194x271'}" alt="${it.title}">
                 <div class="loader"><i class="fas fa-spinner"></i></div>
             </div>
-            <div class="catalogo-item-title" style="display:none;">${it.title}</div>
         `;
 
         // Wire image load to hide loader and reveal title/image
         try {
             const imgEl = d.querySelector('.catalogo-card-image');
             const loaderEl = d.querySelector('.loader');
-            const titleEl = d.querySelector('.catalogo-item-title');
             if (imgEl) {
-                imgEl.style.opacity = '0';
+                // start hidden to allow fade-in
+                try { imgEl.style.opacity = '0'; } catch(e){}
                 imgEl.onload = function() {
                     try { imgEl.style.opacity = '1'; } catch(e){}
                     try { if (loaderEl) loaderEl.style.display = 'none'; } catch(e){}
-                    try { if (titleEl) titleEl.style.display = ''; } catch(e){}
                 };
                 imgEl.onerror = function() {
-                    // hide loader on error and still show title
+                    // hide loader on error
                     try { if (loaderEl) loaderEl.style.display = 'none'; } catch(e){}
-                    try { if (titleEl) titleEl.style.display = ''; } catch(e){}
-                    imgEl.src = imgEl.src; // no-op but keeps behavior
+                    // keep the broken image as-is; avoid infinite loop
                 };
+                // Failsafe: if load events never fire (browser quirk), hide loader after 5s
+                try {
+                    setTimeout(() => { try { if (loaderEl && loaderEl.style && loaderEl.style.display !== 'none') loaderEl.style.display = 'none'; } catch(e){} }, 5000);
+                } catch(e){}
             }
         } catch (e) { console.warn('catalogo: error wiring image loader', e); }
 
