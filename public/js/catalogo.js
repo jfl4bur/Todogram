@@ -199,37 +199,21 @@
             }
         });
 
-        // Tap vs scroll detection using pointer events with long-press suppression
-        // We record pointerdown coords, cancel the tap if move threshold exceeded or long-press detected.
+        // Tap vs scroll detection using pointer events (no long-press handling)
+        // We record pointer/touch coords and cancel the tap if move threshold exceeded.
         let tapCancelled = false;
         let pointerId = null;
         let startX = 0, startY = 0;
         const MOVE_THRESHOLD = 8; // pixels
-        let longPressTimer = null;
-        let longPressed = false;
-        const LONG_PRESS_MS = 500; // long-press threshold
-        let lastPointerType = null;
-
-        function clearLongPress() {
-            if (longPressTimer) { clearTimeout(longPressTimer); longPressTimer = null; }
-            longPressed = false;
-        }
 
         d.addEventListener('pointerdown', (ev) => {
             if (ev.isPrimary === false) return;
             tapCancelled = false;
-            longPressed = false;
-            lastPointerType = ev.pointerType || null;
             pointerId = ev.pointerId;
             startX = ev.clientX;
             startY = ev.clientY;
             // capture pointer to continue receiving move/up even if finger leaves element
             try { d.setPointerCapture(pointerId); } catch (e) {}
-            // start long-press timer to suppress long-press taps and context menu
-            try {
-                clearLongPress();
-                longPressTimer = setTimeout(() => { longPressed = true; tapCancelled = true; }, LONG_PRESS_MS);
-            } catch (e) {}
         }, { passive: true });
 
         d.addEventListener('pointermove', (ev) => {
@@ -238,7 +222,6 @@
             const dy = Math.abs(ev.clientY - startY);
             if (dx > MOVE_THRESHOLD || dy > MOVE_THRESHOLD) {
                 tapCancelled = true;
-                clearLongPress();
             }
         }, { passive: true });
 
@@ -246,10 +229,8 @@
             if (ev.pointerId !== pointerId) return;
             try { d.releasePointerCapture(pointerId); } catch (e) {}
             pointerId = null;
-            clearLongPress();
-            if (!tapCancelled && !longPressed) {
+            if (!tapCancelled) {
                 // Treat as tap
-                // debounce per element to avoid duplicate opens across events
                 try {
                     const now = Date.now();
                     if (!d._lastOpenTime || (now - d._lastOpenTime) > 400) {
@@ -266,7 +247,6 @@
                 pointerId = null;
             }
             tapCancelled = true;
-            clearLongPress();
         });
 
         // Fallback for older touch-only browsers: use touchstart/touchmove/touchend/touchcancel
@@ -274,12 +254,8 @@
             const t = ev.touches && ev.touches[0];
             if (!t) return;
             tapCancelled = false;
-            longPressed = false;
             startX = t.clientX;
             startY = t.clientY;
-            // start long-press timer
-            clearLongPress();
-            longPressTimer = setTimeout(() => { longPressed = true; tapCancelled = true; }, LONG_PRESS_MS);
         }, { passive: true });
 
         d.addEventListener('touchmove', (ev) => {
@@ -289,13 +265,11 @@
             const dy = Math.abs(t.clientY - startY);
             if (dx > MOVE_THRESHOLD || dy > MOVE_THRESHOLD) {
                 tapCancelled = true;
-                clearLongPress();
             }
         }, { passive: true });
 
         d.addEventListener('touchend', (ev) => {
-            clearLongPress();
-            if (!tapCancelled && !longPressed) {
+            if (!tapCancelled) {
                 try {
                     const now = Date.now();
                     if (!d._lastOpenTime || (now - d._lastOpenTime) > 400) {
@@ -306,17 +280,7 @@
             }
         }, { passive: true });
 
-        d.addEventListener('touchcancel', (ev) => { tapCancelled = true; clearLongPress(); });
-
-        // Prevent default contextmenu on touch long-press environments to avoid blocking UI
-        d.addEventListener('contextmenu', (ev) => {
-            try {
-                // if lastPointerType indicates touch, or device likely touch-only, prevent contextmenu
-                if (lastPointerType === 'touch' || (navigator.maxTouchPoints && navigator.maxTouchPoints > 0 && window.matchMedia && window.matchMedia('(hover: none)').matches)) {
-                    ev.preventDefault();
-                }
-            } catch (e) {}
-        });
+        d.addEventListener('touchcancel', (ev) => { tapCancelled = true; });
 
         return d;
     }
@@ -892,6 +856,7 @@
                 // If the mouse moved into another catalog item, keep the hover logic active
                 if (related && related.closest && related.closest('.catalogo-item')) return;
                 // If the mouse moved into the hover modal itself (or any of its children), do not hide
+                if (related && related.closest && (related.closest('#modal-content') || related.closest('.modal-content'))) return;
                 if (window.hoverModal && (typeof window.hoverModal.hide === 'function' || typeof window.hoverModal.close === 'function')) {
                     try { if(window.hoverModal.hide) window.hoverModal.hide(0); else window.hoverModal.close(); } catch(err) { console.error('hoverModal.hide error', err); }
                 }
