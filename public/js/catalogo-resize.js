@@ -21,9 +21,10 @@
         '#catalogo-grid-page',      // grid en la página de catálogo
         '#catalogo-grid'            // fallback alternativo
     ];
-    const DEFAULT_MIN_ITEM = 140; // px
+    const DEFAULT_MIN_ITEM = 180; // px — aumentado para evitar tamaños demasiado pequeños en desktop
     const DEFAULT_MAX_ITEM = 380; // px
     const DEBOUNCE_MS = 80;
+    const DEBUG = false;
 
     function getNumericCssVar(name, fallback){
         try{
@@ -161,6 +162,20 @@
             // fallback
             window.addEventListener('resize', debounced);
         }
+
+        // MutationObserver: si los skeletons se insertan dinámicamente, detectarlos y recomputar
+        try{
+            const skeletonWatchSelectors = ['.skeleton-item-catalogo', '.skeleton-item', '#catalogo-skeleton .skeleton-item', '#catalogo-skeleton-page .skeleton-item'];
+            const mo = new MutationObserver((mutations)=>{
+                for(const m of mutations){
+                    if(m.addedNodes && m.addedNodes.length){
+                        for(const sel of skeletonWatchSelectors){ if(document.querySelector(sel)){ if(DEBUG) console.debug('catalogo-resize: skeleton added -> debounced'); debounced(); return; } }
+                    }
+                }
+            });
+            mo.observe(document.body, { childList: true, subtree: true });
+            if(DEBUG) console.debug('catalogo-resize: mutation observer attached');
+        }catch(e){ if(DEBUG) console.warn('catalogo-resize: MutationObserver failed', e); }
     }
 
     if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
