@@ -185,6 +185,8 @@
             // and UI wiring. Avoid mutating global overlays or window.activeItem here.
             if (window.detailsModal && typeof window.detailsModal.show === 'function') {
                 try {
+                    // Respect global suppression set by long-press detection
+                    try { if (window.__suppressDetailsModalUntil && Date.now() < window.__suppressDetailsModalUntil) { console.log('catalogo.openDetails: supressing open due to long-press flag', window.__suppressDetailsModalUntil); return; } } catch(e){}
                     const existing = findExistingItemById(it.id);
                     const itemToShow = existing || it;
                     // Instrumentación: log y asegurar window.activeItem antes de delegar
@@ -632,7 +634,9 @@
                     const globalItem = findExistingItemById(id) || state.allItems.find(x => String(x.id) === String(id));
                     if (globalItem && window.detailsModal && typeof window.detailsModal.show === 'function') {
                             const el = grid ? querySelectorByDataId(grid, id) : null;
-                        try { 
+                        try {
+                            // Respect global suppression
+                            try { if (window.__suppressDetailsModalUntil && Date.now() < window.__suppressDetailsModalUntil) { console.log('catalogo.openDetailsForId: supressing fallback open due to long-press flag', window.__suppressDetailsModalUntil); return; } } catch(e){}
                             try { window.activeItem = globalItem; } catch(e){}
                             console.debug && console.debug('catalogo.openDetailsForId fallback -> calling detailsModal.show', { source: 'catalogo_fallback', id: globalItem.id, title: globalItem.title });
                             window.detailsModal.show(globalItem, el);
@@ -652,7 +656,10 @@
                         try { el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); } catch(e){}
                     }
                     if((el || !grid) && item && window.detailsModal && typeof window.detailsModal.show === 'function'){
-                        try { window.detailsModal.show(item, el); } catch(e){ console.error('catalogo openDetailsForId error', e); }
+                        try {
+                            try { if (window.__suppressDetailsModalUntil && Date.now() < window.__suppressDetailsModalUntil) { console.log('catalogo.tryOpen: supressing open due to long-press flag', window.__suppressDetailsModalUntil); return; } } catch(e){}
+                            try { window.detailsModal.show(item, el); } catch(e){ console.error('catalogo openDetailsForId error', e); }
+                        } catch(e){ console.error('catalogo.tryOpen unexpected error', e); }
                     }
                     return;
                 }
