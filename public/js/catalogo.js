@@ -116,6 +116,20 @@
         d.className='catalogo-item';
         d.dataset.itemId = it.id;
         d.setAttribute('role','listitem');
+        // Capture-phase click suppressor: if a long-press occurred recently on this element,
+        // stop the click from propagating to other handlers (some handlers may open the modal).
+        try {
+            d.addEventListener('click', function(evt){
+                try {
+                    if (d._lastLongPressed && (Date.now() - d._lastLongPressed) < 1500) {
+                        // suppress the click entirely
+                        try { evt.stopImmediatePropagation(); } catch(e){}
+                        try { evt.preventDefault(); } catch(e){}
+                        return;
+                    }
+                } catch(e){}
+            }, true);
+        } catch(e){}
         // Use poster-sized loader while image loads (same loader used in peliculas carousel)
         d.innerHTML = `
             <div class="poster-container">
