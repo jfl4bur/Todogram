@@ -1,5 +1,13 @@
-/* === BASE STYLES === */
+/* todo.css deduplicated: one @media per query, ordered by breakpoint (desc) */
 
+/* Consolidated media queries generated from styles.css - exact content grouped by query */
+
+/* Root (non-@media) rules */
+
+/* Important: ensure the details modal is above any generic hover/modal overlays
+    which may have very high z-index values elsewhere. This avoids click interception
+    by other overlay elements when the details modal is open (fixes catalog issue).
+*/
 .details-modal-content {
     z-index: 12002 !important;
 }
@@ -5978,35 +5986,8 @@ html, body {
   overflow-x: hidden;
 }
 
-.episodios-series-item {
-    width: 300px;
-    min-width: 300px;
-    max-width: 300px;
-    display: flex;
-    flex-direction: column;
-    background: transparent;
-    overflow: visible;
-    position: relative;
-    margin: 0;
-    padding: 0;
-}
-
-/* ============================================
-   RESPONSIVE BREAKPOINTS
-   ============================================ */
-
-/* === XXL - TV 4K y Pantallas Ultra Grandes (≥ 2560px) === */
-@media (min-width: 2560px) { 
-}
-
-/* === XL - Smart TVs Full HD (≥ 1920px) === */
-@media (min-width: 1920px) and (max-width: 2559px) { 
-
-}
-
-/* === XXL Desktop - Pantallas muy grandes (≥ 1400px) === */
-@media (min-width: 1400px) and (max-width: 1919px) { 
-    .skeleton-catalogo {
+@media (min-width: 1400px) {
+.skeleton-catalogo {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(var(--item-width), 1fr));
         column-gap: 4px !important;
@@ -6032,7 +6013,7 @@ html, body {
         justify-content: center;
     }
 
-    .details-episode-player-inner{max-width:1200px;max-height:700px}
+.details-episode-player-inner{max-width:1200px;max-height:700px}
         .details-episode-player-iframe{max-width:1200px;max-height:700px}
     
 
@@ -6089,15 +6070,13 @@ html, body {
     }
 }
 
-/* === XL Desktop - Pantallas grandes (1200px - 1399px) === */
-@media (min-width: 1200px) and (max-width: 1399px) { 
-    .slider-header-inner {
-        padding: 0 16px;
-    }
-
-    .slider-nav-menu {
+@media (max-width: 1200px) {
+.slider-header-inner {
+    padding: 0 16px;
+  }
+  .slider-nav-menu {
     gap: 16px;
-    }
+  }
 
     .skeleton-catalogo {
         display: grid;
@@ -6124,16 +6103,39 @@ html, body {
         align-items: center;
         justify-content: center;
     }
-    .catalogo-genre-list{grid-template-columns:repeat(2,minmax(120px,1fr))}
 }
 
-/* === LG Desktop (992px - 1199px) === */
-@media (min-width: 992px) and (max-width: 1199px) { 
-    .details-modal-episode-thumb{width:180px;height:100px;flex:0 0 180px}
-    .details-modal-episode-item{gap:14px;padding:12px}
-    .details-modal-episode-title{font-size:15px}
+@media (max-width:1200px) {
+.catalogo-genre-list{grid-template-columns:repeat(2,minmax(120px,1fr))}
+    .skeleton-catalogo {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(var(--item-width), 1fr));
+        column-gap: 4px !important;
+        row-gap: 6px !important;
+        margin: 4px;
+    }
 
-    .catalogo-grid {
+    .skeleton-item {
+        width: var(--item-width);
+        height: var(--item-height);
+    }
+
+    .skeleton-item-catalogo {
+        padding: 4px;
+        flex: 0 0 auto;
+        width: var(--item-width);
+        height: var(--item-height);
+        background-color: var(--secondary-color);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+@media (max-width:1024px) {
+.catalogo-grid {
         column-gap: 6px !important;
         row-gap: 4px !important;
     }
@@ -6163,8 +6165,10 @@ html, body {
         align-items: center;
         justify-content: center;
     }
- 
-    .slider-section {
+}
+
+@media (min-width: 1024px) {
+.slider-section {
         height: 422px;
         margin-top: -25px;
         /*  padding: 0 20px;*/
@@ -6199,70 +6203,8 @@ html, body {
     }
 }
 
-/* === MD Tablet Landscape y Desktop pequeño (900px - 991px) === */
-@media (min-width: 900px) and (max-width: 991px) { 
-    .slider-section {
-    margin-top: 100px; /* Ajustado para tablets */
-    }
-    .details-modal-overlay {
-        padding-top: 70px;
-        padding-bottom: 30px;
-    }
-    .video-modal-overlay,
-    .share-modal-overlay {
-        padding: 70px 16px 16px 16px;
-    }
-
-    .slider-header-inner {
-        padding: 0 12px;
-        height: 56px;
-    }
-    .slider-logo svg {
-        height: 32px;
-    }
-    .slider-nav-menu {
-        gap: 12px;
-    }
-    .slider-nav-link {
-        font-size: 0.9rem;
-        line-height: 56px;
-    }
-
-    .skeleton-catalogo {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(var(--item-width), 1fr));
-        column-gap: 4px !important;
-        row-gap: 6px !important;
-        margin: 4px;
-    }
-
-    .skeleton-item {
-        width: var(--item-width);
-        height: var(--item-height);
-    }
-
-    .skeleton-item-catalogo {
-        padding: 4px;
-        flex: 0 0 auto;
-        width: var(--item-width);
-        height: var(--item-height);
-        background-color: var(--secondary-color);
-        position: relative;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-}
-
-/* === MD Tablet (768px - 899px) === */
-@media (min-width: 768px) and (max-width: 899px) { 
-    .catalogo-grid {
-        column-gap: 6px !important;
-        row-gap: 4px !important;
-    }
-
-    .slider-section {
+@media (max-width: 1023px) and (min-width: 845px) {
+.slider-section {
         height: 420px;
         margin-top: -30px;
       /*  padding: 0 15px;*/
@@ -6302,9 +6244,9 @@ html, body {
       /*  padding: 0 15px;*/
       /*  margin: 0 -15px*/
     }
-    .carousel-skeleton {
-        margin: 50px;
-    }
+.carousel-skeleton {
+    margin: 50px;
+}
     .catalogo-grid, #catalogo-grid-page {
         column-gap: 4px !important;
         row-gap: 10px !important;
@@ -6362,7 +6304,268 @@ html, body {
     .slider-nav-btn i {
         font-size: 18px;
     }
-        .episodios-series-item {
+}
+
+@media (max-width: 992px) {
+.details-modal-episode-thumb{width:180px;height:100px;flex:0 0 180px}
+        .details-modal-episode-item{gap:14px;padding:12px}
+        .details-modal-episode-title{font-size:15px}
+
+    .skeleton-catalogo {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(var(--item-width), 1fr));
+        column-gap: 4px !important;
+        row-gap: 6px !important;
+        margin: 4px;
+    }
+
+    .skeleton-item {
+        width: var(--item-width);
+        height: var(--item-height);
+    }
+
+    .skeleton-item-catalogo {
+        padding: 4px;
+        flex: 0 0 auto;
+        width: var(--item-width);
+        height: var(--item-height);
+        background-color: var(--secondary-color);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 900px) {
+body {
+    padding-top: 56px;
+  }
+  .slider-section {
+    margin-top: 100px; /* Ajustado para tablets */
+  }
+  .details-modal-overlay {
+    padding-top: 70px;
+    padding-bottom: 30px;
+  }
+  .video-modal-overlay,
+  .share-modal-overlay {
+    padding: 70px 16px 16px 16px;
+  }
+
+
+  .slider-header-inner {
+    padding: 0 12px;
+    height: 56px;
+  }
+  .slider-logo svg {
+    height: 32px;
+  }
+  .slider-nav-menu {
+    gap: 12px;
+  }
+  .slider-nav-link {
+    font-size: 0.9rem;
+    line-height: 56px;
+  }
+
+        .skeleton-catalogo {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(var(--item-width), 1fr));
+                column-gap: 4px !important;
+                row-gap: 6px !important;
+                margin: 4px;
+        }
+
+        .skeleton-item {
+                width: var(--item-width);
+                height: var(--item-height);
+        }
+
+        .skeleton-item-catalogo {
+                padding: 4px;
+                flex: 0 0 auto;
+                width: var(--item-width);
+                height: var(--item-height);
+                background-color: var(--secondary-color);
+                position: relative;
+                overflow: hidden;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+        }
+}
+
+@media (max-width: 888px) {
+    .catalogo-grid, #catalogo-grid-page {
+        column-gap: 4px !important;
+        row-gap: 10px !important;
+        margin: 50px;
+    }
+}
+@media (max-width: 844px) {
+.slider-section {
+        height: 190px;
+        margin-top: 20px;
+        padding: 0 30px; 
+    }
+    
+    .slider-slide {
+        width: 90vw;
+        margin-right: 1.2vw;
+        height: 180px !important;
+        margin-left: 0px;
+    }
+    
+    .slider-wrapper {
+        margin-left: calc((100vw - 90vw) / 2);
+    }
+    
+    .slider-nav {
+        position: absolute;
+        top: 50%;
+        padding: 0 15px;
+    }
+
+    .slider-nav-btn {
+        width: 20px;
+        height: 180px;
+        font-size: 18px;
+    }
+    
+    .slider-nav-btn i {
+        font-size: 14px;
+    }
+    
+    .slider-pagination-dot {
+        width: 8px;
+        height: 8px;
+        margin: 0 2px;
+    }
+
+
+    .slider-section {
+        height: 190px;
+        margin-top: 20px;
+        padding: 0 30px; 
+    }
+    
+    .catalogo-grid, #catalogo-grid-page {
+        column-gap: 6px !important;
+        row-gap: 4px !important;
+        margin: 6px;
+    }
+
+    .skeleton-catalogo {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(var(--item-width), 1fr));
+        column-gap: 4px !important;
+        row-gap: 6px !important;
+        margin: 4px;
+    }
+
+    .skeleton-item {
+        width: var(--item-width);
+        height: var(--item-height);
+    }
+
+    .skeleton-item-catalogo {
+        padding: 4px;
+        flex: 0 0 auto;
+        width: var(--item-width);
+        height: var(--item-height);
+        background-color: var(--secondary-color);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .slider-slide {
+        width: 90vw;
+        margin-right: 1.2vw;
+        height: 180px !important;
+        margin-left: 0px;
+    }
+    
+    .slider-wrapper {
+        margin-left: calc((100vw - 90vw) / 2);
+    }
+    
+    .slider-nav {
+        position: absolute;
+        top: 50%;
+        padding: 0 15px;
+    }
+
+    .slider-nav-btn {
+        width: 20px;
+        height: 180px;
+        font-size: 18px;
+    }
+    
+    .slider-nav-btn i {
+        font-size: 14px;
+    }
+    
+    .slider-pagination-dot {
+        width: 8px;
+        height: 8px;
+        margin: 0 2px;
+    }
+}
+
+@media (max-width: 843px) and (min-width: 769px) {
+        .catalogo-grid, #catalogo-grid-page {
+        column-gap: 4px !important;
+        row-gap: 10px !important;
+        margin: 50px;
+    }
+.slider-section {
+        height: 180px;
+        margin-top: 50px;
+      /*  padding: 0 15px;*/
+    }
+    
+    .slider-slide {
+        width: 91vw;
+        margin-right: 1.2vw;
+        height: 160px !important;
+        margin-left: 0px;
+    }
+    
+    .slider-wrapper {
+        margin-left: calc((100vw - 91vw) / 2);
+    }
+    
+    .slider-nav-btn {
+        width: 20px;
+        height: 160px;
+        font-size: 22px;
+    }
+    
+    .slider-nav-btn i {
+        font-size: 18px;
+    }
+}
+
+@media (max-width: 800px) {
+.slider-nav-menu {
+    display: none;
+  }
+  .slider-header-burger {
+    display: flex;
+    margin-left: 0;
+  }
+  .slider-nav-login {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+.episodios-series-item {
         width: 180px;
         min-width: 180px;
         max-width: 180px;
@@ -6589,10 +6792,12 @@ html, body {
         display: inline !important;
     }
 
-    .slider-header {
-        background: #141414;
-        box-shadow: 0 2px 12px rgba(0,0,0,0.15);
-    }
+
+  .slider-header {
+    background: #141414;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  }
+
 
     .slider-background-blur {
         display: none;
@@ -6602,6 +6807,7 @@ html, body {
     .slider-section {
         padding-top: 0;
     }
+
 
     .slider-section {
         height: 190px;
@@ -6640,90 +6846,97 @@ html, body {
         margin: 0 2px;
     }
 
-    .slider-footer {
-        width: 100vw !important;
-        margin-left: calc(-50vw + 50%) !important;
-        max-width: 100vw !important;
-        left: 0 !important;
-        right: 0 !important;
-        position: relative !important;
-    }
-    
-    .slider-footer-inner {
-        padding: 32px 16px 16px 16px;
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 !important;
-    }
-    
-    .slider-footer-content {
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 24px;
-        margin-bottom: 24px;
-    }
-    
-    .slider-footer-title {
-        font-size: 0.9rem;
-        margin-bottom: 12px;
-    }
-    
-    .slider-footer-link {
-        font-size: 0.85rem;
-    }
-    
-    .slider-footer-social-link {
-        width: 36px;
-        height: 36px;
-    }
-    
-    .slider-footer-social-link i {
-        font-size: 1rem;
-    }
-    
-    .slider-footer-bottom {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 12px;
-    }
-    
-    .slider-footer-copyright {
-        font-size: 0.8rem;
-    }
-    
-    .slider-footer-language-select {
-        font-size: 0.8rem;
-        padding: 6px 10px;
+
+  .slider-footer {
+    width: 100vw !important;
+    margin-left: calc(-50vw + 50%) !important;
+    max-width: 100vw !important;
+    left: 0 !important;
+    right: 0 !important;
+    position: relative !important;
+  }
+  
+  .slider-footer-inner {
+    padding: 32px 16px 16px 16px;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+  
+  .slider-footer-content {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+  
+  .slider-footer-title {
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+  }
+  
+  .slider-footer-link {
+    font-size: 0.85rem;
+  }
+  
+  .slider-footer-social-link {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .slider-footer-social-link i {
+    font-size: 1rem;
+  }
+  
+  .slider-footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .slider-footer-copyright {
+    font-size: 0.8rem;
+  }
+  
+  .slider-footer-language-select {
+    font-size: 0.8rem;
+    padding: 6px 10px;
+  }
+}
+
+@media (max-width:768px) {
+.catalogo-grid {
+        column-gap: 6px !important;
+        row-gap: 4px !important;
     }
 }
 
-/* === SM Tablet pequeña y móviles grandes (600px - 767px) === */
-@media (min-width: 600px) and (max-width: 767px) { 
-        .carousel-section {margin-bottom: 40px;}
+@media (max-width: 600px) {
+.carousel-section {
+        margin-bottom: 40px;
+    }
+
+
         .details-modal-episode-item{flex-direction:column;align-items:flex-start;padding:12px 8px}
         .details-modal-episode-thumb{width:100%;height:160px;flex:0 0 auto;max-width:100%}
         .details-modal-play-overlay .details-modal-episode-play{padding:12px}
         .details-modal-episode-meta{width:100%}
         .details-modal-episode-title{font-size:15px}
         .details-modal-episode-synopsis{font-size:13px}
-        .catalogo-header{padding:12px} .catalogo-body{padding:8px 12px 24px 12px} .catalogo-genre-list{position:static;grid-template-columns:repeat(2,1fr);margin-top:8px} .catalogo-controls{width:100%;display:flex;justify-content:flex-end}
-        /* On mobile, don't let the closed dropdown take up layout space. Use display none unless .open on container */
-        .catalogo-genre-dropdown .catalogo-genre-list{display:none;opacity:0;visibility:hidden;transform:none}
-        .catalogo-genre-dropdown.open .catalogo-genre-list{display:grid;opacity:1;visibility:visible}
-
 }
 
-/* === SM Móviles medianos (481px - 599px) === */
-@media (min-width: 481px) and (max-width: 599px) { 
-    :root {
-        --item-width: 115px;
-        --item-height: 161px;
-        --modal-scale: 1.3;
-    }
+@media (max-width:600px) {
+.catalogo-header{padding:12px} .catalogo-body{padding:8px 12px 24px 12px} .catalogo-genre-list{position:static;grid-template-columns:repeat(2,1fr);margin-top:8px} .catalogo-controls{width:100%;display:flex;justify-content:flex-end}
+/* On mobile, don't let the closed dropdown take up layout space. Use display none unless .open on container */
+.catalogo-genre-dropdown .catalogo-genre-list{display:none;opacity:0;visibility:hidden;transform:none}
+.catalogo-genre-dropdown.open .catalogo-genre-list{display:grid;opacity:1;visibility:visible}
+}
 
-    .skeleton-item.skeleton-16x9 {
+@media (max-width: 480px) {
+.skeleton-item.skeleton-16x9 {
         width: 170px;
         /* height removed so poster aspect-ratio controls height */
     }
+
 
     .episodios-series-item .poster-container {
         aspect-ratio: 16/9;
@@ -6844,10 +7057,17 @@ html, body {
         border-style: solid;
         border-color: rgba(0, 0, 0, 0.9) transparent transparent transparent;
     }
-   
-    .details-modal-body .details-modal-episodes .details-modal-episode-item .details-modal-episode-thumb {
-        max-width: 100%;
+
+
+    :root {
+        --item-width: 115px;
+        --item-height: 161px;
+        --modal-scale: 1.3;
     }
+    
+.details-modal-body .details-modal-episodes .details-modal-episode-item .details-modal-episode-thumb {
+    max-width: 100%;
+}
     .carousel-section {
         margin-bottom: 30px;
         margin-left: 20px;
@@ -6947,37 +7167,43 @@ html, body {
         padding: 8px 12px;
     }
 
-    .slider-section {
-        margin-top: 80px; /* Ajustado para móviles */
-    }
-    .details-modal-overlay {
-        padding-top: 60px;
-        padding-bottom: 20px;
-    }
-    .video-modal-overlay,
-    .share-modal-overlay {
-        padding: 60px 12px 12px 12px;
-    }
 
-    .slider-header-inner {
-        height: 44px;
-        padding: 0px 15px;
-    }
-    .slider-logo svg {
-        height: 22px;
-    }
-    .slider-header-burger {
-        width: 32px;
-        height: 32px;
-    }
-    .slider-mobile-menu {
-        max-width: 90vw;
-        padding-top: 16px;
-    }
-    .slider-mobile-menu .slider-nav-link {
-        font-size: 1rem;
-        padding: 14px 18px;
-    }
+  body {
+    padding-top: 44px;
+  }
+  .slider-section {
+    margin-top: 80px; /* Ajustado para móviles */
+  }
+  .details-modal-overlay {
+    padding-top: 60px;
+    padding-bottom: 20px;
+  }
+  .video-modal-overlay,
+  .share-modal-overlay {
+    padding: 60px 12px 12px 12px;
+  }
+
+
+  .slider-header-inner {
+    height: 44px;
+    padding: 0px 15px;
+  }
+  .slider-logo svg {
+    height: 22px;
+  }
+  .slider-header-burger {
+    width: 32px;
+    height: 32px;
+  }
+  .slider-mobile-menu {
+    max-width: 90vw;
+    padding-top: 16px;
+  }
+  .slider-mobile-menu .slider-nav-link {
+    font-size: 1rem;
+    padding: 14px 18px;
+  }
+
 
     .slider-section {
         height: 140px;
@@ -7019,43 +7245,44 @@ html, body {
         margin: 0 1px;
     }
 
-    .slider-footer {
-        width: 100vw !important;
-        margin-left: calc(-50vw + 50%) !important;
-        max-width: 100vw !important;
-        left: 0 !important;
-        right: 0 !important;
-        position: relative !important;
-    }
-    
-    .slider-footer-inner {
-        padding: 24px 12px 12px 12px;
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 !important;
-    }
-    
-    .slider-footer-content {
-        grid-template-columns: 1fr;
-        gap: 20px;
-    }
-    
-    .slider-footer-logo svg {
-        height: 28px;
-    }
-    
-    .slider-footer-social {
-        gap: 12px;
-    }
-    
-    .slider-footer-social-link {
-        width: 32px;
-        height: 32px;
-    }
-    
-    .slider-footer-social-link i {
-        font-size: 0.9rem;
-    }
+
+  .slider-footer {
+    width: 100vw !important;
+    margin-left: calc(-50vw + 50%) !important;
+    max-width: 100vw !important;
+    left: 0 !important;
+    right: 0 !important;
+    position: relative !important;
+  }
+  
+  .slider-footer-inner {
+    padding: 24px 12px 12px 12px;
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+  
+  .slider-footer-content {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .slider-footer-logo svg {
+    height: 28px;
+  }
+  
+  .slider-footer-social {
+    gap: 12px;
+  }
+  
+  .slider-footer-social-link {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .slider-footer-social-link i {
+    font-size: 0.9rem;
+  }
 
 
     .details-modal-episode-thumb{height:140px}
@@ -7111,9 +7338,8 @@ html, body {
     }
 }
 
-/* === XS Móviles pequeños (361px - 480px) === */
-@media (min-width: 361px) and (max-width: 480px) { 
-        .catalogo-grid, #catalogo-grid-page {
+@media (max-width:420px) {
+    .catalogo-grid, #catalogo-grid-page {
         column-gap: 6px !important;
         row-gap: 4px !important;
         margin: 6px;
@@ -7181,11 +7407,12 @@ html, body {
         margin: 0px;
         gap: 0px 4px !important;
     }
+
 }
 
-/* === XXS Móviles muy pequeños (≤ 360px) === */
-@media (max-width: 360px) { 
-    .catalogo-grid, #catalogo-grid-page {
+
+@media (max-width:375px) {
+.catalogo-grid, #catalogo-grid-page {
         column-gap: 6px !important;
         row-gap: 4px !important;
     }
@@ -7216,74 +7443,69 @@ html, body {
     }
 }
 
-/* ============================================
-   ORIENTACIÓN DE DISPOSITIVOS
-   ============================================ */
+@media (max-width:360px) {
+.catalogo-grid, #catalogo-grid-page {
+        column-gap: 6px !important;
+        row-gap: 4px !important;
+    }
+    .skeleton-catalogo {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(var(--item-width), 1fr));
+        column-gap: 4px !important;
+        row-gap: 6px !important;
+        margin: 4px;
+    }
 
-/* === Tablets en Portrait === */
-@media (min-width: 768px) and (max-width: 1024px) and (orientation: portrait) { 
+    .skeleton-item {
+        width: var(--item-width);
+        height: var(--item-height);
+    }
+
+    .skeleton-item-catalogo {
+        padding: 4px;
+        flex: 0 0 auto;
+        width: var(--item-width);
+        height: var(--item-height);
+        background-color: var(--secondary-color);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 }
 
-/* === Tablets en Landscape === */
-@media (min-width: 768px) and (max-width: 1024px) and (orientation: landscape) { 
+@media (max-width:320px) {
+.catalogo-grid, #catalogo-grid-page {
+        column-gap: 6px !important;
+        row-gap: 4px !important;
+    }
+    .skeleton-catalogo {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(var(--item-width), 1fr));
+        column-gap: 4px !important;
+        row-gap: 6px !important;
+        margin: 4px;
+    }
+
+    .skeleton-item {
+        width: var(--item-width);
+        height: var(--item-height);
+    }
+
+    .skeleton-item-catalogo {
+        padding: 4px;
+        flex: 0 0 auto;
+        width: var(--item-width);
+        height: var(--item-height);
+        background-color: var(--secondary-color);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
 }
-
-/* === Móviles en Landscape === */
-@media (max-width: 896px) and (orientation: landscape) { 
-}
-
-/* ============================================
-   PREFERENCIAS DEL USUARIO
-   ============================================ */
-
-/* === Movimiento Reducido === */
-@media (prefers-reduced-motion: reduce) { 
-}
-
-/* === Alto Contraste === */
-@media (prefers-contrast: high) { 
-}
-
-/* === Modo Oscuro (Dark Mode) === */
-@media (prefers-color-scheme: dark) { 
-}
-
-/* === Modo Claro (Light Mode) === */
-@media (prefers-color-scheme: light) { 
-}
-
-/* ============================================
-   PANTALLAS DE ALTA DENSIDAD (RETINA)
-   ============================================ */
-
-/* === Retina 2x === */
-@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) { 
-}
-
-/* === Retina 3x === */
-@media (-webkit-min-device-pixel-ratio: 3), (min-resolution: 288dpi) { 
-}
-
-/* ============================================
-   OPTIMIZACIÓN TOUCH
-   ============================================ */
-
-/* === Dispositivos Touch === */
-@media (hover: none) and (pointer: coarse) { 
-}
-
-/* === Dispositivos con Puntero Fino (mouse) === */
-@media (hover: hover) and (pointer: fine) { 
-}
-
-/* ============================================
-   IMPRESIÓN
-   ============================================ */
-
-@media print { 
-}
-
-
 
 @media (hover: hover) and (pointer: fine) {
     /* Only apply the small lift effect when NOT using the hover-zoom scale */
@@ -7317,4 +7539,17 @@ html, body {
     transform: translateY(0) !important;
     pointer-events: all !important;
     }
+}
+
+.episodios-series-item {
+    width: 300px;
+    min-width: 300px;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+    overflow: visible;
+    position: relative;
+    margin: 0;
+    padding: 0;
 }
