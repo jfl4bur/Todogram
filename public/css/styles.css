@@ -164,6 +164,9 @@
     /* Catalog grid gaps used by JS to compute items per row and pagination */
     --catalogo-gap: 4px;
     --catalogo-row-gap: 48px;
+    /* Límites para resize automático del catálogo (puedes ajustarlos) */
+    --catalogo-min-item-width: 120px;
+    --catalogo-max-item-width: 220px;
 }
 
 /* Definiciones de fuentes */
