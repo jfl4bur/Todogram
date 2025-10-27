@@ -1333,6 +1333,47 @@ button:focus {
     padding: 0;
 }
 
+/* ===== TEMPORARY OVERRIDES: ensure catalog items and skeletons follow the computed CSS variables
+   These rules are intentionally specific and limited to the catalog page to avoid breaking other components.
+   They are reversible and meant as a targeted hotfix while the stylesheet is cleaned. */
+#catalogo-page-root .catalogo-item,
+#catalogo-grid-page .catalogo-item,
+#catalogo-skeleton .skeleton-item,
+.catalogo-item,
+.skeleton-item,
+.custom-carousel-item {
+    width: var(--item-width) !important;
+    height: var(--item-height) !important;
+}
+
+/* Ensure skeleton poster area respects the var-driven size */
+#catalogo-page-root .skeleton-item .skeleton-poster,
+.skeleton-item .skeleton-poster {
+    width: 100% !important;
+    aspect-ratio: auto !important;
+}
+
+/* LIMIT: restore modal sizes for desktop in case they were affected */
+.details-modal-content,
+.modal-content,
+.video-modal-content,
+.video-modal-overlay .video-modal-content,
+.hover-modal,
+.details-modal-body {
+    width: auto !important;
+    max-width: 1100px !important;
+}
+
+/* Ensure catalog loaders are centered but do not force display blocking */
+.catalogo-item .loader,
+.catalogo-item .loader_episodios {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+/* End temporary overrides */
+
 /* ===== Catalog / carousel override to follow runtime variables =====
    This block is placed late in the file so it can override older
    fixed-width rules (many legacy 300px rules). It forces catalog

@@ -25,7 +25,8 @@
     const DEFAULT_MAX_ITEM = 380; // px
     const DEBOUNCE_MS = 80;
     // DEBUG mode: set true temporarily to print diagnostic info in the browser console
-    const DEBUG = true;
+    // Disabled now to avoid noisy logs for the user
+    const DEBUG = false;
 
     function getNumericCssVar(name, fallback){
         try{
