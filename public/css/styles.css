@@ -7203,7 +7203,7 @@ body {
         max-height: calc(1.5em * 3);
     }
 
-    /* Tooltip styles for mobile: hidden by default, shown when button has .active (long-press) */
+    /* Tooltip styles for mobile: hidden by default, shown when button has .active */
     .details-modal-action-btn .tooltip {
         display: block;
         opacity: 0;
@@ -7226,7 +7226,7 @@ body {
         transition: opacity 200ms ease, transform 200ms ease;
     }
 
-    /* Show tooltip only when the action button has .active (set on long-press) */
+    /* Show tooltip only when the action button has .active */
     .details-modal-action-btn.active .tooltip,
     .modal-actions .details-modal-action-btn.active .tooltip {
         opacity: 1 !important;

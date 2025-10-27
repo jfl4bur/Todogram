@@ -181,7 +181,7 @@
             }
         });
 
-        // Tap vs scroll detection using pointer/touch events (sin soporte de long-press)
+    // Tap vs scroll detection using pointer/touch events (sin soporte de long press)
         // Registramos coordenadas en pointerdown/touchstart y descartamos el tap si se supera
         // un umbral de movimiento. Si no se cancela, abrimos el detalle.
         let tapCancelled = false;

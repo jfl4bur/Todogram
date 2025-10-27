@@ -634,10 +634,10 @@ class DetailsModal {
                 });
             });
 
-            // Remove legacy long-press behavior: wire simple click/touch handlers without timers
+            // Wire simple click/touch handlers to ensure action buttons don't keep an active state
             this.detailsModalBody.querySelectorAll('.details-modal-action-btn').forEach(btn => {
-                if (btn._longPressAttached) return;
-                btn._longPressAttached = true;
+                if (btn._touchHandlersAttached) return;
+                btn._touchHandlersAttached = true;
                 // Ensure active class does not remain after an interaction
                 btn.addEventListener('click', (e) => { try { btn.classList.remove('active'); } catch (err) {} });
                 btn.addEventListener('touchend', () => { try { btn.classList.remove('active'); } catch (err) {} }, { passive: true });
