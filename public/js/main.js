@@ -123,6 +123,35 @@ document.addEventListener('DOMContentLoaded', function () {
         window.activeItem = null;
         window.hoverModalItem = null;
 
+        // Global capture-phase click suppressor: when a long-press sets the global flag,
+        // prevent clicks on likely item elements from propagating and opening the modal.
+        try {
+            document.addEventListener('click', function(e){
+                try {
+                    if (window.__suppressDetailsModalUntil && Date.now() < window.__suppressDetailsModalUntil) {
+                        let el = e.target;
+                        while (el && el !== document) {
+                            try {
+                                if (el.classList && (el.classList.contains('catalogo-item') || el.classList.contains('slider-slide') || el.classList.contains('carousel-item') || el.classList.contains('hover-modal-content'))) {
+                                    try { e.stopImmediatePropagation(); } catch(_){}
+                                    try { e.preventDefault(); } catch(_){}
+                                    console.log('Global click suppressor: blocked click on', el);
+                                    return;
+                                }
+                                if (el.dataset && el.dataset.itemId) {
+                                    try { e.stopImmediatePropagation(); } catch(_){}
+                                    try { e.preventDefault(); } catch(_){}
+                                    console.log('Global click suppressor: blocked click on data-item element', el);
+                                    return;
+                                }
+                            } catch(_){}
+                            el = el.parentNode;
+                        }
+                    }
+                } catch(e) { /* ignore suppression errors */ }
+            }, true);
+        } catch(e) {}
+
                 // El slider independiente se inicializa automáticamente
         // No necesitamos delays ni polling
 

@@ -343,7 +343,10 @@ class DetailsModal {
         } catch (e) { /* ignore */ }
         // Debug: report caller and suppression flag for troubleshooting long-press opens
         try {
-            console.log('DetailsModal.show invoked. suppressUntil=', window.__suppressDetailsModalUntil || null, ' itemElement=', itemElement);
+            // Expose last call info in a global so it can be inspected from DevTools
+            try { window.__lastDetailsModalCall = Date.now(); window.__lastDetailsModalStack = (new Error()).stack; } catch(e){}
+            // Use error-level logging to make it prominent in the console
+            try { console.error('DetailsModal.show invoked. suppressUntil=', window.__suppressDetailsModalUntil || null, ' itemElement=', itemElement); } catch(e){}
             // Include a lightweight stack trace to identify the caller
             try { console.trace(); } catch(e) {}
         } catch(e) {}
