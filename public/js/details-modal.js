@@ -1,7 +1,10 @@
 // Permitir que otros scripts llamen a detailsModal.show mediante window.openDetailsModal
 document.addEventListener('DOMContentLoaded', function() {
     if (window.detailsModal) {
-        window.openDetailsModal = (item, origen) => window.detailsModal.show(item);
+        window.openDetailsModal = (item, origen) => {
+            try { if (window.__suppressDetailsModalUntil && Date.now() < window.__suppressDetailsModalUntil) { console.log('openDetailsModal: supressing due to long-press flag', window.__suppressDetailsModalUntil); return false; } } catch(e){}
+            try { return window.detailsModal.show(item); } catch(e) { console.warn('openDetailsModal: error calling detailsModal.show', e); return false; }
+        };
     }
     // Helper to open the share modal consistently from any context
     window.openShareModal = function(item) {
