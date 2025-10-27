@@ -531,7 +531,13 @@ class HoverModal {
                 const origin = this._currentOrigin;
                 this.close();
                 if (item && window.detailsModal) {
-                    window.detailsModal.show(item, origin);
+                    try {
+                        if (window.__suppressDetailsModalUntil && Date.now() < window.__suppressDetailsModalUntil) {
+                            console.log('hover-modal: supressing detailsModal.show due to recent long-press');
+                        } else {
+                            window.detailsModal.show(item, origin);
+                        }
+                    } catch(e) { console.warn('hover-modal: error calling detailsModal.show', e); }
                 }
             }
             return;

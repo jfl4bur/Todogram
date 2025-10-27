@@ -1309,6 +1309,12 @@
         
         function tryOpenModal() {
             if (window.detailsModal && typeof window.detailsModal.show === 'function') {
+                try {
+                    if (window.__suppressDetailsModalUntil && Date.now() < window.__suppressDetailsModalUntil) {
+                        console.log('slider: supressing detailsModal.show due to recent long-press');
+                        return false;
+                    }
+                } catch(e) {}
                 window.detailsModal.show(movie, element);
                 window.activeItem = movie;
                 return true;

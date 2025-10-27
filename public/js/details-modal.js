@@ -338,6 +338,13 @@ class DetailsModal {
                 return false;
             }
         } catch (e) { /* ignore */ }
+        // Debug: report caller and suppression flag for troubleshooting long-press opens
+        try {
+            console.log('DetailsModal.show invoked. suppressUntil=', window.__suppressDetailsModalUntil || null, ' itemElement=', itemElement);
+            // Include a lightweight stack trace to identify the caller
+            try { console.trace(); } catch(e) {}
+        } catch(e) {}
+
         // Normalize: if catalogo passed a 'raw' original row, copy common local fields so this modal can use them
         try {
             const raw = item && item.raw ? item.raw : null;
