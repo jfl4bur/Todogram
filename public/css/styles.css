@@ -1269,6 +1269,10 @@ button:focus {
     position: relative !important;
     width: 100%;
     height: auto !important;
+    /* Ensure posters in the catalog reserve space (same behavior as carousels)
+       so the loader can be vertically centered before the image finishes loading. */
+    aspect-ratio: 194 / 271 !important;
+    min-height: 180px; /* fallback for browsers without aspect-ratio */
 }
 
 /* Hover zoom: scale item and bring above siblings but keep below modal */
