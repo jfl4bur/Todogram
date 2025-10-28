@@ -7853,9 +7853,9 @@ body {
         column-gap: 4px !important;
         row-gap: 40px !important;
         /* margin: 19px !important; */
-        --item-width: 115px;
+        --item-width: 124px;
         --item-height: 162px !;
-        --item-height: 162px;
+        --item-height: 173px;
     }
 }
 
