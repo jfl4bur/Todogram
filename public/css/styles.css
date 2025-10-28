@@ -6649,9 +6649,9 @@ body {
     .catalogo-grid, #catalogo-grid-page {
         column-gap: 4px !important;
         row-gap: 40px !important;
-        margin: 27px !important;
-        --item-width: 127px;
-        --item-height: 184px;
+        margin: 20px !important;
+        --item-width: 139px;
+        --item-height: 181px;
         --modal-scale: 1.3;
     }
 
