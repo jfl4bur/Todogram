@@ -7948,6 +7948,17 @@ body {
     }
 }
 
+@media (max-width: 391px) {
+    .catalogo-grid, #catalogo-grid-page {
+        column-gap: 4px !important;
+        row-gap: 40px !important;
+        /* margin: 19px !important; */
+        --item-width: 124px;
+        --item-height: 162px !;
+        --item-height: 173px;
+    }
+}
+
 @media (max-width:376px) {
     .catalogo-grid, #catalogo-grid-page {
         column-gap: 4px !important;
