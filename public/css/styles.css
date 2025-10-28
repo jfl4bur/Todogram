@@ -4931,7 +4931,6 @@ slider-footer-content {
 }
 
 .loader {
-     0; */
      display: flex;
      align-items: center;
      justify-content: center;
@@ -4940,9 +4939,7 @@ slider-footer-content {
      top: 50%;
      left: 50%;
      transform: translateX(-50%) translateY(-50%);
-     transition: width 180ms 
-ease-out, height 180ms 
-ease-out;
+     transition: width 180ms ease-out, height 180ms ease-out;
      background: rgb(51, 51, 51);
      width: 100%;
      height: 100%;
