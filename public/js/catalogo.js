@@ -181,13 +181,15 @@
             }
         });
 
-    // Tap vs scroll detection using pointer/touch events (sin soporte de long press)
-        // Registramos coordenadas en pointerdown/touchstart y descartamos el tap si se supera
-        // un umbral de movimiento. Si no se cancela, abrimos el detalle.
+        // Tap vs scroll detection using pointer/touch events.
+        // Registramos coordenadas y tiempo en pointerdown/touchstart y descartamos el tap si se
+        // supera un umbral de movimiento o si la duración del contacto indica una pulsación larga.
         let tapCancelled = false;
         let pointerId = null;
         let startX = 0, startY = 0;
+        let startTime = null;
         const MOVE_THRESHOLD = 8; // pixels
+        const LONG_PRESS_MS = 500; // si el contacto dura >= esto, se considera long-press y se suprime la apertura
         let lastPointerType = null;
 
         d.addEventListener('pointerdown', (ev) => {
@@ -197,6 +199,7 @@
             pointerId = ev.pointerId;
             startX = ev.clientX;
             startY = ev.clientY;
+            startTime = Date.now();
             try { d.setPointerCapture(pointerId); } catch (e) {}
         }, { passive: true });
 
@@ -213,6 +216,12 @@
             if (ev.pointerId !== pointerId) return;
             try { d.releasePointerCapture(pointerId); } catch (e) {}
             pointerId = null;
+            // si la duración del contacto fue larga, tratamos como long-press y suprimimos el tap
+            try {
+                const held = startTime ? (Date.now() - startTime) : 0;
+                if (held >= LONG_PRESS_MS) tapCancelled = true;
+            } catch (e) {}
+            startTime = null;
             if (!tapCancelled) {
                 try {
                     const now = Date.now();
@@ -230,6 +239,7 @@
                 pointerId = null;
             }
             tapCancelled = true;
+            startTime = null;
         });
 
         // Fallback for touch-only browsers
@@ -239,6 +249,7 @@
             tapCancelled = false;
             startX = t.clientX;
             startY = t.clientY;
+            startTime = Date.now();
         }, { passive: true });
 
         d.addEventListener('touchmove', (ev) => {
@@ -252,6 +263,11 @@
         }, { passive: true });
 
         d.addEventListener('touchend', (ev) => {
+            try {
+                const held = startTime ? (Date.now() - startTime) : 0;
+                if (held >= LONG_PRESS_MS) tapCancelled = true;
+            } catch (e) {}
+            startTime = null;
             if (!tapCancelled) {
                 try {
                     const now = Date.now();
@@ -263,7 +279,7 @@
             }
         }, { passive: true });
 
-        d.addEventListener('touchcancel', (ev) => { tapCancelled = true; });
+        d.addEventListener('touchcancel', (ev) => { tapCancelled = true; startTime = null; });
 
         return d;
     }
