@@ -7720,6 +7720,16 @@ body {
 
 }
 
+@media (max-width: 415px) {
+    .catalogo-grid, #catalogo-grid-page {
+        column-gap: 4px !important;
+        row-gap: 40px !important;
+        margin: 19px !important;
+        --item-width: 115px;
+        --item-height: 162px !;
+        --item-height: 162px;
+    }
+}
 
 @media (max-width:376px) {
     .catalogo-grid, #catalogo-grid-page {
