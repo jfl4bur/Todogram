@@ -122,14 +122,12 @@
                 <img class="catalogo-card-image" loading="lazy" src="${it.posterUrl||'https://via.placeholder.com/194x271'}" alt="${it.title}">
                 <div class="loader"><i class="fas fa-spinner"></i></div>
             </div>
-            <div class="catalogo-item-title" style="display:none;">${it.title}</div>
         `;
 
         // Wire image load to hide loader and reveal title/image
         try {
             const imgEl = d.querySelector('.catalogo-card-image');
             const loaderEl = d.querySelector('.loader');
-            const titleEl = d.querySelector('.catalogo-item-title');
             if (imgEl) {
                 imgEl.style.opacity = '0';
                 imgEl.onload = function() {
