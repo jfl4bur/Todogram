@@ -2353,7 +2353,7 @@ button:focus {
 .catalogo-close{position:absolute;right:18px;top:10px;background:transparent;border:0;color:var(--text-color);font-size:32px;padding:6px 8px;border-radius:6px;cursor:pointer;z-index:905}
 .catalogo-header{display:flex;align-items:center;gap:12px;padding:18px 32px 12px 32px}
 .catalogo-tabs{display:flex;gap:12px;flex-wrap:wrap;margin: 40px;}
-.catalogo-tab{cursor:pointer;:;olor);padding: 0px;font-family: "Todogram Bold", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Oxygen, Cantarell, sans-serif;line-height: 36px;}
+.catalogo-tab{/* background:transparent; *//* border:0; *//* color:var(--text-secondary); *//* font-size:18px; *//* padding:6px 10px; *//* cursor:pointer; *//* font-family: "Todogram Bold", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Oxygen, Cantarell, sans-serif; *//* border: none; */color: var(--text-color);/* border-bottom: 4px solid rgb(240, 240, 240); */padding: 0px;font-family: "Todogram Bold", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Oxygen, Cantarell, sans-serif;line-height: 36px;}
 .catalogo-tab.active{color:var(--text-color);border-bottom: 4px solid rgb(240, 240, 240);padding: 0px;font-family: "Todogram Bold", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Oxygen, Cantarell, sans-serif;line-height: 36px;font-weight: bold;}
 .catalogo-controls{margin-left:0}
 .catalogo-genre-dropdown{position:relative}
@@ -6138,7 +6138,7 @@ html, body {
 
     .catalogo-tabs {
         display: flex;
-        gap: 12px;
+        gap: 0px;
         margin: 10px;
         flex-direction: row;
         flex-wrap: nowrap;
@@ -6746,7 +6746,7 @@ body {
 
         .catalogo-tabs {
         display: flex;
-        gap: 12px;
+        gap: 2px;
         margin: 15px;
         flex-direction: row;
         flex-wrap: nowrap;
@@ -6872,7 +6872,7 @@ body {
 
         .catalogo-tabs {
         display: flex;
-        gap: 12px;
+        gap: 2px;
         margin: 15px;
         flex-direction: row;
         flex-wrap: nowrap;
@@ -6962,7 +6962,7 @@ body {
 
     .catalogo-tabs {
         display: flex;
-        gap: 12px;
+        gap: 0px;
         margin: 10px;
         flex-direction: row;
         flex-wrap: nowrap;
@@ -7373,7 +7373,7 @@ body {
 
     .catalogo-tabs {
         display: flex;
-        gap: 12px;
+        gap: 0px;
         margin: 10px;
         flex-direction: row;
         flex-wrap: nowrap;
@@ -7414,7 +7414,7 @@ body {
 
     .catalogo-tabs {
         display: flex;
-        gap: 12px;
+        gap: 0px;
         margin: 10px;
         flex-direction: row;
         flex-wrap: nowrap;
@@ -7448,7 +7448,7 @@ body {
 
     .catalogo-tabs {
         display: flex;
-        gap: 12px;
+        gap: 2px;
         margin: 15px;
         flex-direction: row;
         flex-wrap: nowrap;
@@ -7458,7 +7458,7 @@ body {
         column-gap: 4px !important;
         row-gap: 40px!important;
         margin: 8px!important;
-        --item-width: 126px;
+        --item-width: 133px;
         --item-height: 179px;
         --modal-scale: 1.3;
     }
@@ -7943,9 +7943,12 @@ body {
         column-gap: 4px !important;
         row-gap: 40px !important;
         /* margin: 19px !important; */
-        --item-width: 124px;
-        --item-height: 162px !;
-        --item-height: 173px;
+        /* Fluid item sizing: interpola linealmente entre 320px and 415px viewport width
+           --item-width: 115px at 320px -> 124px at 415px
+           formula: 115px + slope * (100vw - 320px), clamped between min and max */
+        --item-width: clamp(115px, calc(115px + 0.09473684 * (100vw - 320px)), 124px);
+        /* --item-height: use a fluid range between 150px and 181px */
+        --item-height: clamp(150px, calc(150px + 0.32631579 * (100vw - 320px)), 181px);
     }
 }
 
@@ -7954,9 +7957,9 @@ body {
         column-gap: 4px !important;
         row-gap: 40px !important;
         /* margin: 19px !important; */
-        --item-width: 115px;
-        --item-height: 162px !;
-        --item-height: 161px;
+        /* Keep same fluid sizing rules so size changes smoothly between breakpoints */
+        --item-width: clamp(115px, calc(115px + 0.09473684 * (100vw - 320px)), 124px);
+        --item-height: clamp(150px, calc(150px + 0.32631579 * (100vw - 320px)), 181px);
     }
 }
 
@@ -7965,9 +7968,9 @@ body {
         column-gap: 4px !important;
         row-gap: 40px  !important;
         margin: 7px  !important;
-        --item-width: 117px;
-        --item-height: 154px !;
-        --item-height: 181px;
+        /* Keep same fluid sizing rules so size changes smoothly between breakpoints */
+        --item-width: clamp(115px, calc(115px + 0.09473684 * (100vw - 320px)), 124px);
+        --item-height: clamp(150px, calc(150px + 0.32631579 * (100vw - 320px)), 181px);
     }
 
     .catalogo-page-header {
