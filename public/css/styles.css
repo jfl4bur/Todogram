@@ -3700,6 +3700,46 @@ ease-out;
   overflow: hidden !important;
 }
 
+/* Activar menú móvil a partir de 1200px y ocultar navegación de escritorio */
+@media (max-width: 1200px) {
+    /* Ocultar el menú de navegación principal (links) para mostrar la versión móvil */
+    .slider-nav-menu {
+        display: none !important;
+    }
+
+    /* Mostrar el botón 'burger' para abrir el menú móvil */
+    .slider-header-burger {
+        display: flex !important;
+    }
+
+    /* Ajustes visuales para header en tamaños medios/pequeños */
+    .slider-header {
+        background: #141414;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+
+    /* Opcional: ocultar búsqueda en header para ahorrar espacio */
+    .header-search {
+        display: none !important;
+    }
+
+    /* Ajustes de espaciado para el header */
+    .slider-header-inner {
+        padding: 0 12px !important;
+        height: 56px !important;
+    }
+
+    .slider-logo svg {
+        height: 32px !important;
+    }
+
+    /* Ocultar botón de login si sobra espacio (puede mostrarse dentro del menú móvil) */
+    .slider-nav-login {
+        display: none !important;
+    }
+}
+
 /* Ajuste para el contenido debajo del header fijo */
 body {
   padding-top: 1px;
