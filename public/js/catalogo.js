@@ -377,6 +377,39 @@
     const grid = document.getElementById('catalogo-grid-page');
     if(grid){ grid.style.columnGap = grid.style.columnGap || getComputedStyle(document.documentElement).getPropertyValue('--catalogo-gap') || '18px'; grid.style.rowGap = grid.style.rowGap || getComputedStyle(document.documentElement).getPropertyValue('--catalogo-row-gap') || '48px'; }
 
+    // Prevent hover modal from showing on touch devices (long-press) and
+    // ensure right-click/contextmenu behaves normally (doesn't open details modal).
+    // Approach:
+    //  - Track recent touchstart events to suppress the synthetic mouseover that
+    //    some browsers fire after touch (prevents long-press -> hover).
+    //  - Add a delegated 'contextmenu' listener that stops propagation when
+    //    triggered on a catalog item so no other delegated handlers open details.
+    if (grid) {
+        // recent touch flag cleared shortly after touchend to allow later hover
+        grid.__suppressHover = false;
+        grid.addEventListener('touchstart', (ev) => {
+            try {
+                grid.__suppressHover = true;
+                if (grid.__suppressHoverTimer) clearTimeout(grid.__suppressHoverTimer);
+                grid.__suppressHoverTimer = setTimeout(() => { grid.__suppressHover = false; grid.__suppressHoverTimer = null; }, 800);
+            } catch (e) {}
+        }, { passive: true });
+
+        // Prevent any delegated 'contextmenu' handlers from acting on catalog items
+        // while still allowing the browser's native context menu to appear.
+        grid.addEventListener('contextmenu', (ev) => {
+            try {
+                const itemEl = ev.target && ev.target.closest ? ev.target.closest('.catalogo-item') : null;
+                if (itemEl && grid.contains(itemEl)) {
+                    // stop propagation so other delegated listeners (that might open
+                    // the details modal) don't receive this event. Do NOT call
+                    // preventDefault() so the native context menu still appears.
+                    ev.stopPropagation();
+                }
+            } catch (e) {}
+        }, true);
+    }
+
         const data = await loadData();
 
         // Global fallback: registrar promesas rechazadas para debugging.
@@ -819,6 +852,13 @@
             // Show hover with a delay (match carousels behaviour)
             const HOVER_SHOW_DELAY = 900; // ms - same delay used in carousels
             grid.addEventListener('mouseover', (e) => {
+                // Do not show hover modal on touch-capable devices or immediately
+                // after a touch event (prevents long-press -> hover behavior).
+                try {
+                    if (('ontouchstart' in window) || window.matchMedia('(hover: none)').matches) return;
+                    if (grid && grid.__suppressHover) return;
+                } catch (err) {}
+
                 const itemEl = e.target.closest('.catalogo-item');
                 if (!itemEl || !grid.contains(itemEl)) return;
                 const itemId = itemEl.dataset.itemId;
