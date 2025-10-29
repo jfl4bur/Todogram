@@ -573,6 +573,8 @@ button:focus {
 }
 
 /* Make catalog items behave like carousel items on hover (lift up slightly) */
+
+.catalogo-item-title{display:none;}
 .catalogo-item {
     flex: 0 0 auto;
     width: var(--item-width);
@@ -591,7 +593,7 @@ button:focus {
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    /* height: 100%; */
     z-index: 1;
 }
 
@@ -1251,8 +1253,8 @@ button:focus {
 }
 .catalogo-body{flex:1;overflow:auto;padding:8px 32px 48px 32px}
 .catalogo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--item-width),1fr));column-gap:4px;row-gap:75px}
-.catalogo-item{background:transparent;padding:4px;border-radius:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;position:relative}
-.catalogo-item img{width:100%;height:auto;border-radius:0;object-fit: fill;background:#232323}
+.catalogo-item{background:transparent;/* padding:4px; */border-radius:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;position:relative}
+.catalogo-item img{width:100%;/* height:auto; */border-radius:0;object-fit: fill;background:#232323}
 .catalogo-item .title{margin-top:8px;font-size:14px;text-align:center;color:var(--text-color)}
 
 /* Improve touch responsiveness on mobile: eliminate delay/gesture ambiguity */
@@ -1268,11 +1270,11 @@ button:focus {
 .catalogo-grid .catalogo-item .poster-container {
     position: relative !important;
     width: 100%;
-    height: auto !important;
+    /* height: auto !important; */
     /* Ensure posters in the catalog reserve space (same behavior as carousels)
        so the loader can be vertically centered before the image finishes loading. */
     aspect-ratio: 194 / 271 !important;
-    min-height: 180px; /* fallback for browsers without aspect-ratio */
+    /* min-height: 180px; */ /* fallback for browsers without aspect-ratio */
 }
 
 /* Hover zoom: scale item and bring above siblings but keep below modal */
@@ -1847,7 +1849,7 @@ button:focus {
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
+    /* height: 100%; */
     z-index: 1;
 }
 
@@ -2414,8 +2416,8 @@ button:focus {
 }
 .catalogo-body{flex:1;overflow:auto;padding:8px 32px 48px 32px}
 .catalogo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--item-width),1fr));column-gap: 5px !important;row-gap: 90px !important;margin: 25px;}
-.catalogo-item{background:transparent;padding:4px;border-radius:0;cursor:pointer;display:flex;flex-direction:column;align-items:center}
-.catalogo-item img{width:100%;height:100%;border-radius:0;object-fit:fill;background:#232323}
+.catalogo-item{background:transparent;/* padding:4px; */border-radius:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;width: 100%;height: 100%;}
+.catalogo-item img{width:100%;/* height:100%; */border-radius:0;object-fit:fill;background:#232323}
 .catalogo-item .title{margin-top:8px;font-size:14px;text-align:center;color:var(--text-color)}
 
 /* Ensure hover modal and details modal overlay show above catalogo */
@@ -7395,7 +7397,7 @@ body {
         margin: 24px !important;
         --item-width: 150px !;
         --item-height: 210px !;
-        --item-width: 150px;
+        --item-width: 137px;
         --item-height: 182px;
     }
 
@@ -7458,8 +7460,8 @@ body {
         column-gap: 4px !important;
         row-gap: 40px!important;
         margin: 8px!important;
-        --item-width: 133px;
-        --item-height: 179px;
+        --item-width: 130px;
+        --item-height: 200px;
         --modal-scale: 1.3;
     }
 
@@ -7869,7 +7871,7 @@ body {
         row-gap: 40px!important;
         margin: 13px !important;
         --item-width: 118px;
-        --item-height: 162px;
+        --item-height: 190px;
         --modal-scale: 1.3;
     }
         .header-search {
@@ -7943,9 +7945,9 @@ body {
         column-gap: 4px !important;
         row-gap: 40px !important;
         /* margin: 19px !important; */
-        --item-width: 124px;
+        --item-width: 115px;
         --item-height: 162px !;
-        --item-height: 173px;
+        --item-height: 185px;
     }
 }
 
@@ -7954,9 +7956,9 @@ body {
         column-gap: 4px !important;
         row-gap: 40px !important;
         /* margin: 19px !important; */
-        --item-width: 115px;
-        --item-height: 162px !;
-        --item-height: 161px;
+        --item-width: 100px;
+        --item-height: 142px !;
+        --item-height: 180px;
     }
 }
 
@@ -7965,7 +7967,7 @@ body {
         column-gap: 4px !important;
         row-gap: 40px  !important;
         margin: 7px  !important;
-        --item-width: 117px;
+        --item-width: 113px;
         --item-height: 154px !;
         --item-height: 181px;
     }
@@ -8023,9 +8025,10 @@ body {
         column-gap: 4px !important;
         row-gap: 40px !important;
         margin: 6px !important;
-        --item-width: 108px!important;
-        --item-height: 162px!important;
-        --modal-scale: 1.3;
+        --item-width: 108px!;
+        --item-height: 162px!;
+        --item-width: 100px;
+        --item-height: 142px;
     }
     .skeleton-catalogo {
         display: grid;
@@ -8059,9 +8062,9 @@ body {
         column-gap: 4px;
         row-gap: 40px;
         margin: 12px;
-        --item-width: 118px;
-        --item-height: 162px;
-        --modal-scale: 1.3;
+        --item-width: 65px;
+        --item-height: 149px !;
+        --item-height: 155px;
     }
     .skeleton-catalogo {
         display: grid;
