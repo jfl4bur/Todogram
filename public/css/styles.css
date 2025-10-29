@@ -1270,7 +1270,7 @@ button:focus {
 .catalogo-grid .catalogo-item .poster-container {
     position: relative !important;
     width: 100%;
-    /* height: auto !important; */
+    height: auto !important;
     /* Ensure posters in the catalog reserve space (same behavior as carousels)
        so the loader can be vertically centered before the image finishes loading. */
     aspect-ratio: 194 / 271 !important;
@@ -2416,8 +2416,8 @@ button:focus {
 }
 .catalogo-body{flex:1;overflow:auto;padding:8px 32px 48px 32px}
 .catalogo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--item-width),1fr));column-gap: 5px !important;row-gap: 90px !important;margin: 25px;}
-.catalogo-item{background:transparent;/* padding:4px; */border-radius:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;width: 100%;height: 100%;}
-.catalogo-item img{width:100%;/* height:100%; */border-radius:0;object-fit:fill;background:#232323}
+.catalogo-item{background:transparent;/* padding:4px; */border-radius:0;cursor:pointer;display:flex;flex-direction:column;align-items:center;width: 100%;height: 91%;}
+.catalogo-item img{width:100%;height: 91%;border-radius:0;object-fit:fill;background:#232323}
 .catalogo-item .title{margin-top:8px;font-size:14px;text-align:center;color:var(--text-color)}
 
 /* Ensure hover modal and details modal overlay show above catalogo */
