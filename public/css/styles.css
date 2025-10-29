@@ -7943,12 +7943,9 @@ body {
         column-gap: 4px !important;
         row-gap: 40px !important;
         /* margin: 19px !important; */
-        /* Fluid item sizing: interpola linealmente entre 320px and 415px viewport width
-           --item-width: 115px at 320px -> 124px at 415px
-           formula: 115px + slope * (100vw - 320px), clamped between min and max */
-        --item-width: clamp(115px, calc(115px + 0.09473684 * (100vw - 320px)), 124px);
-        /* --item-height: use a fluid range between 150px and 181px */
-        --item-height: clamp(150px, calc(150px + 0.32631579 * (100vw - 320px)), 181px);
+        --item-width: 124px;
+        --item-height: 162px !;
+        --item-height: 173px;
     }
 }
 
@@ -7957,9 +7954,9 @@ body {
         column-gap: 4px !important;
         row-gap: 40px !important;
         /* margin: 19px !important; */
-        /* Keep same fluid sizing rules so size changes smoothly between breakpoints */
-        --item-width: clamp(115px, calc(115px + 0.09473684 * (100vw - 320px)), 124px);
-        --item-height: clamp(150px, calc(150px + 0.32631579 * (100vw - 320px)), 181px);
+        --item-width: 115px;
+        --item-height: 162px !;
+        --item-height: 161px;
     }
 }
 
@@ -7968,9 +7965,9 @@ body {
         column-gap: 4px !important;
         row-gap: 40px  !important;
         margin: 7px  !important;
-        /* Keep same fluid sizing rules so size changes smoothly between breakpoints */
-        --item-width: clamp(115px, calc(115px + 0.09473684 * (100vw - 320px)), 124px);
-        --item-height: clamp(150px, calc(150px + 0.32631579 * (100vw - 320px)), 181px);
+        --item-width: 117px;
+        --item-height: 154px !;
+        --item-height: 181px;
     }
 
     .catalogo-page-header {
