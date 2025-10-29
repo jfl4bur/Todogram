@@ -2353,8 +2353,8 @@ button:focus {
 .catalogo-close{position:absolute;right:18px;top:10px;background:transparent;border:0;color:var(--text-color);font-size:32px;padding:6px 8px;border-radius:6px;cursor:pointer;z-index:905}
 .catalogo-header{display:flex;align-items:center;gap:12px;padding:18px 32px 12px 32px}
 .catalogo-tabs{display:flex;gap:12px;flex-wrap:wrap;margin: 40px;}
-.catalogo-tab{/* background:transparent; *//* border:0; *//* color:var(--text-secondary); *//* font-size:18px; *//* padding:6px 10px; *//* cursor:pointer; *//* font-family: "Todogram Bold", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Oxygen, Cantarell, sans-serif; *//* border: none; */color: var(--text-color);/* border-bottom: 4px solid rgb(240, 240, 240); */padding: 0px;font-family: "Todogram Bold", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Oxygen, Cantarell, sans-serif;line-height: 36px;}
-.catalogo-tab.active{color:var(--text-color);border-bottom: 4px solid rgb(240, 240, 240);padding: 0px;font-family: "Todogram Bold", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Oxygen, Cantarell, sans-serif;line-height: 36px;font-weight: bold;}
+.catalogo-tab{background:transparent;border:0;color:var(--text-secondary);font-size:18px;padding:6px 10px;cursor:pointer}
+.catalogo-tab.active{color:var(--text-color);border-bottom: 4px solid rgb(240, 240, 240);padding: 0px;outline: none;font-family: "Todogram Bold", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Oxygen, Cantarell, sans-serif;line-height: 36px;font-weight: bold;}
 .catalogo-controls{margin-left:0}
 .catalogo-genre-dropdown{position:relative}
 /* Dropdown aligned to left to match UI */
@@ -7899,7 +7899,7 @@ body {
 
     .catalogo-tabs {
         display: flex;
-        gap: 18px;
+        gap: 10px;
         margin: 10px;
         flex-direction: row;
         flex-wrap: nowrap;
