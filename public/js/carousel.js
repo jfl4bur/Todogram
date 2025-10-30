@@ -446,9 +446,46 @@ class EpisodiosSeriesCarousel {
     const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
     const wrapperStyle = getComputedStyle(this.wrapper);
     const paddingLeft = parseFloat(wrapperStyle.paddingLeft) || 0;
-    const desired = (items[targetIndex] && typeof items[targetIndex].offsetLeft === 'number') ? items[targetIndex].offsetLeft - paddingLeft : targetIndex * stepSize;
-    const finalScroll = Math.min(Math.max(0, desired), maxScroll);
-    this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+    // Calcular desired usando bounding rect relativo al wrapper + scrollLeft para mayor precisión
+    const computeDesired = () => {
+        if (items[targetIndex]) {
+            try {
+                const itemRect = items[targetIndex].getBoundingClientRect();
+                const containerRect = this.wrapper.getBoundingClientRect();
+                return itemRect.left - containerRect.left + this.wrapper.scrollLeft - paddingLeft;
+            } catch (e) {
+                // fallback a offsetLeft
+                return (typeof items[targetIndex].offsetLeft === 'number') ? items[targetIndex].offsetLeft - paddingLeft : targetIndex * stepSize;
+            }
+        }
+        return targetIndex * stepSize;
+    };
+
+    // Usar requestAnimationFrame para esperar a que posibles reflows (imágenes) terminen
+    requestAnimationFrame(() => {
+        const desired = computeDesired();
+        // Debug: imprimir valores clave para diagnosticar alineación
+        try {
+            console.log('carousel-debug', {
+                carouselId: this.wrapper && this.wrapper.id,
+                direction,
+                currentScroll: this.wrapper ? this.wrapper.scrollLeft : null,
+                currentIndex,
+                targetIndex,
+                itemsLength: items.length,
+                itemOffsetLeft: items[targetIndex] ? items[targetIndex].offsetLeft : null,
+                itemRectLeft: items[targetIndex] ? items[targetIndex].getBoundingClientRect().left : null,
+                containerRectLeft: this.wrapper ? this.wrapper.getBoundingClientRect().left : null,
+                paddingLeft,
+                desired,
+                maxScroll
+            });
+        } catch (e) {
+            console.warn('carousel-debug: error al intentar loggear valores', e);
+        }
+        const finalScroll = Math.min(Math.max(0, Math.round(desired)), maxScroll);
+        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+    });
     }
 
 // (Eliminados duplicados y métodos sobrantes)
@@ -755,9 +792,43 @@ class EpisodiosAnimesCarousel {
         const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
         const wrapperStyle = getComputedStyle(this.wrapper);
         const paddingLeft = parseFloat(wrapperStyle.paddingLeft) || 0;
-        const desired = (items[targetIndex] && typeof items[targetIndex].offsetLeft === 'number') ? items[targetIndex].offsetLeft - paddingLeft : targetIndex * stepSize;
-        const finalScroll = Math.min(Math.max(0, desired), maxScroll);
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+        const computeDesired = () => {
+            if (items[targetIndex]) {
+                try {
+                    const itemRect = items[targetIndex].getBoundingClientRect();
+                    const containerRect = this.wrapper.getBoundingClientRect();
+                    return itemRect.left - containerRect.left + this.wrapper.scrollLeft - paddingLeft;
+                } catch (e) {
+                    return (typeof items[targetIndex].offsetLeft === 'number') ? items[targetIndex].offsetLeft - paddingLeft : targetIndex * stepSize;
+                }
+            }
+            return targetIndex * stepSize;
+        };
+
+        requestAnimationFrame(() => {
+            const desired = computeDesired();
+            // Debug: imprimir valores clave para diagnosticar alineación
+            try {
+                console.log('carousel-debug', {
+                    carouselId: this.wrapper && this.wrapper.id,
+                    direction,
+                    currentScroll: this.wrapper ? this.wrapper.scrollLeft : null,
+                    currentIndex,
+                    targetIndex,
+                    itemsLength: items.length,
+                    itemOffsetLeft: items[targetIndex] ? items[targetIndex].offsetLeft : null,
+                    itemRectLeft: items[targetIndex] ? items[targetIndex].getBoundingClientRect().left : null,
+                    containerRectLeft: this.wrapper ? this.wrapper.getBoundingClientRect().left : null,
+                    paddingLeft,
+                    desired,
+                    maxScroll
+                });
+            } catch (e) {
+                console.warn('carousel-debug: error al intentar loggear valores', e);
+            }
+            const finalScroll = Math.min(Math.max(0, Math.round(desired)), maxScroll);
+            this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+        });
     }
 }
 
@@ -1054,9 +1125,43 @@ class EpisodiosDocumentalesCarousel {
         const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
         const wrapperStyle = getComputedStyle(this.wrapper);
         const paddingLeft = parseFloat(wrapperStyle.paddingLeft) || 0;
-        const desired = (items[targetIndex] && typeof items[targetIndex].offsetLeft === 'number') ? items[targetIndex].offsetLeft - paddingLeft : targetIndex * stepSize;
-        const finalScroll = Math.min(Math.max(0, desired), maxScroll);
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+        const computeDesired = () => {
+            if (items[targetIndex]) {
+                try {
+                    const itemRect = items[targetIndex].getBoundingClientRect();
+                    const containerRect = this.wrapper.getBoundingClientRect();
+                    return itemRect.left - containerRect.left + this.wrapper.scrollLeft - paddingLeft;
+                } catch (e) {
+                    return (typeof items[targetIndex].offsetLeft === 'number') ? items[targetIndex].offsetLeft - paddingLeft : targetIndex * stepSize;
+                }
+            }
+            return targetIndex * stepSize;
+        };
+
+        requestAnimationFrame(() => {
+            const desired = computeDesired();
+            // Debug: imprimir valores clave para diagnosticar alineación
+            try {
+                console.log('carousel-debug', {
+                    carouselId: this.wrapper && this.wrapper.id,
+                    direction,
+                    currentScroll: this.wrapper ? this.wrapper.scrollLeft : null,
+                    currentIndex,
+                    targetIndex,
+                    itemsLength: items.length,
+                    itemOffsetLeft: items[targetIndex] ? items[targetIndex].offsetLeft : null,
+                    itemRectLeft: items[targetIndex] ? items[targetIndex].getBoundingClientRect().left : null,
+                    containerRectLeft: this.wrapper ? this.wrapper.getBoundingClientRect().left : null,
+                    paddingLeft,
+                    desired,
+                    maxScroll
+                });
+            } catch (e) {
+                console.warn('carousel-debug: error al intentar loggear valores', e);
+            }
+            const finalScroll = Math.min(Math.max(0, Math.round(desired)), maxScroll);
+            this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+        });
     }
 }
 class AnimesCarousel {
