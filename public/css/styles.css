@@ -43,10 +43,23 @@
     padding-top: 4px;
     gap: 4px;
 }
-/* Mostrar el icono circular (.iSVRpb) cuando el cursor esté sobre cualquier carousel-container */
+/* Mostrar el icono circular (.iSVRpb) cuando el cursor esté sobre cualquier carousel (sección) */
+/* Usamos .carousel-section:hover porque el header (donde está el icono) está fuera de .carousel-container */
+.carousel-section:hover .iSVRpb,
 .carousel-container:hover .iSVRpb {
-     opacity: 1 !important;
-     pointer-events: auto !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+/* Fallback control via clase .show-icon añadida por JS (para casos donde :hover no se dispara) */
+.carousel-section.show-icon .iSVRpb {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+}
+/* Regla más específica apuntando a la clase del icono generada (por si .iSVRpb no aplica) */
+.carousel-section:hover .styles__StyledCarouselHeaderIcon-sc-1u4jixa-8,
+.carousel-section.show-icon .styles__StyledCarouselHeaderIcon-sc-1u4jixa-8 {
+    opacity: 1 !important;
+    pointer-events: auto !important;
 }
 #episodios-series-carousel-wrapper::-webkit-scrollbar {
     display: none;

@@ -536,5 +536,33 @@
             }, 1000);
         });
     </script>
+        <!-- Script: gestionar mostrar iconos en hover/touch como fallback -->
+        <script>
+            (function(){
+                // añadir listeners a cada carousel-container para forzar la clase show-icon en su sección
+                function initCarouselIconHover(){
+                    const containers = document.querySelectorAll('.carousel-container');
+                    containers.forEach(container => {
+                        const section = container.closest('.carousel-section');
+                        if(!section) return;
+                        container.addEventListener('mouseenter', () => section.classList.add('show-icon'));
+                        container.addEventListener('mouseleave', () => section.classList.remove('show-icon'));
+
+                        // En dispositivos táctiles, togglear al tocar el header o container
+                        container.addEventListener('touchstart', function onTouch(e){
+                            section.classList.add('show-icon');
+                            // quitar tras un timeout corto para que no quede pegado
+                            setTimeout(()=> section.classList.remove('show-icon'), 1200);
+                        }, {passive:true});
+                    });
+                }
+
+                if(document.readyState === 'loading'){
+                    document.addEventListener('DOMContentLoaded', initCarouselIconHover);
+                } else {
+                    initCarouselIconHover();
+                }
+            })();
+        </script>
 </body>
 </html>
