@@ -1090,7 +1090,7 @@ class AnimesCarousel {
             });
         }
         if (this.wrapper) {
-            this.wrapper.addEventListener('scroll', () => this.handleScroll && this.handleScroll());
+            this.wrapper.addEventListener('scroll', () => this.handleScroll());
         }
     }
     async loadAnimeData() {
@@ -2280,6 +2280,28 @@ class DocumentalesCarousel {
         this.setupResizeObserver();
         this.setupEventListeners();
         this.loadDocuData();
+    }
+
+    updateProgressBar() {
+        if (!this.progressBar || !this.wrapper) return;
+        try {
+            if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
+                const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
+                this.progressBar.style.width = `${scrollPercentage}%`;
+            } else {
+                this.progressBar.style.width = '100%';
+            }
+        } catch (e) {}
+    }
+
+    handleScroll() {
+        // Called on wrapper scroll
+        this.updateProgressBar();
+        try {
+            if (this.wrapper.scrollLeft + this.wrapper.clientWidth >= this.wrapper.scrollWidth - 200) {
+                this.renderItems();
+            }
+        } catch (e) {}
     }
     setupResizeObserver() {
         if (!this.wrapper) return;
