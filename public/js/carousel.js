@@ -2007,6 +2007,12 @@ class SeriesCarousel {
     }
 
     async renderItems() {
+        // Evitar reentradas/concurrencia: si ya estamos renderizando, salir
+        if (this._rendering) {
+            console.log('SeriesCarousel: renderItems llamado pero ya en ejecución, saltando');
+            return;
+        }
+        this._rendering = true;
         console.log("SeriesCarousel: renderItems llamado");
         console.log("SeriesCarousel: seriesData.length:", this.seriesData.length);
         console.log("SeriesCarousel: index:", this.index);
@@ -2139,6 +2145,8 @@ class SeriesCarousel {
 
         this.index = end;
         this.updateProgressBar();
+        // liberar bandera de renderizado
+        this._rendering = false;
     }
 
     scrollToPrevPage() {
