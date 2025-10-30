@@ -155,62 +155,18 @@ class HoverModal {
         // This addresses cases where HoverModal was instantiated before the
         // catalog DOM existed (so constructor fallback picked body).
         try {
-            // Candidate container near the item. We'll prefer it only if it's NOT scrollable.
             const candidate = itemElement.closest('.carousel-container, .catalogo-grid, #catalogo-grid-page') || document.body;
-
-            // Helper: detect if an element is scrollable in either axis
-            const isScrollable = (el) => {
-                if (!el || el === document.body) return false;
-                try {
-                    const cs = getComputedStyle(el);
-                    const overflowX = cs.overflowX || cs.overflow;
-                    const overflowY = cs.overflowY || cs.overflow;
-                    const canScrollX = (overflowX === 'auto' || overflowX === 'scroll' || overflowX === 'overlay') && el.scrollWidth > el.clientWidth;
-                    const canScrollY = (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay') && el.scrollHeight > el.clientHeight;
-                    return !!(canScrollX || canScrollY);
-                } catch (err) {
-                    return false;
-                }
-            };
-
-            // Prefer a non-scrollable container: candidate if not scrollable, otherwise try to use
-            // the nearest .carousel-section ancestor that isn't scrollable; fallback to document.body
-            let chosenContainer = document.body;
-            if (candidate && candidate !== document.body && !isScrollable(candidate)) {
-                chosenContainer = candidate;
-            } else if (candidate && candidate !== document.body) {
-                const sectionAncestor = candidate.closest('.carousel-section');
-                if (sectionAncestor && !isScrollable(sectionAncestor)) {
-                    chosenContainer = sectionAncestor;
-                }
-            }
-
-            // update carouselContainer for this show() call
-            this.carouselContainer = chosenContainer || document.body;
-
-            // Only move modalContent into the chosen container when it's not document.body
-            // and when that container is non-scrollable. This prevents inserting the modal
-            // inside wrappers with overflow:auto/scroll which can change scrollLeft/Top.
+            // update carouselContainer to the candidate for this show() call
+            this.carouselContainer = candidate || document.body;
+            // If possible, move the modalContent into the carouselContainer so the browser
+            // will move it synchronously with container scrolling (no JS lag).
             if (this.carouselContainer && this.modalContent.parentElement !== this.carouselContainer && this.carouselContainer !== document.body) {
-                const cs2 = getComputedStyle(this.carouselContainer);
-                if (cs2.position === 'static') {
+                const cs = getComputedStyle(this.carouselContainer);
+                if (cs.position === 'static') {
                     this.carouselContainer.style.position = 'relative';
                     this._carouselPositionChanged = true;
                 }
-                // Guard: snapshot scroll positions of likely carousel wrappers to avoid
-                // any browser-driven jump when we move DOM nodes.
-                try {
-                    const wrappers = Array.from(document.querySelectorAll('[id$="-carousel-wrapper"], .carousel-container'));
-                    const scrollMap = new Map();
-                    wrappers.forEach(w => { try { scrollMap.set(w, { left: w.scrollLeft, top: w.scrollTop }); } catch(e){} });
-                    this.carouselContainer.appendChild(this.modalContent);
-                    // restore scrolls on next frame to avoid any reflow-induced jumps
-                    requestAnimationFrame(() => {
-                        try { wrappers.forEach(w => { const s = scrollMap.get(w); if (s) { w.scrollLeft = s.left; w.scrollTop = s.top; } }); } catch(e){}
-                    });
-                } catch (e2) {
-                    try { this.carouselContainer.appendChild(this.modalContent); } catch(e3){}
-                }
+                this.carouselContainer.appendChild(this.modalContent);
             }
         } catch (e) {}
 
@@ -353,8 +309,10 @@ class HoverModal {
             }
         } catch(e){}
         // Attempt to find a carousel wrapper ancestor to disable clipping while scaled
+        // NOTE: exclude the top-level '#carousel-wrapper' element to avoid applying
+        // the class to the main carousel root which can create layout conflicts.
         try {
-            const wrapper = itemElement.closest('#carousel-wrapper, [id$="-carousel-wrapper"], .carousel-wrapper');
+            const wrapper = itemElement.closest('[id$="-carousel-wrapper"], .carousel-wrapper');
             if (wrapper) {
                 this._currentWrapper = wrapper;
                 wrapper.classList.add('hover-no-clip');
@@ -477,17 +435,7 @@ class HoverModal {
                 // restore modalContent to its original parent if we moved it
                 try {
                     if (this._originalParent && this.modalContent.parentElement !== this._originalParent) {
-                        try {
-                            const wrappers = Array.from(document.querySelectorAll('[id$="-carousel-wrapper"], .carousel-container'));
-                            const scrollMap = new Map();
-                            wrappers.forEach(w => { try { scrollMap.set(w, { left: w.scrollLeft, top: w.scrollTop }); } catch(e){} });
-                            this._originalParent.appendChild(this.modalContent);
-                            requestAnimationFrame(() => {
-                                try { wrappers.forEach(w => { const s = scrollMap.get(w); if (s) { w.scrollLeft = s.left; w.scrollTop = s.top; } }); } catch(e){}
-                            });
-                        } catch (e2) {
-                            try { this._originalParent.appendChild(this.modalContent); } catch(e3){}
-                        }
+                        this._originalParent.appendChild(this.modalContent);
                     }
                     if (this._carouselPositionChanged && this.carouselContainer) {
                         this.carouselContainer.style.position = '';
