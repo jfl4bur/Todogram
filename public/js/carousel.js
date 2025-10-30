@@ -3,13 +3,20 @@ function robustScrollTo(wrapper, computeDesired, maxScroll, behavior = 'smooth')
     if (!wrapper || typeof computeDesired !== 'function') return;
     // Esperar un par de frames para dejar que el layout se estabilice (imágenes, fuentes)
     // Hacemos un único scroll final tras esperar el layout: doble rAF + pequeño timeout.
+    // Esperar reflow (doble rAF + pequeño timeout) y luego fijar la posición EXACTA
+    // Usamos un desplazamiento instantáneo (scrollLeft = finalScroll) en lugar de
+    // scrollTo({ behavior: 'smooth' }) para evitar estados intermedios durante la
+    // animación que están provocando el patrón alternante (item cortado / entero).
+    // Si quieres animación, podemos implementar una animación CSS más controlada
+    // que no cambie los cálculos de indices.
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
             setTimeout(() => {
                 try {
                     const desired = computeDesired();
                     const finalScroll = Math.min(Math.max(0, Math.round(desired)), maxScroll);
-                    wrapper.scrollTo({ left: finalScroll, behavior });
+                    // Desplazamiento INMEDIATO para garantizar alineación exacta
+                    wrapper.scrollLeft = finalScroll;
                 } catch (e) {
                     // Ignorar errores de medición
                 }
