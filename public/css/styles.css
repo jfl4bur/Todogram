@@ -8338,12 +8338,11 @@ ease-in-out;
     background-color: rgba(0, 0, 0, 0.75);
     border-color: rgb(240, 240, 240);
     box-shadow: rgba(0, 0, 0, 0.4) 0px 4px 10px 0px;
+    opacity: 1;
+    pointer-events: auto;
 }
 
-.styles__StyledCarouselContainer-sc-1u4jixa-0:hover .styles__StyledCarouselHeaderIcon-sc-1u4jixa-8 {
-    pointer-events: auto;
-    opacity: 1;
-}
+
 
 .iSVRpb {
     position: relative;
