@@ -1373,7 +1373,7 @@ class Carousel {
             return;
         }
 
-        const itemWidth = 194;
+        const itemWidth = 198;
         const gap = 4;
 
         const calculate = () => {
