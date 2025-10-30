@@ -2553,7 +2553,7 @@ class DocumentalesCarousel {
 
 // Inicialización de ambos carruseles
 window.addEventListener('DOMContentLoaded', () => {
-    new SeriesCarousel();
+    // SeriesCarousel is initialized from main.js to avoid double-instantiation
     window.documentalesCarousel = new DocumentalesCarousel();
     window.animesCarousel = new AnimesCarousel();
 });
