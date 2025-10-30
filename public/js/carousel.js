@@ -208,12 +208,14 @@ class EpisodiosSeriesCarousel {
         if (this.carouselPrev) {
             this.carouselPrev.addEventListener('click', (e) => {
                 e.preventDefault();
+                try { if (window.sliderIndependent && typeof window.sliderIndependent.pauseAutoPlay === 'function') window.sliderIndependent.pauseAutoPlay(); } catch (err) {}
                 this.scrollToPrevPage();
             });
         }
         if (this.carouselNext) {
             this.carouselNext.addEventListener('click', (e) => {
                 e.preventDefault();
+                try { if (window.sliderIndependent && typeof window.sliderIndependent.pauseAutoPlay === 'function') window.sliderIndependent.pauseAutoPlay(); } catch (err) {}
                 this.scrollToNextPage();
             });
         }
@@ -650,8 +652,8 @@ class EpisodiosAnimesCarousel {
     }
     setupEventListeners() {
         window.addEventListener('resize', () => { if (this.updateProgressBar) this.updateProgressBar(); });
-        if (this.carouselPrev) this.carouselPrev.addEventListener('click', (e) => { e.preventDefault(); this.scrollToPrevPage(); });
-        if (this.carouselNext) this.carouselNext.addEventListener('click', (e) => { e.preventDefault(); this.scrollToNextPage(); });
+    if (this.carouselPrev) this.carouselPrev.addEventListener('click', (e) => { e.preventDefault(); try { if (window.sliderIndependent && typeof window.sliderIndependent.pauseAutoPlay === 'function') window.sliderIndependent.pauseAutoPlay(); } catch (err) {} this.scrollToPrevPage(); });
+    if (this.carouselNext) this.carouselNext.addEventListener('click', (e) => { e.preventDefault(); try { if (window.sliderIndependent && typeof window.sliderIndependent.pauseAutoPlay === 'function') window.sliderIndependent.pauseAutoPlay(); } catch (err) {} this.scrollToNextPage(); });
         if (this.wrapper) {
             this.wrapper.addEventListener('scroll', () => { if (this.updateProgressBar) this.updateProgressBar(); });
             if (this.updateProgressBar) this.updateProgressBar();
@@ -944,8 +946,8 @@ class EpisodiosDocumentalesCarousel {
     }
     setupEventListeners() {
         window.addEventListener('resize', () => { if (this.updateProgressBar) this.updateProgressBar(); });
-        if (this.carouselPrev) this.carouselPrev.addEventListener('click', (e) => { e.preventDefault(); this.scrollToPrevPage(); });
-        if (this.carouselNext) this.carouselNext.addEventListener('click', (e) => { e.preventDefault(); this.scrollToNextPage(); });
+    if (this.carouselPrev) this.carouselPrev.addEventListener('click', (e) => { e.preventDefault(); try { if (window.sliderIndependent && typeof window.sliderIndependent.pauseAutoPlay === 'function') window.sliderIndependent.pauseAutoPlay(); } catch (err) {} this.scrollToPrevPage(); });
+    if (this.carouselNext) this.carouselNext.addEventListener('click', (e) => { e.preventDefault(); try { if (window.sliderIndependent && typeof window.sliderIndependent.pauseAutoPlay === 'function') window.sliderIndependent.pauseAutoPlay(); } catch (err) {} this.scrollToNextPage(); });
         if (this.wrapper) {
             this.wrapper.addEventListener('scroll', () => { if (this.updateProgressBar) this.updateProgressBar(); });
             if (this.updateProgressBar) this.updateProgressBar();
@@ -1235,12 +1237,14 @@ class AnimesCarousel {
         if (this.carouselPrev) {
             this.carouselPrev.addEventListener('click', (e) => {
                 e.preventDefault();
+                try { if (window.sliderIndependent && typeof window.sliderIndependent.pauseAutoPlay === 'function') window.sliderIndependent.pauseAutoPlay(); } catch (err) {}
                 this.scrollToPrevPage();
             });
         }
         if (this.carouselNext) {
             this.carouselNext.addEventListener('click', (e) => {
                 e.preventDefault();
+                try { if (window.sliderIndependent && typeof window.sliderIndependent.pauseAutoPlay === 'function') window.sliderIndependent.pauseAutoPlay(); } catch (err) {}
                 this.scrollToNextPage();
             });
         }
@@ -1559,10 +1563,12 @@ class Carousel {
         window.addEventListener('resize', () => this.calculateItemsPerPage());
         this.carouselPrev.addEventListener('click', (e) => {
             e.preventDefault();
+            try { if (window.sliderIndependent && typeof window.sliderIndependent.pauseAutoPlay === 'function') window.sliderIndependent.pauseAutoPlay(); } catch (err) {}
             this.scrollToPrevPage();
         });
         this.carouselNext.addEventListener('click', (e) => {
             e.preventDefault();
+            try { if (window.sliderIndependent && typeof window.sliderIndependent.pauseAutoPlay === 'function') window.sliderIndependent.pauseAutoPlay(); } catch (err) {}
             this.scrollToNextPage();
         });
         this.wrapper.addEventListener('scroll', () => this.handleScroll());
@@ -2003,6 +2009,7 @@ class SeriesCarousel {
             this.carouselPrev.addEventListener('click', (e) => {
                 e.preventDefault();
                 console.log("SeriesCarousel: Botón anterior clickeado");
+                try { if (window.sliderIndependent && typeof window.sliderIndependent.pauseAutoPlay === 'function') window.sliderIndependent.pauseAutoPlay(); } catch (err) {}
                 this.scrollToPrevPage();
             });
         } else {
@@ -2013,6 +2020,7 @@ class SeriesCarousel {
             this.carouselNext.addEventListener('click', (e) => {
                 e.preventDefault();
                 console.log("SeriesCarousel: Botón siguiente clickeado");
+                try { if (window.sliderIndependent && typeof window.sliderIndependent.pauseAutoPlay === 'function') window.sliderIndependent.pauseAutoPlay(); } catch (err) {}
                 this.scrollToNextPage();
             });
         } else {
