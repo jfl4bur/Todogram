@@ -425,13 +425,16 @@ class EpisodiosSeriesCarousel {
             targetIndex = currentIndex + itemsPerViewport;
         }
 
-        // Evitar sobrepasar la cantidad de items
-        const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
-        const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
-        targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
+    // Evitar sobrepasar la cantidad de items
+    const items = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
+    const totalItems = items.length;
+    const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
+    targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
-        const finalScroll = targetIndex * stepSize;
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+    // Calcular el scroll final usando offsetLeft del item destino (más robusto que multiplicar por stepSize)
+    const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
+    const finalScroll = Math.min(Math.max(0, (items[targetIndex] && typeof items[targetIndex].offsetLeft === 'number') ? items[targetIndex].offsetLeft : targetIndex * stepSize), maxScroll);
+    this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 
 // (Eliminados duplicados y métodos sobrantes)
@@ -1718,11 +1721,12 @@ class Carousel {
             targetIndex = currentIndex + itemsPerViewport;
         }
 
-        const maxFirstIndex = Math.max(0, items.length - itemsPerViewport);
-        targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
+    const maxFirstIndex = Math.max(0, items.length - itemsPerViewport);
+    targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
-        const finalScroll = targetIndex * stepSize;
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+    const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
+    const finalScroll = Math.min(Math.max(0, (items[targetIndex] && typeof items[targetIndex].offsetLeft === 'number') ? items[targetIndex].offsetLeft : targetIndex * stepSize), maxScroll);
+    this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 
     // Método para contar elementos realmente visibles
@@ -2216,11 +2220,12 @@ class SeriesCarousel {
             targetIndex = currentIndex + itemsPerViewport;
         }
 
-        const maxFirstIndex = Math.max(0, items.length - itemsPerViewport);
-        targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
+    const maxFirstIndex = Math.max(0, items.length - itemsPerViewport);
+    targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
-        const finalScroll = targetIndex * stepSize;
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+    const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
+    const finalScroll = Math.min(Math.max(0, (items[targetIndex] && typeof items[targetIndex].offsetLeft === 'number') ? items[targetIndex].offsetLeft : targetIndex * stepSize), maxScroll);
+    this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 
     // Método para contar elementos realmente visibles
