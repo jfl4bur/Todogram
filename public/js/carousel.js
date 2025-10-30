@@ -2678,9 +2678,15 @@ class DocumentalesCarousel {
 
 // Inicialización de ambos carruseles
 window.addEventListener('DOMContentLoaded', () => {
-    new SeriesCarousel();
-    window.documentalesCarousel = new DocumentalesCarousel();
-    window.animesCarousel = new AnimesCarousel();
+    // Exponer instancias en window para depuración manual desde consola
+    try { window.seriesCarousel = new SeriesCarousel(); } catch (e) { console.error('SeriesCarousel init error', e); }
+    try { window.documentalesCarousel = new DocumentalesCarousel(); } catch (e) { console.error('DocumentalesCarousel init error', e); }
+    try { window.animesCarousel = new AnimesCarousel(); } catch (e) { console.error('AnimesCarousel init error', e); }
+    // Algunos proyectos también usan la clase Carousel (películas). Intentamos instanciarla si existe.
+    try { if (typeof Carousel !== 'undefined') window.carousel = new Carousel(); } catch (e) { /* no hacer nada si no aplica */ }
+
+    // Panel de depuración inyectado para inspección visual y test manual
+    try { __injectCarouselDebugPanel(); } catch (e) { console.error('No se pudo inyectar panel de depuración', e); }
 });
 
 // Helper visual de depuración para mostrar en pantalla los valores de paginación
@@ -2709,4 +2715,100 @@ function __showPaginationDebug(obj) {
         clearTimeout(el.__hideTimeout);
         el.__hideTimeout = setTimeout(() => { try { el.style.opacity = '0'; } catch (e) {} }, 2500);
     } catch (e) { /* noop */ }
+}
+
+// Panel de depuración interactivo (temporal) para inspeccionar carruseles en runtime
+function __injectCarouselDebugPanel() {
+    try {
+        if (document.getElementById('__carousel-debug-panel')) return;
+        const panel = document.createElement('div');
+        panel.id = '__carousel-debug-panel';
+        panel.style.cssText = 'position:fixed;right:10px;top:10px;z-index:99999;background:rgba(0,0,0,0.78);color:#fff;padding:8px;border-radius:6px;font-size:12px;font-family:Arial,helvetica,sans-serif;max-width:320px;min-width:180px;box-shadow:0 4px 12px rgba(0,0,0,0.6);';
+        panel.innerHTML = `
+            <div style="margin-bottom:6px;font-weight:700">Debug Carrusel</div>
+            <select id="__carousel-debug-select" style="width:100%;margin-bottom:8px;">
+                <option value="series">series</option>
+                <option value="documentales">documentales</option>
+                <option value="animes">animes</option>
+                <option value="carousel">carousel</option>
+            </select>
+            <div style="display:flex;gap:6px;margin-bottom:8px;">
+                <button id="__carousel-debug-metrics" style="flex:1">Métricas</button>
+                <button id="__carousel-debug-prev">Prev</button>
+                <button id="__carousel-debug-next">Next</button>
+            </div>
+            <label style="display:block;margin-bottom:6px;font-size:11px"><input type="checkbox" id="__carousel-debug-outline" /> Outline items</label>
+            <div id="__carousel-debug-output" style="margin-top:6px;max-height:220px;overflow:auto;font-size:11px;white-space:pre-wrap"></div>
+        `;
+        document.body.appendChild(panel);
+
+        const sel = panel.querySelector('#__carousel-debug-select');
+        const out = panel.querySelector('#__carousel-debug-output');
+        const btnMetrics = panel.querySelector('#__carousel-debug-metrics');
+        const btnPrev = panel.querySelector('#__carousel-debug-prev');
+        const btnNext = panel.querySelector('#__carousel-debug-next');
+        const chk = panel.querySelector('#__carousel-debug-outline');
+
+        function getInstance(name) {
+            switch (name) {
+                case 'series': return window.seriesCarousel;
+                case 'documentales': return window.documentalesCarousel;
+                case 'animes': return window.animesCarousel;
+                case 'carousel': return window.carousel;
+                default: return window[name];
+            }
+        }
+
+        btnMetrics.addEventListener('click', () => {
+            const inst = getInstance(sel.value);
+            if (!inst) { out.textContent = 'Instancia no encontrada: ' + sel.value; return; }
+            try {
+                const wrapper = inst.wrapper;
+                if (!wrapper) { out.textContent = 'Wrapper no encontrado en ' + sel.value; return; }
+                const first = wrapper.querySelector('.custom-carousel-item');
+                const second = first && first.nextElementSibling;
+                const itemW = first ? Math.round(first.getBoundingClientRect().width) : 'N/A';
+                const gap = (first && second) ? Math.round(second.getBoundingClientRect().left - (first.getBoundingClientRect().left + first.getBoundingClientRect().width)) : 'N/A';
+                const step = (itemW !== 'N/A' && gap !== 'N/A') ? itemW + gap : 'N/A';
+                const clientW = wrapper.clientWidth;
+                const itemsPerViewport = (step === 'N/A') ? 'N/A' : Math.max(1, Math.floor(clientW / step));
+                const total = wrapper.querySelectorAll('.custom-carousel-item').length;
+                const scrollLeft = wrapper.scrollLeft;
+                const itemsArray = Array.from(wrapper.querySelectorAll('.custom-carousel-item'));
+                const curIndex = (itemsArray.length && typeof scrollLeft === 'number') ? itemsArray.findIndex(el => el.offsetLeft >= scrollLeft - 1) : 'N/A';
+                const maxScroll = Math.max(0, wrapper.scrollWidth - wrapper.clientWidth);
+                const html = [
+                    'wrapperId: ' + (wrapper.id || ''),
+                    'clientWidth: ' + clientW,
+                    'itemWidth: ' + itemW,
+                    'gap: ' + gap,
+                    'stepSize: ' + step,
+                    'itemsPerViewport: ' + itemsPerViewport,
+                    'totalItems: ' + total,
+                    'scrollLeft: ' + scrollLeft,
+                    'currentIndex: ' + curIndex,
+                    'maxScroll: ' + maxScroll
+                ].join('\n');
+                out.textContent = html;
+                console.log('Carousel Debug Metrics', { wrapperId: wrapper.id, clientW, itemW, gap, step, itemsPerViewport, total, scrollLeft, curIndex, maxScroll });
+            } catch (e) { out.textContent = 'Error: ' + (e && e.message); console.error(e); }
+        });
+
+        btnPrev.addEventListener('click', () => {
+            const inst = getInstance(sel.value);
+            if (inst && typeof inst.scrollToPrevPage === 'function') inst.scrollToPrevPage();
+            else out.textContent = 'No scrollToPrevPage en instancia';
+        });
+        btnNext.addEventListener('click', () => {
+            const inst = getInstance(sel.value);
+            if (inst && typeof inst.scrollToNextPage === 'function') inst.scrollToNextPage();
+            else out.textContent = 'No scrollToNextPage en instancia';
+        });
+
+        chk.addEventListener('change', (e) => {
+            const els = document.querySelectorAll('.custom-carousel-item');
+            els.forEach(el => { el.style.outline = e.target.checked ? '2px solid rgba(255,0,0,0.6)' : ''; });
+        });
+
+    } catch (e) { console.error('Error in __injectCarouselDebugPanel', e); }
 }
