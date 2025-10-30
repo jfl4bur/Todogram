@@ -1,7 +1,45 @@
 // Carrusel de Episodios Series (solo episodios con Título episodio completo)
 
 // Helper: calcular tamaño real del item, gap y cuantos items caben en el contenedor
+function computeCarouselStep(wrapper) {
+    if (!wrapper) return { stepSize: null, itemsPerViewport: 1, itemWidth: 0, gap: 0 };
+    const firstItem = wrapper.querySelector('.custom-carousel-item');
+    if (!firstItem) return { stepSize: null, itemsPerViewport: 1, itemWidth: 0, gap: 0 };
 
+    // Forzar reflow/paint para minimizar mediciones a 0 (por lazy-images u otros cambios de layout)
+    // Leer propiedades que forzan layout
+    // eslint-disable-next-line no-unused-vars
+    const _force = wrapper.offsetWidth + firstItem.offsetWidth;
+
+    const itemRect = firstItem.getBoundingClientRect();
+    // Preferir offsetWidth (más estable si getBoundingClientRect es 0 por imágenes pendientes)
+    let itemWidth = Math.round(firstItem.offsetWidth || itemRect.width || parseFloat(getComputedStyle(firstItem).width) || 0);
+
+    // Intentar estimar gap usando el segundo elemento (varias estrategias)
+    let gap = 0;
+    const secondItem = firstItem.nextElementSibling;
+    if (secondItem) {
+        const secondRect = secondItem.getBoundingClientRect();
+        // preferir offsetLeft/offsetWidth para calcular gap
+        const leftA = firstItem.offsetLeft + firstItem.offsetWidth;
+        const leftB = secondItem.offsetLeft || secondRect.left;
+        gap = Math.round((leftB - leftA) || (secondRect.left - (itemRect.left + itemRect.width)));
+        if (isNaN(gap) || gap < 0) gap = 0;
+    }
+
+    // Fallback si por alguna razón itemWidth sigue en 0
+    if (!itemWidth || itemWidth <= 0) {
+        // intentar leer estilo (por ejemplo si existe aspect-ratio) o usar un valor por defecto razonable
+        const cssWidth = parseFloat(getComputedStyle(firstItem).width) || 0;
+        if (cssWidth > 0) itemWidth = Math.round(cssWidth);
+        else itemWidth = 194; // fallback seguro
+    }
+
+    const stepSize = itemWidth + gap;
+    const containerWidth = wrapper.clientWidth || 0;
+    const itemsPerViewport = stepSize > 0 ? Math.max(1, Math.floor(containerWidth / stepSize)) : 1;
+    return { stepSize, itemsPerViewport, itemWidth, gap };
+}
 
 class EpisodiosSeriesCarousel {
     // ...existing code...
