@@ -2027,7 +2027,7 @@ class SeriesCarousel {
         const containerWidth = this.wrapper.clientWidth;
         const itemWidth = 194;
         const gap = 4;
-        const itemsThatFit = containerWidth > 0 ? Math.floor(containerWidth / (itemWidth + gap)) : 5;
+        const itemsThatFit = containerWidth > 0 ? Math.floor(containerWidth / (itemWidth + gap)) : 4;
         
         // Renderizar MÁS items de los que caben (para que haya scroll)
         const step = Math.max(itemsThatFit * 2, 10); // Renderizar el doble + mínimo 10
