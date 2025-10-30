@@ -279,6 +279,8 @@ class EpisodiosSeriesCarousel {
                 </div>
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none;width:300px;height:169px;">
             `;
+            // Attach the data item to the DOM element so hover-modal can always reference the correct item
+            div._carouselItem = item;
             // Fade-in de imagen
             const img = div.querySelector('.episodios-series-card-image');
             img.onload = function() { img.style.opacity = '1'; const l = div.querySelector('.loader_episodios') || div.querySelector('.loader'); if (l) l.style.display = 'none'; };
@@ -639,6 +641,7 @@ class EpisodiosAnimesCarousel {
                 </div>
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none;width:300px;height:169px;">
             `;
+            div._carouselItem = item;
             const img = div.querySelector('.episodios-series-card-image');
             img.onload = function() { img.style.opacity = '1'; const l = div.querySelector('.loader_episodios') || div.querySelector('.loader'); if (l) l.style.display = 'none'; };
             if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
@@ -928,6 +931,7 @@ class EpisodiosDocumentalesCarousel {
                 </div>
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none;width:300px;height:169px;">
             `;
+            div._carouselItem = item;
             const img = div.querySelector('.episodios-series-card-image');
             img.onload = function() { img.style.opacity = '1'; const l = div.querySelector('.loader_episodios') || div.querySelector('.loader'); if (l) l.style.display = 'none'; };
             if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
@@ -1234,6 +1238,7 @@ class AnimesCarousel {
                     ${item.description ? `<div class="carousel-description">${item.description}</div>` : ''}
                 </div>
             `;
+            div._carouselItem = item;
             if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
                 div.addEventListener('mouseenter', (e) => {
                     const itemId = div.dataset.itemId;
@@ -1570,6 +1575,7 @@ class Carousel {
                 ${item.description ? `<div class="carousel-description">${item.description}</div>` : ''}
             </div>
             `;
+                div._carouselItem = item;
 
             if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
                 div.addEventListener('mouseenter', (e) => {
@@ -2049,6 +2055,7 @@ class SeriesCarousel {
                 ${item.description ? `<div class="carousel-description">${item.description}</div>` : ''}
             </div>
             `;
+                div._carouselItem = item;
 
             if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
                 div.addEventListener('mouseenter', (e) => {

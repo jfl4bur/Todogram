@@ -52,7 +52,7 @@ class HoverModal {
             return;
         }
 
-        // Evitar mostrar si ya está visible
+    // Evitar mostrar si ya está visible
 
             // If already visible, cancel any pending hide and continue to update content/position
             if (this.isVisible) {
@@ -63,6 +63,14 @@ class HoverModal {
     this.cancelHide();
     window.isModalOpen = true;
     this.isVisible = true;
+        // Prefer the item attached directly to the DOM element if available.
+        // Esto evita problemas donde la referencia `item` pueda haber quedado desincronizada
+        // por renderizados asíncronos o por reuso de closures.
+        try {
+            if (itemElement && itemElement._carouselItem) {
+                item = itemElement._carouselItem;
+            }
+        } catch (e) {}
         
         // Usar postersUrl como prioridad (campo "Carteles")
         const backdropUrl = item.postersUrl || item.backgroundUrl || item.posterUrl;
