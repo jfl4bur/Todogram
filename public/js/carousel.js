@@ -420,7 +420,9 @@ class EpisodiosSeriesCarousel {
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
 
-        const currentIndex = Math.round(this.wrapper.scrollLeft / stepSize);
+    const itemsArray = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
+    let currentIndex = itemsArray.findIndex(el => el.offsetLeft >= this.wrapper.scrollLeft - 1);
+    if (currentIndex === -1) currentIndex = Math.max(0, Math.floor(this.wrapper.scrollLeft / stepSize));
         let targetIndex;
         if (direction === 'prev') {
             targetIndex = currentIndex - itemsPerViewport;
@@ -731,7 +733,9 @@ class EpisodiosAnimesCarousel {
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
 
-        const currentIndex = Math.round(this.wrapper.scrollLeft / stepSize);
+    const itemsArray = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
+    let currentIndex = itemsArray.findIndex(el => el.offsetLeft >= this.wrapper.scrollLeft - 1);
+    if (currentIndex === -1) currentIndex = Math.max(0, Math.floor(this.wrapper.scrollLeft / stepSize));
         let targetIndex = direction === 'prev' ? currentIndex - itemsPerViewport : currentIndex + itemsPerViewport;
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
@@ -1039,7 +1043,9 @@ class EpisodiosDocumentalesCarousel {
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
 
-        const currentIndex = Math.round(this.wrapper.scrollLeft / stepSize);
+    const itemsArray = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
+    let currentIndex = itemsArray.findIndex(el => el.offsetLeft >= this.wrapper.scrollLeft - 1);
+    if (currentIndex === -1) currentIndex = Math.max(0, Math.floor(this.wrapper.scrollLeft / stepSize));
         let targetIndex = direction === 'prev' ? currentIndex - itemsPerViewport : currentIndex + itemsPerViewport;
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
@@ -1731,7 +1737,9 @@ class Carousel {
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
 
-        const currentIndex = Math.round(this.wrapper.scrollLeft / stepSize);
+    const itemsArray = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
+    let currentIndex = itemsArray.findIndex(el => el.offsetLeft >= this.wrapper.scrollLeft - 1);
+    if (currentIndex === -1) currentIndex = Math.max(0, Math.floor(this.wrapper.scrollLeft / stepSize));
         let targetIndex;
         if (direction === 'prev') {
             targetIndex = currentIndex - itemsPerViewport;
@@ -2241,7 +2249,9 @@ class SeriesCarousel {
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
 
-        const currentIndex = Math.round(this.wrapper.scrollLeft / stepSize);
+    const itemsArray = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
+    let currentIndex = itemsArray.findIndex(el => el.offsetLeft >= this.wrapper.scrollLeft - 1);
+    if (currentIndex === -1) currentIndex = Math.max(0, Math.floor(this.wrapper.scrollLeft / stepSize));
         let targetIndex;
         if (direction === 'prev') {
             targetIndex = currentIndex - itemsPerViewport;
