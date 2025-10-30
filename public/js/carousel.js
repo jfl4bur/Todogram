@@ -428,15 +428,10 @@ class EpisodiosSeriesCarousel {
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
         // Calcular desplazamiento final y centrar el grupo cuando haya espacio extra
-        const groupWidth = itemsPerViewport * stepSize;
-        const extraSpace = Math.max(0, containerWidth - groupWidth);
-        const offsetToCenter = Math.floor(extraSpace / 2);
-
-        const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
-        let finalScroll = targetIndex * stepSize - offsetToCenter;
-        finalScroll = Math.max(0, Math.min(finalScroll, maxScroll));
-
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+    const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
+    let finalScroll = targetIndex * stepSize;
+    finalScroll = Math.max(0, Math.min(finalScroll, maxScroll));
+    this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 
 // (Eliminados duplicados y métodos sobrantes)
@@ -738,15 +733,10 @@ class EpisodiosAnimesCarousel {
         let targetIndex = direction === 'prev' ? currentIndex - itemsPerViewport : currentIndex + itemsPerViewport;
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
-        const groupWidth = itemsPerViewport * stepSize;
-        const extraSpace = Math.max(0, containerWidth - groupWidth);
-        const offsetToCenter = Math.floor(extraSpace / 2);
-
-        const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
-        let finalScroll = targetIndex * stepSize - offsetToCenter;
-        finalScroll = Math.max(0, Math.min(finalScroll, maxScroll));
-
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+    const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
+    let finalScroll = targetIndex * stepSize;
+    finalScroll = Math.max(0, Math.min(finalScroll, maxScroll));
+    this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 }
 
@@ -1038,15 +1028,15 @@ class EpisodiosDocumentalesCarousel {
         let targetIndex = direction === 'prev' ? currentIndex - itemsPerViewport : currentIndex + itemsPerViewport;
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
-        const groupWidth = itemsPerViewport * stepSize;
-        const extraSpace = Math.max(0, containerWidth - groupWidth);
-        const offsetToCenter = Math.floor(extraSpace / 2);
+    const groupWidth = itemsPerViewport * stepSize;
+    const extraSpace = Math.max(0, containerWidth - groupWidth);
+    // left-aligned pagination: preserve existing behavior (do not center the group)
 
-        const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
-        let finalScroll = targetIndex * stepSize - offsetToCenter;
-        finalScroll = Math.max(0, Math.min(finalScroll, maxScroll));
+    const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
+    let finalScroll = targetIndex * stepSize;
+    finalScroll = Math.max(0, Math.min(finalScroll, maxScroll));
 
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+    this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 }
 class AnimesCarousel {
@@ -1724,16 +1714,15 @@ class Carousel {
         }
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
-        // Calcular desplazamiento final y centrar el grupo cuando haya espacio extra
-        const groupWidth = itemsPerViewport * stepSize;
-        const extraSpace = Math.max(0, containerWidth - groupWidth);
-        const offsetToCenter = Math.floor(extraSpace / 2);
+    // Calcular desplazamiento final (alineado a la izquierda) — conservar la semántica existente
+    const groupWidth = itemsPerViewport * stepSize;
+    const extraSpace = Math.max(0, containerWidth - groupWidth);
 
-        const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
-        let finalScroll = targetIndex * stepSize - offsetToCenter;
-        finalScroll = Math.max(0, Math.min(finalScroll, maxScroll));
+    const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
+    let finalScroll = targetIndex * stepSize;
+    finalScroll = Math.max(0, Math.min(finalScroll, maxScroll));
 
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+    this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 
     // Método para contar elementos realmente visibles
@@ -2223,16 +2212,15 @@ class SeriesCarousel {
         }
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
-        // Calcular desplazamiento final y centrar el grupo cuando haya espacio extra
-        const groupWidth = itemsPerViewport * stepSize;
-        const extraSpace = Math.max(0, containerWidth - groupWidth);
-        const offsetToCenter = Math.floor(extraSpace / 2);
+    // Calcular desplazamiento final (alineado a la izquierda) — conservar la semántica existente
+    const groupWidth = itemsPerViewport * stepSize;
+    const extraSpace = Math.max(0, containerWidth - groupWidth);
 
-        const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
-        let finalScroll = targetIndex * stepSize - offsetToCenter;
-        finalScroll = Math.max(0, Math.min(finalScroll, maxScroll));
+    const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
+    let finalScroll = targetIndex * stepSize;
+    finalScroll = Math.max(0, Math.min(finalScroll, maxScroll));
 
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+    this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 
     // Método para contar elementos realmente visibles
@@ -2608,13 +2596,10 @@ class DocumentalesCarousel {
         const currentIndex = Math.round(this.wrapper.scrollLeft / stepSize);
         let targetIndex = direction === 'prev' ? currentIndex - itemsPerViewport : currentIndex + itemsPerViewport;
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
-        const groupWidth = itemsPerViewport * stepSize;
-        const extraSpace = Math.max(0, containerWidth - groupWidth);
-        const offsetToCenter = Math.floor(extraSpace / 2);
-        const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
-        let finalScroll = targetIndex * stepSize - offsetToCenter;
-        finalScroll = Math.max(0, Math.min(finalScroll, maxScroll));
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+    const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
+    let finalScroll = targetIndex * stepSize;
+    finalScroll = Math.max(0, Math.min(finalScroll, maxScroll));
+    this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 }
 
