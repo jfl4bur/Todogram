@@ -593,7 +593,7 @@ button:focus {
     top: 0;
     left: 0;
     width: 100%;
-    /* height: 100%; */
+    height: 100%;
     z-index: 1;
 }
 
@@ -1976,8 +1976,8 @@ button:focus {
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    filter: brightness(0.7);
+    object-fit: fill;
+    filter: brightness(1);
     opacity: 0;
     transition: opacity 0.3s ease;
     z-index: 2;
