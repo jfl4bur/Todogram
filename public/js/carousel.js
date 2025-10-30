@@ -2,7 +2,7 @@
 
 // Helper: calcular tamaño real del item, gap y cuantos items caben en el contenedor
 
-}
+
 class EpisodiosSeriesCarousel {
     // ...existing code...
     scrollToHash(retries = 10) {
