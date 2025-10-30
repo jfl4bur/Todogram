@@ -415,8 +415,20 @@ class EpisodiosSeriesCarousel {
         // Calcular cuántos items completos caben en la vista
         const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
 
-    // Calcular índice del primer item visible actualmente (alinear a la izquierda)
-    const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
+        // Preparar lista de items y calcular índice del primer item visible usando offsetLeft
+        const items = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
+        const currentScroll = Math.round(this.wrapper.scrollLeft);
+        let currentIndex = items.findIndex(it => (typeof it.offsetLeft === 'number') && it.offsetLeft >= currentScroll - 1);
+        if (currentIndex === -1) {
+            // fallback: escoger el último item cuyo offsetLeft sea <= currentScroll
+            currentIndex = 0;
+            for (let i = items.length - 1; i >= 0; i--) {
+                if (typeof items[i].offsetLeft === 'number' && items[i].offsetLeft <= currentScroll + 1) {
+                    currentIndex = i;
+                    break;
+                }
+            }
+        }
 
         let targetIndex;
         if (direction === 'prev') {
@@ -426,14 +438,16 @@ class EpisodiosSeriesCarousel {
         }
 
     // Evitar sobrepasar la cantidad de items
-    const items = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
     const totalItems = items.length;
     const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
     targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
-    // Calcular el scroll final usando offsetLeft del item destino (más robusto que multiplicar por stepSize)
+    // Calcular el scroll final usando offsetLeft del item destino y restando padding-left del wrapper
     const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
-    const finalScroll = Math.min(Math.max(0, (items[targetIndex] && typeof items[targetIndex].offsetLeft === 'number') ? items[targetIndex].offsetLeft : targetIndex * stepSize), maxScroll);
+    const wrapperStyle = getComputedStyle(this.wrapper);
+    const paddingLeft = parseFloat(wrapperStyle.paddingLeft) || 0;
+    const desired = (items[targetIndex] && typeof items[targetIndex].offsetLeft === 'number') ? items[targetIndex].offsetLeft - paddingLeft : targetIndex * stepSize;
+    const finalScroll = Math.min(Math.max(0, desired), maxScroll);
     this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 
@@ -721,13 +735,28 @@ class EpisodiosAnimesCarousel {
         if (secondItem) { const secondRect = secondItem.getBoundingClientRect(); gap = Math.round(secondRect.left - (itemRect.left + itemRect.width)); if (isNaN(gap) || gap < 0) gap = 0; }
         const stepSize = itemWidth + gap;
         const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
-        const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
+
+        const items = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
+        const currentScroll = Math.round(this.wrapper.scrollLeft);
+        let currentIndex = items.findIndex(it => (typeof it.offsetLeft === 'number') && it.offsetLeft >= currentScroll - 1);
+        if (currentIndex === -1) {
+            currentIndex = 0;
+            for (let i = items.length - 1; i >= 0; i--) {
+                if (typeof items[i].offsetLeft === 'number' && items[i].offsetLeft <= currentScroll + 1) { currentIndex = i; break; }
+            }
+        }
+
         let targetIndex;
         if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsPerViewport); else targetIndex = currentIndex + itemsPerViewport;
-        const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
+        const totalItems = items.length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
-        const finalScroll = targetIndex * stepSize;
+
+        const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
+        const wrapperStyle = getComputedStyle(this.wrapper);
+        const paddingLeft = parseFloat(wrapperStyle.paddingLeft) || 0;
+        const desired = (items[targetIndex] && typeof items[targetIndex].offsetLeft === 'number') ? items[targetIndex].offsetLeft - paddingLeft : targetIndex * stepSize;
+        const finalScroll = Math.min(Math.max(0, desired), maxScroll);
         this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 }
@@ -1005,13 +1034,28 @@ class EpisodiosDocumentalesCarousel {
         if (secondItem) { const secondRect = secondItem.getBoundingClientRect(); gap = Math.round(secondRect.left - (itemRect.left + itemRect.width)); if (isNaN(gap) || gap < 0) gap = 0; }
         const stepSize = itemWidth + gap;
         const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
-        const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
+
+        const items = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
+        const currentScroll = Math.round(this.wrapper.scrollLeft);
+        let currentIndex = items.findIndex(it => (typeof it.offsetLeft === 'number') && it.offsetLeft >= currentScroll - 1);
+        if (currentIndex === -1) {
+            currentIndex = 0;
+            for (let i = items.length - 1; i >= 0; i--) {
+                if (typeof items[i].offsetLeft === 'number' && items[i].offsetLeft <= currentScroll + 1) { currentIndex = i; break; }
+            }
+        }
+
         let targetIndex;
         if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsPerViewport); else targetIndex = currentIndex + itemsPerViewport;
-        const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
+        const totalItems = items.length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
-        const finalScroll = targetIndex * stepSize;
+
+        const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
+        const wrapperStyle = getComputedStyle(this.wrapper);
+        const paddingLeft = parseFloat(wrapperStyle.paddingLeft) || 0;
+        const desired = (items[targetIndex] && typeof items[targetIndex].offsetLeft === 'number') ? items[targetIndex].offsetLeft - paddingLeft : targetIndex * stepSize;
+        const finalScroll = Math.min(Math.max(0, desired), maxScroll);
         this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 }
@@ -1702,15 +1746,14 @@ class Carousel {
         const stepSize = itemWidth + gap;
         const itemsPerViewport = Math.max(1, Math.floor(this.wrapper.clientWidth / stepSize));
 
-        // Determinar índice del primer item visible (más robusto frente a offsets iniciales)
+        // Determinar índice del primer item visible (basado en offsetLeft respecto al scrollLeft)
         const items = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
-        let currentIndex = 0;
-        for (let i = 0; i < items.length; i++) {
-            const r = items[i].getBoundingClientRect();
-            // Tomamos el primer item cuya parte derecha esté a la derecha del borde izquierdo del contenedor
-            if (r.right > containerRect.left + 1) {
-                currentIndex = i;
-                break;
+        const currentScroll = Math.round(this.wrapper.scrollLeft);
+        let currentIndex = items.findIndex(it => (typeof it.offsetLeft === 'number') && it.offsetLeft >= currentScroll - 1);
+        if (currentIndex === -1) {
+            currentIndex = 0;
+            for (let i = items.length - 1; i >= 0; i--) {
+                if (typeof items[i].offsetLeft === 'number' && items[i].offsetLeft <= currentScroll + 1) { currentIndex = i; break; }
             }
         }
 
@@ -1725,7 +1768,10 @@ class Carousel {
     targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
     const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
-    const finalScroll = Math.min(Math.max(0, (items[targetIndex] && typeof items[targetIndex].offsetLeft === 'number') ? items[targetIndex].offsetLeft : targetIndex * stepSize), maxScroll);
+    const wrapperStyle = getComputedStyle(this.wrapper);
+    const paddingLeft = parseFloat(wrapperStyle.paddingLeft) || 0;
+    const desired = (items[targetIndex] && typeof items[targetIndex].offsetLeft === 'number') ? items[targetIndex].offsetLeft - paddingLeft : targetIndex * stepSize;
+    const finalScroll = Math.min(Math.max(0, desired), maxScroll);
     this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 
@@ -2202,14 +2248,14 @@ class SeriesCarousel {
         const stepSize = itemWidth + gap;
         const itemsPerViewport = Math.max(1, Math.floor(this.wrapper.clientWidth / stepSize));
 
-        // Determinar índice del primer item visible (más robusto frente a offsets iniciales)
+        // Determinar índice del primer item visible (basado en offsetLeft respecto al scrollLeft)
         const items = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
-        let currentIndex = 0;
-        for (let i = 0; i < items.length; i++) {
-            const r = items[i].getBoundingClientRect();
-            if (r.right > containerRect.left + 1) {
-                currentIndex = i;
-                break;
+        const currentScroll = Math.round(this.wrapper.scrollLeft);
+        let currentIndex = items.findIndex(it => (typeof it.offsetLeft === 'number') && it.offsetLeft >= currentScroll - 1);
+        if (currentIndex === -1) {
+            currentIndex = 0;
+            for (let i = items.length - 1; i >= 0; i--) {
+                if (typeof items[i].offsetLeft === 'number' && items[i].offsetLeft <= currentScroll + 1) { currentIndex = i; break; }
             }
         }
 
