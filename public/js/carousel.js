@@ -107,6 +107,32 @@ function setupCarouselMeasurementGuard(wrapper, prevBtn, nextBtn) {
     } }, 600);
 }
 
+// Helper: obtener índice del primer item completamente visible en el wrapper
+function getFirstFullyVisibleItemIndex(wrapper) {
+    try {
+        if (!wrapper) return null;
+        const items = Array.from(wrapper.querySelectorAll('.custom-carousel-item'));
+        if (!items || items.length === 0) return null;
+        const containerRect = wrapper.getBoundingClientRect();
+        // Tolerancia de 2px para pequeñas diferencias subpixel
+        const tol = 2;
+        for (let i = 0; i < items.length; i++) {
+            const r = items[i].getBoundingClientRect();
+            if (r.left >= containerRect.left - tol && r.right <= containerRect.right + tol) {
+                return i;
+            }
+        }
+        // Si no hay ninguno completamente visible, devolver el primer parcialmente visible
+        for (let i = 0; i < items.length; i++) {
+            const r = items[i].getBoundingClientRect();
+            if (r.right > containerRect.left + tol && r.left < containerRect.right - tol) {
+                return i;
+            }
+        }
+    } catch (e) { /* ignore */ }
+    return null;
+}
+
 class EpisodiosSeriesCarousel {
     // ...existing code...
     scrollToHash(retries = 10) {
@@ -532,7 +558,12 @@ class EpisodiosSeriesCarousel {
         const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
 
         // Calcular índice actual y objetivo
-        const currentIndex = Math.floor(currentScroll / stepSize);
+        let currentIndex = null;
+        try {
+            const idx = getFirstFullyVisibleItemIndex(this.wrapper);
+            if (typeof idx === 'number' && idx >= 0) currentIndex = idx;
+        } catch (e) { currentIndex = null; }
+        if (currentIndex === null) currentIndex = Math.round(currentScroll / stepSize);
         let targetIndex;
         if (direction === 'prev') {
             targetIndex = Math.max(0, currentIndex - itemsPerViewport);
@@ -848,7 +879,12 @@ class EpisodiosAnimesCarousel {
         this._scrollRetryCount = 0;
         const currentScroll = this.wrapper.scrollLeft;
         const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
-        const currentIndex = Math.floor(currentScroll / stepSize);
+        let currentIndex = null;
+        try {
+            const idx = getFirstFullyVisibleItemIndex(this.wrapper);
+            if (typeof idx === 'number' && idx >= 0) currentIndex = idx;
+        } catch (e) { currentIndex = null; }
+        if (currentIndex === null) currentIndex = Math.round(currentScroll / stepSize);
         let targetIndex;
         if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsPerViewport); else targetIndex = currentIndex + itemsPerViewport;
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
@@ -1136,7 +1172,12 @@ class EpisodiosDocumentalesCarousel {
         this._scrollRetryCount = 0;
         const currentScroll = this.wrapper.scrollLeft;
         const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
-        const currentIndex = Math.floor(currentScroll / stepSize);
+        let currentIndex = null;
+        try {
+            const idx = getFirstFullyVisibleItemIndex(this.wrapper);
+            if (typeof idx === 'number' && idx >= 0) currentIndex = idx;
+        } catch (e) { currentIndex = null; }
+        if (currentIndex === null) currentIndex = Math.round(currentScroll / stepSize);
         let targetIndex;
         if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsPerViewport); else targetIndex = currentIndex + itemsPerViewport;
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
