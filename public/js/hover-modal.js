@@ -197,7 +197,20 @@ class HoverModal {
                     this.carouselContainer.style.position = 'relative';
                     this._carouselPositionChanged = true;
                 }
-                this.carouselContainer.appendChild(this.modalContent);
+                // Guard: snapshot scroll positions of likely carousel wrappers to avoid
+                // any browser-driven jump when we move DOM nodes.
+                try {
+                    const wrappers = Array.from(document.querySelectorAll('[id$="-carousel-wrapper"], .carousel-container'));
+                    const scrollMap = new Map();
+                    wrappers.forEach(w => { try { scrollMap.set(w, { left: w.scrollLeft, top: w.scrollTop }); } catch(e){} });
+                    this.carouselContainer.appendChild(this.modalContent);
+                    // restore scrolls on next frame to avoid any reflow-induced jumps
+                    requestAnimationFrame(() => {
+                        try { wrappers.forEach(w => { const s = scrollMap.get(w); if (s) { w.scrollLeft = s.left; w.scrollTop = s.top; } }); } catch(e){}
+                    });
+                } catch (e2) {
+                    try { this.carouselContainer.appendChild(this.modalContent); } catch(e3){}
+                }
             }
         } catch (e) {}
 
@@ -464,7 +477,17 @@ class HoverModal {
                 // restore modalContent to its original parent if we moved it
                 try {
                     if (this._originalParent && this.modalContent.parentElement !== this._originalParent) {
-                        this._originalParent.appendChild(this.modalContent);
+                        try {
+                            const wrappers = Array.from(document.querySelectorAll('[id$="-carousel-wrapper"], .carousel-container'));
+                            const scrollMap = new Map();
+                            wrappers.forEach(w => { try { scrollMap.set(w, { left: w.scrollLeft, top: w.scrollTop }); } catch(e){} });
+                            this._originalParent.appendChild(this.modalContent);
+                            requestAnimationFrame(() => {
+                                try { wrappers.forEach(w => { const s = scrollMap.get(w); if (s) { w.scrollLeft = s.left; w.scrollTop = s.top; } }); } catch(e){}
+                            });
+                        } catch (e2) {
+                            try { this._originalParent.appendChild(this.modalContent); } catch(e3){}
+                        }
                     }
                     if (this._carouselPositionChanged && this.carouselContainer) {
                         this.carouselContainer.style.position = '';
