@@ -395,51 +395,42 @@ class EpisodiosSeriesCarousel {
         if (!this.wrapper) return;
         const containerWidth = this.wrapper.clientWidth;
 
-        // Forzar reflow y medir de forma más confiable
-        const containerRect = this.wrapper.getBoundingClientRect();
-        const measuredContainerWidth = Math.round(containerRect.width) || this.wrapper.clientWidth;
-
         // Determinar tamaño real del ítem y gap leyendo el DOM
         const firstItem = this.wrapper.querySelector('.custom-carousel-item');
         if (!firstItem) return;
+        const itemRect = firstItem.getBoundingClientRect();
+        const itemWidth = Math.round(itemRect.width);
 
-        // Forzar layout del primer ítem
-        firstItem.offsetWidth;
-        const itemWidth = firstItem.offsetWidth || Math.round(firstItem.getBoundingClientRect().width);
-
-        // Intentar obtener gap por CSS (margin-right) y fallback a cálculo por rect
+        // Intentar estimar gap usando el segundo elemento
         let gap = 0;
-        try {
-            const cs = getComputedStyle(firstItem);
-            gap = parseFloat(cs.marginRight) || 0;
-        } catch (e) {
-            gap = 0;
-        }
-        if (!gap) {
-            const secondItem = firstItem.nextElementSibling;
-            if (secondItem) {
-                const firstRect = firstItem.getBoundingClientRect();
-                const secondRect = secondItem.getBoundingClientRect();
-                gap = Math.round(secondRect.left - (firstRect.left + firstRect.width)) || 0;
-                if (gap < 0) gap = 0;
-            }
+        const secondItem = firstItem.nextElementSibling;
+        if (secondItem) {
+            const secondRect = secondItem.getBoundingClientRect();
+            gap = Math.round(secondRect.left - (itemRect.left + itemRect.width));
+            if (isNaN(gap) || gap < 0) gap = 0;
         }
 
-        const stepSize = Math.max(1, itemWidth + gap);
-        const itemsPerViewport = Math.max(1, Math.floor(measuredContainerWidth / stepSize));
+        const stepSize = itemWidth + gap;
 
-        // Usar rounding del índice para evitar errores por valores fraccionarios en scrollLeft
-        const currentIndex = Math.round(this.wrapper.scrollLeft / stepSize);
+        // Calcular cuántos items completos caben en la vista
+        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
 
-        let targetIndex = (direction === 'prev') ? Math.max(0, currentIndex - itemsPerViewport) : currentIndex + itemsPerViewport;
+    // Calcular índice del primer item visible actualmente (alinear a la izquierda)
+    const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
+
+        let targetIndex;
+        if (direction === 'prev') {
+            targetIndex = Math.max(0, currentIndex - itemsPerViewport);
+        } else {
+            targetIndex = currentIndex + itemsPerViewport;
+        }
 
         // Evitar sobrepasar la cantidad de items
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
-        const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
-        const finalScroll = Math.max(0, Math.min(targetIndex * stepSize, maxScroll));
+        const finalScroll = targetIndex * stepSize;
         this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 
@@ -717,50 +708,23 @@ class EpisodiosAnimesCarousel {
     scrollToNextPage() { this.scrollToPage('next'); }
     scrollToPage(direction) {
         if (!this.wrapper) return;
-        // Forzar reflow y medir de forma más confiable
-        const containerRect = this.wrapper.getBoundingClientRect();
-        const measuredContainerWidth = Math.round(containerRect.width) || this.wrapper.clientWidth;
-
+        const containerWidth = this.wrapper.clientWidth;
         const firstItem = this.wrapper.querySelector('.custom-carousel-item');
         if (!firstItem) return;
-
-        // Forzar layout del primer ítem
-        firstItem.offsetWidth;
-        const itemWidth = firstItem.offsetWidth || Math.round(firstItem.getBoundingClientRect().width);
-
-        // Intentar obtener gap por CSS (margin-right) y fallback a cálculo por rect
+        const itemRect = firstItem.getBoundingClientRect();
+        const itemWidth = Math.round(itemRect.width);
         let gap = 0;
-        try {
-            const cs = getComputedStyle(firstItem);
-            gap = parseFloat(cs.marginRight) || 0;
-        } catch (e) {
-            gap = 0;
-        }
-        if (!gap) {
-            const secondItem = firstItem.nextElementSibling;
-            if (secondItem) {
-                const firstRect = firstItem.getBoundingClientRect();
-                const secondRect = secondItem.getBoundingClientRect();
-                gap = Math.round(secondRect.left - (firstRect.left + firstRect.width)) || 0;
-                if (gap < 0) gap = 0;
-            }
-        }
-
-        const stepSize = Math.max(1, itemWidth + gap);
-        const itemsPerViewport = Math.max(1, Math.floor(measuredContainerWidth / stepSize));
-
-        // Usar rounding del índice para evitar errores por valores fraccionarios en scrollLeft
-        const currentIndex = Math.round(this.wrapper.scrollLeft / stepSize);
-
-        let targetIndex = (direction === 'prev') ? Math.max(0, currentIndex - itemsPerViewport) : currentIndex + itemsPerViewport;
-
-        // Evitar sobrepasar la cantidad de items
+        const secondItem = firstItem.nextElementSibling;
+        if (secondItem) { const secondRect = secondItem.getBoundingClientRect(); gap = Math.round(secondRect.left - (itemRect.left + itemRect.width)); if (isNaN(gap) || gap < 0) gap = 0; }
+        const stepSize = itemWidth + gap;
+        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
+        const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
+        let targetIndex;
+        if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsPerViewport); else targetIndex = currentIndex + itemsPerViewport;
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
-
-        const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
-        const finalScroll = Math.max(0, Math.min(targetIndex * stepSize, maxScroll));
+        const finalScroll = targetIndex * stepSize;
         this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 }
@@ -1028,50 +992,23 @@ class EpisodiosDocumentalesCarousel {
     scrollToNextPage() { this.scrollToPage('next'); }
     scrollToPage(direction) {
         if (!this.wrapper) return;
-        // Forzar reflow y medir de forma más confiable
-        const containerRect = this.wrapper.getBoundingClientRect();
-        const measuredContainerWidth = Math.round(containerRect.width) || this.wrapper.clientWidth;
-
+        const containerWidth = this.wrapper.clientWidth;
         const firstItem = this.wrapper.querySelector('.custom-carousel-item');
         if (!firstItem) return;
-
-        // Forzar layout del primer ítem
-        firstItem.offsetWidth;
-        const itemWidth = firstItem.offsetWidth || Math.round(firstItem.getBoundingClientRect().width);
-
-        // Intentar obtener gap por CSS (margin-right) y fallback a cálculo por rect
+        const itemRect = firstItem.getBoundingClientRect();
+        const itemWidth = Math.round(itemRect.width);
         let gap = 0;
-        try {
-            const cs = getComputedStyle(firstItem);
-            gap = parseFloat(cs.marginRight) || 0;
-        } catch (e) {
-            gap = 0;
-        }
-        if (!gap) {
-            const secondItem = firstItem.nextElementSibling;
-            if (secondItem) {
-                const firstRect = firstItem.getBoundingClientRect();
-                const secondRect = secondItem.getBoundingClientRect();
-                gap = Math.round(secondRect.left - (firstRect.left + firstRect.width)) || 0;
-                if (gap < 0) gap = 0;
-            }
-        }
-
-        const stepSize = Math.max(1, itemWidth + gap);
-        const itemsPerViewport = Math.max(1, Math.floor(measuredContainerWidth / stepSize));
-
-        // Usar rounding del índice para evitar errores por valores fraccionarios en scrollLeft
-        const currentIndex = Math.round(this.wrapper.scrollLeft / stepSize);
-
-        let targetIndex = (direction === 'prev') ? Math.max(0, currentIndex - itemsPerViewport) : currentIndex + itemsPerViewport;
-
-        // Evitar sobrepasar la cantidad de items
+        const secondItem = firstItem.nextElementSibling;
+        if (secondItem) { const secondRect = secondItem.getBoundingClientRect(); gap = Math.round(secondRect.left - (itemRect.left + itemRect.width)); if (isNaN(gap) || gap < 0) gap = 0; }
+        const stepSize = itemWidth + gap;
+        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
+        const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
+        let targetIndex;
+        if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsPerViewport); else targetIndex = currentIndex + itemsPerViewport;
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
-
-        const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
-        const finalScroll = Math.max(0, Math.min(targetIndex * stepSize, maxScroll));
+        const finalScroll = targetIndex * stepSize;
         this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 }
@@ -1744,41 +1681,13 @@ class Carousel {
 
     scrollToPage(direction) {
         if (!this.wrapper) return;
-        // Usar valores por defecto pero preferir medidas reales del DOM para evitar desalineado
-        let itemWidth = 194;
-        let gap = 4;
-
-        // Forzar reflow y medir el contenedor
-        const containerRect = this.wrapper.getBoundingClientRect();
-        const containerWidth = Math.round(containerRect.width) || this.wrapper.clientWidth;
-
-        const firstItem = this.wrapper.querySelector('.custom-carousel-item');
-        if (firstItem) {
-            firstItem.offsetWidth;
-            itemWidth = firstItem.offsetWidth || Math.round(firstItem.getBoundingClientRect().width) || itemWidth;
-            try {
-                const cs = getComputedStyle(firstItem);
-                const m = parseFloat(cs.marginRight);
-                if (!isNaN(m)) gap = m;
-            } catch (e) {
-                // ignore
-            }
-            if (!gap) {
-                const secondItem = firstItem.nextElementSibling;
-                if (secondItem) {
-                    const firstRect = firstItem.getBoundingClientRect();
-                    const secondRect = secondItem.getBoundingClientRect();
-                    gap = Math.round(secondRect.left - (firstRect.left + firstRect.width)) || gap;
-                    if (gap < 0) gap = 0;
-                }
-            }
-        }
-
-        // Calcular cuántos items caben en la pantalla
-        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / (itemWidth + gap)));
+        const itemWidth = 194;
+        const gap = 4;
+        const containerWidth = this.wrapper.clientWidth;
+        const itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
         const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
 
-        let currentScroll = Math.round(this.wrapper.scrollLeft);
+        let currentScroll = this.wrapper.scrollLeft;
         let targetScroll;
         if (direction === 'prev') {
             targetScroll = Math.max(0, currentScroll - actualScrollAmount);
@@ -1788,9 +1697,12 @@ class Carousel {
         // Alinear el scroll para que el item de la izquierda quede completo
         const alignedScroll = Math.round(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
         // Evitar sobrepasar los límites
-        const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
+        const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
         const finalScroll = Math.max(0, Math.min(alignedScroll, maxScroll));
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'auto' });
+        this.wrapper.scrollTo({
+            left: finalScroll,
+            behavior: 'auto'
+        });
     }
 
     // Método para contar elementos realmente visibles
@@ -2248,42 +2160,20 @@ class SeriesCarousel {
 
     scrollToPage(direction) {
         if (!this.wrapper) return;
-        // Preferir medidas reales del DOM para evitar problemas de cálculo en primer clic
-        let itemWidth = 194;
-        let gap = 4;
-
-        const containerRect = this.wrapper.getBoundingClientRect();
-        const containerWidth = Math.round(containerRect.width) || this.wrapper.clientWidth;
-
-        const firstItem = this.wrapper.querySelector('.custom-carousel-item');
-        if (firstItem) {
-            firstItem.offsetWidth;
-            itemWidth = firstItem.offsetWidth || Math.round(firstItem.getBoundingClientRect().width) || itemWidth;
-            try {
-                const cs = getComputedStyle(firstItem);
-                const m = parseFloat(cs.marginRight);
-                if (!isNaN(m)) gap = m;
-            } catch (e) {}
-            if (!gap) {
-                const secondItem = firstItem.nextElementSibling;
-                if (secondItem) {
-                    const firstRect = firstItem.getBoundingClientRect();
-                    const secondRect = secondItem.getBoundingClientRect();
-                    gap = Math.round(secondRect.left - (firstRect.left + firstRect.width)) || gap;
-                    if (gap < 0) gap = 0;
-                }
-            }
-        }
-
+        
+        const itemWidth = 194;
+        const gap = 4;
+        const containerWidth = this.wrapper.clientWidth;
+        
         // Calcular cuántos items caben en la pantalla
-        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / (itemWidth + gap)));
+        const itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
         const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
-
+        
         console.log(`Carousel: Container width: ${containerWidth}px`);
         console.log(`Carousel: Item width: ${itemWidth}px, Gap: ${gap}px`);
         console.log(`Carousel: Items que caben en pantalla: ${itemsPerViewport}`);
         console.log(`Carousel: Scroll amount: ${actualScrollAmount}px`);
-
+        
         if (direction === 'prev') {
             // Calcular la posición anterior
             const currentScroll = this.wrapper.scrollLeft;
