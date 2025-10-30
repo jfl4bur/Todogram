@@ -392,26 +392,6 @@ button:focus {
     gap: 4px;
 }
 
-/* Defaults for item size used by .custom-carousel-item via CSS variables
-   These ensure the JS measurements match the rendered sizes. Ajusta si la imagen
-   que quieres mostrar requiere otros valores. */
-#carousel-wrapper {
-    --item-width: 194px;
-    --item-height: 271px;
-}
-#series-carousel-wrapper {
-    --item-width: 194px;
-    --item-height: 271px;
-}
-#animes-carousel-wrapper {
-    --item-width: 194px;
-    --item-height: 271px;
-}
-#documentales-carousel-wrapper {
-    --item-width: 194px;
-    --item-height: 271px;
-}
-
 #carousel-wrapper::-webkit-scrollbar, #series-carousel-wrapper::-webkit-scrollbar {
     display: none;
 }
