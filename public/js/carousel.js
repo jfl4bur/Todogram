@@ -1,3 +1,30 @@
+// Helper: scroll robusto que espera reflows (doble rAF + corrección)
+function robustScrollTo(wrapper, computeDesired, maxScroll, behavior = 'smooth') {
+    if (!wrapper || typeof computeDesired !== 'function') return;
+    // Esperar un par de frames para dejar que el layout se estabilice (imágenes, fuentes)
+    requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+            try {
+                const desired = computeDesired();
+                const finalScroll = Math.min(Math.max(0, Math.round(desired)), maxScroll);
+                wrapper.scrollTo({ left: finalScroll, behavior });
+            } catch (e) {
+                // Ignorar errores de medición
+            }
+            // Re-check corto después por si alguna imagen cambió el layout más tarde
+            setTimeout(() => {
+                try {
+                    const desired2 = computeDesired();
+                    const final2 = Math.min(Math.max(0, Math.round(desired2)), maxScroll);
+                    if (Math.abs(wrapper.scrollLeft - final2) > 2) {
+                        wrapper.scrollTo({ left: final2, behavior });
+                    }
+                } catch (e) {}
+            }, 60);
+        });
+    });
+}
+
 // Carrusel de Episodios Series (solo episodios con Título episodio completo)
 class EpisodiosSeriesCarousel {
     // ...existing code...
@@ -484,7 +511,8 @@ class EpisodiosSeriesCarousel {
             console.warn('carousel-debug: error al intentar loggear valores', e);
         }
         const finalScroll = Math.min(Math.max(0, Math.round(desired)), maxScroll);
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+        // Usar scroll robusto para evitar cortes en el primer clic
+        robustScrollTo(this.wrapper, computeDesired, maxScroll, 'smooth');
     });
     }
 
@@ -827,7 +855,8 @@ class EpisodiosAnimesCarousel {
                 console.warn('carousel-debug: error al intentar loggear valores', e);
             }
             const finalScroll = Math.min(Math.max(0, Math.round(desired)), maxScroll);
-            this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+            // Usar scroll robusto para evitar cortes en el primer clic
+            robustScrollTo(this.wrapper, computeDesired, maxScroll, 'smooth');
         });
     }
 }
@@ -1160,7 +1189,8 @@ class EpisodiosDocumentalesCarousel {
                 console.warn('carousel-debug: error al intentar loggear valores', e);
             }
             const finalScroll = Math.min(Math.max(0, Math.round(desired)), maxScroll);
-            this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+            // Usar scroll robusto para evitar cortes en el primer clic
+            robustScrollTo(this.wrapper, computeDesired, maxScroll, 'smooth');
         });
     }
 }
@@ -1875,9 +1905,9 @@ class Carousel {
     const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
     const wrapperStyle = getComputedStyle(this.wrapper);
     const paddingLeft = parseFloat(wrapperStyle.paddingLeft) || 0;
-    const desired = (items[targetIndex] && typeof items[targetIndex].offsetLeft === 'number') ? items[targetIndex].offsetLeft - paddingLeft : targetIndex * stepSize;
-    const finalScroll = Math.min(Math.max(0, desired), maxScroll);
-    this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+    const computeDesired = () => (items[targetIndex] && typeof items[targetIndex].offsetLeft === 'number') ? items[targetIndex].offsetLeft - paddingLeft : targetIndex * stepSize;
+    // Usar scroll robusto para evitar cortes en el primer clic
+    robustScrollTo(this.wrapper, computeDesired, maxScroll, 'smooth');
     }
 
     // Método para contar elementos realmente visibles
@@ -2375,8 +2405,9 @@ class SeriesCarousel {
     targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
     const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
-    const finalScroll = Math.min(Math.max(0, (items[targetIndex] && typeof items[targetIndex].offsetLeft === 'number') ? items[targetIndex].offsetLeft : targetIndex * stepSize), maxScroll);
-    this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+    const computeDesired = () => (items[targetIndex] && typeof items[targetIndex].offsetLeft === 'number') ? items[targetIndex].offsetLeft : targetIndex * stepSize;
+    // Usar scroll robusto para evitar cortes en el primer clic
+    robustScrollTo(this.wrapper, computeDesired, maxScroll, 'smooth');
     }
 
     // Método para contar elementos realmente visibles
