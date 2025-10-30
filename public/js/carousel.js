@@ -1300,7 +1300,7 @@ class AnimesCarousel {
             div.innerHTML = `
                 <div class="loader"><i class="fas fa-spinner"></i></div>
                 <div class="poster-container">
-                    <img class="poster-image" src="${posterUrl}" alt="${item.title}" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease" loading="lazy">
+                    <img class="poster-image" src="${posterUrl}" alt="${item.title}" width="194" height="271" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease" loading="lazy">
                 </div>
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none">
                 <div class="carousel-overlay">
@@ -1636,7 +1636,7 @@ class Carousel {
             div.innerHTML = `
                 <div class="loader"><i class="fas fa-spinner"></i></div>
                 <div class="poster-container">
-                    <img class="poster-image" src="${posterUrl}" alt="${item.title}" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease" loading="lazy">
+                    <img class="poster-image" src="${posterUrl}" alt="${item.title}" width="194" height="271" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease" loading="lazy">
                 </div>
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none">
                             <div class="carousel-overlay">
@@ -2122,7 +2122,7 @@ class SeriesCarousel {
             div.innerHTML = `
                 <div class="loader"><i class="fas fa-spinner"></i></div>
                 <div class="poster-container">
-                    <img class="poster-image" src="${posterUrl}" alt="${item.title}" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease" loading="lazy">
+                    <img class="poster-image" src="${posterUrl}" alt="${item.title}" width="194" height="271" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease" loading="lazy">
                 </div>
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none">
                             <div class="carousel-overlay">
@@ -2530,7 +2530,7 @@ class DocumentalesCarousel {
             div.innerHTML = `
                 <div class="loader"><i class="fas fa-spinner"></i></div>
                 <div class="poster-container">
-                    <img class="poster-image" src="${posterUrl}" alt="${item.title}" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease" loading="lazy">
+                    <img class="poster-image" src="${posterUrl}" alt="${item.title}" width="194" height="271" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease" loading="lazy">
                 </div>
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none">
                 <div class="carousel-overlay">
