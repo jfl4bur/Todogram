@@ -155,16 +155,50 @@ class HoverModal {
         // This addresses cases where HoverModal was instantiated before the
         // catalog DOM existed (so constructor fallback picked body).
         try {
+            // Candidate container near the item. We'll prefer it only if it's NOT scrollable.
             const candidate = itemElement.closest('.carousel-container, .catalogo-grid, #catalogo-grid-page') || document.body;
-            // update carouselContainer to the candidate for this show() call
-            this.carouselContainer = candidate || document.body;
-            // NOTE: we used to move `modalContent` into the carouselContainer to let the
-            // browser natively move it with container scrolling. That produced layout
-            // reflows in some carousels and caused the wrapper.scrollLeft to snap to 0
-            // (showing page 1) when the hover modal opened. To avoid that regression we
-            // no longer reparent the modalContent. Keep it in its original parent (the
-            // modal overlay) and compute absolute coordinates for positioning instead.
-            // This keeps the layout stable and prevents unexpected jumps.
+
+            // Helper: detect if an element is scrollable in either axis
+            const isScrollable = (el) => {
+                if (!el || el === document.body) return false;
+                try {
+                    const cs = getComputedStyle(el);
+                    const overflowX = cs.overflowX || cs.overflow;
+                    const overflowY = cs.overflowY || cs.overflow;
+                    const canScrollX = (overflowX === 'auto' || overflowX === 'scroll' || overflowX === 'overlay') && el.scrollWidth > el.clientWidth;
+                    const canScrollY = (overflowY === 'auto' || overflowY === 'scroll' || overflowY === 'overlay') && el.scrollHeight > el.clientHeight;
+                    return !!(canScrollX || canScrollY);
+                } catch (err) {
+                    return false;
+                }
+            };
+
+            // Prefer a non-scrollable container: candidate if not scrollable, otherwise try to use
+            // the nearest .carousel-section ancestor that isn't scrollable; fallback to document.body
+            let chosenContainer = document.body;
+            if (candidate && candidate !== document.body && !isScrollable(candidate)) {
+                chosenContainer = candidate;
+            } else if (candidate && candidate !== document.body) {
+                const sectionAncestor = candidate.closest('.carousel-section');
+                if (sectionAncestor && !isScrollable(sectionAncestor)) {
+                    chosenContainer = sectionAncestor;
+                }
+            }
+
+            // update carouselContainer for this show() call
+            this.carouselContainer = chosenContainer || document.body;
+
+            // Only move modalContent into the chosen container when it's not document.body
+            // and when that container is non-scrollable. This prevents inserting the modal
+            // inside wrappers with overflow:auto/scroll which can change scrollLeft/Top.
+            if (this.carouselContainer && this.modalContent.parentElement !== this.carouselContainer && this.carouselContainer !== document.body) {
+                const cs2 = getComputedStyle(this.carouselContainer);
+                if (cs2.position === 'static') {
+                    this.carouselContainer.style.position = 'relative';
+                    this._carouselPositionChanged = true;
+                }
+                this.carouselContainer.appendChild(this.modalContent);
+            }
         } catch (e) {}
 
         const position = this.calculateModalPosition(itemElement);
