@@ -65,8 +65,13 @@ document.addEventListener('DOMContentLoaded', function () {
         
         // Inicializar el carrusel de series inmediatamente
             console.log("Main: Inicializando carrusel de series...");
-            const seriesCarousel = new SeriesCarousel();
-            window.seriesCarousel = seriesCarousel;
+            // Evitar instanciar dos veces si ya fue creado por otro módulo
+            if (!window.seriesCarousel) {
+                const seriesCarousel = new SeriesCarousel();
+                window.seriesCarousel = seriesCarousel;
+            } else {
+                console.log('Main: seriesCarousel ya existe — no se crea otra instancia');
+            }
 
         // Inicializar el carrusel de episodios (Episodios Series)
             console.log("Main: Inicializando carrusel de episodios...");

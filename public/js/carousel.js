@@ -2597,7 +2597,11 @@ class DocumentalesCarousel {
 
 // Inicialización de ambos carruseles
 window.addEventListener('DOMContentLoaded', () => {
-    new SeriesCarousel();
+    if (!window.seriesCarousel) {
+        window.seriesCarousel = new SeriesCarousel();
+    } else {
+        console.log('Carousel.js: seriesCarousel ya existe — no se crea otra instancia');
+    }
     window.documentalesCarousel = new DocumentalesCarousel();
     window.animesCarousel = new AnimesCarousel();
 });
