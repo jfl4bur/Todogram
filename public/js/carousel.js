@@ -35,6 +35,8 @@ class EpisodiosSeriesCarousel {
             setTimeout(() => this.scrollToHash(retries - 1), 120);
         }
     }
+
+
     constructor() {
         this.wrapper = document.getElementById('episodios-series-carousel-wrapper');
         this.skeleton = document.getElementById('episodios-series-carousel-skeleton');
@@ -743,7 +745,8 @@ class EpisodiosAnimesCarousel {
                 itemsPerViewport,
                 stepSize
             });
-        } catch (e) {}
+    } catch (e) {}
+    try { __showPaginationDebug({ wrapperId: this.wrapper ? this.wrapper.id : null, direction, currentIndex, targetIndex, itemsPerViewport, stepSize }); } catch (e) {}
 
     const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
     let finalScroll = targetIndex * stepSize;
@@ -2669,3 +2672,31 @@ window.addEventListener('DOMContentLoaded', () => {
     window.documentalesCarousel = new DocumentalesCarousel();
     window.animesCarousel = new AnimesCarousel();
 });
+
+// Helper visual de depuración para mostrar en pantalla los valores de paginación
+function __showPaginationDebug(obj) {
+    try {
+        let el = document.getElementById('__pagination-debug-overlay');
+        if (!el) {
+            el = document.createElement('div');
+            el.id = '__pagination-debug-overlay';
+            el.style.position = 'fixed';
+            el.style.right = '12px';
+            el.style.bottom = '12px';
+            el.style.zIndex = '99999';
+            el.style.background = 'rgba(0,0,0,0.7)';
+            el.style.color = '#fff';
+            el.style.fontSize = '12px';
+            el.style.padding = '8px 10px';
+            el.style.borderRadius = '6px';
+            el.style.maxWidth = '320px';
+            el.style.pointerEvents = 'none';
+            document.body.appendChild(el);
+        }
+        el.textContent = 'PAG: ' + (obj.wrapperId || '') + ' • ' + (obj.direction || '') + ' • cur:' + (obj.currentIndex ?? '') + ' → tgt:' + (obj.targetIndex ?? '') + ' • vp:' + (obj.itemsPerViewport ?? '') + ' • step:' + (obj.stepSize ?? '');
+        // desaparecer después de 2.5s
+        el.style.opacity = '1';
+        clearTimeout(el.__hideTimeout);
+        el.__hideTimeout = setTimeout(() => { try { el.style.opacity = '0'; } catch (e) {} }, 2500);
+    } catch (e) { /* noop */ }
+}
