@@ -38,6 +38,9 @@ function computeCarouselStep(wrapper) {
     const stepSize = itemWidth + gap;
     const containerWidth = wrapper.clientWidth || 0;
     const itemsPerViewport = stepSize > 0 ? Math.max(1, Math.floor(containerWidth / stepSize)) : 1;
+    try {
+        console.debug(`[computeCarouselStep] wrapper=${wrapper && wrapper.id ? wrapper.id : 'unknown'} itemWidth=${itemWidth} gap=${gap} stepSize=${stepSize} itemsPerViewport=${itemsPerViewport} containerWidth=${containerWidth}`);
+    } catch (e) {}
     return { stepSize, itemsPerViewport, itemWidth, gap };
 }
 
@@ -436,7 +439,9 @@ class EpisodiosSeriesCarousel {
     scrollToPage(direction) {
         if (!this.wrapper) return;
         // Medir paso dinámicamente y alinear al múltiplo de stepSize
-        const { stepSize, itemsPerViewport } = computeCarouselStep(this.wrapper);
+    const { stepSize, itemsPerViewport } = computeCarouselStep(this.wrapper);
+    try { console.log(`[Carousel][${this.wrapper && this.wrapper.id ? this.wrapper.id : 'unknown'}] measured: stepSize=${stepSize}, itemsPerViewport=${itemsPerViewport}`); } catch (e) {}
+
         // Si la medición es inválida (p. ej. imágenes aún no cargadas), reintentar unas pocas veces
         if (!stepSize || stepSize < 30) {
             this._scrollRetryCount = (this._scrollRetryCount || 0) + 1;
@@ -447,8 +452,14 @@ class EpisodiosSeriesCarousel {
             // resetear contador y continuar con fallback
             this._scrollRetryCount = 0;
         }
+
         // medición válida -> resetear contador
         this._scrollRetryCount = 0;
+
+        // Log diagnóstico del intento de paginación
+        try {
+            console.log(`[Carousel][${this.wrapper && this.wrapper.id ? this.wrapper.id : 'unknown'}] scrollToPage(${direction}) called -> containerWidth=${this.wrapper.clientWidth}, stepSize=${stepSize}, itemsPerViewport=${itemsPerViewport}, currentScroll=${this.wrapper.scrollLeft}, scrollWidth=${this.wrapper.scrollWidth}`);
+        } catch (e) {}
 
         const currentScroll = this.wrapper.scrollLeft;
         const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
@@ -744,7 +755,8 @@ class EpisodiosAnimesCarousel {
     scrollToNextPage() { this.scrollToPage('next'); }
     scrollToPage(direction) {
         if (!this.wrapper) return;
-        const { stepSize, itemsPerViewport } = computeCarouselStep(this.wrapper);
+    const { stepSize, itemsPerViewport } = computeCarouselStep(this.wrapper);
+    try { console.log(`[Carousel][${this.wrapper && this.wrapper.id ? this.wrapper.id : 'unknown'}] measured: stepSize=${stepSize}, itemsPerViewport=${itemsPerViewport}`); } catch (e) {}
         if (!stepSize || stepSize < 30) {
             this._scrollRetryCount = (this._scrollRetryCount || 0) + 1;
             if (this._scrollRetryCount <= 3) {
@@ -1030,7 +1042,8 @@ class EpisodiosDocumentalesCarousel {
     scrollToNextPage() { this.scrollToPage('next'); }
     scrollToPage(direction) {
         if (!this.wrapper) return;
-        const { stepSize, itemsPerViewport } = computeCarouselStep(this.wrapper);
+    const { stepSize, itemsPerViewport } = computeCarouselStep(this.wrapper);
+    try { console.log(`[Carousel][${this.wrapper && this.wrapper.id ? this.wrapper.id : 'unknown'}] measured: stepSize=${stepSize}, itemsPerViewport=${itemsPerViewport}`); } catch (e) {}
         if (!stepSize || stepSize < 30) {
             this._scrollRetryCount = (this._scrollRetryCount || 0) + 1;
             if (this._scrollRetryCount <= 3) {
@@ -1722,7 +1735,8 @@ class Carousel {
     scrollToPage(direction) {
         if (!this.wrapper) return;
         // Calcular dinámicamente el tamaño del item y el gap para evitar errores en el primer clic
-        const { stepSize, itemsPerViewport } = computeCarouselStep(this.wrapper);
+    const { stepSize, itemsPerViewport } = computeCarouselStep(this.wrapper);
+    try { console.log(`[Carousel][${this.wrapper && this.wrapper.id ? this.wrapper.id : 'unknown'}] measured: stepSize=${stepSize}, itemsPerViewport=${itemsPerViewport}`); } catch (e) {}
         if (!stepSize || stepSize < 30) {
             this._scrollRetryCount = (this._scrollRetryCount || 0) + 1;
             if (this._scrollRetryCount <= 3) {
@@ -2207,7 +2221,8 @@ class SeriesCarousel {
     scrollToPage(direction) {
         if (!this.wrapper) return;
         // Usar medición dinámica para evitar errores de ancho en el primer clic
-        const { stepSize, itemsPerViewport } = computeCarouselStep(this.wrapper);
+    const { stepSize, itemsPerViewport } = computeCarouselStep(this.wrapper);
+    try { console.log(`[Carousel][${this.wrapper && this.wrapper.id ? this.wrapper.id : 'unknown'}] measured: stepSize=${stepSize}, itemsPerViewport=${itemsPerViewport}`); } catch (e) {}
         if (!stepSize) return;
 
         const containerWidth = this.wrapper.clientWidth;
