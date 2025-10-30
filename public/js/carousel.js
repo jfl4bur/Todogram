@@ -446,8 +446,9 @@ class EpisodiosSeriesCarousel {
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
-        const finalScroll = targetIndex * stepSize;
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+    const finalScroll = targetIndex * stepSize;
+    try { console.log(`[Carousel] ${this.wrapper && this.wrapper.id ? this.wrapper.id : '<unknown>'} scrollToPage dir=${direction} currentIndex=${currentIndex} targetIndex=${targetIndex} stepSize=${stepSize} finalScroll=${finalScroll}`); } catch(e){}
+    this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 
 // (Eliminados duplicados y métodos sobrantes)
@@ -752,8 +753,9 @@ class EpisodiosAnimesCarousel {
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
-        const finalScroll = targetIndex * stepSize;
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+    const finalScroll = targetIndex * stepSize;
+    try { console.log(`[Carousel] ${this.wrapper && this.wrapper.id ? this.wrapper.id : '<unknown>'} scrollToPage dir=${direction} currentIndex=${currentIndex} targetIndex=${targetIndex} stepSize=${stepSize} finalScroll=${finalScroll}`); } catch(e){}
+    this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 }
 
@@ -1048,8 +1050,9 @@ class EpisodiosDocumentalesCarousel {
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
-        const finalScroll = targetIndex * stepSize;
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+    const finalScroll = targetIndex * stepSize;
+    try { console.log(`[Carousel] ${this.wrapper && this.wrapper.id ? this.wrapper.id : '<unknown>'} scrollToPage dir=${direction} currentIndex=${currentIndex} targetIndex=${targetIndex} stepSize=${stepSize} finalScroll=${finalScroll}`); } catch(e){}
+    this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 }
 class AnimesCarousel {
@@ -1727,8 +1730,9 @@ class Carousel {
         if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsPerViewport);
         else targetIndex = Math.min(items.length - itemsPerViewport, currentIndex + itemsPerViewport);
 
-        const finalScroll = Math.max(0, Math.min(targetIndex * stepSize, this.wrapper.scrollWidth - this.wrapper.clientWidth));
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'auto' });
+    const finalScroll = Math.max(0, Math.min(targetIndex * stepSize, this.wrapper.scrollWidth - this.wrapper.clientWidth));
+    try { console.log(`[Carousel] ${this.wrapper && this.wrapper.id ? this.wrapper.id : '<unknown>'} scrollToPage dir=${direction} currentIndex=${currentIndex} targetIndex=${targetIndex} stepSize=${stepSize} finalScroll=${finalScroll}`); } catch(e){}
+    this.wrapper.scrollTo({ left: finalScroll, behavior: 'auto' });
     }
 
     // Método para contar elementos realmente visibles
@@ -2214,8 +2218,9 @@ class SeriesCarousel {
         if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsPerViewport);
         else targetIndex = Math.min(items.length - itemsPerViewport, currentIndex + itemsPerViewport);
 
-        const finalScroll = Math.max(0, Math.min(targetIndex * stepSize, this.wrapper.scrollWidth - this.wrapper.clientWidth));
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'auto' });
+    const finalScroll = Math.max(0, Math.min(targetIndex * stepSize, this.wrapper.scrollWidth - this.wrapper.clientWidth));
+    try { console.log(`[Carousel] ${this.wrapper && this.wrapper.id ? this.wrapper.id : '<unknown>'} scrollToPage dir=${direction} currentIndex=${currentIndex} targetIndex=${targetIndex} stepSize=${stepSize} finalScroll=${finalScroll}`); } catch(e){}
+    this.wrapper.scrollTo({ left: finalScroll, behavior: 'auto' });
         return;
         
     }
