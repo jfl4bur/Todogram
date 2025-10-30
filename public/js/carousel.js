@@ -279,8 +279,6 @@ class EpisodiosSeriesCarousel {
                 </div>
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none;width:300px;height:169px;">
             `;
-            // Attach the data item to the DOM element so hover-modal can always reference the correct item
-            div._carouselItem = item;
             // Fade-in de imagen
             const img = div.querySelector('.episodios-series-card-image');
             img.onload = function() { img.style.opacity = '1'; const l = div.querySelector('.loader_episodios') || div.querySelector('.loader'); if (l) l.style.display = 'none'; };
@@ -641,7 +639,6 @@ class EpisodiosAnimesCarousel {
                 </div>
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none;width:300px;height:169px;">
             `;
-            div._carouselItem = item;
             const img = div.querySelector('.episodios-series-card-image');
             img.onload = function() { img.style.opacity = '1'; const l = div.querySelector('.loader_episodios') || div.querySelector('.loader'); if (l) l.style.display = 'none'; };
             if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
@@ -931,7 +928,6 @@ class EpisodiosDocumentalesCarousel {
                 </div>
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none;width:300px;height:169px;">
             `;
-            div._carouselItem = item;
             const img = div.querySelector('.episodios-series-card-image');
             img.onload = function() { img.style.opacity = '1'; const l = div.querySelector('.loader_episodios') || div.querySelector('.loader'); if (l) l.style.display = 'none'; };
             if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
@@ -1215,8 +1211,6 @@ class AnimesCarousel {
         const end = Math.min(this.index + step, this.animeData.length);
         for (let i = this.index; i < end; i++) {
             const item = this.animeData[i];
-            // Evitar renderizar duplicados si ya existe un elemento con el mismo id en el wrapper
-            try { if (this.wrapper.querySelector(`[data-item-id="${CSS.escape(item.id || i)}"]`)) continue; } catch(e) { if (this.wrapper.querySelector(`[data-item-id="${item.id || i}"]`)) continue; }
             const div = document.createElement("div");
             div.className = "custom-carousel-item";
             div.dataset.itemId = i;
@@ -1240,7 +1234,6 @@ class AnimesCarousel {
                     ${item.description ? `<div class="carousel-description">${item.description}</div>` : ''}
                 </div>
             `;
-            div._carouselItem = item;
             if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
                 div.addEventListener('mouseenter', (e) => {
                     const itemId = div.dataset.itemId;
@@ -1549,8 +1542,6 @@ class Carousel {
         
         for (let i = this.index; i < end; i++) {
             const item = this.moviesData[i];
-            // Evitar renderizar duplicados si ya existe un elemento con el mismo id en el wrapper
-            try { if (this.wrapper.querySelector(`[data-item-id="${CSS.escape(item.id || i)}"]`)) continue; } catch(e) { if (this.wrapper.querySelector(`[data-item-id="${item.id || i}"]`)) continue; }
             const div = document.createElement("div");
             div.className = "custom-carousel-item";
             div.dataset.itemId = i;
@@ -1579,7 +1570,6 @@ class Carousel {
                 ${item.description ? `<div class="carousel-description">${item.description}</div>` : ''}
             </div>
             `;
-                div._carouselItem = item;
 
             if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
                 div.addEventListener('mouseenter', (e) => {
@@ -2007,12 +1997,6 @@ class SeriesCarousel {
     }
 
     async renderItems() {
-        // Evitar reentradas/concurrencia: si ya estamos renderizando, salir
-        if (this._rendering) {
-            console.log('SeriesCarousel: renderItems llamado pero ya en ejecución, saltando');
-            return;
-        }
-        this._rendering = true;
         console.log("SeriesCarousel: renderItems llamado");
         console.log("SeriesCarousel: seriesData.length:", this.seriesData.length);
         console.log("SeriesCarousel: index:", this.index);
@@ -2037,8 +2021,6 @@ class SeriesCarousel {
         
         for (let i = this.index; i < end; i++) {
             const item = this.seriesData[i];
-            // Evitar renderizar duplicados si ya existe un elemento con el mismo id en el wrapper
-            try { if (this.wrapper.querySelector(`[data-item-id="${CSS.escape(item.id || i)}"]`)) continue; } catch(e) { if (this.wrapper.querySelector(`[data-item-id="${item.id || i}"]`)) continue; }
             const div = document.createElement("div");
             div.className = "custom-carousel-item";
             div.dataset.itemId = item.id;
@@ -2067,7 +2049,6 @@ class SeriesCarousel {
                 ${item.description ? `<div class="carousel-description">${item.description}</div>` : ''}
             </div>
             `;
-                div._carouselItem = item;
 
             if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
                 div.addEventListener('mouseenter', (e) => {
@@ -2145,8 +2126,6 @@ class SeriesCarousel {
 
         this.index = end;
         this.updateProgressBar();
-        // liberar bandera de renderizado
-        this._rendering = false;
     }
 
     scrollToPrevPage() {
@@ -2464,8 +2443,6 @@ class DocumentalesCarousel {
         const end = Math.min(this.index + step, this.docuData.length);
         for (let i = this.index; i < end; i++) {
             const item = this.docuData[i];
-            // Evitar renderizar duplicados si ya existe un elemento con el mismo id en el wrapper
-            try { if (this.wrapper.querySelector(`[data-item-id="${CSS.escape(item.id || i)}"]`)) continue; } catch(e) { if (this.wrapper.querySelector(`[data-item-id="${item.id || i}"]`)) continue; }
             const div = document.createElement("div");
             div.className = "custom-carousel-item";
             div.dataset.itemId = i;
@@ -2576,7 +2553,7 @@ class DocumentalesCarousel {
 
 // Inicialización de ambos carruseles
 window.addEventListener('DOMContentLoaded', () => {
-    // SeriesCarousel is initialized from main.js to avoid double-instantiation
+    new SeriesCarousel();
     window.documentalesCarousel = new DocumentalesCarousel();
     window.animesCarousel = new AnimesCarousel();
 });

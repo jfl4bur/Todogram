@@ -52,7 +52,7 @@ class HoverModal {
             return;
         }
 
-    // Evitar mostrar si ya está visible
+        // Evitar mostrar si ya está visible
 
             // If already visible, cancel any pending hide and continue to update content/position
             if (this.isVisible) {
@@ -63,14 +63,6 @@ class HoverModal {
     this.cancelHide();
     window.isModalOpen = true;
     this.isVisible = true;
-        // Prefer the item attached directly to the DOM element if available.
-        // Esto evita problemas donde la referencia `item` pueda haber quedado desincronizada
-        // por renderizados asíncronos o por reuso de closures.
-        try {
-            if (itemElement && itemElement._carouselItem) {
-                item = itemElement._carouselItem;
-            }
-        } catch (e) {}
         
         // Usar postersUrl como prioridad (campo "Carteles")
         const backdropUrl = item.postersUrl || item.backgroundUrl || item.posterUrl;
@@ -166,16 +158,13 @@ class HoverModal {
             const candidate = itemElement.closest('.carousel-container, .catalogo-grid, #catalogo-grid-page') || document.body;
             // update carouselContainer to the candidate for this show() call
             this.carouselContainer = candidate || document.body;
-            // If possible, move the modalContent into the carouselContainer so the browser
-            // will move it synchronously with container scrolling (no JS lag).
-            if (this.carouselContainer && this.modalContent.parentElement !== this.carouselContainer && this.carouselContainer !== document.body) {
-                const cs = getComputedStyle(this.carouselContainer);
-                if (cs.position === 'static') {
-                    this.carouselContainer.style.position = 'relative';
-                    this._carouselPositionChanged = true;
-                }
-                this.carouselContainer.appendChild(this.modalContent);
-            }
+            // NOTE: we used to move `modalContent` into the carouselContainer to let the
+            // browser natively move it with container scrolling. That produced layout
+            // reflows in some carousels and caused the wrapper.scrollLeft to snap to 0
+            // (showing page 1) when the hover modal opened. To avoid that regression we
+            // no longer reparent the modalContent. Keep it in its original parent (the
+            // modal overlay) and compute absolute coordinates for positioning instead.
+            // This keeps the layout stable and prevents unexpected jumps.
         } catch (e) {}
 
         const position = this.calculateModalPosition(itemElement);
