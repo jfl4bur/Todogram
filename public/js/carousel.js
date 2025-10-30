@@ -1215,6 +1215,8 @@ class AnimesCarousel {
         const end = Math.min(this.index + step, this.animeData.length);
         for (let i = this.index; i < end; i++) {
             const item = this.animeData[i];
+            // Evitar renderizar duplicados si ya existe un elemento con el mismo id en el wrapper
+            try { if (this.wrapper.querySelector(`[data-item-id="${CSS.escape(item.id || i)}"]`)) continue; } catch(e) { if (this.wrapper.querySelector(`[data-item-id="${item.id || i}"]`)) continue; }
             const div = document.createElement("div");
             div.className = "custom-carousel-item";
             div.dataset.itemId = i;
@@ -1547,6 +1549,8 @@ class Carousel {
         
         for (let i = this.index; i < end; i++) {
             const item = this.moviesData[i];
+            // Evitar renderizar duplicados si ya existe un elemento con el mismo id en el wrapper
+            try { if (this.wrapper.querySelector(`[data-item-id="${CSS.escape(item.id || i)}"]`)) continue; } catch(e) { if (this.wrapper.querySelector(`[data-item-id="${item.id || i}"]`)) continue; }
             const div = document.createElement("div");
             div.className = "custom-carousel-item";
             div.dataset.itemId = i;
@@ -2027,6 +2031,8 @@ class SeriesCarousel {
         
         for (let i = this.index; i < end; i++) {
             const item = this.seriesData[i];
+            // Evitar renderizar duplicados si ya existe un elemento con el mismo id en el wrapper
+            try { if (this.wrapper.querySelector(`[data-item-id="${CSS.escape(item.id || i)}"]`)) continue; } catch(e) { if (this.wrapper.querySelector(`[data-item-id="${item.id || i}"]`)) continue; }
             const div = document.createElement("div");
             div.className = "custom-carousel-item";
             div.dataset.itemId = item.id;
@@ -2450,6 +2456,8 @@ class DocumentalesCarousel {
         const end = Math.min(this.index + step, this.docuData.length);
         for (let i = this.index; i < end; i++) {
             const item = this.docuData[i];
+            // Evitar renderizar duplicados si ya existe un elemento con el mismo id en el wrapper
+            try { if (this.wrapper.querySelector(`[data-item-id="${CSS.escape(item.id || i)}"]`)) continue; } catch(e) { if (this.wrapper.querySelector(`[data-item-id="${item.id || i}"]`)) continue; }
             const div = document.createElement("div");
             div.className = "custom-carousel-item";
             div.dataset.itemId = i;
