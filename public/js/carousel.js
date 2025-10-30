@@ -1,196 +1,4 @@
 // Carrusel de Episodios Series (solo episodios con Título episodio completo)
-
-// Helper: calcular tamaño real del item, gap y cuantos items caben en el contenedor
-function computeCarouselStep(wrapper) {
-    if (!wrapper) return { stepSize: null, itemsPerViewport: 1, itemWidth: 0, gap: 0 };
-    const firstItem = wrapper.querySelector('.custom-carousel-item');
-    if (!firstItem) return { stepSize: null, itemsPerViewport: 1, itemWidth: 0, gap: 0 };
-
-    // Forzar reflow/paint para minimizar mediciones a 0 (por lazy-images u otros cambios de layout)
-    // Leer propiedades que forzan layout
-    // eslint-disable-next-line no-unused-vars
-    const _force = wrapper.offsetWidth + firstItem.offsetWidth;
-
-    const itemRect = firstItem.getBoundingClientRect();
-    // Preferir offsetWidth (más estable si getBoundingClientRect es 0 por imágenes pendientes)
-    let itemWidth = Math.round(firstItem.offsetWidth || itemRect.width || parseFloat(getComputedStyle(firstItem).width) || 0);
-
-    // Intentar estimar gap usando el segundo elemento (varias estrategias)
-    let gap = 0;
-    const secondItem = firstItem.nextElementSibling;
-    if (secondItem) {
-        const secondRect = secondItem.getBoundingClientRect();
-        // preferir offsetLeft/offsetWidth para calcular gap
-        const leftA = firstItem.offsetLeft + firstItem.offsetWidth;
-        const leftB = secondItem.offsetLeft || secondRect.left;
-        gap = Math.round((leftB - leftA) || (secondRect.left - (itemRect.left + itemRect.width)));
-        if (isNaN(gap) || gap < 0) gap = 0;
-    }
-
-    // Fallback si por alguna razón itemWidth sigue en 0
-    if (!itemWidth || itemWidth <= 0) {
-        // intentar leer estilo (por ejemplo si existe aspect-ratio) o usar un valor por defecto razonable
-        const cssWidth = parseFloat(getComputedStyle(firstItem).width) || 0;
-        if (cssWidth > 0) itemWidth = Math.round(cssWidth);
-        else itemWidth = 194; // fallback seguro
-    }
-
-    const stepSize = itemWidth + gap;
-    const containerWidth = wrapper.clientWidth || 0;
-    const itemsPerViewport = stepSize > 0 ? Math.max(1, Math.floor(containerWidth / stepSize)) : 1;
-    try {
-        console.debug(`[computeCarouselStep] wrapper=${wrapper && wrapper.id ? wrapper.id : 'unknown'} itemWidth=${itemWidth} gap=${gap} stepSize=${stepSize} itemsPerViewport=${itemsPerViewport} containerWidth=${containerWidth}`);
-    } catch (e) {}
-    return { stepSize, itemsPerViewport, itemWidth, gap };
-}
-
-// Setup measurement guard: observa cambios de tamaño e imágenes para asegurar
-// que la medición (stepSize) esté lista antes de permitir paginación.
-function setupCarouselMeasurementGuard(wrapper, prevBtn, nextBtn) {
-    if (!wrapper) return;
-    const recalc = () => {
-        const { stepSize, itemsPerViewport } = computeCarouselStep(wrapper);
-        const ready = !!stepSize && stepSize >= 30;
-        wrapper._carouselMeasurement = { stepSize, itemsPerViewport, ready };
-        try {
-            if (prevBtn) prevBtn.disabled = !ready;
-            if (nextBtn) nextBtn.disabled = !ready;
-        } catch (e) {}
-        return ready;
-    };
-
-    // Ejecutar un cálculo inicial
-    recalc();
-
-    // ResizeObserver para cambios en el contenedor
-    try {
-        const ro = new ResizeObserver(() => { recalc(); });
-        ro.observe(wrapper);
-        // Guardar referencia para posible limpieza
-        wrapper._carouselGuard = wrapper._carouselGuard || {};
-        wrapper._carouselGuard.resizeObserver = ro;
-    } catch (e) {}
-
-    // Adjuntar listeners a imágenes ya presentes y futuras (MutationObserver)
-    const attachToImages = (root) => {
-        try {
-            const imgs = root.querySelectorAll && root.querySelectorAll('img');
-            if (!imgs) return;
-            imgs.forEach(img => {
-                if (img._carouselGuardAttached) return;
-                img._carouselGuardAttached = true;
-                img.addEventListener('load', () => { setTimeout(recalc, 40); });
-                img.addEventListener('error', () => { setTimeout(recalc, 40); });
-            });
-        } catch (e) {}
-    };
-    attachToImages(wrapper);
-
-    try {
-        const mo = new MutationObserver((mutations) => {
-            mutations.forEach(m => {
-                if (m.addedNodes && m.addedNodes.length) {
-                    m.addedNodes.forEach(n => { if (n && n.querySelectorAll) attachToImages(n); });
-                }
-            });
-            // re-evaluar al añadir nodos
-            setTimeout(recalc, 40);
-        });
-        mo.observe(wrapper, { childList: true, subtree: true });
-        wrapper._carouselGuard = wrapper._carouselGuard || {};
-        wrapper._carouselGuard.mutationObserver = mo;
-    } catch (e) {}
-
-    // Como protección extra, tras 600ms permitir botones aunque no haya medición válida
-    setTimeout(() => { recalc(); if (!wrapper._carouselMeasurement || !wrapper._carouselMeasurement.ready) {
-        try { if (prevBtn) prevBtn.disabled = false; if (nextBtn) nextBtn.disabled = false; } catch (e) {}
-    } }, 600);
-}
-
-// Helper: obtener índice del primer item completamente visible en el wrapper
-function getFirstFullyVisibleItemIndex(wrapper) {
-    try {
-        if (!wrapper) return null;
-        const items = Array.from(wrapper.querySelectorAll('.custom-carousel-item'));
-        if (!items || items.length === 0) return null;
-        const containerRect = wrapper.getBoundingClientRect();
-        // Tolerancia de 2px para pequeñas diferencias subpixel
-        const tol = 2;
-        for (let i = 0; i < items.length; i++) {
-            const r = items[i].getBoundingClientRect();
-            if (r.left >= containerRect.left - tol && r.right <= containerRect.right + tol) {
-                return i;
-            }
-        }
-        // Si no hay ninguno completamente visible, devolver el primer parcialmente visible
-        for (let i = 0; i < items.length; i++) {
-            const r = items[i].getBoundingClientRect();
-            if (r.right > containerRect.left + tol && r.left < containerRect.right - tol) {
-                return i;
-            }
-        }
-    } catch (e) { /* ignore */ }
-    return null;
-}
-
-// Helper universal: paginar de forma determinista usando índices y scrollIntoView
-function paginateCarouselByIndex(wrapper, direction) {
-    try {
-        if (!wrapper) return;
-        const items = Array.from(wrapper.querySelectorAll('.custom-carousel-item'));
-        if (!items.length) return;
-        const total = items.length;
-
-        // Intentar obtener índice del primer completamente visible
-        let currentIndex = getFirstFullyVisibleItemIndex(wrapper);
-
-        // Si no hay ninguno completamente visible, buscar el primer parcialmente visible
-        if (currentIndex === null) {
-            const containerRect = wrapper.getBoundingClientRect();
-            for (let i = 0; i < items.length; i++) {
-                const r = items[i].getBoundingClientRect();
-                if (r.right > containerRect.left + 1 && r.left < containerRect.right - 1) {
-                    currentIndex = i;
-                    break;
-                }
-            }
-        }
-        if (currentIndex === null) currentIndex = 0;
-
-        const measurement = computeCarouselStep(wrapper) || {};
-        const itemsPerViewport = Math.max(1, measurement.itemsPerViewport || 1);
-        const step = itemsPerViewport;
-
-        let targetIndex = (direction === 'prev') ? Math.max(0, currentIndex - step) : Math.min(Math.max(0, total - step), currentIndex + step);
-
-        // Clamp targetIndex
-        targetIndex = Math.max(0, Math.min(targetIndex, Math.max(0, total - 1)));
-
-        const targetItem = items[targetIndex];
-        if (targetItem && typeof targetItem.scrollIntoView === 'function') {
-            try {
-                targetItem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
-                return;
-            } catch (e) {
-                // continuar al fallback
-            }
-        }
-
-        // Fallback basado en píxeles si no hay scrollIntoView o falla
-        const stepSize = (measurement && measurement.stepSize) || 0;
-        if (stepSize > 0) {
-            const finalScroll = targetIndex * stepSize;
-            const maxScroll = wrapper.scrollWidth - wrapper.clientWidth;
-            wrapper.scrollTo({ left: Math.max(0, Math.min(finalScroll, maxScroll)), behavior: 'smooth' });
-            return;
-        }
-
-        // Último recurso: hacer un scroll por cantidad de viewport
-        const scrollAmount = wrapper.clientWidth || 0;
-        if (direction === 'prev') wrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' }); else wrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' });
-    } catch (e) { /* ignore */ }
-}
-
 class EpisodiosSeriesCarousel {
     // ...existing code...
     scrollToHash(retries = 10) {
@@ -263,8 +71,6 @@ class EpisodiosSeriesCarousel {
         }
         this.setupResizeObserver();
         this.setupEventListeners();
-        // Proteger paginación hasta tener mediciones válidas
-        try { setupCarouselMeasurementGuard(this.wrapper, this.carouselPrev, this.carouselNext); } catch (e) {}
         this.loadEpisodiosData();
     }
     setupResizeObserver() {
@@ -292,14 +98,12 @@ class EpisodiosSeriesCarousel {
         if (this.carouselPrev) {
             this.carouselPrev.addEventListener('click', (e) => {
                 e.preventDefault();
-                try { if (window.sliderIndependent && typeof window.sliderIndependent.pauseAutoPlay === 'function') window.sliderIndependent.pauseAutoPlay(); } catch (err) {}
                 this.scrollToPrevPage();
             });
         }
         if (this.carouselNext) {
             this.carouselNext.addEventListener('click', (e) => {
                 e.preventDefault();
-                try { if (window.sliderIndependent && typeof window.sliderIndependent.pauseAutoPlay === 'function') window.sliderIndependent.pauseAutoPlay(); } catch (err) {}
                 this.scrollToNextPage();
             });
         }
@@ -588,7 +392,55 @@ class EpisodiosSeriesCarousel {
         this.scrollToPage('next');
     }
     scrollToPage(direction) {
-        paginateCarouselByIndex(this.wrapper, direction);
+        if (!this.wrapper) return;
+        const containerWidth = this.wrapper.clientWidth;
+
+        // Forzar reflow y medir de forma más confiable
+        const containerRect = this.wrapper.getBoundingClientRect();
+        const measuredContainerWidth = Math.round(containerRect.width) || this.wrapper.clientWidth;
+
+        // Determinar tamaño real del ítem y gap leyendo el DOM
+        const firstItem = this.wrapper.querySelector('.custom-carousel-item');
+        if (!firstItem) return;
+
+        // Forzar layout del primer ítem
+        firstItem.offsetWidth;
+        const itemWidth = firstItem.offsetWidth || Math.round(firstItem.getBoundingClientRect().width);
+
+        // Intentar obtener gap por CSS (margin-right) y fallback a cálculo por rect
+        let gap = 0;
+        try {
+            const cs = getComputedStyle(firstItem);
+            gap = parseFloat(cs.marginRight) || 0;
+        } catch (e) {
+            gap = 0;
+        }
+        if (!gap) {
+            const secondItem = firstItem.nextElementSibling;
+            if (secondItem) {
+                const firstRect = firstItem.getBoundingClientRect();
+                const secondRect = secondItem.getBoundingClientRect();
+                gap = Math.round(secondRect.left - (firstRect.left + firstRect.width)) || 0;
+                if (gap < 0) gap = 0;
+            }
+        }
+
+        const stepSize = Math.max(1, itemWidth + gap);
+        const itemsPerViewport = Math.max(1, Math.floor(measuredContainerWidth / stepSize));
+
+        // Usar rounding del índice para evitar errores por valores fraccionarios en scrollLeft
+        const currentIndex = Math.round(this.wrapper.scrollLeft / stepSize);
+
+        let targetIndex = (direction === 'prev') ? Math.max(0, currentIndex - itemsPerViewport) : currentIndex + itemsPerViewport;
+
+        // Evitar sobrepasar la cantidad de items
+        const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
+        const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
+        targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
+
+        const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
+        const finalScroll = Math.max(0, Math.min(targetIndex * stepSize, maxScroll));
+        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 
 // (Eliminados duplicados y métodos sobrantes)
@@ -659,7 +511,6 @@ class EpisodiosAnimesCarousel {
         if (this.wrapper) this.progressBar = this.wrapper.parentElement.querySelector('.carousel-progress-bar');
         this.setupResizeObserver();
         this.setupEventListeners();
-        try { setupCarouselMeasurementGuard(this.wrapper, this.carouselPrev, this.carouselNext); } catch (e) {}
         this.loadEpisodiosData();
     }
     setupResizeObserver() {
@@ -683,8 +534,8 @@ class EpisodiosAnimesCarousel {
     }
     setupEventListeners() {
         window.addEventListener('resize', () => { if (this.updateProgressBar) this.updateProgressBar(); });
-    if (this.carouselPrev) this.carouselPrev.addEventListener('click', (e) => { e.preventDefault(); try { if (window.sliderIndependent && typeof window.sliderIndependent.pauseAutoPlay === 'function') window.sliderIndependent.pauseAutoPlay(); } catch (err) {} this.scrollToPrevPage(); });
-    if (this.carouselNext) this.carouselNext.addEventListener('click', (e) => { e.preventDefault(); try { if (window.sliderIndependent && typeof window.sliderIndependent.pauseAutoPlay === 'function') window.sliderIndependent.pauseAutoPlay(); } catch (err) {} this.scrollToNextPage(); });
+        if (this.carouselPrev) this.carouselPrev.addEventListener('click', (e) => { e.preventDefault(); this.scrollToPrevPage(); });
+        if (this.carouselNext) this.carouselNext.addEventListener('click', (e) => { e.preventDefault(); this.scrollToNextPage(); });
         if (this.wrapper) {
             this.wrapper.addEventListener('scroll', () => { if (this.updateProgressBar) this.updateProgressBar(); });
             if (this.updateProgressBar) this.updateProgressBar();
@@ -865,7 +716,52 @@ class EpisodiosAnimesCarousel {
     scrollToPrevPage() { this.scrollToPage('prev'); }
     scrollToNextPage() { this.scrollToPage('next'); }
     scrollToPage(direction) {
-        paginateCarouselByIndex(this.wrapper, direction);
+        if (!this.wrapper) return;
+        // Forzar reflow y medir de forma más confiable
+        const containerRect = this.wrapper.getBoundingClientRect();
+        const measuredContainerWidth = Math.round(containerRect.width) || this.wrapper.clientWidth;
+
+        const firstItem = this.wrapper.querySelector('.custom-carousel-item');
+        if (!firstItem) return;
+
+        // Forzar layout del primer ítem
+        firstItem.offsetWidth;
+        const itemWidth = firstItem.offsetWidth || Math.round(firstItem.getBoundingClientRect().width);
+
+        // Intentar obtener gap por CSS (margin-right) y fallback a cálculo por rect
+        let gap = 0;
+        try {
+            const cs = getComputedStyle(firstItem);
+            gap = parseFloat(cs.marginRight) || 0;
+        } catch (e) {
+            gap = 0;
+        }
+        if (!gap) {
+            const secondItem = firstItem.nextElementSibling;
+            if (secondItem) {
+                const firstRect = firstItem.getBoundingClientRect();
+                const secondRect = secondItem.getBoundingClientRect();
+                gap = Math.round(secondRect.left - (firstRect.left + firstRect.width)) || 0;
+                if (gap < 0) gap = 0;
+            }
+        }
+
+        const stepSize = Math.max(1, itemWidth + gap);
+        const itemsPerViewport = Math.max(1, Math.floor(measuredContainerWidth / stepSize));
+
+        // Usar rounding del índice para evitar errores por valores fraccionarios en scrollLeft
+        const currentIndex = Math.round(this.wrapper.scrollLeft / stepSize);
+
+        let targetIndex = (direction === 'prev') ? Math.max(0, currentIndex - itemsPerViewport) : currentIndex + itemsPerViewport;
+
+        // Evitar sobrepasar la cantidad de items
+        const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
+        const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
+        targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
+
+        const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
+        const finalScroll = Math.max(0, Math.min(targetIndex * stepSize, maxScroll));
+        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 }
 
@@ -932,7 +828,6 @@ class EpisodiosDocumentalesCarousel {
         if (this.wrapper) this.progressBar = this.wrapper.parentElement.querySelector('.carousel-progress-bar');
         this.setupResizeObserver();
         this.setupEventListeners();
-        try { setupCarouselMeasurementGuard(this.wrapper, this.carouselPrev, this.carouselNext); } catch (e) {}
         this.loadEpisodiosData();
     }
     setupResizeObserver() {
@@ -956,8 +851,8 @@ class EpisodiosDocumentalesCarousel {
     }
     setupEventListeners() {
         window.addEventListener('resize', () => { if (this.updateProgressBar) this.updateProgressBar(); });
-    if (this.carouselPrev) this.carouselPrev.addEventListener('click', (e) => { e.preventDefault(); try { if (window.sliderIndependent && typeof window.sliderIndependent.pauseAutoPlay === 'function') window.sliderIndependent.pauseAutoPlay(); } catch (err) {} this.scrollToPrevPage(); });
-    if (this.carouselNext) this.carouselNext.addEventListener('click', (e) => { e.preventDefault(); try { if (window.sliderIndependent && typeof window.sliderIndependent.pauseAutoPlay === 'function') window.sliderIndependent.pauseAutoPlay(); } catch (err) {} this.scrollToNextPage(); });
+        if (this.carouselPrev) this.carouselPrev.addEventListener('click', (e) => { e.preventDefault(); this.scrollToPrevPage(); });
+        if (this.carouselNext) this.carouselNext.addEventListener('click', (e) => { e.preventDefault(); this.scrollToNextPage(); });
         if (this.wrapper) {
             this.wrapper.addEventListener('scroll', () => { if (this.updateProgressBar) this.updateProgressBar(); });
             if (this.updateProgressBar) this.updateProgressBar();
@@ -1132,7 +1027,52 @@ class EpisodiosDocumentalesCarousel {
     scrollToPrevPage() { this.scrollToPage('prev'); }
     scrollToNextPage() { this.scrollToPage('next'); }
     scrollToPage(direction) {
-        paginateCarouselByIndex(this.wrapper, direction);
+        if (!this.wrapper) return;
+        // Forzar reflow y medir de forma más confiable
+        const containerRect = this.wrapper.getBoundingClientRect();
+        const measuredContainerWidth = Math.round(containerRect.width) || this.wrapper.clientWidth;
+
+        const firstItem = this.wrapper.querySelector('.custom-carousel-item');
+        if (!firstItem) return;
+
+        // Forzar layout del primer ítem
+        firstItem.offsetWidth;
+        const itemWidth = firstItem.offsetWidth || Math.round(firstItem.getBoundingClientRect().width);
+
+        // Intentar obtener gap por CSS (margin-right) y fallback a cálculo por rect
+        let gap = 0;
+        try {
+            const cs = getComputedStyle(firstItem);
+            gap = parseFloat(cs.marginRight) || 0;
+        } catch (e) {
+            gap = 0;
+        }
+        if (!gap) {
+            const secondItem = firstItem.nextElementSibling;
+            if (secondItem) {
+                const firstRect = firstItem.getBoundingClientRect();
+                const secondRect = secondItem.getBoundingClientRect();
+                gap = Math.round(secondRect.left - (firstRect.left + firstRect.width)) || 0;
+                if (gap < 0) gap = 0;
+            }
+        }
+
+        const stepSize = Math.max(1, itemWidth + gap);
+        const itemsPerViewport = Math.max(1, Math.floor(measuredContainerWidth / stepSize));
+
+        // Usar rounding del índice para evitar errores por valores fraccionarios en scrollLeft
+        const currentIndex = Math.round(this.wrapper.scrollLeft / stepSize);
+
+        let targetIndex = (direction === 'prev') ? Math.max(0, currentIndex - itemsPerViewport) : currentIndex + itemsPerViewport;
+
+        // Evitar sobrepasar la cantidad de items
+        const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
+        const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
+        targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
+
+        const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
+        const finalScroll = Math.max(0, Math.min(targetIndex * stepSize, maxScroll));
+        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 }
 class AnimesCarousel {
@@ -1177,7 +1117,6 @@ class AnimesCarousel {
         }
         this.setupResizeObserver();
         this.setupEventListeners();
-        try { setupCarouselMeasurementGuard(this.wrapper, this.carouselPrev, this.carouselNext); } catch (e) {}
         this.loadAnimeData();
     }
 
@@ -1226,14 +1165,12 @@ class AnimesCarousel {
         if (this.carouselPrev) {
             this.carouselPrev.addEventListener('click', (e) => {
                 e.preventDefault();
-                try { if (window.sliderIndependent && typeof window.sliderIndependent.pauseAutoPlay === 'function') window.sliderIndependent.pauseAutoPlay(); } catch (err) {}
                 this.scrollToPrevPage();
             });
         }
         if (this.carouselNext) {
             this.carouselNext.addEventListener('click', (e) => {
                 e.preventDefault();
-                try { if (window.sliderIndependent && typeof window.sliderIndependent.pauseAutoPlay === 'function') window.sliderIndependent.pauseAutoPlay(); } catch (err) {}
                 this.scrollToNextPage();
             });
         }
@@ -1373,7 +1310,7 @@ class AnimesCarousel {
             div.innerHTML = `
                 <div class="loader"><i class="fas fa-spinner"></i></div>
                 <div class="poster-container">
-                    <img class="poster-image" src="${posterUrl}" alt="${item.title}" width="194" height="271" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease" loading="lazy">
+                    <img class="poster-image" src="${posterUrl}" alt="${item.title}" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease" loading="lazy">
                 </div>
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none">
                 <div class="carousel-overlay">
@@ -1460,10 +1397,14 @@ class AnimesCarousel {
         }
     }
     scrollToPrevPage() {
-        paginateCarouselByIndex(this.wrapper, 'prev');
+        if (!this.wrapper) return;
+        const scrollAmount = this.wrapper.clientWidth;
+        this.wrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
     }
     scrollToNextPage() {
-        paginateCarouselByIndex(this.wrapper, 'next');
+        if (!this.wrapper) return;
+        const scrollAmount = this.wrapper.clientWidth;
+        this.wrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
 }
 class Carousel {
@@ -1507,7 +1448,6 @@ class Carousel {
     init() {
         this.setupResizeObserver();
         this.setupEventListeners();
-        try { setupCarouselMeasurementGuard(this.wrapper, this.carouselPrev, this.carouselNext); } catch (e) {}
         this.loadMoviesData();
     }
 
@@ -1548,12 +1488,10 @@ class Carousel {
         window.addEventListener('resize', () => this.calculateItemsPerPage());
         this.carouselPrev.addEventListener('click', (e) => {
             e.preventDefault();
-            try { if (window.sliderIndependent && typeof window.sliderIndependent.pauseAutoPlay === 'function') window.sliderIndependent.pauseAutoPlay(); } catch (err) {}
             this.scrollToPrevPage();
         });
         this.carouselNext.addEventListener('click', (e) => {
             e.preventDefault();
-            try { if (window.sliderIndependent && typeof window.sliderIndependent.pauseAutoPlay === 'function') window.sliderIndependent.pauseAutoPlay(); } catch (err) {}
             this.scrollToNextPage();
         });
         this.wrapper.addEventListener('scroll', () => this.handleScroll());
@@ -1708,7 +1646,7 @@ class Carousel {
             div.innerHTML = `
                 <div class="loader"><i class="fas fa-spinner"></i></div>
                 <div class="poster-container">
-                    <img class="poster-image" src="${posterUrl}" alt="${item.title}" width="194" height="271" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease" loading="lazy">
+                    <img class="poster-image" src="${posterUrl}" alt="${item.title}" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease" loading="lazy">
                 </div>
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none">
                             <div class="carousel-overlay">
@@ -1805,7 +1743,54 @@ class Carousel {
     }
 
     scrollToPage(direction) {
-        paginateCarouselByIndex(this.wrapper, direction);
+        if (!this.wrapper) return;
+        // Usar valores por defecto pero preferir medidas reales del DOM para evitar desalineado
+        let itemWidth = 194;
+        let gap = 4;
+
+        // Forzar reflow y medir el contenedor
+        const containerRect = this.wrapper.getBoundingClientRect();
+        const containerWidth = Math.round(containerRect.width) || this.wrapper.clientWidth;
+
+        const firstItem = this.wrapper.querySelector('.custom-carousel-item');
+        if (firstItem) {
+            firstItem.offsetWidth;
+            itemWidth = firstItem.offsetWidth || Math.round(firstItem.getBoundingClientRect().width) || itemWidth;
+            try {
+                const cs = getComputedStyle(firstItem);
+                const m = parseFloat(cs.marginRight);
+                if (!isNaN(m)) gap = m;
+            } catch (e) {
+                // ignore
+            }
+            if (!gap) {
+                const secondItem = firstItem.nextElementSibling;
+                if (secondItem) {
+                    const firstRect = firstItem.getBoundingClientRect();
+                    const secondRect = secondItem.getBoundingClientRect();
+                    gap = Math.round(secondRect.left - (firstRect.left + firstRect.width)) || gap;
+                    if (gap < 0) gap = 0;
+                }
+            }
+        }
+
+        // Calcular cuántos items caben en la pantalla
+        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / (itemWidth + gap)));
+        const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
+
+        let currentScroll = Math.round(this.wrapper.scrollLeft);
+        let targetScroll;
+        if (direction === 'prev') {
+            targetScroll = Math.max(0, currentScroll - actualScrollAmount);
+        } else {
+            targetScroll = currentScroll + actualScrollAmount;
+        }
+        // Alinear el scroll para que el item de la izquierda quede completo
+        const alignedScroll = Math.round(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
+        // Evitar sobrepasar los límites
+        const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
+        const finalScroll = Math.max(0, Math.min(alignedScroll, maxScroll));
+        this.wrapper.scrollTo({ left: finalScroll, behavior: 'auto' });
     }
 
     // Método para contar elementos realmente visibles
@@ -1914,7 +1899,6 @@ class SeriesCarousel {
         
         this.setupResizeObserver();
         this.setupEventListeners();
-        try { setupCarouselMeasurementGuard(this.wrapper, this.carouselPrev, this.carouselNext); } catch (e) {}
         this.loadSeriesData();
     }
 
@@ -1965,7 +1949,6 @@ class SeriesCarousel {
             this.carouselPrev.addEventListener('click', (e) => {
                 e.preventDefault();
                 console.log("SeriesCarousel: Botón anterior clickeado");
-                try { if (window.sliderIndependent && typeof window.sliderIndependent.pauseAutoPlay === 'function') window.sliderIndependent.pauseAutoPlay(); } catch (err) {}
                 this.scrollToPrevPage();
             });
         } else {
@@ -1976,7 +1959,6 @@ class SeriesCarousel {
             this.carouselNext.addEventListener('click', (e) => {
                 e.preventDefault();
                 console.log("SeriesCarousel: Botón siguiente clickeado");
-                try { if (window.sliderIndependent && typeof window.sliderIndependent.pauseAutoPlay === 'function') window.sliderIndependent.pauseAutoPlay(); } catch (err) {}
                 this.scrollToNextPage();
             });
         } else {
@@ -2168,7 +2150,7 @@ class SeriesCarousel {
             div.innerHTML = `
                 <div class="loader"><i class="fas fa-spinner"></i></div>
                 <div class="poster-container">
-                    <img class="poster-image" src="${posterUrl}" alt="${item.title}" width="194" height="271" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease" loading="lazy">
+                    <img class="poster-image" src="${posterUrl}" alt="${item.title}" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease" loading="lazy">
                 </div>
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none">
                             <div class="carousel-overlay">
@@ -2265,7 +2247,84 @@ class SeriesCarousel {
     }
 
     scrollToPage(direction) {
-        paginateCarouselByIndex(this.wrapper, direction);
+        if (!this.wrapper) return;
+        // Preferir medidas reales del DOM para evitar problemas de cálculo en primer clic
+        let itemWidth = 194;
+        let gap = 4;
+
+        const containerRect = this.wrapper.getBoundingClientRect();
+        const containerWidth = Math.round(containerRect.width) || this.wrapper.clientWidth;
+
+        const firstItem = this.wrapper.querySelector('.custom-carousel-item');
+        if (firstItem) {
+            firstItem.offsetWidth;
+            itemWidth = firstItem.offsetWidth || Math.round(firstItem.getBoundingClientRect().width) || itemWidth;
+            try {
+                const cs = getComputedStyle(firstItem);
+                const m = parseFloat(cs.marginRight);
+                if (!isNaN(m)) gap = m;
+            } catch (e) {}
+            if (!gap) {
+                const secondItem = firstItem.nextElementSibling;
+                if (secondItem) {
+                    const firstRect = firstItem.getBoundingClientRect();
+                    const secondRect = secondItem.getBoundingClientRect();
+                    gap = Math.round(secondRect.left - (firstRect.left + firstRect.width)) || gap;
+                    if (gap < 0) gap = 0;
+                }
+            }
+        }
+
+        // Calcular cuántos items caben en la pantalla
+        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / (itemWidth + gap)));
+        const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
+
+        console.log(`Carousel: Container width: ${containerWidth}px`);
+        console.log(`Carousel: Item width: ${itemWidth}px, Gap: ${gap}px`);
+        console.log(`Carousel: Items que caben en pantalla: ${itemsPerViewport}`);
+        console.log(`Carousel: Scroll amount: ${actualScrollAmount}px`);
+
+        if (direction === 'prev') {
+            // Calcular la posición anterior
+            const currentScroll = this.wrapper.scrollLeft;
+            const targetScroll = Math.max(0, currentScroll - actualScrollAmount);
+            
+            // Alinear a los límites de los items para que el de la izquierda esté completo
+            const alignedScroll = Math.ceil(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
+            
+            console.log(`Carousel: Prev - Current: ${currentScroll}, Target: ${targetScroll}, Aligned: ${alignedScroll}`);
+            
+            this.wrapper.scrollTo({
+                left: alignedScroll,
+                behavior: 'auto'
+            });
+        } else {
+            // Calcular la posición siguiente
+            const currentScroll = this.wrapper.scrollLeft;
+            const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
+            
+            // Calcular cuántos items completos caben en la pantalla
+            // Usar un valor que funcione bien para la mayoría de pantallas
+            const itemsPerViewport = Math.max(4, Math.floor(containerWidth / (itemWidth + gap)));
+            
+            // Calcular la posición exacta del siguiente scroll
+            // Si es el primer clic (currentScroll = 0), usar un cálculo especial
+            let targetScroll;
+            if (currentScroll === 0) {
+                // Para el primer clic, mover exactamente por los items que caben
+                targetScroll = itemsPerViewport * (itemWidth + gap);
+            } else {
+                // Para los siguientes clics, usar el cálculo normal
+                targetScroll = currentScroll + (itemsPerViewport * (itemWidth + gap));
+            }
+            
+            console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}`);
+            
+            this.wrapper.scrollTo({
+                left: targetScroll,
+                behavior: 'auto'
+            });
+        }
     }
 
     // Método para contar elementos realmente visibles
@@ -2352,7 +2411,6 @@ class DocumentalesCarousel {
         }
         this.setupResizeObserver();
         this.setupEventListeners();
-        try { setupCarouselMeasurementGuard(this.wrapper, this.carouselPrev, this.carouselNext); } catch (e) {}
         this.loadDocuData();
     }
 
@@ -2553,7 +2611,7 @@ class DocumentalesCarousel {
             div.innerHTML = `
                 <div class="loader"><i class="fas fa-spinner"></i></div>
                 <div class="poster-container">
-                    <img class="poster-image" src="${posterUrl}" alt="${item.title}" width="194" height="271" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease" loading="lazy">
+                    <img class="poster-image" src="${posterUrl}" alt="${item.title}" onload="this.parentElement.previousElementSibling.style.display='none'; this.style.opacity='1'" style="opacity:0;transition:opacity 0.3s ease" loading="lazy">
                 </div>
                 <img class="detail-background" src="${item.backgroundUrl || posterUrl}" alt="${item.title} - Background" loading="lazy" style="display:none">
                 <div class="carousel-overlay">
@@ -2636,10 +2694,14 @@ class DocumentalesCarousel {
     }
 
     scrollToPrevPage() {
-        paginateCarouselByIndex(this.wrapper, 'prev');
+        if (!this.wrapper) return;
+        const scrollAmount = this.wrapper.clientWidth;
+        this.wrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
     }
     scrollToNextPage() {
-        paginateCarouselByIndex(this.wrapper, 'next');
+        if (!this.wrapper) return;
+        const scrollAmount = this.wrapper.clientWidth;
+        this.wrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
 }
 
