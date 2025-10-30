@@ -1,23 +1,7 @@
 // Carrusel de Episodios Series (solo episodios con Título episodio completo)
 
 // Helper: calcular tamaño real del item, gap y cuantos items caben en el contenedor
-function computeCarouselStep(wrapper) {
-    if (!wrapper) return { stepSize: null, itemsPerViewport: 1, itemWidth: 0, gap: 0 };
-    const firstItem = wrapper.querySelector('.custom-carousel-item');
-    if (!firstItem) return { stepSize: null, itemsPerViewport: 1, itemWidth: 0, gap: 0 };
-    const itemRect = firstItem.getBoundingClientRect();
-    const itemWidth = Math.round(itemRect.width);
-    let gap = 0;
-    const secondItem = firstItem.nextElementSibling;
-    if (secondItem) {
-        const secondRect = secondItem.getBoundingClientRect();
-        gap = Math.round(secondRect.left - (itemRect.left + itemRect.width));
-        if (isNaN(gap) || gap < 0) gap = 0;
-    }
-    const stepSize = itemWidth + gap;
-    const containerWidth = wrapper.clientWidth || 0;
-    const itemsPerViewport = stepSize > 0 ? Math.max(1, Math.floor(containerWidth / stepSize)) : 1;
-    return { stepSize, itemsPerViewport, itemWidth, gap };
+
 }
 class EpisodiosSeriesCarousel {
     // ...existing code...
