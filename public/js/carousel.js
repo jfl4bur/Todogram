@@ -477,6 +477,18 @@ class EpisodiosSeriesCarousel {
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
+        // Intentar alinear usando el elemento objetivo para evitar cálculos de píxeles
+        const itemList = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
+        const targetItem = itemList[targetIndex];
+        if (targetItem && typeof targetItem.scrollIntoView === 'function') {
+            try {
+                targetItem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+                return;
+            } catch (e) {
+                // fallback a scrollTo si scrollIntoView falla
+            }
+        }
+        
         const finalScroll = targetIndex * stepSize;
         this.wrapper.scrollTo({ left: Math.max(0, Math.min(finalScroll, maxScroll)), behavior: 'smooth' });
     }
