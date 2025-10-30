@@ -314,11 +314,12 @@ class HoverModal {
         try {
             const wrapper = itemElement.closest('[id$="-carousel-wrapper"], .carousel-wrapper');
             if (wrapper) {
+                // keep reference for cleanup, but do NOT add the class to avoid
+                // changing overflow on global carousel wrappers which causes layout issues
                 this._currentWrapper = wrapper;
-                wrapper.classList.add('hover-no-clip');
-                // also ensure parent section allows visible overflow
+                // also record parent section (but do not modify its classes)
                 const section = wrapper.closest('.carousel-section');
-                if (section) { section.classList.add('hover-no-clip'); this._currentSection = section; }
+                if (section) { this._currentSection = section; }
             }
         } catch (e) {}
         window.activeItem = item;
