@@ -44,6 +44,69 @@ function computeCarouselStep(wrapper) {
     return { stepSize, itemsPerViewport, itemWidth, gap };
 }
 
+// Setup measurement guard: observa cambios de tamaño e imágenes para asegurar
+// que la medición (stepSize) esté lista antes de permitir paginación.
+function setupCarouselMeasurementGuard(wrapper, prevBtn, nextBtn) {
+    if (!wrapper) return;
+    const recalc = () => {
+        const { stepSize, itemsPerViewport } = computeCarouselStep(wrapper);
+        const ready = !!stepSize && stepSize >= 30;
+        wrapper._carouselMeasurement = { stepSize, itemsPerViewport, ready };
+        try {
+            if (prevBtn) prevBtn.disabled = !ready;
+            if (nextBtn) nextBtn.disabled = !ready;
+        } catch (e) {}
+        return ready;
+    };
+
+    // Ejecutar un cálculo inicial
+    recalc();
+
+    // ResizeObserver para cambios en el contenedor
+    try {
+        const ro = new ResizeObserver(() => { recalc(); });
+        ro.observe(wrapper);
+        // Guardar referencia para posible limpieza
+        wrapper._carouselGuard = wrapper._carouselGuard || {};
+        wrapper._carouselGuard.resizeObserver = ro;
+    } catch (e) {}
+
+    // Adjuntar listeners a imágenes ya presentes y futuras (MutationObserver)
+    const attachToImages = (root) => {
+        try {
+            const imgs = root.querySelectorAll && root.querySelectorAll('img');
+            if (!imgs) return;
+            imgs.forEach(img => {
+                if (img._carouselGuardAttached) return;
+                img._carouselGuardAttached = true;
+                img.addEventListener('load', () => { setTimeout(recalc, 40); });
+                img.addEventListener('error', () => { setTimeout(recalc, 40); });
+            });
+        } catch (e) {}
+    };
+    attachToImages(wrapper);
+
+    try {
+        const mo = new MutationObserver((mutations) => {
+            mutations.forEach(m => {
+                if (m.addedNodes && m.addedNodes.length) {
+                    m.addedNodes.forEach(n => { if (n && n.querySelectorAll) attachToImages(n); });
+                }
+            });
+            // re-evaluar al añadir nodos
+            setTimeout(recalc, 40);
+        });
+        mo.observe(wrapper, { childList: true, subtree: true });
+        wrapper._carouselGuard = wrapper._carouselGuard || {};
+        wrapper._carouselGuard.mutationObserver = mo;
+    } catch (e) {}
+
+    // Como protección extra, tras 600ms permitir botones aunque no haya medición válida
+    setTimeout(() => { recalc(); if (!wrapper._carouselMeasurement || !wrapper._carouselMeasurement.ready) {
+        try { if (prevBtn) prevBtn.disabled = false; if (nextBtn) nextBtn.disabled = false; } catch (e) {}
+    } }, 600);
+}
+
 class EpisodiosSeriesCarousel {
     // ...existing code...
     scrollToHash(retries = 10) {
@@ -116,6 +179,8 @@ class EpisodiosSeriesCarousel {
         }
         this.setupResizeObserver();
         this.setupEventListeners();
+        // Proteger paginación hasta tener mediciones válidas
+        try { setupCarouselMeasurementGuard(this.wrapper, this.carouselPrev, this.carouselNext); } catch (e) {}
         this.loadEpisodiosData();
     }
     setupResizeObserver() {
@@ -561,6 +626,7 @@ class EpisodiosAnimesCarousel {
         if (this.wrapper) this.progressBar = this.wrapper.parentElement.querySelector('.carousel-progress-bar');
         this.setupResizeObserver();
         this.setupEventListeners();
+        try { setupCarouselMeasurementGuard(this.wrapper, this.carouselPrev, this.carouselNext); } catch (e) {}
         this.loadEpisodiosData();
     }
     setupResizeObserver() {
@@ -854,6 +920,7 @@ class EpisodiosDocumentalesCarousel {
         if (this.wrapper) this.progressBar = this.wrapper.parentElement.querySelector('.carousel-progress-bar');
         this.setupResizeObserver();
         this.setupEventListeners();
+        try { setupCarouselMeasurementGuard(this.wrapper, this.carouselPrev, this.carouselNext); } catch (e) {}
         this.loadEpisodiosData();
     }
     setupResizeObserver() {
@@ -1119,6 +1186,7 @@ class AnimesCarousel {
         }
         this.setupResizeObserver();
         this.setupEventListeners();
+        try { setupCarouselMeasurementGuard(this.wrapper, this.carouselPrev, this.carouselNext); } catch (e) {}
         this.loadAnimeData();
     }
 
@@ -1450,6 +1518,7 @@ class Carousel {
     init() {
         this.setupResizeObserver();
         this.setupEventListeners();
+        try { setupCarouselMeasurementGuard(this.wrapper, this.carouselPrev, this.carouselNext); } catch (e) {}
         this.loadMoviesData();
     }
 
@@ -1883,6 +1952,7 @@ class SeriesCarousel {
         
         this.setupResizeObserver();
         this.setupEventListeners();
+        try { setupCarouselMeasurementGuard(this.wrapper, this.carouselPrev, this.carouselNext); } catch (e) {}
         this.loadSeriesData();
     }
 
@@ -2342,6 +2412,7 @@ class DocumentalesCarousel {
         }
         this.setupResizeObserver();
         this.setupEventListeners();
+        try { setupCarouselMeasurementGuard(this.wrapper, this.carouselPrev, this.carouselNext); } catch (e) {}
         this.loadDocuData();
     }
 
