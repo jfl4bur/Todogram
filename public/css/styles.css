@@ -43,6 +43,11 @@
     padding-top: 4px;
     gap: 4px;
 }
+/* Mostrar el icono circular (.iSVRpb) cuando el cursor esté sobre cualquier carousel-container */
+.carousel-container:hover .iSVRpb {
+     opacity: 1 !important;
+     pointer-events: auto !important;
+}
 #episodios-series-carousel-wrapper::-webkit-scrollbar {
     display: none;
 }
