@@ -133,6 +133,64 @@ function getFirstFullyVisibleItemIndex(wrapper) {
     return null;
 }
 
+// Helper universal: paginar de forma determinista usando índices y scrollIntoView
+function paginateCarouselByIndex(wrapper, direction) {
+    try {
+        if (!wrapper) return;
+        const items = Array.from(wrapper.querySelectorAll('.custom-carousel-item'));
+        if (!items.length) return;
+        const total = items.length;
+
+        // Intentar obtener índice del primer completamente visible
+        let currentIndex = getFirstFullyVisibleItemIndex(wrapper);
+
+        // Si no hay ninguno completamente visible, buscar el primer parcialmente visible
+        if (currentIndex === null) {
+            const containerRect = wrapper.getBoundingClientRect();
+            for (let i = 0; i < items.length; i++) {
+                const r = items[i].getBoundingClientRect();
+                if (r.right > containerRect.left + 1 && r.left < containerRect.right - 1) {
+                    currentIndex = i;
+                    break;
+                }
+            }
+        }
+        if (currentIndex === null) currentIndex = 0;
+
+        const measurement = computeCarouselStep(wrapper) || {};
+        const itemsPerViewport = Math.max(1, measurement.itemsPerViewport || 1);
+        const step = itemsPerViewport;
+
+        let targetIndex = (direction === 'prev') ? Math.max(0, currentIndex - step) : Math.min(Math.max(0, total - step), currentIndex + step);
+
+        // Clamp targetIndex
+        targetIndex = Math.max(0, Math.min(targetIndex, Math.max(0, total - 1)));
+
+        const targetItem = items[targetIndex];
+        if (targetItem && typeof targetItem.scrollIntoView === 'function') {
+            try {
+                targetItem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
+                return;
+            } catch (e) {
+                // continuar al fallback
+            }
+        }
+
+        // Fallback basado en píxeles si no hay scrollIntoView o falla
+        const stepSize = (measurement && measurement.stepSize) || 0;
+        if (stepSize > 0) {
+            const finalScroll = targetIndex * stepSize;
+            const maxScroll = wrapper.scrollWidth - wrapper.clientWidth;
+            wrapper.scrollTo({ left: Math.max(0, Math.min(finalScroll, maxScroll)), behavior: 'smooth' });
+            return;
+        }
+
+        // Último recurso: hacer un scroll por cantidad de viewport
+        const scrollAmount = wrapper.clientWidth || 0;
+        if (direction === 'prev') wrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' }); else wrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    } catch (e) { /* ignore */ }
+}
+
 class EpisodiosSeriesCarousel {
     // ...existing code...
     scrollToHash(retries = 10) {
@@ -530,65 +588,7 @@ class EpisodiosSeriesCarousel {
         this.scrollToPage('next');
     }
     scrollToPage(direction) {
-        if (!this.wrapper) return;
-        // Medir paso dinámicamente y alinear al múltiplo de stepSize
-    const { stepSize, itemsPerViewport } = computeCarouselStep(this.wrapper);
-    try { console.log(`[Carousel][${this.wrapper && this.wrapper.id ? this.wrapper.id : 'unknown'}] measured: stepSize=${stepSize}, itemsPerViewport=${itemsPerViewport}`); } catch (e) {}
-
-        // Si la medición es inválida (p. ej. imágenes aún no cargadas), reintentar unas pocas veces
-        if (!stepSize || stepSize < 30) {
-            this._scrollRetryCount = (this._scrollRetryCount || 0) + 1;
-            if (this._scrollRetryCount <= 3) {
-                setTimeout(() => this.scrollToPage(direction), 80);
-                return;
-            }
-            // resetear contador y continuar con fallback
-            this._scrollRetryCount = 0;
-        }
-
-        // medición válida -> resetear contador
-        this._scrollRetryCount = 0;
-
-        // Log diagnóstico del intento de paginación
-        try {
-            console.log(`[Carousel][${this.wrapper && this.wrapper.id ? this.wrapper.id : 'unknown'}] scrollToPage(${direction}) called -> containerWidth=${this.wrapper.clientWidth}, stepSize=${stepSize}, itemsPerViewport=${itemsPerViewport}, currentScroll=${this.wrapper.scrollLeft}, scrollWidth=${this.wrapper.scrollWidth}`);
-        } catch (e) {}
-
-        const currentScroll = this.wrapper.scrollLeft;
-        const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
-
-        // Calcular índice actual y objetivo
-        let currentIndex = null;
-        try {
-            const idx = getFirstFullyVisibleItemIndex(this.wrapper);
-            if (typeof idx === 'number' && idx >= 0) currentIndex = idx;
-        } catch (e) { currentIndex = null; }
-        if (currentIndex === null) currentIndex = Math.round(currentScroll / stepSize);
-        let targetIndex;
-        if (direction === 'prev') {
-            targetIndex = Math.max(0, currentIndex - itemsPerViewport);
-        } else {
-            targetIndex = currentIndex + itemsPerViewport;
-        }
-
-        const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
-        const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
-        targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
-
-        // Intentar alinear usando el elemento objetivo para evitar cálculos de píxeles
-        const itemList = Array.from(this.wrapper.querySelectorAll('.custom-carousel-item'));
-        const targetItem = itemList[targetIndex];
-        if (targetItem && typeof targetItem.scrollIntoView === 'function') {
-            try {
-                targetItem.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
-                return;
-            } catch (e) {
-                // fallback a scrollTo si scrollIntoView falla
-            }
-        }
-        
-        const finalScroll = targetIndex * stepSize;
-        this.wrapper.scrollTo({ left: Math.max(0, Math.min(finalScroll, maxScroll)), behavior: 'smooth' });
+        paginateCarouselByIndex(this.wrapper, direction);
     }
 
 // (Eliminados duplicados y métodos sobrantes)
@@ -865,33 +865,7 @@ class EpisodiosAnimesCarousel {
     scrollToPrevPage() { this.scrollToPage('prev'); }
     scrollToNextPage() { this.scrollToPage('next'); }
     scrollToPage(direction) {
-        if (!this.wrapper) return;
-    const { stepSize, itemsPerViewport } = computeCarouselStep(this.wrapper);
-    try { console.log(`[Carousel][${this.wrapper && this.wrapper.id ? this.wrapper.id : 'unknown'}] measured: stepSize=${stepSize}, itemsPerViewport=${itemsPerViewport}`); } catch (e) {}
-        if (!stepSize || stepSize < 30) {
-            this._scrollRetryCount = (this._scrollRetryCount || 0) + 1;
-            if (this._scrollRetryCount <= 3) {
-                setTimeout(() => this.scrollToPage(direction), 80);
-                return;
-            }
-            this._scrollRetryCount = 0;
-        }
-        this._scrollRetryCount = 0;
-        const currentScroll = this.wrapper.scrollLeft;
-        const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
-        let currentIndex = null;
-        try {
-            const idx = getFirstFullyVisibleItemIndex(this.wrapper);
-            if (typeof idx === 'number' && idx >= 0) currentIndex = idx;
-        } catch (e) { currentIndex = null; }
-        if (currentIndex === null) currentIndex = Math.round(currentScroll / stepSize);
-        let targetIndex;
-        if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsPerViewport); else targetIndex = currentIndex + itemsPerViewport;
-        const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
-        const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
-        targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
-        const finalScroll = targetIndex * stepSize;
-        this.wrapper.scrollTo({ left: Math.max(0, Math.min(finalScroll, maxScroll)), behavior: 'smooth' });
+        paginateCarouselByIndex(this.wrapper, direction);
     }
 }
 
@@ -1158,33 +1132,7 @@ class EpisodiosDocumentalesCarousel {
     scrollToPrevPage() { this.scrollToPage('prev'); }
     scrollToNextPage() { this.scrollToPage('next'); }
     scrollToPage(direction) {
-        if (!this.wrapper) return;
-    const { stepSize, itemsPerViewport } = computeCarouselStep(this.wrapper);
-    try { console.log(`[Carousel][${this.wrapper && this.wrapper.id ? this.wrapper.id : 'unknown'}] measured: stepSize=${stepSize}, itemsPerViewport=${itemsPerViewport}`); } catch (e) {}
-        if (!stepSize || stepSize < 30) {
-            this._scrollRetryCount = (this._scrollRetryCount || 0) + 1;
-            if (this._scrollRetryCount <= 3) {
-                setTimeout(() => this.scrollToPage(direction), 80);
-                return;
-            }
-            this._scrollRetryCount = 0;
-        }
-        this._scrollRetryCount = 0;
-        const currentScroll = this.wrapper.scrollLeft;
-        const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
-        let currentIndex = null;
-        try {
-            const idx = getFirstFullyVisibleItemIndex(this.wrapper);
-            if (typeof idx === 'number' && idx >= 0) currentIndex = idx;
-        } catch (e) { currentIndex = null; }
-        if (currentIndex === null) currentIndex = Math.round(currentScroll / stepSize);
-        let targetIndex;
-        if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsPerViewport); else targetIndex = currentIndex + itemsPerViewport;
-        const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
-        const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
-        targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
-        const finalScroll = targetIndex * stepSize;
-        this.wrapper.scrollTo({ left: Math.max(0, Math.min(finalScroll, maxScroll)), behavior: 'smooth' });
+        paginateCarouselByIndex(this.wrapper, direction);
     }
 }
 class AnimesCarousel {
@@ -1512,14 +1460,10 @@ class AnimesCarousel {
         }
     }
     scrollToPrevPage() {
-        if (!this.wrapper) return;
-        const scrollAmount = this.wrapper.clientWidth;
-        this.wrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        paginateCarouselByIndex(this.wrapper, 'prev');
     }
     scrollToNextPage() {
-        if (!this.wrapper) return;
-        const scrollAmount = this.wrapper.clientWidth;
-        this.wrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        paginateCarouselByIndex(this.wrapper, 'next');
     }
 }
 class Carousel {
@@ -1861,36 +1805,7 @@ class Carousel {
     }
 
     scrollToPage(direction) {
-        if (!this.wrapper) return;
-        // Calcular dinámicamente el tamaño del item y el gap para evitar errores en el primer clic
-    const { stepSize, itemsPerViewport } = computeCarouselStep(this.wrapper);
-    try { console.log(`[Carousel][${this.wrapper && this.wrapper.id ? this.wrapper.id : 'unknown'}] measured: stepSize=${stepSize}, itemsPerViewport=${itemsPerViewport}`); } catch (e) {}
-        if (!stepSize || stepSize < 30) {
-            this._scrollRetryCount = (this._scrollRetryCount || 0) + 1;
-            if (this._scrollRetryCount <= 3) {
-                setTimeout(() => this.scrollToPage(direction), 80);
-                return;
-            }
-            this._scrollRetryCount = 0;
-        }
-        this._scrollRetryCount = 0;
-
-        const containerWidth = this.wrapper.clientWidth;
-        const actualScrollAmount = itemsPerViewport * stepSize;
-
-        let currentScroll = this.wrapper.scrollLeft;
-        let targetScroll;
-        if (direction === 'prev') {
-            targetScroll = Math.max(0, currentScroll - actualScrollAmount);
-        } else {
-            targetScroll = currentScroll + actualScrollAmount;
-        }
-        // Alinear el scroll para que el item de la izquierda quede completo
-        const alignedScroll = Math.round(targetScroll / stepSize) * stepSize;
-        // Evitar sobrepasar los límites
-        const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
-        const finalScroll = Math.max(0, Math.min(alignedScroll, maxScroll));
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+        paginateCarouselByIndex(this.wrapper, direction);
     }
 
     // Método para contar elementos realmente visibles
@@ -2350,31 +2265,7 @@ class SeriesCarousel {
     }
 
     scrollToPage(direction) {
-        if (!this.wrapper) return;
-        // Usar medición dinámica para evitar errores de ancho en el primer clic
-    const { stepSize, itemsPerViewport } = computeCarouselStep(this.wrapper);
-    try { console.log(`[Carousel][${this.wrapper && this.wrapper.id ? this.wrapper.id : 'unknown'}] measured: stepSize=${stepSize}, itemsPerViewport=${itemsPerViewport}`); } catch (e) {}
-        if (!stepSize) return;
-
-        const containerWidth = this.wrapper.clientWidth;
-        const currentScroll = this.wrapper.scrollLeft;
-        const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
-
-        if (direction === 'prev') {
-            const actualScrollAmount = itemsPerViewport * stepSize;
-            const targetScroll = Math.max(0, currentScroll - actualScrollAmount);
-            const alignedScroll = Math.round(targetScroll / stepSize) * stepSize;
-            this.wrapper.scrollTo({ left: Math.max(0, Math.min(alignedScroll, maxScroll)), behavior: 'smooth' });
-        } else {
-            const actualScrollAmount = itemsPerViewport * stepSize;
-            let targetScroll = currentScroll + actualScrollAmount;
-            // Si estamos en el inicio, asegurar que el primer movimiento sea exactamente itemsPerViewport
-            if (currentScroll === 0) {
-                targetScroll = itemsPerViewport * stepSize;
-            }
-            const alignedScroll = Math.round(targetScroll / stepSize) * stepSize;
-            this.wrapper.scrollTo({ left: Math.max(0, Math.min(alignedScroll, maxScroll)), behavior: 'smooth' });
-        }
+        paginateCarouselByIndex(this.wrapper, direction);
     }
 
     // Método para contar elementos realmente visibles
@@ -2745,14 +2636,10 @@ class DocumentalesCarousel {
     }
 
     scrollToPrevPage() {
-        if (!this.wrapper) return;
-        const scrollAmount = this.wrapper.clientWidth;
-        this.wrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        paginateCarouselByIndex(this.wrapper, 'prev');
     }
     scrollToNextPage() {
-        if (!this.wrapper) return;
-        const scrollAmount = this.wrapper.clientWidth;
-        this.wrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        paginateCarouselByIndex(this.wrapper, 'next');
     }
 }
 
