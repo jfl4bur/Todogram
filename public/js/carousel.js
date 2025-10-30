@@ -733,6 +733,18 @@ class EpisodiosAnimesCarousel {
         let targetIndex = direction === 'prev' ? currentIndex - itemsPerViewport : currentIndex + itemsPerViewport;
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
+        // DEBUG: registrar valores para verificar que la paginación se está ejecutando
+        try {
+            console.debug('scrollToPage', {
+                wrapperId: this.wrapper ? this.wrapper.id : null,
+                direction,
+                currentIndex,
+                targetIndex,
+                itemsPerViewport,
+                stepSize
+            });
+        } catch (e) {}
+
     const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
     let finalScroll = targetIndex * stepSize;
     finalScroll = Math.max(0, Math.min(finalScroll, maxScroll));
@@ -1028,9 +1040,20 @@ class EpisodiosDocumentalesCarousel {
         let targetIndex = direction === 'prev' ? currentIndex - itemsPerViewport : currentIndex + itemsPerViewport;
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
+        // DEBUG: registrar valores para verificar que la paginación se está ejecutando
+        try {
+            console.debug('scrollToPage', {
+                wrapperId: this.wrapper ? this.wrapper.id : null,
+                direction,
+                currentIndex,
+                targetIndex,
+                itemsPerViewport,
+                stepSize
+            });
+        } catch (e) {}
+
     const groupWidth = itemsPerViewport * stepSize;
     const extraSpace = Math.max(0, containerWidth - groupWidth);
-    // left-aligned pagination: preserve existing behavior (do not center the group)
 
     const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
     let finalScroll = targetIndex * stepSize;
@@ -1714,6 +1737,18 @@ class Carousel {
         }
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
+    // DEBUG: registrar valores para verificar que la paginación se está ejecutando
+    try {
+        console.debug('scrollToPage', {
+            wrapperId: this.wrapper ? this.wrapper.id : null,
+            direction,
+            currentIndex,
+            targetIndex,
+            itemsPerViewport,
+            stepSize
+        });
+    } catch (e) {}
+
     // Calcular desplazamiento final (alineado a la izquierda) — conservar la semántica existente
     const groupWidth = itemsPerViewport * stepSize;
     const extraSpace = Math.max(0, containerWidth - groupWidth);
@@ -2212,6 +2247,18 @@ class SeriesCarousel {
         }
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
+    // DEBUG: registrar valores para verificar que la paginación se está ejecutando
+    try {
+        console.debug('scrollToPage', {
+            wrapperId: this.wrapper ? this.wrapper.id : null,
+            direction,
+            currentIndex,
+            targetIndex,
+            itemsPerViewport,
+            stepSize
+        });
+    } catch (e) {}
+
     // Calcular desplazamiento final (alineado a la izquierda) — conservar la semántica existente
     const groupWidth = itemsPerViewport * stepSize;
     const extraSpace = Math.max(0, containerWidth - groupWidth);
@@ -2596,6 +2643,19 @@ class DocumentalesCarousel {
         const currentIndex = Math.round(this.wrapper.scrollLeft / stepSize);
         let targetIndex = direction === 'prev' ? currentIndex - itemsPerViewport : currentIndex + itemsPerViewport;
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
+
+        // DEBUG: registrar valores para verificar que la paginación se está ejecutando
+        try {
+            console.debug('scrollToPage', {
+                wrapperId: this.wrapper ? this.wrapper.id : null,
+                direction,
+                currentIndex,
+                targetIndex,
+                itemsPerViewport,
+                stepSize
+            });
+        } catch (e) {}
+
     const maxScroll = Math.max(0, this.wrapper.scrollWidth - this.wrapper.clientWidth);
     let finalScroll = targetIndex * stepSize;
     finalScroll = Math.max(0, Math.min(finalScroll, maxScroll));
