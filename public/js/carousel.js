@@ -435,31 +435,26 @@ class EpisodiosSeriesCarousel {
     }
     scrollToPage(direction) {
         if (!this.wrapper) return;
-        const containerWidth = this.wrapper.clientWidth;
-
-        // Determinar tamaño real del ítem y gap leyendo el DOM
-        const firstItem = this.wrapper.querySelector('.custom-carousel-item');
-        if (!firstItem) return;
-        const itemRect = firstItem.getBoundingClientRect();
-        const itemWidth = Math.round(itemRect.width);
-
-        // Intentar estimar gap usando el segundo elemento
-        let gap = 0;
-        const secondItem = firstItem.nextElementSibling;
-        if (secondItem) {
-            const secondRect = secondItem.getBoundingClientRect();
-            gap = Math.round(secondRect.left - (itemRect.left + itemRect.width));
-            if (isNaN(gap) || gap < 0) gap = 0;
+        // Medir paso dinámicamente y alinear al múltiplo de stepSize
+        const { stepSize, itemsPerViewport } = computeCarouselStep(this.wrapper);
+        // Si la medición es inválida (p. ej. imágenes aún no cargadas), reintentar unas pocas veces
+        if (!stepSize || stepSize < 30) {
+            this._scrollRetryCount = (this._scrollRetryCount || 0) + 1;
+            if (this._scrollRetryCount <= 3) {
+                setTimeout(() => this.scrollToPage(direction), 80);
+                return;
+            }
+            // resetear contador y continuar con fallback
+            this._scrollRetryCount = 0;
         }
+        // medición válida -> resetear contador
+        this._scrollRetryCount = 0;
 
-        const stepSize = itemWidth + gap;
+        const currentScroll = this.wrapper.scrollLeft;
+        const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
 
-        // Calcular cuántos items completos caben en la vista
-        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
-
-    // Calcular índice del primer item visible actualmente (alinear a la izquierda)
-    const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
-
+        // Calcular índice actual y objetivo
+        const currentIndex = Math.floor(currentScroll / stepSize);
         let targetIndex;
         if (direction === 'prev') {
             targetIndex = Math.max(0, currentIndex - itemsPerViewport);
@@ -467,13 +462,12 @@ class EpisodiosSeriesCarousel {
             targetIndex = currentIndex + itemsPerViewport;
         }
 
-        // Evitar sobrepasar la cantidad de items
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
         const finalScroll = targetIndex * stepSize;
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+        this.wrapper.scrollTo({ left: Math.max(0, Math.min(finalScroll, maxScroll)), behavior: 'smooth' });
     }
 
 // (Eliminados duplicados y métodos sobrantes)
@@ -750,24 +744,26 @@ class EpisodiosAnimesCarousel {
     scrollToNextPage() { this.scrollToPage('next'); }
     scrollToPage(direction) {
         if (!this.wrapper) return;
-        const containerWidth = this.wrapper.clientWidth;
-        const firstItem = this.wrapper.querySelector('.custom-carousel-item');
-        if (!firstItem) return;
-        const itemRect = firstItem.getBoundingClientRect();
-        const itemWidth = Math.round(itemRect.width);
-        let gap = 0;
-        const secondItem = firstItem.nextElementSibling;
-        if (secondItem) { const secondRect = secondItem.getBoundingClientRect(); gap = Math.round(secondRect.left - (itemRect.left + itemRect.width)); if (isNaN(gap) || gap < 0) gap = 0; }
-        const stepSize = itemWidth + gap;
-        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
-        const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
+        const { stepSize, itemsPerViewport } = computeCarouselStep(this.wrapper);
+        if (!stepSize || stepSize < 30) {
+            this._scrollRetryCount = (this._scrollRetryCount || 0) + 1;
+            if (this._scrollRetryCount <= 3) {
+                setTimeout(() => this.scrollToPage(direction), 80);
+                return;
+            }
+            this._scrollRetryCount = 0;
+        }
+        this._scrollRetryCount = 0;
+        const currentScroll = this.wrapper.scrollLeft;
+        const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
+        const currentIndex = Math.floor(currentScroll / stepSize);
         let targetIndex;
         if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsPerViewport); else targetIndex = currentIndex + itemsPerViewport;
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
         const finalScroll = targetIndex * stepSize;
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+        this.wrapper.scrollTo({ left: Math.max(0, Math.min(finalScroll, maxScroll)), behavior: 'smooth' });
     }
 }
 
@@ -1034,24 +1030,26 @@ class EpisodiosDocumentalesCarousel {
     scrollToNextPage() { this.scrollToPage('next'); }
     scrollToPage(direction) {
         if (!this.wrapper) return;
-        const containerWidth = this.wrapper.clientWidth;
-        const firstItem = this.wrapper.querySelector('.custom-carousel-item');
-        if (!firstItem) return;
-        const itemRect = firstItem.getBoundingClientRect();
-        const itemWidth = Math.round(itemRect.width);
-        let gap = 0;
-        const secondItem = firstItem.nextElementSibling;
-        if (secondItem) { const secondRect = secondItem.getBoundingClientRect(); gap = Math.round(secondRect.left - (itemRect.left + itemRect.width)); if (isNaN(gap) || gap < 0) gap = 0; }
-        const stepSize = itemWidth + gap;
-        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
-        const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
+        const { stepSize, itemsPerViewport } = computeCarouselStep(this.wrapper);
+        if (!stepSize || stepSize < 30) {
+            this._scrollRetryCount = (this._scrollRetryCount || 0) + 1;
+            if (this._scrollRetryCount <= 3) {
+                setTimeout(() => this.scrollToPage(direction), 80);
+                return;
+            }
+            this._scrollRetryCount = 0;
+        }
+        this._scrollRetryCount = 0;
+        const currentScroll = this.wrapper.scrollLeft;
+        const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
+        const currentIndex = Math.floor(currentScroll / stepSize);
         let targetIndex;
         if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsPerViewport); else targetIndex = currentIndex + itemsPerViewport;
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
         const finalScroll = targetIndex * stepSize;
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+        this.wrapper.scrollTo({ left: Math.max(0, Math.min(finalScroll, maxScroll)), behavior: 'smooth' });
     }
 }
 class AnimesCarousel {
@@ -1725,7 +1723,15 @@ class Carousel {
         if (!this.wrapper) return;
         // Calcular dinámicamente el tamaño del item y el gap para evitar errores en el primer clic
         const { stepSize, itemsPerViewport } = computeCarouselStep(this.wrapper);
-        if (!stepSize) return;
+        if (!stepSize || stepSize < 30) {
+            this._scrollRetryCount = (this._scrollRetryCount || 0) + 1;
+            if (this._scrollRetryCount <= 3) {
+                setTimeout(() => this.scrollToPage(direction), 80);
+                return;
+            }
+            this._scrollRetryCount = 0;
+        }
+        this._scrollRetryCount = 0;
 
         const containerWidth = this.wrapper.clientWidth;
         const actualScrollAmount = itemsPerViewport * stepSize;
