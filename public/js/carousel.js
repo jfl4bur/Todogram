@@ -2,25 +2,18 @@
 function robustScrollTo(wrapper, computeDesired, maxScroll, behavior = 'smooth') {
     if (!wrapper || typeof computeDesired !== 'function') return;
     // Esperar un par de frames para dejar que el layout se estabilice (imágenes, fuentes)
+    // Hacemos un único scroll final tras esperar el layout: doble rAF + pequeño timeout.
     requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-            try {
-                const desired = computeDesired();
-                const finalScroll = Math.min(Math.max(0, Math.round(desired)), maxScroll);
-                wrapper.scrollTo({ left: finalScroll, behavior });
-            } catch (e) {
-                // Ignorar errores de medición
-            }
-            // Re-check corto después por si alguna imagen cambió el layout más tarde
             setTimeout(() => {
                 try {
-                    const desired2 = computeDesired();
-                    const final2 = Math.min(Math.max(0, Math.round(desired2)), maxScroll);
-                    if (Math.abs(wrapper.scrollLeft - final2) > 2) {
-                        wrapper.scrollTo({ left: final2, behavior });
-                    }
-                } catch (e) {}
-            }, 60);
+                    const desired = computeDesired();
+                    const finalScroll = Math.min(Math.max(0, Math.round(desired)), maxScroll);
+                    wrapper.scrollTo({ left: finalScroll, behavior });
+                } catch (e) {
+                    // Ignorar errores de medición
+                }
+            }, 40);
         });
     });
 }
