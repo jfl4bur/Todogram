@@ -35,6 +35,8 @@ class HoverModal {
     // escape any overflow: hidden/auto ancestors without breaking carousel scroll
     this._portalEl = null;
     this._portalTimeout = null;
+    // whether the portal is currently animating back to origin
+    this._portalAnimating = false;
     // remember original parent so we can restore DOM position
     this._originalParent = this.modalContent.parentElement;
     this._carouselPositionChanged = false;
@@ -749,8 +751,11 @@ class HoverModal {
                 // - carousel items: use left/top/width/height animation (legacy)
                 //   to preserve the previously expected carousel motion.
                 if (animateBack && origin && origin instanceof HTMLElement) {
-                    try {
-                        const isCatalogOrigin = !!origin.closest('.catalogo-grid, #catalogo-grid-page');
+            try {
+                // prevent duplicate animate-backs
+                if (this._portalAnimating) return;
+                this._portalAnimating = true;
+                const isCatalogOrigin = !!origin.closest('.catalogo-grid, #catalogo-grid-page');
                         // compute rects once
                         const oRect = origin.getBoundingClientRect();
                         const cRect = clone.getBoundingClientRect();
@@ -844,6 +849,7 @@ class HoverModal {
                                 this._portalEl = null;
                                 try { origin.style.visibility = ''; } catch (e) {}
                                 this._portalActive = false;
+                                this._portalAnimating = false;
                                 try { this._detachPortalScrollListeners(); } catch (e) {}
                             };
 
@@ -898,6 +904,7 @@ class HoverModal {
                                     this._portalEl = null;
                                     try { origin.style.visibility = ''; } catch (e) {}
                                     this._portalActive = false;
+                                    this._portalAnimating = false;
                                     try { this._detachPortalScrollListeners(); } catch (e) {}
                                 };
 
@@ -934,6 +941,7 @@ class HoverModal {
                 try { this._currentOrigin.style.visibility = ''; } catch (e) {}
             }
             this._portalActive = false;
+            this._portalAnimating = false;
             if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
         } catch (e) {}
     }
