@@ -750,20 +750,7 @@ button:focus {
     display: none;
 }
 
-.carousel-overlay {
-    position: absolute;
-    top: 60%;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 15px;
-    color: white;
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
-    transform: translateY(20px);
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    opacity: 0;
-    z-index: 2;
-}
+
 
 .carousel-title {
     font-size: 1.8rem;
@@ -2030,7 +2017,7 @@ button:focus {
     background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
     transform: translateY(20px);
     transition: transform 0.3s ease, opacity 0.3s ease;
-    opacity: 0;
+    opacity: 0 !important;
     z-index: 2;
 }
 
