@@ -1,222 +1,3 @@
-// Quick runtime sanity log to help debug: indica si el archivo JS se cargó
-try { console.log('carousel.js cargado — inicio de ejecución'); } catch (e) {}
-
-// Utility: ensure there is an inner scrollable track when the outer wrapper uses overflow: visible
-// This allows items to visually overflow (por ejemplo al hacer zoom) mientras que el scroll horizontal
-// sigue funcionando correctamente dentro de `.carousel-track`.
-function ensureCarouselTrack(wrapper) {
-    if (!wrapper) return null;
-    // If a track already exists, return it
-    const existing = wrapper.querySelector('.carousel-track');
-    if (existing) return existing;
-    // Mark wrapper so CSS can relax overflow on inner items when needed (do this always)
-    try { wrapper.classList.add('carousel-allow-overflow'); } catch (e) {}
-
-    // If the wrapper is scrollable already, just return the wrapper
-    try {
-        const style = window.getComputedStyle(wrapper);
-        if (style.overflowX !== 'visible' && style.overflowX !== 'hidden') {
-            return wrapper;
-        }
-    } catch (e) {
-        // ignore and create track
-    }
-
-    // Create track and move children into it
-    const track = document.createElement('div');
-    track.className = 'carousel-track';
-    // Move children into track
-    while (wrapper.firstChild) track.appendChild(wrapper.firstChild);
-    wrapper.appendChild(track);
-
-    // Also scan ancestors and mark those with restrictive overflow so CSS can relax them.
-    try {
-        let node = wrapper.parentElement;
-        while (node && node !== document.body) {
-            const cs = window.getComputedStyle(node);
-            const overflowValues = [cs.overflow, cs.overflowX, cs.overflowY].filter(Boolean);
-            const hasHidden = overflowValues.some(v => v === 'hidden' || v === 'clip');
-            if (hasHidden) {
-                try { node.classList.add('carousel-allow-overflow-ancestor'); } catch (e) {}
-                // stop at first restrictive ancestor to avoid altering layout too widely
-                break;
-            }
-            node = node.parentElement;
-        }
-    } catch (e) { }
-
-    // Inline minimal styles to ensure horizontal scrolling works even if outer wrapper is overflow: visible
-    track.style.display = 'flex';
-    track.style.gap = getComputedStyle(wrapper).getPropertyValue('--carousel-gap') || '8px';
-    track.style.overflowX = 'auto';
-    track.style.overflowY = 'visible';
-    track.style.scrollBehavior = 'smooth';
-    track.style.webkitOverflowScrolling = 'touch';
-
-    return track;
-}
-
-// Temporarily relax clipping on ancestors while an item is hovered (to allow visual overflow)
-function _allowOverflowForItem(item) {
-    try {
-        if (!item) return;
-        const wrapper = item.closest('[id$="-carousel-wrapper"], .carousel-wrapper');
-        if (!wrapper) return;
-        // If already adjusted, skip
-        if (wrapper._adjustedAncestors) return;
-        const adjusted = [];
-        let node = wrapper.parentElement;
-        while (node && node !== document.body) {
-            const cs = window.getComputedStyle(node);
-            // If any overflow axis is restrictive, relax it
-            if (cs.overflow === 'hidden' || cs.overflowX === 'hidden' || cs.overflowY === 'hidden' || cs.overflow === 'clip' || cs.overflowX === 'clip' || cs.overflowY === 'clip') {
-                // Save original inline styles so we can restore later
-                node.dataset._origOverflow = `${node.style.overflow||''}||${node.style.overflowX||''}||${node.style.overflowY||''}`;
-                node.style.overflow = 'visible';
-                node.style.overflowX = 'visible';
-                node.style.overflowY = 'visible';
-                adjusted.push(node);
-                // Stop at the first restrictive ancestor to limit layout changes
-                break;
-            }
-            node = node.parentElement;
-        }
-        if (adjusted.length) wrapper._adjustedAncestors = adjusted;
-    } catch (e) { /* silent */ }
-}
-
-function _revertOverflowForItem(item) {
-    try {
-        if (!item) return;
-        const wrapper = item.closest('[id$="-carousel-wrapper"], .carousel-wrapper');
-        if (!wrapper) return;
-        const adjusted = wrapper._adjustedAncestors;
-        if (!adjusted || !adjusted.length) return;
-        adjusted.forEach(node => {
-            const orig = node.dataset._origOverflow || '';
-            const parts = orig.split('||');
-            node.style.overflow = parts[0] || '';
-            node.style.overflowX = parts[1] || '';
-            node.style.overflowY = parts[2] || '';
-            delete node.dataset._origOverflow;
-        });
-        wrapper._adjustedAncestors = null;
-    } catch (e) { /* silent */ }
-}
-// Portal-based hover: move detail-background to document.body so it can escape clipping.
-function _createPortalForItem(item) {
-    try {
-        if (!item) return;
-        if (item._portalElement) return;
-        const bg = item.querySelector('.detail-background');
-        if (!bg) return;
-        const rect = bg.getBoundingClientRect();
-        const portal = bg.cloneNode(true);
-        portal.classList.add('carousel-portal-detail');
-        portal.style.position = 'fixed';
-        portal.style.left = `${rect.left}px`;
-        portal.style.top = `${rect.top}px`;
-        portal.style.width = `${rect.width}px`;
-        portal.style.height = `${rect.height}px`;
-    // Use a very large z-index to try to escape any stacking contexts
-    portal.style.zIndex = '2147483647';
-        portal.style.display = 'block';
-        portal.style.pointerEvents = 'none';
-        portal.style.opacity = '1';
-        portal.style.transition = 'none';
-        portal.style.transform = 'translateZ(0)';
-        // Ensure cloned background is visible (some styles may hide it by default)
-        try {
-            portal.style.display = 'block';
-            portal.style.opacity = '1';
-            const imgs = portal.querySelectorAll('img');
-            imgs.forEach(i => { i.style.opacity = '1'; i.style.display = 'block'; });
-        } catch (e) {}
-        document.body.appendChild(portal);
-        // hide original so we don't see duplicate
-        bg.style.display = 'none';
-        item._portalElement = portal;
-
-        // updater to reposition portal on scroll/resize/pointermove using rAF for smoothness
-        let rafId = null;
-        const doUpdate = () => {
-            try {
-                const rect = item.getBoundingClientRect();
-                // If detail-background inside item has different rect, prefer it
-                const innerBg = item.querySelector('.detail-background');
-                const r = (innerBg && innerBg.getBoundingClientRect && innerBg.getBoundingClientRect().width>0) ? innerBg.getBoundingClientRect() : rect;
-                portal.style.left = `${Math.round(r.left)}px`;
-                portal.style.top = `${Math.round(r.top)}px`;
-                portal.style.width = `${Math.round(r.width)}px`;
-                portal.style.height = `${Math.round(r.height)}px`;
-            } catch (e) {}
-            rafId = null;
-        };
-        const scheduleUpdate = () => { if (rafId==null) rafId = requestAnimationFrame(doUpdate); };
-        const onScroll = scheduleUpdate;
-        const onResize = scheduleUpdate;
-        const onPointer = scheduleUpdate;
-        item._portalUpdater = { onScroll, onResize, onPointer, rafCancel: () => { if (rafId) cancelAnimationFrame(rafId); rafId = null; } };
-        window.addEventListener('scroll', onScroll, true);
-        window.addEventListener('resize', onResize);
-        window.addEventListener('pointermove', onPointer, true);
-    } catch (e) { /* silent */ }
-}
-
-function _removePortalForItem(item) {
-    try {
-        if (!item) return;
-        const portal = item._portalElement;
-        if (portal && portal.parentElement) portal.parentElement.removeChild(portal);
-        const bg = item.querySelector('.detail-background');
-        if (bg) bg.style.display = '';
-        // remove listeners and cancel rAF
-        try {
-            if (item._portalUpdater) {
-                try { window.removeEventListener('scroll', item._portalUpdater.onScroll, true); } catch (e) {}
-                try { window.removeEventListener('resize', item._portalUpdater.onResize); } catch (e) {}
-                try { window.removeEventListener('pointermove', item._portalUpdater.onPointer, true); } catch (e) {}
-                try { item._portalUpdater.rafCancel(); } catch (e) {}
-                item._portalUpdater = null;
-            }
-        } catch (e) {}
-        item._portalElement = null;
-    } catch (e) { /* silent */ }
-}
-
-// Attach global pointerenter/pointerleave handlers to use portal approach during hover.
-document.addEventListener('pointerenter', function(e){
-    try {
-        const item = e.target.closest && e.target.closest('.custom-carousel-item');
-        if (item) {
-            _createPortalForItem(item);
-            // keep the old fallback to relax ancestors in case cloning isn't enough
-            _allowOverflowForItem(item);
-        }
-    } catch (e) {}
-}, true);
-document.addEventListener('pointerleave', function(e){
-    try {
-        const item = e.target.closest && e.target.closest('.custom-carousel-item');
-        if (item) {
-            _removePortalForItem(item);
-            _revertOverflowForItem(item);
-        }
-    } catch (e) {}
-}, true);
-
-// Add minimal CSS for .carousel-track once
-(function addCarouselTrackStyles(){
-    if (document.getElementById('carousel-track-styles')) return;
-    const s = document.createElement('style');
-    s.id = 'carousel-track-styles';
-    s.textContent = `
-        .carousel-track{display:flex;gap:var(--carousel-gap,8px);overflow-x:auto;overflow-y:visible;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
-        .carousel-track::-webkit-scrollbar{height:8px}
-    `;
-    document.head.appendChild(s);
-})();
-
 // Carrusel de Episodios Series (solo episodios con Título episodio completo)
 class EpisodiosSeriesCarousel {
     // ...existing code...
@@ -256,10 +37,6 @@ class EpisodiosSeriesCarousel {
     }
     constructor() {
         this.wrapper = document.getElementById('episodios-series-carousel-wrapper');
-        if (this.wrapper) {
-            const _t = ensureCarouselTrack(this.wrapper) || this.wrapper;
-            if (_t !== this.wrapper) { this._originalWrapper = this.wrapper; this.wrapper = _t; }
-        }
         this.skeleton = document.getElementById('episodios-series-carousel-skeleton');
         this.progressBar = null;
         this.carouselNav = document.getElementById('episodios-series-carousel-nav');
@@ -301,8 +78,7 @@ class EpisodiosSeriesCarousel {
         const itemWidth = 246; // 16:9
         const gap = 4;
         const calculate = () => {
-            const scrollEl = this._originalWrapper || this.wrapper;
-            const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
+            const containerWidth = this.wrapper.clientWidth;
             if (containerWidth > 0) {
                 const itemsThatFit = Math.floor(containerWidth / (itemWidth + gap));
                 this.itemsPerPage = Math.max(1, itemsThatFit);
@@ -525,7 +301,6 @@ class EpisodiosSeriesCarousel {
                             const overlay = div.querySelector('.carousel-overlay');
                             background.style.display = 'block';
                             background.style.opacity = '1';
-                            try { if (typeof _createPortalForItem === 'function') _createPortalForItem(div); } catch (e) {}
                             overlay.style.opacity = '1';
                             overlay.style.transform = 'translateY(0)';
                             this.hoverTimeouts[itemId].modal = setTimeout(() => {
@@ -546,7 +321,6 @@ class EpisodiosSeriesCarousel {
                         clearTimeout(this.hoverTimeouts[itemId].modal);
                         delete this.hoverTimeouts[itemId];
                     }
-                    try { if (typeof _removePortalForItem === 'function') _removePortalForItem(div); } catch (e) {}
                     const img = div.querySelector('.episodios-series-card-image');
                     const background = div.querySelector('.detail-background');
                     const overlay = div.querySelector('.carousel-overlay');
@@ -575,17 +349,6 @@ class EpisodiosSeriesCarousel {
                     window.detailsModal.show(item, div);
                 }
             });
-            // Ensure scrollable track exists when outer wrapper uses overflow: visible
-            (function(){
-                const _target = ensureCarouselTrack(this.wrapper) || this.wrapper;
-                if (_target !== this.wrapper) {
-                    this.wrapper = _target;
-                    if (!this._carouselTrackListenerAttached) {
-                        this.wrapper.addEventListener('scroll', () => { if (this.updateProgressBar) this.updateProgressBar(); });
-                        this._carouselTrackListenerAttached = true;
-                    }
-                }
-            }).call(this);
             this.wrapper.appendChild(div);
         }
         // Barra de progreso
@@ -614,15 +377,12 @@ class EpisodiosSeriesCarousel {
 
     updateProgressBar() {
         if (!this.progressBar) return;
-        const scrollEl = this._originalWrapper || this.wrapper;
-        try {
-            if (scrollEl.scrollWidth > scrollEl.clientWidth) {
-                const scrollPercentage = (scrollEl.scrollLeft / (scrollEl.scrollWidth - scrollEl.clientWidth)) * 100;
-                this.progressBar.style.width = `${scrollPercentage}%`;
-            } else {
-                this.progressBar.style.width = '100%';
-            }
-        } catch (e) { this.progressBar.style.width = '100%'; }
+        if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
+            const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
+            this.progressBar.style.width = `${scrollPercentage}%`;
+        } else {
+            this.progressBar.style.width = '100%';
+        }
     }
 
     scrollToPrevPage() {
@@ -633,40 +393,30 @@ class EpisodiosSeriesCarousel {
     }
     scrollToPage(direction) {
         if (!this.wrapper) return;
-    const scrollEl = this._originalWrapper || this.wrapper;
-    const containerWidth = (scrollEl && (scrollEl.clientWidth || (scrollEl.parentElement && scrollEl.parentElement.clientWidth))) || 0;
+        const containerWidth = this.wrapper.clientWidth;
 
-        // Determinar tamaño del ítem de manera robusta: preferimos offsetWidth
+        // Determinar tamaño real del ítem y gap leyendo el DOM
         const firstItem = this.wrapper.querySelector('.custom-carousel-item');
         if (!firstItem) return;
-        let itemWidth = Math.round(firstItem.offsetWidth || 0);
+        const itemRect = firstItem.getBoundingClientRect();
+        const itemWidth = Math.round(itemRect.width);
 
-        // Si el itemWidth es demasiado pequeño (imagenes no cargadas), intentar rect.width como fallback
-        if (!itemWidth || itemWidth < 30) {
-            try {
-                const rect = firstItem.getBoundingClientRect();
-                itemWidth = Math.max(itemWidth, Math.round(rect.width) || 0);
-            } catch (e) { }
-        }
-
-        // Calcular gap consultando posiciones de offset para evitar problemas de sub-pixel
+        // Intentar estimar gap usando el segundo elemento
         let gap = 0;
         const secondItem = firstItem.nextElementSibling;
         if (secondItem) {
-            try {
-                gap = Math.round(secondItem.offsetLeft - (firstItem.offsetLeft + firstItem.offsetWidth));
-                if (isNaN(gap) || gap < 0) gap = 0;
-            } catch (e) { gap = 0; }
+            const secondRect = secondItem.getBoundingClientRect();
+            gap = Math.round(secondRect.left - (itemRect.left + itemRect.width));
+            if (isNaN(gap) || gap < 0) gap = 0;
         }
 
-        // Si aún no tenemos un ancho razonable, usar un valor por defecto para evitar división por cero
-        if (!itemWidth) itemWidth = 240;
-
         const stepSize = itemWidth + gap;
-        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize) || 1);
+
+        // Calcular cuántos items completos caben en la vista
+        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
 
     // Calcular índice del primer item visible actualmente (alinear a la izquierda)
-    const currentIndex = Math.floor((((this._originalWrapper || this.wrapper) && (this._originalWrapper || this.wrapper).scrollLeft) || 0) / stepSize);
+    const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
 
         let targetIndex;
         if (direction === 'prev') {
@@ -681,7 +431,7 @@ class EpisodiosSeriesCarousel {
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
         const finalScroll = targetIndex * stepSize;
-        try { if (scrollEl && typeof scrollEl.scrollTo === 'function') scrollEl.scrollTo({ left: finalScroll, behavior: 'smooth' }); else if (scrollEl) scrollEl.scrollLeft = finalScroll; } catch (e) { if (scrollEl) scrollEl.scrollLeft = finalScroll; }
+        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 
 // (Eliminados duplicados y métodos sobrantes)
@@ -717,10 +467,6 @@ class EpisodiosAnimesCarousel {
     }
     constructor() {
         this.wrapper = document.getElementById('episodios-animes-carousel-wrapper');
-        if (this.wrapper) {
-            const _t = ensureCarouselTrack(this.wrapper) || this.wrapper;
-            if (_t !== this.wrapper) { this._originalWrapper = this.wrapper; this.wrapper = _t; }
-        }
         this.skeleton = document.getElementById('episodios-animes-carousel-skeleton');
         this.progressBar = null;
         this.carouselNav = document.getElementById('episodios-animes-carousel-nav');
@@ -763,8 +509,7 @@ class EpisodiosAnimesCarousel {
         const itemWidth = 246;
         const gap = 4;
         const calculate = () => {
-            const scrollEl = this._originalWrapper || this.wrapper;
-            const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
+            const containerWidth = this.wrapper.clientWidth;
             if (containerWidth > 0) {
                 const itemsThatFit = Math.floor(containerWidth / (itemWidth + gap));
                 this.itemsPerPage = Math.max(1, itemsThatFit);
@@ -910,7 +655,6 @@ class EpisodiosAnimesCarousel {
                         const overlay = div.querySelector('.carousel-overlay');
                         background.style.display = 'block';
                         background.style.opacity = '1';
-                        try { if (typeof _createPortalForItem === 'function') _createPortalForItem(div); } catch (e) {}
                         overlay.style.opacity = '1';
                         overlay.style.transform = 'translateY(0)';
                         this.hoverTimeouts[itemId].modal = setTimeout(() => {
@@ -924,7 +668,6 @@ class EpisodiosAnimesCarousel {
                 div.addEventListener('mouseleave', () => {
                     const itemId = div.dataset.itemId;
                     if (this.hoverTimeouts[itemId]) { clearTimeout(this.hoverTimeouts[itemId].details); clearTimeout(this.hoverTimeouts[itemId].modal); delete this.hoverTimeouts[itemId]; }
-                    try { if (typeof _removePortalForItem === 'function') _removePortalForItem(div); } catch (e) {}
                     const img = div.querySelector('.episodios-series-card-image');
                     const background = div.querySelector('.detail-background');
                     const overlay = div.querySelector('.carousel-overlay');
@@ -943,16 +686,6 @@ class EpisodiosAnimesCarousel {
                 if (window.location.hash !== `#${hash}`) history.pushState(null, '', `#${hash}`);
                 if (window.detailsModal && typeof window.detailsModal.show === 'function') window.detailsModal.show(item, div);
             });
-            (function(){
-                const _target = ensureCarouselTrack(this.wrapper) || this.wrapper;
-                if (_target !== this.wrapper) {
-                    this.wrapper = _target;
-                    if (!this._carouselTrackListenerAttached) {
-                        this.wrapper.addEventListener('scroll', () => { if (this.updateProgressBar) this.updateProgressBar(); });
-                        this._carouselTrackListenerAttached = true;
-                    }
-                }
-            }).call(this);
             this.wrapper.appendChild(div);
         }
         this.updateProgressBar();
@@ -964,45 +697,35 @@ class EpisodiosAnimesCarousel {
     }
     updateProgressBar() {
         if (!this.progressBar) return;
-        const scrollEl = this._originalWrapper || this.wrapper;
-        try {
-            if (scrollEl.scrollWidth > scrollEl.clientWidth) {
-                const scrollPercentage = (scrollEl.scrollLeft / (scrollEl.scrollWidth - scrollEl.clientWidth)) * 100;
-                this.progressBar.style.width = `${scrollPercentage}%`;
-            } else {
-                this.progressBar.style.width = '100%';
-            }
-        } catch (e) { this.progressBar.style.width = '100%'; }
+        if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
+            const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
+            this.progressBar.style.width = `${scrollPercentage}%`;
+        } else {
+            this.progressBar.style.width = '100%';
+        }
     }
     scrollToPrevPage() { this.scrollToPage('prev'); }
     scrollToNextPage() { this.scrollToPage('next'); }
     scrollToPage(direction) {
         if (!this.wrapper) return;
-    const scrollEl = this._originalWrapper || this.wrapper;
-    const containerWidth = (scrollEl && (scrollEl.clientWidth || (scrollEl.parentElement && scrollEl.parentElement.clientWidth))) || 0;
-
+        const containerWidth = this.wrapper.clientWidth;
         const firstItem = this.wrapper.querySelector('.custom-carousel-item');
         if (!firstItem) return;
-        let itemWidth = Math.round(firstItem.offsetWidth || 0);
-        if (!itemWidth || itemWidth < 30) {
-            try { const rect = firstItem.getBoundingClientRect(); itemWidth = Math.max(itemWidth, Math.round(rect.width) || 0); } catch (e) {}
-        }
+        const itemRect = firstItem.getBoundingClientRect();
+        const itemWidth = Math.round(itemRect.width);
         let gap = 0;
         const secondItem = firstItem.nextElementSibling;
-        if (secondItem) {
-            try { gap = Math.round(secondItem.offsetLeft - (firstItem.offsetLeft + firstItem.offsetWidth)); if (isNaN(gap) || gap < 0) gap = 0; } catch (e) { gap = 0; }
-        }
-        if (!itemWidth) itemWidth = 240;
+        if (secondItem) { const secondRect = secondItem.getBoundingClientRect(); gap = Math.round(secondRect.left - (itemRect.left + itemRect.width)); if (isNaN(gap) || gap < 0) gap = 0; }
         const stepSize = itemWidth + gap;
-        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize) || 1);
-    const currentIndex = Math.floor((((this._originalWrapper || this.wrapper) && (this._originalWrapper || this.wrapper).scrollLeft) || 0) / stepSize);
+        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
+        const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
         let targetIndex;
         if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsPerViewport); else targetIndex = currentIndex + itemsPerViewport;
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
         const finalScroll = targetIndex * stepSize;
-        try { if (scrollEl && typeof scrollEl.scrollTo === 'function') scrollEl.scrollTo({ left: finalScroll, behavior: 'smooth' }); else if (scrollEl) scrollEl.scrollLeft = finalScroll; } catch (e) { if (scrollEl) scrollEl.scrollLeft = finalScroll; }
+        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 }
 
@@ -1037,10 +760,6 @@ class EpisodiosDocumentalesCarousel {
     }
     constructor() {
         this.wrapper = document.getElementById('episodios-documentales-carousel-wrapper');
-        if (this.wrapper) {
-            const _t = ensureCarouselTrack(this.wrapper) || this.wrapper;
-            if (_t !== this.wrapper) { this._originalWrapper = this.wrapper; this.wrapper = _t; }
-        }
         this.skeleton = document.getElementById('episodios-documentales-carousel-skeleton');
         this.progressBar = null;
         this.carouselNav = document.getElementById('episodios-documentales-carousel-nav');
@@ -1080,8 +799,7 @@ class EpisodiosDocumentalesCarousel {
         const itemWidth = 246;
         const gap = 4;
         const calculate = () => {
-            const scrollEl = this._originalWrapper || this.wrapper;
-            const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
+            const containerWidth = this.wrapper.clientWidth;
             if (containerWidth > 0) {
                 const itemsThatFit = Math.floor(containerWidth / (itemWidth + gap));
                 this.itemsPerPage = Math.max(1, itemsThatFit);
@@ -1223,7 +941,6 @@ class EpisodiosDocumentalesCarousel {
                         const overlay = div.querySelector('.carousel-overlay');
                         background.style.display = 'block';
                         background.style.opacity = '1';
-                        try { if (typeof _createPortalForItem === 'function') _createPortalForItem(div); } catch (e) {}
                         overlay.style.opacity = '1';
                         overlay.style.transform = 'translateY(0)';
                         this.hoverTimeouts[itemId].modal = setTimeout(() => {
@@ -1237,7 +954,6 @@ class EpisodiosDocumentalesCarousel {
                 div.addEventListener('mouseleave', () => {
                     const itemId = div.dataset.itemId;
                     if (this.hoverTimeouts[itemId]) { clearTimeout(this.hoverTimeouts[itemId].details); clearTimeout(this.hoverTimeouts[itemId].modal); delete this.hoverTimeouts[itemId]; }
-                    try { if (typeof _removePortalForItem === 'function') _removePortalForItem(div); } catch (e) {}
                     const img = div.querySelector('.episodios-series-card-image');
                     const background = div.querySelector('.detail-background');
                     const overlay = div.querySelector('.carousel-overlay');
@@ -1267,52 +983,39 @@ class EpisodiosDocumentalesCarousel {
     }
     updateProgressBar() {
         if (!this.progressBar) return;
-        const scrollEl = this._originalWrapper || this.wrapper;
-        try {
-            if (scrollEl.scrollWidth > scrollEl.clientWidth) {
-                const scrollPercentage = (scrollEl.scrollLeft / (scrollEl.scrollWidth - scrollEl.clientWidth)) * 100;
-                this.progressBar.style.width = `${scrollPercentage}%`;
-            } else { this.progressBar.style.width = '100%'; }
-        } catch (e) { this.progressBar.style.width = '100%'; }
+        if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
+            const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
+            this.progressBar.style.width = `${scrollPercentage}%`;
+        } else { this.progressBar.style.width = '100%'; }
     }
     scrollToPrevPage() { this.scrollToPage('prev'); }
     scrollToNextPage() { this.scrollToPage('next'); }
     scrollToPage(direction) {
-    if (!this.wrapper) return;
-    const scrollEl = this._originalWrapper || this.wrapper;
-    const containerWidth = (scrollEl && (scrollEl.clientWidth || (scrollEl.parentElement && scrollEl.parentElement.clientWidth))) || 0;
+        if (!this.wrapper) return;
+        const containerWidth = this.wrapper.clientWidth;
         const firstItem = this.wrapper.querySelector('.custom-carousel-item');
         if (!firstItem) return;
-        let itemWidth = Math.round(firstItem.offsetWidth || 0);
-        if (!itemWidth || itemWidth < 30) {
-            try { const rect = firstItem.getBoundingClientRect(); itemWidth = Math.max(itemWidth, Math.round(rect.width) || 0); } catch (e) {}
-        }
+        const itemRect = firstItem.getBoundingClientRect();
+        const itemWidth = Math.round(itemRect.width);
         let gap = 0;
         const secondItem = firstItem.nextElementSibling;
-        if (secondItem) {
-            try { gap = Math.round(secondItem.offsetLeft - (firstItem.offsetLeft + firstItem.offsetWidth)); if (isNaN(gap) || gap < 0) gap = 0; } catch (e) { gap = 0; }
-        }
-        if (!itemWidth) itemWidth = 240;
+        if (secondItem) { const secondRect = secondItem.getBoundingClientRect(); gap = Math.round(secondRect.left - (itemRect.left + itemRect.width)); if (isNaN(gap) || gap < 0) gap = 0; }
         const stepSize = itemWidth + gap;
-        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize) || 1);
-    const currentIndex = Math.floor((((this._originalWrapper || this.wrapper) && (this._originalWrapper || this.wrapper).scrollLeft) || 0) / stepSize);
+        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
+        const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
         let targetIndex;
         if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsPerViewport); else targetIndex = currentIndex + itemsPerViewport;
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
         const finalScroll = targetIndex * stepSize;
-        try { if (scrollEl && typeof scrollEl.scrollTo === 'function') scrollEl.scrollTo({ left: finalScroll, behavior: 'smooth' }); else if (scrollEl) scrollEl.scrollLeft = finalScroll; } catch (e) { if (scrollEl) scrollEl.scrollLeft = finalScroll; }
+        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
     }
 }
 class AnimesCarousel {
     constructor() {
         console.log("AnimesCarousel: Constructor iniciado");
         this.wrapper = document.getElementById('animes-carousel-wrapper');
-        if (this.wrapper) {
-            const _t = ensureCarouselTrack(this.wrapper) || this.wrapper;
-            if (_t !== this.wrapper) { this._originalWrapper = this.wrapper; this.wrapper = _t; }
-        }
         this.skeleton = document.getElementById('animes-carousel-skeleton');
         this.progressBar = null;
         this.carouselNav = document.getElementById('animes-carousel-nav');
@@ -1356,23 +1059,21 @@ class AnimesCarousel {
 
     updateProgressBar() {
         if (!this.progressBar || !this.wrapper) return;
-        const scrollEl = this._originalWrapper || this.wrapper;
         try {
-            if (scrollEl.scrollWidth > scrollEl.clientWidth) {
-                const scrollPercentage = (scrollEl.scrollLeft / (scrollEl.scrollWidth - scrollEl.clientWidth)) * 100;
+            if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
+                const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
                 this.progressBar.style.width = `${scrollPercentage}%`;
             } else {
                 this.progressBar.style.width = '100%';
             }
-        } catch (e) { this.progressBar.style.width = '100%'; }
+        } catch (e) {}
     }
 
     handleScroll() {
         // Update visual progress and trigger lazy loading when near the end
         this.updateProgressBar();
         try {
-            const scrollEl = this._originalWrapper || this.wrapper;
-            if ((scrollEl.scrollLeft || 0) + scrollEl.clientWidth >= (scrollEl.scrollWidth || 0) - 200) {
+            if (this.wrapper.scrollLeft + this.wrapper.clientWidth >= this.wrapper.scrollWidth - 200) {
                 this.renderItems();
             }
         } catch (e) {}
@@ -1382,8 +1083,7 @@ class AnimesCarousel {
         const itemWidth = 194;
         const gap = 4;
         const calculate = () => {
-            const scrollEl = this._originalWrapper || this.wrapper;
-            const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
+            const containerWidth = this.wrapper.clientWidth;
             if (containerWidth > 0) {
                 const itemsThatFit = Math.floor(containerWidth / (itemWidth + gap));
                 this.itemsPerPage = Math.max(1, itemsThatFit);
@@ -1522,8 +1222,7 @@ class AnimesCarousel {
         }
     }
     async renderItems() {
-        const scrollEl = this._originalWrapper || this.wrapper;
-        const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
+        const containerWidth = this.wrapper.clientWidth;
         const itemWidth = 194;
         const gap = 4;
         const itemsThatFit = containerWidth > 0 ? Math.floor(containerWidth / (itemWidth + gap)) : 5;
@@ -1575,7 +1274,6 @@ class AnimesCarousel {
                             const overlay = div.querySelector('.carousel-overlay');
                             background.style.display = 'block';
                             background.style.opacity = '1';
-                            try { if (typeof _createPortalForItem === 'function') _createPortalForItem(div); } catch (e) {}
                             overlay.style.opacity = '1';
                             overlay.style.transform = 'translateY(0)';
                             this.hoverTimeouts[itemId].modal = setTimeout(() => {
@@ -1596,7 +1294,6 @@ class AnimesCarousel {
                         clearTimeout(this.hoverTimeouts[itemId].modal);
                         delete this.hoverTimeouts[itemId];
                     }
-                    try { if (typeof _removePortalForItem === 'function') _removePortalForItem(div); } catch (e) {}
                     const poster = div.querySelector('.poster-image');
                     const background = div.querySelector('.detail-background');
                     const overlay = div.querySelector('.carousel-overlay');
@@ -1628,35 +1325,28 @@ class AnimesCarousel {
         this.index = end;
         // Si hay barra de progreso, actualizarla
         if (this.progressBar) {
-            const scrollEl = this._originalWrapper || this.wrapper;
-            try {
-                if (scrollEl.scrollWidth > scrollEl.clientWidth) {
-                    const scrollPercentage = (scrollEl.scrollLeft / (scrollEl.scrollWidth - scrollEl.clientWidth)) * 100;
-                    this.progressBar.style.width = `${scrollPercentage}%`;
-                } else {
-                    this.progressBar.style.width = '100%';
-                }
-            } catch (e) { this.progressBar.style.width = '100%'; }
+            if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
+                const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
+                this.progressBar.style.width = `${scrollPercentage}%`;
+            } else {
+                this.progressBar.style.width = '100%';
+            }
         }
     }
     scrollToPrevPage() {
         if (!this.wrapper) return;
-        const scrollEl = this._originalWrapper || this.wrapper;
-        try { const scrollAmount = scrollEl.clientWidth || 0; if (typeof scrollEl.scrollBy === 'function') scrollEl.scrollBy({ left: -scrollAmount, behavior: 'smooth' }); else scrollEl.scrollLeft = Math.max(0, (scrollEl.scrollLeft || 0) - scrollAmount); } catch (e) {}
+        const scrollAmount = this.wrapper.clientWidth;
+        this.wrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
     }
     scrollToNextPage() {
         if (!this.wrapper) return;
-        const scrollEl = this._originalWrapper || this.wrapper;
-        try { const scrollAmount = scrollEl.clientWidth || 0; if (typeof scrollEl.scrollBy === 'function') scrollEl.scrollBy({ left: scrollAmount, behavior: 'smooth' }); else scrollEl.scrollLeft = (scrollEl.scrollLeft || 0) + scrollAmount; } catch (e) {}
+        const scrollAmount = this.wrapper.clientWidth;
+        this.wrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
 }
 class Carousel {
     constructor() {
         this.wrapper = document.getElementById('carousel-wrapper');
-        if (this.wrapper) {
-            const _t = ensureCarouselTrack(this.wrapper) || this.wrapper;
-            if (_t !== this.wrapper) { this._originalWrapper = this.wrapper; this.wrapper = _t; }
-        }
         this.skeleton = document.getElementById('carousel-skeleton');
         this.progressBar = document.querySelector('.carousel-progress-bar');
         this.carouselNav = document.getElementById('carousel-nav');
@@ -1709,8 +1399,7 @@ class Carousel {
         const gap = 4;
 
         const calculate = () => {
-            const scrollEl = this._originalWrapper || this.wrapper;
-            const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
+            const containerWidth = this.wrapper.clientWidth;
             if (containerWidth > 0) {
                 // Calcular cuántos items caben en la pantalla
                 const itemsThatFit = Math.floor(containerWidth / (itemWidth + gap));
@@ -1858,8 +1547,7 @@ class Carousel {
 
     async renderItems() {
         // Calcular cuántos items caben en la pantalla
-        const scrollEl = this._originalWrapper || this.wrapper;
-        const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
+        const containerWidth = this.wrapper.clientWidth;
         const itemWidth = 194;
         const gap = 4;
         const itemsThatFit = containerWidth > 0 ? Math.floor(containerWidth / (itemWidth + gap)) : 5;
@@ -1995,12 +1683,11 @@ class Carousel {
         if (!this.wrapper) return;
         const itemWidth = 194;
         const gap = 4;
-        const scrollEl = this._originalWrapper || this.wrapper;
-        const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
+        const containerWidth = this.wrapper.clientWidth;
         const itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
         const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
 
-        let currentScroll = (scrollEl && scrollEl.scrollLeft) || 0;
+        let currentScroll = this.wrapper.scrollLeft;
         let targetScroll;
         if (direction === 'prev') {
             targetScroll = Math.max(0, currentScroll - actualScrollAmount);
@@ -2010,9 +1697,12 @@ class Carousel {
         // Alinear el scroll para que el item de la izquierda quede completo
         const alignedScroll = Math.round(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
         // Evitar sobrepasar los límites
-        const maxScroll = (scrollEl && (scrollEl.scrollWidth - scrollEl.clientWidth)) || 0;
+        const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
         const finalScroll = Math.max(0, Math.min(alignedScroll, maxScroll));
-        try { if (scrollEl && typeof scrollEl.scrollTo === 'function') scrollEl.scrollTo({ left: finalScroll, behavior: 'auto' }); else if (scrollEl) scrollEl.scrollLeft = finalScroll; } catch (e) { if (scrollEl) scrollEl.scrollLeft = finalScroll; }
+        this.wrapper.scrollTo({
+            left: finalScroll,
+            behavior: 'auto'
+        });
     }
 
     // Método para contar elementos realmente visibles
@@ -2039,21 +1729,18 @@ class Carousel {
 
     updateProgressBar() {
         if (!this.progressBar) return;
-        const scrollEl = this._originalWrapper || this.wrapper;
-        try {
-            if (scrollEl.scrollWidth > scrollEl.clientWidth) {
-                const scrollPercentage = (scrollEl.scrollLeft / (scrollEl.scrollWidth - scrollEl.clientWidth)) * 100;
-                this.progressBar.style.width = `${scrollPercentage}%`;
-            } else {
-                this.progressBar.style.width = '100%';
-            }
-        } catch (e) { this.progressBar.style.width = '100%'; }
+        
+        if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
+            const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
+            this.progressBar.style.width = `${scrollPercentage}%`;
+        } else {
+            this.progressBar.style.width = '100%';
+        }
     }
 
     handleScroll() {
         this.updateProgressBar();
-        const scrollEl = this._originalWrapper || this.wrapper;
-        if ((scrollEl.scrollLeft || 0) + scrollEl.clientWidth >= (scrollEl.scrollWidth || 0) - 200) {
+        if (this.wrapper.scrollLeft + this.wrapper.clientWidth >= this.wrapper.scrollWidth - 200) {
             this.renderItems();
         }
     }
@@ -2064,10 +1751,6 @@ class SeriesCarousel {
     constructor() {
         console.log("SeriesCarousel: Constructor iniciado");
         this.wrapper = document.getElementById('series-carousel-wrapper');
-        if (this.wrapper) {
-            const _t = ensureCarouselTrack(this.wrapper) || this.wrapper;
-            if (_t !== this.wrapper) { this._originalWrapper = this.wrapper; this.wrapper = _t; }
-        }
         this.skeleton = document.getElementById('series-carousel-skeleton');
         this.progressBar = null; // Se configurará después de verificar que wrapper existe
         this.carouselNav = document.getElementById('series-carousel-nav');
@@ -2142,8 +1825,7 @@ class SeriesCarousel {
         const gap = 4;
 
         const calculate = () => {
-            const scrollEl = this._originalWrapper || this.wrapper;
-            const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
+            const containerWidth = this.wrapper.clientWidth;
             if (containerWidth > 0) {
                 // Calcular cuántos items caben en la pantalla
                 const itemsThatFit = Math.floor(containerWidth / (itemWidth + gap));
@@ -2341,9 +2023,8 @@ class SeriesCarousel {
         console.log("SeriesCarousel: seriesData.length:", this.seriesData.length);
         console.log("SeriesCarousel: index:", this.index);
         
-    // Calcular cuántos items caben en la pantalla
-    const scrollEl = this._originalWrapper || this.wrapper;
-    const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
+        // Calcular cuántos items caben en la pantalla
+        const containerWidth = this.wrapper.clientWidth;
         const itemWidth = 194;
         const gap = 4;
         const itemsThatFit = containerWidth > 0 ? Math.floor(containerWidth / (itemWidth + gap)) : 5;
@@ -2482,8 +2163,7 @@ class SeriesCarousel {
         
         const itemWidth = 194;
         const gap = 4;
-        const scrollEl = this._originalWrapper || this.wrapper;
-        const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
+        const containerWidth = this.wrapper.clientWidth;
         
         // Calcular cuántos items caben en la pantalla
         const itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
@@ -2496,7 +2176,7 @@ class SeriesCarousel {
         
         if (direction === 'prev') {
             // Calcular la posición anterior
-            const currentScroll = (scrollEl && scrollEl.scrollLeft) || 0;
+            const currentScroll = this.wrapper.scrollLeft;
             const targetScroll = Math.max(0, currentScroll - actualScrollAmount);
             
             // Alinear a los límites de los items para que el de la izquierda esté completo
@@ -2504,11 +2184,14 @@ class SeriesCarousel {
             
             console.log(`Carousel: Prev - Current: ${currentScroll}, Target: ${targetScroll}, Aligned: ${alignedScroll}`);
             
-            try { if (scrollEl && typeof scrollEl.scrollTo === 'function') scrollEl.scrollTo({ left: alignedScroll, behavior: 'auto' }); else if (scrollEl) scrollEl.scrollLeft = alignedScroll; } catch (e) {}
+            this.wrapper.scrollTo({
+                left: alignedScroll,
+                behavior: 'auto'
+            });
         } else {
             // Calcular la posición siguiente
-            const currentScroll = (scrollEl && scrollEl.scrollLeft) || 0;
-            const maxScroll = (scrollEl && (scrollEl.scrollWidth - scrollEl.clientWidth)) || 0;
+            const currentScroll = this.wrapper.scrollLeft;
+            const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
             
             // Calcular cuántos items completos caben en la pantalla
             // Usar un valor que funcione bien para la mayoría de pantallas
@@ -2526,7 +2209,11 @@ class SeriesCarousel {
             }
             
             console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}`);
-            try { if (scrollEl && typeof scrollEl.scrollTo === 'function') scrollEl.scrollTo({ left: targetScroll, behavior: 'auto' }); else if (scrollEl) scrollEl.scrollLeft = targetScroll; } catch (e) {}
+            
+            this.wrapper.scrollTo({
+                left: targetScroll,
+                behavior: 'auto'
+            });
         }
     }
 
@@ -2554,21 +2241,18 @@ class SeriesCarousel {
 
     updateProgressBar() {
         if (!this.progressBar) return;
-        const scrollEl = this._originalWrapper || this.wrapper;
-        try {
-            if (scrollEl.scrollWidth > scrollEl.clientWidth) {
-                const scrollPercentage = (scrollEl.scrollLeft / (scrollEl.scrollWidth - scrollEl.clientWidth)) * 100;
-                this.progressBar.style.width = `${scrollPercentage}%`;
-            } else {
-                this.progressBar.style.width = '100%';
-            }
-        } catch (e) { this.progressBar.style.width = '100%'; }
+        
+        if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
+            const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
+            this.progressBar.style.width = `${scrollPercentage}%`;
+        } else {
+            this.progressBar.style.width = '100%';
+        }
     }
 
     handleScroll() {
         this.updateProgressBar();
-        const scrollEl = this._originalWrapper || this.wrapper;
-        if ((scrollEl.scrollLeft || 0) + scrollEl.clientWidth >= (scrollEl.scrollWidth || 0) - 200) {
+        if (this.wrapper.scrollLeft + this.wrapper.clientWidth >= this.wrapper.scrollWidth - 200) {
             this.renderItems();
         }
     }
@@ -2579,10 +2263,6 @@ class DocumentalesCarousel {
     constructor() {
         console.log("DocumentalesCarousel: Constructor iniciado");
         this.wrapper = document.getElementById('documentales-carousel-wrapper');
-        if (this.wrapper) {
-            const _t = ensureCarouselTrack(this.wrapper) || this.wrapper;
-            if (_t !== this.wrapper) { this._originalWrapper = this.wrapper; this.wrapper = _t; }
-        }
         this.skeleton = document.getElementById('documentales-carousel-skeleton');
         this.progressBar = null;
         this.carouselNav = document.getElementById('documentales-carousel-nav');
@@ -2626,23 +2306,21 @@ class DocumentalesCarousel {
 
     updateProgressBar() {
         if (!this.progressBar || !this.wrapper) return;
-        const scrollEl = this._originalWrapper || this.wrapper;
         try {
-            if (scrollEl.scrollWidth > scrollEl.clientWidth) {
-                const scrollPercentage = (scrollEl.scrollLeft / (scrollEl.scrollWidth - scrollEl.clientWidth)) * 100;
+            if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
+                const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
                 this.progressBar.style.width = `${scrollPercentage}%`;
             } else {
                 this.progressBar.style.width = '100%';
             }
-        } catch (e) { this.progressBar.style.width = '100%'; }
+        } catch (e) {}
     }
 
     handleScroll() {
         // Called on wrapper scroll
         this.updateProgressBar();
         try {
-            const scrollEl = this._originalWrapper || this.wrapper;
-            if ((scrollEl.scrollLeft || 0) + scrollEl.clientWidth >= (scrollEl.scrollWidth || 0) - 200) {
+            if (this.wrapper.scrollLeft + this.wrapper.clientWidth >= this.wrapper.scrollWidth - 200) {
                 this.renderItems();
             }
         } catch (e) {}
@@ -2652,8 +2330,7 @@ class DocumentalesCarousel {
         const itemWidth = 194;
         const gap = 4;
         const calculate = () => {
-            const scrollEl = this._originalWrapper || this.wrapper;
-            const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
+            const containerWidth = this.wrapper.clientWidth;
             if (containerWidth > 0) {
                 const itemsThatFit = Math.floor(containerWidth / (itemWidth + gap));
                 this.itemsPerPage = Math.max(1, itemsThatFit);
@@ -2799,8 +2476,7 @@ class DocumentalesCarousel {
     }
 
     async renderItems() {
-        const scrollEl = this._originalWrapper || this.wrapper;
-        const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
+        const containerWidth = this.wrapper.clientWidth;
         const itemWidth = 194;
         const gap = 4;
         const itemsThatFit = containerWidth > 0 ? Math.floor(containerWidth / (itemWidth + gap)) : 5;
@@ -2893,42 +2569,29 @@ class DocumentalesCarousel {
                 }
                 window.detailsModal.show(item, div);
             });
-            (function(){
-                const _target = ensureCarouselTrack(this.wrapper) || this.wrapper;
-                if (_target !== this.wrapper) {
-                    this.wrapper = _target;
-                    if (!this._carouselTrackListenerAttached) {
-                        this.wrapper.addEventListener('scroll', () => { if (this.updateProgressBar) this.updateProgressBar(); });
-                        this._carouselTrackListenerAttached = true;
-                    }
-                }
-            }).call(this);
             this.wrapper.appendChild(div);
         }
         this.index = end;
         // Si hay barra de progreso, actualizarla
         if (this.progressBar) {
-            const scrollEl = this._originalWrapper || this.wrapper;
-            try {
-                if (scrollEl.scrollWidth > scrollEl.clientWidth) {
-                    const scrollPercentage = (scrollEl.scrollLeft / (scrollEl.scrollWidth - scrollEl.clientWidth)) * 100;
-                    this.progressBar.style.width = `${scrollPercentage}%`;
-                } else {
-                    this.progressBar.style.width = '100%';
-                }
-            } catch (e) { this.progressBar.style.width = '100%'; }
+            if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
+                const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
+                this.progressBar.style.width = `${scrollPercentage}%`;
+            } else {
+                this.progressBar.style.width = '100%';
+            }
         }
     }
 
     scrollToPrevPage() {
         if (!this.wrapper) return;
-        const scrollEl = this._originalWrapper || this.wrapper;
-        try { const scrollAmount = scrollEl.clientWidth || 0; if (typeof scrollEl.scrollBy === 'function') scrollEl.scrollBy({ left: -scrollAmount, behavior: 'smooth' }); else scrollEl.scrollLeft = Math.max(0, (scrollEl.scrollLeft || 0) - scrollAmount); } catch (e) {}
+        const scrollAmount = this.wrapper.clientWidth;
+        this.wrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
     }
     scrollToNextPage() {
         if (!this.wrapper) return;
-        const scrollEl = this._originalWrapper || this.wrapper;
-        try { const scrollAmount = scrollEl.clientWidth || 0; if (typeof scrollEl.scrollBy === 'function') scrollEl.scrollBy({ left: scrollAmount, behavior: 'smooth' }); else scrollEl.scrollLeft = (scrollEl.scrollLeft || 0) + scrollAmount; } catch (e) {}
+        const scrollAmount = this.wrapper.clientWidth;
+        this.wrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' });
     }
 }
 

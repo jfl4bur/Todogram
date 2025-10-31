@@ -765,45 +765,6 @@ button:focus {
     z-index: 2;
 }
 
-/* When a carousel wrapper requests visual overflow (JS adds .carousel-allow-overflow),
-   allow items and poster containers to overflow vertically so hover/zoom visuals can escape
-   the normal clipping. We scope this narrowly to avoid breaking other layouts. */
-.carousel-allow-overflow {
-    overflow: visible !important;
-}
-.carousel-allow-overflow .carousel-track {
-    overflow-x: auto !important; /* keep horizontal scrolling */
-    overflow-y: visible !important;
-}
-.carousel-allow-overflow .carousel-track .custom-carousel-item,
-.carousel-allow-overflow .carousel-track .poster-container {
-    overflow: visible !important;
-}
-.carousel-allow-overflow .detail-background {
-    z-index: 9999 !important; /* ensure it sits above siblings when displayed */
-}
-
-/* Portal clone used to escape any clipping/stacking context. Appended to document.body */
-.carousel-portal-detail {
-    position: fixed !important;
-    pointer-events: none !important;
-    z-index: 2147483647 !important;
-    display: block !important;
-    opacity: 1 !important;
-    will-change: left, top, width, height;
-}
-
-/* Also cover the case where a track wasn't created and items are direct children of the wrapper */
-.carousel-allow-overflow .custom-carousel-item,
-.carousel-allow-overflow .poster-container {
-    overflow: visible !important;
-}
-
-/* Ancestor class added by JS to relax clipping on the nearest overflow:hidden ancestor */
-.carousel-allow-overflow-ancestor {
-    overflow: visible !important;
-}
-
 .carousel-title {
     font-size: 1.8rem;
     font-weight: 600;
@@ -3212,7 +3173,9 @@ ease-out;
     right: 0;
     transform: translateY(-50%);
     pointer-events: none;
-    z-index: 1100;
+    /* Elevado por encima de los items escalados (hover-zoom usa z-index: 10900)
+       para evitar que los elementos desbordados intercepten los clicks de navegación */
+    z-index: 11100;
 }
 
 .carousel-nav-btn {
