@@ -783,6 +783,12 @@ button:focus {
     z-index: 9999 !important; /* ensure it sits above siblings when displayed */
 }
 
+/* Also cover the case where a track wasn't created and items are direct children of the wrapper */
+.carousel-allow-overflow .custom-carousel-item,
+.carousel-allow-overflow .poster-container {
+    overflow: visible !important;
+}
+
 /* Ancestor class added by JS to relax clipping on the nearest overflow:hidden ancestor */
 .carousel-allow-overflow-ancestor {
     overflow: visible !important;
