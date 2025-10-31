@@ -694,25 +694,10 @@ class HoverModal {
             // ensure clone starts unscaled so we can trigger the transition
             clone.classList.remove('hover-zoom');
 
-            // Decide parent for the clone: prefer modalOverlay (fixed fullscreen)
-            // so the clone doesn't move with scroll (modalOverlay is fixed).
-            let parentForClone = document.body;
-            try {
-                if (this.modalOverlay && this.modalOverlay instanceof HTMLElement) parentForClone = this.modalOverlay;
-            } catch (e) {}
-
             // inline styles to pin the clone to the same viewport position
-            if (parentForClone === document.body) {
-                clone.style.position = 'fixed';
-                clone.style.left = `${rect.left}px`;
-                clone.style.top = `${rect.top}px`;
-            } else {
-                // modalOverlay is fixed covering the viewport; position absolute inside it
-                clone.style.position = 'absolute';
-                const pRect = parentForClone.getBoundingClientRect();
-                clone.style.left = `${rect.left - pRect.left}px`;
-                clone.style.top = `${rect.top - pRect.top}px`;
-            }
+            clone.style.position = 'fixed';
+            clone.style.left = `${rect.left}px`;
+            clone.style.top = `${rect.top}px`;
             clone.style.width = `${Math.round(rect.width)}px`;
             clone.style.height = `${Math.round(rect.height)}px`;
             clone.style.margin = '0';
@@ -731,7 +716,7 @@ class HoverModal {
             } catch (e) {}
 
             // append to body and trigger the scale via class
-            try { parentForClone.appendChild(clone); } catch (e) { document.body.appendChild(clone); }
+            document.body.appendChild(clone);
             // hide original to avoid duplicate visuals but keep layout
             try { origin.style.visibility = 'hidden'; } catch (e) {}
 
@@ -740,6 +725,11 @@ class HoverModal {
             clone.classList.add('hover-zoom');
 
             this._portalEl = clone;
+            // record initial viewport-based position so we can lock the clone
+            // in place (prevent it from moving when the page/container scrolls)
+            this._portalInitial = { left: rect.left, top: rect.top };
+            // attach listeners to keep the portal fixed in viewport
+            this._attachPortalSyncListeners();
             // mark portal active so we skip origin animations
             this._portalActive = true;
         } catch (e) {
@@ -805,12 +795,42 @@ class HoverModal {
             if (this._portalEl && this._portalEl.parentElement) {
                 try { this._portalEl.parentElement.removeChild(this._portalEl); } catch (e) {}
             }
+            // detach any portal sync listeners
+            try { this._detachPortalSyncListeners(); } catch (e) {}
             this._portalEl = null;
             if (this._currentOrigin && this._currentOrigin.style) {
                 try { this._currentOrigin.style.visibility = ''; } catch (e) {}
             }
             this._portalActive = false;
             if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
+        } catch (e) {}
+    }
+
+    _attachPortalSyncListeners() {
+        try {
+            if (this._portalSyncAttached) return;
+            this._syncPortalPosition = this._syncPortalPosition.bind(this);
+            window.addEventListener('scroll', this._syncPortalPosition, true);
+            window.addEventListener('resize', this._syncPortalPosition);
+            this._portalSyncAttached = true;
+        } catch (e) {}
+    }
+
+    _detachPortalSyncListeners() {
+        try {
+            if (!this._portalSyncAttached) return;
+            window.removeEventListener('scroll', this._syncPortalPosition, true);
+            window.removeEventListener('resize', this._syncPortalPosition);
+            this._portalSyncAttached = false;
+            this._syncPortalPosition = null;
+        } catch (e) {}
+    }
+
+    _syncPortalPosition() {
+        try {
+            if (!this._portalEl || !this._portalInitial) return;
+            this._portalEl.style.left = `${this._portalInitial.left}px`;
+            this._portalEl.style.top = `${this._portalInitial.top}px`;
         } catch (e) {}
     }
 }
