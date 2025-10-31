@@ -298,7 +298,8 @@ class EpisodiosSeriesCarousel {
         const itemWidth = 246; // 16:9
         const gap = 4;
         const calculate = () => {
-            const containerWidth = this.wrapper.clientWidth;
+            const scrollEl = this._originalWrapper || this.wrapper;
+            const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
             if (containerWidth > 0) {
                 const itemsThatFit = Math.floor(containerWidth / (itemWidth + gap));
                 this.itemsPerPage = Math.max(1, itemsThatFit);
@@ -610,12 +611,15 @@ class EpisodiosSeriesCarousel {
 
     updateProgressBar() {
         if (!this.progressBar) return;
-        if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
-            const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
-            this.progressBar.style.width = `${scrollPercentage}%`;
-        } else {
-            this.progressBar.style.width = '100%';
-        }
+        const scrollEl = this._originalWrapper || this.wrapper;
+        try {
+            if (scrollEl.scrollWidth > scrollEl.clientWidth) {
+                const scrollPercentage = (scrollEl.scrollLeft / (scrollEl.scrollWidth - scrollEl.clientWidth)) * 100;
+                this.progressBar.style.width = `${scrollPercentage}%`;
+            } else {
+                this.progressBar.style.width = '100%';
+            }
+        } catch (e) { this.progressBar.style.width = '100%'; }
     }
 
     scrollToPrevPage() {
@@ -626,7 +630,8 @@ class EpisodiosSeriesCarousel {
     }
     scrollToPage(direction) {
         if (!this.wrapper) return;
-        const containerWidth = this.wrapper.clientWidth || (this.wrapper.parentElement && this.wrapper.parentElement.clientWidth) || 0;
+    const scrollEl = this._originalWrapper || this.wrapper;
+    const containerWidth = (scrollEl && (scrollEl.clientWidth || (scrollEl.parentElement && scrollEl.parentElement.clientWidth))) || 0;
 
         // Determinar tamaño del ítem de manera robusta: preferimos offsetWidth
         const firstItem = this.wrapper.querySelector('.custom-carousel-item');
@@ -657,8 +662,9 @@ class EpisodiosSeriesCarousel {
         const stepSize = itemWidth + gap;
         const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize) || 1);
 
-        // Calcular índice del primer item visible actualmente (alinear a la izquierda)
-        const currentIndex = Math.floor((this.wrapper.scrollLeft || 0) / stepSize);
+    // Calcular índice del primer item visible actualmente (alinear a la izquierda)
+    const scrollEl = this._originalWrapper || this.wrapper;
+    const currentIndex = Math.floor(((scrollEl && scrollEl.scrollLeft) || 0) / stepSize);
 
         let targetIndex;
         if (direction === 'prev') {
@@ -673,7 +679,7 @@ class EpisodiosSeriesCarousel {
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
         const finalScroll = targetIndex * stepSize;
-        try { this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' }); } catch (e) { this.wrapper.scrollLeft = finalScroll; }
+        try { if (scrollEl && typeof scrollEl.scrollTo === 'function') scrollEl.scrollTo({ left: finalScroll, behavior: 'smooth' }); else if (scrollEl) scrollEl.scrollLeft = finalScroll; } catch (e) { if (scrollEl) scrollEl.scrollLeft = finalScroll; }
     }
 
 // (Eliminados duplicados y métodos sobrantes)
@@ -755,7 +761,8 @@ class EpisodiosAnimesCarousel {
         const itemWidth = 246;
         const gap = 4;
         const calculate = () => {
-            const containerWidth = this.wrapper.clientWidth;
+            const scrollEl = this._originalWrapper || this.wrapper;
+            const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
             if (containerWidth > 0) {
                 const itemsThatFit = Math.floor(containerWidth / (itemWidth + gap));
                 this.itemsPerPage = Math.max(1, itemsThatFit);
@@ -955,18 +962,22 @@ class EpisodiosAnimesCarousel {
     }
     updateProgressBar() {
         if (!this.progressBar) return;
-        if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
-            const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
-            this.progressBar.style.width = `${scrollPercentage}%`;
-        } else {
-            this.progressBar.style.width = '100%';
-        }
+        const scrollEl = this._originalWrapper || this.wrapper;
+        try {
+            if (scrollEl.scrollWidth > scrollEl.clientWidth) {
+                const scrollPercentage = (scrollEl.scrollLeft / (scrollEl.scrollWidth - scrollEl.clientWidth)) * 100;
+                this.progressBar.style.width = `${scrollPercentage}%`;
+            } else {
+                this.progressBar.style.width = '100%';
+            }
+        } catch (e) { this.progressBar.style.width = '100%'; }
     }
     scrollToPrevPage() { this.scrollToPage('prev'); }
     scrollToNextPage() { this.scrollToPage('next'); }
     scrollToPage(direction) {
         if (!this.wrapper) return;
-        const containerWidth = this.wrapper.clientWidth || (this.wrapper.parentElement && this.wrapper.parentElement.clientWidth) || 0;
+    const scrollEl = this._originalWrapper || this.wrapper;
+    const containerWidth = (scrollEl && (scrollEl.clientWidth || (scrollEl.parentElement && scrollEl.parentElement.clientWidth))) || 0;
 
         const firstItem = this.wrapper.querySelector('.custom-carousel-item');
         if (!firstItem) return;
@@ -982,14 +993,15 @@ class EpisodiosAnimesCarousel {
         if (!itemWidth) itemWidth = 240;
         const stepSize = itemWidth + gap;
         const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize) || 1);
-        const currentIndex = Math.floor((this.wrapper.scrollLeft || 0) / stepSize);
+    const scrollEl = this._originalWrapper || this.wrapper;
+    const currentIndex = Math.floor(((scrollEl && scrollEl.scrollLeft) || 0) / stepSize);
         let targetIndex;
         if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsPerViewport); else targetIndex = currentIndex + itemsPerViewport;
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
         const finalScroll = targetIndex * stepSize;
-        try { this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' }); } catch (e) { this.wrapper.scrollLeft = finalScroll; }
+        try { if (scrollEl && typeof scrollEl.scrollTo === 'function') scrollEl.scrollTo({ left: finalScroll, behavior: 'smooth' }); else if (scrollEl) scrollEl.scrollLeft = finalScroll; } catch (e) { if (scrollEl) scrollEl.scrollLeft = finalScroll; }
     }
 }
 
@@ -1067,7 +1079,8 @@ class EpisodiosDocumentalesCarousel {
         const itemWidth = 246;
         const gap = 4;
         const calculate = () => {
-            const containerWidth = this.wrapper.clientWidth;
+            const scrollEl = this._originalWrapper || this.wrapper;
+            const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
             if (containerWidth > 0) {
                 const itemsThatFit = Math.floor(containerWidth / (itemWidth + gap));
                 this.itemsPerPage = Math.max(1, itemsThatFit);
@@ -1253,16 +1266,20 @@ class EpisodiosDocumentalesCarousel {
     }
     updateProgressBar() {
         if (!this.progressBar) return;
-        if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
-            const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
-            this.progressBar.style.width = `${scrollPercentage}%`;
-        } else { this.progressBar.style.width = '100%'; }
+        const scrollEl = this._originalWrapper || this.wrapper;
+        try {
+            if (scrollEl.scrollWidth > scrollEl.clientWidth) {
+                const scrollPercentage = (scrollEl.scrollLeft / (scrollEl.scrollWidth - scrollEl.clientWidth)) * 100;
+                this.progressBar.style.width = `${scrollPercentage}%`;
+            } else { this.progressBar.style.width = '100%'; }
+        } catch (e) { this.progressBar.style.width = '100%'; }
     }
     scrollToPrevPage() { this.scrollToPage('prev'); }
     scrollToNextPage() { this.scrollToPage('next'); }
     scrollToPage(direction) {
-        if (!this.wrapper) return;
-        const containerWidth = this.wrapper.clientWidth || (this.wrapper.parentElement && this.wrapper.parentElement.clientWidth) || 0;
+    if (!this.wrapper) return;
+    const scrollEl = this._originalWrapper || this.wrapper;
+    const containerWidth = (scrollEl && (scrollEl.clientWidth || (scrollEl.parentElement && scrollEl.parentElement.clientWidth))) || 0;
         const firstItem = this.wrapper.querySelector('.custom-carousel-item');
         if (!firstItem) return;
         let itemWidth = Math.round(firstItem.offsetWidth || 0);
@@ -1277,14 +1294,15 @@ class EpisodiosDocumentalesCarousel {
         if (!itemWidth) itemWidth = 240;
         const stepSize = itemWidth + gap;
         const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize) || 1);
-        const currentIndex = Math.floor((this.wrapper.scrollLeft || 0) / stepSize);
+    const scrollEl = this._originalWrapper || this.wrapper;
+    const currentIndex = Math.floor(((scrollEl && scrollEl.scrollLeft) || 0) / stepSize);
         let targetIndex;
         if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsPerViewport); else targetIndex = currentIndex + itemsPerViewport;
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
         const finalScroll = targetIndex * stepSize;
-        try { this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' }); } catch (e) { this.wrapper.scrollLeft = finalScroll; }
+        try { if (scrollEl && typeof scrollEl.scrollTo === 'function') scrollEl.scrollTo({ left: finalScroll, behavior: 'smooth' }); else if (scrollEl) scrollEl.scrollLeft = finalScroll; } catch (e) { if (scrollEl) scrollEl.scrollLeft = finalScroll; }
     }
 }
 class AnimesCarousel {
@@ -1338,21 +1356,23 @@ class AnimesCarousel {
 
     updateProgressBar() {
         if (!this.progressBar || !this.wrapper) return;
+        const scrollEl = this._originalWrapper || this.wrapper;
         try {
-            if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
-                const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
+            if (scrollEl.scrollWidth > scrollEl.clientWidth) {
+                const scrollPercentage = (scrollEl.scrollLeft / (scrollEl.scrollWidth - scrollEl.clientWidth)) * 100;
                 this.progressBar.style.width = `${scrollPercentage}%`;
             } else {
                 this.progressBar.style.width = '100%';
             }
-        } catch (e) {}
+        } catch (e) { this.progressBar.style.width = '100%'; }
     }
 
     handleScroll() {
         // Update visual progress and trigger lazy loading when near the end
         this.updateProgressBar();
         try {
-            if (this.wrapper.scrollLeft + this.wrapper.clientWidth >= this.wrapper.scrollWidth - 200) {
+            const scrollEl = this._originalWrapper || this.wrapper;
+            if ((scrollEl.scrollLeft || 0) + scrollEl.clientWidth >= (scrollEl.scrollWidth || 0) - 200) {
                 this.renderItems();
             }
         } catch (e) {}
@@ -1362,7 +1382,8 @@ class AnimesCarousel {
         const itemWidth = 194;
         const gap = 4;
         const calculate = () => {
-            const containerWidth = this.wrapper.clientWidth;
+            const scrollEl = this._originalWrapper || this.wrapper;
+            const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
             if (containerWidth > 0) {
                 const itemsThatFit = Math.floor(containerWidth / (itemWidth + gap));
                 this.itemsPerPage = Math.max(1, itemsThatFit);
@@ -1501,7 +1522,8 @@ class AnimesCarousel {
         }
     }
     async renderItems() {
-        const containerWidth = this.wrapper.clientWidth;
+        const scrollEl = this._originalWrapper || this.wrapper;
+        const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
         const itemWidth = 194;
         const gap = 4;
         const itemsThatFit = containerWidth > 0 ? Math.floor(containerWidth / (itemWidth + gap)) : 5;
@@ -1606,23 +1628,26 @@ class AnimesCarousel {
         this.index = end;
         // Si hay barra de progreso, actualizarla
         if (this.progressBar) {
-            if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
-                const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
-                this.progressBar.style.width = `${scrollPercentage}%`;
-            } else {
-                this.progressBar.style.width = '100%';
-            }
+            const scrollEl = this._originalWrapper || this.wrapper;
+            try {
+                if (scrollEl.scrollWidth > scrollEl.clientWidth) {
+                    const scrollPercentage = (scrollEl.scrollLeft / (scrollEl.scrollWidth - scrollEl.clientWidth)) * 100;
+                    this.progressBar.style.width = `${scrollPercentage}%`;
+                } else {
+                    this.progressBar.style.width = '100%';
+                }
+            } catch (e) { this.progressBar.style.width = '100%'; }
         }
     }
     scrollToPrevPage() {
         if (!this.wrapper) return;
-        const scrollAmount = this.wrapper.clientWidth;
-        this.wrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        const scrollEl = this._originalWrapper || this.wrapper;
+        try { const scrollAmount = scrollEl.clientWidth || 0; if (typeof scrollEl.scrollBy === 'function') scrollEl.scrollBy({ left: -scrollAmount, behavior: 'smooth' }); else scrollEl.scrollLeft = Math.max(0, (scrollEl.scrollLeft || 0) - scrollAmount); } catch (e) {}
     }
     scrollToNextPage() {
         if (!this.wrapper) return;
-        const scrollAmount = this.wrapper.clientWidth;
-        this.wrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        const scrollEl = this._originalWrapper || this.wrapper;
+        try { const scrollAmount = scrollEl.clientWidth || 0; if (typeof scrollEl.scrollBy === 'function') scrollEl.scrollBy({ left: scrollAmount, behavior: 'smooth' }); else scrollEl.scrollLeft = (scrollEl.scrollLeft || 0) + scrollAmount; } catch (e) {}
     }
 }
 class Carousel {
@@ -1684,7 +1709,8 @@ class Carousel {
         const gap = 4;
 
         const calculate = () => {
-            const containerWidth = this.wrapper.clientWidth;
+            const scrollEl = this._originalWrapper || this.wrapper;
+            const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
             if (containerWidth > 0) {
                 // Calcular cuántos items caben en la pantalla
                 const itemsThatFit = Math.floor(containerWidth / (itemWidth + gap));
@@ -1832,7 +1858,8 @@ class Carousel {
 
     async renderItems() {
         // Calcular cuántos items caben en la pantalla
-        const containerWidth = this.wrapper.clientWidth;
+        const scrollEl = this._originalWrapper || this.wrapper;
+        const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
         const itemWidth = 194;
         const gap = 4;
         const itemsThatFit = containerWidth > 0 ? Math.floor(containerWidth / (itemWidth + gap)) : 5;
@@ -1968,11 +1995,12 @@ class Carousel {
         if (!this.wrapper) return;
         const itemWidth = 194;
         const gap = 4;
-        const containerWidth = this.wrapper.clientWidth;
+        const scrollEl = this._originalWrapper || this.wrapper;
+        const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
         const itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
         const actualScrollAmount = itemsPerViewport * (itemWidth + gap);
 
-        let currentScroll = this.wrapper.scrollLeft;
+        let currentScroll = (scrollEl && scrollEl.scrollLeft) || 0;
         let targetScroll;
         if (direction === 'prev') {
             targetScroll = Math.max(0, currentScroll - actualScrollAmount);
@@ -1982,12 +2010,9 @@ class Carousel {
         // Alinear el scroll para que el item de la izquierda quede completo
         const alignedScroll = Math.round(targetScroll / (itemWidth + gap)) * (itemWidth + gap);
         // Evitar sobrepasar los límites
-        const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
+        const maxScroll = (scrollEl && (scrollEl.scrollWidth - scrollEl.clientWidth)) || 0;
         const finalScroll = Math.max(0, Math.min(alignedScroll, maxScroll));
-        this.wrapper.scrollTo({
-            left: finalScroll,
-            behavior: 'auto'
-        });
+        try { if (scrollEl && typeof scrollEl.scrollTo === 'function') scrollEl.scrollTo({ left: finalScroll, behavior: 'auto' }); else if (scrollEl) scrollEl.scrollLeft = finalScroll; } catch (e) { if (scrollEl) scrollEl.scrollLeft = finalScroll; }
     }
 
     // Método para contar elementos realmente visibles
@@ -2014,18 +2039,21 @@ class Carousel {
 
     updateProgressBar() {
         if (!this.progressBar) return;
-        
-        if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
-            const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
-            this.progressBar.style.width = `${scrollPercentage}%`;
-        } else {
-            this.progressBar.style.width = '100%';
-        }
+        const scrollEl = this._originalWrapper || this.wrapper;
+        try {
+            if (scrollEl.scrollWidth > scrollEl.clientWidth) {
+                const scrollPercentage = (scrollEl.scrollLeft / (scrollEl.scrollWidth - scrollEl.clientWidth)) * 100;
+                this.progressBar.style.width = `${scrollPercentage}%`;
+            } else {
+                this.progressBar.style.width = '100%';
+            }
+        } catch (e) { this.progressBar.style.width = '100%'; }
     }
 
     handleScroll() {
         this.updateProgressBar();
-        if (this.wrapper.scrollLeft + this.wrapper.clientWidth >= this.wrapper.scrollWidth - 200) {
+        const scrollEl = this._originalWrapper || this.wrapper;
+        if ((scrollEl.scrollLeft || 0) + scrollEl.clientWidth >= (scrollEl.scrollWidth || 0) - 200) {
             this.renderItems();
         }
     }
@@ -2114,7 +2142,8 @@ class SeriesCarousel {
         const gap = 4;
 
         const calculate = () => {
-            const containerWidth = this.wrapper.clientWidth;
+            const scrollEl = this._originalWrapper || this.wrapper;
+            const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
             if (containerWidth > 0) {
                 // Calcular cuántos items caben en la pantalla
                 const itemsThatFit = Math.floor(containerWidth / (itemWidth + gap));
@@ -2312,8 +2341,9 @@ class SeriesCarousel {
         console.log("SeriesCarousel: seriesData.length:", this.seriesData.length);
         console.log("SeriesCarousel: index:", this.index);
         
-        // Calcular cuántos items caben en la pantalla
-        const containerWidth = this.wrapper.clientWidth;
+    // Calcular cuántos items caben en la pantalla
+    const scrollEl = this._originalWrapper || this.wrapper;
+    const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
         const itemWidth = 194;
         const gap = 4;
         const itemsThatFit = containerWidth > 0 ? Math.floor(containerWidth / (itemWidth + gap)) : 5;
@@ -2452,7 +2482,8 @@ class SeriesCarousel {
         
         const itemWidth = 194;
         const gap = 4;
-        const containerWidth = this.wrapper.clientWidth;
+        const scrollEl = this._originalWrapper || this.wrapper;
+        const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
         
         // Calcular cuántos items caben en la pantalla
         const itemsPerViewport = Math.floor(containerWidth / (itemWidth + gap));
@@ -2465,7 +2496,7 @@ class SeriesCarousel {
         
         if (direction === 'prev') {
             // Calcular la posición anterior
-            const currentScroll = this.wrapper.scrollLeft;
+            const currentScroll = (scrollEl && scrollEl.scrollLeft) || 0;
             const targetScroll = Math.max(0, currentScroll - actualScrollAmount);
             
             // Alinear a los límites de los items para que el de la izquierda esté completo
@@ -2473,14 +2504,11 @@ class SeriesCarousel {
             
             console.log(`Carousel: Prev - Current: ${currentScroll}, Target: ${targetScroll}, Aligned: ${alignedScroll}`);
             
-            this.wrapper.scrollTo({
-                left: alignedScroll,
-                behavior: 'auto'
-            });
+            try { if (scrollEl && typeof scrollEl.scrollTo === 'function') scrollEl.scrollTo({ left: alignedScroll, behavior: 'auto' }); else if (scrollEl) scrollEl.scrollLeft = alignedScroll; } catch (e) {}
         } else {
             // Calcular la posición siguiente
-            const currentScroll = this.wrapper.scrollLeft;
-            const maxScroll = this.wrapper.scrollWidth - this.wrapper.clientWidth;
+            const currentScroll = (scrollEl && scrollEl.scrollLeft) || 0;
+            const maxScroll = (scrollEl && (scrollEl.scrollWidth - scrollEl.clientWidth)) || 0;
             
             // Calcular cuántos items completos caben en la pantalla
             // Usar un valor que funcione bien para la mayoría de pantallas
@@ -2498,11 +2526,7 @@ class SeriesCarousel {
             }
             
             console.log(`Carousel: Next - Current: ${currentScroll}, Items per viewport: ${itemsPerViewport}, Target: ${targetScroll}`);
-            
-            this.wrapper.scrollTo({
-                left: targetScroll,
-                behavior: 'auto'
-            });
+            try { if (scrollEl && typeof scrollEl.scrollTo === 'function') scrollEl.scrollTo({ left: targetScroll, behavior: 'auto' }); else if (scrollEl) scrollEl.scrollLeft = targetScroll; } catch (e) {}
         }
     }
 
@@ -2530,18 +2554,21 @@ class SeriesCarousel {
 
     updateProgressBar() {
         if (!this.progressBar) return;
-        
-        if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
-            const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
-            this.progressBar.style.width = `${scrollPercentage}%`;
-        } else {
-            this.progressBar.style.width = '100%';
-        }
+        const scrollEl = this._originalWrapper || this.wrapper;
+        try {
+            if (scrollEl.scrollWidth > scrollEl.clientWidth) {
+                const scrollPercentage = (scrollEl.scrollLeft / (scrollEl.scrollWidth - scrollEl.clientWidth)) * 100;
+                this.progressBar.style.width = `${scrollPercentage}%`;
+            } else {
+                this.progressBar.style.width = '100%';
+            }
+        } catch (e) { this.progressBar.style.width = '100%'; }
     }
 
     handleScroll() {
         this.updateProgressBar();
-        if (this.wrapper.scrollLeft + this.wrapper.clientWidth >= this.wrapper.scrollWidth - 200) {
+        const scrollEl = this._originalWrapper || this.wrapper;
+        if ((scrollEl.scrollLeft || 0) + scrollEl.clientWidth >= (scrollEl.scrollWidth || 0) - 200) {
             this.renderItems();
         }
     }
@@ -2599,21 +2626,23 @@ class DocumentalesCarousel {
 
     updateProgressBar() {
         if (!this.progressBar || !this.wrapper) return;
+        const scrollEl = this._originalWrapper || this.wrapper;
         try {
-            if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
-                const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
+            if (scrollEl.scrollWidth > scrollEl.clientWidth) {
+                const scrollPercentage = (scrollEl.scrollLeft / (scrollEl.scrollWidth - scrollEl.clientWidth)) * 100;
                 this.progressBar.style.width = `${scrollPercentage}%`;
             } else {
                 this.progressBar.style.width = '100%';
             }
-        } catch (e) {}
+        } catch (e) { this.progressBar.style.width = '100%'; }
     }
 
     handleScroll() {
         // Called on wrapper scroll
         this.updateProgressBar();
         try {
-            if (this.wrapper.scrollLeft + this.wrapper.clientWidth >= this.wrapper.scrollWidth - 200) {
+            const scrollEl = this._originalWrapper || this.wrapper;
+            if ((scrollEl.scrollLeft || 0) + scrollEl.clientWidth >= (scrollEl.scrollWidth || 0) - 200) {
                 this.renderItems();
             }
         } catch (e) {}
@@ -2623,7 +2652,8 @@ class DocumentalesCarousel {
         const itemWidth = 194;
         const gap = 4;
         const calculate = () => {
-            const containerWidth = this.wrapper.clientWidth;
+            const scrollEl = this._originalWrapper || this.wrapper;
+            const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
             if (containerWidth > 0) {
                 const itemsThatFit = Math.floor(containerWidth / (itemWidth + gap));
                 this.itemsPerPage = Math.max(1, itemsThatFit);
@@ -2769,7 +2799,8 @@ class DocumentalesCarousel {
     }
 
     async renderItems() {
-        const containerWidth = this.wrapper.clientWidth;
+        const scrollEl = this._originalWrapper || this.wrapper;
+        const containerWidth = (scrollEl && scrollEl.clientWidth) || 0;
         const itemWidth = 194;
         const gap = 4;
         const itemsThatFit = containerWidth > 0 ? Math.floor(containerWidth / (itemWidth + gap)) : 5;
@@ -2877,24 +2908,27 @@ class DocumentalesCarousel {
         this.index = end;
         // Si hay barra de progreso, actualizarla
         if (this.progressBar) {
-            if (this.wrapper.scrollWidth > this.wrapper.clientWidth) {
-                const scrollPercentage = (this.wrapper.scrollLeft / (this.wrapper.scrollWidth - this.wrapper.clientWidth)) * 100;
-                this.progressBar.style.width = `${scrollPercentage}%`;
-            } else {
-                this.progressBar.style.width = '100%';
-            }
+            const scrollEl = this._originalWrapper || this.wrapper;
+            try {
+                if (scrollEl.scrollWidth > scrollEl.clientWidth) {
+                    const scrollPercentage = (scrollEl.scrollLeft / (scrollEl.scrollWidth - scrollEl.clientWidth)) * 100;
+                    this.progressBar.style.width = `${scrollPercentage}%`;
+                } else {
+                    this.progressBar.style.width = '100%';
+                }
+            } catch (e) { this.progressBar.style.width = '100%'; }
         }
     }
 
     scrollToPrevPage() {
         if (!this.wrapper) return;
-        const scrollAmount = this.wrapper.clientWidth;
-        this.wrapper.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        const scrollEl = this._originalWrapper || this.wrapper;
+        try { const scrollAmount = scrollEl.clientWidth || 0; if (typeof scrollEl.scrollBy === 'function') scrollEl.scrollBy({ left: -scrollAmount, behavior: 'smooth' }); else scrollEl.scrollLeft = Math.max(0, (scrollEl.scrollLeft || 0) - scrollAmount); } catch (e) {}
     }
     scrollToNextPage() {
         if (!this.wrapper) return;
-        const scrollAmount = this.wrapper.clientWidth;
-        this.wrapper.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        const scrollEl = this._originalWrapper || this.wrapper;
+        try { const scrollAmount = scrollEl.clientWidth || 0; if (typeof scrollEl.scrollBy === 'function') scrollEl.scrollBy({ left: scrollAmount, behavior: 'smooth' }); else scrollEl.scrollLeft = (scrollEl.scrollLeft || 0) + scrollAmount; } catch (e) {}
     }
 }
 

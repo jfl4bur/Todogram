@@ -783,6 +783,16 @@ button:focus {
     z-index: 9999 !important; /* ensure it sits above siblings when displayed */
 }
 
+/* Portal clone used to escape any clipping/stacking context. Appended to document.body */
+.carousel-portal-detail {
+    position: fixed !important;
+    pointer-events: none !important;
+    z-index: 2147483647 !important;
+    display: block !important;
+    opacity: 1 !important;
+    will-change: left, top, width, height;
+}
+
 /* Also cover the case where a track wasn't created and items are direct children of the wrapper */
 .carousel-allow-overflow .custom-carousel-item,
 .carousel-allow-overflow .poster-container {
