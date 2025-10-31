@@ -481,6 +481,8 @@ class HoverModal {
             this._modalCloseTimeout = setTimeout(() => {
                 try { if (this._modalCloseHandler) this._modalCloseHandler({ propertyName: 'transform' }); } catch(e){}
             }, 200);
+            // Start animating the portal clone back immediately (overlap with modal close)
+            try { if (this._portalEl) this._removePortal(true); } catch(e){}
         } catch(e) {
             // if anything fails, ensure we at least attempt to restore state
             try {
@@ -729,7 +731,8 @@ class HoverModal {
                 try {
                     const oRect = origin.getBoundingClientRect();
                     // ensure clone has fixed positioning and will transition
-                    clone.style.transition = 'transform 140ms cubic-bezier(.2,.8,.2,1), left 160ms ease, top 160ms ease, width 160ms ease, height 160ms ease, opacity 160ms ease';
+                    // use slightly longer transform timing with ease-out for smoother motion
+                    clone.style.transition = 'transform 200ms cubic-bezier(.22,.9,.23,1), left 200ms cubic-bezier(.22,.9,.23,1), top 200ms cubic-bezier(.22,.9,.23,1), width 200ms cubic-bezier(.22,.9,.23,1), height 200ms cubic-bezier(.22,.9,.23,1), opacity 200ms ease';
                     // make sure clone is visible during animation
                     clone.style.pointerEvents = 'none';
                     // set target position/size to match origin
@@ -762,6 +765,9 @@ class HoverModal {
                         cleanup();
                         if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
                     }, 260);
+                    // safety: slightly longer than transition to ensure complete
+                    // fallback cleanup if transitionend doesn't fire
+                    // (already set above to 260ms)
                     return;
                 } catch (e) {
                     console.warn('hover-modal: portal animateBack failed', e);
