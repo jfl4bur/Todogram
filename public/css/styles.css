@@ -1331,6 +1331,15 @@ button:focus {
     overflow-y: visible !important;
 }
 
+/* Portal clone used to render a hovered item above page content so it can
+   escape ancestor clipping without changing carousel overflow behavior. */
+.hover-portal-clone {
+    pointer-events: none;
+    will-change: transform, left, top;
+    transition: transform 120ms cubic-bezier(.2,.8,.2,1), left 120ms ease, top 120ms ease, opacity 120ms ease;
+    transform-origin: var(--hover-transform-origin, center center);
+}
+
 /* While scaling down, keep the high z-index until the transform transition ends */
 .hover-zoom.hover-zoom-closing {
     transform: translateX(0) scale(1);

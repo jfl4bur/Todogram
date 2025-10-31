@@ -31,6 +31,10 @@ class HoverModal {
     // track the currently shown item and its origin element
         this._currentItem = null;
         this._currentOrigin = null;
+    // portal element used to render a cloned origin in document.body so it can
+    // escape any overflow: hidden/auto ancestors without breaking carousel scroll
+    this._portalEl = null;
+    this._portalTimeout = null;
     // remember original parent so we can restore DOM position
     this._originalParent = this.modalContent.parentElement;
     this._carouselPositionChanged = false;
@@ -186,30 +190,31 @@ class HoverModal {
 
         // Show sequence: ensure the origin finishes scaling first, then animate modal from item-size to full
         try {
-            const origin = this._currentOrigin;
-            const showModalNow = () => {
-                // force reflow so variable takes effect
-                void this.modalContent.offsetWidth;
-                // cancel any pending modal close fallback
-                try { if (this._modalCloseTimeout) { clearTimeout(this._modalCloseTimeout); this._modalCloseTimeout = null; } } catch(e){}
-                this.modalContent.classList.add('show');
-            };
-
-            // If origin just got the hover-zoom class, wait for its transform transition to end
-            let waited = false;
-            if (origin && origin.classList && origin.classList.contains('hover-zoom')) {
-                const onEnd = (ev) => {
-                    if (ev && ev.propertyName && ev.propertyName.indexOf('transform') === -1) return;
-                    try { origin.removeEventListener('transitionend', onEnd); } catch(e){}
-                    if (!waited) { waited = true; showModalNow(); }
+                const origin = this._currentOrigin;
+                const showModalNow = () => {
+                    // force reflow so variable takes effect
+                    void this.modalContent.offsetWidth;
+                    // cancel any pending modal close fallback
+                    try { if (this._modalCloseTimeout) { clearTimeout(this._modalCloseTimeout); this._modalCloseTimeout = null; } } catch(e){}
+                    this.modalContent.classList.add('show');
                 };
-                // attach handler and also fallback in case transitionend doesn't fire
-                try { origin.addEventListener('transitionend', onEnd); } catch(e){}
-                setTimeout(() => { if (!waited) { waited = true; try { origin.removeEventListener('transitionend', onEnd); } catch(e){} showModalNow(); } }, 160);
-            } else {
-                // no origin or already scaled — show immediately
-                showModalNow();
-            }
+
+                // If we created a portal clone for the origin, wait for the portal's
+                // transition to end (or timeout) before showing the modal. Otherwise
+                // wait for the origin transition as before.
+                let waited = false;
+                const waitTarget = (this._portalEl && this._portalEl.classList && this._portalEl.classList.contains('hover-zoom')) ? this._portalEl : origin;
+                if (waitTarget) {
+                    const onEnd = (ev) => {
+                        if (ev && ev.propertyName && ev.propertyName.indexOf('transform') === -1) return;
+                        try { waitTarget.removeEventListener('transitionend', onEnd); } catch(e){}
+                        if (!waited) { waited = true; showModalNow(); }
+                    };
+                    try { waitTarget.addEventListener('transitionend', onEnd); } catch(e){}
+                    setTimeout(() => { if (!waited) { waited = true; try { waitTarget.removeEventListener('transitionend', onEnd); } catch(e){} showModalNow(); } }, 180);
+                } else {
+                    showModalNow();
+                }
         } catch (e) {
             // fallback: just show
             try { this.modalContent.classList.add('show'); } catch (e) {}
@@ -260,7 +265,7 @@ class HoverModal {
                 } catch (e) {}
             });
 
-            if (this._currentOrigin && this._currentOrigin.classList) {
+                    if (this._currentOrigin && this._currentOrigin.classList) {
                 try { this._currentOrigin.classList.remove('hover-zoom-closing'); } catch(e){}
                 if (this._scaleDownHandler && this._currentOrigin._scaleDownHandlerAttached) {
                     try { this._currentOrigin.removeEventListener('transitionend', this._scaleDownHandler); } catch(e){}
@@ -300,6 +305,16 @@ class HoverModal {
                             else this._currentOrigin.style.setProperty('--hover-translate-x', '0px');
                         } catch (er2) {}
                     } catch (er) {}
+                    // If possible, create a portal clone so the scaled item can escape
+                    // any ancestor clipping (overflow:hidden/auto) without changing
+                    // the carousel's overflow behavior which would break pagination.
+                    try {
+                        const shouldPortal = !isEpisodios;
+                        if (shouldPortal) this._createPortalForOrigin(this._currentOrigin);
+                    } catch (pe) {}
+
+                    // Add hover class to origin for compatibility; the visual may be
+                    // served by the portal clone when created (we hide the origin).
                     this._currentOrigin.classList.add('hover-zoom');
                 } else {
                     // ensure any residual variables are cleared for episodios items
@@ -345,6 +360,8 @@ class HoverModal {
                     // hide overlay immediately when modal finished closing
                     this.modalOverlay.style.display = 'none';
                     this.modalOverlay.style.pointerEvents = 'none';
+                    // remove any portal clone and restore origin visibility
+                    try { this._removePortal(); } catch (e) {}
                     window.isModalOpen = false;
                     window.activeItem = null;
                     window.hoverModalItem = null;
@@ -462,6 +479,7 @@ class HoverModal {
             try {
                 if (this._currentWrapper && this._currentWrapper.classList) this._currentWrapper.classList.remove('hover-no-clip');
                 if (this._currentSection && this._currentSection.classList) this._currentSection.classList.remove('hover-no-clip');
+                try { this._removePortal(); } catch(e){}
             } catch (e) {}
             this._currentWrapper = null; this._currentSection = null; this._currentItem = null; this._currentOrigin = null;
         }
@@ -630,5 +648,71 @@ class HoverModal {
             return videoUrl + '&dl=1';
         }
         return videoUrl + '?dl=1';
+    }
+
+    /* Portal helpers: clone origin into document.body so it can visually escape
+       ancestor clipping without modifying carousel overflow (which breaks pagination). */
+    _createPortalForOrigin(origin) {
+        try {
+            // remove any existing portal
+            this._removePortal();
+            if (!origin || !(origin instanceof HTMLElement)) return;
+
+            const rect = origin.getBoundingClientRect();
+            const clone = origin.cloneNode(true);
+
+            // Remove any id on the clone to avoid duplicates
+            try { clone.removeAttribute('id'); } catch (e) {}
+
+            clone.classList.add('hover-portal-clone');
+            // ensure clone starts unscaled so we can trigger the transition
+            clone.classList.remove('hover-zoom');
+
+            // inline styles to pin the clone to the same viewport position
+            clone.style.position = 'fixed';
+            clone.style.left = `${rect.left}px`;
+            clone.style.top = `${rect.top}px`;
+            clone.style.width = `${Math.round(rect.width)}px`;
+            clone.style.height = `${Math.round(rect.height)}px`;
+            clone.style.margin = '0';
+            clone.style.zIndex = '20000';
+            clone.style.pointerEvents = 'none';
+            clone.style.boxSizing = 'border-box';
+
+            // copy CSS variables used for transform origin/translate
+            try {
+                const originTransform = origin.style.getPropertyValue('--hover-transform-origin') || getComputedStyle(origin).getPropertyValue('--hover-transform-origin') || 'center center';
+                const originTranslate = origin.style.getPropertyValue('--hover-translate-x') || getComputedStyle(origin).getPropertyValue('--hover-translate-x') || '0px';
+                clone.style.setProperty('--hover-transform-origin', originTransform);
+                clone.style.setProperty('--hover-translate-x', originTranslate);
+            } catch (e) {}
+
+            // append to body and trigger the scale via class
+            document.body.appendChild(clone);
+            // hide original to avoid duplicate visuals but keep layout
+            try { origin.style.visibility = 'hidden'; } catch (e) {}
+
+            // force reflow then add hover-zoom to animate
+            void clone.offsetWidth;
+            clone.classList.add('hover-zoom');
+
+            this._portalEl = clone;
+        } catch (e) {
+            console.warn('hover-modal: portal creation failed', e);
+            try { this._removePortal(); } catch (er) {}
+        }
+    }
+
+    _removePortal() {
+        try {
+            if (this._portalEl && this._portalEl.parentElement) {
+                try { this._portalEl.parentElement.removeChild(this._portalEl); } catch (e) {}
+            }
+            this._portalEl = null;
+            if (this._currentOrigin && this._currentOrigin.style) {
+                try { this._currentOrigin.style.visibility = ''; } catch (e) {}
+            }
+            if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
+        } catch (e) {}
     }
 }
