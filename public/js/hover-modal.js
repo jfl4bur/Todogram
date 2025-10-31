@@ -694,30 +694,33 @@ class HoverModal {
             // ensure clone starts unscaled so we can trigger the transition
             clone.classList.remove('hover-zoom');
 
-            // inline styles to pin the clone to the same viewport position
-            // If the modal overlay is visible, attach the clone to the overlay
-            // so it shares the same fixed coordinate space as the modal and
-            // will not move when the page scrolls (stays visually with modal).
-            const overlay = (this.modalOverlay && this.modalOverlay.style && this.modalOverlay.style.display !== 'none') ? this.modalOverlay : null;
-            if (overlay) {
-                // position relative to overlay (overlay is fixed), so use absolute
-                clone.style.position = 'absolute';
-                const oRect = overlay.getBoundingClientRect();
-                clone.style.left = `${rect.left - oRect.left}px`;
-                clone.style.top = `${rect.top - oRect.top}px`;
-            } else {
-                clone.style.position = 'fixed';
-                clone.style.left = `${rect.left}px`;
-                clone.style.top = `${rect.top}px`;
-            }
+            // Prepare sizing and box model
             clone.style.width = `${Math.round(rect.width)}px`;
             clone.style.height = `${Math.round(rect.height)}px`;
             clone.style.margin = '0';
+            clone.style.boxSizing = 'border-box';
             // place clone under modal hover content: modal-content uses z-index ~1001
             // choose 1000 so the cloned item appears beneath the modal but above page
             clone.style.zIndex = '1000';
             clone.style.pointerEvents = 'none';
-            clone.style.boxSizing = 'border-box';
+
+            // Choose parent for the clone. Prefer the modal overlay (fixed) so the
+            // clone stays locked to the same viewport coordinate space as the modal
+            // even if the page scrolls. Fallback to document.body.
+            const parentForClone = (this.modalOverlay && this.modalOverlay.style && this.modalOverlay.style.display !== 'none') ? this.modalOverlay : document.body;
+            if (parentForClone === this.modalOverlay) {
+                // position absolute relative to overlay (overlay is fixed)
+                clone.style.position = 'absolute';
+                // compute coordinates relative to overlay
+                const overlayRect = this.modalOverlay.getBoundingClientRect();
+                clone.style.left = `${Math.round(rect.left - overlayRect.left)}px`;
+                clone.style.top = `${Math.round(rect.top - overlayRect.top)}px`;
+            } else {
+                // fallback: keep fixed positioning on body
+                clone.style.position = 'fixed';
+                clone.style.left = `${rect.left}px`;
+                clone.style.top = `${rect.top}px`;
+            }
 
             // copy CSS variables used for transform origin/translate
             try {
@@ -727,12 +730,7 @@ class HoverModal {
                 clone.style.setProperty('--hover-translate-x', originTranslate);
             } catch (e) {}
 
-            // append to overlay (if visible) or body and trigger the scale via class
-            if (overlay) {
-                try { overlay.appendChild(clone); } catch(e) { document.body.appendChild(clone); }
-            } else {
-                document.body.appendChild(clone);
-            }
+            parentForClone.appendChild(clone);
             // hide original to avoid duplicate visuals but keep layout
             try { origin.style.visibility = 'hidden'; } catch (e) {}
 
