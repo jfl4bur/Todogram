@@ -783,6 +783,11 @@ button:focus {
     z-index: 9999 !important; /* ensure it sits above siblings when displayed */
 }
 
+/* Ancestor class added by JS to relax clipping on the nearest overflow:hidden ancestor */
+.carousel-allow-overflow-ancestor {
+    overflow: visible !important;
+}
+
 .carousel-title {
     font-size: 1.8rem;
     font-weight: 600;

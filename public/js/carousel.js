@@ -26,8 +26,21 @@ function ensureCarouselTrack(wrapper) {
     while (wrapper.firstChild) track.appendChild(wrapper.firstChild);
     wrapper.appendChild(track);
 
-    // Mark the outer wrapper so CSS can relax overflow on inner items when needed
-    try { wrapper.classList.add('carousel-allow-overflow'); } catch (e) {}
+    // Also scan ancestors and mark those with restrictive overflow so CSS can relax them.
+    try {
+        let node = wrapper.parentElement;
+        while (node && node !== document.body) {
+            const cs = window.getComputedStyle(node);
+            const overflowValues = [cs.overflow, cs.overflowX, cs.overflowY].filter(Boolean);
+            const hasHidden = overflowValues.some(v => v === 'hidden' || v === 'clip');
+            if (hasHidden) {
+                try { node.classList.add('carousel-allow-overflow-ancestor'); } catch (e) {}
+                // stop at first restrictive ancestor to avoid altering layout too widely
+                break;
+            }
+            node = node.parentElement;
+        }
+    } catch (e) { }
 
     // Inline minimal styles to ensure horizontal scrolling works even if outer wrapper is overflow: visible
     track.style.display = 'flex';
