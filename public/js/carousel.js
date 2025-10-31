@@ -118,10 +118,34 @@ function _createPortalForItem(item) {
         portal.style.zIndex = '10050';
         portal.style.display = 'block';
         portal.style.pointerEvents = 'none';
+        portal.style.opacity = '1';
+        portal.style.transition = 'none';
+        portal.style.transform = 'translateZ(0)';
+        // Ensure cloned background is visible (some styles may hide it by default)
+        try {
+            portal.style.display = 'block';
+            portal.style.opacity = '1';
+            const imgs = portal.querySelectorAll('img');
+            imgs.forEach(i => { i.style.opacity = '1'; i.style.display = 'block'; });
+        } catch (e) {}
         document.body.appendChild(portal);
         // hide original so we don't see duplicate
         bg.style.display = 'none';
         item._portalElement = portal;
+
+        // updater to reposition portal on scroll/resize
+        const updater = () => {
+            try {
+                const r = (item.querySelector('.detail-background') || portal).getBoundingClientRect();
+                portal.style.left = `${r.left}px`;
+                portal.style.top = `${r.top}px`;
+                portal.style.width = `${r.width}px`;
+                portal.style.height = `${r.height}px`;
+            } catch (e) {}
+        };
+        item._portalUpdater = updater;
+        window.addEventListener('scroll', updater, true);
+        window.addEventListener('resize', updater);
     } catch (e) { /* silent */ }
 }
 
@@ -132,6 +156,14 @@ function _removePortalForItem(item) {
         if (portal && portal.parentElement) portal.parentElement.removeChild(portal);
         const bg = item.querySelector('.detail-background');
         if (bg) bg.style.display = '';
+        // remove listeners
+        try {
+            if (item._portalUpdater) {
+                window.removeEventListener('scroll', item._portalUpdater, true);
+                window.removeEventListener('resize', item._portalUpdater);
+                item._portalUpdater = null;
+            }
+        } catch (e) {}
         item._portalElement = null;
     } catch (e) { /* silent */ }
 }
