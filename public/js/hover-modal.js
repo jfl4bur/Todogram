@@ -323,7 +323,11 @@ class HoverModal {
                     // any ancestor clipping (overflow:hidden/auto) without changing
                     // the carousel's overflow behavior which would break pagination.
                     try {
-                        const shouldPortal = !isEpisodios;
+                        // Always create a portal clone so the hovered item can escape
+                        // ancestor clipping and remain fixed in viewport while the
+                        // hover modal is open. This prevents the item from moving
+                        // with scroll regardless of carousel type.
+                        const shouldPortal = true;
                         if (shouldPortal) this._createPortalForOrigin(this._currentOrigin);
                     } catch (pe) {}
 
