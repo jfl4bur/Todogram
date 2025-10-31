@@ -758,44 +758,48 @@ class HoverModal {
             if (animateBack && origin && origin instanceof HTMLElement) {
                 try {
                     const oRect = origin.getBoundingClientRect();
-                    // ensure clone has fixed positioning and will transition
-                    // use slightly longer transform timing with ease-out for smoother motion
-                    clone.style.transition = 'transform 200ms cubic-bezier(.22,.9,.23,1), left 200ms cubic-bezier(.22,.9,.23,1), top 200ms cubic-bezier(.22,.9,.23,1), width 200ms cubic-bezier(.22,.9,.23,1), height 200ms cubic-bezier(.22,.9,.23,1), opacity 200ms ease';
-                    // make sure clone is visible during animation
+                    // compute current clone rect and required deltas
+                    const cRect = clone.getBoundingClientRect();
+                    const dx = oRect.left - cRect.left;
+                    const dy = oRect.top - cRect.top;
+                    const scale = (cRect.width > 0) ? (oRect.width / cRect.width) : 1;
+
+                    // capture current computed transform so we can animate from it
+                    const computed = getComputedStyle(clone).transform || 'none';
+                    // set inline transform to the current computed value to avoid jumps
+                    try { clone.style.transform = (computed === 'none') ? 'none' : computed; } catch (e) {}
+
+                    // ensure clone will transition only transform/opacity (more performant)
+                    clone.style.transition = 'transform 300ms cubic-bezier(.22,.9,.23,1), opacity 220ms ease';
                     clone.style.pointerEvents = 'none';
-                    // set target position/size to match origin
-                    clone.style.left = `${oRect.left}px`;
-                    clone.style.top = `${oRect.top}px`;
-                    clone.style.width = `${Math.round(oRect.width)}px`;
-                    clone.style.height = `${Math.round(oRect.height)}px`;
-                    // remove hover-zoom (scale) so it animates back
-                    clone.classList.remove('hover-zoom');
+
+                    // trigger transform to target using translate3d+scale for smoothness
+                    requestAnimationFrame(() => {
+                        try {
+                            clone.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(${scale})`;
+                        } catch (e) {}
+                    });
 
                     // wait for transitionend or timeout
                     const cleanup = () => {
                         try { if (clone && clone.parentElement) clone.parentElement.removeChild(clone); } catch (e) {}
                         this._portalEl = null;
-                        // restore origin visibility and mark portal inactive
                         try { origin.style.visibility = ''; } catch (e) {}
                         this._portalActive = false;
                     };
                     const onEnd = (ev) => {
-                        // accept left/top/transform/width/height
-                        if (ev && ev.propertyName && ['left','top','transform','width','height','opacity'].indexOf(ev.propertyName) === -1) return;
+                        if (ev && ev.propertyName && ev.propertyName.indexOf('transform') === -1 && ev.propertyName.indexOf('opacity') === -1) return;
                         try { clone.removeEventListener('transitionend', onEnd); } catch(e){}
                         cleanup();
                         if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
                     };
                     try { clone.addEventListener('transitionend', onEnd); } catch(e){}
-                    // safety timeout
+                    // safety timeout slightly longer than transition
                     this._portalTimeout = setTimeout(() => {
                         try { clone.removeEventListener('transitionend', onEnd); } catch(e){}
                         cleanup();
                         if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
-                    }, 260);
-                    // safety: slightly longer than transition to ensure complete
-                    // fallback cleanup if transitionend doesn't fire
-                    // (already set above to 260ms)
+                    }, 380);
                     return;
                 } catch (e) {
                     console.warn('hover-modal: portal animateBack failed', e);
