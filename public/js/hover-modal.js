@@ -694,17 +694,8 @@ class HoverModal {
             // ensure clone starts unscaled so we can trigger the transition
             clone.classList.remove('hover-zoom');
 
-            // Determine host for clone. If modalOverlay exists (fixed full-viewport)
-            // append to it so the clone shares the same coordinate system as the modal
-            // and therefore won't appear to 'scroll' differently.
-            const host = (this.modalOverlay && this.modalOverlay instanceof HTMLElement) ? this.modalOverlay : document.body;
             // inline styles to pin the clone to the same viewport position
-            // If host is modalOverlay (fixed), use absolute positioning inside it.
-            if (host === document.body) {
-                clone.style.position = 'fixed';
-            } else {
-                clone.style.position = 'absolute';
-            }
+            clone.style.position = 'fixed';
             clone.style.left = `${rect.left}px`;
             clone.style.top = `${rect.top}px`;
             clone.style.width = `${Math.round(rect.width)}px`;
@@ -724,8 +715,8 @@ class HoverModal {
                 clone.style.setProperty('--hover-translate-x', originTranslate);
             } catch (e) {}
 
-            // append to host (modalOverlay preferred) and trigger the scale via class
-            try { host.appendChild(clone); } catch(e) { document.body.appendChild(clone); }
+            // append to body and trigger the scale via class
+            document.body.appendChild(clone);
             // hide original to avoid duplicate visuals but keep layout
             try { origin.style.visibility = 'hidden'; } catch (e) {}
 
