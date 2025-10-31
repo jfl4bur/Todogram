@@ -699,12 +699,11 @@ class HoverModal {
             clone.classList.remove('hover-zoom');
 
             // inline styles to pin the clone to the same viewport position
-            // We'll append the clone into a top-level fixed container so the
-            // clone can be positioned absolutely inside it and remain fixed
-            // in the viewport even if other ancestors have transforms.
-            clone.style.position = 'absolute';
-            clone.style.left = `${rect.left}px`;
-            clone.style.top = `${rect.top}px`;
+            // Use fixed positioning and append directly to body to minimize
+            // the chance that ancestor transforms will affect it.
+            clone.style.position = 'fixed';
+            clone.style.left = `${Math.round(rect.left)}px`;
+            clone.style.top = `${Math.round(rect.top)}px`;
             clone.style.width = `${Math.round(rect.width)}px`;
             clone.style.height = `${Math.round(rect.height)}px`;
             clone.style.margin = '0';
@@ -722,25 +721,15 @@ class HoverModal {
                 clone.style.setProperty('--hover-translate-x', originTranslate);
             } catch (e) {}
 
-            // ensure portal root exists (fixed full-viewport container)
-            let portalRoot = document.getElementById('__hover_portal_root');
-            if (!portalRoot) {
-                portalRoot = document.createElement('div');
-                portalRoot.id = '__hover_portal_root';
-                portalRoot.style.position = 'fixed';
-                portalRoot.style.left = '0';
-                portalRoot.style.top = '0';
-                portalRoot.style.width = '100%';
-                portalRoot.style.height = '100%';
-                portalRoot.style.pointerEvents = 'none';
-                // give it a z-index just below modal-content (modal uses ~1001)
-                portalRoot.style.zIndex = '1000';
-                document.body.appendChild(portalRoot);
-                this._portalRootCreated = true;
-            } else {
-                this._portalRootCreated = false;
+            // append clone directly to body (position:fixed keeps it in viewport)
+            try {
+                document.body.appendChild(clone);
+            } catch (e) {
+                // fallback to documentElement if body is not available
+                try { document.documentElement.appendChild(clone); } catch(e){}
             }
-            portalRoot.appendChild(clone);
+            // debug log to help diagnose issues in the wild
+            try { console.log('hover-modal: portal clone created', clone); } catch(e) {}
             // hide original to avoid duplicate visuals but keep layout
             try { origin.style.visibility = 'hidden'; } catch (e) {}
 
@@ -751,8 +740,6 @@ class HoverModal {
             this._portalEl = clone;
             // mark portal active so we skip origin animations
             this._portalActive = true;
-            // remember portalRoot so we can cleanup it later
-            this._portalRoot = portalRoot;
         } catch (e) {
             console.warn('hover-modal: portal creation failed', e);
             try { this._removePortal(); } catch (er) {}
@@ -816,6 +803,7 @@ class HoverModal {
             if (this._portalEl && this._portalEl.parentElement) {
                 try { this._portalEl.parentElement.removeChild(this._portalEl); } catch (e) {}
             }
+            try { console.log('hover-modal: portal clone removed'); } catch(e) {}
             this._portalEl = null;
             // if we created a portal root, remove it when empty
             try {
