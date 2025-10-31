@@ -727,6 +727,21 @@ class HoverModal {
             this._portalEl = clone;
             // mark portal active so we skip origin animations
             this._portalActive = true;
+            // store fixed viewport coords so we can enforce them on scroll
+            try {
+                this._portalFixedPos = { left: rect.left, top: rect.top };
+                this._portalScrollHandler = () => {
+                    try {
+                        if (this._portalEl) {
+                            this._portalEl.style.left = `${this._portalFixedPos.left}px`;
+                            this._portalEl.style.top = `${this._portalFixedPos.top}px`;
+                        }
+                    } catch (e) {}
+                };
+                // capture scroll on ancestors and window resize
+                window.addEventListener('scroll', this._portalScrollHandler, true);
+                window.addEventListener('resize', this._portalScrollHandler);
+            } catch (e) {}
         } catch (e) {
             console.warn('hover-modal: portal creation failed', e);
             try { this._removePortal(); } catch (er) {}
@@ -791,6 +806,15 @@ class HoverModal {
                 try { this._portalEl.parentElement.removeChild(this._portalEl); } catch (e) {}
             }
             this._portalEl = null;
+            // remove simple scroll handler if attached
+            try {
+                if (this._portalScrollHandler) {
+                    try { window.removeEventListener('scroll', this._portalScrollHandler, true); } catch(e){}
+                    try { window.removeEventListener('resize', this._portalScrollHandler); } catch(e){}
+                }
+            } catch (e) {}
+            this._portalScrollHandler = null;
+            this._portalFixedPos = null;
             if (this._currentOrigin && this._currentOrigin.style) {
                 try { this._currentOrigin.style.visibility = ''; } catch (e) {}
             }
