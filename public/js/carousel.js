@@ -6,6 +6,8 @@ function ensureCarouselTrack(wrapper) {
     // If a track already exists, return it
     const existing = wrapper.querySelector('.carousel-track');
     if (existing) return existing;
+    // Mark wrapper so CSS can relax overflow on inner items when needed (do this always)
+    try { wrapper.classList.add('carousel-allow-overflow'); } catch (e) {}
 
     // If the wrapper is scrollable already, just return the wrapper
     try {
