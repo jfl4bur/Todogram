@@ -115,7 +115,8 @@ function _createPortalForItem(item) {
         portal.style.top = `${rect.top}px`;
         portal.style.width = `${rect.width}px`;
         portal.style.height = `${rect.height}px`;
-        portal.style.zIndex = '10050';
+    // Use a very large z-index to try to escape any stacking contexts
+    portal.style.zIndex = '2147483647';
         portal.style.display = 'block';
         portal.style.pointerEvents = 'none';
         portal.style.opacity = '1';
@@ -133,19 +134,29 @@ function _createPortalForItem(item) {
         bg.style.display = 'none';
         item._portalElement = portal;
 
-        // updater to reposition portal on scroll/resize
-        const updater = () => {
+        // updater to reposition portal on scroll/resize/pointermove using rAF for smoothness
+        let rafId = null;
+        const doUpdate = () => {
             try {
-                const r = (item.querySelector('.detail-background') || portal).getBoundingClientRect();
-                portal.style.left = `${r.left}px`;
-                portal.style.top = `${r.top}px`;
-                portal.style.width = `${r.width}px`;
-                portal.style.height = `${r.height}px`;
+                const rect = item.getBoundingClientRect();
+                // If detail-background inside item has different rect, prefer it
+                const innerBg = item.querySelector('.detail-background');
+                const r = (innerBg && innerBg.getBoundingClientRect && innerBg.getBoundingClientRect().width>0) ? innerBg.getBoundingClientRect() : rect;
+                portal.style.left = `${Math.round(r.left)}px`;
+                portal.style.top = `${Math.round(r.top)}px`;
+                portal.style.width = `${Math.round(r.width)}px`;
+                portal.style.height = `${Math.round(r.height)}px`;
             } catch (e) {}
+            rafId = null;
         };
-        item._portalUpdater = updater;
-        window.addEventListener('scroll', updater, true);
-        window.addEventListener('resize', updater);
+        const scheduleUpdate = () => { if (rafId==null) rafId = requestAnimationFrame(doUpdate); };
+        const onScroll = scheduleUpdate;
+        const onResize = scheduleUpdate;
+        const onPointer = scheduleUpdate;
+        item._portalUpdater = { onScroll, onResize, onPointer, rafCancel: () => { if (rafId) cancelAnimationFrame(rafId); rafId = null; } };
+        window.addEventListener('scroll', onScroll, true);
+        window.addEventListener('resize', onResize);
+        window.addEventListener('pointermove', onPointer, true);
     } catch (e) { /* silent */ }
 }
 
@@ -156,11 +167,13 @@ function _removePortalForItem(item) {
         if (portal && portal.parentElement) portal.parentElement.removeChild(portal);
         const bg = item.querySelector('.detail-background');
         if (bg) bg.style.display = '';
-        // remove listeners
+        // remove listeners and cancel rAF
         try {
             if (item._portalUpdater) {
-                window.removeEventListener('scroll', item._portalUpdater, true);
-                window.removeEventListener('resize', item._portalUpdater);
+                try { window.removeEventListener('scroll', item._portalUpdater.onScroll, true); } catch (e) {}
+                try { window.removeEventListener('resize', item._portalUpdater.onResize); } catch (e) {}
+                try { window.removeEventListener('pointermove', item._portalUpdater.onPointer, true); } catch (e) {}
+                try { item._portalUpdater.rafCancel(); } catch (e) {}
                 item._portalUpdater = null;
             }
         } catch (e) {}
