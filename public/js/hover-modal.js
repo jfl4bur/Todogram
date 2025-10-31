@@ -190,6 +190,12 @@ class HoverModal {
             this.modalContent.style.setProperty('--modal-start-scale', String(startScale));
         } catch (e) {}
 
+        // Show the hover modal immediately (no wait). If a portal clone exists
+        // it will animate under the modal; ensure modal gets the 'show' class.
+        try {
+            this.modalContent.classList.add('show');
+        } catch (e) {}
+
         // Attach scroll/resize listeners only when necessary.
         // If modalContent is inside the same scroll container as the item, the
         // browser will move it natively during scroll and we don't need a window
