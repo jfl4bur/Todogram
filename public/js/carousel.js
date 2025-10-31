@@ -663,8 +663,7 @@ class EpisodiosSeriesCarousel {
         const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize) || 1);
 
     // Calcular índice del primer item visible actualmente (alinear a la izquierda)
-    const scrollEl = this._originalWrapper || this.wrapper;
-    const currentIndex = Math.floor(((scrollEl && scrollEl.scrollLeft) || 0) / stepSize);
+    const currentIndex = Math.floor((((this._originalWrapper || this.wrapper) && (this._originalWrapper || this.wrapper).scrollLeft) || 0) / stepSize);
 
         let targetIndex;
         if (direction === 'prev') {
@@ -993,8 +992,7 @@ class EpisodiosAnimesCarousel {
         if (!itemWidth) itemWidth = 240;
         const stepSize = itemWidth + gap;
         const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize) || 1);
-    const scrollEl = this._originalWrapper || this.wrapper;
-    const currentIndex = Math.floor(((scrollEl && scrollEl.scrollLeft) || 0) / stepSize);
+    const currentIndex = Math.floor((((this._originalWrapper || this.wrapper) && (this._originalWrapper || this.wrapper).scrollLeft) || 0) / stepSize);
         let targetIndex;
         if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsPerViewport); else targetIndex = currentIndex + itemsPerViewport;
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
@@ -1294,8 +1292,7 @@ class EpisodiosDocumentalesCarousel {
         if (!itemWidth) itemWidth = 240;
         const stepSize = itemWidth + gap;
         const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize) || 1);
-    const scrollEl = this._originalWrapper || this.wrapper;
-    const currentIndex = Math.floor(((scrollEl && scrollEl.scrollLeft) || 0) / stepSize);
+    const currentIndex = Math.floor((((this._originalWrapper || this.wrapper) && (this._originalWrapper || this.wrapper).scrollLeft) || 0) / stepSize);
         let targetIndex;
         if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsPerViewport); else targetIndex = currentIndex + itemsPerViewport;
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
