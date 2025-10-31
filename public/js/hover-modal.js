@@ -35,6 +35,8 @@ class HoverModal {
     // escape any overflow: hidden/auto ancestors without breaking carousel scroll
     this._portalEl = null;
     this._portalTimeout = null;
+    this._portalAttachToContainer = false;
+    this._portalContainerPositionChanged = false;
     // remember original parent so we can restore DOM position
     this._originalParent = this.modalContent.parentElement;
     this._carouselPositionChanged = false;
@@ -694,10 +696,32 @@ class HoverModal {
             // ensure clone starts unscaled so we can trigger the transition
             clone.classList.remove('hover-zoom');
 
-            // inline styles to pin the clone to the same viewport position
-            clone.style.position = 'fixed';
-            clone.style.left = `${rect.left}px`;
-            clone.style.top = `${rect.top}px`;
+            // decide whether to attach the clone to the carousel container so it
+            // moves natively with container scroll (matches modal behavior)
+            const attachToContainer = (this.modalContent.parentElement === this.carouselContainer && this.carouselContainer && this.carouselContainer !== document.body);
+
+            // inline styles to pin the clone to the same viewport position or to
+            // the container coordinate space depending on attachToContainer
+            if (attachToContainer) {
+                const containerRect = this.carouselContainer.getBoundingClientRect();
+                const leftInContainer = Math.round(rect.left - containerRect.left + this.carouselContainer.scrollLeft);
+                const topInContainer = Math.round(rect.top - containerRect.top + this.carouselContainer.scrollTop);
+                clone.style.position = 'absolute';
+                clone.style.left = `${leftInContainer}px`;
+                clone.style.top = `${topInContainer}px`;
+                // remember we'll attach to container so we can restore positioning later
+                const cs = getComputedStyle(this.carouselContainer);
+                if (cs.position === 'static') {
+                    this.carouselContainer.style.position = 'relative';
+                    this._portalContainerPositionChanged = true;
+                }
+                this._portalAttachToContainer = true;
+            } else {
+                clone.style.position = 'fixed';
+                clone.style.left = `${rect.left}px`;
+                clone.style.top = `${rect.top}px`;
+                this._portalAttachToContainer = false;
+            }
             clone.style.width = `${Math.round(rect.width)}px`;
             clone.style.height = `${Math.round(rect.height)}px`;
             clone.style.margin = '0';
@@ -715,8 +739,12 @@ class HoverModal {
                 clone.style.setProperty('--hover-translate-x', originTranslate);
             } catch (e) {}
 
-            // append to body and trigger the scale via class
-            document.body.appendChild(clone);
+            // append to chosen parent
+            if (this._portalAttachToContainer) {
+                this.carouselContainer.appendChild(clone);
+            } else {
+                document.body.appendChild(clone);
+            }
             // hide original to avoid duplicate visuals but keep layout
             try { origin.style.visibility = 'hidden'; } catch (e) {}
 
@@ -738,96 +766,63 @@ class HoverModal {
             if (!this._portalEl) return;
             const clone = this._portalEl;
             const origin = this._currentOrigin;
-            // If requested, animate the clone back to the origin rect before removing
+
+            const finalize = () => {
+                try { if (clone && clone.parentElement) clone.parentElement.removeChild(clone); } catch (e) {}
+                this._portalEl = null;
+                try { if (origin && origin.style) origin.style.visibility = ''; } catch (e) {}
+                this._portalActive = false;
+                // restore container positioning if we changed it when attaching the portal
+                try {
+                    if (this._portalAttachToContainer && this._portalContainerPositionChanged && this.carouselContainer) {
+                        this.carouselContainer.style.position = '';
+                        this._portalContainerPositionChanged = false;
+                    }
+                } catch (e) {}
+            };
+
             if (animateBack && origin && origin instanceof HTMLElement) {
                 try {
                     const oRect = origin.getBoundingClientRect();
-                    // ensure clone has fixed positioning and will transition
-                    // use slightly longer transform timing with ease-out for smoother motion
-                    clone.style.transition = 'transform 200ms cubic-bezier(.22,.9,.23,1), left 200ms cubic-bezier(.22,.9,.23,1), top 200ms cubic-bezier(.22,.9,.23,1), width 200ms cubic-bezier(.22,.9,.23,1), height 200ms cubic-bezier(.22,.9,.23,1), opacity 200ms ease';
-                    // make sure clone is visible during animation
-                    clone.style.pointerEvents = 'none';
-                    // set target position/size to match origin
-                    clone.style.left = `${oRect.left}px`;
-                    clone.style.top = `${oRect.top}px`;
-                    clone.style.width = `${Math.round(oRect.width)}px`;
-                    clone.style.height = `${Math.round(oRect.height)}px`;
-                    // remove hover-zoom (scale) so it animates back
-                    clone.classList.remove('hover-zoom');
+                    const cRect = clone.getBoundingClientRect();
+                    const dx = oRect.left - cRect.left;
+                    const dy = oRect.top - cRect.top;
+                    const scale = (cRect.width > 0) ? (oRect.width / cRect.width) : 1;
 
-                    // wait for transitionend or timeout
-                    const cleanup = () => {
-                        try { if (clone && clone.parentElement) clone.parentElement.removeChild(clone); } catch (e) {}
-                        this._portalEl = null;
-                        // restore origin visibility and mark portal inactive
-                        try { origin.style.visibility = ''; } catch (e) {}
-                        this._portalActive = false;
-                    };
+                    // animate with transform for smoothness and resilience to scroll
+                    clone.style.transition = 'transform 320ms cubic-bezier(.22,.9,.23,1), opacity 200ms ease';
+                    clone.style.pointerEvents = 'none';
+                    try { clone.classList.remove('hover-zoom'); } catch (e) {}
+
+                    requestAnimationFrame(() => {
+                        try {
+                            clone.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(${scale})`;
+                            clone.style.opacity = '1';
+                        } catch (e) {}
+                    });
+
                     const onEnd = (ev) => {
-                        // accept left/top/transform/width/height
-                        if (ev && ev.propertyName && ['left','top','transform','width','height','opacity'].indexOf(ev.propertyName) === -1) return;
-                        try { clone.removeEventListener('transitionend', onEnd); } catch(e){}
-                        cleanup();
-                        if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
+                        if (ev && ev.propertyName && ev.propertyName.indexOf('transform') === -1 && ev.propertyName.indexOf('opacity') === -1) return;
+                        try { clone.removeEventListener('transitionend', onEnd); } catch (e) {}
+                        finalize();
+                        if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch (e) {} this._portalTimeout = null; }
                     };
-                    try { clone.addEventListener('transitionend', onEnd); } catch(e){}
-                    // safety timeout
+                    try { clone.addEventListener('transitionend', onEnd); } catch (e) {}
+
+                    // safety timeout in case transitionend doesn't fire
                     this._portalTimeout = setTimeout(() => {
-                        try { clone.removeEventListener('transitionend', onEnd); } catch(e){}
-                        cleanup();
-                        if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
-                    }, 260);
-                    // safety: slightly longer than transition to ensure complete
-                    // fallback cleanup if transitionend doesn't fire
-                    // (already set above to 260ms)
-                        const rect = origin.getBoundingClientRect();
-                        const clone = origin.cloneNode(true);
-                        // decide whether to attach the clone to the carousel container so it
-                        // moves natively with container scroll (matches modal behavior)
-                        const attachToContainer = (this.modalContent.parentElement === this.carouselContainer && this.carouselContainer && this.carouselContainer !== document.body);
-                    console.warn('hover-modal: portal animateBack failed', e);
-                        // inline styles to pin the clone to the same position. If the modal
-                        // content was moved into the carouselContainer, append the clone to
-                        // that container and use absolute positioning relative to it so the
-                        // clone scrolls with the container (matching modal). Otherwise use
-                        // fixed positioning on the body so the clone stays in viewport.
-                        if (attachToContainer) {
-                            const containerRect = this.carouselContainer.getBoundingClientRect();
-                            // position absolute inside container; account for scroll offset so
-                            // clone appears exactly over the origin element
-                            const leftInContainer = Math.round(rect.left - containerRect.left + this.carouselContainer.scrollLeft);
-                            const topInContainer = Math.round(rect.top - containerRect.top + this.carouselContainer.scrollTop);
-                            clone.style.position = 'absolute';
-                            clone.style.left = `${leftInContainer}px`;
-                            clone.style.top = `${topInContainer}px`;
-                        } else {
-                            clone.style.position = 'fixed';
-                            clone.style.left = `${rect.left}px`;
-                            clone.style.top = `${rect.top}px`;
-                        }
-                        clone.style.width = `${Math.round(rect.width)}px`;
-                        clone.style.height = `${Math.round(rect.height)}px`;
-                try { this._portalEl.parentElement.removeChild(this._portalEl); } catch (e) {}
-                        // append to the chosen parent
-                        if (attachToContainer) {
-                            // ensure container is positioned so absolute child is positioned correctly
-                            const cs = getComputedStyle(this.carouselContainer);
-                            if (cs.position === 'static') this.carouselContainer.style.position = 'relative';
-                            this.carouselContainer.appendChild(clone);
-                            this._portalAttachedToContainer = true;
-                        } else {
-                            document.body.appendChild(clone);
-                            this._portalAttachedToContainer = false;
-                        }
-            this._portalEl = null;
-            if (this._currentOrigin && this._currentOrigin.style) {
-                try { this._currentOrigin.style.visibility = ''; } catch (e) {}
+                        try { clone.removeEventListener('transitionend', onEnd); } catch (e) {}
+                        finalize();
+                        if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch (e) {} this._portalTimeout = null; }
+                    }, 420);
+                    return;
+                } catch (e) {
+                    // fall through to immediate finalize
+                }
             }
-            this._portalActive = false;
-                        // mark portal active so we skip origin animations
-                        this._portalActive = true;
-                        this._portalAttachToContainer = attachToContainer;
-            if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
+
+            // immediate cleanup (no animation)
+            finalize();
         } catch (e) {}
     }
 }
