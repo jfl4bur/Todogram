@@ -246,9 +246,9 @@ class HoverModal {
             window.addEventListener('resize', this._onResize);
         }
 
-    // If a portal clone exists, ensure it's positioned under the modal and
-    // attach portal scroll listeners so it remains fixed relative to the modal.
-    try { if (this._portalEl) this._positionPortalUnderModal(); } catch(e) {}
+    // If a portal clone exists, ensure it's positioned under the modal.
+    // The portal will be appended to the modal's parent so it naturally
+    // follows the modal (no scroll listeners required).
 
         // Decide whether overlay should accept pointer events. If modalContent
         // is inside the overlay (original behavior), let the overlay receive
@@ -698,10 +698,25 @@ class HoverModal {
             // ensure clone starts unscaled so we can trigger the transition
             clone.classList.remove('hover-zoom');
 
-            // inline styles to pin the clone to the same viewport position
-            clone.style.position = 'fixed';
-            clone.style.left = `${rect.left}px`;
-            clone.style.top = `${rect.top}px`;
+            // Determine appropriate parent for the portal: prefer the modal's
+            // parent so the clone follows the modal's coordinate system and
+            // stays visually fixed relative to it (no scroll updates needed).
+            const portalParent = (this.modalContent && this.modalContent.parentElement) ? this.modalContent.parentElement : document.body;
+            const useBody = (portalParent === document.body);
+
+            // inline styles to pin the clone to the same position within the
+            // chosen parent coordinate space
+            if (useBody) {
+                clone.style.position = 'fixed';
+                clone.style.left = `${rect.left}px`;
+                clone.style.top = `${rect.top}px`;
+            } else {
+                // position absolute relative to portalParent
+                const pRect = portalParent.getBoundingClientRect();
+                clone.style.position = 'absolute';
+                clone.style.left = `${Math.round(rect.left - pRect.left)}px`;
+                clone.style.top = `${Math.round(rect.top - pRect.top)}px`;
+            }
             clone.style.width = `${Math.round(rect.width)}px`;
             clone.style.height = `${Math.round(rect.height)}px`;
             clone.style.margin = '0';
@@ -719,8 +734,15 @@ class HoverModal {
                 clone.style.setProperty('--hover-translate-x', originTranslate);
             } catch (e) {}
 
-            // append to body and trigger the scale via class
-            document.body.appendChild(clone);
+            // append to the selected parent. If parent is the modal's parent,
+            // insert the clone right before the modal so it appears beneath it.
+            try {
+                if (useBody) document.body.appendChild(clone);
+                else portalParent.insertBefore(clone, this.modalContent);
+            } catch (e) {
+                // fallback to body if insertion fails
+                try { document.body.appendChild(clone); } catch (ee) {}
+            }
             // hide original to avoid duplicate visuals but keep layout
             try { origin.style.visibility = 'hidden'; } catch (e) {}
 
