@@ -184,11 +184,55 @@ class HoverModal {
 
         // Compute modal start scale so it appears to grow from the item's size
         try {
-            const rect = itemElement.getBoundingClientRect();
-            const modalWidth = parseFloat(getComputedStyle(this.modalContent).width) || 1;
-            const startScale = Math.max(0.25, Math.min(1, rect.width / modalWidth));
-            this.modalContent.style.setProperty('--modal-start-scale', String(startScale));
-        } catch (e) {}
+                    const oRect = origin.getBoundingClientRect();
+                    // compute current clone rect and required deltas
+                    const cRect = clone.getBoundingClientRect();
+                    const dx = oRect.left - cRect.left;
+                    const dy = oRect.top - cRect.top;
+                    const scale = (cRect.width > 0) ? (oRect.width / cRect.width) : 1;
+
+                    // ensure clone will transition only transform/opacity (more performant)
+                    clone.style.transition = 'transform 300ms cubic-bezier(.22,.9,.23,1), opacity 200ms ease';
+                    clone.style.pointerEvents = 'none';
+
+                    // Remove hover class so computed transform is the starting point, then
+                    // set target transform to translate the clone to the origin and scale it.
+                    try { clone.classList.remove('hover-zoom'); } catch(e){}
+
+                    // apply transform to animate back. Using translate3d + scale is
+                    // smoother and resilient to scroll because it doesn't change layout.
+                    // Start the transition by setting the target transform.
+                    // Use requestAnimationFrame to ensure style mutations are flushed.
+                    requestAnimationFrame(() => {
+                        try {
+                            clone.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(${scale})`;
+                        } catch (e) {}
+                    });
+
+                    // wait for transitionend or timeout
+                    const cleanup = () => {
+                        try { if (clone && clone.parentElement) clone.parentElement.removeChild(clone); } catch (e) {}
+                        this._portalEl = null;
+                        try { origin.style.visibility = ''; } catch (e) {}
+                        this._portalActive = false;
+                    };
+                    const onEnd = (ev) => {
+                        if (ev && ev.propertyName && ev.propertyName.indexOf('transform') === -1 && ev.propertyName.indexOf('opacity') === -1) return;
+                        try { clone.removeEventListener('transitionend', onEnd); } catch(e){}
+                        cleanup();
+                        if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
+                    };
+                    try { clone.addEventListener('transitionend', onEnd); } catch(e){}
+                    // safety timeout slightly longer than transition
+                    this._portalTimeout = setTimeout(() => {
+                        try { clone.removeEventListener('transitionend', onEnd); } catch(e){}
+                        cleanup();
+                        if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
+                    }, 380);
+        } catch (e) {
+            // fallback: just show
+            try { this.modalContent.classList.add('show'); } catch (e) {}
+        }
 
         // Attach scroll/resize listeners only when necessary.
         // If modalContent is inside the same scroll container as the item, the
@@ -651,9 +695,21 @@ class HoverModal {
             clone.classList.remove('hover-zoom');
 
             // inline styles to pin the clone to the same viewport position
-            clone.style.position = 'fixed';
-            clone.style.left = `${rect.left}px`;
-            clone.style.top = `${rect.top}px`;
+            // If the modal overlay is visible, attach the clone to the overlay
+            // so it shares the same fixed coordinate space as the modal and
+            // will not move when the page scrolls (stays visually with modal).
+            const overlay = (this.modalOverlay && this.modalOverlay.style && this.modalOverlay.style.display !== 'none') ? this.modalOverlay : null;
+            if (overlay) {
+                // position relative to overlay (overlay is fixed), so use absolute
+                clone.style.position = 'absolute';
+                const oRect = overlay.getBoundingClientRect();
+                clone.style.left = `${rect.left - oRect.left}px`;
+                clone.style.top = `${rect.top - oRect.top}px`;
+            } else {
+                clone.style.position = 'fixed';
+                clone.style.left = `${rect.left}px`;
+                clone.style.top = `${rect.top}px`;
+            }
             clone.style.width = `${Math.round(rect.width)}px`;
             clone.style.height = `${Math.round(rect.height)}px`;
             clone.style.margin = '0';
@@ -671,8 +727,12 @@ class HoverModal {
                 clone.style.setProperty('--hover-translate-x', originTranslate);
             } catch (e) {}
 
-            // append to body and trigger the scale via class
-            document.body.appendChild(clone);
+            // append to overlay (if visible) or body and trigger the scale via class
+            if (overlay) {
+                try { overlay.appendChild(clone); } catch(e) { document.body.appendChild(clone); }
+            } else {
+                document.body.appendChild(clone);
+            }
             // hide original to avoid duplicate visuals but keep layout
             try { origin.style.visibility = 'hidden'; } catch (e) {}
 
@@ -683,22 +743,6 @@ class HoverModal {
             this._portalEl = clone;
             // mark portal active so we skip origin animations
             this._portalActive = true;
-            // store fixed viewport position so we can keep clone pinned
-            try {
-                this._portalViewport = { left: rect.left, top: rect.top };
-                this._portalScrollHandler = () => {
-                    try {
-                        if (!this._portalEl) return;
-                        // reapply the original viewport coordinates so the clone
-                        // doesn't move when the page or ancestors scroll/transform
-                        this._portalEl.style.left = `${this._portalViewport.left}px`;
-                        this._portalEl.style.top = `${this._portalViewport.top}px`;
-                    } catch (e) {}
-                };
-                // attach capturing scroll so we catch scrolls inside any scroll container
-                window.addEventListener('scroll', this._portalScrollHandler, true);
-                window.addEventListener('resize', this._portalScrollHandler);
-            } catch (e) {}
         } catch (e) {
             console.warn('hover-modal: portal creation failed', e);
             try { this._removePortal(); } catch (er) {}
@@ -714,28 +758,18 @@ class HoverModal {
             if (animateBack && origin && origin instanceof HTMLElement) {
                 try {
                     const oRect = origin.getBoundingClientRect();
-                    // compute current clone rect and required deltas
-                    const cRect = clone.getBoundingClientRect();
-                    const dx = oRect.left - cRect.left;
-                    const dy = oRect.top - cRect.top;
-                    const scale = (cRect.width > 0) ? (oRect.width / cRect.width) : 1;
-
-                    // ensure clone will transition only transform/opacity (more performant)
-                    clone.style.transition = 'transform 320ms cubic-bezier(.22,.9,.23,1), opacity 220ms ease';
+                    // ensure clone has fixed positioning and will transition
+                    // use slightly longer transform timing with ease-out for smoother motion
+                    clone.style.transition = 'transform 200ms cubic-bezier(.22,.9,.23,1), left 200ms cubic-bezier(.22,.9,.23,1), top 200ms cubic-bezier(.22,.9,.23,1), width 200ms cubic-bezier(.22,.9,.23,1), height 200ms cubic-bezier(.22,.9,.23,1), opacity 200ms ease';
+                    // make sure clone is visible during animation
                     clone.style.pointerEvents = 'none';
-
-                    // Remove hover class so computed transform is the starting point, then
-                    // set target transform to translate the clone to the origin and scale it.
-                    try { clone.classList.remove('hover-zoom'); } catch(e){}
-
-                    // apply transform to animate back. Using translate3d + scale is
-                    // smoother and resilient to scroll because it doesn't change layout.
-                    requestAnimationFrame(() => {
-                        try {
-                            clone.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(${scale})`;
-                            clone.style.opacity = '1';
-                        } catch (e) {}
-                    });
+                    // set target position/size to match origin
+                    clone.style.left = `${oRect.left}px`;
+                    clone.style.top = `${oRect.top}px`;
+                    clone.style.width = `${Math.round(oRect.width)}px`;
+                    clone.style.height = `${Math.round(oRect.height)}px`;
+                    // remove hover-zoom (scale) so it animates back
+                    clone.classList.remove('hover-zoom');
 
                     // wait for transitionend or timeout
                     const cleanup = () => {
@@ -744,23 +778,24 @@ class HoverModal {
                         // restore origin visibility and mark portal inactive
                         try { origin.style.visibility = ''; } catch (e) {}
                         this._portalActive = false;
-                        // remove scroll/resize handlers if present
-                        try { if (this._portalScrollHandler) { window.removeEventListener('scroll', this._portalScrollHandler, true); window.removeEventListener('resize', this._portalScrollHandler); this._portalScrollHandler = null; } } catch(e){}
-                        this._portalViewport = null;
                     };
                     const onEnd = (ev) => {
-                        if (ev && ev.propertyName && ev.propertyName.indexOf('transform') === -1 && ev.propertyName.indexOf('opacity') === -1) return;
+                        // accept left/top/transform/width/height
+                        if (ev && ev.propertyName && ['left','top','transform','width','height','opacity'].indexOf(ev.propertyName) === -1) return;
                         try { clone.removeEventListener('transitionend', onEnd); } catch(e){}
                         cleanup();
                         if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
                     };
                     try { clone.addEventListener('transitionend', onEnd); } catch(e){}
-                    // safety timeout slightly longer than transition
+                    // safety timeout
                     this._portalTimeout = setTimeout(() => {
                         try { clone.removeEventListener('transitionend', onEnd); } catch(e){}
                         cleanup();
                         if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
-                    }, 420);
+                    }, 260);
+                    // safety: slightly longer than transition to ensure complete
+                    // fallback cleanup if transitionend doesn't fire
+                    // (already set above to 260ms)
                     return;
                 } catch (e) {
                     console.warn('hover-modal: portal animateBack failed', e);
@@ -775,9 +810,6 @@ class HoverModal {
             if (this._currentOrigin && this._currentOrigin.style) {
                 try { this._currentOrigin.style.visibility = ''; } catch (e) {}
             }
-            // remove scroll/resize handlers if present
-            try { if (this._portalScrollHandler) { window.removeEventListener('scroll', this._portalScrollHandler, true); window.removeEventListener('resize', this._portalScrollHandler); this._portalScrollHandler = null; } } catch(e){}
-            this._portalViewport = null;
             this._portalActive = false;
             if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
         } catch (e) {}
