@@ -1323,6 +1323,14 @@ button:focus {
     overflow: visible !important;
 }
 
+/* Ensure carousel wrappers keep horizontal scrolling (pagination relies on it)
+   but allow items to overflow vertically when scaled. This overrides any
+   accidental `overflow: visible` that disables horizontal scrolling. */
+#carousel-wrapper, #series-carousel-wrapper {
+    overflow-x: auto !important;
+    overflow-y: visible !important;
+}
+
 /* While scaling down, keep the high z-index until the transform transition ends */
 .hover-zoom.hover-zoom-closing {
     transform: translateX(0) scale(1);
@@ -3173,9 +3181,7 @@ ease-out;
     right: 0;
     transform: translateY(-50%);
     pointer-events: none;
-    /* Elevado por encima de los items escalados (hover-zoom usa z-index: 10900)
-       para evitar que los elementos desbordados intercepten los clicks de navegación */
-    z-index: 11100;
+    z-index: 1100;
 }
 
 .carousel-nav-btn {
