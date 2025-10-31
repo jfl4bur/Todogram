@@ -732,7 +732,9 @@ class HoverModal {
                     const oRect = origin.getBoundingClientRect();
                     // ensure clone has fixed positioning and will transition
                     // use slightly longer transform timing with ease-out for smoother motion
-                    clone.style.transition = 'transform 200ms cubic-bezier(.22,.9,.23,1), left 200ms cubic-bezier(.22,.9,.23,1), top 200ms cubic-bezier(.22,.9,.23,1), width 200ms cubic-bezier(.22,.9,.23,1), height 200ms cubic-bezier(.22,.9,.23,1), opacity 200ms ease';
+                    // Use ease-out timing and avoid overly springy bezier to prevent
+                    // elastic-looking rebounds observed in the catalog view.
+                    clone.style.transition = 'transform 220ms ease-out, left 220ms ease-out, top 220ms ease-out, width 220ms ease-out, height 220ms ease-out, opacity 180ms ease-out';
                     // make sure clone is visible during animation
                     clone.style.pointerEvents = 'none';
                     // set target position/size to match origin. If the clone is
