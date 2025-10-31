@@ -253,6 +253,10 @@ class EpisodiosSeriesCarousel {
     }
     constructor() {
         this.wrapper = document.getElementById('episodios-series-carousel-wrapper');
+        if (this.wrapper) {
+            const _t = ensureCarouselTrack(this.wrapper) || this.wrapper;
+            if (_t !== this.wrapper) { this._originalWrapper = this.wrapper; this.wrapper = _t; }
+        }
         this.skeleton = document.getElementById('episodios-series-carousel-skeleton');
         this.progressBar = null;
         this.carouselNav = document.getElementById('episodios-series-carousel-nav');
@@ -705,6 +709,10 @@ class EpisodiosAnimesCarousel {
     }
     constructor() {
         this.wrapper = document.getElementById('episodios-animes-carousel-wrapper');
+        if (this.wrapper) {
+            const _t = ensureCarouselTrack(this.wrapper) || this.wrapper;
+            if (_t !== this.wrapper) { this._originalWrapper = this.wrapper; this.wrapper = _t; }
+        }
         this.skeleton = document.getElementById('episodios-animes-carousel-skeleton');
         this.progressBar = null;
         this.carouselNav = document.getElementById('episodios-animes-carousel-nav');
@@ -1016,6 +1024,10 @@ class EpisodiosDocumentalesCarousel {
     }
     constructor() {
         this.wrapper = document.getElementById('episodios-documentales-carousel-wrapper');
+        if (this.wrapper) {
+            const _t = ensureCarouselTrack(this.wrapper) || this.wrapper;
+            if (_t !== this.wrapper) { this._originalWrapper = this.wrapper; this.wrapper = _t; }
+        }
         this.skeleton = document.getElementById('episodios-documentales-carousel-skeleton');
         this.progressBar = null;
         this.carouselNav = document.getElementById('episodios-documentales-carousel-nav');
@@ -1279,6 +1291,10 @@ class AnimesCarousel {
     constructor() {
         console.log("AnimesCarousel: Constructor iniciado");
         this.wrapper = document.getElementById('animes-carousel-wrapper');
+        if (this.wrapper) {
+            const _t = ensureCarouselTrack(this.wrapper) || this.wrapper;
+            if (_t !== this.wrapper) { this._originalWrapper = this.wrapper; this.wrapper = _t; }
+        }
         this.skeleton = document.getElementById('animes-carousel-skeleton');
         this.progressBar = null;
         this.carouselNav = document.getElementById('animes-carousel-nav');
@@ -1612,6 +1628,10 @@ class AnimesCarousel {
 class Carousel {
     constructor() {
         this.wrapper = document.getElementById('carousel-wrapper');
+        if (this.wrapper) {
+            const _t = ensureCarouselTrack(this.wrapper) || this.wrapper;
+            if (_t !== this.wrapper) { this._originalWrapper = this.wrapper; this.wrapper = _t; }
+        }
         this.skeleton = document.getElementById('carousel-skeleton');
         this.progressBar = document.querySelector('.carousel-progress-bar');
         this.carouselNav = document.getElementById('carousel-nav');
@@ -2016,6 +2036,10 @@ class SeriesCarousel {
     constructor() {
         console.log("SeriesCarousel: Constructor iniciado");
         this.wrapper = document.getElementById('series-carousel-wrapper');
+        if (this.wrapper) {
+            const _t = ensureCarouselTrack(this.wrapper) || this.wrapper;
+            if (_t !== this.wrapper) { this._originalWrapper = this.wrapper; this.wrapper = _t; }
+        }
         this.skeleton = document.getElementById('series-carousel-skeleton');
         this.progressBar = null; // Se configurará después de verificar que wrapper existe
         this.carouselNav = document.getElementById('series-carousel-nav');
@@ -2528,6 +2552,10 @@ class DocumentalesCarousel {
     constructor() {
         console.log("DocumentalesCarousel: Constructor iniciado");
         this.wrapper = document.getElementById('documentales-carousel-wrapper');
+        if (this.wrapper) {
+            const _t = ensureCarouselTrack(this.wrapper) || this.wrapper;
+            if (_t !== this.wrapper) { this._originalWrapper = this.wrapper; this.wrapper = _t; }
+        }
         this.skeleton = document.getElementById('documentales-carousel-skeleton');
         this.progressBar = null;
         this.carouselNav = document.getElementById('documentales-carousel-nav');
