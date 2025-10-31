@@ -360,8 +360,8 @@ class HoverModal {
                     // hide overlay immediately when modal finished closing
                     this.modalOverlay.style.display = 'none';
                     this.modalOverlay.style.pointerEvents = 'none';
-                    // remove any portal clone and restore origin visibility
-                    try { this._removePortal(); } catch (e) {}
+                    // animate portal clone back to origin and restore origin visibility
+                    try { this._removePortal(true); } catch (e) {}
                     window.isModalOpen = false;
                     window.activeItem = null;
                     window.hoverModalItem = null;
@@ -675,7 +675,9 @@ class HoverModal {
             clone.style.width = `${Math.round(rect.width)}px`;
             clone.style.height = `${Math.round(rect.height)}px`;
             clone.style.margin = '0';
-            clone.style.zIndex = '20000';
+            // place clone under modal hover content: modal-content uses z-index ~1001
+            // choose 1000 so the cloned item appears beneath the modal but above page
+            clone.style.zIndex = '1000';
             clone.style.pointerEvents = 'none';
             clone.style.boxSizing = 'border-box';
 
@@ -703,8 +705,54 @@ class HoverModal {
         }
     }
 
-    _removePortal() {
+    _removePortal(animateBack = false) {
         try {
+            if (!this._portalEl) return;
+            const clone = this._portalEl;
+            const origin = this._currentOrigin;
+            // If requested, animate the clone back to the origin rect before removing
+            if (animateBack && origin && origin instanceof HTMLElement) {
+                try {
+                    const oRect = origin.getBoundingClientRect();
+                    // ensure clone has fixed positioning and will transition
+                    clone.style.transition = 'transform 140ms cubic-bezier(.2,.8,.2,1), left 160ms ease, top 160ms ease, width 160ms ease, height 160ms ease, opacity 160ms ease';
+                    // make sure clone is visible during animation
+                    clone.style.pointerEvents = 'none';
+                    // set target position/size to match origin
+                    clone.style.left = `${oRect.left}px`;
+                    clone.style.top = `${oRect.top}px`;
+                    clone.style.width = `${Math.round(oRect.width)}px`;
+                    clone.style.height = `${Math.round(oRect.height)}px`;
+                    // remove hover-zoom (scale) so it animates back
+                    clone.classList.remove('hover-zoom');
+
+                    // wait for transitionend or timeout
+                    const cleanup = () => {
+                        try { if (clone && clone.parentElement) clone.parentElement.removeChild(clone); } catch (e) {}
+                        this._portalEl = null;
+                        try { origin.style.visibility = ''; } catch (e) {}
+                    };
+                    const onEnd = (ev) => {
+                        // accept left/top/transform/width/height
+                        if (ev && ev.propertyName && ['left','top','transform','width','height','opacity'].indexOf(ev.propertyName) === -1) return;
+                        try { clone.removeEventListener('transitionend', onEnd); } catch(e){}
+                        cleanup();
+                        if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
+                    };
+                    try { clone.addEventListener('transitionend', onEnd); } catch(e){}
+                    // safety timeout
+                    this._portalTimeout = setTimeout(() => {
+                        try { clone.removeEventListener('transitionend', onEnd); } catch(e){}
+                        cleanup();
+                        if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
+                    }, 260);
+                    return;
+                } catch (e) {
+                    console.warn('hover-modal: portal animateBack failed', e);
+                    // fallthrough to immediate removal
+                }
+            }
+
             if (this._portalEl && this._portalEl.parentElement) {
                 try { this._portalEl.parentElement.removeChild(this._portalEl); } catch (e) {}
             }
