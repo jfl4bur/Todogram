@@ -184,39 +184,51 @@ class HoverModal {
 
         // Compute modal start scale so it appears to grow from the item's size
         try {
-            const rect = itemElement.getBoundingClientRect();
-            const modalWidth = parseFloat(getComputedStyle(this.modalContent).width) || 1;
-            const startScale = Math.max(0.25, Math.min(1, rect.width / modalWidth));
-            this.modalContent.style.setProperty('--modal-start-scale', String(startScale));
-        } catch (e) {}
+                    const oRect = origin.getBoundingClientRect();
+                    // compute current clone rect and required deltas
+                    const cRect = clone.getBoundingClientRect();
+                    const dx = oRect.left - cRect.left;
+                    const dy = oRect.top - cRect.top;
+                    const scale = (cRect.width > 0) ? (oRect.width / cRect.width) : 1;
 
-        // Show sequence: ensure the origin finishes scaling first, then animate modal from item-size to full
-        try {
-                const origin = this._currentOrigin;
-                const showModalNow = () => {
-                    // force reflow so variable takes effect
-                    void this.modalContent.offsetWidth;
-                    // cancel any pending modal close fallback
-                    try { if (this._modalCloseTimeout) { clearTimeout(this._modalCloseTimeout); this._modalCloseTimeout = null; } } catch(e){}
-                    this.modalContent.classList.add('show');
-                };
+                    // ensure clone will transition only transform/opacity (more performant)
+                    clone.style.transition = 'transform 300ms cubic-bezier(.22,.9,.23,1), opacity 200ms ease';
+                    clone.style.pointerEvents = 'none';
 
-                // If we created a portal clone for the origin, wait for the portal's
-                // transition to end (or timeout) before showing the modal. Otherwise
-                // wait for the origin transition as before.
-                let waited = false;
-                const waitTarget = (this._portalEl && this._portalEl.classList && this._portalEl.classList.contains('hover-zoom')) ? this._portalEl : origin;
-                if (waitTarget) {
-                    const onEnd = (ev) => {
-                        if (ev && ev.propertyName && ev.propertyName.indexOf('transform') === -1) return;
-                        try { waitTarget.removeEventListener('transitionend', onEnd); } catch(e){}
-                        if (!waited) { waited = true; showModalNow(); }
+                    // Remove hover class so computed transform is the starting point, then
+                    // set target transform to translate the clone to the origin and scale it.
+                    try { clone.classList.remove('hover-zoom'); } catch(e){}
+
+                    // apply transform to animate back. Using translate3d + scale is
+                    // smoother and resilient to scroll because it doesn't change layout.
+                    // Start the transition by setting the target transform.
+                    // Use requestAnimationFrame to ensure style mutations are flushed.
+                    requestAnimationFrame(() => {
+                        try {
+                            clone.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(${scale})`;
+                        } catch (e) {}
+                    });
+
+                    // wait for transitionend or timeout
+                    const cleanup = () => {
+                        try { if (clone && clone.parentElement) clone.parentElement.removeChild(clone); } catch (e) {}
+                        this._portalEl = null;
+                        try { origin.style.visibility = ''; } catch (e) {}
+                        this._portalActive = false;
                     };
-                    try { waitTarget.addEventListener('transitionend', onEnd); } catch(e){}
-                    setTimeout(() => { if (!waited) { waited = true; try { waitTarget.removeEventListener('transitionend', onEnd); } catch(e){} showModalNow(); } }, 180);
-                } else {
-                    showModalNow();
-                }
+                    const onEnd = (ev) => {
+                        if (ev && ev.propertyName && ev.propertyName.indexOf('transform') === -1 && ev.propertyName.indexOf('opacity') === -1) return;
+                        try { clone.removeEventListener('transitionend', onEnd); } catch(e){}
+                        cleanup();
+                        if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
+                    };
+                    try { clone.addEventListener('transitionend', onEnd); } catch(e){}
+                    // safety timeout slightly longer than transition
+                    this._portalTimeout = setTimeout(() => {
+                        try { clone.removeEventListener('transitionend', onEnd); } catch(e){}
+                        cleanup();
+                        if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
+                    }, 380);
         } catch (e) {
             // fallback: just show
             try { this.modalContent.classList.add('show'); } catch (e) {}
