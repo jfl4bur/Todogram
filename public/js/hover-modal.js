@@ -184,55 +184,11 @@ class HoverModal {
 
         // Compute modal start scale so it appears to grow from the item's size
         try {
-                    const oRect = origin.getBoundingClientRect();
-                    // compute current clone rect and required deltas
-                    const cRect = clone.getBoundingClientRect();
-                    const dx = oRect.left - cRect.left;
-                    const dy = oRect.top - cRect.top;
-                    const scale = (cRect.width > 0) ? (oRect.width / cRect.width) : 1;
-
-                    // ensure clone will transition only transform/opacity (more performant)
-                    clone.style.transition = 'transform 300ms cubic-bezier(.22,.9,.23,1), opacity 200ms ease';
-                    clone.style.pointerEvents = 'none';
-
-                    // Remove hover class so computed transform is the starting point, then
-                    // set target transform to translate the clone to the origin and scale it.
-                    try { clone.classList.remove('hover-zoom'); } catch(e){}
-
-                    // apply transform to animate back. Using translate3d + scale is
-                    // smoother and resilient to scroll because it doesn't change layout.
-                    // Start the transition by setting the target transform.
-                    // Use requestAnimationFrame to ensure style mutations are flushed.
-                    requestAnimationFrame(() => {
-                        try {
-                            clone.style.transform = `translate3d(${dx}px, ${dy}px, 0) scale(${scale})`;
-                        } catch (e) {}
-                    });
-
-                    // wait for transitionend or timeout
-                    const cleanup = () => {
-                        try { if (clone && clone.parentElement) clone.parentElement.removeChild(clone); } catch (e) {}
-                        this._portalEl = null;
-                        try { origin.style.visibility = ''; } catch (e) {}
-                        this._portalActive = false;
-                    };
-                    const onEnd = (ev) => {
-                        if (ev && ev.propertyName && ev.propertyName.indexOf('transform') === -1 && ev.propertyName.indexOf('opacity') === -1) return;
-                        try { clone.removeEventListener('transitionend', onEnd); } catch(e){}
-                        cleanup();
-                        if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
-                    };
-                    try { clone.addEventListener('transitionend', onEnd); } catch(e){}
-                    // safety timeout slightly longer than transition
-                    this._portalTimeout = setTimeout(() => {
-                        try { clone.removeEventListener('transitionend', onEnd); } catch(e){}
-                        cleanup();
-                        if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
-                    }, 380);
-        } catch (e) {
-            // fallback: just show
-            try { this.modalContent.classList.add('show'); } catch (e) {}
-        }
+            const rect = itemElement.getBoundingClientRect();
+            const modalWidth = parseFloat(getComputedStyle(this.modalContent).width) || 1;
+            const startScale = Math.max(0.25, Math.min(1, rect.width / modalWidth));
+            this.modalContent.style.setProperty('--modal-start-scale', String(startScale));
+        } catch (e) {}
 
         // Attach scroll/resize listeners only when necessary.
         // If modalContent is inside the same scroll container as the item, the
@@ -773,9 +729,24 @@ class HoverModal {
                     clone.style.transition = 'transform 200ms cubic-bezier(.22,.9,.23,1), left 200ms cubic-bezier(.22,.9,.23,1), top 200ms cubic-bezier(.22,.9,.23,1), width 200ms cubic-bezier(.22,.9,.23,1), height 200ms cubic-bezier(.22,.9,.23,1), opacity 200ms ease';
                     // make sure clone is visible during animation
                     clone.style.pointerEvents = 'none';
-                    // set target position/size to match origin
-                    clone.style.left = `${oRect.left}px`;
-                    clone.style.top = `${oRect.top}px`;
+                    // set target position/size to match origin. If the clone is
+                    // inside a parent (not body) its left/top must be relative
+                    // to that parent's client rect.
+                    try {
+                        const p = clone.parentElement;
+                        if (p && p !== document.body) {
+                            const pRect = p.getBoundingClientRect();
+                            clone.style.left = `${Math.round(oRect.left - pRect.left)}px`;
+                            clone.style.top = `${Math.round(oRect.top - pRect.top)}px`;
+                        } else {
+                            // positioned relative to viewport
+                            clone.style.left = `${Math.round(oRect.left)}px`;
+                            clone.style.top = `${Math.round(oRect.top)}px`;
+                        }
+                    } catch (e) {
+                        clone.style.left = `${Math.round(oRect.left)}px`;
+                        clone.style.top = `${Math.round(oRect.top)}px`;
+                    }
                     clone.style.width = `${Math.round(oRect.width)}px`;
                     clone.style.height = `${Math.round(oRect.height)}px`;
                     // remove hover-zoom (scale) so it animates back
