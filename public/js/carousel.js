@@ -24,6 +24,9 @@ function ensureCarouselTrack(wrapper) {
     while (wrapper.firstChild) track.appendChild(wrapper.firstChild);
     wrapper.appendChild(track);
 
+    // Mark the outer wrapper so CSS can relax overflow on inner items when needed
+    try { wrapper.classList.add('carousel-allow-overflow'); } catch (e) {}
+
     // Inline minimal styles to ensure horizontal scrolling works even if outer wrapper is overflow: visible
     track.style.display = 'flex';
     track.style.gap = getComputedStyle(wrapper).getPropertyValue('--carousel-gap') || '8px';

@@ -765,6 +765,24 @@ button:focus {
     z-index: 2;
 }
 
+/* When a carousel wrapper requests visual overflow (JS adds .carousel-allow-overflow),
+   allow items and poster containers to overflow vertically so hover/zoom visuals can escape
+   the normal clipping. We scope this narrowly to avoid breaking other layouts. */
+.carousel-allow-overflow {
+    overflow: visible !important;
+}
+.carousel-allow-overflow .carousel-track {
+    overflow-x: auto !important; /* keep horizontal scrolling */
+    overflow-y: visible !important;
+}
+.carousel-allow-overflow .carousel-track .custom-carousel-item,
+.carousel-allow-overflow .carousel-track .poster-container {
+    overflow: visible !important;
+}
+.carousel-allow-overflow .detail-background {
+    z-index: 9999 !important; /* ensure it sits above siblings when displayed */
+}
+
 .carousel-title {
     font-size: 1.8rem;
     font-weight: 600;
