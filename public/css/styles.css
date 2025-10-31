@@ -1275,6 +1275,34 @@ button:focus {
 .catalogo-item img{width:100%;/* height:auto; */border-radius:0;object-fit: fill;background:#232323}
 .catalogo-item .title{margin-top:8px;font-size:14px;text-align:center;color:var(--text-color)}
 
+/* Ensure catalog originals never perform the scale transform locally.
+   The portal clone handles the visual scale so the catalog layout and
+   hover behaviour (lift) remain consistent and carousels aren't affected.
+   These rules are scoped to catalog containers only to avoid touching
+   global carousel selectors. */
+.catalogo-grid .catalogo-item.hover-zoom,
+#catalogo-grid-page .catalogo-item.hover-zoom,
+.catalogo-item.hover-zoom {
+    /* only apply the translate used for small placement shifts; no scale */
+    transform: translateX(var(--hover-translate-x, 0));
+    transition: transform 120ms cubic-bezier(.2,.8,.2,1);
+    z-index: 10900;
+    position: relative;
+    will-change: transform;
+}
+
+/* In the catalog, keep the small 4px lift on hover for non-portal items
+   (this preserves the subtle motion users expect). Scoped so it doesn't
+   override carousel hover scale rules. */
+@media (hover: hover) and (pointer: fine) {
+    .catalogo-grid .catalogo-item:not(.hover-zoom):hover,
+    #catalogo-grid-page .catalogo-item:not(.hover-zoom):hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.6);
+        z-index: 10;
+    }
+}
+
 /* Improve touch responsiveness on mobile: eliminate delay/gesture ambiguity */
 .catalogo-item, .catalogo-item .poster-container {
     touch-action: manipulation;
@@ -1345,18 +1373,6 @@ button:focus {
 .hover-portal-clone.hover-zoom {
     transform: translateX(var(--hover-translate-x, 0)) scale(1.3);
     transition: transform 200ms cubic-bezier(.22,.9,.23,1), opacity 160ms ease;
-}
-
-/* When a portal clone is active, disable original-item transforms/transitions
-   to avoid duplicated/conflicting animations (useful for catálogo where
-   layout/hover interactions are sensitive). The portal clone performs the
-   visual scale while the original stays static/hidden. */
-body.hover-portal-active .catalogo-item,
-body.hover-portal-active .catalogo-item *,
-body.hover-portal-active .custom-carousel-item,
-body.hover-portal-active .custom-carousel-item * {
-    transition: none !important;
-    transform: none !important;
 }
 
 /* While scaling down, keep the high z-index until the transform transition ends */

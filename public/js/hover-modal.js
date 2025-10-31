@@ -715,8 +715,6 @@ class HoverModal {
             this._portalEl = clone;
             // mark portal active so we skip origin animations
             this._portalActive = true;
-            // add a body-level marker so CSS can disable original-item animations
-            try { document.body.classList.add('hover-portal-active'); } catch (e) {}
         } catch (e) {
             console.warn('hover-modal: portal creation failed', e);
             try { this._removePortal(); } catch (er) {}
@@ -731,81 +729,61 @@ class HoverModal {
             // If requested, animate the clone back to the origin rect before removing
             if (animateBack && origin && origin instanceof HTMLElement) {
                 try {
-                    // Use transform-based return animation (translate3d + scale)
-                    // This avoids layout thrash and keeps motion smooth regardless
-                    // of whether the clone is positioned in body or inside another parent.
-                    const cRect = clone.getBoundingClientRect();
                     const oRect = origin.getBoundingClientRect();
-
-                    // Compute delta from clone to origin in viewport space
-                    const deltaX = Math.round(oRect.left - cRect.left);
-                    const deltaY = Math.round(oRect.top - cRect.top);
-                    const scaleX = (oRect.width && cRect.width) ? (oRect.width / cRect.width) : 1;
-                    const scaleY = (oRect.height && cRect.height) ? (oRect.height / cRect.height) : scaleX;
-                    const targetScale = (Math.abs(scaleX - scaleY) < 0.08) ? ((scaleX + scaleY) / 2) : scaleX;
-
-                    // Ensure clone uses transform for animation
-                    clone.style.transition = 'transform 220ms cubic-bezier(.22,.9,.23,1), opacity 180ms ease';
-                    clone.style.willChange = 'transform, opacity';
+                    // ensure clone has fixed positioning and will transition
+                    // use slightly longer transform timing with ease-out for smoother motion
+                    clone.style.transition = 'transform 200ms cubic-bezier(.22,.9,.23,1), left 200ms cubic-bezier(.22,.9,.23,1), top 200ms cubic-bezier(.22,.9,.23,1), width 200ms cubic-bezier(.22,.9,.23,1), height 200ms cubic-bezier(.22,.9,.23,1), opacity 200ms ease';
+                    // make sure clone is visible during animation
                     clone.style.pointerEvents = 'none';
-
-                    // Translate/scale relative to current position. Because getBoundingClientRect
-                    // returns viewport coords, using translate3d(deltaX, deltaY, 0) will move
-                    // the clone towards the origin regardless of its offset parent.
-                    // Capture current computed transform so we can animate smoothly
-                    // from the clone's current visual state to the origin.
+                    // set target position/size to match origin. If the clone is
+                    // inside a parent (not body) its left/top must be relative
+                    // to that parent's client rect.
                     try {
-                        const cs = getComputedStyle(clone);
-                        const currentTransform = cs.transform && cs.transform !== 'none' ? cs.transform : 'none';
-                        // lock current transform inline to prevent CSS class removal from jumping
-                        clone.style.transform = currentTransform;
-                    } catch (er) {}
-
-                    // force reflow, remove hover class and then apply final transform
-                    void clone.offsetWidth;
+                        const p = clone.parentElement;
+                        if (p && p !== document.body) {
+                            const pRect = p.getBoundingClientRect();
+                            clone.style.left = `${Math.round(oRect.left - pRect.left)}px`;
+                            clone.style.top = `${Math.round(oRect.top - pRect.top)}px`;
+                        } else {
+                            // positioned relative to viewport
+                            clone.style.left = `${Math.round(oRect.left)}px`;
+                            clone.style.top = `${Math.round(oRect.top)}px`;
+                        }
+                    } catch (e) {
+                        clone.style.left = `${Math.round(oRect.left)}px`;
+                        clone.style.top = `${Math.round(oRect.top)}px`;
+                    }
+                    clone.style.width = `${Math.round(oRect.width)}px`;
+                    clone.style.height = `${Math.round(oRect.height)}px`;
+                    // remove hover-zoom (scale) so it animates back
                     clone.classList.remove('hover-zoom');
-                    clone.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0) scale(${targetScale})`;
 
+                    // wait for transitionend or timeout
                     const cleanup = () => {
                         try { if (clone && clone.parentElement) clone.parentElement.removeChild(clone); } catch (e) {}
                         this._portalEl = null;
-                        // mark portal inactive
+                        // restore origin visibility and mark portal inactive
+                        try { origin.style.visibility = ''; } catch (e) {}
                         this._portalActive = false;
-                        // remove body-level marker now that visual handoff is complete
-                        try { document.body.classList.remove('hover-portal-active'); } catch (e) {}
-                        // Show origin but avoid triggering its transition/transform jump.
-                        // Temporarily disable transitions on the origin, make it visible,
-                        // force reflow, then restore transition so future hovers animate.
-                        try {
-                            if (origin && origin.style) {
-                                // store previous inline transition to restore later
-                                const prevTransition = origin.style.transition || '';
-                                origin.style.transition = 'none';
-                                origin.style.visibility = '';
-                                // force reflow
-                                void origin.offsetWidth;
-                                // restore transition shortly after to re-enable hover animations
-                                setTimeout(() => {
-                                    try { origin.style.transition = prevTransition; } catch (e) {}
-                                }, 40);
-                            }
-                        } catch (e) {}
                         try { this._detachPortalScrollListeners(); } catch (e) {}
                     };
-
                     const onEnd = (ev) => {
-                        if (ev && ev.propertyName && ev.propertyName.indexOf('transform') === -1) return;
+                        // accept left/top/transform/width/height
+                        if (ev && ev.propertyName && ['left','top','transform','width','height','opacity'].indexOf(ev.propertyName) === -1) return;
                         try { clone.removeEventListener('transitionend', onEnd); } catch(e){}
                         cleanup();
                         if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
                     };
                     try { clone.addEventListener('transitionend', onEnd); } catch(e){}
-                    // safety timeout slightly longer than transition
+                    // safety timeout
                     this._portalTimeout = setTimeout(() => {
                         try { clone.removeEventListener('transitionend', onEnd); } catch(e){}
                         cleanup();
                         if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
-                    }, 300);
+                    }, 260);
+                    // safety: slightly longer than transition to ensure complete
+                    // fallback cleanup if transitionend doesn't fire
+                    // (already set above to 260ms)
                     return;
                 } catch (e) {
                     console.warn('hover-modal: portal animateBack failed', e);
@@ -818,20 +796,10 @@ class HoverModal {
                 try { this._portalEl.parentElement.removeChild(this._portalEl); } catch (e) {}
             }
             this._portalEl = null;
+            if (this._currentOrigin && this._currentOrigin.style) {
+                try { this._currentOrigin.style.visibility = ''; } catch (e) {}
+            }
             this._portalActive = false;
-            // remove body-level marker used to disable original animations
-            try { document.body.classList.remove('hover-portal-active'); } catch (e) {}
-            // Restore origin visibility safely (disable transitions briefly to avoid jumps)
-            try {
-                const origin = this._currentOrigin;
-                if (origin && origin.style) {
-                    const prevTransition = origin.style.transition || '';
-                    origin.style.transition = 'none';
-                    origin.style.visibility = '';
-                    void origin.offsetWidth;
-                    setTimeout(() => { try { origin.style.transition = prevTransition; } catch(e) {} }, 40);
-                }
-            } catch (e) {}
             if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
         } catch (e) {}
     }
