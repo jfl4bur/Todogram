@@ -802,6 +802,26 @@ class HoverModal {
                             // ensure clone is visible and non-interactive
                             clone.style.pointerEvents = 'none';
                             clone.style.transition = 'transform 260ms ease-out, opacity 180ms ease-out';
+                            // ensure GPU-acceleration hints
+                            clone.style.willChange = 'transform';
+
+                            // Force the transform-origin to match the origin so scaling
+                            // appears to grow/shrink toward the right anchor.
+                            try {
+                                const originTO = origin.style.getPropertyValue('--hover-transform-origin') || getComputedStyle(origin).transformOrigin || 'center center';
+                                clone.style.transformOrigin = originTO;
+                            } catch (e) {}
+
+                            // Disable transitions on all children inside the clone so that
+                            // only the clone's transform animates. This prevents nested
+                            // elements from animating and causing apparent rebounding.
+                            try {
+                                const inner = clone.querySelectorAll('*');
+                                inner.forEach((n) => {
+                                    try { n.style.transition = 'none'; } catch (e) {}
+                                });
+                                if (window.HOVER_MODAL_DEBUG) console.debug('hover-modal:disabled-child-transitions', inner.length);
+                            } catch (e) {}
 
                             // set initial transform to current hover visual if not already
                             // read computed style for transform; fallback to scale(1.3)
@@ -809,7 +829,6 @@ class HoverModal {
                                 const cs = getComputedStyle(clone);
                                 const currentTransform = cs.transform && cs.transform !== 'none' ? cs.transform : null;
                                 if (!currentTransform) {
-                                    // best-effort: if hover scale was 1.3, start from that
                                     clone.style.transform = 'translate3d(0px,0px,0px) scale(1.3)';
                                 }
                             } catch (e) {
