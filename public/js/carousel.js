@@ -1,3 +1,6 @@
+// Quick runtime sanity log to help debug: indica si el archivo JS se cargó
+try { console.log('carousel.js cargado — inicio de ejecución'); } catch (e) {}
+
 // Utility: ensure there is an inner scrollable track when the outer wrapper uses overflow: visible
 // This allows items to visually overflow (por ejemplo al hacer zoom) mientras que el scroll horizontal
 // sigue funcionando correctamente dentro de `.carousel-track`.
