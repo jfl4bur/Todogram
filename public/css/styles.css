@@ -750,7 +750,20 @@ button:focus {
     display: none;
 }
 
-
+.carousel-overlay {
+    position: absolute;
+    top: 60%;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 15px;
+    color: white;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
+    transform: translateY(20px);
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+    z-index: 2;
+}
 
 .carousel-title {
     font-size: 1.8rem;
@@ -1322,9 +1335,8 @@ button:focus {
    escape ancestor clipping without changing carousel overflow behavior. */
 .hover-portal-clone {
     pointer-events: none;
-    will-change: transform, opacity;
-    /* default transition; JS may override for the return animation */
-    transition: transform 200ms cubic-bezier(.22,.9,.23,1), opacity 150ms ease;
+    will-change: transform, left, top;
+    transition: transform 120ms cubic-bezier(.2,.8,.2,1), left 120ms ease, top 120ms ease, opacity 120ms ease;
     transform-origin: var(--hover-transform-origin, center center);
 }
 
@@ -2018,7 +2030,7 @@ button:focus {
     background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
     transform: translateY(20px);
     transition: transform 0.3s ease, opacity 0.3s ease;
-    opacity: 0 !important;
+    opacity: 0;
     z-index: 2;
 }
 
