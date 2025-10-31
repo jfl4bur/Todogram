@@ -725,11 +725,6 @@ class HoverModal {
             clone.classList.add('hover-zoom');
 
             this._portalEl = clone;
-            // record initial viewport-based position so we can lock the clone
-            // in place (prevent it from moving when the page/container scrolls)
-            this._portalInitial = { left: rect.left, top: rect.top };
-            // attach listeners to keep the portal fixed in viewport
-            this._attachPortalSyncListeners();
             // mark portal active so we skip origin animations
             this._portalActive = true;
         } catch (e) {
@@ -795,42 +790,12 @@ class HoverModal {
             if (this._portalEl && this._portalEl.parentElement) {
                 try { this._portalEl.parentElement.removeChild(this._portalEl); } catch (e) {}
             }
-            // detach any portal sync listeners
-            try { this._detachPortalSyncListeners(); } catch (e) {}
             this._portalEl = null;
             if (this._currentOrigin && this._currentOrigin.style) {
                 try { this._currentOrigin.style.visibility = ''; } catch (e) {}
             }
             this._portalActive = false;
             if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
-        } catch (e) {}
-    }
-
-    _attachPortalSyncListeners() {
-        try {
-            if (this._portalSyncAttached) return;
-            this._syncPortalPosition = this._syncPortalPosition.bind(this);
-            window.addEventListener('scroll', this._syncPortalPosition, true);
-            window.addEventListener('resize', this._syncPortalPosition);
-            this._portalSyncAttached = true;
-        } catch (e) {}
-    }
-
-    _detachPortalSyncListeners() {
-        try {
-            if (!this._portalSyncAttached) return;
-            window.removeEventListener('scroll', this._syncPortalPosition, true);
-            window.removeEventListener('resize', this._syncPortalPosition);
-            this._portalSyncAttached = false;
-            this._syncPortalPosition = null;
-        } catch (e) {}
-    }
-
-    _syncPortalPosition() {
-        try {
-            if (!this._portalEl || !this._portalInitial) return;
-            this._portalEl.style.left = `${this._portalInitial.left}px`;
-            this._portalEl.style.top = `${this._portalInitial.top}px`;
         } catch (e) {}
     }
 }
