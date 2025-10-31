@@ -100,18 +100,60 @@ function _revertOverflowForItem(item) {
         wrapper._adjustedAncestors = null;
     } catch (e) { /* silent */ }
 }
+// Portal-based hover: move detail-background to document.body so it can escape clipping.
+function _createPortalForItem(item) {
+    try {
+        if (!item) return;
+        if (item._portalElement) return;
+        const bg = item.querySelector('.detail-background');
+        if (!bg) return;
+        const rect = bg.getBoundingClientRect();
+        const portal = bg.cloneNode(true);
+        portal.classList.add('carousel-portal-detail');
+        portal.style.position = 'fixed';
+        portal.style.left = `${rect.left}px`;
+        portal.style.top = `${rect.top}px`;
+        portal.style.width = `${rect.width}px`;
+        portal.style.height = `${rect.height}px`;
+        portal.style.zIndex = '10050';
+        portal.style.display = 'block';
+        portal.style.pointerEvents = 'none';
+        document.body.appendChild(portal);
+        // hide original so we don't see duplicate
+        bg.style.display = 'none';
+        item._portalElement = portal;
+    } catch (e) { /* silent */ }
+}
 
-// Attach global pointerenter/pointerleave handlers to relax clipping during hover.
+function _removePortalForItem(item) {
+    try {
+        if (!item) return;
+        const portal = item._portalElement;
+        if (portal && portal.parentElement) portal.parentElement.removeChild(portal);
+        const bg = item.querySelector('.detail-background');
+        if (bg) bg.style.display = '';
+        item._portalElement = null;
+    } catch (e) { /* silent */ }
+}
+
+// Attach global pointerenter/pointerleave handlers to use portal approach during hover.
 document.addEventListener('pointerenter', function(e){
     try {
         const item = e.target.closest && e.target.closest('.custom-carousel-item');
-        if (item) _allowOverflowForItem(item);
+        if (item) {
+            _createPortalForItem(item);
+            // keep the old fallback to relax ancestors in case cloning isn't enough
+            _allowOverflowForItem(item);
+        }
     } catch (e) {}
 }, true);
 document.addEventListener('pointerleave', function(e){
     try {
         const item = e.target.closest && e.target.closest('.custom-carousel-item');
-        if (item) _revertOverflowForItem(item);
+        if (item) {
+            _removePortalForItem(item);
+            _revertOverflowForItem(item);
+        }
     } catch (e) {}
 }, true);
 
