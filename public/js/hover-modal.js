@@ -705,6 +705,21 @@ class HoverModal {
                 // fallback to body if insertion fails
                 try { document.body.appendChild(clone); } catch (ee) {}
             }
+            // Debug info: output rects and chosen parent when debugging is enabled
+            try {
+                if (window.HOVER_MODAL_DEBUG) {
+                    const originRectDbg = origin.getBoundingClientRect();
+                    const cloneRectDbg = clone.getBoundingClientRect();
+                    console.debug('hover-modal:portal-created', {
+                        originRect: originRectDbg,
+                        cloneRect: cloneRectDbg,
+                        portalParent: portalParent && portalParent.nodeName,
+                        useBody: useBody,
+                        hoverTransformOrigin: clone.style.getPropertyValue('--hover-transform-origin'),
+                        hoverTranslateX: clone.style.getPropertyValue('--hover-translate-x')
+                    });
+                }
+            } catch (e) {}
             // hide original to avoid duplicate visuals but keep layout
             try { origin.style.visibility = 'hidden'; } catch (e) {}
 
@@ -765,6 +780,21 @@ class HoverModal {
                             const deltaX = Math.round(oRect.left - cRect.left);
                             const deltaY = Math.round(oRect.top - cRect.top);
                             const targetScale = (cRect.width > 0) ? (oRect.width / cRect.width) : 1;
+
+                            // Debug info before animating back
+                            try {
+                                if (window.HOVER_MODAL_DEBUG) {
+                                    console.debug('hover-modal:animate-back', {
+                                        isCatalogOrigin: isCatalogOrigin,
+                                        originRect: oRect,
+                                        cloneRect: cRect,
+                                        deltaX: deltaX,
+                                        deltaY: deltaY,
+                                        targetScale: targetScale,
+                                        cloneTransformOrigin: clone.style.transformOrigin || getComputedStyle(clone).transformOrigin
+                                    });
+                                }
+                            } catch (e) {}
 
                             // prepare transform-based animation: start from current visual
                             // state (keep current scale/translate from CSS variables) and
