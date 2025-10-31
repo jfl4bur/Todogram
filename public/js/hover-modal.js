@@ -563,6 +563,22 @@ class HoverModal {
         const position = this.calculateModalPosition(this._currentOrigin);
         this.modalContent.style.left = `${position.left}px`;
         this.modalContent.style.top = `${position.top}px`;
+        // If a portal clone exists, keep it aligned with the modal (fixed to viewport)
+        try {
+            if (this._portalEl && this._portalEl instanceof HTMLElement) {
+                const clone = this._portalEl;
+                // ensure clone uses fixed positioning so it doesn't move with scroll
+                try { clone.style.position = 'fixed'; } catch (e) {}
+                // compute clone rect and align its center to the modal center
+                const cRect = clone.getBoundingClientRect();
+                const left = Math.round(position.left - (cRect.width / 2));
+                const top = Math.round(position.top - (cRect.height / 2));
+                try {
+                    clone.style.left = `${left}px`;
+                    clone.style.top = `${top}px`;
+                } catch (e) {}
+            }
+        } catch (e) {}
     }
 
     // Delegated click handler for modal content (attached once in constructor)
@@ -715,10 +731,26 @@ class HoverModal {
                 clone.style.setProperty('--hover-translate-x', originTranslate);
             } catch (e) {}
 
-            // append to body and trigger the scale via class
+            // append to body
             document.body.appendChild(clone);
             // hide original to avoid duplicate visuals but keep layout
             try { origin.style.visibility = 'hidden'; } catch (e) {}
+
+            // Align clone initially with the modal center if possible so it
+            // visually appears beneath the modal and won't jump on the first scroll.
+            try {
+                const pos = this.calculateModalPosition(origin);
+                // wait for clone to render, then size and position it
+                requestAnimationFrame(() => {
+                    try {
+                        const cRect = clone.getBoundingClientRect();
+                        const left = Math.round(pos.left - (cRect.width / 2));
+                        const top = Math.round(pos.top - (cRect.height / 2));
+                        clone.style.left = `${left}px`;
+                        clone.style.top = `${top}px`;
+                    } catch (e) {}
+                });
+            } catch (e) {}
 
             // force reflow then add hover-zoom to animate
             void clone.offsetWidth;
