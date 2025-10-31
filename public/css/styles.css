@@ -1322,8 +1322,9 @@ button:focus {
    escape ancestor clipping without changing carousel overflow behavior. */
 .hover-portal-clone {
     pointer-events: none;
-    will-change: transform, left, top;
-    transition: transform 120ms cubic-bezier(.2,.8,.2,1), left 120ms ease, top 120ms ease, opacity 120ms ease;
+    will-change: transform, opacity;
+    /* default transition; JS may override for the return animation */
+    transition: transform 200ms cubic-bezier(.22,.9,.23,1), opacity 150ms ease;
     transform-origin: var(--hover-transform-origin, center center);
 }
 
