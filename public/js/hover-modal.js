@@ -563,22 +563,6 @@ class HoverModal {
         const position = this.calculateModalPosition(this._currentOrigin);
         this.modalContent.style.left = `${position.left}px`;
         this.modalContent.style.top = `${position.top}px`;
-        // If a portal clone exists, keep it aligned with the modal (fixed to viewport)
-        try {
-            if (this._portalEl && this._portalEl instanceof HTMLElement) {
-                const clone = this._portalEl;
-                // ensure clone uses fixed positioning so it doesn't move with scroll
-                try { clone.style.position = 'fixed'; } catch (e) {}
-                // compute clone rect and align its center to the modal center
-                const cRect = clone.getBoundingClientRect();
-                const left = Math.round(position.left - (cRect.width / 2));
-                const top = Math.round(position.top - (cRect.height / 2));
-                try {
-                    clone.style.left = `${left}px`;
-                    clone.style.top = `${top}px`;
-                } catch (e) {}
-            }
-        } catch (e) {}
     }
 
     // Delegated click handler for modal content (attached once in constructor)
@@ -731,26 +715,10 @@ class HoverModal {
                 clone.style.setProperty('--hover-translate-x', originTranslate);
             } catch (e) {}
 
-            // append to body
+            // append to body and trigger the scale via class
             document.body.appendChild(clone);
             // hide original to avoid duplicate visuals but keep layout
             try { origin.style.visibility = 'hidden'; } catch (e) {}
-
-            // Align clone initially with the modal center if possible so it
-            // visually appears beneath the modal and won't jump on the first scroll.
-            try {
-                const pos = this.calculateModalPosition(origin);
-                // wait for clone to render, then size and position it
-                requestAnimationFrame(() => {
-                    try {
-                        const cRect = clone.getBoundingClientRect();
-                        const left = Math.round(pos.left - (cRect.width / 2));
-                        const top = Math.round(pos.top - (cRect.height / 2));
-                        clone.style.left = `${left}px`;
-                        clone.style.top = `${top}px`;
-                    } catch (e) {}
-                });
-            } catch (e) {}
 
             // force reflow then add hover-zoom to animate
             void clone.offsetWidth;
@@ -812,21 +780,53 @@ class HoverModal {
                     // safety: slightly longer than transition to ensure complete
                     // fallback cleanup if transitionend doesn't fire
                     // (already set above to 260ms)
-                    return;
-                } catch (e) {
+                        const rect = origin.getBoundingClientRect();
+                        const clone = origin.cloneNode(true);
+                        // decide whether to attach the clone to the carousel container so it
+                        // moves natively with container scroll (matches modal behavior)
+                        const attachToContainer = (this.modalContent.parentElement === this.carouselContainer && this.carouselContainer && this.carouselContainer !== document.body);
                     console.warn('hover-modal: portal animateBack failed', e);
-                    // fallthrough to immediate removal
-                }
-            }
-
-            if (this._portalEl && this._portalEl.parentElement) {
+                        // inline styles to pin the clone to the same position. If the modal
+                        // content was moved into the carouselContainer, append the clone to
+                        // that container and use absolute positioning relative to it so the
+                        // clone scrolls with the container (matching modal). Otherwise use
+                        // fixed positioning on the body so the clone stays in viewport.
+                        if (attachToContainer) {
+                            const containerRect = this.carouselContainer.getBoundingClientRect();
+                            // position absolute inside container; account for scroll offset so
+                            // clone appears exactly over the origin element
+                            const leftInContainer = Math.round(rect.left - containerRect.left + this.carouselContainer.scrollLeft);
+                            const topInContainer = Math.round(rect.top - containerRect.top + this.carouselContainer.scrollTop);
+                            clone.style.position = 'absolute';
+                            clone.style.left = `${leftInContainer}px`;
+                            clone.style.top = `${topInContainer}px`;
+                        } else {
+                            clone.style.position = 'fixed';
+                            clone.style.left = `${rect.left}px`;
+                            clone.style.top = `${rect.top}px`;
+                        }
+                        clone.style.width = `${Math.round(rect.width)}px`;
+                        clone.style.height = `${Math.round(rect.height)}px`;
                 try { this._portalEl.parentElement.removeChild(this._portalEl); } catch (e) {}
-            }
+                        // append to the chosen parent
+                        if (attachToContainer) {
+                            // ensure container is positioned so absolute child is positioned correctly
+                            const cs = getComputedStyle(this.carouselContainer);
+                            if (cs.position === 'static') this.carouselContainer.style.position = 'relative';
+                            this.carouselContainer.appendChild(clone);
+                            this._portalAttachedToContainer = true;
+                        } else {
+                            document.body.appendChild(clone);
+                            this._portalAttachedToContainer = false;
+                        }
             this._portalEl = null;
             if (this._currentOrigin && this._currentOrigin.style) {
                 try { this._currentOrigin.style.visibility = ''; } catch (e) {}
             }
             this._portalActive = false;
+                        // mark portal active so we skip origin animations
+                        this._portalActive = true;
+                        this._portalAttachToContainer = attachToContainer;
             if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
         } catch (e) {}
     }
