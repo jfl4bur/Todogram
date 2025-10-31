@@ -773,9 +773,23 @@ class HoverModal {
                         this._portalActive = false;
                         // remove body-level marker now that visual handoff is complete
                         try { document.body.classList.remove('hover-portal-active'); } catch (e) {}
-                        // restore origin visibility after removing the body marker so
-                        // the origin can animate normally if needed
-                        try { origin.style.visibility = ''; } catch (e) {}
+                        // Show origin but avoid triggering its transition/transform jump.
+                        // Temporarily disable transitions on the origin, make it visible,
+                        // force reflow, then restore transition so future hovers animate.
+                        try {
+                            if (origin && origin.style) {
+                                // store previous inline transition to restore later
+                                const prevTransition = origin.style.transition || '';
+                                origin.style.transition = 'none';
+                                origin.style.visibility = '';
+                                // force reflow
+                                void origin.offsetWidth;
+                                // restore transition shortly after to re-enable hover animations
+                                setTimeout(() => {
+                                    try { origin.style.transition = prevTransition; } catch (e) {}
+                                }, 40);
+                            }
+                        } catch (e) {}
                         try { this._detachPortalScrollListeners(); } catch (e) {}
                     };
 
@@ -804,12 +818,20 @@ class HoverModal {
                 try { this._portalEl.parentElement.removeChild(this._portalEl); } catch (e) {}
             }
             this._portalEl = null;
-            if (this._currentOrigin && this._currentOrigin.style) {
-                try { this._currentOrigin.style.visibility = ''; } catch (e) {}
-            }
             this._portalActive = false;
             // remove body-level marker used to disable original animations
             try { document.body.classList.remove('hover-portal-active'); } catch (e) {}
+            // Restore origin visibility safely (disable transitions briefly to avoid jumps)
+            try {
+                const origin = this._currentOrigin;
+                if (origin && origin.style) {
+                    const prevTransition = origin.style.transition || '';
+                    origin.style.transition = 'none';
+                    origin.style.visibility = '';
+                    void origin.offsetWidth;
+                    setTimeout(() => { try { origin.style.transition = prevTransition; } catch(e) {} }, 40);
+                }
+            } catch (e) {}
             if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
         } catch (e) {}
     }
