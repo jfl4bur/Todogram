@@ -694,10 +694,7 @@ class HoverModal {
             // ensure clone starts unscaled so we can trigger the transition
             clone.classList.remove('hover-zoom');
 
-            // inline styles to pin the clone to the same viewport position
-            clone.style.position = 'fixed';
-            clone.style.left = `${rect.left}px`;
-            clone.style.top = `${rect.top}px`;
+            // inline styles to size the clone; positioning handled depending on parent
             clone.style.width = `${Math.round(rect.width)}px`;
             clone.style.height = `${Math.round(rect.height)}px`;
             clone.style.margin = '0';
@@ -715,8 +712,27 @@ class HoverModal {
                 clone.style.setProperty('--hover-translate-x', originTranslate);
             } catch (e) {}
 
-            // append to body and trigger the scale via class
-            document.body.appendChild(clone);
+            // Append clone to the same parent as the modalContent so it mirrors
+            // the modal's positioning (prevents it moving differently on scroll).
+            const portalParent = (this.modalContent && this.modalContent.parentElement) ? this.modalContent.parentElement : document.body;
+            if (portalParent === document.body) {
+                // fixed positioning relative to viewport
+                clone.style.position = 'fixed';
+                clone.style.left = `${rect.left}px`;
+                clone.style.top = `${rect.top}px`;
+            } else {
+                // absolute positioning relative to portalParent
+                clone.style.position = 'absolute';
+                try {
+                    const pRect = portalParent.getBoundingClientRect();
+                    clone.style.left = `${rect.left - pRect.left}px`;
+                    clone.style.top = `${rect.top - pRect.top}px`;
+                } catch (e) {
+                    clone.style.left = `${rect.left}px`;
+                    clone.style.top = `${rect.top}px`;
+                }
+            }
+            portalParent.appendChild(clone);
             // hide original to avoid duplicate visuals but keep layout
             try { origin.style.visibility = 'hidden'; } catch (e) {}
 
