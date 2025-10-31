@@ -1,3 +1,52 @@
+// Utility: ensure there is an inner scrollable track when the outer wrapper uses overflow: visible
+// This allows items to visually overflow (por ejemplo al hacer zoom) mientras que el scroll horizontal
+// sigue funcionando correctamente dentro de `.carousel-track`.
+function ensureCarouselTrack(wrapper) {
+    if (!wrapper) return null;
+    // If a track already exists, return it
+    const existing = wrapper.querySelector('.carousel-track');
+    if (existing) return existing;
+
+    // If the wrapper is scrollable already, just return the wrapper
+    try {
+        const style = window.getComputedStyle(wrapper);
+        if (style.overflowX !== 'visible' && style.overflowX !== 'hidden') {
+            return wrapper;
+        }
+    } catch (e) {
+        // ignore and create track
+    }
+
+    // Create track and move children into it
+    const track = document.createElement('div');
+    track.className = 'carousel-track';
+    // Move children into track
+    while (wrapper.firstChild) track.appendChild(wrapper.firstChild);
+    wrapper.appendChild(track);
+
+    // Inline minimal styles to ensure horizontal scrolling works even if outer wrapper is overflow: visible
+    track.style.display = 'flex';
+    track.style.gap = getComputedStyle(wrapper).getPropertyValue('--carousel-gap') || '8px';
+    track.style.overflowX = 'auto';
+    track.style.overflowY = 'visible';
+    track.style.scrollBehavior = 'smooth';
+    track.style.webkitOverflowScrolling = 'touch';
+
+    return track;
+}
+
+// Add minimal CSS for .carousel-track once
+(function addCarouselTrackStyles(){
+    if (document.getElementById('carousel-track-styles')) return;
+    const s = document.createElement('style');
+    s.id = 'carousel-track-styles';
+    s.textContent = `
+        .carousel-track{display:flex;gap:var(--carousel-gap,8px);overflow-x:auto;overflow-y:visible;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+        .carousel-track::-webkit-scrollbar{height:8px}
+    `;
+    document.head.appendChild(s);
+})();
+
 // Carrusel de Episodios Series (solo episodios con Título episodio completo)
 class EpisodiosSeriesCarousel {
     // ...existing code...
@@ -349,6 +398,67 @@ class EpisodiosSeriesCarousel {
                     window.detailsModal.show(item, div);
                 }
             });
+            // Ensure scrollable track exists when outer wrapper uses overflow: visible
+            (function(){
+                const _target = ensureCarouselTrack(this.wrapper) || this.wrapper;
+                if (_target !== this.wrapper) {
+                    this.wrapper = _target;
+                    if (!this._carouselTrackListenerAttached) {
+                        this.wrapper.addEventListener('scroll', () => { if (this.updateProgressBar) this.updateProgressBar(); });
+                        this._carouselTrackListenerAttached = true;
+                    }
+                }
+            }).call(this);
+            (function(){
+                const _target = ensureCarouselTrack(this.wrapper) || this.wrapper;
+                if (_target !== this.wrapper) {
+                    this.wrapper = _target;
+                    if (!this._carouselTrackListenerAttached) {
+                        this.wrapper.addEventListener('scroll', () => { if (this.updateProgressBar) this.updateProgressBar(); });
+                        this._carouselTrackListenerAttached = true;
+                    }
+                }
+            }).call(this);
+            (function(){
+                const _target = ensureCarouselTrack(this.wrapper) || this.wrapper;
+                if (_target !== this.wrapper) {
+                    this.wrapper = _target;
+                    if (!this._carouselTrackListenerAttached) {
+                        this.wrapper.addEventListener('scroll', () => { if (this.updateProgressBar) this.updateProgressBar(); });
+                        this._carouselTrackListenerAttached = true;
+                    }
+                }
+            }).call(this);
+            (function(){
+                const _target = ensureCarouselTrack(this.wrapper) || this.wrapper;
+                if (_target !== this.wrapper) {
+                    this.wrapper = _target;
+                    if (!this._carouselTrackListenerAttached) {
+                        this.wrapper.addEventListener('scroll', () => { if (this.updateProgressBar) this.updateProgressBar(); });
+                        this._carouselTrackListenerAttached = true;
+                    }
+                }
+            }).call(this);
+            (function(){
+                const _target = ensureCarouselTrack(this.wrapper) || this.wrapper;
+                if (_target !== this.wrapper) {
+                    this.wrapper = _target;
+                    if (!this._carouselTrackListenerAttached) {
+                        this.wrapper.addEventListener('scroll', () => { if (this.updateProgressBar) this.updateProgressBar(); });
+                        this._carouselTrackListenerAttached = true;
+                    }
+                }
+            }).call(this);
+            (function(){
+                const _target = ensureCarouselTrack(this.wrapper) || this.wrapper;
+                if (_target !== this.wrapper) {
+                    this.wrapper = _target;
+                    if (!this._carouselTrackListenerAttached) {
+                        this.wrapper.addEventListener('scroll', () => { if (this.updateProgressBar) this.updateProgressBar(); });
+                        this._carouselTrackListenerAttached = true;
+                    }
+                }
+            }).call(this);
             this.wrapper.appendChild(div);
         }
         // Barra de progreso
@@ -686,6 +796,16 @@ class EpisodiosAnimesCarousel {
                 if (window.location.hash !== `#${hash}`) history.pushState(null, '', `#${hash}`);
                 if (window.detailsModal && typeof window.detailsModal.show === 'function') window.detailsModal.show(item, div);
             });
+            (function(){
+                const _target = ensureCarouselTrack(this.wrapper) || this.wrapper;
+                if (_target !== this.wrapper) {
+                    this.wrapper = _target;
+                    if (!this._carouselTrackListenerAttached) {
+                        this.wrapper.addEventListener('scroll', () => { if (this.updateProgressBar) this.updateProgressBar(); });
+                        this._carouselTrackListenerAttached = true;
+                    }
+                }
+            }).call(this);
             this.wrapper.appendChild(div);
         }
         this.updateProgressBar();
@@ -2569,6 +2689,16 @@ class DocumentalesCarousel {
                 }
                 window.detailsModal.show(item, div);
             });
+            (function(){
+                const _target = ensureCarouselTrack(this.wrapper) || this.wrapper;
+                if (_target !== this.wrapper) {
+                    this.wrapper = _target;
+                    if (!this._carouselTrackListenerAttached) {
+                        this.wrapper.addEventListener('scroll', () => { if (this.updateProgressBar) this.updateProgressBar(); });
+                        this._carouselTrackListenerAttached = true;
+                    }
+                }
+            }).call(this);
             this.wrapper.appendChild(div);
         }
         this.index = end;
