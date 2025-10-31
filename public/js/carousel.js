@@ -517,6 +517,7 @@ class EpisodiosSeriesCarousel {
                             const overlay = div.querySelector('.carousel-overlay');
                             background.style.display = 'block';
                             background.style.opacity = '1';
+                            try { if (typeof _createPortalForItem === 'function') _createPortalForItem(div); } catch (e) {}
                             overlay.style.opacity = '1';
                             overlay.style.transform = 'translateY(0)';
                             this.hoverTimeouts[itemId].modal = setTimeout(() => {
@@ -537,6 +538,7 @@ class EpisodiosSeriesCarousel {
                         clearTimeout(this.hoverTimeouts[itemId].modal);
                         delete this.hoverTimeouts[itemId];
                     }
+                    try { if (typeof _removePortalForItem === 'function') _removePortalForItem(div); } catch (e) {}
                     const img = div.querySelector('.episodios-series-card-image');
                     const background = div.querySelector('.detail-background');
                     const overlay = div.querySelector('.carousel-overlay');
@@ -566,56 +568,6 @@ class EpisodiosSeriesCarousel {
                 }
             });
             // Ensure scrollable track exists when outer wrapper uses overflow: visible
-            (function(){
-                const _target = ensureCarouselTrack(this.wrapper) || this.wrapper;
-                if (_target !== this.wrapper) {
-                    this.wrapper = _target;
-                    if (!this._carouselTrackListenerAttached) {
-                        this.wrapper.addEventListener('scroll', () => { if (this.updateProgressBar) this.updateProgressBar(); });
-                        this._carouselTrackListenerAttached = true;
-                    }
-                }
-            }).call(this);
-            (function(){
-                const _target = ensureCarouselTrack(this.wrapper) || this.wrapper;
-                if (_target !== this.wrapper) {
-                    this.wrapper = _target;
-                    if (!this._carouselTrackListenerAttached) {
-                        this.wrapper.addEventListener('scroll', () => { if (this.updateProgressBar) this.updateProgressBar(); });
-                        this._carouselTrackListenerAttached = true;
-                    }
-                }
-            }).call(this);
-            (function(){
-                const _target = ensureCarouselTrack(this.wrapper) || this.wrapper;
-                if (_target !== this.wrapper) {
-                    this.wrapper = _target;
-                    if (!this._carouselTrackListenerAttached) {
-                        this.wrapper.addEventListener('scroll', () => { if (this.updateProgressBar) this.updateProgressBar(); });
-                        this._carouselTrackListenerAttached = true;
-                    }
-                }
-            }).call(this);
-            (function(){
-                const _target = ensureCarouselTrack(this.wrapper) || this.wrapper;
-                if (_target !== this.wrapper) {
-                    this.wrapper = _target;
-                    if (!this._carouselTrackListenerAttached) {
-                        this.wrapper.addEventListener('scroll', () => { if (this.updateProgressBar) this.updateProgressBar(); });
-                        this._carouselTrackListenerAttached = true;
-                    }
-                }
-            }).call(this);
-            (function(){
-                const _target = ensureCarouselTrack(this.wrapper) || this.wrapper;
-                if (_target !== this.wrapper) {
-                    this.wrapper = _target;
-                    if (!this._carouselTrackListenerAttached) {
-                        this.wrapper.addEventListener('scroll', () => { if (this.updateProgressBar) this.updateProgressBar(); });
-                        this._carouselTrackListenerAttached = true;
-                    }
-                }
-            }).call(this);
             (function(){
                 const _target = ensureCarouselTrack(this.wrapper) || this.wrapper;
                 if (_target !== this.wrapper) {
@@ -670,30 +622,39 @@ class EpisodiosSeriesCarousel {
     }
     scrollToPage(direction) {
         if (!this.wrapper) return;
-        const containerWidth = this.wrapper.clientWidth;
+        const containerWidth = this.wrapper.clientWidth || (this.wrapper.parentElement && this.wrapper.parentElement.clientWidth) || 0;
 
-        // Determinar tamaño real del ítem y gap leyendo el DOM
+        // Determinar tamaño del ítem de manera robusta: preferimos offsetWidth
         const firstItem = this.wrapper.querySelector('.custom-carousel-item');
         if (!firstItem) return;
-        const itemRect = firstItem.getBoundingClientRect();
-        const itemWidth = Math.round(itemRect.width);
+        let itemWidth = Math.round(firstItem.offsetWidth || 0);
 
-        // Intentar estimar gap usando el segundo elemento
+        // Si el itemWidth es demasiado pequeño (imagenes no cargadas), intentar rect.width como fallback
+        if (!itemWidth || itemWidth < 30) {
+            try {
+                const rect = firstItem.getBoundingClientRect();
+                itemWidth = Math.max(itemWidth, Math.round(rect.width) || 0);
+            } catch (e) { }
+        }
+
+        // Calcular gap consultando posiciones de offset para evitar problemas de sub-pixel
         let gap = 0;
         const secondItem = firstItem.nextElementSibling;
         if (secondItem) {
-            const secondRect = secondItem.getBoundingClientRect();
-            gap = Math.round(secondRect.left - (itemRect.left + itemRect.width));
-            if (isNaN(gap) || gap < 0) gap = 0;
+            try {
+                gap = Math.round(secondItem.offsetLeft - (firstItem.offsetLeft + firstItem.offsetWidth));
+                if (isNaN(gap) || gap < 0) gap = 0;
+            } catch (e) { gap = 0; }
         }
 
+        // Si aún no tenemos un ancho razonable, usar un valor por defecto para evitar división por cero
+        if (!itemWidth) itemWidth = 240;
+
         const stepSize = itemWidth + gap;
+        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize) || 1);
 
-        // Calcular cuántos items completos caben en la vista
-        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
-
-    // Calcular índice del primer item visible actualmente (alinear a la izquierda)
-    const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
+        // Calcular índice del primer item visible actualmente (alinear a la izquierda)
+        const currentIndex = Math.floor((this.wrapper.scrollLeft || 0) / stepSize);
 
         let targetIndex;
         if (direction === 'prev') {
@@ -708,7 +669,7 @@ class EpisodiosSeriesCarousel {
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
 
         const finalScroll = targetIndex * stepSize;
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+        try { this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' }); } catch (e) { this.wrapper.scrollLeft = finalScroll; }
     }
 
 // (Eliminados duplicados y métodos sobrantes)
@@ -932,6 +893,7 @@ class EpisodiosAnimesCarousel {
                         const overlay = div.querySelector('.carousel-overlay');
                         background.style.display = 'block';
                         background.style.opacity = '1';
+                        try { if (typeof _createPortalForItem === 'function') _createPortalForItem(div); } catch (e) {}
                         overlay.style.opacity = '1';
                         overlay.style.transform = 'translateY(0)';
                         this.hoverTimeouts[itemId].modal = setTimeout(() => {
@@ -945,6 +907,7 @@ class EpisodiosAnimesCarousel {
                 div.addEventListener('mouseleave', () => {
                     const itemId = div.dataset.itemId;
                     if (this.hoverTimeouts[itemId]) { clearTimeout(this.hoverTimeouts[itemId].details); clearTimeout(this.hoverTimeouts[itemId].modal); delete this.hoverTimeouts[itemId]; }
+                    try { if (typeof _removePortalForItem === 'function') _removePortalForItem(div); } catch (e) {}
                     const img = div.querySelector('.episodios-series-card-image');
                     const background = div.querySelector('.detail-background');
                     const overlay = div.querySelector('.carousel-overlay');
@@ -995,24 +958,30 @@ class EpisodiosAnimesCarousel {
     scrollToNextPage() { this.scrollToPage('next'); }
     scrollToPage(direction) {
         if (!this.wrapper) return;
-        const containerWidth = this.wrapper.clientWidth;
+        const containerWidth = this.wrapper.clientWidth || (this.wrapper.parentElement && this.wrapper.parentElement.clientWidth) || 0;
+
         const firstItem = this.wrapper.querySelector('.custom-carousel-item');
         if (!firstItem) return;
-        const itemRect = firstItem.getBoundingClientRect();
-        const itemWidth = Math.round(itemRect.width);
+        let itemWidth = Math.round(firstItem.offsetWidth || 0);
+        if (!itemWidth || itemWidth < 30) {
+            try { const rect = firstItem.getBoundingClientRect(); itemWidth = Math.max(itemWidth, Math.round(rect.width) || 0); } catch (e) {}
+        }
         let gap = 0;
         const secondItem = firstItem.nextElementSibling;
-        if (secondItem) { const secondRect = secondItem.getBoundingClientRect(); gap = Math.round(secondRect.left - (itemRect.left + itemRect.width)); if (isNaN(gap) || gap < 0) gap = 0; }
+        if (secondItem) {
+            try { gap = Math.round(secondItem.offsetLeft - (firstItem.offsetLeft + firstItem.offsetWidth)); if (isNaN(gap) || gap < 0) gap = 0; } catch (e) { gap = 0; }
+        }
+        if (!itemWidth) itemWidth = 240;
         const stepSize = itemWidth + gap;
-        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
-        const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
+        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize) || 1);
+        const currentIndex = Math.floor((this.wrapper.scrollLeft || 0) / stepSize);
         let targetIndex;
         if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsPerViewport); else targetIndex = currentIndex + itemsPerViewport;
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
         const finalScroll = targetIndex * stepSize;
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+        try { this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' }); } catch (e) { this.wrapper.scrollLeft = finalScroll; }
     }
 }
 
@@ -1228,6 +1197,7 @@ class EpisodiosDocumentalesCarousel {
                         const overlay = div.querySelector('.carousel-overlay');
                         background.style.display = 'block';
                         background.style.opacity = '1';
+                        try { if (typeof _createPortalForItem === 'function') _createPortalForItem(div); } catch (e) {}
                         overlay.style.opacity = '1';
                         overlay.style.transform = 'translateY(0)';
                         this.hoverTimeouts[itemId].modal = setTimeout(() => {
@@ -1241,6 +1211,7 @@ class EpisodiosDocumentalesCarousel {
                 div.addEventListener('mouseleave', () => {
                     const itemId = div.dataset.itemId;
                     if (this.hoverTimeouts[itemId]) { clearTimeout(this.hoverTimeouts[itemId].details); clearTimeout(this.hoverTimeouts[itemId].modal); delete this.hoverTimeouts[itemId]; }
+                    try { if (typeof _removePortalForItem === 'function') _removePortalForItem(div); } catch (e) {}
                     const img = div.querySelector('.episodios-series-card-image');
                     const background = div.querySelector('.detail-background');
                     const overlay = div.querySelector('.carousel-overlay');
@@ -1279,24 +1250,29 @@ class EpisodiosDocumentalesCarousel {
     scrollToNextPage() { this.scrollToPage('next'); }
     scrollToPage(direction) {
         if (!this.wrapper) return;
-        const containerWidth = this.wrapper.clientWidth;
+        const containerWidth = this.wrapper.clientWidth || (this.wrapper.parentElement && this.wrapper.parentElement.clientWidth) || 0;
         const firstItem = this.wrapper.querySelector('.custom-carousel-item');
         if (!firstItem) return;
-        const itemRect = firstItem.getBoundingClientRect();
-        const itemWidth = Math.round(itemRect.width);
+        let itemWidth = Math.round(firstItem.offsetWidth || 0);
+        if (!itemWidth || itemWidth < 30) {
+            try { const rect = firstItem.getBoundingClientRect(); itemWidth = Math.max(itemWidth, Math.round(rect.width) || 0); } catch (e) {}
+        }
         let gap = 0;
         const secondItem = firstItem.nextElementSibling;
-        if (secondItem) { const secondRect = secondItem.getBoundingClientRect(); gap = Math.round(secondRect.left - (itemRect.left + itemRect.width)); if (isNaN(gap) || gap < 0) gap = 0; }
+        if (secondItem) {
+            try { gap = Math.round(secondItem.offsetLeft - (firstItem.offsetLeft + firstItem.offsetWidth)); if (isNaN(gap) || gap < 0) gap = 0; } catch (e) { gap = 0; }
+        }
+        if (!itemWidth) itemWidth = 240;
         const stepSize = itemWidth + gap;
-        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize));
-        const currentIndex = Math.floor(this.wrapper.scrollLeft / stepSize);
+        const itemsPerViewport = Math.max(1, Math.floor(containerWidth / stepSize) || 1);
+        const currentIndex = Math.floor((this.wrapper.scrollLeft || 0) / stepSize);
         let targetIndex;
         if (direction === 'prev') targetIndex = Math.max(0, currentIndex - itemsPerViewport); else targetIndex = currentIndex + itemsPerViewport;
         const totalItems = this.wrapper.querySelectorAll('.custom-carousel-item').length;
         const maxFirstIndex = Math.max(0, totalItems - itemsPerViewport);
         targetIndex = Math.max(0, Math.min(targetIndex, maxFirstIndex));
         const finalScroll = targetIndex * stepSize;
-        this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' });
+        try { this.wrapper.scrollTo({ left: finalScroll, behavior: 'smooth' }); } catch (e) { this.wrapper.scrollLeft = finalScroll; }
     }
 }
 class AnimesCarousel {
@@ -1561,6 +1537,7 @@ class AnimesCarousel {
                             const overlay = div.querySelector('.carousel-overlay');
                             background.style.display = 'block';
                             background.style.opacity = '1';
+                            try { if (typeof _createPortalForItem === 'function') _createPortalForItem(div); } catch (e) {}
                             overlay.style.opacity = '1';
                             overlay.style.transform = 'translateY(0)';
                             this.hoverTimeouts[itemId].modal = setTimeout(() => {
@@ -1581,6 +1558,7 @@ class AnimesCarousel {
                         clearTimeout(this.hoverTimeouts[itemId].modal);
                         delete this.hoverTimeouts[itemId];
                     }
+                    try { if (typeof _removePortalForItem === 'function') _removePortalForItem(div); } catch (e) {}
                     const poster = div.querySelector('.poster-image');
                     const background = div.querySelector('.detail-background');
                     const overlay = div.querySelector('.carousel-overlay');
