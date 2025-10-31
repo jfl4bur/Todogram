@@ -1347,6 +1347,18 @@ button:focus {
     transition: transform 200ms cubic-bezier(.22,.9,.23,1), opacity 160ms ease;
 }
 
+/* When a portal clone is active, disable original-item transforms/transitions
+   to avoid duplicated/conflicting animations (useful for catálogo where
+   layout/hover interactions are sensitive). The portal clone performs the
+   visual scale while the original stays static/hidden. */
+body.hover-portal-active .catalogo-item,
+body.hover-portal-active .catalogo-item *,
+body.hover-portal-active .custom-carousel-item,
+body.hover-portal-active .custom-carousel-item * {
+    transition: none !important;
+    transform: none !important;
+}
+
 /* While scaling down, keep the high z-index until the transform transition ends */
 .hover-zoom.hover-zoom-closing {
     /* When closing, ensure the original element returns to its neutral

@@ -715,6 +715,8 @@ class HoverModal {
             this._portalEl = clone;
             // mark portal active so we skip origin animations
             this._portalActive = true;
+            // add a body-level marker so CSS can disable original-item animations
+            try { document.body.classList.add('hover-portal-active'); } catch (e) {}
         } catch (e) {
             console.warn('hover-modal: portal creation failed', e);
             try { this._removePortal(); } catch (er) {}
@@ -800,6 +802,8 @@ class HoverModal {
                 try { this._currentOrigin.style.visibility = ''; } catch (e) {}
             }
             this._portalActive = false;
+            // remove body-level marker used to disable original animations
+            try { document.body.classList.remove('hover-portal-active'); } catch (e) {}
             if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
         } catch (e) {}
     }
