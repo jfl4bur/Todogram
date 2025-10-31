@@ -704,17 +704,28 @@ class HoverModal {
             clone.style.zIndex = '1000';
             clone.style.pointerEvents = 'none';
 
-            // Choose parent for the clone. Prefer the modal overlay (fixed) so the
-            // clone stays locked to the same viewport coordinate space as the modal
-            // even if the page scrolls. Fallback to document.body.
-            const parentForClone = (this.modalOverlay && this.modalOverlay.style && this.modalOverlay.style.display !== 'none') ? this.modalOverlay : document.body;
-            if (parentForClone === this.modalOverlay) {
-                // position absolute relative to overlay (overlay is fixed)
+            // Choose parent for the clone. Prefer the current parent of modalContent
+            // (the same container the modal is rendered into) so the clone stays
+            // locked to the same coordinate space as the modal and won't move with
+            // page scroll. If that's not available, prefer the modal overlay (fixed).
+            // Fallback to document.body.
+            let parentForClone = document.body;
+            try {
+                const modalParent = this.modalContent && this.modalContent.parentElement;
+                if (modalParent && modalParent !== document.body) {
+                    parentForClone = modalParent;
+                } else if (this.modalOverlay && this.modalOverlay.style && this.modalOverlay.style.display !== 'none') {
+                    parentForClone = this.modalOverlay;
+                }
+            } catch (e) {}
+
+            if (parentForClone && parentForClone !== document.body) {
+                // position absolute relative to the chosen parent (parent should
+                // be positioned by modal logic when necessary)
                 clone.style.position = 'absolute';
-                // compute coordinates relative to overlay
-                const overlayRect = this.modalOverlay.getBoundingClientRect();
-                clone.style.left = `${Math.round(rect.left - overlayRect.left)}px`;
-                clone.style.top = `${Math.round(rect.top - overlayRect.top)}px`;
+                const parentRect = parentForClone.getBoundingClientRect();
+                clone.style.left = `${Math.round(rect.left - parentRect.left)}px`;
+                clone.style.top = `${Math.round(rect.top - parentRect.top)}px`;
             } else {
                 // fallback: keep fixed positioning on body
                 clone.style.position = 'fixed';
