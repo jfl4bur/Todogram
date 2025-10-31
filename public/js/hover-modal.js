@@ -246,6 +246,10 @@ class HoverModal {
             window.addEventListener('resize', this._onResize);
         }
 
+    // If a portal clone exists, ensure it's positioned under the modal and
+    // attach portal scroll listeners so it remains fixed relative to the modal.
+    try { if (this._portalEl) this._positionPortalUnderModal(); } catch(e) {}
+
         // Decide whether overlay should accept pointer events. If modalContent
         // is inside the overlay (original behavior), let the overlay receive
         // pointer events so mouseenter/mouseleave on modal work. If we moved
@@ -323,11 +327,7 @@ class HoverModal {
                     // any ancestor clipping (overflow:hidden/auto) without changing
                     // the carousel's overflow behavior which would break pagination.
                     try {
-                        // Always create a portal clone so the hovered item can escape
-                        // ancestor clipping and remain fixed in viewport while the
-                        // hover modal is open. This prevents the item from moving
-                        // with scroll regardless of carousel type.
-                        const shouldPortal = true;
+                        const shouldPortal = !isEpisodios;
                         if (shouldPortal) this._createPortalForOrigin(this._currentOrigin);
                     } catch (pe) {}
 
@@ -699,11 +699,9 @@ class HoverModal {
             clone.classList.remove('hover-zoom');
 
             // inline styles to pin the clone to the same viewport position
-            // Use fixed positioning and append directly to body to minimize
-            // the chance that ancestor transforms will affect it.
             clone.style.position = 'fixed';
-            clone.style.left = `${Math.round(rect.left)}px`;
-            clone.style.top = `${Math.round(rect.top)}px`;
+            clone.style.left = `${rect.left}px`;
+            clone.style.top = `${rect.top}px`;
             clone.style.width = `${Math.round(rect.width)}px`;
             clone.style.height = `${Math.round(rect.height)}px`;
             clone.style.margin = '0';
@@ -721,15 +719,8 @@ class HoverModal {
                 clone.style.setProperty('--hover-translate-x', originTranslate);
             } catch (e) {}
 
-            // append clone directly to body (position:fixed keeps it in viewport)
-            try {
-                document.body.appendChild(clone);
-            } catch (e) {
-                // fallback to documentElement if body is not available
-                try { document.documentElement.appendChild(clone); } catch(e){}
-            }
-            // debug log to help diagnose issues in the wild
-            try { console.log('hover-modal: portal clone created', clone); } catch(e) {}
+            // append to body and trigger the scale via class
+            document.body.appendChild(clone);
             // hide original to avoid duplicate visuals but keep layout
             try { origin.style.visibility = 'hidden'; } catch (e) {}
 
@@ -775,6 +766,7 @@ class HoverModal {
                         // restore origin visibility and mark portal inactive
                         try { origin.style.visibility = ''; } catch (e) {}
                         this._portalActive = false;
+                        try { this._detachPortalScrollListeners(); } catch (e) {}
                     };
                     const onEnd = (ev) => {
                         // accept left/top/transform/width/height
@@ -800,26 +792,71 @@ class HoverModal {
                 }
             }
 
+            try { this._detachPortalScrollListeners(); } catch (e) {}
             if (this._portalEl && this._portalEl.parentElement) {
                 try { this._portalEl.parentElement.removeChild(this._portalEl); } catch (e) {}
             }
-            try { console.log('hover-modal: portal clone removed'); } catch(e) {}
             this._portalEl = null;
-            // if we created a portal root, remove it when empty
-            try {
-                if (this._portalRoot && this._portalRootCreated && this._portalRoot.parentElement) {
-                    // if no children remain, remove the root
-                    if (!this._portalRoot.hasChildNodes()) {
-                        try { this._portalRoot.parentElement.removeChild(this._portalRoot); } catch (e) {}
-                    }
-                }
-            } catch (e) {}
-            this._portalRoot = null;
             if (this._currentOrigin && this._currentOrigin.style) {
                 try { this._currentOrigin.style.visibility = ''; } catch (e) {}
             }
             this._portalActive = false;
             if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
+        } catch (e) {}
+    }
+
+    _positionPortalUnderModal() {
+        try {
+            if (!this._portalEl || !this.modalContent) return;
+            const clone = this._portalEl;
+            const modalRect = this.modalContent.getBoundingClientRect();
+            const cRect = clone.getBoundingClientRect();
+            // center clone horizontally under modal and place slightly below
+            const targetLeft = modalRect.left + Math.max(0, (modalRect.width - cRect.width) / 2);
+            const targetTop = modalRect.top + modalRect.height + 8; // 8px gap
+
+            // use left/top transitions for this repositioning
+            clone.style.transition = 'left 200ms cubic-bezier(.22,.9,.23,1), top 200ms cubic-bezier(.22,.9,.23,1), opacity 160ms ease';
+            clone.style.left = `${Math.round(targetLeft)}px`;
+            clone.style.top = `${Math.round(targetTop)}px`;
+
+            // attach scroll/resize listeners so clone follows modal (stays fixed relative to modal)
+            this._attachPortalScrollListeners();
+        } catch (e) {
+            console.warn('hover-modal: positionPortalUnderModal failed', e);
+        }
+    }
+
+    _attachPortalScrollListeners() {
+        try {
+            if (this._portalScrollAttached) return;
+            this._portalOnScroll = this._portalOnScroll || this._portalOnScrollHandler.bind(this);
+            window.addEventListener('scroll', this._portalOnScroll, true);
+            window.addEventListener('resize', this._portalOnScroll);
+            this._portalScrollAttached = true;
+        } catch (e) {}
+    }
+
+    _detachPortalScrollListeners() {
+        try {
+            if (!this._portalScrollAttached) return;
+            window.removeEventListener('scroll', this._portalOnScroll, true);
+            window.removeEventListener('resize', this._portalOnScroll);
+            this._portalScrollAttached = false;
+        } catch (e) {}
+    }
+
+    _portalOnScrollHandler() {
+        try {
+            if (!this._portalEl || !this.modalContent) return;
+            const clone = this._portalEl;
+            const modalRect = this.modalContent.getBoundingClientRect();
+            const cRect = clone.getBoundingClientRect();
+            const targetLeft = modalRect.left + Math.max(0, (modalRect.width - cRect.width) / 2);
+            const targetTop = modalRect.top + modalRect.height + 8;
+            // update without heavy layout thrash
+            clone.style.left = `${Math.round(targetLeft)}px`;
+            clone.style.top = `${Math.round(targetTop)}px`;
         } catch (e) {}
     }
 }

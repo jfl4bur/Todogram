@@ -1340,17 +1340,6 @@ button:focus {
     transform-origin: var(--hover-transform-origin, center center);
 }
 
-/* Force portal clones to be fixed in the viewport to avoid moving with vertical scroll
-   in layouts where ancestors have transforms or create containing blocks. */
-.hover-portal-clone {
-    position: fixed !important;
-    transform: none !important;
-    left: auto !important;
-    top: auto !important;
-    margin: 0 !important;
-    pointer-events: none !important;
-}
-
 /* While scaling down, keep the high z-index until the transform transition ends */
 .hover-zoom.hover-zoom-closing {
     transform: translateX(0) scale(1);
