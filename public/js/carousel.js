@@ -53,6 +53,68 @@ function ensureCarouselTrack(wrapper) {
     return track;
 }
 
+// Temporarily relax clipping on ancestors while an item is hovered (to allow visual overflow)
+function _allowOverflowForItem(item) {
+    try {
+        if (!item) return;
+        const wrapper = item.closest('[id$="-carousel-wrapper"], .carousel-wrapper');
+        if (!wrapper) return;
+        // If already adjusted, skip
+        if (wrapper._adjustedAncestors) return;
+        const adjusted = [];
+        let node = wrapper.parentElement;
+        while (node && node !== document.body) {
+            const cs = window.getComputedStyle(node);
+            // If any overflow axis is restrictive, relax it
+            if (cs.overflow === 'hidden' || cs.overflowX === 'hidden' || cs.overflowY === 'hidden' || cs.overflow === 'clip' || cs.overflowX === 'clip' || cs.overflowY === 'clip') {
+                // Save original inline styles so we can restore later
+                node.dataset._origOverflow = `${node.style.overflow||''}||${node.style.overflowX||''}||${node.style.overflowY||''}`;
+                node.style.overflow = 'visible';
+                node.style.overflowX = 'visible';
+                node.style.overflowY = 'visible';
+                adjusted.push(node);
+                // Stop at the first restrictive ancestor to limit layout changes
+                break;
+            }
+            node = node.parentElement;
+        }
+        if (adjusted.length) wrapper._adjustedAncestors = adjusted;
+    } catch (e) { /* silent */ }
+}
+
+function _revertOverflowForItem(item) {
+    try {
+        if (!item) return;
+        const wrapper = item.closest('[id$="-carousel-wrapper"], .carousel-wrapper');
+        if (!wrapper) return;
+        const adjusted = wrapper._adjustedAncestors;
+        if (!adjusted || !adjusted.length) return;
+        adjusted.forEach(node => {
+            const orig = node.dataset._origOverflow || '';
+            const parts = orig.split('||');
+            node.style.overflow = parts[0] || '';
+            node.style.overflowX = parts[1] || '';
+            node.style.overflowY = parts[2] || '';
+            delete node.dataset._origOverflow;
+        });
+        wrapper._adjustedAncestors = null;
+    } catch (e) { /* silent */ }
+}
+
+// Attach global pointerenter/pointerleave handlers to relax clipping during hover.
+document.addEventListener('pointerenter', function(e){
+    try {
+        const item = e.target.closest && e.target.closest('.custom-carousel-item');
+        if (item) _allowOverflowForItem(item);
+    } catch (e) {}
+}, true);
+document.addEventListener('pointerleave', function(e){
+    try {
+        const item = e.target.closest && e.target.closest('.custom-carousel-item');
+        if (item) _revertOverflowForItem(item);
+    } catch (e) {}
+}, true);
+
 // Add minimal CSS for .carousel-track once
 (function addCarouselTrackStyles(){
     if (document.getElementById('carousel-track-styles')) return;
