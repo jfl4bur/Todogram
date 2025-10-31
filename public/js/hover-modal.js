@@ -694,21 +694,10 @@ class HoverModal {
             // ensure clone starts unscaled so we can trigger the transition
             clone.classList.remove('hover-zoom');
 
-            // Decide parent for the clone: prefer the modal overlay (fixed) so
-            // the clone stays locked relative to the modal and doesn't move on scroll.
-            const overlay = (this.modalOverlay && this.modalOverlay instanceof HTMLElement) ? this.modalOverlay : null;
-            if (overlay && overlay !== document.body) {
-                // position absolute inside the overlay (overlay is fixed)
-                const oRect = overlay.getBoundingClientRect();
-                clone.style.position = 'absolute';
-                clone.style.left = `${rect.left - oRect.left}px`;
-                clone.style.top = `${rect.top - oRect.top}px`;
-            } else {
-                // fallback to fixed on body
-                clone.style.position = 'fixed';
-                clone.style.left = `${rect.left}px`;
-                clone.style.top = `${rect.top}px`;
-            }
+            // inline styles to pin the clone to the same viewport position
+            clone.style.position = 'fixed';
+            clone.style.left = `${rect.left}px`;
+            clone.style.top = `${rect.top}px`;
             clone.style.width = `${Math.round(rect.width)}px`;
             clone.style.height = `${Math.round(rect.height)}px`;
             clone.style.margin = '0';
@@ -726,13 +715,8 @@ class HoverModal {
                 clone.style.setProperty('--hover-translate-x', originTranslate);
             } catch (e) {}
 
-            // append to overlay (preferred) or body and trigger the scale via class
-            try {
-                if (overlay && overlay instanceof HTMLElement) overlay.appendChild(clone);
-                else document.body.appendChild(clone);
-            } catch (e) {
-                document.body.appendChild(clone);
-            }
+            // append to body and trigger the scale via class
+            document.body.appendChild(clone);
             // hide original to avoid duplicate visuals but keep layout
             try { origin.style.visibility = 'hidden'; } catch (e) {}
 
