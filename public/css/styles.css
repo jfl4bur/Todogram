@@ -927,6 +927,7 @@ button:focus {
 /* New hover title wrapper: allow wrapping and custom styling for hover modal titles */
 .modal-body .hover-title-wrapper {
     margin-bottom: 10px;
+    margin-top: 10px;
 }
 .modal-body .hover-title {
     font-family: 'Slider Sans UI', sans-serif;
@@ -2192,7 +2193,7 @@ button:focus {
 .modal-header {
     position: relative;
     height: 0;
-    padding-bottom: 42.25%; /* 16:9 aspect ratio */
+    padding-bottom: 50.25%; /* 16:9 aspect ratio */
     background-color: #000;
 }
 
@@ -2214,10 +2215,11 @@ button:focus {
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: fill;
     /* dejar brillo "normal" -> quitar filtro y poner opacidad sutil */
     filter: none;
     opacity: 0.20; /* más sutil, no tan oscuro */
+    z-index: 999;
 }
 
 .modal-body {
