@@ -368,7 +368,10 @@ class EpisodiosSeriesCarousel {
                 closeBtn._episodiosHashListener = true;
                 closeBtn.addEventListener('click', () => {
                     if (window.location.hash.startsWith('#id=')) {
-                        history.replaceState(null, '', window.location.pathname + window.location.search);
+                        const modalInstance = window.detailsModal;
+                        if (!modalInstance || typeof modalInstance.restoreUrl !== 'function') {
+                            history.replaceState(null, '', window.location.pathname + window.location.search);
+                        }
                     }
                 });
             }
@@ -692,7 +695,17 @@ class EpisodiosAnimesCarousel {
         if (!this._hashListener) { this._hashListener = true; window.addEventListener('hashchange', () => { setTimeout(() => this.scrollToHash(), 0); }); }
         if (window.detailsModalOverlay) {
             const closeBtn = document.getElementById('details-modal-close');
-            if (closeBtn && !closeBtn._episodiosHashListener) { closeBtn._episodiosHashListener = true; closeBtn.addEventListener('click', () => { if (window.location.hash.startsWith('#id=')) history.replaceState(null, '', window.location.pathname + window.location.search); }); }
+            if (closeBtn && !closeBtn._episodiosHashListener) {
+                closeBtn._episodiosHashListener = true;
+                closeBtn.addEventListener('click', () => {
+                    if (window.location.hash.startsWith('#id=')) {
+                        const modalInstance = window.detailsModal;
+                        if (!modalInstance || typeof modalInstance.restoreUrl !== 'function') {
+                            history.replaceState(null, '', window.location.pathname + window.location.search);
+                        }
+                    }
+                });
+            }
         }
     }
     updateProgressBar() {
@@ -978,7 +991,17 @@ class EpisodiosDocumentalesCarousel {
         if (!this._hashListener) { this._hashListener = true; window.addEventListener('hashchange', () => { setTimeout(() => this.scrollToHash(), 0); }); }
         if (window.detailsModalOverlay) {
             const closeBtn = document.getElementById('details-modal-close');
-            if (closeBtn && !closeBtn._episodiosHashListener) { closeBtn._episodiosHashListener = true; closeBtn.addEventListener('click', () => { if (window.location.hash.startsWith('#id=')) history.replaceState(null, '', window.location.pathname + window.location.search); }); }
+            if (closeBtn && !closeBtn._episodiosHashListener) {
+                closeBtn._episodiosHashListener = true;
+                closeBtn.addEventListener('click', () => {
+                    if (window.location.hash.startsWith('#id=')) {
+                        const modalInstance = window.detailsModal;
+                        if (!modalInstance || typeof modalInstance.restoreUrl !== 'function') {
+                            history.replaceState(null, '', window.location.pathname + window.location.search);
+                        }
+                    }
+                });
+            }
         }
     }
     updateProgressBar() {

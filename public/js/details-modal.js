@@ -44,6 +44,7 @@ class DetailsModal {
         this.detailsModalClose = document.getElementById('details-modal-close');
         this.activeItem = null;
         this.isDetailsModalOpen = false;
+    this.preModalHash = null;
         this.TMDB_API_KEY = 'f28077ae6a89b54c86be927ea88d64d9';
         this.domCache = {}; // Cache para elementos DOM frecuentemente usados
 
@@ -354,9 +355,19 @@ class DetailsModal {
             trailerUrl: item.trailerUrl,
             tmdbUrl: item.tmdbUrl
         });
-    this.isDetailsModalOpen = true;
-    // Instrumentación temporal: marcar timestamp de apertura para depuración
-    try { this._openedAt = Date.now(); console.log('DetailsModal: show() timestamp', this._openedAt); } catch(e){}
+        if (!this.isDetailsModalOpen) {
+            const currentHashSnapshot = window.location.hash || '';
+            if (currentHashSnapshot && !currentHashSnapshot.startsWith('#id=')) {
+                this.preModalHash = currentHashSnapshot;
+            } else if (!currentHashSnapshot) {
+                this.preModalHash = '';
+            } else if (this.preModalHash == null) {
+                this.preModalHash = '';
+            }
+        }
+        this.isDetailsModalOpen = true;
+        // Instrumentación temporal: marcar timestamp de apertura para depuración
+        try { this._openedAt = Date.now(); console.log('DetailsModal: show() timestamp', this._openedAt); } catch(e){}
         this.updateUrlForModal(item);
         
         this.detailsModalBody.innerHTML = `
@@ -876,9 +887,11 @@ class DetailsModal {
     }
 
     restoreUrl() {
-        if (window.location.hash) {
-            window.history.replaceState(null, null, window.location.pathname);
-        }
+        const baseUrl = `${window.location.pathname}${window.location.search}`;
+        const targetHash = (typeof this.preModalHash === 'string') ? this.preModalHash : '';
+        const targetUrl = targetHash ? `${baseUrl}${targetHash}` : baseUrl;
+        window.history.replaceState(null, null, targetUrl);
+        this.preModalHash = null;
     }
 
     updateMetaTags(item) {
