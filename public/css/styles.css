@@ -8555,28 +8555,3 @@ body {
     color: inherit;
     text-decoration: none;
     cursor: pointer;
-}
-
-.carousel-header-link span:first-child {
-    color: inherit;
-    text-decoration: none;
-}
-
-.carousel-header-link:focus-visible {
-    outline: 2px solid rgba(255, 255, 255, 0.6);
-    outline-offset: 4px;
-}
-
-.styles__StyledCarouselHeaderText-sc-1u4jixa-5:hover .styles__StyledText-sc-1u4jixa-7 {
-    opacity: 1;
-    margin-left: 8px;
-}
-
-
-.styles__StyledCarouselHeaderText-sc-1u4jixa-5:hover .styles__StyledCarouselHeaderIcon-sc-1u4jixa-8 {
-    background-color: rgba(0, 0, 0, 0.75);
-    border-color: rgb(240, 240, 240);
-    box-shadow: rgba(0, 0, 0, 0.4) 0px 4px 10px 0px;
-    opacity: 1;
-    pointer-events: auto;
-}
