@@ -4193,15 +4193,14 @@ html, body {
 .slider-nav {
     position: absolute;
     top: 60%;
-    left: 0;
-    right: 0px;
+    left: var(--slider-nav-btn-offset, 18px);
+    right: var(--slider-nav-btn-offset, 18px);
     transform: translateY(-50%);
     display: flex;
     justify-content: space-between;
     align-items: center;
     pointer-events: none;
     z-index: 15;
-    margin: 0px -10px;
     box-sizing: border-box;
 }
 
@@ -5933,15 +5932,14 @@ html, body {
 .slider-nav {
     position: absolute;
     top: 60%;
-    left: 0;
-    right: 0px;
+    left: var(--slider-nav-btn-offset, 18px);
+    right: var(--slider-nav-btn-offset, 18px);
     transform: translateY(-50%);
     display: flex;
     justify-content: space-between;
     align-items: center;
     pointer-events: none;
     z-index: 15;
-    margin: 0px -10px;
     box-sizing: border-box;
 }
 
