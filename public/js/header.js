@@ -15,9 +15,9 @@ const headerHTML = `
       <nav class="slider-nav-menu">
         <a href="/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Todo+el+cat%C3%A1logo" class="slider-nav-link"><i class="fas fa-film"></i><span>Películas</span></a>
         <a href="/catalogo/#catalogo?tab=Series&genre=Todo+el+catálogo" class="slider-nav-link"><i class="fas fa-tv"></i><span>Series</span></a>
-        <a href="/catalogo/#catalogo?tab=Documentales&genre=Todo+el+catálogo" class="slider-nav-link"><i class="fas fa-child"></i><span>Documentales</span></a>
-        <a href="/catalogo/#catalogo?tab=Animes&genre=Todo+el+catálogo" class="slider-nav-link"><i class="fas fa-crown"></i><span>Animes</span></a>
-        <a href="/catalogo" class="slider-nav-link"><i class="fas fa-broadcast-tower"></i><span>Todo el catálogo</span></a>
+  <a href="/catalogo/#catalogo?tab=Documentales&genre=Todo+el+catálogo" class="slider-nav-link"><i class="fas fa-landmark"></i><span>Documentales</span></a>
+  <a href="/catalogo/#catalogo?tab=Animes&genre=Todo+el+catálogo" class="slider-nav-link"><i class="fas fa-dragon"></i><span>Animes</span></a>
+  <a href="/catalogo" class="slider-nav-link"><i class="fas fa-th-large"></i><span>Todo el catálogo</span></a>
       </nav>
       <div class="header-search" id="header-search">
         <input id="global-search-input" type="search" placeholder="Buscar..." aria-label="Buscar" autocomplete="off">
@@ -39,9 +39,9 @@ const headerHTML = `
     <a href="/" class="slider-nav-link"><i class="fas fa-home"></i><span>Inicio</span></a>
     <a href="/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Todo+el+cat%C3%A1logo" class="slider-nav-link"><i class="fas fa-film"></i><span>Películas</span></a>
     <a href="/catalogo/#catalogo?tab=Series&genre=Todo+el+catálogo" class="slider-nav-link"><i class="fas fa-tv"></i><span>Series</span></a>
-    <a href="/catalogo/#catalogo?tab=Documentales&genre=Todo+el+catálogo" class="slider-nav-link"><i class="fas fa-child"></i><span>Documentales</span></a>
-    <a href="/catalogo/#catalogo?tab=Animes&genre=Todo+el+catálogo" class="slider-nav-link"><i class="fas fa-crown"></i><span>Animes</span></a>
-    <a href="/catalogo" class="slider-nav-link"><i class="fas fa-broadcast-tower"></i><span>Todo el catálogo</span></a>
+  <a href="/catalogo/#catalogo?tab=Documentales&genre=Todo+el+catálogo" class="slider-nav-link"><i class="fas fa-landmark"></i><span>Documentales</span></a>
+  <a href="/catalogo/#catalogo?tab=Animes&genre=Todo+el+catálogo" class="slider-nav-link"><i class="fas fa-dragon"></i><span>Animes</span></a>
+  <a href="/catalogo" class="slider-nav-link"><i class="fas fa-th-large"></i><span>Todo el catálogo</span></a>
   </div>
 `;
 
