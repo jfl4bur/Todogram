@@ -13,11 +13,11 @@ const headerHTML = `
         </a>
       </div>
       <nav class="slider-nav-menu">
-        <a href="/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Todo+el+cat%C3%A1logo" class="slider-nav-link"><i class="fas fa-film"></i><span>Películas</span></a>
-        <a href="/catalogo/#catalogo?tab=Series&genre=Todo+el+catálogo" class="slider-nav-link"><i class="fas fa-tv"></i><span>Series</span></a>
-  <a href="/catalogo/#catalogo?tab=Documentales&genre=Todo+el+catálogo" class="slider-nav-link"><i class="fas fa-landmark"></i><span>Documentales</span></a>
-  <a href="/catalogo/#catalogo?tab=Animes&genre=Todo+el+catálogo" class="slider-nav-link"><i class="fas fa-dragon"></i><span>Animes</span></a>
-  <a href="/catalogo" class="slider-nav-link"><i class="fas fa-th-large"></i><span>Todo el catálogo</span></a>
+    <a href="/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Todo+el+cat%C3%A1logo" class="slider-nav-link" data-nav="peliculas"><i class="fas fa-film"></i><span>Películas</span></a>
+    <a href="/catalogo/#catalogo?tab=Series&genre=Todo+el+catálogo" class="slider-nav-link" data-nav="series"><i class="fas fa-tv"></i><span>Series</span></a>
+  <a href="/catalogo/#catalogo?tab=Documentales&genre=Todo+el+catálogo" class="slider-nav-link" data-nav="documentales"><i class="fas fa-landmark"></i><span>Documentales</span></a>
+  <a href="/catalogo/#catalogo?tab=Animes&genre=Todo+el+catálogo" class="slider-nav-link" data-nav="animes"><i class="fas fa-dragon"></i><span>Animes</span></a>
+  <a href="/catalogo" class="slider-nav-link" data-nav="catalogo"><i class="fas fa-th-large"></i><span>Todo el catálogo</span></a>
       </nav>
       <div class="header-search" id="header-search">
         <input id="global-search-input" type="search" placeholder="Buscar..." aria-label="Buscar" autocomplete="off">
@@ -36,12 +36,12 @@ const headerHTML = `
   
   <!-- Mobile Menu -->
   <div class="slider-mobile-menu" id="slider-mobile-menu">
-    <a href="/" class="slider-nav-link"><i class="fas fa-home"></i><span>Inicio</span></a>
-    <a href="/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Todo+el+cat%C3%A1logo" class="slider-nav-link"><i class="fas fa-film"></i><span>Películas</span></a>
-    <a href="/catalogo/#catalogo?tab=Series&genre=Todo+el+catálogo" class="slider-nav-link"><i class="fas fa-tv"></i><span>Series</span></a>
-  <a href="/catalogo/#catalogo?tab=Documentales&genre=Todo+el+catálogo" class="slider-nav-link"><i class="fas fa-landmark"></i><span>Documentales</span></a>
-  <a href="/catalogo/#catalogo?tab=Animes&genre=Todo+el+catálogo" class="slider-nav-link"><i class="fas fa-dragon"></i><span>Animes</span></a>
-  <a href="/catalogo" class="slider-nav-link"><i class="fas fa-th-large"></i><span>Todo el catálogo</span></a>
+    <a href="/" class="slider-nav-link" data-nav="home"><i class="fas fa-home"></i><span>Inicio</span></a>
+    <a href="/catalogo/#catalogo?tab=Pel%C3%ADculas&genre=Todo+el+cat%C3%A1logo" class="slider-nav-link" data-nav="peliculas"><i class="fas fa-film"></i><span>Películas</span></a>
+    <a href="/catalogo/#catalogo?tab=Series&genre=Todo+el+catálogo" class="slider-nav-link" data-nav="series"><i class="fas fa-tv"></i><span>Series</span></a>
+  <a href="/catalogo/#catalogo?tab=Documentales&genre=Todo+el+catálogo" class="slider-nav-link" data-nav="documentales"><i class="fas fa-landmark"></i><span>Documentales</span></a>
+  <a href="/catalogo/#catalogo?tab=Animes&genre=Todo+el+catálogo" class="slider-nav-link" data-nav="animes"><i class="fas fa-dragon"></i><span>Animes</span></a>
+  <a href="/catalogo" class="slider-nav-link" data-nav="catalogo"><i class="fas fa-th-large"></i><span>Todo el catálogo</span></a>
   </div>
 `;
 
@@ -161,15 +161,137 @@ document.addEventListener('DOMContentLoaded', function() {
   window.addEventListener('scroll', onScrollHeader);
 
   // Cerrar el menú móvil al hacer click en cualquier enlace del menú (comportamiento esperado en móviles)
+  let mobileLinks = [];
   try {
-    const mobileLinks = mobileMenu.querySelectorAll('a.slider-nav-link');
+    mobileLinks = Array.from(mobileMenu.querySelectorAll('a.slider-nav-link'));
     mobileLinks.forEach(link => {
-      link.addEventListener('click', (e) => {
+      link.addEventListener('click', () => {
         // cerrar el menú inmediatamente; permitir que la navegación por href ocurra
         closeMobileMenu();
       }, { passive: true });
     });
-  } catch (e) { /* no bloquear si algo falla */ }
+  } catch (e) { mobileLinks = []; /* no bloquear si algo falla */ }
+
+  const desktopNavLinks = Array.from(document.querySelectorAll('.slider-nav-menu .slider-nav-link'));
+  const allNavLinks = desktopNavLinks.concat(mobileLinks);
+  const catalogNavKeys = new Set(['peliculas', 'series', 'documentales', 'animes']);
+  const tabKeyMap = new Map([
+    ['peliculas', 'peliculas'],
+    ['series', 'series'],
+    ['documentales', 'documentales'],
+    ['animes', 'animes'],
+    ['catalogo', 'catalogo'],
+    ['todoelcatalogo', 'catalogo'],
+    ['todocatalogo', 'catalogo']
+  ]);
+  let lastCatalogTabKey = null;
+
+  function normalizeNavValue(value) {
+    if (value == null) return '';
+    try {
+      return String(value)
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '');
+    } catch (err) {
+      return String(value).toLowerCase().replace(/[^a-z0-9]+/g, '');
+    }
+  }
+
+  function getNormalizedPathname() {
+    let path = window.location.pathname || '/';
+    if (!path.startsWith('/')) path = '/' + path;
+    path = path.replace(/index\.html$/i, '');
+    path = path.replace(/\/+/g, '/');
+    if (path.length > 1 && path.endsWith('/')) path = path.slice(0, -1);
+    return path.toLowerCase();
+  }
+
+  function extractCatalogTab(hashValue) {
+    if (!hashValue || hashValue[0] !== '#') return null;
+    const [rawHashPath, queryString = ''] = hashValue.split('?');
+    if (normalizeNavValue(rawHashPath.slice(1)) !== 'catalogo') return null;
+    if (!queryString) return null;
+    const params = new URLSearchParams(queryString);
+    const tab = params.get('tab');
+    if (!tab) return null;
+    const normalizedTab = normalizeNavValue(tab);
+    if (!normalizedTab) return null;
+    return tabKeyMap.get(normalizedTab) || normalizedTab;
+  }
+
+  function resolveNavKey() {
+    const pathLower = getNormalizedPathname();
+    const segments = pathLower.split('/').filter(Boolean);
+    const lastSegment = segments[segments.length - 1] || '';
+    const secondLast = segments[segments.length - 2] || '';
+    const hash = window.location.hash || '';
+    const tabFromHash = extractCatalogTab(hash);
+    if (tabFromHash) {
+      lastCatalogTabKey = tabFromHash;
+    }
+    const isCatalogPath = lastSegment === 'catalogo' || secondLast === 'catalogo';
+    if (isCatalogPath) {
+      if (tabFromHash) return tabFromHash;
+      if (lastCatalogTabKey && catalogNavKeys.has(lastCatalogTabKey)) return lastCatalogTabKey;
+      return 'catalogo';
+    }
+    lastCatalogTabKey = null;
+    if (segments.length === 0) return 'home';
+    return null;
+  }
+
+  function applyActiveNav(activeKey) {
+    const normalizedActive = normalizeNavValue(activeKey);
+    allNavLinks.forEach(link => {
+      const navKey = normalizeNavValue(link.dataset.nav || '');
+      if (normalizedActive && navKey === normalizedActive) {
+        link.classList.add('active');
+      } else {
+        link.classList.remove('active');
+      }
+    });
+  }
+
+  function updateActiveNav() {
+    const navKey = resolveNavKey();
+    applyActiveNav(navKey);
+  }
+
+  function wrapHistoryMethod(name) {
+    try {
+      const original = history[name];
+      if (typeof original !== 'function' || original.__headerNavWrapped) return;
+      const wrapped = function(...args) {
+        const result = original.apply(this, args);
+        try { updateActiveNav(); } catch (err) {}
+        return result;
+      };
+      wrapped.__headerNavWrapped = true;
+      history[name] = wrapped;
+    } catch (err) { /* ignore */ }
+  }
+
+  wrapHistoryMethod('pushState');
+  wrapHistoryMethod('replaceState');
+
+  allNavLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      const navKey = normalizeNavValue(link.dataset.nav || '');
+      if (catalogNavKeys.has(navKey)) {
+        lastCatalogTabKey = navKey;
+      } else if (navKey === 'catalogo') {
+        lastCatalogTabKey = null;
+      }
+      requestAnimationFrame(updateActiveNav);
+    }, { passive: true });
+  });
+
+  window.addEventListener('hashchange', updateActiveNav);
+  window.addEventListener('popstate', updateActiveNav);
+  window.headerUpdateActiveNav = updateActiveNav;
+  updateActiveNav();
   
   // Función para configurar el scroll del modal
   function setupModalScroll() {
