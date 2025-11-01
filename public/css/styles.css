@@ -7080,6 +7080,16 @@ body {
         --slider-nav-btn-offset: clamp(15px, calc(var(--slider-side-space) * 0.38), 60px);
     }
 
+    .slider-nav-btn {
+        width: 20px;
+        height: 180px;
+        font-size: 18px;
+    }
+    
+    .slider-nav-btn i {
+        font-size: 14px;
+    }
+
     .catalogo-grid, #catalogo-grid-page, .skeleton-catalogo {
         column-gap: 4px;
         row-gap: 10px;
@@ -7095,6 +7105,15 @@ body {
         --slider-nav-btn-offset: clamp(14px, calc(var(--slider-side-space) * 0.36), 56px);
     }
 
+    .slider-nav-btn {
+        width: 20px;
+        height: 180px;
+        font-size: 18px;
+    }
+    
+    .slider-nav-btn i {
+        font-size: 14px;
+    }
 
     .slider-slide {
         width: 90vw;
@@ -7283,6 +7302,16 @@ body {
         --slider-slide-gap: 12px;
         --slider-side-space: max(20px, calc((100vw - var(--slider-slide-width)) / 2));
         --slider-nav-btn-offset: clamp(14px, calc(var(--slider-side-space) * 0.36), 54px);
+    }
+
+    .slider-nav-btn {
+        width: 20px;
+        height: 170px;
+        font-size: 18px;
+    }
+    
+    .slider-nav-btn i {
+        font-size: 14px;
     }
 
 .slider-nav-menu {
