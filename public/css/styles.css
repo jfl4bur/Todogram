@@ -6823,6 +6823,12 @@ html, body {
 }
 
 @media (max-width: 900px) {
+    .catalogo-page-header {
+        display: flex;
+        flex-direction: row;
+        margin: -56px 0 0 0;
+    }
+    
     :root {
         --slider-slide-width: 90vw;
         --slider-slide-height: 180px;
@@ -6890,6 +6896,12 @@ body {
 }
 
 @media (max-width: 896px) {
+
+        .catalogo-page-header {
+        display: flex;
+        flex-direction: row;
+        margin: -59px 0 0 0;
+    }
 
         :root {
         --item-width: 131px;
@@ -7162,7 +7174,7 @@ body {
     .catalogo-page-header {
         display: flex;
         flex-direction: row;
-        margin: -38px 0 0 0;
+        margin: -55px 0 0 0;
     }
 
     .catalogo-controls {
@@ -7586,8 +7598,8 @@ body {
 
         .catalogo-page-header {
         display: flex;
-        flex-direction: column;
-        margin: -38px 0 0 0;
+        flex-direction: row;
+        margin: -55px 0 0 -75px;
     }
 
     .catalogo-controls {
@@ -7678,7 +7690,7 @@ body {
         font-size: 1.2rem !important;
         margin-left: 10px !important;
     }
-.catalogo-header{padding:12px} .catalogo-body{padding:8px 12px 24px 12px} .catalogo-genre-list{position:static;grid-template-columns:repeat(2,1fr);margin-top:8px} .catalogo-controls{width:100%;display:flex;justify-content:flex-end}
+.catalogo-header{padding:12px} .catalogo-body{padding:8px 12px 24px 12px} .catalogo-genre-list{position:static;grid-template-columns:repeat(2,1fr);margin-top:8px} .catalogo-controls{width:100%;display:flex;justify-content: center;}
 /* On mobile, don't let the closed dropdown take up layout space. Use display none unless .open on container */
 .catalogo-genre-dropdown .catalogo-genre-list{display:none;opacity:0;visibility:hidden;transform:none}
 .catalogo-genre-dropdown.open .catalogo-genre-list{display:grid;opacity:1;visibility:visible}
@@ -7703,7 +7715,7 @@ body {
     .catalogo-controls {
         width: 100%;
         display: flex;
-        justify-content: flex-start;
+        justify-content: center;
         margin-left: 10px;
     }
 
@@ -8163,7 +8175,7 @@ body {
     .catalogo-controls {
         width: 100%;
         display: flex;
-        justify-content: flex-start;
+        justify-content: center;
         margin-left: 10px;
     }
 
@@ -8285,7 +8297,7 @@ body {
     .catalogo-controls {
         width: 100%;
         display: flex;
-        justify-content: flex-start;
+        justify-content: center;
         margin-left: 10px;
     }
 
