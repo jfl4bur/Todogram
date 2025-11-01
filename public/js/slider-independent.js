@@ -25,57 +25,74 @@
         const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent) || 
                         (navigator.userAgent.includes('Mac') && navigator.userAgent.includes('Safari'));
         
-        // Calcular el ancho del slide para ocupar la mayor parte de la pantalla
-        // dejando espacio para ver elementos adyacentes
+        // Calcular el ancho del slide para ocupar gran parte de la pantalla
+        // dejando espacio para ver elementos adyacentes (mismo criterio que CSS)
         let slideWidth, slideHeight, slideGap, sideSpace;
-        
-        // Reordenar rangos para evitar que <=844 capture <=768 antes
+
         if (viewportWidth <= 480) {
-           // Móvil pequeño: dejar espacio lateral pequeño para ver adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.94);
-            slideHeight = Math.floor(slideWidth * 0.50); // más alto para móviles
+            // Móvil pequeño: más alto para mantener 16:9 y un poco de espacio lateral
+            slideWidth = Math.floor(viewportWidth * 0.90);
+            slideHeight = Math.floor(slideWidth * 0.56);
             slideGap = 8;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else if (viewportWidth <= 768) {
-            // Tablet pequeña / móviles grandes
-            slideWidth = Math.floor(viewportWidth * 0.92);
-            slideHeight = Math.floor(slideWidth * 0.45);
+            // Móviles grandes / tablet chica
+            slideWidth = Math.floor(viewportWidth * 0.90);
+            slideHeight = Math.floor(slideWidth * 0.54);
             slideGap = 10;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
-        } else if (viewportWidth <= 844) {
-            // Tablet: más estrecho para elementos adyacentes visibles
-            slideWidth = Math.floor(viewportWidth * 0.90);
-            slideHeight = Math.floor(slideWidth * 0.18);
+        } else if (viewportWidth <= 800) {
+            // Tablet apaisada: dejar más espacio lateral visible
+            slideWidth = Math.floor(viewportWidth * 0.88);
+            slideHeight = Math.floor(slideWidth * 0.50);
             slideGap = 12;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
-        } else if (viewportWidth <= 1024) {
-            // Desktop pequeño: mayor visibilidad de elementos adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.90);
-            slideHeight = Math.floor(slideWidth * 0.18);
+        } else if (viewportWidth <= 844) {
+            // Entre tablet y escritorio pequeño
+            slideWidth = Math.floor(viewportWidth * 0.86);
+            slideHeight = Math.floor(slideWidth * 0.48);
+            slideGap = 12;
+            sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
+        } else if (viewportWidth <= 888) {
+            // Ajuste fino para cuando desaparecía el botón derecho
+            slideWidth = Math.floor(viewportWidth * 0.88);
+            slideHeight = Math.floor(slideWidth * 0.46);
+            slideGap = 14;
+            sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
+        } else if (viewportWidth <= 896) {
+            // Cercano a 896px: mantener botones visibles con slides más altos
+            slideWidth = Math.floor(viewportWidth * 0.88);
+            slideHeight = Math.floor(slideWidth * 0.50);
             slideGap = 16;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
-        } else if (viewportWidth <= 1400) {
-            // Desktop mediano: muy ancho como Rakuten.tv
+        } else if (viewportWidth <= 1024) {
+            // Desktop pequeño: equilibrio entre altura y side peek
             slideWidth = Math.floor(viewportWidth * 0.88);
-            slideHeight = Math.floor(slideWidth * 0.40);
+            slideHeight = Math.floor(slideWidth * 0.54);
+            slideGap = 18;
+            sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
+        } else if (viewportWidth <= 1400) {
+            // Desktop mediano: 16:9 dominante con más gap
+            slideWidth = Math.floor(viewportWidth * 0.88);
+            slideHeight = Math.floor(slideWidth * 0.56);
             slideGap = 20;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         } else {
-            // Desktop grande: máximo ancho con elementos adyacentes
-            slideWidth = Math.floor(viewportWidth * 0.90);
-            slideHeight = Math.floor(slideWidth * 0.40);
-            slideGap = 24;
+            // Desktop grande: mantener mismo ratio con gap mayor
+            slideWidth = Math.floor(viewportWidth * 0.88);
+            slideHeight = Math.floor(slideWidth * 0.56);
+            slideGap = 22;
             sideSpace = Math.floor((viewportWidth - slideWidth) / 2);
         }
         
         // Límites mínimos y máximos
     // Ajustes adaptativos: permitir sideSpace más pequeño en móviles para centrar mejor
-    const minSlideWidth = viewportWidth <= 480 ? 220 : 300;
+    const minSlideWidth = viewportWidth <= 480 ? 220 : 280;
     const minSlideHeight = viewportWidth <= 480 ? 140 : 170;
-    const minSideSpace = viewportWidth <= 480 ? 12 : 20;
+    const minSideSpace = viewportWidth <= 480 ? 12 : 18;
 
     slideWidth = Math.max(minSlideWidth, Math.min(slideWidth, 2000));
-    slideHeight = Math.max(minSlideHeight, Math.min(slideHeight, 400)); // Máximo 400px para desktop
+    slideHeight = Math.max(minSlideHeight, Math.min(slideHeight, 460));
     slideGap = Math.max(viewportWidth <= 480 ? 6 : 8, slideGap);
     sideSpace = Math.max(minSideSpace, sideSpace);
         
@@ -391,7 +408,10 @@
         const dimensions = calculateResponsiveDimensions();
         
         // Calcular offset de botones de navegación (centrados verticalmente)
-        const navBtnOffset = Math.max(10, Math.floor(dimensions.sideSpace * 0.3));
+    const offsetFactor = dimensions.viewportWidth <= 480 ? 0.45 : 0.35;
+    const minOffset = dimensions.viewportWidth <= 480 ? 10 : 12;
+    const maxOffset = dimensions.viewportWidth <= 1024 ? 72 : 80;
+    const navBtnOffset = Math.min(maxOffset, Math.max(minOffset, Math.floor(dimensions.sideSpace * offsetFactor)));
 
         // Actualizar variables CSS de forma forzada
         const root = document.documentElement;
