@@ -3662,7 +3662,7 @@ ease-out;
 .slider-logo-badge {
     height: 34px;
     width: auto;
-    margin-left: 12px;
+    margin-left: -35px;
     display: block;
     object-fit: contain;
 }
@@ -3841,7 +3841,7 @@ ease-out;
 
     .slider-logo-badge {
         height: 28px !important;
-        margin-left: 10px !important;
+        margin-left: -25px !important;
     }
 
     /* Ocultar botón de login si sobra espacio (puede mostrarse dentro del menú móvil) */
@@ -6810,7 +6810,7 @@ body {
   }
     .slider-logo-badge {
         height: 28px;
-        margin-left: 10px;
+        margin-left: -25px !important;
     }
   .slider-nav-menu {
     gap: 12px;
@@ -7892,7 +7892,7 @@ body {
   }
     .slider-logo-badge {
         height: 20px;
-        margin-left: 8px;
+        margin-left: -25px !important;
     }
   .slider-header-burger {
     width: 32px;
