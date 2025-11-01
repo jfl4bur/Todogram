@@ -746,159 +746,82 @@ class HoverModal {
                         const oRect = origin.getBoundingClientRect();
                         const cRect = clone.getBoundingClientRect();
 
-                        if (isCatalogOrigin) {
-                            // --- CATALOG: transform-only animation (current behavior) ---
+                        // Unificar animación: usar SIEMPRE transform-only como en catálogo
+                        // para que el "regreso" del item en carruseles tenga la misma
+                        // velocidad/sensación que el catálogo.
 
-                            // Ensure the clone is positioned relative to the viewport so
-                            // transform translations map predictably. Convert to fixed
-                            // positioning at current viewport coords.
-                            try {
-                                const curLeft = Math.round(cRect.left);
-                                const curTop = Math.round(cRect.top);
-                                clone.style.position = 'fixed';
-                                clone.style.left = `${curLeft}px`;
-                                clone.style.top = `${curTop}px`;
-                                // ensure explicit width/height so scale math matches
-                                clone.style.width = `${Math.round(cRect.width)}px`;
-                                clone.style.height = `${Math.round(cRect.height)}px`;
-                                // move into body to avoid parent transform/overflow surprises
-                                if (clone.parentElement && clone.parentElement !== document.body) {
-                                    document.body.appendChild(clone);
-                                }
-                            } catch (e) {}
+                        // Asegurar posicionamiento fijo relativo al viewport
+                        try {
+                            const curLeft = Math.round(cRect.left);
+                            const curTop = Math.round(cRect.top);
+                            clone.style.position = 'fixed';
+                            clone.style.left = `${curLeft}px`;
+                            clone.style.top = `${curTop}px`;
+                            clone.style.width = `${Math.round(cRect.width)}px`;
+                            clone.style.height = `${Math.round(cRect.height)}px`;
+                            if (clone.parentElement && clone.parentElement !== document.body) {
+                                document.body.appendChild(clone);
+                            }
+                        } catch (e) {}
 
-                            // compute translation delta in viewport pixels
-                            const deltaX = Math.round(oRect.left - cRect.left);
-                            const deltaY = Math.round(oRect.top - cRect.top);
-                            const targetScale = (cRect.width > 0) ? (oRect.width / cRect.width) : 1;
+                        // Calcular delta y escala objetivo
+                        const deltaX = Math.round(oRect.left - cRect.left);
+                        const deltaY = Math.round(oRect.top - cRect.top);
+                        const targetScale = (cRect.width > 0) ? (oRect.width / cRect.width) : 1;
 
-                            // debug hooks removed in production
+                        clone.style.pointerEvents = 'none';
+                        clone.style.transition = 'transform 200ms ease-out, opacity 150ms ease-out';
+                        clone.style.willChange = 'transform';
 
-                            // prepare transform-based animation: start from current visual
-                            // state (keep current scale/translate from CSS variables) and
-                            // animate to target translate + target scale
-                            // ensure clone is visible and non-interactive
-                            clone.style.pointerEvents = 'none';
-                            clone.style.transition = 'transform 200ms ease-out, opacity 150ms ease-out';
-                            // ensure GPU-acceleration hints
-                            clone.style.willChange = 'transform';
+                        try {
+                            const originTO = origin.style.getPropertyValue('--hover-transform-origin') || getComputedStyle(origin).transformOrigin || 'center center';
+                            clone.style.transformOrigin = originTO;
+                        } catch (e) {}
 
-                            // Force the transform-origin to match the origin so scaling
-                            // appears to grow/shrink toward the right anchor.
-                            try {
-                                const originTO = origin.style.getPropertyValue('--hover-transform-origin') || getComputedStyle(origin).transformOrigin || 'center center';
-                                clone.style.transformOrigin = originTO;
-                            } catch (e) {}
+                        // Evitar transiciones internas
+                        try {
+                            const inner = clone.querySelectorAll('*');
+                            inner.forEach((n) => { try { n.style.transition = 'none'; } catch (e) {} });
+                        } catch (e) {}
 
-                            // Disable transitions on all children inside the clone so that
-                            // only the clone's transform animates. This prevents nested
-                            // elements from animating and causing apparent rebounding.
-                            try {
-                                const inner = clone.querySelectorAll('*');
-                                inner.forEach((n) => {
-                                    try { n.style.transition = 'none'; } catch (e) {}
-                                });
-                                // child transitions disabled
-                            } catch (e) {}
-
-                            // set initial transform to current hover visual if not already
-                            // read computed style for transform; fallback to scale(1.3)
-                            try {
-                                const cs = getComputedStyle(clone);
-                                const currentTransform = cs.transform && cs.transform !== 'none' ? cs.transform : null;
-                                if (!currentTransform) {
-                                    clone.style.transform = 'translate3d(0px,0px,0px) scale(1.3)';
-                                }
-                            } catch (e) {
+                        // Asegurar estado inicial si no hay transform calculado
+                        try {
+                            const cs = getComputedStyle(clone);
+                            const currentTransform = cs.transform && cs.transform !== 'none' ? cs.transform : null;
+                            if (!currentTransform) {
                                 clone.style.transform = 'translate3d(0px,0px,0px) scale(1.3)';
                             }
-
-                            // force reflow then trigger the transform to move+scale into origin
-                            void clone.offsetWidth;
-                            clone.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0px) scale(${targetScale})`;
-
-                            const cleanup = () => {
-                                try { if (clone && clone.parentElement) clone.parentElement.removeChild(clone); } catch (e) {}
-                                this._portalEl = null;
-                                try { origin.style.visibility = ''; } catch (e) {}
-                                this._portalActive = false;
-                                this._portalAnimating = false;
-                                try { this._detachPortalScrollListeners(); } catch (e) {}
-                            };
-
-                            const onEnd = (ev) => {
-                                if (ev && ev.propertyName && ev.propertyName.indexOf('transform') === -1) return;
-                                try { clone.removeEventListener('transitionend', onEnd); } catch(e){}
-                                cleanup();
-                                if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
-                            };
-                            try { clone.addEventListener('transitionend', onEnd); } catch(e){}
-
-                            this._portalTimeout = setTimeout(() => {
-                                try { clone.removeEventListener('transitionend', onEnd); } catch(e){}
-                                cleanup();
-                                if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
-                            }, 300);
-                            return;
-
-                        } else {
-                            // --- CAROUSEL: legacy left/top/width/height animation (preserve prior feel) ---
-
-                            // Use gentle ease-out but animate layout properties to match
-                            // previous carousel behavior which looked correct for sliders.
-                            try {
-                                // recompute origin rect in case layout changed
-                                const targetRect = origin.getBoundingClientRect();
-                                clone.style.transition = 'transform 180ms ease-out, left 180ms ease-out, top 180ms ease-out, width 180ms ease-out, height 180ms ease-out, opacity 180ms ease-out';
-                                clone.style.pointerEvents = 'none';
-
-                                try {
-                                    const p = clone.parentElement;
-                                    if (p && p !== document.body) {
-                                        const pRect = p.getBoundingClientRect();
-                                        clone.style.left = `${Math.round(targetRect.left - pRect.left)}px`;
-                                        clone.style.top = `${Math.round(targetRect.top - pRect.top)}px`;
-                                    } else {
-                                        clone.style.left = `${Math.round(targetRect.left)}px`;
-                                        clone.style.top = `${Math.round(targetRect.top)}px`;
-                                    }
-                                } catch (e) {
-                                    clone.style.left = `${Math.round(targetRect.left)}px`;
-                                    clone.style.top = `${Math.round(targetRect.top)}px`;
-                                }
-
-                                clone.style.width = `${Math.round(targetRect.width)}px`;
-                                clone.style.height = `${Math.round(targetRect.height)}px`;
-                                // remove visual scale so it animates back visibly
-                                clone.classList.remove('hover-zoom');
-
-                                const cleanup2 = () => {
-                                    try { if (clone && clone.parentElement) clone.parentElement.removeChild(clone); } catch (e) {}
-                                    this._portalEl = null;
-                                    try { origin.style.visibility = ''; } catch (e) {}
-                                    this._portalActive = false;
-                                    this._portalAnimating = false;
-                                    try { this._detachPortalScrollListeners(); } catch (e) {}
-                                };
-
-                                const onEnd2 = (ev) => {
-                                    if (ev && ev.propertyName && ['left','top','transform','width','height','opacity'].indexOf(ev.propertyName) === -1) return;
-                                    try { clone.removeEventListener('transitionend', onEnd2); } catch(e){}
-                                    cleanup2();
-                                    if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
-                                };
-                                try { clone.addEventListener('transitionend', onEnd2); } catch(e){}
-                                this._portalTimeout = setTimeout(() => {
-                                    try { clone.removeEventListener('transitionend', onEnd2); } catch(e){}
-                                    cleanup2();
-                                    if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
-                                }, 280);
-                                return;
-                            } catch (e) {
-                                console.warn('hover-modal: portal animateBack (carousel) failed', e);
-                                // fallthrough to immediate removal
-                            }
+                        } catch (e) {
+                            clone.style.transform = 'translate3d(0px,0px,0px) scale(1.3)';
                         }
+
+                        // Disparar animación hacia el origen
+                        void clone.offsetWidth;
+                        clone.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0px) scale(${targetScale})`;
+
+                        const cleanup = () => {
+                            try { if (clone && clone.parentElement) clone.parentElement.removeChild(clone); } catch (e) {}
+                            this._portalEl = null;
+                            try { origin.style.visibility = ''; } catch (e) {}
+                            this._portalActive = false;
+                            this._portalAnimating = false;
+                            try { this._detachPortalScrollListeners(); } catch (e) {}
+                        };
+
+                        const onEnd = (ev) => {
+                            if (ev && ev.propertyName && ev.propertyName.indexOf('transform') === -1) return;
+                            try { clone.removeEventListener('transitionend', onEnd); } catch(e){}
+                            cleanup();
+                            if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
+                        };
+                        try { clone.addEventListener('transitionend', onEnd); } catch(e){}
+
+                        this._portalTimeout = setTimeout(() => {
+                            try { clone.removeEventListener('transitionend', onEnd); } catch(e){}
+                            cleanup();
+                            if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
+                        }, 300);
+                        return;
                     } catch (e) {
                         console.warn('hover-modal: portal animateBack failed', e);
                         // fallthrough to immediate removal
