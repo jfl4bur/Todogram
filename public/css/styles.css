@@ -3650,6 +3650,10 @@ ease-out;
   margin-right: 32px;
   text-decoration: none;
 }
+.slider-logo-link {
+    display: inline-flex;
+    align-items: center;
+}
 .slider-logo svg {
   height: 38px;
   width: auto;
