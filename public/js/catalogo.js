@@ -853,7 +853,7 @@
         // Delegated hover handlers: funcionan para items ya renderizados y para elementos que se agreguen posteriormente
         if (grid && !grid.__hover_delegation_installed) {
             // Show hover with a delay (match carousels behaviour)
-            const HOVER_SHOW_DELAY = 200; // ms - same delay used in carousels
+            const HOVER_SHOW_DELAY = 350; // ms - same delay used in carousels
             grid.addEventListener('mouseover', (e) => {
                 // Do not show hover modal on touch-capable devices or immediately
                 // after a touch event (prevents long-press -> hover behavior).

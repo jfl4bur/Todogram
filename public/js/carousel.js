@@ -311,7 +311,7 @@ class EpisodiosSeriesCarousel {
                                     }
                                 }
                             }, 200);
-                        }, 200)
+                        }, 350)
                     };
                 });
                 div.addEventListener('mouseleave', () => {
