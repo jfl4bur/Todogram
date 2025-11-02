@@ -838,7 +838,7 @@ class HoverModal {
                                 try { clone.removeEventListener('transitionend', onEnd); } catch(e){}
                                 cleanup();
                                 if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
-                            }, 350);
+                            }, 400);
                             return;
 
                         } else {
@@ -892,7 +892,7 @@ class HoverModal {
                                     try { clone.removeEventListener('transitionend', onEnd2); } catch(e){}
                                     cleanup2();
                                     if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
-                                }, 350);
+                                }, 400);
                                 return;
                             } catch (e) {
                                 console.warn('hover-modal: portal animateBack (carousel) failed', e);
