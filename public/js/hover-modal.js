@@ -779,7 +779,7 @@ class HoverModal {
                             // animate to target translate + target scale
                             // ensure clone is visible and non-interactive
                             clone.style.pointerEvents = 'none';
-                            clone.style.transition = 'transform 200ms ease-out, opacity 150ms ease-out';
+                            clone.style.transition = 'transform 140ms ease-out, opacity 140ms ease-out';
                             // ensure GPU-acceleration hints
                             clone.style.willChange = 'transform';
 
@@ -838,7 +838,7 @@ class HoverModal {
                                 try { clone.removeEventListener('transitionend', onEnd); } catch(e){}
                                 cleanup();
                                 if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
-                            }, 300);
+                            }, 200);
                             return;
 
                         } else {
@@ -849,7 +849,7 @@ class HoverModal {
                             try {
                                 // recompute origin rect in case layout changed
                                 const targetRect = origin.getBoundingClientRect();
-                                clone.style.transition = 'transform 180ms ease-out, left 180ms ease-out, top 180ms ease-out, width 180ms ease-out, height 180ms ease-out, opacity 180ms ease-out';
+                                clone.style.transition = 'transform 140ms ease-out, left 140ms ease-out, top 140ms ease-out, width 140ms ease-out, height 140ms ease-out, opacity 140ms ease-out';
                                 clone.style.pointerEvents = 'none';
 
                                 try {
@@ -892,7 +892,7 @@ class HoverModal {
                                     try { clone.removeEventListener('transitionend', onEnd2); } catch(e){}
                                     cleanup2();
                                     if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
-                                }, 280);
+                                }, 200);
                                 return;
                             } catch (e) {
                                 console.warn('hover-modal: portal animateBack (carousel) failed', e);
