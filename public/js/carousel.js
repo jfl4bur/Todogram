@@ -311,7 +311,7 @@ class EpisodiosSeriesCarousel {
                                     }
                                 }
                             }, 200);
-                        }, 700)
+                        }, 500)
                     };
                 });
                 div.addEventListener('mouseleave', () => {
@@ -666,7 +666,7 @@ class EpisodiosAnimesCarousel {
                                 if (window.hoverModal && div) window.hoverModal.show(item, div);
                             }
                         }, 200);
-                    }, 900) };
+                    }, 700) };
                 });
                 div.addEventListener('mouseleave', () => {
                     const itemId = div.dataset.itemId;
@@ -962,7 +962,7 @@ class EpisodiosDocumentalesCarousel {
                                 if (window.hoverModal && div) window.hoverModal.show(item, div);
                             }
                         }, 200);
-                    }, 900) };
+                    }, 700) };
                 });
                 div.addEventListener('mouseleave', () => {
                     const itemId = div.dataset.itemId;
@@ -1307,7 +1307,7 @@ class AnimesCarousel {
                                     }
                                 }
                             }, 200);
-                        }, 900)
+                        }, 700)
                     };
                 });
                 div.addEventListener('mouseleave', () => {
@@ -1648,7 +1648,7 @@ class Carousel {
                                     }
                                 }
                             }, 200);
-                        }, 900)
+                        }, 700)
                     };
                 });
 
@@ -2127,7 +2127,7 @@ class SeriesCarousel {
                                     }
                                 }
                             }, 200);
-                        }, 900)
+                        }, 700)
                     };
                 });
 
@@ -2561,7 +2561,7 @@ class DocumentalesCarousel {
                                     }
                                 }
                             }, 200);
-                        }, 900)
+                        }, 700)
                     };
                 });
                 div.addEventListener('mouseleave', () => {
