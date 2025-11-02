@@ -779,9 +779,9 @@ class HoverModal {
                             // animate to target translate + target scale
                             // ensure clone is visible and non-interactive
                             clone.style.pointerEvents = 'none';
-                            clone.style.transition = 'transform 140ms ease-out, opacity 140ms ease-out';
+                            clone.style.transition = 'transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 150ms ease-out, box-shadow 250ms cubic-bezier(0.34, 1.56, 0.64, 1)';
                             // ensure GPU-acceleration hints
-                            clone.style.willChange = 'transform';
+                            clone.style.willChange = 'transform, box-shadow';
 
                             // Force the transform-origin to match the origin so scaling
                             // appears to grow/shrink toward the right anchor.
@@ -812,10 +812,15 @@ class HoverModal {
                             } catch (e) {
                                 clone.style.transform = 'translate3d(0px,0px,0px) scale(1.3)';
                             }
+                            
+                            // Set initial hover shadow (dramatic like streaming platforms)
+                            clone.style.boxShadow = '0 16px 48px rgba(0, 0, 0, 0.8), 0 4px 16px rgba(0, 0, 0, 0.6)';
 
                             // force reflow then trigger the transform to move+scale into origin
                             void clone.offsetWidth;
                             clone.style.transform = `translate3d(${deltaX}px, ${deltaY}px, 0px) scale(${targetScale})`;
+                            // Remove shadow when scaling back
+                            clone.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
 
                             const cleanup = () => {
                                 try { if (clone && clone.parentElement) clone.parentElement.removeChild(clone); } catch (e) {}
@@ -838,18 +843,17 @@ class HoverModal {
                                 try { clone.removeEventListener('transitionend', onEnd); } catch(e){}
                                 cleanup();
                                 if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
-                            }, 400);
+                            }, 320);
                             return;
 
                         } else {
                             // --- CAROUSEL: legacy left/top/width/height animation (preserve prior feel) ---
 
-                            // Use gentle ease-out but animate layout properties to match
-                            // previous carousel behavior which looked correct for sliders.
+                            // Use smooth elastic animation for carousel items similar to catalog
                             try {
                                 // recompute origin rect in case layout changed
                                 const targetRect = origin.getBoundingClientRect();
-                                clone.style.transition = 'transform 140ms ease-out, left 140ms ease-out, top 140ms ease-out, width 120ms ease-out, height 120ms ease-out, opacity 120ms ease-out';
+                                clone.style.transition = 'transform 250ms cubic-bezier(0.34, 1.56, 0.64, 1), left 250ms cubic-bezier(0.34, 1.56, 0.64, 1), top 250ms cubic-bezier(0.34, 1.56, 0.64, 1), width 250ms cubic-bezier(0.34, 1.56, 0.64, 1), height 250ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 150ms ease-out, box-shadow 250ms cubic-bezier(0.34, 1.56, 0.64, 1)';
                                 clone.style.pointerEvents = 'none';
 
                                 try {
@@ -871,6 +875,8 @@ class HoverModal {
                                 clone.style.height = `${Math.round(targetRect.height)}px`;
                                 // remove visual scale so it animates back visibly
                                 clone.classList.remove('hover-zoom');
+                                // Remove dramatic shadow when scaling back
+                                clone.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
 
                                 const cleanup2 = () => {
                                     try { if (clone && clone.parentElement) clone.parentElement.removeChild(clone); } catch (e) {}
@@ -892,7 +898,7 @@ class HoverModal {
                                     try { clone.removeEventListener('transitionend', onEnd2); } catch(e){}
                                     cleanup2();
                                     if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
-                                }, 400);
+                                }, 320);
                                 return;
                             } catch (e) {
                                 console.warn('hover-modal: portal animateBack (carousel) failed', e);
