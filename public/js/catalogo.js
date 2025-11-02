@@ -12,6 +12,7 @@
         const rawGenres = d['Géneros'] || d['Género'] || '';
         // Normalizar lista de géneros (divisores comunes: · , / | ;)
         const genresList = String(rawGenres).split(/·|\||,|\/|;/).map(s=>s.trim()).filter(Boolean);
+        const originalCategory = d['Categoría'] || '';
         return {
             id: d['ID TMDB'] ? String(d['ID TMDB']) : `i_${index}`,
             title: d['Título'] || d['Título original'] || 'Sin título',
@@ -20,7 +21,8 @@
             posterUrl: d['Portada'] || '',
             postersUrl: d['Carteles'] || '',
             backgroundUrl: d['Carteles'] || d['Portada'] || '',
-            category: d['Categoría'] || 'Películas',
+            category: originalCategory || 'Películas',
+            originalCategory: originalCategory,
             // item.genre es la propiedad que esperan los modales (una cadena legible)
             genre: genresList.length ? genresList[0] : '',
             // mantener también la lista completa
@@ -308,6 +310,9 @@
     function applyFiltersAndRender(grid, data, tab, genre){
         state.allItems = (data||[]).map(buildItemFromData);
         state.filteredItems = state.allItems.filter(it=>{
+            // Excluir items sin categoría original (vacío o undefined)
+            if(!it.originalCategory || it.originalCategory.trim() === '') return false;
+            
             // category mismatch
             if(tab && it.category && it.category!==tab) return false;
 
