@@ -6394,7 +6394,7 @@ html, body {
     }
 .slider-section {
         height: 422px;
-        margin-top: -25px;
+        margin-top: -30px;
         /*  padding: 0 20px;*/
     }
     
@@ -6471,10 +6471,10 @@ html, body {
 
 
     .slider-section {
-        height: 420px;
+        height: 345px;
         margin-top: -30px;
-      /*  padding: 0 15px;*/
-      /*  margin: 0 -15px*/
+        /*  padding: 0 15px;*/
+        /*  margin: 0 -15px*/
     }
 .carousel-skeleton {
     margin: 50px;
@@ -6589,6 +6589,13 @@ html, body {
 }
 
 @media (max-width: 900px) {
+
+    .slider-section {
+        height: 342px;
+        margin-top: -30px;
+        /* padding: 0 15px; */
+    }
+    
     .catalogo-page-header {
         display: flex;
         flex-direction: row;
@@ -6606,7 +6613,7 @@ body {
     padding-top: 56px;
   }
   .slider-section {
-    margin-top: 100px; /* Ajustado para tablets */
+    margin-top: -89px; /* Ajustado para tablets */
   }
   .details-modal-overlay {
     padding-top: 70px;
@@ -6712,7 +6719,7 @@ body {
 
     .slider-section {
         height: 200px;
-        margin-top: 20px;
+        margin-top: 15px;
         padding: 0;
     }
     
@@ -6960,7 +6967,7 @@ body {
     
     .slider-section {
         height: 180px;
-        margin-top: 50px;
+        margin-top: 15px;
         padding: 0;
     }
     
@@ -7260,7 +7267,7 @@ body {
 
     .slider-section {
         height: 190px;
-        margin-top: 40px;
+        margin-top: 15px;
         padding: 0;
     }
     
