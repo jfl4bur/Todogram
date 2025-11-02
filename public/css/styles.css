@@ -1869,6 +1869,7 @@ button:focus {
     align-items: center;
     position: relative;
     margin-left: var(--slider-side-space, 20px);
+    margin-top: -8px;
 }
 
 .slider-skeleton::-webkit-scrollbar {
