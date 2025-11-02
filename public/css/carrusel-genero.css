@@ -4,9 +4,9 @@
 /* Ocultar scrollbar horizontal (todos los navegadores principales) */
 .carrusel-genero #generos-carousel-wrapper::-webkit-scrollbar { display: none; height: 0; }
 .carrusel-genero #generos-carousel-wrapper { -ms-overflow-style: none; scrollbar-width: none; }
-.genero-item {display: inline-flex;flex-direction: column;align-items: center;text-align: center;text-decoration: none;flex: 0 0 auto;color: rgb(198, 197, 197);}
-.genero-item .genero-img {width: 160px;height: 160px;border-radius: 50%;object-fit: cover;display: block;/* box-shadow: 0 6px 18px rgba(0,0,0,0.6); */border: none;overflow: unset;}
-.genero-item .genero-title {margin-top: 12px;max-width: 170px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;display: block;word-break: break-word;font-size: 1.2rem;font-family: TodogramSans, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Oxygen, Cantarell, sans-serif;font-weight: normal;color: rgb(198, 197, 197);text-align: center;line-height: 24px;}
+.genero-item {display: inline-flex;flex-direction: column;align-items: center;text-align: center;text-decoration: none;flex: 0 0 auto;color: rgb(198, 197, 197);touch-action: manipulation;cursor: pointer;-webkit-tap-highlight-color: transparent;}
+.genero-item .genero-img {width: 160px;height: 160px;border-radius: 50%;object-fit: cover;display: block;/* box-shadow: 0 6px 18px rgba(0,0,0,0.6); */border: none;overflow: unset;pointer-events: none;}
+.genero-item .genero-title {margin-top: 12px;max-width: 170px;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;display: block;word-break: break-word;font-size: 1.2rem;font-family: TodogramSans, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Helvetica Neue", Oxygen, Cantarell, sans-serif;font-weight: normal;color: rgb(198, 197, 197);text-align: center;line-height: 24px;pointer-events: none;}
 /* Al hacer hover/focus en todo el item, el título debe aclararse - solo en dispositivos con hover */
 @media (hover: hover) and (pointer: fine) {
     .genero-item {transition: transform 0.15s ease-out;}
