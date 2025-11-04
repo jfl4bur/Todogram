@@ -751,18 +751,10 @@ button:focus {
 }
 
 .carousel-overlay {
-    position: absolute;
-    top: 60%;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 15px;
-    color: white;
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
-    transform: translateY(20px);
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    opacity: 0;
-    z-index: 2;
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 
 .carousel-title {
@@ -2080,18 +2072,10 @@ button:focus {
 }
 
 .carousel-overlay {
-    position: absolute;
-    top: 25%;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 15px;
-    color: white;
-    background: linear-gradient(transparent, rgba(0, 0, 0, 0.9));
-    transform: translateY(20px);
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    opacity: 0;
-    z-index: 2;
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
 }
 
 .carousel-title-overlay {
