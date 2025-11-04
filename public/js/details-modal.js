@@ -1331,6 +1331,19 @@ class DetailsModal {
             // Inicializar filtro de temporada si existe
             const seasonSelect = this.detailsModalBody.querySelector('#season-select');
             if (seasonSelect) {
+                const filterContainer = seasonSelect.closest('.details-modal-season-filter');
+                
+                // Detectar cuando el select se abre/cierra
+                seasonSelect.addEventListener('mousedown', () => {
+                    if (filterContainer) filterContainer.classList.add('open');
+                });
+                seasonSelect.addEventListener('blur', () => {
+                    if (filterContainer) filterContainer.classList.remove('open');
+                });
+                seasonSelect.addEventListener('change', () => {
+                    if (filterContainer) filterContainer.classList.remove('open');
+                });
+                
                 seasonSelect.addEventListener('change', (e) => {
                     const val = seasonSelect.value;
                     const items = this.detailsModalBody.querySelectorAll('.details-modal-episode-item');
