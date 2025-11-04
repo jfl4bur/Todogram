@@ -1047,14 +1047,11 @@ button:focus {
 
     /* Header season filter */
     .details-modal-episodes-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
-    .details-modal-season-filter{display:flex;align-items:center;gap:8px}
-    .details-modal-season-filter .select-wrapper{position:relative;display:inline-flex;align-items:center}
-    .details-modal-season-select{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);padding:10px 35px 10px 12px;border-radius:6px;color:#fff;font-size:14px;font-weight:500;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;-moz-appearance:none;transition:all 0.18s ease}
-    .details-modal-season-select:hover{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3)}
-    .details-modal-season-select:focus{border-color:var(--primary-color);background:rgba(255,255,255,0.12)}
-    .details-modal-season-select option{background:#1a1a1a;color:#fff;padding:8px}
-    .select-wrapper .select-chev{position:absolute;right:10px;pointer-events:none;color:rgba(255,255,255,0.7);transition:transform 0.18s ease}
-    .details-modal-season-filter.open .select-chev{transform:rotate(180deg)}
+    .details-modal-season-filter{display:flex;align-items:center;gap:8px;position:relative}
+    .season-select-wrapper{position:relative;display:inline-flex;align-items:center}
+    .season-select-wrapper .chev{position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:rgba(255,255,255,0.8);transition:transform .18s ease}
+    .details-modal-season-filter.open .season-select-wrapper .chev{transform:translateY(-50%) rotate(180deg)}
+    .details-modal-season-select{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);padding:10px 32px 10px 12px;border-radius:6px;color:#fff;font-size:14px;font-weight:500;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;-moz-appearance:none;transition:all 0.2s ease}.details-modal-season-select:hover{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3)}.details-modal-season-select:focus{border-color:var(--primary-color);background:rgba(255,255,255,0.12)}.details-modal-season-select option{background:#1a1a1a;color:#fff;padding:8px}
 
     /* End of episodes styles */
 
@@ -2362,6 +2359,13 @@ button:focus {
     .details-modal-body .details-modal-episodes .details-modal-episode-item{align-items:flex-start}
 
     /* Header season filter */
+    .details-modal-episodes-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+    .details-modal-season-filter{display:flex;align-items:center;gap:8px;position:relative}
+    .season-select-wrapper{position:relative;display:inline-flex;align-items:center}
+    .season-select-wrapper .chev{position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:rgba(255,255,255,0.8);transition:transform .18s ease}
+    .details-modal-season-filter.open .season-select-wrapper .chev{transform:translateY(-50%) rotate(180deg)}
+    .details-modal-season-select{background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);padding:10px 32px 10px 12px;border-radius:6px;color:#fff;font-size:14px;font-weight:500;cursor:pointer;outline:none;appearance:none;-webkit-appearance:none;-moz-appearance:none;transition:all 0.2s ease}.details-modal-season-select:hover{background:rgba(255,255,255,0.15);border-color:rgba(255,255,255,0.3)}.details-modal-season-select:focus{border-color:var(--primary-color);background:rgba(255,255,255,0.12)}.details-modal-season-select option{background:#1a1a1a;color:#fff;padding:8px}
+
     /* End of episodes styles */
 
     /* Toggleable synopsis: collapsed (clamped) / expanded (full) */

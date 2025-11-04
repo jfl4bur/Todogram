@@ -1291,11 +1291,11 @@ class DetailsModal {
         // Construir header con selector de temporadas si hay más de una temporada
         let headerHtml = `<div class="details-modal-episodes-header"><h3 class="details-modal-episodes-title">Episodios</h3>`;
         if (seasons.length > 0) {
-            headerHtml += `<div class="details-modal-season-filter"><label for="season-select">Temporada</label><div class="select-wrapper"><select id="season-select" class="details-modal-season-select"><option value="all">Todas</option>`;
+            headerHtml += `<div class="details-modal-season-filter"><label for="season-select">Temporada</label><div class="season-select-wrapper"><select id="season-select" class="details-modal-season-select"><option value="all">Todas</option>`;
             seasons.forEach(s => {
                 headerHtml += `<option value="${s}">Temporada ${s}</option>`;
             });
-            headerHtml += `</select><svg class="select-chev" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>`;
+            headerHtml += `</select><svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>`;
         }
         headerHtml += `</div>`;
 
