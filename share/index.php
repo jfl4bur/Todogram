@@ -13,9 +13,6 @@ const USER_AGENT = 'TodogramShareBot/1.0 (+https://todogram.free.nf)';
 
 header('Content-Type: text/html; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
-header('Cache-Control: no-cache, no-store, must-revalidate');
-header('Pragma: no-cache');
-header('Expires: 0');
 
 function readQueryParam(string $key): ?string {
     if (!isset($_GET[$key])) {
@@ -92,7 +89,7 @@ function fetchDataSet(): array {
         return [];
     }
 
-    $data = json_decode($raw, true, 512, JSON_BIGINT_AS_STRING);
+    $data = json_decode($raw, true, flags: JSON_BIGINT_AS_STRING);
     return is_array($data) ? $data : [];
 }
 
@@ -246,6 +243,8 @@ if (!$matched) {
     <meta name="twitter:image" content="<?= escapeAttr($imageUrl) ?>">
 
     <link rel="canonical" href="<?= escapeAttr($canonicalUrl) ?>">
+
+    <meta http-equiv="refresh" content="0; url=<?= escapeAttr($redirectUrl) ?>">
     <style>
         :root { color-scheme: dark light; }
         body {
@@ -305,7 +304,7 @@ if (!$matched) {
     <script>
     (function(){
         const redirectUrl = <?= json_encode($redirectUrl, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
-        setTimeout(function(){ window.location.replace(redirectUrl); }, 200);
+        setTimeout(function(){ window.location.replace(redirectUrl); }, 150);
     })();
     </script>
 </body>
