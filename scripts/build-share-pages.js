@@ -25,7 +25,7 @@ function generateSharePage(item) {
     const image = item['Portada'] || item.posterUrl || 'https://via.placeholder.com/1200x630';
     const id = item['ID TMDB'] || item.id || ''; // Usar ID TMDB
     const titleSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    const originalUrl = `https://todogram.free.nf/#id=${id}&title=${titleSlug}`;
+    const originalUrl = `https://jfl4bur.github.io/Todogram/#id=${id}&title=${titleSlug}`;
     const filename = `${id}-${titleSlug}.html`;
     
     const html = `<!DOCTYPE html>
