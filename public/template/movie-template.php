@@ -7,7 +7,8 @@ $originalUrl = isset($_GET['originalUrl']) ? htmlspecialchars($_GET['originalUrl
 $hash = isset($_GET['hash']) ? htmlspecialchars($_GET['hash'], ENT_QUOTES, 'UTF-8') : '';
 
 // Construir la URL actual
-$currentUrl = "https://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
+$currentUrl = $protocol . "://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
 // Construir URL de redirección
 $redirectUrl = $originalUrl;
@@ -15,6 +16,11 @@ if (!empty($hash)) {
     // Asegurarse de que el hash comience con #
     $redirectUrl .= (strpos($hash, '#') === 0) ? $hash : '#' . $hash;
 }
+
+// Headers para evitar caché en bots de redes sociales
+header("Cache-Control: no-cache, no-store, must-revalidate");
+header("Pragma: no-cache");
+header("Expires: 0");
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -24,13 +30,18 @@ if (!empty($hash)) {
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Todogram">
     <meta property="og:title" content="<?php echo $title; ?>">
     <meta property="og:description" content="<?php echo $description; ?>">
     <meta property="og:image" content="<?php echo $image; ?>">
+    <meta property="og:image:secure_url" content="<?php echo $image; ?>">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:url" content="<?php echo $currentUrl; ?>">
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@Todogram">
     <meta name="twitter:title" content="<?php echo $title; ?>">
     <meta name="twitter:description" content="<?php echo $description; ?>">
     <meta name="twitter:image" content="<?php echo $image; ?>">

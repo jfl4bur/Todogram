@@ -133,8 +133,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Función para generar URL de compartir
         window.generateShareUrl = function(item, originalUrl) {
-            const staticBaseUrl = 'https://todogram.free.nf/public/template/movie-template.php';
-            return `${staticBaseUrl}?title=${encodeURIComponent(item.title)}&description=${encodeURIComponent(item.description || 'Explora esta película en Todogram.')}&image=${encodeURIComponent(item.posterUrl || 'https://via.placeholder.com/194x271')}&originalUrl=${encodeURIComponent(originalUrl)}&hash=${encodeURIComponent(window.location.hash)}`;
+            // Obtener ID y título
+            const id = item['ID TMDB'] || item.id || '';
+            const title = item['Título'] || item.title || '';
+            const titleSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+            
+            // Usar páginas estáticas pregeneradas en GitHub Pages
+            const sharePageUrl = `https://jfl4bur.github.io/Todogram/public/share/${id}-${titleSlug}.html`;
+            return sharePageUrl;
         };
 
         // Evento para el botón "Share" dentro del modal de detalles
