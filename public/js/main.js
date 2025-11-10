@@ -133,8 +133,48 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Función para generar URL de compartir
         window.generateShareUrl = function(item, originalUrl) {
-            const staticBaseUrl = 'https://jfl4bur.github.io/Todogram/public/template/movie-template.html';
-            return `${staticBaseUrl}?title=${encodeURIComponent(item.title)}&description=${encodeURIComponent(item.description || 'Explora esta película en Todogram.')}&image=${encodeURIComponent(item.posterUrl || 'https://via.placeholder.com/194x271')}&originalUrl=${encodeURIComponent(originalUrl)}&hash=${encodeURIComponent(window.location.hash)}`;
+            if (!item) return originalUrl || window.location.href;
+            try {
+                const baseUrl = new URL(originalUrl || window.location.href);
+                if (!item.id) return baseUrl.toString();
+
+                const detailsInstance = window.detailsModal;
+                const normalizeTitle = (titleValue) => {
+                    if (!titleValue) return '';
+                    try {
+                        if (detailsInstance && typeof detailsInstance.normalizeText === 'function') {
+                            return detailsInstance.normalizeText(titleValue);
+                        }
+                        return String(titleValue)
+                            .normalize('NFD')
+                            .replace(/[\u0300-\u036f]/g, '')
+                            .toLowerCase()
+                            .replace(/[^a-z0-9]/g, '-')
+                            .replace(/-+/g, '-')
+                            .replace(/^-|-$/g, '');
+                    } catch (err) {
+                        return String(titleValue).toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                    }
+                };
+
+                const normalizedTitle = normalizeTitle(item.title || '');
+                let hashValue = '';
+
+                if (detailsInstance && typeof detailsInstance.buildModalHash === 'function') {
+                    hashValue = detailsInstance.buildModalHash(item.id, normalizedTitle);
+                } else {
+                    const params = new URLSearchParams();
+                    params.set('id', item.id);
+                    if (normalizedTitle) params.set('title', normalizedTitle);
+                    hashValue = params.toString();
+                }
+
+                if (hashValue) baseUrl.hash = hashValue;
+                return baseUrl.toString();
+            } catch (error) {
+                console.warn('Main: generateShareUrl fallback to original URL', error);
+                return originalUrl || window.location.href;
+            }
         };
 
         // Evento para el botón "Share" dentro del modal de detalles
