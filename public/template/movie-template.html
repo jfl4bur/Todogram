@@ -18,7 +18,7 @@
         const description = urlParams.get('description') || 'Explora las mejores películas en Todogram.';
         const image = urlParams.get('image') || 'https://via.placeholder.com/194x271'; // Fallback público
         const originalUrl = urlParams.get('originalUrl') || 'https://todogram.softr.app';
-        const hash = urlParams.get('hash') || window.location.hash;
+        const hash = urlParams.get('hash') || '';
 
         // Actualizar metadatos para usuarios (no para bots)
         document.querySelector('meta[property="og:title"]').setAttribute('content', title);
@@ -30,8 +30,10 @@
         document.querySelector('meta[name="twitter:image"]').setAttribute('content', image);
 
         // Redirigir a la URL original con hash después de 1 segundo
+        // Si hay hash en los parámetros, usarlo; si no, mantener la URL base
         setTimeout(() => {
-            window.location.href = originalUrl + hash;
+            const redirectUrl = hash ? originalUrl + (hash.startsWith('#') ? hash : '#' + hash) : originalUrl;
+            window.location.href = redirectUrl;
         }, 1000);
     </script>
 </head>

@@ -54,30 +54,16 @@ class ShareModal {
             return;
         }
 
-        let resolvedShareUrl = item.shareUrl || null;
-        if (!resolvedShareUrl && typeof window.generateShareUrl === 'function') {
+        // Generar shareUrl si falta usando el hash actual de la URL
+        if (!item.shareUrl) {
             try {
-                resolvedShareUrl = window.generateShareUrl(item, window.location.href);
+                // Usar directamente la URL actual con el hash que ya existe
+                // Esto preserva el hash original creado por el modal de detalles
+                item.shareUrl = window.location.href;
             } catch (err) {
-                console.warn('ShareModal: generateShareUrl falló, usando fallback', err);
+                item.shareUrl = window.location.href;
             }
         }
-
-        if (!resolvedShareUrl) {
-            try {
-                const url = new URL(window.location.href);
-                const hashParts = [];
-                if (item.id) hashParts.push('id=' + encodeURIComponent(item.id));
-                const normalizedTitle = this.normalizeText(item.title || '');
-                if (normalizedTitle) hashParts.push('title=' + encodeURIComponent(normalizedTitle));
-                if (hashParts.length) url.hash = hashParts.join('&');
-                resolvedShareUrl = url.toString();
-            } catch (err) {
-                resolvedShareUrl = window.location.href;
-            }
-        }
-
-        item.shareUrl = resolvedShareUrl;
 
         this.isVisible = true;
 
@@ -94,9 +80,8 @@ class ShareModal {
         if (description.length > maxLength) description = description.substring(0, maxLength) + '...';
         if (this.sharePreviewDescription) this.sharePreviewDescription.textContent = description;
 
-        if (this.shareLinkInput) this.shareLinkInput.value = resolvedShareUrl;
-        this.currentShareUrl = resolvedShareUrl;
-        this.applyShareMeta(item, resolvedShareUrl);
+        if (this.shareLinkInput) this.shareLinkInput.value = item.shareUrl;
+        this.currentShareUrl = item.shareUrl;
 
         // Mostrar el modal (si existen elementos)
         if (this.shareModalOverlay) this.shareModalOverlay.style.display = 'flex';
@@ -162,82 +147,6 @@ class ShareModal {
         }
         
         window.open(shareUrl, '_blank', 'width=600,height=400');
-    }
-
-    applyShareMeta(item, shareUrl) {
-        if (!item) return;
-
-        if (window.detailsModal && typeof window.detailsModal.updateMetaTags === 'function') {
-            try {
-                window.detailsModal.updateMetaTags(item);
-                return;
-            } catch (err) {
-                console.warn('ShareModal: no se pudo delegar updateMetaTags', err);
-            }
-        }
-
-        const title = `Mira ${item.title || 'este contenido'} en nuestra plataforma`;
-        const description = item.description || 'Descubre más contenido en Todogram.';
-        const imageUrl = item.posterUrl || 'https://via.placeholder.com/194x271';
-        let resolvedUrl = shareUrl;
-
-        if (!resolvedUrl) {
-            try {
-                const baseUrl = new URL(window.location.href);
-                if (item.id) {
-                    const normalizedTitle = this.normalizeText(item.title || '');
-                    const params = new URLSearchParams();
-                    params.set('id', item.id);
-                    if (normalizedTitle) params.set('title', normalizedTitle);
-                    baseUrl.hash = params.toString();
-                }
-                resolvedUrl = baseUrl.toString();
-            } catch (err) {
-                resolvedUrl = window.location.href;
-            }
-        }
-
-        this.ensureMetaElement('og-title', 'property', 'og:title').setAttribute('content', title);
-        this.ensureMetaElement('og-description', 'property', 'og:description').setAttribute('content', description);
-        this.ensureMetaElement('og-image', 'property', 'og:image').setAttribute('content', imageUrl);
-        this.ensureMetaElement('og-url', 'property', 'og:url').setAttribute('content', resolvedUrl);
-        this.ensureMetaElement(null, 'property', 'og:type').setAttribute('content', 'website');
-        this.ensureMetaElement(null, 'property', 'og:site_name').setAttribute('content', 'Todogram');
-        this.ensureMetaElement(null, 'name', 'description').setAttribute('content', description);
-        this.ensureMetaElement('twitter-title', 'name', 'twitter:title').setAttribute('content', title);
-        this.ensureMetaElement('twitter-description', 'name', 'twitter:description').setAttribute('content', description);
-        this.ensureMetaElement('twitter-image', 'name', 'twitter:image').setAttribute('content', imageUrl);
-        this.ensureMetaElement(null, 'name', 'twitter:card').setAttribute('content', 'summary_large_image');
-
-        let canonical = document.querySelector('link[rel="canonical"]');
-        if (!canonical) {
-            canonical = document.createElement('link');
-            canonical.rel = 'canonical';
-            document.head.appendChild(canonical);
-        }
-        canonical.href = resolvedUrl;
-    }
-
-    ensureMetaElement(id, attrName, attrValue) {
-        let el = null;
-        if (id) el = document.getElementById(id);
-        if (!el) {
-            try {
-                el = document.head.querySelector(`meta[${attrName}="${attrValue}"]`);
-            } catch (err) {
-                el = null;
-            }
-        }
-        if (!el) {
-            el = document.createElement('meta');
-            if (attrName && attrValue) el.setAttribute(attrName, attrValue);
-            if (id) el.id = id;
-            document.head.appendChild(el);
-        } else {
-            if (id) el.id = id;
-            if (attrName && attrValue) el.setAttribute(attrName, attrValue);
-        }
-        return el;
     }
 
     normalizeText(text) {

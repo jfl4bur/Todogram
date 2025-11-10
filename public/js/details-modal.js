@@ -909,7 +909,6 @@ class DetailsModal {
         const twitterTitle = document.getElementById('twitter-title');
         const twitterDescription = document.getElementById('twitter-description');
         const twitterImage = document.getElementById('twitter-image');
-    const descriptionMeta = document.querySelector('meta[name="description"]');
         
         if (ogTitle) ogTitle.content = title;
         if (ogDescription) ogDescription.content = description;
@@ -918,7 +917,6 @@ class DetailsModal {
         if (twitterTitle) twitterTitle.content = title;
         if (twitterDescription) twitterDescription.content = description;
         if (twitterImage) twitterImage.content = imageUrl;
-    if (descriptionMeta) descriptionMeta.setAttribute('content', description);
         
         const canonicalLink = document.querySelector('link[rel="canonical"]') || document.createElement('link');
         canonicalLink.rel = 'canonical';
