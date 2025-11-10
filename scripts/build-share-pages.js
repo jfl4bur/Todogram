@@ -25,7 +25,7 @@ function generateSharePage(item) {
     const image = item['Portada'] || item.posterUrl || 'https://via.placeholder.com/1200x630';
     const id = item['ID TMDB'] || item.id || ''; // Usar ID TMDB
     const titleSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    const originalUrl = `https://jfl4bur.github.io/Todogram/#id=${id}&title=${titleSlug}`;
+    const originalUrl = `https://todogram.free.nf/#id=${id}&title=${titleSlug}`; // SPA destino (sin redirección automática)
     const filename = `${id}-${titleSlug}.html`;
     
     const html = `<!DOCTYPE html>
@@ -40,7 +40,7 @@ function generateSharePage(item) {
     <meta name="description" content="${description}">
     
     <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="video.movie">
+    <meta property="og:type" content="website">
     <meta property="og:site_name" content="Todogram">
     <meta property="og:url" content="https://jfl4bur.github.io/Todogram/share/${filename}">
     <meta property="og:title" content="${title}">
@@ -49,7 +49,7 @@ function generateSharePage(item) {
     <meta property="og:image:secure_url" content="${image}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <meta property="og:image:type" content="image/jpeg">
+    <link rel="canonical" href="https://jfl4bur.github.io/Todogram/share/${filename}">
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
@@ -58,84 +58,54 @@ function generateSharePage(item) {
     <meta name="twitter:description" content="${description}">
     <meta name="twitter:image" content="${image}">
     
+    <!-- NOTA: Sin redirección automática para que los scrapers (Facebook/Twitter) lean las meta tags.
+        El usuario verá un botón para ir a la app SPA. -->
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
-        }
-        .card {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            max-width: 500px;
-            width: 100%;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-        .poster {
-            width: 100%;
-            height: 300px;
-            object-fit: cover;
-            display: block;
-        }
-        .content {
-            padding: 24px;
-        }
-        h1 {
-            color: #333;
-            font-size: 24px;
-            margin-bottom: 12px;
-            line-height: 1.3;
-        }
-        .description {
-            color: #666;
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 24px;
-        }
-        .btn {
-            display: inline-block;
-            width: 100%;
-            padding: 14px 24px;
+            height: 100vh;
+            margin: 0;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: 600;
-            font-size: 16px;
+        }
+        .container {
             text-align: center;
-            transition: transform 0.2s, box-shadow 0.2s;
+            padding: 20px;
         }
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid white;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
         }
-        .logo {
-            text-align: center;
-            color: #999;
-            font-size: 12px;
-            margin-top: 16px;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
+        h1 { margin: 0; font-size: 24px; }
+        p { opacity: 0.9; margin-top: 10px; }
     </style>
+    
+    <script>
+        // Pequeña mejora UX: si el usuario llega directamente, puede pulsar el botón.
+        // Opcional: añadir autoredirección diferida (comentada para no interferir con scrapers):
+        // setTimeout(()=> location.href = "${originalUrl}", 4000);
+    </script>
 </head>
 <body>
-    <div class="card">
-        <img class="poster" src="${image}" alt="${title}" onerror="this.src='https://via.placeholder.com/500x300?text=Todogram'">
-        <div class="content">
-            <h1>${title}</h1>
-            <p class="description">${description}</p>
-            <a href="${originalUrl}" class="btn">Ver en Todogram</a>
-            <div class="logo">TODOGRAM</div>
-        </div>
+    <div class="container">
+        <div class="spinner"></div>
+        <h1>${title}</h1>
+        <p>${description}</p>
+        <p style="margin-top:20px; font-size:14px; opacity:.85">Esta es una página de previsualización para compartir. Haz clic para abrir el contenido en la aplicación.</p>
+        <p><a href="${originalUrl}" style="display:inline-block;padding:10px 18px;background:#fff;color:#333;border-radius:6px;text-decoration:none;font-weight:600">Ver en Todogram</a></p>
     </div>
 </body>
 </html>`;

@@ -133,14 +133,18 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Función para generar URL de compartir
         window.generateShareUrl = function(item, originalUrl) {
-            // Obtener ID (índice) y título
-            const id = item.id || ''; // Usar el ID que viene del carousel (índice)
+            // Obtener ID y título para slug
+            const id = item.id || '';
             const title = item.title || '';
-            const titleSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-            
-            // Usar páginas estáticas pregeneradas en GitHub Pages
-            const sharePageUrl = `https://jfl4bur.github.io/Todogram/public/share/${id}-${titleSlug}.html`;
-            return sharePageUrl;
+            const titleSlug = title
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '') // quitar acentos para URL limpia
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-|-$/g, '');
+
+            // Nueva ruta (sin /public) para coincidir con og:url generado por build-share-pages.js
+            return `https://jfl4bur.github.io/Todogram/share/${id}-${titleSlug}.html`;
         };
 
         // Evento para el botón "Share" dentro del modal de detalles
