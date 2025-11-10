@@ -131,10 +131,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 // El slider independiente se inicializa automáticamente
         // No necesitamos delays ni polling
 
-        // Función para generar URL de compartir
+        // Función para generar URL de compartir (sin plantilla externa)
         window.generateShareUrl = function(item, originalUrl) {
-            const staticBaseUrl = 'https://jfl4bur.github.io/Todogram/public/template/movie-template.html';
-            return `${staticBaseUrl}?title=${encodeURIComponent(item.title)}&description=${encodeURIComponent(item.description || 'Explora esta película en Todogram.')}&image=${encodeURIComponent(item.posterUrl || 'https://via.placeholder.com/194x271')}&originalUrl=${encodeURIComponent(originalUrl)}&hash=${encodeURIComponent(window.location.hash)}`;
+            try {
+                const url = new URL(originalUrl || window.location.href);
+                const params = new URLSearchParams(url.hash.replace('#',''));
+                if (item?.id) params.set('id', item.id);
+                if (item?.title) params.set('title', item.title);
+                url.hash = params.toString();
+                return url.toString();
+            } catch (e) {
+                return originalUrl || window.location.href;
+            }
         };
 
         // Evento para el botón "Share" dentro del modal de detalles
