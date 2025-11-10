@@ -201,11 +201,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 try {
                     const shareBase = new URL('/share/index.php', window.location.origin);
-                    if (stableId) shareBase.searchParams.set('id', stableId);
-                    else if (item.id) shareBase.searchParams.set('id', String(item.id));
+                    if (stableId) {
+                        shareBase.searchParams.set('id', stableId);
+                    } else if (item.id) {
+                        shareBase.searchParams.set('id', String(item.id));
+                    }
                     if (normalizedTitle) shareBase.searchParams.set('slug', normalizedTitle);
                     if (item.title) shareBase.searchParams.set('title', item.title);
-                    shareBase.searchParams.set('redirect', directUrl);
                     return shareBase.toString();
                 } catch (err) {
                     console.warn('Main: share endpoint URL failed, using direct hash URL', err);

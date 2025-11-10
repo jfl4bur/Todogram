@@ -4,6 +4,10 @@ declare(strict_types=1);
 const DATA_SOURCE_URL = 'https://raw.githubusercontent.com/jfl4bur/Todogram/main/public/data.json';
 const SITE_BASE_URL = 'https://todogram.free.nf/';
 const DEFAULT_IMAGE_URL = 'https://jfl4bur.github.io/Todogram/public/images/logo.png';
+const LOCAL_DATA_PATHS = [
+    __DIR__ . '/../public/data.json',
+    __DIR__ . '/../public/data/data.json',
+];
 const DEFAULT_DESCRIPTION = 'Descubre las mejores series y películas en Todogram.';
 const USER_AGENT = 'TodogramShareBot/1.0 (+https://todogram.free.nf)';
 
@@ -18,27 +22,17 @@ function readQueryParam(string $key): ?string {
     return $value === '' ? null : $value;
 }
 
-function buildRedirectUrl(?string $explicitRedirect, ?string $itemId, ?string $slug): string {
-    $fallback = SITE_BASE_URL;
-
-    if ($explicitRedirect) {
-        $safe = filter_var($explicitRedirect, FILTER_VALIDATE_URL);
-        if ($safe) {
-            return $safe;
-        }
-    }
-
+function buildRedirectUrl(?string $itemId, ?string $slug): string {
     if (!$itemId) {
-        return $fallback;
+        return SITE_BASE_URL;
     }
 
-    $url = SITE_BASE_URL;
     $hash = 'id=' . rawurlencode($itemId);
     if ($slug) {
         $hash .= '&title=' . rawurlencode($slug);
     }
 
-    return rtrim($url, '#?/') . '/#' . $hash;
+    return rtrim(SITE_BASE_URL, '#?/') . '/#' . $hash;
 }
 
 function fetchRemote(string $url): ?string {
@@ -81,6 +75,17 @@ function fetchRemote(string $url): ?string {
 function fetchDataSet(): array {
     $raw = fetchRemote(DATA_SOURCE_URL);
     if ($raw === null) {
+        foreach (LOCAL_DATA_PATHS as $path) {
+            if (is_readable($path)) {
+                $raw = @file_get_contents($path);
+                if ($raw !== false && $raw !== '') {
+                    break;
+                }
+            }
+        }
+    }
+
+    if ($raw === null || $raw === false || $raw === '') {
         return [];
     }
 
@@ -132,7 +137,7 @@ function escapeAttr(string $value): string {
 $idParam = readQueryParam('id');
 $slugParam = readQueryParam('slug');
 $titleParam = readQueryParam('title');
-$redirectParam = readQueryParam('redirect');
+$redirectParam = null;
 
 $dataset = fetchDataSet();
 $matched = null;
@@ -203,8 +208,14 @@ if ($matched) {
     }
 }
 
-$redirectUrl = buildRedirectUrl($redirectParam, $itemId, $slugParam);
-$canonicalUrl = $redirectUrl;
+$redirectUrl = buildRedirectUrl($itemId, $slugParam);
+
+$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+$host = $_SERVER['HTTP_HOST'] ?? parse_url(SITE_BASE_URL, PHP_URL_HOST) ?? 'localhost';
+$requestUri = $_SERVER['REQUEST_URI'] ?? '/share/index.php';
+$sharePageUrl = $scheme . '://' . $host . $requestUri;
+
+$canonicalUrl = $sharePageUrl;
 
 if (!$matched) {
     http_response_code(404);
@@ -288,10 +299,10 @@ if (!$matched) {
         <h1><?= escapeAttr($title) ?></h1>
         <p><?= escapeAttr($description) ?></p>
         <p class="status">Te redirigiremos automáticamente. Si no sucede en unos segundos, toca el botón.</p>
-        <a class="button" href="<?= escapeAttr($redirectUrl) ?>">Ir a Todogram</a>
+    <a class="button" href="<?= escapeAttr($redirectUrl) ?>">Ir a Todogram</a>
     </main>
     <script>
-        setTimeout(function(){ window.location.replace('<?= escapeAttr($redirectUrl) ?>'); }, 150);
+    setTimeout(function(){ window.location.replace('<?= escapeAttr($redirectUrl) ?>'); }, 150);
     </script>
 </body>
 </html>
