@@ -135,8 +135,13 @@ document.addEventListener('DOMContentLoaded', function () {
         window.generateShareUrl = function(item) {
             if (!item || !item.id) return window.location.href;
             const id = encodeURIComponent(item.id);
+            // Preparar parámetros extra para que el backend pueda renderizar metas sin depender de data.json
+            const title = encodeURIComponent(item.title || item.name || 'Todogram');
+            const rawDesc = item.description || item.synopsis || item.overview || 'Explora este título en Todogram';
+            const desc = encodeURIComponent(rawDesc.length > 220 ? (rawDesc.substring(0,217) + '…') : rawDesc);
+            const image = encodeURIComponent(item.posterUrl || item.image || item.cover || '/images/logo.png');
             // Hosting con PHP (free.nf): usar share.php en la raíz
-            return `${window.location.origin}/share.php?id=${id}`;
+            return `${window.location.origin}/share.php?id=${id}&title=${title}&description=${desc}&image=${image}`;
         };
 
         // Evento para el botón "Share" dentro del modal de detalles

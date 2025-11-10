@@ -107,7 +107,11 @@ class ShareModal {
             // Preferir endpoint SSR para compartir (tarjetas con imagen/descripcion)
             if (item.id) {
                 const id = encodeURIComponent(item.id);
-                item.shareUrl = `${window.location.origin}/share.php?id=${id}`;
+                const title = encodeURIComponent(item.title || item.name || 'Todogram');
+                const rawDesc = item.description || item.synopsis || item.overview || 'Explora este título en Todogram';
+                const desc = encodeURIComponent(rawDesc.length > 220 ? (rawDesc.substring(0,217) + '…') : rawDesc);
+                const image = encodeURIComponent(item.posterUrl || item.image || item.cover || '/images/logo.png');
+                item.shareUrl = `${window.location.origin}/share.php?id=${id}&title=${title}&description=${desc}&image=${image}`;
             } else {
                 try {
                     const url = new URL(window.location.href);

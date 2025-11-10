@@ -179,7 +179,9 @@ $canonical = $origin . $_SERVER['REQUEST_URI'];
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><?php echo escape_html($title); ?> - Todogram</title>
     <meta name="description" content="<?php echo escape_html($description); ?>" />
+    <meta name="robots" content="index,follow" />
   <link rel="canonical" href="<?php echo escape_html($canonical); ?>" />
+    <link rel="image_src" href="<?php echo escape_html($imageAbs); ?>" />
     <meta property="og:site_name" content="Todogram" />
     <meta property="og:locale" content="es_ES" />
     <meta property="og:type" content="website" />
