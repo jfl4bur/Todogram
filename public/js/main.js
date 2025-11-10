@@ -173,11 +173,31 @@ document.addEventListener('DOMContentLoaded', function () {
                 trySetStableId(item?.tmdbId);
                 trySetStableId(item?.id);
 
+                const parseTmdbId = (rawValue) => {
+                    if (!rawValue) return null;
+                    const valueStr = String(rawValue);
+                    const matchMovie = valueStr.match(/movie\/(\d+)/i);
+                    if (matchMovie && matchMovie[1]) return matchMovie[1];
+                    const matchTv = valueStr.match(/(tv|series)\/(\d+)/i);
+                    if (matchTv && matchTv[2]) return matchTv[2];
+                    const matchGeneric = valueStr.match(/(\/|=)(\d+)(?:[^\d]|$)/);
+                    if (matchGeneric && matchGeneric[2]) return matchGeneric[2];
+                    if (/^\d+$/.test(valueStr)) return valueStr;
+                    return null;
+                };
+
                 if (!stableId && item?.tmdbUrl) {
                     const matchMovie = String(item.tmdbUrl).match(/movie\/(\d+)/i);
                     const matchTv = String(item.tmdbUrl).match(/(tv|series)\/(\d+)/i);
                     trySetStableId(matchMovie && matchMovie[1]);
                     trySetStableId(matchTv && matchTv[2]);
+                    trySetStableId(parseTmdbId(item.tmdbUrl));
+                }
+
+                if (!stableId) {
+                    trySetStableId(parseTmdbId(item?.TMDB));
+                    trySetStableId(parseTmdbId(item?.tmdb));
+                    trySetStableId(parseTmdbId(item?.id_tmdb));
                 }
 
                 const params = new URLSearchParams();

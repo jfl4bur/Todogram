@@ -302,7 +302,10 @@ if (!$matched) {
     <a class="button" href="<?= escapeAttr($redirectUrl) ?>">Ir a Todogram</a>
     </main>
     <script>
-    setTimeout(function(){ window.location.replace('<?= escapeAttr($redirectUrl) ?>'); }, 150);
+    (function(){
+        const redirectUrl = <?= json_encode($redirectUrl, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE); ?>;
+        setTimeout(function(){ window.location.replace(redirectUrl); }, 150);
+    })();
     </script>
 </body>
 </html>
