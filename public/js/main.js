@@ -220,17 +220,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 const directUrl = baseUrl.toString();
 
                 try {
-                    const shareBase = new URL('/share/index.php', window.location.origin);
-                    if (stableId) {
-                        shareBase.searchParams.set('id', stableId);
-                    } else if (item.id) {
-                        shareBase.searchParams.set('id', String(item.id));
+                    const staticBase = 'https://jfl4bur.github.io/Todogram/share';
+                    const slugValue = normalizedTitle || (stableId ? `item-${stableId}` : (item.id ? `item-${item.id}` : 'item'));
+                    if (!stableId && !item.id) {
+                        return directUrl;
                     }
-                    if (normalizedTitle) shareBase.searchParams.set('slug', normalizedTitle);
-                    if (item.title) shareBase.searchParams.set('title', item.title);
-                    return shareBase.toString();
+                    const idForUrl = stableId || String(item.id);
+                    const cleanBase = staticBase.replace(/\/$/, '');
+                    return `${cleanBase}/${encodeURIComponent(idForUrl)}/${encodeURIComponent(slugValue)}.html`;
                 } catch (err) {
-                    console.warn('Main: share endpoint URL failed, using direct hash URL', err);
+                    console.warn('Main: share endpoint URL failed, usando URL directa', err);
                     return directUrl;
                 }
             } catch (error) {

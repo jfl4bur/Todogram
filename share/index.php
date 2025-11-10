@@ -13,6 +13,9 @@ const USER_AGENT = 'TodogramShareBot/1.0 (+https://todogram.free.nf)';
 
 header('Content-Type: text/html; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
+header('Cache-Control: no-cache, no-store, must-revalidate');
+header('Pragma: no-cache');
+header('Expires: 0');
 
 function readQueryParam(string $key): ?string {
     if (!isset($_GET[$key])) {
@@ -89,7 +92,7 @@ function fetchDataSet(): array {
         return [];
     }
 
-    $data = json_decode($raw, true, flags: JSON_BIGINT_AS_STRING);
+    $data = json_decode($raw, true, 512, JSON_BIGINT_AS_STRING);
     return is_array($data) ? $data : [];
 }
 
@@ -210,10 +213,19 @@ if ($matched) {
 
 $redirectUrl = buildRedirectUrl($itemId, $slugParam);
 
-$scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host = $_SERVER['HTTP_HOST'] ?? parse_url(SITE_BASE_URL, PHP_URL_HOST) ?? 'localhost';
-$requestUri = $_SERVER['REQUEST_URI'] ?? '/share/index.php';
-$sharePageUrl = $scheme . '://' . $host . $requestUri;
+$shareBase = rtrim(SITE_BASE_URL, '/');
+$shareQuery = [];
+if ($itemId) {
+    $shareQuery['id'] = $itemId;
+}
+if ($slugParam) {
+    $shareQuery['slug'] = $slugParam;
+}
+
+$sharePageUrl = $shareBase . '/share/index.php';
+if (!empty($shareQuery)) {
+    $sharePageUrl .= '?' . http_build_query($shareQuery);
+}
 
 $canonicalUrl = $sharePageUrl;
 
@@ -244,7 +256,6 @@ if (!$matched) {
 
     <link rel="canonical" href="<?= escapeAttr($canonicalUrl) ?>">
 
-    <meta http-equiv="refresh" content="0; url=<?= escapeAttr($redirectUrl) ?>">
     <style>
         :root { color-scheme: dark light; }
         body {
