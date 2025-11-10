@@ -10,7 +10,6 @@ const LOCAL_DATA_PATHS = [
 ];
 const DEFAULT_DESCRIPTION = 'Descubre las mejores series y películas en Todogram.';
 const USER_AGENT = 'TodogramShareBot/1.0 (+https://todogram.free.nf)';
-const DEFAULT_IMAGE_MIME = 'image/png';
 
 header('Content-Type: text/html; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
@@ -93,7 +92,7 @@ function fetchDataSet(): array {
         return [];
     }
 
-    $data = json_decode($raw, true, flags: JSON_BIGINT_AS_STRING);
+    $data = json_decode($raw, true, 512, JSON_BIGINT_AS_STRING);
     return is_array($data) ? $data : [];
 }
 
@@ -136,55 +135,6 @@ function shorten(string $text, int $max = 180): string {
 
 function escapeAttr(string $value): string {
     return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-}
-
-function normaliseSocialImageUrl(?string $candidate): array {
-    $url = trim((string)($candidate ?? ''));
-    if ($url === '') {
-        return [DEFAULT_IMAGE_URL, DEFAULT_IMAGE_MIME];
-    }
-
-    if (substr($url, 0, 2) === '//') {
-        $url = 'https:' . $url;
-    }
-
-    if (!preg_match('#^https?://#i', $url)) {
-        return [DEFAULT_IMAGE_URL, DEFAULT_IMAGE_MIME];
-    }
-
-    $lowerPath = strtolower(parse_url($url, PHP_URL_PATH) ?? '');
-    $pathExt = pathinfo($lowerPath, PATHINFO_EXTENSION);
-    $unsupportedExt = $pathExt && in_array($pathExt, ['webp', 'avif', 'heic', 'heif', 'jp2'], true);
-
-    $isCloudinary = stripos($url, 'res.cloudinary.com') !== false && strpos($lowerPath, '/image/upload/') !== false;
-    if ($isCloudinary) {
-        if (strpos($url, '/image/upload/f_jpg') === false) {
-            $url = preg_replace('#/image/upload/#i', '/image/upload/f_jpg,q_auto,fl_lossy/', $url, 1) ?? $url;
-        }
-        $url = preg_replace('#\.(webp|avif|heic|heif|jp2)(\.[a-z0-9]+)?(?=$|\?)#i', '.jpg', $url) ?? $url;
-        $pathExt = 'jpg';
-        $unsupportedExt = false;
-    }
-
-    if ($unsupportedExt) {
-        return [DEFAULT_IMAGE_URL, DEFAULT_IMAGE_MIME];
-    }
-
-    switch ($pathExt) {
-        case 'png':
-            $mime = 'image/png';
-            break;
-        case 'gif':
-            $mime = 'image/gif';
-            break;
-        case 'webp':
-            $mime = 'image/webp';
-            break;
-        default:
-            $mime = 'image/jpeg';
-    }
-
-    return [$url, $mime];
 }
 
 $idParam = readQueryParam('id');
@@ -230,9 +180,7 @@ foreach ($dataset as $entry) {
 $title = 'Todogram - Series y Películas';
 $description = DEFAULT_DESCRIPTION;
 $imageUrl = DEFAULT_IMAGE_URL;
-$imageMime = DEFAULT_IMAGE_MIME;
 $itemId = $idParam;
-$rawImage = $imageUrl;
 
 if ($matched) {
     $title = pickFirstNonEmpty([
@@ -246,11 +194,11 @@ if ($matched) {
         $matched['Descripción'] ?? null
     ], $description);
 
-    $rawImage = pickFirstNonEmpty([
+    $imageUrl = pickFirstNonEmpty([
         $matched['Portada'] ?? null,
         $matched['Carteles'] ?? null,
         $matched['Slider'] ?? null
-    ], $rawImage);
+    ], $imageUrl);
 
     $description = shorten($description);
 
@@ -262,8 +210,6 @@ if ($matched) {
         $slugParam = normaliseSlug($title);
     }
 }
-
-[$imageUrl, $imageMime] = normaliseSocialImageUrl($rawImage);
 
 $redirectUrl = buildRedirectUrl($itemId, $slugParam);
 
@@ -290,22 +236,14 @@ if (!$matched) {
     <meta property="og:title" content="<?= escapeAttr($title) ?>">
     <meta property="og:description" content="<?= escapeAttr($description) ?>">
     <meta property="og:image" content="<?= escapeAttr($imageUrl) ?>">
-    <meta property="og:image:secure_url" content="<?= escapeAttr($imageUrl) ?>">
-    <meta property="og:image:type" content="<?= escapeAttr($imageMime) ?>">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:image:alt" content="<?= escapeAttr($title) ?>">
     <meta property="og:url" content="<?= escapeAttr($canonicalUrl) ?>">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Todogram">
-    <meta property="og:locale" content="es_ES">
 
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="<?= escapeAttr($title) ?>">
     <meta name="twitter:description" content="<?= escapeAttr($description) ?>">
     <meta name="twitter:image" content="<?= escapeAttr($imageUrl) ?>">
-    <meta name="twitter:image:alt" content="<?= escapeAttr($title) ?>">
-    <meta name="twitter:url" content="<?= escapeAttr($canonicalUrl) ?>">
 
     <link rel="canonical" href="<?= escapeAttr($canonicalUrl) ?>">
     <style>
