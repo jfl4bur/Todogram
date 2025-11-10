@@ -107,11 +107,10 @@ class ShareModal {
             // Preferir endpoint SSR para compartir (tarjetas con imagen/descripcion)
             if (item.id) {
                 const id = encodeURIComponent(item.id);
-                const title = encodeURIComponent(item.title || item.name || 'Todogram');
-                const rawDesc = item.description || item.synopsis || item.overview || 'Explora este título en Todogram';
-                const desc = encodeURIComponent(rawDesc.length > 220 ? (rawDesc.substring(0,217) + '…') : rawDesc);
-                const image = encodeURIComponent(item.posterUrl || item.image || item.cover || '/images/logo.png');
-                item.shareUrl = `${window.location.origin}/share.php?id=${id}&title=${title}&description=${desc}&image=${image}`;
+                const slug = (item.title || item.name || 'todogram')
+                    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+                    .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
+                item.shareUrl = `${window.location.origin}/share.php?id=${id}&title=${encodeURIComponent(slug)}`;
             } else {
                 try {
                     const url = new URL(window.location.href);
@@ -140,7 +139,9 @@ class ShareModal {
         if (description.length > maxLength) description = description.substring(0, maxLength) + '...';
         if (this.sharePreviewDescription) this.sharePreviewDescription.textContent = description;
 
-    if (this.shareLinkInput) this.shareLinkInput.value = item.shareUrl;
+    // Para copiar, mostramos un enlace bonito con hash (UI). Para compartir en redes usamos shareUrl con metatags.
+    const prettyHash = `#id=${encodeURIComponent(item.id)}&title=${encodeURIComponent((item.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''))}`;
+    if (this.shareLinkInput) this.shareLinkInput.value = `${window.location.origin}/${prettyHash}`;
     this.currentShareUrl = item.shareUrl;
     // Actualizar metatags globales al abrir el modal
     this.updateMetaTags(item, item.shareUrl);

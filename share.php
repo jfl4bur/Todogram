@@ -163,11 +163,16 @@ $imageSecure = enforce_https($imageAbs);
 $imageMime = guess_mime($imageAbs);
 
 $origin = base_url();
+// Construir una URL bonita con hash para mostrar/canonical (no la usan los bots)
+$slug = $title ?: ($item['Título'] ?? $item['Título original'] ?? 'todogram');
+$slug = strtolower(iconv('UTF-8','ASCII//TRANSLIT',$slug));
+$slug = preg_replace('/[^a-z0-9]+/','-',$slug);
+$slug = trim($slug,'-');
 // URL de destino para usuarios (home con hash para abrir details)
-$redirect = $origin . '/#id=' . rawurlencode($id) . '&title=' . rawurlencode($title);
+$redirect = $origin . '/#id=' . rawurlencode($id) . '&title=' . rawurlencode($slug);
 
-// URL canónica de esta página de compartir
-$canonical = $origin . $_SERVER['REQUEST_URI'];
+// URL canónica: el enlace bonito con hash para que se muestre limpio en los UIs
+$canonical = $redirect;
 
 // Importante: no redirigimos con 302 para evitar que algunos scrapers pierdan las metatags.
 // La redirección para usuarios se hará con JS en el cliente (los bots no ejecutan JS).

@@ -135,13 +135,13 @@ document.addEventListener('DOMContentLoaded', function () {
         window.generateShareUrl = function(item) {
             if (!item || !item.id) return window.location.href;
             const id = encodeURIComponent(item.id);
-            // Preparar parámetros extra para que el backend pueda renderizar metas sin depender de data.json
-            const title = encodeURIComponent(item.title || item.name || 'Todogram');
-            const rawDesc = item.description || item.synopsis || item.overview || 'Explora este título en Todogram';
-            const desc = encodeURIComponent(rawDesc.length > 220 ? (rawDesc.substring(0,217) + '…') : rawDesc);
-            const image = encodeURIComponent(item.posterUrl || item.image || item.cover || '/images/logo.png');
-            // Hosting con PHP (free.nf): usar share.php en la raíz
-            return `${window.location.origin}/share.php?id=${id}&title=${title}&description=${desc}&image=${image}`;
+            // Slug corto solo para mostrar bonito en la UI (el backend resolverá datos por id)
+            const slug = encodeURIComponent((item.title || item.name || 'todogram')
+                .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+                .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''));
+            // URL para redes (con metatags): corta, solo id y slug
+            const shareUrl = `${window.location.origin}/share.php?id=${id}&title=${slug}`;
+            return shareUrl;
         };
 
         // Evento para el botón "Share" dentro del modal de detalles
