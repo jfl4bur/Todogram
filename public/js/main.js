@@ -131,18 +131,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 // El slider independiente se inicializa automáticamente
         // No necesitamos delays ni polling
 
-        // Función para generar URL de compartir (sin plantilla externa)
-        window.generateShareUrl = function(item, originalUrl) {
-            try {
-                const url = new URL(originalUrl || window.location.href);
-                const params = new URLSearchParams(url.hash.replace('#',''));
-                if (item?.id) params.set('id', item.id);
-                if (item?.title) params.set('title', item.title);
-                url.hash = params.toString();
-                return url.toString();
-            } catch (e) {
-                return originalUrl || window.location.href;
-            }
+        // Nueva función: genera URL a la ruta SSR /share/:id para que redes sociales lean metatags estáticas
+        window.generateShareUrl = function(item) {
+            if (!item || !item.id) return window.location.href;
+            // Usar ruta relativa: depende del dominio real donde se aloje
+            return `/share/${encodeURIComponent(item.id)}`;
         };
 
         // Evento para el botón "Share" dentro del modal de detalles

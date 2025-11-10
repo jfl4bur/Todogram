@@ -104,15 +104,19 @@ class ShareModal {
 
         // Generar shareUrl si falta
         if (!item.shareUrl) {
-            try {
-                const url = new URL(window.location.href);
-                const hashParts = [];
-                if (item.id) hashParts.push('id=' + encodeURIComponent(item.id));
-                if (item.title) hashParts.push('title=' + encodeURIComponent(item.title));
-                if (hashParts.length) url.hash = hashParts.join('&');
-                item.shareUrl = url.toString();
-            } catch (err) {
-                item.shareUrl = window.location.href;
+            // Preferir endpoint SSR para compartir (tarjetas con imagen/descripcion)
+            if (item.id) {
+                item.shareUrl = `/share/${encodeURIComponent(item.id)}`;
+            } else {
+                try {
+                    const url = new URL(window.location.href);
+                    const hashParts = [];
+                    if (item.title) hashParts.push('title=' + encodeURIComponent(item.title));
+                    if (hashParts.length) url.hash = hashParts.join('&');
+                    item.shareUrl = url.toString();
+                } catch (err) {
+                    item.shareUrl = window.location.href;
+                }
             }
         }
 
