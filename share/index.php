@@ -10,6 +10,8 @@ const LOCAL_DATA_PATHS = [
 ];
 const DEFAULT_DESCRIPTION = 'Descubre las mejores series y películas en Todogram.';
 const USER_AGENT = 'TodogramShareBot/1.0 (+https://todogram.free.nf)';
+const DEFAULT_IMAGE_WIDTH = 1200;
+const DEFAULT_IMAGE_HEIGHT = 630;
 
 header('Content-Type: text/html; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
@@ -137,6 +139,80 @@ function escapeAttr(string $value): string {
     return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
+function normaliseImageUrl(?string $url): string {
+    if (!is_string($url)) {
+        return DEFAULT_IMAGE_URL;
+    }
+
+    $url = trim($url);
+    if ($url === '') {
+        return DEFAULT_IMAGE_URL;
+    }
+
+    if (!preg_match('#^https?://#i', $url)) {
+        return DEFAULT_IMAGE_URL;
+    }
+
+    // Prefer JPEG for wider social sharing support
+    if (stripos($url, 'res.cloudinary.com') !== false && stripos($url, '/image/upload/') !== false) {
+        $parsed = parse_url($url);
+        if ($parsed && isset($parsed['path'])) {
+            $path = $parsed['path'];
+            $query = isset($parsed['query']) ? '?' . $parsed['query'] : '';
+            $fragment = isset($parsed['fragment']) ? '#' . $parsed['fragment'] : '';
+
+            $segments = explode('/image/upload/', $path, 2);
+            if (count($segments) === 2) {
+                [$prefixPath, $rest] = $segments;
+                $restSegments = explode('/', $rest, 2);
+                $firstSegment = $restSegments[0] ?? '';
+                $remaining = $restSegments[1] ?? '';
+
+                $jpegDirective = 'f_jpg,q_auto:best';
+                $hasTransformation = $firstSegment !== '' && stripos($firstSegment, 'v') !== 0;
+
+                if ($hasTransformation) {
+                    if (stripos($firstSegment, 'f_jpg') === false && stripos($firstSegment, 'f_auto') === false) {
+                        $firstSegment .= ',' . $jpegDirective;
+                    }
+                } else {
+                    $remaining = $firstSegment . ($remaining !== '' ? '/' . $remaining : '');
+                    $firstSegment = $jpegDirective;
+                }
+
+                $newPath = $segments[0] . '/image/upload/' . $firstSegment;
+                if ($remaining !== '') {
+                    $newPath .= '/' . ltrim($remaining, '/');
+                }
+
+                $url = (isset($parsed['scheme']) ? $parsed['scheme'] : 'https') . '://' . ($parsed['host'] ?? '') . $newPath . $query . $fragment;
+            }
+        }
+    }
+
+    // Force HTTPS for consistency
+    $url = preg_replace('#^http://#i', 'https://', $url);
+
+    return $url !== '' ? $url : DEFAULT_IMAGE_URL;
+}
+
+function detectImageMime(string $url): string {
+    $lower = strtolower($url);
+    if (strpos($lower, 'f_jpg') !== false || strpos($lower, '.jpg') !== false || strpos($lower, '.jpeg') !== false) {
+        return 'image/jpeg';
+    }
+    if (strpos($lower, '.png') !== false) {
+        return 'image/png';
+    }
+    if (strpos($lower, '.gif') !== false) {
+        return 'image/gif';
+    }
+    if (strpos($lower, '.webp') !== false) {
+        return 'image/webp';
+    }
+    return 'image/jpeg';
+}
+
 $idParam = readQueryParam('id');
 $slugParam = readQueryParam('slug');
 $titleParam = readQueryParam('title');
@@ -194,11 +270,11 @@ if ($matched) {
         $matched['Descripción'] ?? null
     ], $description);
 
-    $imageUrl = pickFirstNonEmpty([
+    $imageUrl = normaliseImageUrl(pickFirstNonEmpty([
         $matched['Portada'] ?? null,
         $matched['Carteles'] ?? null,
         $matched['Slider'] ?? null
-    ], $imageUrl);
+    ], $imageUrl));
 
     $description = shorten($description);
 
@@ -209,6 +285,8 @@ if ($matched) {
     if (!$slugParam) {
         $slugParam = normaliseSlug($title);
     }
+} else {
+    $imageUrl = normaliseImageUrl($imageUrl);
 }
 
 $redirectUrl = buildRedirectUrl($itemId, $slugParam);
@@ -219,6 +297,7 @@ $requestUri = $_SERVER['REQUEST_URI'] ?? '/share/index.php';
 $sharePageUrl = $scheme . '://' . $host . $requestUri;
 
 $canonicalUrl = $sharePageUrl;
+$imageMime = detectImageMime($imageUrl);
 
 if (!$matched) {
     http_response_code(404);
@@ -236,6 +315,10 @@ if (!$matched) {
     <meta property="og:title" content="<?= escapeAttr($title) ?>">
     <meta property="og:description" content="<?= escapeAttr($description) ?>">
     <meta property="og:image" content="<?= escapeAttr($imageUrl) ?>">
+    <meta property="og:image:secure_url" content="<?= escapeAttr($imageUrl) ?>">
+    <meta property="og:image:type" content="<?= escapeAttr($imageMime) ?>">
+    <meta property="og:image:width" content="<?= DEFAULT_IMAGE_WIDTH ?>">
+    <meta property="og:image:height" content="<?= DEFAULT_IMAGE_HEIGHT ?>">
     <meta property="og:url" content="<?= escapeAttr($canonicalUrl) ?>">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Todogram">
@@ -243,7 +326,9 @@ if (!$matched) {
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="<?= escapeAttr($title) ?>">
     <meta name="twitter:description" content="<?= escapeAttr($description) ?>">
+    <meta name="twitter:url" content="<?= escapeAttr($canonicalUrl) ?>">
     <meta name="twitter:image" content="<?= escapeAttr($imageUrl) ?>">
+    <meta name="twitter:image:src" content="<?= escapeAttr($imageUrl) ?>">
 
     <link rel="canonical" href="<?= escapeAttr($canonicalUrl) ?>">
     <style>
