@@ -136,15 +136,15 @@ document.addEventListener('DOMContentLoaded', function () {
             // Obtener ID y título para slug
             const id = item.id || '';
             const title = item.title || '';
+            // Alinear el slug con el generador de páginas (build-share-pages.js)
+            // Importante: no quitar acentos; se reemplazan por '-'
             const titleSlug = title
                 .toLowerCase()
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '') // quitar acentos para URL limpia
                 .replace(/[^a-z0-9]+/g, '-')
                 .replace(/^-|-$/g, '');
 
-            // Nueva ruta (sin /public) para coincidir con og:url generado por build-share-pages.js
-            return `https://jfl4bur.github.io/Todogram/share/${id}-${titleSlug}.html`;
+            // Ruta real publicada en GitHub Pages (incluye /public/)
+            return `https://jfl4bur.github.io/Todogram/public/share/${id}-${titleSlug}.html`;
         };
 
         // Evento para el botón "Share" dentro del modal de detalles
