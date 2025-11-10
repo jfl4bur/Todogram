@@ -107,11 +107,7 @@ class ShareModal {
             // Preferir endpoint SSR para compartir (tarjetas con imagen/descripcion)
             if (item.id) {
                 const id = encodeURIComponent(item.id);
-                const pathName = window.location.pathname || '/';
-                const inSubPath = /^\/[A-Za-z0-9_-]+\//.test(pathName);
-                const baseSub = inSubPath ? (pathName.split('/').filter(Boolean)[0]) : '';
-                const sharePath = baseSub ? `/${baseSub}/public/share/${id}.html` : `/share/${id}.html`;
-                item.shareUrl = `${window.location.origin}${sharePath}`;
+                item.shareUrl = `${window.location.origin}/share.php?id=${id}`;
             } else {
                 try {
                     const url = new URL(window.location.href);

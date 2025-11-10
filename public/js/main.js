@@ -135,13 +135,8 @@ document.addEventListener('DOMContentLoaded', function () {
         window.generateShareUrl = function(item) {
             if (!item || !item.id) return window.location.href;
             const id = encodeURIComponent(item.id);
-            const pathName = window.location.pathname || '/';
-            // Si estamos en un subpath (ej. /Todogram), las páginas estáticas viven en /Todogram/public/share/
-            // En un hosting propio donde /public se sirve como raíz, vivirán en /share/
-            const inSubPath = /^\/[A-Za-z0-9_-]+\//.test(pathName);
-            const baseSub = inSubPath ? (pathName.split('/').filter(Boolean)[0]) : '';
-            const sharePath = baseSub ? `/${baseSub}/public/share/${id}.html` : `/share/${id}.html`;
-            return `${window.location.origin}${sharePath}`;
+            // Hosting con PHP (free.nf): usar share.php en la raíz
+            return `${window.location.origin}/share.php?id=${id}`;
         };
 
         // Evento para el botón "Share" dentro del modal de detalles
