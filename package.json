@@ -4,7 +4,8 @@
   "type": "module",
   "main": "main.js",
   "scripts": {
-    "start": "node main.js"
+    "start": "node main.js",
+    "build:share": "node ./scripts/generate-share-pages.js"
   },
   "dependencies": {
     "@notionhq/client": "^2.3.0",

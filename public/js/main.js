@@ -134,8 +134,14 @@ document.addEventListener('DOMContentLoaded', function () {
         // Nueva función: genera URL a la ruta SSR /share/:id para que redes sociales lean metatags estáticas
         window.generateShareUrl = function(item) {
             if (!item || !item.id) return window.location.href;
-            // Usar ruta relativa: depende del dominio real donde se aloje
-            return `/share/${encodeURIComponent(item.id)}`;
+            const id = encodeURIComponent(item.id);
+            const pathName = window.location.pathname || '/';
+            // Si estamos en un subpath (ej. /Todogram), las páginas estáticas viven en /Todogram/public/share/
+            // En un hosting propio donde /public se sirve como raíz, vivirán en /share/
+            const inSubPath = /^\/[A-Za-z0-9_-]+\//.test(pathName);
+            const baseSub = inSubPath ? (pathName.split('/').filter(Boolean)[0]) : '';
+            const sharePath = baseSub ? `/${baseSub}/public/share/${id}.html` : `/share/${id}.html`;
+            return `${window.location.origin}${sharePath}`;
         };
 
         // Evento para el botón "Share" dentro del modal de detalles
