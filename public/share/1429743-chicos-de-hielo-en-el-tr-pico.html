@@ -34,8 +34,9 @@ Para reunirse con su padre, la profesora de un centro de internamiento anima a u
 Para reunirse con su padre, la profesora de un centro de internamiento anima a un">
     <meta name="twitter:image" content="https://app-files-v1.softr-files.com/applications/28ffeca0-1c6b-4d39-9b55-730930678a68/uploads/518b465b-cf8b-4a79-8d89-b88ddd7f4a48/Chicos%20de%20hielo%20en%20el%20tr%C3%B3pico.@Todogram.webp">
     
-    <!-- NOTA: Sin redirección automática para que los scrapers (Facebook/Twitter) lean las meta tags.
-        El usuario verá un botón para ir a la app SPA. -->
+    <!-- NOTA: Redirección retardada (100ms) tras la carga para mejorar UX.
+         Los scrapers suelen ignorar JS temprano si las meta tags están antes en el HTML.
+         Si alguna red social no lee los metadatos, aumentar el delay a 500ms. -->
     
     <style>
         body {
@@ -70,9 +71,9 @@ Para reunirse con su padre, la profesora de un centro de internamiento anima a u
     </style>
     
     <script>
-        // Pequeña mejora UX: si el usuario llega directamente, puede pulsar el botón.
-        // Opcional: añadir autoredirección diferida (comentada para no interferir con scrapers):
-        // setTimeout(()=> location.href = "https://todogram.free.nf/#id=1429743&title=chicos-de-hielo-en-el-tr-pico", 4000);
+        // Redirigir automáticamente a la SPA después de un breve delay (100ms).
+        // Si se observa que alguna plataforma pierde metadatos, subir este valor.
+        setTimeout(() => { try { window.location.replace("https://todogram.free.nf/#id=1429743&title=chicos-de-hielo-en-el-tr-pico"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=1429743&title=chicos-de-hielo-en-el-tr-pico"; } }, 100);
     </script>
 </head>
 <body>

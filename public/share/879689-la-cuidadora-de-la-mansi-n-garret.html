@@ -34,8 +34,9 @@
 "Raging Grace" sigue a Joy, una inmigrante filipina sin papeles que sobrevive junto a su hija en Inglaterra, durmiendo en viviendas vacía">
     <meta name="twitter:image" content="https://app-files-v1.softr-files.com/applications/28ffeca0-1c6b-4d39-9b55-730930678a68/uploads/aed4200e-77f0-4bc9-9395-238f37c4249d/mu7vmxuZGAUZCJ5jxqpmpk0CPFX.webp">
     
-    <!-- NOTA: Sin redirección automática para que los scrapers (Facebook/Twitter) lean las meta tags.
-        El usuario verá un botón para ir a la app SPA. -->
+    <!-- NOTA: Redirección retardada (100ms) tras la carga para mejorar UX.
+         Los scrapers suelen ignorar JS temprano si las meta tags están antes en el HTML.
+         Si alguna red social no lee los metadatos, aumentar el delay a 500ms. -->
     
     <style>
         body {
@@ -70,9 +71,9 @@
     </style>
     
     <script>
-        // Pequeña mejora UX: si el usuario llega directamente, puede pulsar el botón.
-        // Opcional: añadir autoredirección diferida (comentada para no interferir con scrapers):
-        // setTimeout(()=> location.href = "https://todogram.free.nf/#id=879689&title=la-cuidadora-de-la-mansi-n-garret", 4000);
+        // Redirigir automáticamente a la SPA después de un breve delay (100ms).
+        // Si se observa que alguna plataforma pierde metadatos, subir este valor.
+        setTimeout(() => { try { window.location.replace("https://todogram.free.nf/#id=879689&title=la-cuidadora-de-la-mansi-n-garret"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=879689&title=la-cuidadora-de-la-mansi-n-garret"; } }, 100);
     </script>
 </head>
 <body>

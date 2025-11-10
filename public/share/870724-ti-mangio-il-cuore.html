@@ -28,8 +28,9 @@
     <meta name="twitter:description" content="Región de Apulia. Quemado por el sol y por el odio, el promontorio de Gargano es disputado por criminales que parecen venir de un pasado remoto regido por la le">
     <meta name="twitter:image" content="https://app-files-v1.softr-files.com/applications/28ffeca0-1c6b-4d39-9b55-730930678a68/uploads/2fc7a9fe-d7fc-40e3-a771-853f3f5deadb/4Z8JtsK0le3R75DBZoVT839iXVA.webp">
     
-    <!-- NOTA: Sin redirección automática para que los scrapers (Facebook/Twitter) lean las meta tags.
-        El usuario verá un botón para ir a la app SPA. -->
+    <!-- NOTA: Redirección retardada (100ms) tras la carga para mejorar UX.
+         Los scrapers suelen ignorar JS temprano si las meta tags están antes en el HTML.
+         Si alguna red social no lee los metadatos, aumentar el delay a 500ms. -->
     
     <style>
         body {
@@ -64,9 +65,9 @@
     </style>
     
     <script>
-        // Pequeña mejora UX: si el usuario llega directamente, puede pulsar el botón.
-        // Opcional: añadir autoredirección diferida (comentada para no interferir con scrapers):
-        // setTimeout(()=> location.href = "https://todogram.free.nf/#id=870724&title=ti-mangio-il-cuore", 4000);
+        // Redirigir automáticamente a la SPA después de un breve delay (100ms).
+        // Si se observa que alguna plataforma pierde metadatos, subir este valor.
+        setTimeout(() => { try { window.location.replace("https://todogram.free.nf/#id=870724&title=ti-mangio-il-cuore"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=870724&title=ti-mangio-il-cuore"; } }, 100);
     </script>
 </head>
 <body>

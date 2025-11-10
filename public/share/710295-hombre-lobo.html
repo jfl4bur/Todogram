@@ -34,8 +34,9 @@ Blake es un hombre casado y padre de familia residente en San Francisco que here
 Blake es un hombre casado y padre de familia residente en San Francisco que hereda la remota casa donde creció en una zona rural de Oregón tra">
     <meta name="twitter:image" content="https://res.cloudinary.com/de7knrhj7/image/upload/v1761247524/notion-uploads/1761247523079-k6VBhNc66CdGTEdw7sR7GBt7AFY.webp.webp">
     
-    <!-- NOTA: Sin redirección automática para que los scrapers (Facebook/Twitter) lean las meta tags.
-        El usuario verá un botón para ir a la app SPA. -->
+    <!-- NOTA: Redirección retardada (100ms) tras la carga para mejorar UX.
+         Los scrapers suelen ignorar JS temprano si las meta tags están antes en el HTML.
+         Si alguna red social no lee los metadatos, aumentar el delay a 500ms. -->
     
     <style>
         body {
@@ -70,9 +71,9 @@ Blake es un hombre casado y padre de familia residente en San Francisco que here
     </style>
     
     <script>
-        // Pequeña mejora UX: si el usuario llega directamente, puede pulsar el botón.
-        // Opcional: añadir autoredirección diferida (comentada para no interferir con scrapers):
-        // setTimeout(()=> location.href = "https://todogram.free.nf/#id=710295&title=hombre-lobo", 4000);
+        // Redirigir automáticamente a la SPA después de un breve delay (100ms).
+        // Si se observa que alguna plataforma pierde metadatos, subir este valor.
+        setTimeout(() => { try { window.location.replace("https://todogram.free.nf/#id=710295&title=hombre-lobo"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=710295&title=hombre-lobo"; } }, 100);
     </script>
 </head>
 <body>

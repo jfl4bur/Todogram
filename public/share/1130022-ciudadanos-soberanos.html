@@ -28,8 +28,9 @@
     <meta name="twitter:description" content="Un padre ha convencido a su hijo de que las leyes son solo mentiras, y juntos se han unido a un grupo extremista en medio de la crisis económica de 2008. La his">
     <meta name="twitter:image" content="https://res.cloudinary.com/de7knrhj7/image/upload/v1758091319/notion-uploads/1758091318492-3tKoiSTXBafXPbIyFF0eeb0KVoJ.webp.webp">
     
-    <!-- NOTA: Sin redirección automática para que los scrapers (Facebook/Twitter) lean las meta tags.
-        El usuario verá un botón para ir a la app SPA. -->
+    <!-- NOTA: Redirección retardada (100ms) tras la carga para mejorar UX.
+         Los scrapers suelen ignorar JS temprano si las meta tags están antes en el HTML.
+         Si alguna red social no lee los metadatos, aumentar el delay a 500ms. -->
     
     <style>
         body {
@@ -64,9 +65,9 @@
     </style>
     
     <script>
-        // Pequeña mejora UX: si el usuario llega directamente, puede pulsar el botón.
-        // Opcional: añadir autoredirección diferida (comentada para no interferir con scrapers):
-        // setTimeout(()=> location.href = "https://todogram.free.nf/#id=1130022&title=ciudadanos-soberanos", 4000);
+        // Redirigir automáticamente a la SPA después de un breve delay (100ms).
+        // Si se observa que alguna plataforma pierde metadatos, subir este valor.
+        setTimeout(() => { try { window.location.replace("https://todogram.free.nf/#id=1130022&title=ciudadanos-soberanos"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=1130022&title=ciudadanos-soberanos"; } }, 100);
     </script>
 </head>
 <body>

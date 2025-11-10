@@ -34,8 +34,9 @@ Tras recibir una inesperada llamada de sus antepasados, Vaiana debe viajar a los
 Tras recibir una inesperada llamada de sus antepasados, Vaiana debe viajar a los lejanos mares de Oceanía y adentrarse ">
     <meta name="twitter:image" content="https://app-files-v1.softr-files.com/applications/28ffeca0-1c6b-4d39-9b55-730930678a68/uploads/39c0a7a1-6e79-4214-bb3e-fd16f7ef7c1c/Vaiana 2.@Todogram.webp">
     
-    <!-- NOTA: Sin redirección automática para que los scrapers (Facebook/Twitter) lean las meta tags.
-        El usuario verá un botón para ir a la app SPA. -->
+    <!-- NOTA: Redirección retardada (100ms) tras la carga para mejorar UX.
+         Los scrapers suelen ignorar JS temprano si las meta tags están antes en el HTML.
+         Si alguna red social no lee los metadatos, aumentar el delay a 500ms. -->
     
     <style>
         body {
@@ -70,9 +71,9 @@ Tras recibir una inesperada llamada de sus antepasados, Vaiana debe viajar a los
     </style>
     
     <script>
-        // Pequeña mejora UX: si el usuario llega directamente, puede pulsar el botón.
-        // Opcional: añadir autoredirección diferida (comentada para no interferir con scrapers):
-        // setTimeout(()=> location.href = "https://todogram.free.nf/#id=1241982&title=vaiana-2", 4000);
+        // Redirigir automáticamente a la SPA después de un breve delay (100ms).
+        // Si se observa que alguna plataforma pierde metadatos, subir este valor.
+        setTimeout(() => { try { window.location.replace("https://todogram.free.nf/#id=1241982&title=vaiana-2"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=1241982&title=vaiana-2"; } }, 100);
     </script>
 </head>
 <body>

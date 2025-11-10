@@ -34,8 +34,9 @@ Minnie y Quinn nacen el mismo día, con un minuto de diferencia. Sus vidas puede
 Minnie y Quinn nacen el mismo día, con un minuto de diferencia. Sus vidas pueden comenzar juntas, pero sus mundos no podrían">
     <meta name="twitter:image" content="https://app-files-v1.softr-files.com/applications/28ffeca0-1c6b-4d39-9b55-730930678a68/uploads/77ace34a-f042-4d54-aa5a-78050b09bb98/A un minuto de ti.@Todogram.webp">
     
-    <!-- NOTA: Sin redirección automática para que los scrapers (Facebook/Twitter) lean las meta tags.
-        El usuario verá un botón para ir a la app SPA. -->
+    <!-- NOTA: Redirección retardada (100ms) tras la carga para mejorar UX.
+         Los scrapers suelen ignorar JS temprano si las meta tags están antes en el HTML.
+         Si alguna red social no lee los metadatos, aumentar el delay a 500ms. -->
     
     <style>
         body {
@@ -70,9 +71,9 @@ Minnie y Quinn nacen el mismo día, con un minuto de diferencia. Sus vidas puede
     </style>
     
     <script>
-        // Pequeña mejora UX: si el usuario llega directamente, puede pulsar el botón.
-        // Opcional: añadir autoredirección diferida (comentada para no interferir con scrapers):
-        // setTimeout(()=> location.href = "https://todogram.free.nf/#id=1122418&title=a-un-minuto-de-ti", 4000);
+        // Redirigir automáticamente a la SPA después de un breve delay (100ms).
+        // Si se observa que alguna plataforma pierde metadatos, subir este valor.
+        setTimeout(() => { try { window.location.replace("https://todogram.free.nf/#id=1122418&title=a-un-minuto-de-ti"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=1122418&title=a-un-minuto-de-ti"; } }, 100);
     </script>
 </head>
 <body>

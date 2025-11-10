@@ -28,8 +28,9 @@
     <meta name="twitter:description" content="Un torbellino de 72 horas en la vida del artista bohemio Amedeo Modigliani, conocido como Modi por sus amigos, sigue una caótica serie de acontecimientos en las">
     <meta name="twitter:image" content="https://res.cloudinary.com/de7knrhj7/image/upload/v1753256146/notion-uploads/1753256144759-jMYXWxHcAH5JAk4KlAcy1HiSLcY.webp.webp">
     
-    <!-- NOTA: Sin redirección automática para que los scrapers (Facebook/Twitter) lean las meta tags.
-        El usuario verá un botón para ir a la app SPA. -->
+    <!-- NOTA: Redirección retardada (100ms) tras la carga para mejorar UX.
+         Los scrapers suelen ignorar JS temprano si las meta tags están antes en el HTML.
+         Si alguna red social no lee los metadatos, aumentar el delay a 500ms. -->
     
     <style>
         body {
@@ -64,9 +65,9 @@
     </style>
     
     <script>
-        // Pequeña mejora UX: si el usuario llega directamente, puede pulsar el botón.
-        // Opcional: añadir autoredirección diferida (comentada para no interferir con scrapers):
-        // setTimeout(()=> location.href = "https://todogram.free.nf/#id=1013406&title=modigliani-tres-d-as-en-montparnasse", 4000);
+        // Redirigir automáticamente a la SPA después de un breve delay (100ms).
+        // Si se observa que alguna plataforma pierde metadatos, subir este valor.
+        setTimeout(() => { try { window.location.replace("https://todogram.free.nf/#id=1013406&title=modigliani-tres-d-as-en-montparnasse"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=1013406&title=modigliani-tres-d-as-en-montparnasse"; } }, 100);
     </script>
 </head>
 <body>

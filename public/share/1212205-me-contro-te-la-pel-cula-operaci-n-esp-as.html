@@ -28,8 +28,9 @@
     <meta name="twitter:description" content="La alianza de Maléficos, formada por Mr. S., Perfidia, Viperiana y Serpe han convencido al mundo de que Él y Sophi son criminales y los dos, para no ser buscado">
     <meta name="twitter:image" content="https://app-files-v1.softr-files.com/applications/28ffeca0-1c6b-4d39-9b55-730930678a68/uploads/46c83872-9b0c-41c3-9ef8-316f34fd555d/Me%20contro%20te%20%20-%20%20la%20pel%C3%ADcula;%20operaci%C3%B3n%20esp%C3%ADas.@Todogram.webp">
     
-    <!-- NOTA: Sin redirección automática para que los scrapers (Facebook/Twitter) lean las meta tags.
-        El usuario verá un botón para ir a la app SPA. -->
+    <!-- NOTA: Redirección retardada (100ms) tras la carga para mejorar UX.
+         Los scrapers suelen ignorar JS temprano si las meta tags están antes en el HTML.
+         Si alguna red social no lee los metadatos, aumentar el delay a 500ms. -->
     
     <style>
         body {
@@ -64,9 +65,9 @@
     </style>
     
     <script>
-        // Pequeña mejora UX: si el usuario llega directamente, puede pulsar el botón.
-        // Opcional: añadir autoredirección diferida (comentada para no interferir con scrapers):
-        // setTimeout(()=> location.href = "https://todogram.free.nf/#id=1212205&title=me-contro-te-la-pel-cula-operaci-n-esp-as", 4000);
+        // Redirigir automáticamente a la SPA después de un breve delay (100ms).
+        // Si se observa que alguna plataforma pierde metadatos, subir este valor.
+        setTimeout(() => { try { window.location.replace("https://todogram.free.nf/#id=1212205&title=me-contro-te-la-pel-cula-operaci-n-esp-as"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=1212205&title=me-contro-te-la-pel-cula-operaci-n-esp-as"; } }, 100);
     </script>
 </head>
 <body>

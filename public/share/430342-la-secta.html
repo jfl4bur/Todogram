@@ -28,8 +28,9 @@
     <meta name="twitter:description" content="El psicólogo social estadounidense Ben Monroe investiga una secta local relacionada con un suceso perturbador, mientras su hija se enreda con un misterioso chic">
     <meta name="twitter:image" content="https://app-files-v1.softr-files.com/applications/28ffeca0-1c6b-4d39-9b55-730930678a68/uploads/6377bc09-1d5e-40f1-9798-a564047edcf0/La secta @Todogram.webp">
     
-    <!-- NOTA: Sin redirección automática para que los scrapers (Facebook/Twitter) lean las meta tags.
-        El usuario verá un botón para ir a la app SPA. -->
+    <!-- NOTA: Redirección retardada (100ms) tras la carga para mejorar UX.
+         Los scrapers suelen ignorar JS temprano si las meta tags están antes en el HTML.
+         Si alguna red social no lee los metadatos, aumentar el delay a 500ms. -->
     
     <style>
         body {
@@ -64,9 +65,9 @@
     </style>
     
     <script>
-        // Pequeña mejora UX: si el usuario llega directamente, puede pulsar el botón.
-        // Opcional: añadir autoredirección diferida (comentada para no interferir con scrapers):
-        // setTimeout(()=> location.href = "https://todogram.free.nf/#id=430342&title=la-secta", 4000);
+        // Redirigir automáticamente a la SPA después de un breve delay (100ms).
+        // Si se observa que alguna plataforma pierde metadatos, subir este valor.
+        setTimeout(() => { try { window.location.replace("https://todogram.free.nf/#id=430342&title=la-secta"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=430342&title=la-secta"; } }, 100);
     </script>
 </head>
 <body>

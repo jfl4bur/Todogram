@@ -28,8 +28,9 @@
     <meta name="twitter:description" content="Relato moderno de una de las historias de amor más emblemáticas de la Biblia. Una joven escapa de la escena musical de Atlanta para cuidar de una anciana viuda ">
     <meta name="twitter:image" content="https://res.cloudinary.com/de7knrhj7/image/upload/v1759063998/notion-uploads/1759063996812-mtMJEIHjeHcLtvP0tFPAptk1Var.webp.webp">
     
-    <!-- NOTA: Sin redirección automática para que los scrapers (Facebook/Twitter) lean las meta tags.
-        El usuario verá un botón para ir a la app SPA. -->
+    <!-- NOTA: Redirección retardada (100ms) tras la carga para mejorar UX.
+         Los scrapers suelen ignorar JS temprano si las meta tags están antes en el HTML.
+         Si alguna red social no lee los metadatos, aumentar el delay a 500ms. -->
     
     <style>
         body {
@@ -64,9 +65,9 @@
     </style>
     
     <script>
-        // Pequeña mejora UX: si el usuario llega directamente, puede pulsar el botón.
-        // Opcional: añadir autoredirección diferida (comentada para no interferir con scrapers):
-        // setTimeout(()=> location.href = "https://todogram.free.nf/#id=1371189&title=rut-y-booz", 4000);
+        // Redirigir automáticamente a la SPA después de un breve delay (100ms).
+        // Si se observa que alguna plataforma pierde metadatos, subir este valor.
+        setTimeout(() => { try { window.location.replace("https://todogram.free.nf/#id=1371189&title=rut-y-booz"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=1371189&title=rut-y-booz"; } }, 100);
     </script>
 </head>
 <body>

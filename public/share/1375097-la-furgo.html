@@ -28,8 +28,9 @@
     <meta name="twitter:description" content="Oso es un hombre divorciado de 45 años que vive con su hija de 6 años en una furgoneta en Barcelona mientras intenta reconstruir su vida. Acompañado por un grup">
     <meta name="twitter:image" content="https://res.cloudinary.com/de7knrhj7/image/upload/v1760733662/notion-uploads/1760733659623-yqc9x6KNIAUO26TFYEguSALXzDG.webp.webp">
     
-    <!-- NOTA: Sin redirección automática para que los scrapers (Facebook/Twitter) lean las meta tags.
-        El usuario verá un botón para ir a la app SPA. -->
+    <!-- NOTA: Redirección retardada (100ms) tras la carga para mejorar UX.
+         Los scrapers suelen ignorar JS temprano si las meta tags están antes en el HTML.
+         Si alguna red social no lee los metadatos, aumentar el delay a 500ms. -->
     
     <style>
         body {
@@ -64,9 +65,9 @@
     </style>
     
     <script>
-        // Pequeña mejora UX: si el usuario llega directamente, puede pulsar el botón.
-        // Opcional: añadir autoredirección diferida (comentada para no interferir con scrapers):
-        // setTimeout(()=> location.href = "https://todogram.free.nf/#id=1375097&title=la-furgo", 4000);
+        // Redirigir automáticamente a la SPA después de un breve delay (100ms).
+        // Si se observa que alguna plataforma pierde metadatos, subir este valor.
+        setTimeout(() => { try { window.location.replace("https://todogram.free.nf/#id=1375097&title=la-furgo"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=1375097&title=la-furgo"; } }, 100);
     </script>
 </head>
 <body>

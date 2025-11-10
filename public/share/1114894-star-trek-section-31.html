@@ -34,8 +34,9 @@ En Star Trek: Sección 31, la Emperadora Philippa Georgiou, se une a una divisi�
 En Star Trek: Sección 31, la Emperadora Philippa Georgiou, se une a una división secreta de la Flota Estelar encarga">
     <meta name="twitter:image" content="https://app-files-v1.softr-files.com/applications/28ffeca0-1c6b-4d39-9b55-730930678a68/uploads/0ca748a4-657b-4136-806f-9a030ae9e716/Star Trek; Section 31.@Todogram.webp">
     
-    <!-- NOTA: Sin redirección automática para que los scrapers (Facebook/Twitter) lean las meta tags.
-        El usuario verá un botón para ir a la app SPA. -->
+    <!-- NOTA: Redirección retardada (100ms) tras la carga para mejorar UX.
+         Los scrapers suelen ignorar JS temprano si las meta tags están antes en el HTML.
+         Si alguna red social no lee los metadatos, aumentar el delay a 500ms. -->
     
     <style>
         body {
@@ -70,9 +71,9 @@ En Star Trek: Sección 31, la Emperadora Philippa Georgiou, se une a una divisi�
     </style>
     
     <script>
-        // Pequeña mejora UX: si el usuario llega directamente, puede pulsar el botón.
-        // Opcional: añadir autoredirección diferida (comentada para no interferir con scrapers):
-        // setTimeout(()=> location.href = "https://todogram.free.nf/#id=1114894&title=star-trek-section-31", 4000);
+        // Redirigir automáticamente a la SPA después de un breve delay (100ms).
+        // Si se observa que alguna plataforma pierde metadatos, subir este valor.
+        setTimeout(() => { try { window.location.replace("https://todogram.free.nf/#id=1114894&title=star-trek-section-31"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=1114894&title=star-trek-section-31"; } }, 100);
     </script>
 </head>
 <body>
