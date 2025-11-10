@@ -173,11 +173,17 @@ if ($imgParam) {
         if ($parts && isset($parts[0])) $image = $parts[0];
     }
 }
-// Fallback estable en el mismo dominio
+// Fallback estable en el mismo dominio (usar logo si existe); si la imagen original parece muy pequeña o ausente, usaremos más abajo un placeholder grande
 if (!$image) $image = '/images/logo.png';
 
 list($imageAbs, $imageMime) = normalize_image_for_og($image);
 $imageSecure = enforce_https($imageAbs);
+// Forzar un placeholder grande si la imagen es el logo (posible tamaño pequeño) para mejorar previews en redes
+if (preg_match('#/images/logo(\.|$)#', $imageAbs)) {
+    $imageAbs = 'https://via.placeholder.com/1200x630.png?text=Todogram';
+    $imageSecure = enforce_https($imageAbs);
+    $imageMime = 'image/png';
+}
 
 $origin = base_url();
 // Construir una URL bonita con hash para mostrar/canonical (no la usan los bots)
@@ -209,6 +215,7 @@ $canonical = $origin . $_SERVER['REQUEST_URI'];
     <meta property="og:type" content="website" />
   <meta property="og:title" content="<?php echo escape_html($title); ?>" />
   <meta property="og:description" content="<?php echo escape_html($description); ?>" />
+    <meta property="og:image" content="<?php echo escape_html($imageAbs); ?>" />
     <meta property="og:image" content="<?php echo escape_html($imageAbs); ?>" />
     <meta property="og:image:secure_url" content="<?php echo escape_html($imageSecure); ?>" />
     <meta property="og:image:type" content="<?php echo escape_html($imageMime); ?>" />
