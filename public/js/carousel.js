@@ -1476,11 +1476,15 @@ class Carousel {
             this.moviesData = data
                 .filter(item => item && typeof item === 'object' && item['Categoría'] === 'Películas')
                 .map((item, index) => ({
-                    id: index.toString(),
+                    id: item['ID TMDB'] || index.toString(),
+                    'ID TMDB': item['ID TMDB'] || index.toString(),
                     title: item['Título'] || 'Sin título',
+                    'Título': item['Título'] || 'Sin título',
                     description: item['Synopsis'] || 'Descripción no disponible',
+                    'Synopsis': item['Synopsis'] || 'Descripción no disponible',
                     posterUrl: item['Portada'] || '',
-                    postersUrl: item['Carteles'] || '', // Añadido campo postersUrl
+                    'Portada': item['Portada'] || '',
+                    postersUrl: item['Carteles'] || '',
                     backgroundUrl: item['Fondo'] || '',
                     year: item['Año'] ? item['Año'].toString() : '',
                     duration: item['Duración'] || '',

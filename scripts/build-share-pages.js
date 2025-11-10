@@ -23,7 +23,7 @@ function generateSharePage(item) {
     const title = item['Título'] || item.title || 'Todogram';
     const description = (item['Synopsis'] || item.description || 'Explora esta película en Todogram').substring(0, 160);
     const image = item['Portada'] || item.posterUrl || 'https://via.placeholder.com/1200x630';
-    const id = item['ID TMDB'] || item.id || '';
+    const id = item['ID TMDB'] || item.id || ''; // Usar ID TMDB
     const titleSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     const originalUrl = `https://todogram.free.nf/#id=${id}&title=${titleSlug}`;
     const filename = `${id}-${titleSlug}.html`;
@@ -113,20 +113,13 @@ function generateSharePage(item) {
 console.log('🚀 Generando páginas de compartir...\n');
 
 if (Array.isArray(data)) {
-    data.forEach(item => {
-        const id = item['ID TMDB'] || item.id;
+    data.forEach((item, index) => {
+        const id = item['ID TMDB'];
         const title = item['Título'] || item.title;
-        if (item && id && title) {
-            const { filename, html } = generateSharePage(item);
-            const filePath = path.join(shareDir, filename);
-            fs.writeFileSync(filePath, html, 'utf8');
-            generatedCount++;
-            console.log(`✅ ${filename}`);
-        }
-    });
-} else if (data.peliculas && Array.isArray(data.peliculas)) {
-    data.peliculas.forEach(item => {
-        if (item && item.id && item.title) {
+        const categoria = item['Categoría'];
+        
+        // Solo procesar películas que tengan ID TMDB
+        if (item && id && title && categoria === 'Películas') {
             const { filename, html } = generateSharePage(item);
             const filePath = path.join(shareDir, filename);
             fs.writeFileSync(filePath, html, 'utf8');

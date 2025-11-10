@@ -133,9 +133,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Función para generar URL de compartir
         window.generateShareUrl = function(item, originalUrl) {
-            // Obtener ID y título
-            const id = item['ID TMDB'] || item.id || '';
-            const title = item['Título'] || item.title || '';
+            // Obtener ID (índice) y título
+            const id = item.id || ''; // Usar el ID que viene del carousel (índice)
+            const title = item.title || '';
             const titleSlug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
             
             // Usar páginas estáticas pregeneradas en GitHub Pages
