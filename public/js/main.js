@@ -134,43 +134,83 @@ document.addEventListener('DOMContentLoaded', function () {
         // Función para generar URL de compartir
         window.generateShareUrl = function(item, originalUrl) {
             if (!item) return originalUrl || window.location.href;
+
+            const detailsInstance = window.detailsModal;
+            const normalizeTitle = (titleValue) => {
+                if (!titleValue) return '';
+                try {
+                    if (detailsInstance && typeof detailsInstance.normalizeText === 'function') {
+                        return detailsInstance.normalizeText(titleValue);
+                    }
+                    return String(titleValue)
+                        .normalize('NFD')
+                        .replace(/[\u0300-\u036f]/g, '')
+                        .toLowerCase()
+                        .replace(/[^a-z0-9]/g, '-')
+                        .replace(/-+/g, '-')
+                        .replace(/^-|-$/g, '');
+                } catch (err) {
+                    return String(titleValue).toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                }
+            };
+
             try {
                 const baseUrl = new URL(originalUrl || window.location.href);
-                if (!item.id) return baseUrl.toString();
+                const normalizedTitle = normalizeTitle(item.title || item.originalTitle || '');
 
-                const detailsInstance = window.detailsModal;
-                const normalizeTitle = (titleValue) => {
-                    if (!titleValue) return '';
-                    try {
-                        if (detailsInstance && typeof detailsInstance.normalizeText === 'function') {
-                            return detailsInstance.normalizeText(titleValue);
-                        }
-                        return String(titleValue)
-                            .normalize('NFD')
-                            .replace(/[\u0300-\u036f]/g, '')
-                            .toLowerCase()
-                            .replace(/[^a-z0-9]/g, '-')
-                            .replace(/-+/g, '-')
-                            .replace(/^-|-$/g, '');
-                    } catch (err) {
-                        return String(titleValue).toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                let stableId = '';
+                const trySetStableId = (candidate) => {
+                    if (stableId) return;
+                    if (!candidate && candidate !== 0) return;
+                    const value = String(candidate).trim();
+                    if (value && !/^i_/.test(value)) {
+                        stableId = value;
                     }
                 };
 
-                const normalizedTitle = normalizeTitle(item.title || '');
-                let hashValue = '';
+                trySetStableId(item?.raw?.['ID TMDB']);
+                trySetStableId(item?.['ID TMDB']);
+                trySetStableId(item?.tmdbId);
+                trySetStableId(item?.id);
 
-                if (detailsInstance && typeof detailsInstance.buildModalHash === 'function') {
-                    hashValue = detailsInstance.buildModalHash(item.id, normalizedTitle);
-                } else {
-                    const params = new URLSearchParams();
-                    params.set('id', item.id);
-                    if (normalizedTitle) params.set('title', normalizedTitle);
-                    hashValue = params.toString();
+                if (!stableId && item?.tmdbUrl) {
+                    const matchMovie = String(item.tmdbUrl).match(/movie\/(\d+)/i);
+                    const matchTv = String(item.tmdbUrl).match(/(tv|series)\/(\d+)/i);
+                    trySetStableId(matchMovie && matchMovie[1]);
+                    trySetStableId(matchTv && matchTv[2]);
                 }
 
-                if (hashValue) baseUrl.hash = hashValue;
-                return baseUrl.toString();
+                const params = new URLSearchParams();
+                if (stableId) {
+                    params.set('id', stableId);
+                } else if (item.id) {
+                    params.set('id', String(item.id));
+                }
+                if (normalizedTitle) params.set('title', normalizedTitle);
+
+                if (detailsInstance && typeof detailsInstance.buildModalHash === 'function') {
+                    const hash = detailsInstance.buildModalHash(stableId || item.id || '', normalizedTitle);
+                    if (hash) {
+                        baseUrl.hash = hash;
+                    }
+                } else if ([...params.entries()].length) {
+                    baseUrl.hash = params.toString();
+                }
+
+                const directUrl = baseUrl.toString();
+
+                try {
+                    const shareBase = new URL('/share/index.php', window.location.origin);
+                    if (stableId) shareBase.searchParams.set('id', stableId);
+                    else if (item.id) shareBase.searchParams.set('id', String(item.id));
+                    if (normalizedTitle) shareBase.searchParams.set('slug', normalizedTitle);
+                    if (item.title) shareBase.searchParams.set('title', item.title);
+                    shareBase.searchParams.set('redirect', directUrl);
+                    return shareBase.toString();
+                } catch (err) {
+                    console.warn('Main: share endpoint URL failed, using direct hash URL', err);
+                    return directUrl;
+                }
             } catch (error) {
                 console.warn('Main: generateShareUrl fallback to original URL', error);
                 return originalUrl || window.location.href;
