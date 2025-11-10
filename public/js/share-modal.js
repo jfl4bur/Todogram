@@ -127,28 +127,33 @@ class ShareModal {
 
     shareOnSocial(network) {
         if (!this.currentShareUrl) return;
-        
-        const title = `Mira ${this.sharePreviewTitle.textContent} en nuestra plataforma`;
-        const text = `${this.sharePreviewTitle.textContent}: ${this.sharePreviewDescription.textContent}`;
+
+        const hashtag = 'Todogram'; // Re-utiliza el único hashtag existente (no crear nuevos)
+        const rawTitle = this.sharePreviewTitle?.textContent || 'Contenido en Todogram';
+        const rawDesc = this.sharePreviewDescription?.textContent || '';
+        const title = `Mira ${rawTitle} en Todogram`;
+        const text = `${rawTitle}: ${rawDesc}`.substring(0, 200);
+
+        // Los metadatos ya están en <head>; sólo compartimos la URL actual.
         let shareUrl = '';
-        
-        switch(network) {
+        switch (network) {
             case 'facebook':
                 shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(this.currentShareUrl)}`;
                 break;
             case 'twitter':
-                shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(this.currentShareUrl)}`;
+                // Twitter recomienda usar 'text' + URL; hashtag sin # dentro del param (usa &hashtags=)
+                shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(this.currentShareUrl)}&hashtags=${encodeURIComponent(hashtag)}`;
                 break;
             case 'whatsapp':
-                shareUrl = `https://wa.me/?text=${encodeURIComponent(title + ' ' + this.currentShareUrl)}`;
+                shareUrl = `https://wa.me/?text=${encodeURIComponent(title + ' ' + this.currentShareUrl + ' #' + hashtag)}`;
                 break;
             case 'telegram':
-                shareUrl = `https://t.me/share/url?url=${encodeURIComponent(this.currentShareUrl)}&text=${encodeURIComponent(title)}`;
+                shareUrl = `https://t.me/share/url?url=${encodeURIComponent(this.currentShareUrl)}&text=${encodeURIComponent(title + ' #' + hashtag)}`;
                 break;
             default:
                 return;
         }
-        
+
         window.open(shareUrl, '_blank', 'width=600,height=400');
     }
 
