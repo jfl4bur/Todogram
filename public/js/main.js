@@ -142,8 +142,8 @@ document.addEventListener('DOMContentLoaded', function () {
             if (e.target.closest('#share-button')) {
                 const item = window.activeItem;
                 if (item && window.shareModal) {
-                    const currentUrl = window.location.href;
-                    const shareUrl = window.generateShareUrl(item, currentUrl);
+                    // Usar directamente la URL actual con el hash original del modal de detalles
+                    const shareUrl = window.location.href;
                     window.shareModal.show({ ...item, shareUrl }); // Pasar shareUrl al modal
                 } else {
                     console.error('Item o shareModal no definidos:', { item, shareModal: window.shareModal });
