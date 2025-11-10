@@ -220,22 +220,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const directUrl = baseUrl.toString();
 
                 try {
-                    const defaultShareEndpoint = 'https://todogram.free.nf/share/index.php';
-                    const configuredShareRoot = window.__SHARE_ENDPOINT_ROOT || document.documentElement?.dataset?.shareEndpointRoot || null;
-                    let shareBase;
-
-                    if (configuredShareRoot) {
-                        shareBase = new URL(configuredShareRoot, window.location.origin);
-                    } else {
-                        shareBase = new URL('/share/index.php', window.location.origin);
-                    }
-
-                    const hostname = shareBase.hostname || '';
-                    const needsFallback = shareBase.protocol === 'file:' || /github\.io$/i.test(hostname) || hostname === '';
-                    if (needsFallback) {
-                        shareBase = new URL(defaultShareEndpoint);
-                    }
-
+                    const shareBase = new URL('/share/index.php', window.location.origin);
                     if (stableId) {
                         shareBase.searchParams.set('id', stableId);
                     } else if (item.id) {
