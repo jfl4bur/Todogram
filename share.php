@@ -1,5 +1,10 @@
 <?php
 header('Content-Type: text/html; charset=UTF-8');
+// Evitar cachés agresivas de proxies/bots
+header('Cache-Control: no-cache, no-store, must-revalidate');
+header('Pragma: no-cache');
+header('Expires: 0');
+header('X-Robots-Tag: all');
 // share.php: Genera metatags OG/Twitter para compartir un ítem por ID sin ejecutar JS
 // Uso: /share.php?id=123
 
@@ -164,14 +169,11 @@ $redirect = $origin . '/#id=' . rawurlencode($id) . '&title=' . rawurlencode($ti
 // URL canónica de esta página de compartir
 $canonical = $origin . $_SERVER['REQUEST_URI'];
 
-// Si no es un bot, redirigir con 302 y no servir HTML (los bots necesitan el HTML con metatags)
-if (!is_bot() && strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'HEAD') {
-    header('Location: ' . $redirect, true, 302);
-    exit;
-}
+// Importante: no redirigimos con 302 para evitar que algunos scrapers pierdan las metatags.
+// La redirección para usuarios se hará con JS en el cliente (los bots no ejecutan JS).
 
 ?><!DOCTYPE html>
-<html lang="es">
+<html lang="es" prefix="og: http://ogp.me/ns#">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -189,6 +191,7 @@ if (!is_bot() && strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'HEAD') {
     <meta property="og:image:alt" content="<?php echo escape_html($title); ?>" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:updated_time" content="<?php echo time(); ?>" />
   <meta property="og:url" content="<?php echo escape_html($canonical); ?>" />
   <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@todogram" />
@@ -198,6 +201,6 @@ if (!is_bot() && strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'HEAD') {
     <meta name="twitter:image:alt" content="<?php echo escape_html($title); ?>" />
 </head>
 <body>
-    <p>Vista previa generada para compartición. Si estás viendo esta página como usuario, haz clic aquí para ir a la app: <a href="<?php echo escape_html($redirect); ?>"><?php echo escape_html($redirect); ?></a>.</p>
+        <p>Vista previa para compartir. Abre el contenido en: <a href="<?php echo escape_html($redirect); ?>"><?php echo escape_html($redirect); ?></a>.</p>
 </body>
 </html>
