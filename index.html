@@ -8,18 +8,51 @@
     <link rel="stylesheet" href="https://jfl4bur.github.io/Todogram/public/css/styles.css">
     <link rel="stylesheet" href="https://jfl4bur.github.io/Todogram/public/css/carrusel-genero.css">
     
-    <!-- Metatags globales (se actualizarán dinámicamente sin usar plantilla externa) -->
-    <meta name="description" content="Explora películas y series en Todogram" id="meta-description">
-    <meta property="og:title" id="og-title" content="Todogram - Series y Películas">
-    <meta property="og:description" id="og-description" content="Explora películas y series en Todogram">
-    <meta property="og:image" id="og-image" content="https://via.placeholder.com/600x315?text=Todogram">
-    <meta property="og:url" id="og-url" content="/">
-    <meta property="og:type" id="og-type" content="website">
-    <meta name="twitter:card" content="summary_large_image" id="twitter-card">
-    <meta name="twitter:title" id="twitter-title" content="Todogram - Series y Películas">
-    <meta name="twitter:description" id="twitter-description" content="Explora películas y series en Todogram">
-    <meta name="twitter:image" id="twitter-image" content="https://via.placeholder.com/600x315?text=Todogram">
-    <link rel="canonical" id="canonical-link" href="/">
+    <!-- Metatags globales para compartir (OG + Twitter) -->
+    <meta property="og:site_name" content="Todogram" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" id="og-title" content="Todogram - Series y Películas" />
+    <meta property="og:description" id="og-description" content="Explora y comparte las mejores películas y series en Todogram." />
+    <meta property="og:image" id="og-image" content="https://jfl4bur.github.io/Todogram/images/logo_r.png" />
+    <meta property="og:url" id="og-url" content="https://jfl4bur.github.io/Todogram/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@Todogram" />
+    <meta name="twitter:title" id="twitter-title" content="Todogram - Series y Películas" />
+    <meta name="twitter:description" id="twitter-description" content="Explora y comparte las mejores películas y series en Todogram." />
+    <meta name="twitter:image" id="twitter-image" content="https://jfl4bur.github.io/Todogram/images/logo_r.png" />
+    <!-- Script para actualizar dinámicamente los meta tags al abrir el modal de detalles/compartir -->
+    <script>
+        // Actualiza las etiquetas meta globales según el item activo
+        window.updateGlobalShareMeta = function(item) {
+            try {
+                if (!item) return;
+                const title = item.title || 'Todogram - Series y Películas';
+                const description = (item.description || item.synopsis || 'Explora y comparte las mejores películas y series en Todogram.').slice(0, 180);
+                const image = item.posterUrl || 'https://jfl4bur.github.io/Todogram/images/logo_r.png';
+                const url = window.location.href.split('#')[0];
+                const ogTitle = document.getElementById('og-title');
+                const ogDesc = document.getElementById('og-description');
+                const ogImg = document.getElementById('og-image');
+                const ogUrl = document.getElementById('og-url');
+                const twTitle = document.getElementById('twitter-title');
+                const twDesc = document.getElementById('twitter-description');
+                const twImg = document.getElementById('twitter-image');
+                if (ogTitle) ogTitle.setAttribute('content', title);
+                if (ogDesc) ogDesc.setAttribute('content', description);
+                if (ogImg) ogImg.setAttribute('content', image);
+                if (ogUrl) ogUrl.setAttribute('content', url);
+                if (twTitle) twTitle.setAttribute('content', title);
+                if (twDesc) twDesc.setAttribute('content', description);
+                if (twImg) twImg.setAttribute('content', image);
+                // Opcional: log para depuración
+                console.log('Metatags de compartir actualizados:', { title, description, image, url });
+            } catch(e) { console.warn('updateGlobalShareMeta fallo', e); }
+        };
+        // Hook: cuando se cambia el item activo en el modal de detalles
+        document.addEventListener('detailsModalItemSet', function(ev){
+            if (ev.detail && ev.detail.item) window.updateGlobalShareMeta(ev.detail.item);
+        });
+    </script>
 
     <!-- (Estilos eliminados: el usuario pidió no cambiar la lógica de hover; sólo se modificará el SVG) -->
 

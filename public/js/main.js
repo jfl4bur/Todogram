@@ -131,20 +131,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 // El slider independiente se inicializa automáticamente
         // No necesitamos delays ni polling
 
-        // Nueva función: genera URL a la ruta SSR /share/:id para que redes sociales lean metatags estáticas
-        window.generateShareUrl = function(item) {
-            if (!item || !item.id) return window.location.href;
-            const id = encodeURIComponent(item.id);
-            // Slug corto solo para mostrar bonito en la UI (el backend resolverá datos por id)
-            const slug = encodeURIComponent((item.title || item.name || 'todogram')
-                .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-                .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''));
-            // URL para redes (con metatags): corta, solo id y slug
-            // Importante: para que Facebook/Twitter/Telegram respeten las metatags,
-            // deben solicitar una URL sin hash y que el servidor responda con OG tags.
-            // Usamos share.php con id y un slug opcional sólo informativo.
-            const shareUrl = `${window.location.origin}/share.php?id=${id}&title=${slug}`;
-            return shareUrl;
+        // Función para generar URL de compartir (sin plantilla externa)
+        window.generateShareUrl = function(item, originalUrl) {
+            try {
+                const u = new URL(originalUrl || window.location.href);
+                const parts = [];
+                if (item && item.id) parts.push('id=' + encodeURIComponent(item.id));
+                if (item && item.title) parts.push('title=' + encodeURIComponent(item.title));
+                if (parts.length) {
+                    u.hash = parts.join('&');
+                }
+                return u.toString();
+            } catch (e) {
+                return originalUrl || window.location.href;
+            }
         };
 
         // Evento para el botón "Share" dentro del modal de detalles

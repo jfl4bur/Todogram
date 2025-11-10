@@ -10,20 +10,6 @@ class ShareModal {
         this.shareLinkButton = document.getElementById('share-link-button');
         this.currentShareUrl = '';
         this.isVisible = false;
-        // Referencias a metatags globales (se crean/adquieren una vez)
-        this.meta = {
-            ogTitle: document.getElementById('og-title') || this.ensureMeta('property','og:title','Todogram'),
-            ogDescription: document.getElementById('og-description') || this.ensureMeta('property','og:description','Explora contenido en Todogram'),
-            ogImage: document.getElementById('og-image') || this.ensureMeta('property','og:image','https://via.placeholder.com/600x315?text=Todogram'),
-            ogUrl: document.getElementById('og-url') || this.ensureMeta('property','og:url',window.location.href),
-            ogType: document.getElementById('og-type') || this.ensureMeta('property','og:type','website'),
-            twCard: document.getElementById('twitter-card') || this.ensureMeta('name','twitter:card','summary_large_image'),
-            twTitle: document.getElementById('twitter-title') || this.ensureMeta('name','twitter:title','Todogram'),
-            twDescription: document.getElementById('twitter-description') || this.ensureMeta('name','twitter:description','Explora contenido en Todogram'),
-            twImage: document.getElementById('twitter-image') || this.ensureMeta('name','twitter:image','https://via.placeholder.com/600x315?text=Todogram'),
-            canonical: document.getElementById('canonical-link') || this.ensureLink('canonical', window.location.href),
-            description: document.getElementById('meta-description') || this.ensureMeta('name','description','Explora contenido en Todogram')
-        };
 
         // Warn if optional elements are missing but continue: modal can still work with minimal UI
         const missing = [];
@@ -38,40 +24,6 @@ class ShareModal {
         if (missing.length) console.warn('ShareModal: faltan elementos opcionales en el DOM:', missing);
 
         this.setupEventListeners();
-    }
-
-    ensureMeta(attr, name, content) {
-        const m = document.createElement('meta');
-        m.setAttribute(attr, name);
-        m.content = content;
-        document.head.appendChild(m);
-        return m;
-    }
-
-    ensureLink(rel, href) {
-        const l = document.createElement('link');
-        l.rel = rel; l.href = href; document.head.appendChild(l); return l;
-    }
-
-    updateMetaTags(item, shareUrl) {
-        if (!item) return;
-        const title = item.title || 'Todogram';
-        const descriptionRaw = item.description || item.synopsis || 'Explora este título en Todogram';
-        const description = (descriptionRaw.length > 160) ? descriptionRaw.substring(0,157) + '…' : descriptionRaw;
-        const image = item.posterUrl || 'https://via.placeholder.com/600x315?text=Todogram';
-        const url = shareUrl || window.location.href;
-        // Actualizar meta propiedades
-        this.meta.ogTitle.content = title;
-        this.meta.ogDescription.content = description;
-        this.meta.ogImage.content = image;
-        this.meta.ogUrl.content = url;
-        this.meta.ogType.content = 'website';
-        this.meta.twTitle.content = title;
-        this.meta.twDescription.content = description;
-        this.meta.twImage.content = image;
-        this.meta.description.content = description;
-        this.meta.canonical.href = url;
-        // Nota: Scrapers que no ejecutan JS (Facebook/Twitter bots) pueden no ver cambios dinámicos sin renderizado server-side.
     }
 
     setupEventListeners() {
@@ -104,23 +56,15 @@ class ShareModal {
 
         // Generar shareUrl si falta
         if (!item.shareUrl) {
-            // Preferir endpoint SSR para compartir (tarjetas con imagen/descripcion)
-            if (item.id) {
-                const id = encodeURIComponent(item.id);
-                const slug = (item.title || item.name || 'todogram')
-                    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
-                    .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');
-                item.shareUrl = `${window.location.origin}/share.php?id=${id}&title=${encodeURIComponent(slug)}`;
-            } else {
-                try {
-                    const url = new URL(window.location.href);
-                    const hashParts = [];
-                    if (item.title) hashParts.push('title=' + encodeURIComponent(item.title));
-                    if (hashParts.length) url.hash = hashParts.join('&');
-                    item.shareUrl = url.toString();
-                } catch (err) {
-                    item.shareUrl = window.location.href;
-                }
+            try {
+                const url = new URL(window.location.href);
+                const hashParts = [];
+                if (item.id) hashParts.push('id=' + encodeURIComponent(item.id));
+                if (item.title) hashParts.push('title=' + encodeURIComponent(item.title));
+                if (hashParts.length) url.hash = hashParts.join('&');
+                item.shareUrl = url.toString();
+            } catch (err) {
+                item.shareUrl = window.location.href;
             }
         }
 
@@ -139,12 +83,8 @@ class ShareModal {
         if (description.length > maxLength) description = description.substring(0, maxLength) + '...';
         if (this.sharePreviewDescription) this.sharePreviewDescription.textContent = description;
 
-    // Para copiar, mostramos un enlace bonito con hash (UI). Para compartir en redes usamos shareUrl con metatags.
-    const prettyHash = `#id=${encodeURIComponent(item.id)}&title=${encodeURIComponent((item.title||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''))}`;
-    if (this.shareLinkInput) this.shareLinkInput.value = `${window.location.origin}/${prettyHash}`;
-    this.currentShareUrl = item.shareUrl;
-    // Actualizar metatags globales al abrir el modal
-    this.updateMetaTags(item, item.shareUrl);
+        if (this.shareLinkInput) this.shareLinkInput.value = item.shareUrl;
+        this.currentShareUrl = item.shareUrl;
 
         // Mostrar el modal (si existen elementos)
         if (this.shareModalOverlay) this.shareModalOverlay.style.display = 'flex';
