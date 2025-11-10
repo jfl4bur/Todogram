@@ -4,37 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Todogram - Catálogo</title>
-    <!-- Metatags globales para compartir (catalogo) -->
-    <meta property="og:site_name" content="Todogram" />
-    <meta property="og:type" content="website" />
-    <meta property="og:title" id="og-title" content="Todogram - Catálogo" />
-    <meta property="og:description" id="og-description" content="Explora el catálogo completo de películas y series en Todogram." />
-    <meta property="og:image" id="og-image" content="https://jfl4bur.github.io/Todogram/images/logo_r.png" />
-    <meta property="og:url" id="og-url" content="https://jfl4bur.github.io/Todogram/public/catalogo/" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" id="twitter-title" content="Todogram - Catálogo" />
-    <meta name="twitter:description" id="twitter-description" content="Explora el catálogo completo de películas y series en Todogram." />
-    <meta name="twitter:image" id="twitter-image" content="https://jfl4bur.github.io/Todogram/images/logo_r.png" />
-    <script>
-        window.updateGlobalShareMeta = function(item) {
-            try {
-                if (!item) return;
-                const title = item.title || 'Todogram - Catálogo';
-                const description = (item.description || item.synopsis || 'Explora el catálogo completo de películas y series en Todogram.').slice(0, 180);
-                const image = item.posterUrl || 'https://jfl4bur.github.io/Todogram/images/logo_r.png';
-                const url = window.location.href.split('#')[0];
-                const set = (id, val) => { const el = document.getElementById(id); if (el) el.setAttribute('content', val); };
-                set('og-title', title);
-                set('og-description', description);
-                set('og-image', image);
-                set('og-url', url);
-                set('twitter-title', title);
-                set('twitter-description', description);
-                set('twitter-image', image);
-                console.log('[Catalogo] Metatags actualizados', {title, description, image, url});
-            } catch(e){ console.warn('Catalogo updateGlobalShareMeta fallo', e); }
-        };
-    </script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://jfl4bur.github.io/Todogram/public/css/styles.css">
 </head>

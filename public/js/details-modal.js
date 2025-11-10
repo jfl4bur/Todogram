@@ -737,10 +737,6 @@ class DetailsModal {
         } catch (e) { /* ignore */ }
 
         window.activeItem = item;
-        try {
-            const ev = new CustomEvent('detailsModalItemSet', { detail: { item } });
-            document.dispatchEvent(ev);
-        } catch(e) { /* ignore */ }
         console.log('DetailsModal: Modal completado para:', item.title);
     }
 
