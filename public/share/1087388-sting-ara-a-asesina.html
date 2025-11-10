@@ -10,7 +10,7 @@
     <meta name="description" content="Pelicula inspirada en uno de los mayores temores de la humanidad, la aracnofobia, más monstruosa que nunca.">
     
     <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="video.movie">
     <meta property="og:site_name" content="Todogram">
     <meta property="og:url" content="https://jfl4bur.github.io/Todogram/share/1087388-sting-ara-a-asesina.html">
     <meta property="og:title" content="Sting. Araña asesina">
@@ -19,6 +19,7 @@
     <meta property="og:image:secure_url" content="https://app-files-v1.softr-files.com/applications/28ffeca0-1c6b-4d39-9b55-730930678a68/uploads/0dde65c5-bac4-47d9-8195-51c1784b3e7b/8uVI2hCr4X7VdhbfCInx0iYH7rH.webp">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
+    <meta property="og:image:type" content="image/jpeg">
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
@@ -27,51 +28,84 @@
     <meta name="twitter:description" content="Pelicula inspirada en uno de los mayores temores de la humanidad, la aracnofobia, más monstruosa que nunca.">
     <meta name="twitter:image" content="https://app-files-v1.softr-files.com/applications/28ffeca0-1c6b-4d39-9b55-730930678a68/uploads/0dde65c5-bac4-47d9-8195-51c1784b3e7b/8uVI2hCr4X7VdhbfCInx0iYH7rH.webp">
     
-    <!-- Redirección -->
-    <meta http-equiv="refresh" content="0;url=https://todogram.free.nf/#id=1087388&title=sting-ara-a-asesina">
-    
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
-            margin: 0;
+            min-height: 100vh;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        .container {
-            text-align: center;
             padding: 20px;
         }
-        .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top: 4px solid white;
-            width: 50px;
-            height: 50px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+        .card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .poster {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            display: block;
         }
-        h1 { margin: 0; font-size: 24px; }
-        p { opacity: 0.9; margin-top: 10px; }
+        .content {
+            padding: 24px;
+        }
+        h1 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+        .description {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+        .btn {
+            display: inline-block;
+            width: 100%;
+            padding: 14px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
+        }
+        .logo {
+            text-align: center;
+            color: #999;
+            font-size: 12px;
+            margin-top: 16px;
+        }
     </style>
-    
-    <script>
-        // Redirección inmediata
-        window.location.href = "https://todogram.free.nf/#id=1087388&title=sting-ara-a-asesina";
-    </script>
 </head>
 <body>
-    <div class="container">
-        <div class="spinner"></div>
-        <h1>Sting. Araña asesina</h1>
-        <p>Redirigiendo a Todogram...</p>
+    <div class="card">
+        <img class="poster" src="https://app-files-v1.softr-files.com/applications/28ffeca0-1c6b-4d39-9b55-730930678a68/uploads/0dde65c5-bac4-47d9-8195-51c1784b3e7b/8uVI2hCr4X7VdhbfCInx0iYH7rH.webp" alt="Sting. Araña asesina" onerror="this.src='https://via.placeholder.com/500x300?text=Todogram'">
+        <div class="content">
+            <h1>Sting. Araña asesina</h1>
+            <p class="description">Pelicula inspirada en uno de los mayores temores de la humanidad, la aracnofobia, más monstruosa que nunca.</p>
+            <a href="https://todogram.free.nf/#id=1087388&title=sting-ara-a-asesina" class="btn">Ver en Todogram</a>
+            <div class="logo">TODOGRAM</div>
+        </div>
     </div>
 </body>
 </html>
