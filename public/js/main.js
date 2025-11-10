@@ -154,6 +154,18 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
             };
 
+            const toPathSegment = (value, fallback = '') => {
+                if (value == null) return fallback;
+                try {
+                    const str = String(value);
+                    const normalized = str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+                    const cleaned = normalized.replace(/[^a-zA-Z0-9_-]+/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+                    return cleaned.toLowerCase() || fallback;
+                } catch (err) {
+                    return String(value).toLowerCase().replace(/[^a-z0-9_-]+/g, '-') || fallback;
+                }
+            };
+
             try {
                 const baseUrl = new URL(originalUrl || window.location.href);
                 const normalizedTitle = normalizeTitle(item.title || item.originalTitle || '');
@@ -220,15 +232,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 const directUrl = baseUrl.toString();
 
                 try {
-                    const shareBase = new URL('/share/index.php', window.location.origin);
-                    if (stableId) {
-                        shareBase.searchParams.set('id', stableId);
-                    } else if (item.id) {
-                        shareBase.searchParams.set('id', String(item.id));
-                    }
-                    if (normalizedTitle) shareBase.searchParams.set('slug', normalizedTitle);
-                    if (item.title) shareBase.searchParams.set('title', item.title);
-                    return shareBase.toString();
+                    const shareId = stableId || (item.id != null ? String(item.id).trim() : '');
+                    const idSegment = toPathSegment(shareId, toPathSegment(normalizedTitle, 'item'));
+                    const slugSegment = toPathSegment(normalizedTitle, idSegment);
+                    const fileName = `${idSegment}-${slugSegment}.html`;
+                    return `https://jfl4bur.github.io/Todogram/share-pages/${fileName}`;
                 } catch (err) {
                     console.warn('Main: share endpoint URL failed, using direct hash URL', err);
                     return directUrl;

@@ -123,17 +123,47 @@ class ShareModal {
 
     copyShareLink() {
         if (!this.currentShareUrl) return;
-        
-        this.shareLinkInput.select();
-        document.execCommand('copy');
-        
+
+        const fallbackCopy = () => {
+            try {
+                if (this.shareLinkInput) {
+                    this.shareLinkInput.focus({ preventScroll: true });
+                    this.shareLinkInput.select();
+                }
+                const succeeded = document.execCommand && document.execCommand('copy');
+                if (!succeeded) {
+                    throw new Error('execCommand copy failed');
+                }
+                this.showCopyFeedback();
+            } catch (err) {
+                console.warn('ShareModal: copy fallback failed', err);
+                this.showCopyFeedback(false);
+            }
+        };
+
+        if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+            navigator.clipboard
+                .writeText(this.currentShareUrl)
+                .then(() => this.showCopyFeedback())
+                .catch((err) => {
+                    console.warn('ShareModal: navigator.clipboard failed, falling back', err);
+                    fallbackCopy();
+                });
+        } else {
+            fallbackCopy();
+        }
+    }
+
+    showCopyFeedback(success = true) {
+        if (!this.shareLinkButton) return;
         const originalText = this.shareLinkButton.textContent;
-        this.shareLinkButton.textContent = '¡Copiado!';
-        this.shareLinkButton.style.backgroundColor = '#4CAF50';
-        
+        const originalBg = this.shareLinkButton.style.backgroundColor;
+        this.shareLinkButton.textContent = success ? '¡Copiado!' : 'Copia manual';
+        this.shareLinkButton.style.backgroundColor = success ? '#4CAF50' : '#FF6B6B';
+
         setTimeout(() => {
             this.shareLinkButton.textContent = originalText;
-            this.shareLinkButton.style.backgroundColor = '';
+            this.shareLinkButton.style.backgroundColor = originalBg;
         }, 2000);
     }
 
