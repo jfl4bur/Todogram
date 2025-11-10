@@ -1,10 +1,12 @@
 <?php
 header('Content-Type: text/html; charset=UTF-8');
+header('Content-Language: es');
 // Evitar cachés agresivas de proxies/bots
 header('Cache-Control: no-cache, no-store, must-revalidate');
 header('Pragma: no-cache');
 header('Expires: 0');
 header('X-Robots-Tag: all');
+header('Vary: User-Agent');
 // share.php: Genera metatags OG/Twitter para compartir un ítem por ID sin ejecutar JS
 // Uso: /share.php?id=123
 
@@ -188,7 +190,11 @@ if (preg_match('#/images/logo(\.|$)#', $imageAbs)) {
 $origin = base_url();
 // Construir una URL bonita con hash para mostrar/canonical (no la usan los bots)
 $slug = $title ?: ($item['Título'] ?? $item['Título original'] ?? 'todogram');
-$slug = strtolower(iconv('UTF-8','ASCII//TRANSLIT',$slug));
+$iconvSlug = @iconv('UTF-8','ASCII//TRANSLIT',$slug);
+if ($iconvSlug !== false && $iconvSlug !== null) {
+    $slug = $iconvSlug;
+}
+$slug = strtolower((string)$slug);
 $slug = preg_replace('/[^a-z0-9]+/','-',$slug);
 $slug = trim($slug,'-');
 // URL de destino para usuarios (home con hash para abrir details)
@@ -210,13 +216,12 @@ $canonical = $origin . $_SERVER['REQUEST_URI'];
     <meta name="robots" content="index,follow" />
   <link rel="canonical" href="<?php echo escape_html($canonical); ?>" />
     <link rel="image_src" href="<?php echo escape_html($imageAbs); ?>" />
-    <meta property="og:site_name" content="Todogram" />
-    <meta property="og:locale" content="es_ES" />
-    <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="Todogram" />
+        <meta property="og:locale" content="es_ES" />
+        <meta property="og:type" content="article" />
   <meta property="og:title" content="<?php echo escape_html($title); ?>" />
   <meta property="og:description" content="<?php echo escape_html($description); ?>" />
-    <meta property="og:image" content="<?php echo escape_html($imageAbs); ?>" />
-    <meta property="og:image" content="<?php echo escape_html($imageAbs); ?>" />
+        <meta property="og:image" content="<?php echo escape_html($imageAbs); ?>" />
     <meta property="og:image:secure_url" content="<?php echo escape_html($imageSecure); ?>" />
     <meta property="og:image:type" content="<?php echo escape_html($imageMime); ?>" />
     <meta property="og:image:alt" content="<?php echo escape_html($title); ?>" />
@@ -226,6 +231,7 @@ $canonical = $origin . $_SERVER['REQUEST_URI'];
     <meta property="og:url" content="<?php echo escape_html($canonical); ?>" />
   <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@todogram" />
+    <meta name="twitter:url" content="<?php echo escape_html($canonical); ?>" />
   <meta name="twitter:title" content="<?php echo escape_html($title); ?>" />
   <meta name="twitter:description" content="<?php echo escape_html($description); ?>" />
     <meta name="twitter:image" content="<?php echo escape_html($imageAbs); ?>" />
