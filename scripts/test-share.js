@@ -1,7 +1,7 @@
 import fetch from 'node-fetch';
 
 const DATA_SOURCE_URL = process.env.DATA_SOURCE_URL ?? 'https://raw.githubusercontent.com/jfl4bur/Todogram/main/public/data.json';
-const SHARE_BASE_URL = process.env.SHARE_BASE_URL ?? 'https://jfl4bur.github.io/Todogram/share';
+const SHARE_BASE_URL = process.env.SHARE_BASE_URL ?? 'https://jfl4bur.github.io/Todogram/share-static';
 const SAMPLE_LIMIT = Number.parseInt(process.env.SHARE_SAMPLE_LIMIT ?? '5', 10);
 const USER_AGENT = 'TodogramShareVerifier/1.0 (+https://todogram.free.nf)';
 

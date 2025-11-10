@@ -5,7 +5,7 @@ import fetch from 'node-fetch';
 
 const DATA_SOURCE_URL = process.env.DATA_SOURCE_URL ?? 'https://raw.githubusercontent.com/jfl4bur/Todogram/main/public/data.json';
 const SITE_BASE_URL = process.env.SITE_BASE_URL ?? 'https://todogram.free.nf/';
-const STATIC_BASE_URL = process.env.STATIC_SHARE_BASE_URL ?? 'https://jfl4bur.github.io/Todogram/share';
+const STATIC_BASE_URL = process.env.STATIC_SHARE_BASE_URL ?? 'https://jfl4bur.github.io/Todogram/share-static';
 const DEFAULT_IMAGE_URL = process.env.DEFAULT_IMAGE_URL ?? 'https://jfl4bur.github.io/Todogram/public/images/logo.png';
 const DEFAULT_DESCRIPTION = process.env.DEFAULT_DESCRIPTION ?? 'Descubre las mejores series y películas en Todogram.';
 const DESCRIPTION_LIMIT = Number.parseInt(process.env.DESCRIPTION_LIMIT ?? '180', 10);

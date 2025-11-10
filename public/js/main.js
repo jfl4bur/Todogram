@@ -220,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const directUrl = baseUrl.toString();
 
                 try {
-                    const staticBase = 'https://jfl4bur.github.io/Todogram/share';
+                    const staticBase = 'https://jfl4bur.github.io/Todogram/share-static';
                     const slugValue = normalizedTitle || (stableId ? `item-${stableId}` : (item.id ? `item-${item.id}` : 'item'));
                     if (!stableId && !item.id) {
                         return directUrl;
