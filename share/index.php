@@ -11,7 +11,6 @@ const LOCAL_DATA_PATHS = [
 const DEFAULT_DESCRIPTION = 'Descubre las mejores series y películas en Todogram.';
 const USER_AGENT = 'TodogramShareBot/1.0 (+https://todogram.free.nf)';
 const DEFAULT_IMAGE_MIME = 'image/png';
-const CLOUDINARY_SOCIAL_TRANSFORM = 'c_fit,w_1200,h_630,b_auto,q_auto,f_jpg,fl_lossy';
 
 header('Content-Type: text/html; charset=utf-8');
 header('X-Content-Type-Options: nosniff');
@@ -132,7 +131,7 @@ function shorten(string $text, int $max = 180): string {
     if ($lengthFn($safe) <= $max) {
         return $safe;
     }
-    return rtrim($substrFn($safe, 0, $max - 3)) . '...';
+    return rtrim($substrFn($safe, 0, $max - 1)) . '…';
 }
 
 function escapeAttr(string $value): string {
@@ -142,7 +141,7 @@ function escapeAttr(string $value): string {
 function normaliseSocialImageUrl(?string $candidate): array {
     $url = trim((string)($candidate ?? ''));
     if ($url === '') {
-        return [DEFAULT_IMAGE_URL, DEFAULT_IMAGE_MIME, null, null];
+        return [DEFAULT_IMAGE_URL, DEFAULT_IMAGE_MIME];
     }
 
     if (substr($url, 0, 2) === '//') {
@@ -150,29 +149,25 @@ function normaliseSocialImageUrl(?string $candidate): array {
     }
 
     if (!preg_match('#^https?://#i', $url)) {
-        return [DEFAULT_IMAGE_URL, DEFAULT_IMAGE_MIME, null, null];
+        return [DEFAULT_IMAGE_URL, DEFAULT_IMAGE_MIME];
     }
 
     $lowerPath = strtolower(parse_url($url, PHP_URL_PATH) ?? '');
     $pathExt = pathinfo($lowerPath, PATHINFO_EXTENSION);
     $unsupportedExt = $pathExt && in_array($pathExt, ['webp', 'avif', 'heic', 'heif', 'jp2'], true);
-    $width = null;
-    $height = null;
 
     $isCloudinary = stripos($url, 'res.cloudinary.com') !== false && strpos($lowerPath, '/image/upload/') !== false;
     if ($isCloudinary) {
-        if (!preg_match('#/image/upload/[^/]*' . preg_quote(CLOUDINARY_SOCIAL_TRANSFORM, '#') . '#i', $url)) {
-            $url = preg_replace('#/image/upload/#i', '/image/upload/' . CLOUDINARY_SOCIAL_TRANSFORM . '/', $url, 1) ?? $url;
+        if (strpos($url, '/image/upload/f_jpg') === false) {
+            $url = preg_replace('#/image/upload/#i', '/image/upload/f_jpg,q_auto,fl_lossy/', $url, 1) ?? $url;
         }
         $url = preg_replace('#\.(webp|avif|heic|heif|jp2)(\.[a-z0-9]+)?(?=$|\?)#i', '.jpg', $url) ?? $url;
         $pathExt = 'jpg';
         $unsupportedExt = false;
-        $width = 1200;
-        $height = 630;
     }
 
     if ($unsupportedExt) {
-        return [DEFAULT_IMAGE_URL, DEFAULT_IMAGE_MIME, null, null];
+        return [DEFAULT_IMAGE_URL, DEFAULT_IMAGE_MIME];
     }
 
     switch ($pathExt) {
@@ -189,7 +184,7 @@ function normaliseSocialImageUrl(?string $candidate): array {
             $mime = 'image/jpeg';
     }
 
-    return [$url, $mime, $width, $height];
+    return [$url, $mime];
 }
 
 $idParam = readQueryParam('id');
@@ -236,8 +231,6 @@ $title = 'Todogram - Series y Películas';
 $description = DEFAULT_DESCRIPTION;
 $imageUrl = DEFAULT_IMAGE_URL;
 $imageMime = DEFAULT_IMAGE_MIME;
-$imageWidth = null;
-$imageHeight = null;
 $itemId = $idParam;
 $rawImage = $imageUrl;
 
@@ -270,7 +263,7 @@ if ($matched) {
     }
 }
 
-[$imageUrl, $imageMime, $imageWidth, $imageHeight] = normaliseSocialImageUrl($rawImage);
+[$imageUrl, $imageMime] = normaliseSocialImageUrl($rawImage);
 
 $redirectUrl = buildRedirectUrl($itemId, $slugParam);
 
@@ -299,10 +292,8 @@ if (!$matched) {
     <meta property="og:image" content="<?= escapeAttr($imageUrl) ?>">
     <meta property="og:image:secure_url" content="<?= escapeAttr($imageUrl) ?>">
     <meta property="og:image:type" content="<?= escapeAttr($imageMime) ?>">
-<?php if ($imageWidth && $imageHeight): ?>
-    <meta property="og:image:width" content="<?= (int)$imageWidth ?>">
-    <meta property="og:image:height" content="<?= (int)$imageHeight ?>">
-<?php endif; ?>
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="<?= escapeAttr($title) ?>">
     <meta property="og:url" content="<?= escapeAttr($canonicalUrl) ?>">
     <meta property="og:type" content="website">
@@ -313,12 +304,7 @@ if (!$matched) {
     <meta name="twitter:title" content="<?= escapeAttr($title) ?>">
     <meta name="twitter:description" content="<?= escapeAttr($description) ?>">
     <meta name="twitter:image" content="<?= escapeAttr($imageUrl) ?>">
-    <meta name="twitter:image:src" content="<?= escapeAttr($imageUrl) ?>">
     <meta name="twitter:image:alt" content="<?= escapeAttr($title) ?>">
-<?php if ($imageWidth && $imageHeight): ?>
-    <meta name="twitter:image:width" content="<?= (int)$imageWidth ?>">
-    <meta name="twitter:image:height" content="<?= (int)$imageHeight ?>">
-<?php endif; ?>
     <meta name="twitter:url" content="<?= escapeAttr($canonicalUrl) ?>">
 
     <link rel="canonical" href="<?= escapeAttr($canonicalUrl) ?>">
