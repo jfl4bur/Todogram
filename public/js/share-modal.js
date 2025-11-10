@@ -8,7 +8,8 @@ class ShareModal {
         this.sharePreviewDescription = document.getElementById('share-preview-description');
         this.shareLinkInput = document.getElementById('share-link-input');
         this.shareLinkButton = document.getElementById('share-link-button');
-        this.currentShareUrl = '';
+        this.currentShareUrl = ''; // URL directa con hashtag (para copiar)
+        this.currentSocialUrl = ''; // URL del template PHP (para redes sociales)
         this.isVisible = false;
 
         // Warn if optional elements are missing but continue: modal can still work with minimal UI
@@ -54,18 +55,17 @@ class ShareModal {
             return;
         }
 
-        // Generar shareUrl si falta usando el hash actual de la URL
-        if (!item.shareUrl) {
-            try {
-                // Usar directamente la URL actual con el hash que ya existe
-                // Esto preserva el hash original creado por el modal de detalles
-                item.shareUrl = window.location.href;
-            } catch (err) {
-                item.shareUrl = window.location.href;
-            }
-        }
-
         this.isVisible = true;
+
+        // URL directa con hashtag (para copiar y mostrar al usuario)
+        const directUrl = window.location.href;
+        
+        // URL del template PHP (para compartir en redes sociales con metadatos)
+        const socialUrl = item.shareUrl || directUrl;
+
+        // Guardar ambas URLs
+        this.currentShareUrl = directUrl;  // Para copiar
+        this.currentSocialUrl = socialUrl;  // Para redes sociales
 
         // Actualizar elementos del modal con datos dinámicos del item (usar guards)
         if (this.sharePreviewImage) {
@@ -80,8 +80,8 @@ class ShareModal {
         if (description.length > maxLength) description = description.substring(0, maxLength) + '...';
         if (this.sharePreviewDescription) this.sharePreviewDescription.textContent = description;
 
-        if (this.shareLinkInput) this.shareLinkInput.value = item.shareUrl;
-        this.currentShareUrl = item.shareUrl;
+        // Mostrar la URL directa en el input (la que el usuario verá)
+        if (this.shareLinkInput) this.shareLinkInput.value = directUrl;
 
         // Mostrar el modal (si existen elementos)
         if (this.shareModalOverlay) this.shareModalOverlay.style.display = 'flex';
@@ -123,7 +123,9 @@ class ShareModal {
     }
 
     shareOnSocial(network) {
-        if (!this.currentShareUrl) return;
+        // Usar la URL del template PHP para redes sociales (tiene metadatos)
+        const urlToShare = this.currentSocialUrl || this.currentShareUrl;
+        if (!urlToShare) return;
         
         const title = `Mira ${this.sharePreviewTitle.textContent} en nuestra plataforma`;
         const text = `${this.sharePreviewTitle.textContent}: ${this.sharePreviewDescription.textContent}`;
@@ -131,16 +133,16 @@ class ShareModal {
         
         switch(network) {
             case 'facebook':
-                shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(this.currentShareUrl)}`;
+                shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(urlToShare)}`;
                 break;
             case 'twitter':
-                shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(this.currentShareUrl)}`;
+                shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(urlToShare)}`;
                 break;
             case 'whatsapp':
-                shareUrl = `https://wa.me/?text=${encodeURIComponent(title + ' ' + this.currentShareUrl)}`;
+                shareUrl = `https://wa.me/?text=${encodeURIComponent(title + ' ' + urlToShare)}`;
                 break;
             case 'telegram':
-                shareUrl = `https://t.me/share/url?url=${encodeURIComponent(this.currentShareUrl)}&text=${encodeURIComponent(title)}`;
+                shareUrl = `https://t.me/share/url?url=${encodeURIComponent(urlToShare)}&text=${encodeURIComponent(title)}`;
                 break;
             default:
                 return;
