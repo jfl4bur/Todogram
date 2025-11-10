@@ -140,6 +140,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
                 .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,''));
             // URL para redes (con metatags): corta, solo id y slug
+            // Importante: para que Facebook/Twitter/Telegram respeten las metatags,
+            // deben solicitar una URL sin hash y que el servidor responda con OG tags.
+            // Usamos share.php con id y un slug opcional sólo informativo.
             const shareUrl = `${window.location.origin}/share.php?id=${id}&title=${slug}`;
             return shareUrl;
         };

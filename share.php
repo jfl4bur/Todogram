@@ -171,8 +171,8 @@ $slug = trim($slug,'-');
 // URL de destino para usuarios (home con hash para abrir details)
 $redirect = $origin . '/#id=' . rawurlencode($id) . '&title=' . rawurlencode($slug);
 
-// URL canónica: el enlace bonito con hash para que se muestre limpio en los UIs
-$canonical = $redirect;
+// URL canónica y og:url deben ser la URL real de share.php para que los scrapers NO pierdan metadatos
+$canonical = $origin . $_SERVER['REQUEST_URI'];
 
 // Importante: no redirigimos con 302 para evitar que algunos scrapers pierdan las metatags.
 // La redirección para usuarios se hará con JS en el cliente (los bots no ejecutan JS).
@@ -199,7 +199,7 @@ $canonical = $redirect;
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:updated_time" content="<?php echo time(); ?>" />
-  <meta property="og:url" content="<?php echo escape_html($canonical); ?>" />
+    <meta property="og:url" content="<?php echo escape_html($canonical); ?>" />
   <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content="@todogram" />
   <meta name="twitter:title" content="<?php echo escape_html($title); ?>" />
@@ -208,6 +208,6 @@ $canonical = $redirect;
     <meta name="twitter:image:alt" content="<?php echo escape_html($title); ?>" />
 </head>
 <body>
-        <p>Vista previa para compartir. Abre el contenido en: <a href="<?php echo escape_html($redirect); ?>"><?php echo escape_html($redirect); ?></a>.</p>
+    <p>Vista previa para compartir. Ir al contenido: <a href="<?php echo escape_html($redirect); ?>"><?php echo escape_html($redirect); ?></a>.</p>
 </body>
 </html>
