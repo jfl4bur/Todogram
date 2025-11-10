@@ -28,9 +28,8 @@
     <meta name="twitter:description" content="Dos parejas de amigos, Ale y Santi, y Natalia y Mario, celebran que hace veinte años que están juntos con unas vacaciones en Samaná. Sin embargo, todo se descar">
     <meta name="twitter:image" content="https://app-files-v1.softr-files.com/applications/28ffeca0-1c6b-4d39-9b55-730930678a68/uploads/37c6bef2-a285-4a73-a356-13fca6ca9f72/Amanece%20en%20Saman%C3%A1.@Todogram.webp">
     
-    <!-- NOTA: Redirección retardada (100ms) tras la carga para mejorar UX.
-         Los scrapers suelen ignorar JS temprano si las meta tags están antes en el HTML.
-         Si alguna red social no lee los metadatos, aumentar el delay a 500ms. -->
+    <!-- NOTA: Redirección inmediata a la SPA (sin espera).
+        Advertencia: si alguna red social pierde metadatos, considerar reponer un pequeño delay. -->
     
     <style>
         body {
@@ -65,9 +64,8 @@
     </style>
     
     <script>
-        // Redirigir automáticamente a la SPA después de un breve delay (100ms).
-        // Si se observa que alguna plataforma pierde metadatos, subir este valor.
-        setTimeout(() => { try { window.location.replace("https://todogram.free.nf/#id=1341012&title=amanece-en-saman"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=1341012&title=amanece-en-saman"; } }, 100);
+        // Redirección inmediata a la SPA (sin espera)
+        try { window.location.replace("https://todogram.free.nf/#id=1341012&title=amanece-en-saman"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=1341012&title=amanece-en-saman"; }
     </script>
 </head>
 <body>

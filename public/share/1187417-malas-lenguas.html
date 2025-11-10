@@ -34,9 +34,8 @@ Los líderes de siete democracias mas ricas del mundo se pierden en un bosque, a
 Los líderes de siete democracias mas ricas del mundo se pierden en un bosque, al tiempo que tratan de redactar una declaración sobr">
     <meta name="twitter:image" content="https://app-files-v1.softr-files.com/applications/28ffeca0-1c6b-4d39-9b55-730930678a68/uploads/b157c7f0-b633-4c4d-a90b-3178e77611e7/Malas%20lenguas.@Todogram.webp">
     
-    <!-- NOTA: Redirección retardada (100ms) tras la carga para mejorar UX.
-         Los scrapers suelen ignorar JS temprano si las meta tags están antes en el HTML.
-         Si alguna red social no lee los metadatos, aumentar el delay a 500ms. -->
+    <!-- NOTA: Redirección inmediata a la SPA (sin espera).
+        Advertencia: si alguna red social pierde metadatos, considerar reponer un pequeño delay. -->
     
     <style>
         body {
@@ -71,9 +70,8 @@ Los líderes de siete democracias mas ricas del mundo se pierden en un bosque, a
     </style>
     
     <script>
-        // Redirigir automáticamente a la SPA después de un breve delay (100ms).
-        // Si se observa que alguna plataforma pierde metadatos, subir este valor.
-        setTimeout(() => { try { window.location.replace("https://todogram.free.nf/#id=1187417&title=malas-lenguas"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=1187417&title=malas-lenguas"; } }, 100);
+        // Redirección inmediata a la SPA (sin espera)
+        try { window.location.replace("https://todogram.free.nf/#id=1187417&title=malas-lenguas"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=1187417&title=malas-lenguas"; }
     </script>
 </head>
 <body>

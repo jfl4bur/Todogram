@@ -34,9 +34,8 @@ Una elección desesperada lleva a Jack por un camino que lo deja golpeado y magu
 Una elección desesperada lleva a Jack por un camino que lo deja golpeado y magullado mientras lucha contra el hombre, la naturaleza y">
     <meta name="twitter:image" content="https://res.cloudinary.com/de7knrhj7/image/upload/v1761247395/notion-uploads/1761247394705-1RyuIs4aQBlKtRHbC6mIirVyEsr.webp.webp">
     
-    <!-- NOTA: Redirección retardada (100ms) tras la carga para mejorar UX.
-         Los scrapers suelen ignorar JS temprano si las meta tags están antes en el HTML.
-         Si alguna red social no lee los metadatos, aumentar el delay a 500ms. -->
+    <!-- NOTA: Redirección inmediata a la SPA (sin espera).
+        Advertencia: si alguna red social pierde metadatos, considerar reponer un pequeño delay. -->
     
     <style>
         body {
@@ -71,9 +70,8 @@ Una elección desesperada lleva a Jack por un camino que lo deja golpeado y magu
     </style>
     
     <script>
-        // Redirigir automáticamente a la SPA después de un breve delay (100ms).
-        // Si se observa que alguna plataforma pierde metadatos, subir este valor.
-        setTimeout(() => { try { window.location.replace("https://todogram.free.nf/#id=1032949&title=beaten-to-death"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=1032949&title=beaten-to-death"; } }, 100);
+        // Redirección inmediata a la SPA (sin espera)
+        try { window.location.replace("https://todogram.free.nf/#id=1032949&title=beaten-to-death"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=1032949&title=beaten-to-death"; }
     </script>
 </head>
 <body>

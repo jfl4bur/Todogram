@@ -42,24 +42,24 @@ function generateSharePage(item) {
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Todogram">
-    <meta property="og:url" content="https://jfl4bur.github.io/Todogram/share/${filename}">
+    <meta property="og:url" content="https://jfl4bur.github.io/Todogram/public/share/${filename}">
     <meta property="og:title" content="${title}">
     <meta property="og:description" content="${description}">
     <meta property="og:image" content="${image}">
     <meta property="og:image:secure_url" content="${image}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
-    <link rel="canonical" href="https://jfl4bur.github.io/Todogram/share/${filename}">
+    <link rel="canonical" href="https://jfl4bur.github.io/Todogram/public/share/${filename}">
     
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:url" content="https://jfl4bur.github.io/Todogram/share/${filename}">
+    <meta name="twitter:url" content="https://jfl4bur.github.io/Todogram/public/share/${filename}">
     <meta name="twitter:title" content="${title}">
     <meta name="twitter:description" content="${description}">
     <meta name="twitter:image" content="${image}">
     
-    <!-- NOTA: Sin redirección automática para que los scrapers (Facebook/Twitter) lean las meta tags.
-        El usuario verá un botón para ir a la app SPA. -->
+    <!-- NOTA: Redirección inmediata a la SPA (sin espera).
+        Advertencia: si alguna red social pierde metadatos, considerar reponer un pequeño delay. -->
     
     <style>
         body {
@@ -94,9 +94,8 @@ function generateSharePage(item) {
     </style>
     
     <script>
-        // Pequeña mejora UX: si el usuario llega directamente, puede pulsar el botón.
-        // Opcional: añadir autoredirección diferida (comentada para no interferir con scrapers):
-        // setTimeout(()=> location.href = "${originalUrl}", 4000);
+        // Redirección inmediata a la SPA (sin espera)
+        try { window.location.replace("${originalUrl}"); } catch(e) { window.location.href = "${originalUrl}"; }
     </script>
 </head>
 <body>

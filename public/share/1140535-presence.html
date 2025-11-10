@@ -28,9 +28,8 @@
     <meta name="twitter:description" content="Una pareja y sus hijos se mudan a una casa suburbana aparentemente normal. Cuando ocurren eventos extraños, comienzan a creer que hay algo más en la casa con el">
     <meta name="twitter:image" content="https://app-files-v1.softr-files.com/applications/28ffeca0-1c6b-4d39-9b55-730930678a68/uploads/6fbd44db-88bd-4722-bd1b-5765ddd7517c/8mRO5AdZ4Rn1crgjTHaUnWWhJXB.webp">
     
-    <!-- NOTA: Redirección retardada (100ms) tras la carga para mejorar UX.
-         Los scrapers suelen ignorar JS temprano si las meta tags están antes en el HTML.
-         Si alguna red social no lee los metadatos, aumentar el delay a 500ms. -->
+    <!-- NOTA: Redirección inmediata a la SPA (sin espera).
+        Advertencia: si alguna red social pierde metadatos, considerar reponer un pequeño delay. -->
     
     <style>
         body {
@@ -65,9 +64,8 @@
     </style>
     
     <script>
-        // Redirigir automáticamente a la SPA después de un breve delay (100ms).
-        // Si se observa que alguna plataforma pierde metadatos, subir este valor.
-        setTimeout(() => { try { window.location.replace("https://todogram.free.nf/#id=1140535&title=presence"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=1140535&title=presence"; } }, 100);
+        // Redirección inmediata a la SPA (sin espera)
+        try { window.location.replace("https://todogram.free.nf/#id=1140535&title=presence"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=1140535&title=presence"; }
     </script>
 </head>
 <body>

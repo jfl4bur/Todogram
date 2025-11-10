@@ -34,9 +34,8 @@ Ambientada a principios de la década de 1900, la película contará la historia
 Ambientada a principios de la década de 1900, la película contará la historia de los luchadores por la indepe">
     <meta name="twitter:image" content="https://app-files-v1.softr-files.com/applications/28ffeca0-1c6b-4d39-9b55-730930678a68/uploads/1c6f3321-30e0-43b4-a32b-3131ec653a5c/2GxQAMh6CpltOYX4kjPLVO0Xrzz.webp">
     
-    <!-- NOTA: Redirección retardada (100ms) tras la carga para mejorar UX.
-         Los scrapers suelen ignorar JS temprano si las meta tags están antes en el HTML.
-         Si alguna red social no lee los metadatos, aumentar el delay a 500ms. -->
+    <!-- NOTA: Redirección inmediata a la SPA (sin espera).
+        Advertencia: si alguna red social pierde metadatos, considerar reponer un pequeño delay. -->
     
     <style>
         body {
@@ -71,9 +70,8 @@ Ambientada a principios de la década de 1900, la película contará la historia
     </style>
     
     <script>
-        // Redirigir automáticamente a la SPA después de un breve delay (100ms).
-        // Si se observa que alguna plataforma pierde metadatos, subir este valor.
-        setTimeout(() => { try { window.location.replace("https://todogram.free.nf/#id=610251&title=harbin"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=610251&title=harbin"; } }, 100);
+        // Redirección inmediata a la SPA (sin espera)
+        try { window.location.replace("https://todogram.free.nf/#id=610251&title=harbin"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=610251&title=harbin"; }
     </script>
 </head>
 <body>

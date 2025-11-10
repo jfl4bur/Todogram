@@ -34,9 +34,8 @@ Joe Flood, un sicario con enfermedad terminal, contrata a un asesino para acabar
 Joe Flood, un sicario con enfermedad terminal, contrata a un asesino para acabar con su vida. Tras descubrir que su diagnóstico era">
     <meta name="twitter:image" content="https://prod-files-secure.s3.us-west-2.amazonaws.com/540bbcc7-4564-40af-854c-3f5347dbae03/e142273e-ff76-4f7d-8d4f-62390c987274/El_juego_del_asesino.Todogram.webp?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=ASIAZI2LB466ZMKIEIVO%2F20251110%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20251110T083634Z&X-Amz-Expires=3600&X-Amz-Security-Token=IQoJb3JpZ2luX2VjEDgaCXVzLXdlc3QtMiJHMEUCIDzosa9M9s6OkKPb3hm3tDZkkQSJ2WGGgW0AMuGsMy1XAiEA1QQ4M4q15TI624%2Bjz1PA13DD6c0ceqNahwEMfBb61b0q%2FwMIARAAGgw2Mzc0MjMxODM4MDUiDJlAoFVOBA8PFQpAjSrcA4If9rLitqLZM7xVFM2BVX0BURcy0l6nSQ2aGLujAmLi%2FZMME3CH3%2B8WF5Z3LAgBwqwz%2B5xm3Vs9QJXqI5LXpXQROztFZE3gs%2B75paLrmNbM64iCDaogTLW9yI3gqv1AXMb266UK6gI6ygCPUS3l0EiQcf078LQU628FC8ak2POhF2YZtjT0O4eE%2BJLXfyqBVbseK4X0A4nULCkAJSCLurCDUfLi7lRV%2FIey13bOjpVOOy6QHtIA4QZNiIi9IT3ZIZ6d5%2F%2BiAJkCHnhDOshKL%2FFOUTScjQdPWAliwMUSNazKfMZPoR0J0GnjqhCJ03gspMtoQ9j53ix57pCKMpqH56Je%2FWwGrWbxrX9FZV70ne8%2FDb4xgbmpd6qXrTEi3Pi8XpgccD7rrpGWyefvyPIRkrus46q4PiJbqxpTTCGKB8WXcZ16venbsYNJjEBBCjyUJXRzZnzvMnJaB4bH6dCiHF%2FVfhnDxqF1oHbrR3i8FBulFu7aKybEoWrtb5RV0JzhIUf4jO7ADl1G1DKoaEgorC%2Fam%2F2ZwsNYnd5MkJcY9umKup4oxfsXniMq56c%2BGSN%2FcswPlnoKsvgxmvK9dchpADOaXOebEVoGsYK2YGCNt8%2BdXzV5nn4ircE5dKp6MOi3xsgGOqUBgj7m9ecz6HnXLvRkauiqMulXwI%2BzDu7eQN9Eax3rE0j0LO19nM8RVU6zXKihdEA5REU3ARhaVgzWA96GerYHUFo%2FTGHlWeY5Y1c03jl%2BcZWWzYIOs9F0JZOfkX5vNoZbUD%2Fo2fMySzFtf2OgPQuzQBMAlzE%2FCuag4F1mccFPlQi2HS%2FvwwEFzAQbjo7SoeW9RExzNCuSbzzy8hGkYHugxa4LYJUN&X-Amz-Signature=c6ae26eb76accf654e6f1aaf0a831039a0c7b7decd0c2b269ba190972c6c3a57&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject">
     
-    <!-- NOTA: Redirección retardada (100ms) tras la carga para mejorar UX.
-         Los scrapers suelen ignorar JS temprano si las meta tags están antes en el HTML.
-         Si alguna red social no lee los metadatos, aumentar el delay a 500ms. -->
+    <!-- NOTA: Redirección inmediata a la SPA (sin espera).
+        Advertencia: si alguna red social pierde metadatos, considerar reponer un pequeño delay. -->
     
     <style>
         body {
@@ -71,9 +70,8 @@ Joe Flood, un sicario con enfermedad terminal, contrata a un asesino para acabar
     </style>
     
     <script>
-        // Redirigir automáticamente a la SPA después de un breve delay (100ms).
-        // Si se observa que alguna plataforma pierde metadatos, subir este valor.
-        setTimeout(() => { try { window.location.replace("https://todogram.free.nf/#id=507241&title=el-juego-del-asesino"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=507241&title=el-juego-del-asesino"; } }, 100);
+        // Redirección inmediata a la SPA (sin espera)
+        try { window.location.replace("https://todogram.free.nf/#id=507241&title=el-juego-del-asesino"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=507241&title=el-juego-del-asesino"; }
     </script>
 </head>
 <body>

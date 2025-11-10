@@ -28,9 +28,8 @@
     <meta name="twitter:description" content="Un hombre, que está devastado por la pérdida de su novia, descubre un medicamento que le permite soñar con ella. A través de estos sueños, intenta lidiar con su">
     <meta name="twitter:image" content="https://app-files-v1.softr-files.com/applications/28ffeca0-1c6b-4d39-9b55-730930678a68/uploads/6067b610-f3be-4ae7-a3e7-06490ea3ab08/bMp6uSDSnsmJOaZIvcclmEiHa1r.webp">
     
-    <!-- NOTA: Redirección retardada (100ms) tras la carga para mejorar UX.
-         Los scrapers suelen ignorar JS temprano si las meta tags están antes en el HTML.
-         Si alguna red social no lee los metadatos, aumentar el delay a 500ms. -->
+    <!-- NOTA: Redirección inmediata a la SPA (sin espera).
+        Advertencia: si alguna red social pierde metadatos, considerar reponer un pequeño delay. -->
     
     <style>
         body {
@@ -65,9 +64,8 @@
     </style>
     
     <script>
-        // Redirigir automáticamente a la SPA después de un breve delay (100ms).
-        // Si se observa que alguna plataforma pierde metadatos, subir este valor.
-        setTimeout(() => { try { window.location.replace("https://todogram.free.nf/#id=1084440&title=daniela-forever"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=1084440&title=daniela-forever"; } }, 100);
+        // Redirección inmediata a la SPA (sin espera)
+        try { window.location.replace("https://todogram.free.nf/#id=1084440&title=daniela-forever"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=1084440&title=daniela-forever"; }
     </script>
 </head>
 <body>

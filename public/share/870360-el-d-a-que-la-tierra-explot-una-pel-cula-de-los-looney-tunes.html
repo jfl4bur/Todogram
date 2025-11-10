@@ -28,9 +28,8 @@
     <meta name="twitter:description" content="Porky y el Pato Lucas regresan a la gran pantalla, junto con Petunia, en una nueva y emocionante aventura animada. En esta comedia de ciencia ficción, nuestros ">
     <meta name="twitter:image" content="https://res.cloudinary.com/de7knrhj7/image/upload/v1760637297/notion-uploads/1760637296743-xSd2zSbIIuyz6MYZmCXzeVvlxsz.webp.webp">
     
-    <!-- NOTA: Redirección retardada (100ms) tras la carga para mejorar UX.
-         Los scrapers suelen ignorar JS temprano si las meta tags están antes en el HTML.
-         Si alguna red social no lee los metadatos, aumentar el delay a 500ms. -->
+    <!-- NOTA: Redirección inmediata a la SPA (sin espera).
+        Advertencia: si alguna red social pierde metadatos, considerar reponer un pequeño delay. -->
     
     <style>
         body {
@@ -65,9 +64,8 @@
     </style>
     
     <script>
-        // Redirigir automáticamente a la SPA después de un breve delay (100ms).
-        // Si se observa que alguna plataforma pierde metadatos, subir este valor.
-        setTimeout(() => { try { window.location.replace("https://todogram.free.nf/#id=870360&title=el-d-a-que-la-tierra-explot-una-pel-cula-de-los-looney-tunes"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=870360&title=el-d-a-que-la-tierra-explot-una-pel-cula-de-los-looney-tunes"; } }, 100);
+        // Redirección inmediata a la SPA (sin espera)
+        try { window.location.replace("https://todogram.free.nf/#id=870360&title=el-d-a-que-la-tierra-explot-una-pel-cula-de-los-looney-tunes"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=870360&title=el-d-a-que-la-tierra-explot-una-pel-cula-de-los-looney-tunes"; }
     </script>
 </head>
 <body>

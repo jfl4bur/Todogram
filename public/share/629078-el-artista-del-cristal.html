@@ -34,9 +34,8 @@ El joven Vincent y su padre Tomas, los encargados de dirigir el mejor taller d">
 El joven Vincent y su padre Tomas, los encargados de dirigir el mejor taller d">
     <meta name="twitter:image" content="https://app-files-v1.softr-files.com/applications/28ffeca0-1c6b-4d39-9b55-730930678a68/uploads/e091c0df-7fc0-4c89-a49d-8dc2616d9e1e/El%20artista%20del%20cristal.@Todogram.webp">
     
-    <!-- NOTA: Redirección retardada (100ms) tras la carga para mejorar UX.
-         Los scrapers suelen ignorar JS temprano si las meta tags están antes en el HTML.
-         Si alguna red social no lee los metadatos, aumentar el delay a 500ms. -->
+    <!-- NOTA: Redirección inmediata a la SPA (sin espera).
+        Advertencia: si alguna red social pierde metadatos, considerar reponer un pequeño delay. -->
     
     <style>
         body {
@@ -71,9 +70,8 @@ El joven Vincent y su padre Tomas, los encargados de dirigir el mejor taller d">
     </style>
     
     <script>
-        // Redirigir automáticamente a la SPA después de un breve delay (100ms).
-        // Si se observa que alguna plataforma pierde metadatos, subir este valor.
-        setTimeout(() => { try { window.location.replace("https://todogram.free.nf/#id=629078&title=el-artista-del-cristal"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=629078&title=el-artista-del-cristal"; } }, 100);
+        // Redirección inmediata a la SPA (sin espera)
+        try { window.location.replace("https://todogram.free.nf/#id=629078&title=el-artista-del-cristal"); } catch(e) { window.location.href = "https://todogram.free.nf/#id=629078&title=el-artista-del-cristal"; }
     </script>
 </head>
 <body>
