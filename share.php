@@ -75,6 +75,24 @@ function guess_mime($url) {
     }
 }
 
+// Normaliza URLs de imagen para que sean compatibles con scrapers (evitar WEBP)
+function normalize_image_for_og($url) {
+    $abs = make_absolute_url($url);
+    $mime = guess_mime($abs);
+    // Si es Cloudinary, forzar JPEG con transformación
+    if (strpos($abs, 'res.cloudinary.com/') !== false && strpos($abs, '/upload/') !== false) {
+        // Insertar f_jpg,q_auto tras /upload/
+        $abs = preg_replace('#/upload/(?!f_[^/]+/)#', '/upload/f_jpg,q_auto/', $abs, 1);
+        $mime = 'image/jpeg';
+    }
+    // Si aún es WEBP u otro formato no soportado por algunas redes, usar placeholder grande
+    if ($mime === 'image/webp') {
+        $abs = 'https://via.placeholder.com/1200x630.png?text=Todogram';
+        $mime = 'image/png';
+    }
+    return [$abs, $mime];
+}
+
 function fetch_data($url) {
     // Intentar con file_get_contents; fallback a cURL si está deshabilitado allow_url_fopen
     $context = stream_context_create([
@@ -158,9 +176,8 @@ if ($imgParam) {
 // Fallback estable en el mismo dominio
 if (!$image) $image = '/images/logo.png';
 
-$imageAbs = make_absolute_url($image);
+list($imageAbs, $imageMime) = normalize_image_for_og($image);
 $imageSecure = enforce_https($imageAbs);
-$imageMime = guess_mime($imageAbs);
 
 $origin = base_url();
 // Construir una URL bonita con hash para mostrar/canonical (no la usan los bots)
