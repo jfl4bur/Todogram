@@ -8,8 +8,8 @@ class ShareModal {
         this.sharePreviewDescription = document.getElementById('share-preview-description');
         this.shareLinkInput = document.getElementById('share-link-input');
         this.shareLinkButton = document.getElementById('share-link-button');
-        this.currentShareUrl = ''; // URL directa con hashtag (para copiar)
-        this.currentSocialUrl = ''; // URL del template PHP (para redes sociales)
+    this.currentShareUrl = ''; // URL estática con metadatos (para copiar y compartir)
+    this.currentSocialUrl = ''; // Igual que currentShareUrl; mantenemos por compatibilidad
         this.isVisible = false;
 
         // Warn if optional elements are missing but continue: modal can still work with minimal UI
@@ -57,15 +57,17 @@ class ShareModal {
 
         this.isVisible = true;
 
-        // URL directa con hashtag (para copiar y mostrar al usuario)
-        const directUrl = window.location.href;
-        
-        // URL del template PHP (para compartir en redes sociales con metadatos)
-        const socialUrl = item.shareUrl || directUrl;
+        // Determinar URL estática correcta (página con OG meta tags)
+        let staticShareUrl = item.shareUrl || '';
+        if (!staticShareUrl && typeof window.generateShareUrl === 'function') {
+            try { staticShareUrl = window.generateShareUrl(item, window.location.href); } catch (e) { /* ignore */ }
+        }
+        // Fallback absoluto: si algo falla, usar la URL actual (menos ideal para redes sociales)
+        if (!staticShareUrl) staticShareUrl = window.location.href;
 
-        // Guardar ambas URLs
-        this.currentShareUrl = directUrl;  // Para copiar
-        this.currentSocialUrl = socialUrl;  // Para redes sociales
+        // Guardar URL para copiar y compartir (unificadas)
+        this.currentShareUrl = staticShareUrl;
+        this.currentSocialUrl = staticShareUrl;
 
         // Actualizar elementos del modal con datos dinámicos del item (usar guards)
         if (this.sharePreviewImage) {
@@ -80,8 +82,8 @@ class ShareModal {
         if (description.length > maxLength) description = description.substring(0, maxLength) + '...';
         if (this.sharePreviewDescription) this.sharePreviewDescription.textContent = description;
 
-        // Mostrar la URL directa en el input (la que el usuario verá)
-        if (this.shareLinkInput) this.shareLinkInput.value = directUrl;
+    // Mostrar la URL estática en el input (la que el usuario copiará para redes)
+    if (this.shareLinkInput) this.shareLinkInput.value = staticShareUrl;
 
         // Mostrar el modal (si existen elementos)
         if (this.shareModalOverlay) this.shareModalOverlay.style.display = 'flex';
