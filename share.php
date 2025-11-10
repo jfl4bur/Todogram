@@ -1,4 +1,5 @@
 <?php
+header('Content-Type: text/html; charset=UTF-8');
 // share.php: Genera metatags OG/Twitter para compartir un ítem por ID sin ejecutar JS
 // Uso: /share.php?id=123
 
@@ -23,6 +24,50 @@ function get_param($name, $default = '') {
 
 function escape_html($str) {
     return htmlspecialchars((string)$str, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+
+// Detectar bots de redes sociales para evitar redirecciones
+function is_bot() {
+    $ua = strtolower($_SERVER['HTTP_USER_AGENT'] ?? '');
+    if ($ua === '') return false;
+    $bots = [
+        'facebookexternalhit', 'facebot', 'twitterbot', 'slackbot', 'discordbot',
+        'linkedinbot', 'whatsapp', 'telegrambot', 'pinterest', 'skypeuripreview',
+        'googlebot', 'bingbot', 'yandex', 'baiduspider', 'bot', 'preview'
+    ];
+    foreach ($bots as $b) {
+        if (strpos($ua, $b) !== false) return true;
+    }
+    return false;
+}
+
+// Utilidades para URLs de imagen
+function make_absolute_url($url) {
+    if (!$url) return '';
+    if (preg_match('#^https?://#i', $url)) return $url; // ya es absoluta
+    if (strpos($url, '//') === 0) return (is_https() ? 'https:' : 'http:') . $url;
+    $origin = base_url();
+    if ($url[0] !== '/') $url = '/' . $url;
+    return $origin . $url;
+}
+
+function enforce_https($url) {
+    if (strpos($url, 'http://') === 0) return 'https://' . substr($url, 7);
+    if (strpos($url, '//') === 0) return 'https:' . $url;
+    return $url;
+}
+
+function guess_mime($url) {
+    $path = parse_url($url, PHP_URL_PATH) ?? '';
+    $ext = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+    switch ($ext) {
+        case 'jpg':
+        case 'jpeg': return 'image/jpeg';
+        case 'png': return 'image/png';
+        case 'webp': return 'image/webp';
+        case 'gif': return 'image/gif';
+        default: return 'image/jpeg';
+    }
 }
 
 function fetch_data($url) {
@@ -54,17 +99,22 @@ function fetch_data($url) {
 
 $id = get_param('id');
 $titleParam = get_param('title');
+$descParam = get_param('description');
+$imgParam = get_param('image');
 
-$items = fetch_data($DATA_URL);
+$items = [];
 $item = null;
-foreach ($items as $row) {
-    $candidates = [
-        isset($row['ID TMDB']) ? (string)$row['ID TMDB'] : null,
-        isset($row['ID']) ? (string)$row['ID'] : null,
-        isset($row['id']) ? (string)$row['id'] : null,
-    ];
-    foreach ($candidates as $cand) {
-        if ($cand !== null && (string)$cand === (string)$id) { $item = $row; break 2; }
+if ($id !== '') {
+    $items = fetch_data($DATA_URL);
+    foreach ($items as $row) {
+        $candidates = [
+            isset($row['ID TMDB']) ? (string)$row['ID TMDB'] : null,
+            isset($row['ID']) ? (string)$row['ID'] : null,
+            isset($row['id']) ? (string)$row['id'] : null,
+        ];
+        foreach ($candidates as $cand) {
+            if ($cand !== null && (string)$cand === (string)$id) { $item = $row; break 2; }
+        }
     }
 }
 
@@ -76,7 +126,9 @@ if (!$title) {
 }
 
 $description = '';
-if ($item) {
+if ($descParam) {
+    $description = $descParam;
+} elseif ($item) {
     foreach (['Synopsis','Sinopsis','Descripción'] as $k) {
         if (isset($item[$k]) && $item[$k]) { $description = (string)$item[$k]; break; }
     }
@@ -87,7 +139,9 @@ if (mb_strlen($description, 'UTF-8') > 200) {
 }
 
 $image = '';
-if ($item) {
+if ($imgParam) {
+    $image = $imgParam;
+} elseif ($item) {
     if (!empty($item['Portada'])) $image = (string)$item['Portada'];
     elseif (!empty($item['Imagen'])) $image = (string)$item['Imagen'];
     elseif (!empty($item['Poster'])) $image = (string)$item['Poster'];
@@ -96,7 +150,12 @@ if ($item) {
         if ($parts && isset($parts[0])) $image = $parts[0];
     }
 }
-if (!$image) $image = 'https://via.placeholder.com/1200x630?text=Todogram';
+// Fallback estable en el mismo dominio
+if (!$image) $image = '/images/logo.png';
+
+$imageAbs = make_absolute_url($image);
+$imageSecure = enforce_https($imageAbs);
+$imageMime = guess_mime($imageAbs);
 
 $origin = base_url();
 // URL de destino para usuarios (home con hash para abrir details)
@@ -105,28 +164,40 @@ $redirect = $origin . '/#id=' . rawurlencode($id) . '&title=' . rawurlencode($ti
 // URL canónica de esta página de compartir
 $canonical = $origin . $_SERVER['REQUEST_URI'];
 
+// Si no es un bot, redirigir con 302 y no servir HTML (los bots necesitan el HTML con metatags)
+if (!is_bot() && strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'HEAD') {
+    header('Location: ' . $redirect, true, 302);
+    exit;
+}
+
 ?><!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><?php echo escape_html($title); ?> - Todogram</title>
-  <meta name="description" content="<?php echo escape_html($description); ?>" />
+    <meta name="description" content="<?php echo escape_html($description); ?>" />
   <link rel="canonical" href="<?php echo escape_html($canonical); ?>" />
-  <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Todogram" />
+    <meta property="og:locale" content="es_ES" />
+    <meta property="og:type" content="website" />
   <meta property="og:title" content="<?php echo escape_html($title); ?>" />
   <meta property="og:description" content="<?php echo escape_html($description); ?>" />
-  <meta property="og:image" content="<?php echo escape_html($image); ?>" />
+    <meta property="og:image" content="<?php echo escape_html($imageAbs); ?>" />
+    <meta property="og:image:secure_url" content="<?php echo escape_html($imageSecure); ?>" />
+    <meta property="og:image:type" content="<?php echo escape_html($imageMime); ?>" />
+    <meta property="og:image:alt" content="<?php echo escape_html($title); ?>" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
   <meta property="og:url" content="<?php echo escape_html($canonical); ?>" />
   <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@todogram" />
   <meta name="twitter:title" content="<?php echo escape_html($title); ?>" />
   <meta name="twitter:description" content="<?php echo escape_html($description); ?>" />
-  <meta name="twitter:image" content="<?php echo escape_html($image); ?>" />
-  <meta name="robots" content="noindex" />
-  <meta http-equiv="refresh" content="1;url=<?php echo escape_html($redirect); ?>" />
-  <script>setTimeout(function(){ location.replace(<?php echo json_encode($redirect); ?>); }, 1000);</script>
+    <meta name="twitter:image" content="<?php echo escape_html($imageAbs); ?>" />
+    <meta name="twitter:image:alt" content="<?php echo escape_html($title); ?>" />
 </head>
 <body>
-  <p>Redirigiendo a <a href="<?php echo escape_html($redirect); ?>"><?php echo escape_html($redirect); ?></a>…</p>
+    <p>Vista previa generada para compartición. Si estás viendo esta página como usuario, haz clic aquí para ir a la app: <a href="<?php echo escape_html($redirect); ?>"><?php echo escape_html($redirect); ?></a>.</p>
 </body>
 </html>
