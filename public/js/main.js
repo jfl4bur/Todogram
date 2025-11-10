@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Función para generar URL de compartir
         window.generateShareUrl = function(item, originalUrl) {
-            const staticBaseUrl = 'https://jfl4bur.github.io/Todogram/public/template/movie-template.html';
+            const staticBaseUrl = 'https://todogram.free.nf/public/template/movie-template.php';
             return `${staticBaseUrl}?title=${encodeURIComponent(item.title)}&description=${encodeURIComponent(item.description || 'Explora esta película en Todogram.')}&image=${encodeURIComponent(item.posterUrl || 'https://via.placeholder.com/194x271')}&originalUrl=${encodeURIComponent(originalUrl)}&hash=${encodeURIComponent(window.location.hash)}`;
         };
 
@@ -142,9 +142,10 @@ document.addEventListener('DOMContentLoaded', function () {
             if (e.target.closest('#share-button')) {
                 const item = window.activeItem;
                 if (item && window.shareModal) {
-                    // Usar directamente la URL actual con el hash original del modal de detalles
-                    const shareUrl = window.location.href;
-                    window.shareModal.show({ ...item, shareUrl }); // Pasar shareUrl al modal
+                    // Generar URL del template PHP con metadatos para redes sociales
+                    const currentUrl = window.location.href;
+                    const shareUrl = window.generateShareUrl(item, currentUrl);
+                    window.shareModal.show({ ...item, shareUrl });
                 } else {
                     console.error('Item o shareModal no definidos:', { item, shareModal: window.shareModal });
                 }

@@ -13,8 +13,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (window.shareModal && typeof window.shareModal.show === 'function') {
             try {
-                // Usar directamente la URL actual con el hash original
-                const shareUrl = window.location.href;
+                const currentUrl = window.location.href;
+                let shareUrl = null;
+                try { shareUrl = (typeof window.generateShareUrl === 'function') ? window.generateShareUrl(item, currentUrl) : null; } catch(e) { shareUrl = null; }
                 window.shareModal.show({ ...item, shareUrl });
                 return true;
             } catch (err) {
@@ -679,8 +680,9 @@ class DetailsModal {
                             if (!ok) console.warn('details-modal: openShareModal returned false');
                         } else {
                             if (!window.shareModal && typeof ShareModal === 'function') window.shareModal = new ShareModal();
-                            // Usar directamente la URL actual con el hash original
-                            const shareUrl = window.location.href;
+                            const currentUrl = window.location.href;
+                            let shareUrl = null;
+                            try { shareUrl = (typeof window.generateShareUrl === 'function') ? window.generateShareUrl(shareItem, currentUrl) : null; } catch(err) { shareUrl = null; }
                             if (window.shareModal && typeof window.shareModal.show === 'function') {
                                 window.shareModal.show({ ...shareItem, shareUrl });
                             } else {

@@ -561,8 +561,9 @@ class HoverModal {
                 } else {
                     // fallback: ensure shareModal exists and show
                     if (!window.shareModal && typeof ShareModal === 'function') window.shareModal = new ShareModal();
-                    // Usar directamente la URL actual con el hash original
-                    const shareUrl = window.location.href;
+                    const currentUrl = window.location.href;
+                    let shareUrl = null;
+                    try { shareUrl = (typeof window.generateShareUrl === 'function') ? window.generateShareUrl(item, currentUrl) : null; } catch(e) { shareUrl = null; }
                     if (window.shareModal) window.shareModal.show({ ...item, shareUrl });
                 }
             } catch (err) { console.warn('hover-modal: share open failed', err); }
