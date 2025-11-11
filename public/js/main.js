@@ -139,11 +139,13 @@ document.addEventListener('DOMContentLoaded', function () {
             const categoria = item.categoria || item.category || item['Categoría'] || '';
             const episodioTitulo = item.tituloEpisodio || item.episodeTitle || item['Título episodio'] || '';
 
-            // Reutilizar el mismo algoritmo del extractor: slug minúsculas, solo a-z0-9
-            const slug = (title || 'todogram')
-                .toLowerCase()
-                .replace(/[^a-z0-9]+/g, '-')
-                .replace(/^-|-$/g, '');
+                // Reutilizar el mismo algoritmo del extractor: slug minúsculas, solo a-z0-9
+                const slug = (title || 'todogram')
+                    .normalize('NFD')
+                    .replace(/[\u0300-\u036f]/g, '')
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-|-$/g, '');
 
             // Si es episodio, combinar para mejor semántica (pero el filename usa solo título base)
             const categorySlug = (categoria || 'general')
