@@ -28,8 +28,8 @@ backups
 
 # Ignorar carpetas
 UTILES/
-# Se permite admin para incluir extractor y auto-push en el repositorio
-# admin/
+# Admin (extractor y auto-push) solo local, NO subir a GitHub
+admin/
 
 #  SECRET_KEYS
 .env
