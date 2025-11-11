@@ -412,7 +412,8 @@ class DetailsModal {
         
     const trailerUrl = item.trailerUrl || (tmdbData?.trailer_url || '');
     // Mostrar "Ver Película" solo si hay iframe (Video iframe o Video iframe 1)
-    const preferredVideo = item.videoIframe || item.videoIframe1 || item['Video iframe'] || item['Video iframe 1'] || item.videoUrl || '';
+    // Solo mostrar botón si existe iframe explícito (Video iframe / Video iframe 1).
+    const preferredVideo = item.videoIframe || item.videoIframe1 || item['Video iframe'] || item['Video iframe 1'] || item['Video iframe1'] || '';
         
         let metaItems = [];
         
