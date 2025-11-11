@@ -871,7 +871,14 @@
                 .map((item, index) => ({ ...item, originalIndex: index })) // Guardar el índice original
                 .filter(item => typeof item['Slider'] === 'string' && item['Slider'].trim() !== '')
                 .map(item => ({
-                    id: item.originalIndex.toString(), // Usar el índice original como ID
+                    // Usar ID TMDB numérico como ID canónico si existe; fallback: índice original
+                    id: (() => {
+                        const fromUrl = (item['TMDB'] || '').match(/(movie|tv)\/(\d+)/)?.[2] || '';
+                        const fromField = (item['ID TMDB'] || '').toString().trim();
+                        if (/^\d+$/.test(fromUrl)) return fromUrl;
+                        if (/^\d+$/.test(fromField)) return fromField;
+                        return item.originalIndex.toString();
+                    })(),
                     title: item['Título'] || 'Sin título',
                     description: item['Synopsis'] || 'Descripción no disponible',
                     posterUrl: item['Portada'] || '',
@@ -885,7 +892,13 @@
                     cast: item['Reparto principal'] || '',
                     synopsis: item['Synopsis'] || '',
                     tmdbUrl: item['TMDB'] || '',
-                    tmdbId: item['ID TMDB'] || '',
+                    tmdbId: (() => {
+                        const fromUrl = (item['TMDB'] || '').match(/(movie|tv)\/(\d+)/)?.[2] || '';
+                        const fromField = (item['ID TMDB'] || '').toString().trim();
+                        if (/^\d+$/.test(fromUrl)) return fromUrl;
+                        if (/^\d+$/.test(fromField)) return fromField;
+                        return '';
+                    })(),
                     trailerUrl: item['Trailer'] || '',
                     videoUrl: item['Video iframe'] || item['Video iframe 1'] || item['Ver Película'] || '',
                     originalTitle: item['Título original'] || '',
@@ -1067,9 +1080,37 @@
             });
 
             // Click handler
-            slideDiv.addEventListener('click', (e) => {
-                handleSlideClick(e, movie, slideDiv);
-            });
+                    slideDiv.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        try {
+                            // Priorizar ID TMDB numérico si existe para un hash consistente
+                            const idCandidates = [];
+                            if (movie.tmdbId) idCandidates.push(String(movie.tmdbId));
+                            if (movie['ID TMDB']) idCandidates.push(String(movie['ID TMDB']));
+                            if (movie.tmdbUrl || movie['TMDB']) {
+                                const m = String(movie.tmdbUrl || movie['TMDB']).match(/(movie|tv)\/(\d+)/);
+                                if (m && m[2]) idCandidates.push(m[2]);
+                            }
+                            if (movie.id) idCandidates.push(String(movie.id));
+                            const numericId = idCandidates.find(v => /^\d+$/.test(v)) || '';
+                            const finalId = numericId || (idCandidates[0] || movie.id || '');
+
+                            const titleSlug = (movie.title || '')
+                              .toLowerCase()
+                              .replace(/[^a-z0-9]+/g, '-')
+                              .replace(/^-|-$/g, '');
+
+                            const newHash = `#id=${finalId}&title=${titleSlug}`;
+                            if (window.location.hash !== newHash) {
+                                window.location.hash = newHash;
+                            }
+                        } catch (err) {
+                            console.warn('Slider: error construyendo hash consistente', err);
+                        }
+                        // Abrir modal con datos originales
+                        handleSlideClick(e, movie, slideDiv);
+                    });
 
             sliderWrapper.appendChild(slideDiv);
         });
