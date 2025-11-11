@@ -827,11 +827,42 @@ class DetailsModal {
             .replace(/^-|-$/g, '');
     }
 
+    getShareId(item, fallback = '') {
+        if (!item) return fallback ? String(fallback) : '';
+        if (typeof window.getItemShareId === 'function') {
+            const resolved = window.getItemShareId(item, fallback);
+            if (resolved != null && String(resolved).trim()) return String(resolved).trim();
+        }
+        const candidates = [item.shareId, item.tmdbId, item.id_tmdb, item.tmdb_id, item['ID TMDB']];
+        for (const raw of candidates) {
+            if (raw == null) continue;
+            const value = String(raw).trim();
+            if (value) return value;
+        }
+        if (typeof item.tmdbUrl === 'string') {
+            const match = item.tmdbUrl.match(/(\d+)/);
+            if (match && match[1]) return match[1];
+        }
+        if (fallback != null && String(fallback).trim()) return String(fallback).trim();
+        if (item.id != null) return String(item.id);
+        return '';
+    }
+
+    getShareSlug(item) {
+        if (!item) return '';
+        const source = item.title || item['Título'] || item['Título episodio'] || '';
+        const slug = typeof source === 'string' ? this.normalizeText(source) : '';
+        if (slug) return slug;
+        if (item.title) return this.normalizeText(String(item.title));
+        return '';
+    }
+
     updateUrlForModal(item) {
         if (!item || item.id === '0') return;
-        const normalizedTitle = this.normalizeText(item.title);
+        const shareId = this.getShareId(item, item.id || '');
+        const normalizedTitle = this.getShareSlug(item) || this.normalizeText(item.title || '');
         // Construir nuevo hash con id y title pero preservar parámetros adicionales existentes (ej. ep)
-        const newHashBase = `id=${item.id}&title=${normalizedTitle}`;
+        const newHashBase = `id=${shareId}&title=${normalizedTitle}`;
         const existingHash = window.location.hash.substring(1);
         let extras = '';
         if (existingHash) {
@@ -899,7 +930,9 @@ class DetailsModal {
         const title = `Mira ${item.title} en nuestra plataforma`;
         const description = item.description || 'Una gran película que no te puedes perder';
         const imageUrl = item.posterUrl || 'https://via.placeholder.com/194x271';
-        const url = `${window.location.origin}${window.location.pathname}#id=${item.id}&title=${this.normalizeText(item.title)}`;
+    const shareId = this.getShareId(item, item.id || '');
+    const slug = this.getShareSlug(item) || this.normalizeText(item.title || '');
+    const url = `${window.location.origin}${window.location.pathname}#id=${shareId}&title=${slug}`;
         
         // Verificar que los elementos meta existan antes de intentar actualizarlos
         const ogTitle = document.getElementById('og-title');
@@ -1189,8 +1222,8 @@ class DetailsModal {
                         e.stopPropagation();
                         const epHash = titleEl.getAttribute('data-ep-hash') || '';
                         const currentItem = window.activeItem || outerItem;
-                        const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
-                        const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
+                        const baseId = this.getShareId(currentItem, currentItem?.id || '');
+                        const normalized = currentItem ? (this.getShareSlug(currentItem) || this.normalizeText(currentItem.title || currentItem['Título'] || '')) : '';
                         const newHash = this.buildModalHash(baseId, normalized, epHash ? {ep: epHash.replace(/^ep=/,'')} : {});
                         if (window.location.hash.substring(1) !== newHash) {
                             window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
@@ -1315,8 +1348,8 @@ class DetailsModal {
                     try {
                         const outerItem = item;
                         const currentItem = window.activeItem || outerItem;
-                        const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
-                        const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
+                        const baseId = this.getShareId(currentItem, currentItem?.id || '');
+                        const normalized = currentItem ? (this.getShareSlug(currentItem) || this.normalizeText(currentItem.title || currentItem['Título'] || '')) : '';
                         const epHash = card ? (card.getAttribute('data-ep-hash') || '') : '';
                         const newHash = this.buildModalHash(baseId, normalized, epHash ? {ep: epHash.replace(/^ep=/,'')} : {});
                         if (window.location.hash.substring(1) !== newHash) {
@@ -1368,8 +1401,8 @@ class DetailsModal {
                     try {
                         const outerItem = item;
                         const currentItem = window.activeItem || outerItem;
-                        const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
-                        const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
+                        const baseId = this.getShareId(currentItem, currentItem?.id || '');
+                        const normalized = currentItem ? (this.getShareSlug(currentItem) || this.normalizeText(currentItem.title || currentItem['Título'] || '')) : '';
                         const epHash = card.getAttribute('data-ep-hash') || '';
                         const newHash = this.buildModalHash(baseId, normalized, epHash ? {ep: epHash.replace(/^ep=/,'')} : {});
                         if (window.location.hash.substring(1) !== newHash) {

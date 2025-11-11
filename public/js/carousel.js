@@ -1,3 +1,57 @@
+// Utilidades compartidas para hashes y slugs de páginas estáticas
+const SHARE_ID_REGEX = /(\d+)/;
+
+function computeShareId(item, fallback) {
+    if (!item) return fallback != null ? String(fallback) : '';
+    const candidates = [
+        item.shareId,
+        item.tmdbId,
+        item.id_tmdb,
+        item.tmdb_id,
+        item['ID TMDB']
+    ];
+    for (const raw of candidates) {
+        if (raw == null) continue;
+        const value = String(raw).trim();
+        if (value) return value;
+    }
+    if (typeof item.tmdbUrl === 'string') {
+        const match = item.tmdbUrl.match(SHARE_ID_REGEX);
+        if (match && match[1]) return match[1];
+    }
+    if (fallback != null) return String(fallback);
+    if (item.id != null) return String(item.id);
+    return '';
+}
+
+function normalizeShareSlug(text) {
+    if (!text) return '';
+    try {
+        return text
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
+    } catch (err) {
+        return String(text)
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/-+/g, '-')
+            .replace(/^-|-$/g, '');
+    }
+}
+
+if (typeof window !== 'undefined') {
+    if (typeof window.getItemShareId !== 'function') {
+        window.getItemShareId = (item, fallback) => computeShareId(item, fallback);
+    }
+    if (typeof window.getShareSlug !== 'function') {
+        window.getShareSlug = (value) => normalizeShareSlug(value);
+    }
+}
+
 // Carrusel de Episodios Series (solo episodios con Título episodio completo)
 class EpisodiosSeriesCarousel {
     // ...existing code...
@@ -23,9 +77,13 @@ class EpisodiosSeriesCarousel {
             }
         };
         const decodedTitle = decodeURIComponent(title);
-        const item = this.episodiosData.find(ep => String(ep.id) === id && ep.title && normalizeText(ep.title) === decodedTitle);
+        const item = this.episodiosData.find(ep => {
+            const shareId = computeShareId(ep, ep.id);
+            return String(shareId) === id && ep.title && normalizeText(ep.title) === decodedTitle;
+        });
         if (!item) return; // Si no es un episodio, no hacer nada
-        const div = this.wrapper.querySelector(`[data-item-id="${CSS.escape(item.id)}"]`);
+        const shareId = computeShareId(item, item.id);
+        const div = this.wrapper.querySelector(`[data-share-id="${CSS.escape(String(shareId))}"]`) || this.wrapper.querySelector(`[data-item-id="${CSS.escape(item.id)}"]`);
         if (div) {
             div.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
             if (window.detailsModal && typeof window.detailsModal.show === 'function') {
@@ -129,8 +187,12 @@ class EpisodiosSeriesCarousel {
             let epIndex = 0;
             for (const item of data) {
                 if (item && typeof item === 'object' && item['Categoría'] === 'Series' && item['Título episodio'] && item['Título episodio'].trim() !== '') {
+                    const fallbackId = `ep_${epIndex}`;
+                    const shareId = computeShareId(item, fallbackId);
                     this.episodiosData.push({
-                        id: `ep_${epIndex}`,
+                        id: fallbackId,
+                        shareId,
+                        "ID TMDB": computeShareId(item, ''),
                         title: item['Título episodio'] || 'Sin título',
                         serie: item['Título'] || '',
                         description: item['Synopsis'] || 'Descripción no disponible',
@@ -159,6 +221,8 @@ class EpisodiosSeriesCarousel {
                 this.episodiosData = [
                     {
                         id: "ep_12345",
+                        shareId: "ep_12345",
+                        "ID TMDB": '',
                         title: "Ejemplo de episodio",
                         serie: "Serie de ejemplo",
                         description: "Este es un episodio de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
@@ -194,6 +258,8 @@ class EpisodiosSeriesCarousel {
             this.episodiosData = [
                 {
                     id: "ep_12345",
+                    shareId: "ep_12345",
+                    "ID TMDB": '',
                     title: "Ejemplo de episodio",
                     serie: "Serie de ejemplo",
                     description: "Este es un episodio de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
@@ -250,9 +316,11 @@ class EpisodiosSeriesCarousel {
         const gap = 8; // Un poco más de espacio entre ítems
         for (let i = 0; i < this.episodiosData.length; i++) {
             const item = this.episodiosData[i];
+            const shareId = computeShareId(item, item.id);
             const div = document.createElement("div");
             div.className = "custom-carousel-item episodios-series-item";
             div.dataset.itemId = item.id;
+            div.dataset.shareId = shareId;
             const metaInfo = [];
             if (item.serie) metaInfo.push(`<span>${item.serie}</span>`);
             if (item.temporada) metaInfo.push(`<span>T${item.temporada}</span>`);
@@ -341,7 +409,8 @@ class EpisodiosSeriesCarousel {
                     clearTimeout(this.hoverTimeouts[itemId].modal);
                 }
                 // Hash persistente igual que Series/Animes
-                const hash = `id=${encodeURIComponent(item.id)}&title=${encodeURIComponent(item.title)}`;
+                const slug = normalizeShareSlug(item.title);
+                const hash = `id=${encodeURIComponent(shareId)}&title=${encodeURIComponent(slug)}`;
                 if (window.location.hash !== `#${hash}`) {
                     history.pushState(null, '', `#${hash}`);
                 }

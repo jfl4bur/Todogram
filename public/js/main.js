@@ -63,88 +63,147 @@ document.addEventListener('DOMContentLoaded', function () {
         
         const carousel = new Carousel();
         
-        // Inicializar el carrusel de series inmediatamente
-            console.log("Main: Inicializando carrusel de series...");
-            // Evitar instanciar dos veces si ya fue creado por otro módulo
-            if (!window.seriesCarousel) {
-                const seriesCarousel = new SeriesCarousel();
-                window.seriesCarousel = seriesCarousel;
-            } else {
-                console.log('Main: seriesCarousel ya existe — no se crea otra instancia');
+                const escapeSelector = (value) => {
+                    if (value == null) return '';
+                    const str = String(value);
+                    if (window.CSS && typeof window.CSS.escape === 'function') {
+                        try { return window.CSS.escape(str); } catch (err) { return str.replace(/"/g, '\\"'); }
+                    }
+                    return str.replace(/"/g, '\\"');
+                };
+
+                const getShareId = (candidate) => {
+                    if (!candidate || typeof candidate !== 'object') return '';
+                    if (typeof window.getItemShareId === 'function') {
+                        return String(window.getItemShareId(candidate, candidate.id)).trim();
+                    }
+                    const tmdb = candidate['ID TMDB'] || candidate.tmdbId || candidate.id_tmdb || candidate.tmdb_id;
+                    if (tmdb && String(tmdb).trim()) return String(tmdb).trim();
+                    if (typeof candidate.tmdbUrl === 'string') {
+                        const match = candidate.tmdbUrl.match(/(\d+)/);
+                        if (match && match[1]) return match[1];
+                    }
+                    if (candidate.id != null) return String(candidate.id);
+                    return '';
+                };
+
+                const matchesShareId = (candidate) => {
+                    if (!candidate) return false;
+                    const shareId = getShareId(candidate);
+                    if (shareId && shareId === urlParams.id) return true;
+                    if (candidate.id != null && String(candidate.id) === urlParams.id) return true;
+                    return false;
+                };
+
+                const locateElementForItem = (candidate) => {
+                    if (!candidate) return null;
+                    const shareId = getShareId(candidate);
+                    if (shareId) {
+                        const shareEscaped = escapeSelector(shareId);
+                        const byShareId = document.querySelector(`.custom-carousel-item[data-share-id="${shareEscaped}"]`);
+                        if (byShareId) return byShareId;
+                    }
+                    if (candidate.id != null) {
+                        const fallback = escapeSelector(candidate.id);
+                        const byItemId = document.querySelector(`.custom-carousel-item[data-item-id="${fallback}"]`);
+                        if (byItemId) return byItemId;
+                    }
+                    return null;
+                };
+
+                // Verificar que los carruseles tengan datos
+                if (!carousel.moviesData || carousel.moviesData.length === 0) {
+                    console.log('Datos del carrusel de películas no disponibles, esperando...');
+                    if (retryCount < maxRetries) {
+                        setTimeout(() => processUrlParams(retryCount + 1, maxRetries), 200);
+                    }
+                    return;
+                }
+
+                let item = carousel.moviesData.find(matchesShareId);
+                let itemElement = locateElementForItem(item);
+                let itemSource = 'peliculas';
+
+                if (!item && window.seriesCarousel && Array.isArray(window.seriesCarousel.seriesData) && window.seriesCarousel.seriesData.length > 0) {
+                    item = window.seriesCarousel.seriesData.find(matchesShareId);
+                    if (item) {
+                        itemElement = locateElementForItem(item);
+                        itemSource = 'series';
+                        console.log('Serie encontrada en carrusel de series:', item);
+                        console.log('Elemento DOM encontrado para serie:', itemElement);
+                    }
+                }
+
+                if (!item && window.documentalesCarousel && Array.isArray(window.documentalesCarousel.docuData) && window.documentalesCarousel.docuData.length > 0) {
+                    item = window.documentalesCarousel.docuData.find(matchesShareId);
+                    if (item) {
+                        itemElement = locateElementForItem(item);
+                        itemSource = 'documentales';
+                        console.log('Documental encontrado en carrusel de documentales:', item);
+                        console.log('Elemento DOM encontrado para documental:', itemElement);
+                    }
+                }
+
+                if (!item && window.animesCarousel && Array.isArray(window.animesCarousel.animeData) && window.animesCarousel.animeData.length > 0) {
+                    item = window.animesCarousel.animeData.find(matchesShareId);
+                    if (item) {
+                        itemElement = locateElementForItem(item);
+                        itemSource = 'animes';
+                        console.log('Anime encontrado en carrusel de animes:', item);
+                        console.log('Elemento DOM encontrado para anime:', itemElement);
+                    }
+                }
+
+                if (!item && window.episodiosCarousel && Array.isArray(window.episodiosCarousel.episodiosData) && window.episodiosCarousel.episodiosData.length > 0) {
+                    item = window.episodiosCarousel.episodiosData.find(matchesShareId);
+                    if (item) {
+                        itemElement = locateElementForItem(item);
+                        itemSource = 'episodios';
+                        console.log('Episodio encontrado en carrusel de episodios:', item);
+                        console.log('Elemento DOM encontrado para episodio:', itemElement);
+                    }
+                }
+
+                if (!item && window.episodiosAnimesCarousel && Array.isArray(window.episodiosAnimesCarousel.episodiosData) && window.episodiosAnimesCarousel.episodiosData.length > 0) {
+                    item = window.episodiosAnimesCarousel.episodiosData.find(matchesShareId);
+                    if (item) {
+                        itemElement = locateElementForItem(item);
+                        itemSource = 'episodios_animes';
+                        console.log('Episodio (anime) encontrado en carrusel de episodios animes:', item);
+                        console.log('Elemento DOM encontrado para episodio (anime):', itemElement);
+                    }
+                }
+
+                if (!item && window.episodiosDocumentalesCarousel && Array.isArray(window.episodiosDocumentalesCarousel.episodiosData) && window.episodiosDocumentalesCarousel.episodiosData.length > 0) {
+                    item = window.episodiosDocumentalesCarousel.episodiosData.find(matchesShareId);
+                    if (item) {
+                        itemElement = locateElementForItem(item);
+                        itemSource = 'episodios_documentales';
+                        console.log('Episodio (documental) encontrado en carrusel de episodios documentales:', item);
+                        console.log('Elemento DOM encontrado para episodio (documental):', itemElement);
+                    }
+                }
+
+                if (!item && window.sliderIndependent) {
+                    const sliderData = window.sliderIndependent.getSlidesData();
+                    item = sliderData.find(matchesShareId);
+                    if (item) {
+                        itemElement = document.querySelector('.slider-slide[data-index]');
+                        itemSource = 'slider';
+                        console.log('Película encontrada en slider independiente:', item);
+                    }
+                }
+                    .replace(/^-|-$/g, '');
+            };
+
+            const shareId = getShareId(item, item.id || '');
+            const slugSource = item.title || item['Título'] || item['Título episodio'] || '';
+            const titleSlug = getSlug(slugSource) || getSlug(item.title || '') || 'todogram';
+            if (!shareId) {
+                return originalUrl || window.location.href;
             }
 
-        // Inicializar el carrusel de episodios (Episodios Series)
-            console.log("Main: Inicializando carrusel de episodios...");
-            try {
-                const episodiosCarousel = new EpisodiosSeriesCarousel();
-                window.episodiosCarousel = episodiosCarousel;
-            } catch (e) {
-                console.error('Error inicializando EpisodiosSeriesCarousel:', e);
-            }
-            // Inicializar el carrusel de episodios para Animes
-            console.log("Main: Inicializando carrusel de episodios (Animes)...");
-            try {
-                const episodiosAnimesCarousel = new EpisodiosAnimesCarousel();
-                window.episodiosAnimesCarousel = episodiosAnimesCarousel;
-            } catch (e) {
-                console.error('Error inicializando EpisodiosAnimesCarousel:', e);
-            }
-            // Inicializar el carrusel de episodios para Documentales
-            console.log("Main: Inicializando carrusel de episodios (Documentales)...");
-            try {
-                const episodiosDocumentalesCarousel = new EpisodiosDocumentalesCarousel();
-                window.episodiosDocumentalesCarousel = episodiosDocumentalesCarousel;
-            } catch (e) {
-                console.error('Error inicializando EpisodiosDocumentalesCarousel:', e);
-            }
-        
-        // Verificar que el carrusel de series se inicializó correctamente
-        setTimeout(() => {
-            console.log("Main: Verificando carrusel de series después de 1 segundo...");
-            console.log("Main: seriesCarousel:", !!window.seriesCarousel);
-            console.log("Main: Elementos del carrusel de series:", {
-                wrapper: !!window.seriesCarousel?.wrapper,
-                carouselPrev: !!window.seriesCarousel?.carouselPrev,
-                carouselNext: !!window.seriesCarousel?.carouselNext,
-                carouselNav: !!window.seriesCarousel?.carouselNav
-            });
-        }, 1000);
-        
-        const hoverModal = new HoverModal();
-        const detailsModal = new DetailsModal();
-        const videoModal = new VideoModal();
-        const shareModal = new ShareModal();
-
-        // El skeleton del slider se maneja internamente en slider-independent.js
-        // No necesitamos configurarlo aquí ya que se inicializa automáticamente
-
-        window.carousel = carousel;
-        window.hoverModal = hoverModal;
-        window.detailsModal = detailsModal;
-        window.videoModal = videoModal;
-        window.shareModal = shareModal;
-        window.isModalOpen = false;
-        window.isDetailsModalOpen = false;
-        window.activeItem = null;
-        window.hoverModalItem = null;
-
-                // El slider independiente se inicializa automáticamente
-        // No necesitamos delays ni polling
-
-        // Función para generar URL de compartir
-        window.generateShareUrl = function(item, originalUrl) {
-            // Obtener ID y título para slug
-            const id = item.id || '';
-            const title = item.title || '';
-            // Alinear el slug con las páginas generadas por el extractor (integrado en admin/extractor.js)
-            // Importante: no quitar acentos; se reemplazan por '-'
-            const titleSlug = title
-                .toLowerCase()
-                .replace(/[^a-z0-9]+/g, '-')
-                .replace(/^-|-$/g, '');
-
-            // Ruta real publicada en GitHub Pages (incluye /public/)
-            return `https://jfl4bur.github.io/Todogram/public/share/${id}-${titleSlug}.html`;
+            return `https://jfl4bur.github.io/Todogram/public/share/${shareId}-${titleSlug}.html`;
         };
 
         // Evento para el botón "Share" dentro del modal de detalles
