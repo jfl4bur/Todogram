@@ -35,3 +35,5 @@ admin/
 
 # Ignorar los scripts de sincronización locales
 GEMINI.md
+package.json
+package-lock.json
