@@ -15,7 +15,7 @@ dayjs.extend(relativeTime);
 // 🎨 CONFIGURACIÓN
 const TARGET_FILE = '../public/data.json';
 const SHARE_DIR = '../public/share';
-const COMMIT_MESSAGE = '📚 Auto-commit: Actualización data.json [skip ci]';
+const COMMIT_MESSAGE = '📚 Auto-commit: Share y Actualización data.json [skip ci]';
 const WATCH_INTERVAL = 3000;
 const BRANCH = 'main';
 const MAX_RETRIES = 3;

@@ -28,7 +28,6 @@ backups
 
 # Ignorar carpetas
 UTILES/
-# Admin (extractor y auto-push) solo local, NO subir a GitHub
 admin/
 
 #  SECRET_KEYS
