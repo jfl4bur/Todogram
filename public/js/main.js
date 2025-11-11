@@ -131,35 +131,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 // El slider independiente se inicializa automáticamente
         // No necesitamos delays ni polling
 
-        // Función para generar URL de compartir (modo legacy para NO romper hashtags existentes)
-        // Películas: ID-titulo.html (si hay ID) o peliculas_0-titulo.html
-        // Series/Animes/Documentales: prefix_0-titulo.html
-        // Episodios: mismo prefijo que su categoría (sin tX/eY para respetar formato legado)
-        window.generateShareUrl = function(item) {
-            const categoriaRaw = item.categoria || item.category || item['Categoría'] || '';
-            const categoria = (categoriaRaw || '').toLowerCase();
-            const title = item.title || item.titulo || item['Título'] || '';
-            const toSlug = (txt) => String(txt || 'todogram')
-                .normalize('NFD')
-                .replace(/[\u0300-\u036f]/g, '')
+        // Función para generar URL de compartir
+        window.generateShareUrl = function(item, originalUrl) {
+            // Obtener ID y título para slug
+            const id = item.id || '';
+            const title = item.title || '';
+            // Alinear el slug con las páginas generadas por el extractor (integrado en admin/extractor.js)
+            // Importante: no quitar acentos; se reemplazan por '-'
+            const titleSlug = title
                 .toLowerCase()
                 .replace(/[^a-z0-9]+/g, '-')
                 .replace(/^-|-$/g, '');
-            const titleSlug = toSlug(title);
-            const tmdbId = item.id || item['ID TMDB'] || '';
 
-            if (categoria.includes('pelicula') || categoria === 'películas' || categoria === 'peliculas') {
-                if (tmdbId) return `https://jfl4bur.github.io/Todogram/public/share/${tmdbId}-${titleSlug}.html`;
-                return `https://jfl4bur.github.io/Todogram/public/share/peliculas_0-${titleSlug}.html`;
-            }
-
-            let prefix = 'general_0';
-            if (categoria.includes('serie')) prefix = 'series_0';
-            else if (categoria.includes('anime')) prefix = 'animes_0';
-            else if (categoria.includes('documental')) prefix = 'documentales_0';
-            else if (categoria.includes('episodio')) prefix = 'episodios_0';
-
-            return `https://jfl4bur.github.io/Todogram/public/share/${prefix}-${titleSlug}.html`;
+            // Ruta real publicada en GitHub Pages (incluye /public/)
+            return `https://jfl4bur.github.io/Todogram/public/share/${id}-${titleSlug}.html`;
         };
 
         // Evento para el botón "Share" dentro del modal de detalles
