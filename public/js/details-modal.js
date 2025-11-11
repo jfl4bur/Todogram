@@ -411,7 +411,9 @@ class DetailsModal {
         };
         
     const trailerUrl = item.trailerUrl || (tmdbData?.trailer_url || '');
-    const preferredVideo = item.videoUrl || item.videoIframe || item.videoIframe1 || item['Video iframe'] || item['Video iframe 1'] || '';
+    // Mostrar "Ver Película" SOLO si existen los campos 'Video iframe' o 'Video iframe 1'
+    // Considerar también alias normalizados (videoIframe, videoIframe1)
+    const preferredVideo = item['Video iframe'] || item['Video iframe 1'] || item.videoIframe || item.videoIframe1 || '';
         
         let metaItems = [];
         

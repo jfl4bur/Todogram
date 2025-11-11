@@ -81,8 +81,9 @@ class HoverModal {
         };
         
     const trailerUrl = item.trailerUrl;
-    // Accept iframe-based video links too (many records use 'Video iframe')
-    const preferredVideo = item.videoUrl || item.videoIframe || item.videoIframe1 || item.videoIframe1 || item.videoIframe;
+    // Mostrar "Ver Película" SOLO si existen los campos 'Video iframe' o 'Video iframe 1'
+    // Considerar también alias normalizados (videoIframe, videoIframe1)
+    const preferredVideo = item['Video iframe'] || item['Video iframe 1'] || item.videoIframe || item.videoIframe1 || '';
         
         let metaItems = [];
         
