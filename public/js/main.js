@@ -131,32 +131,35 @@ document.addEventListener('DOMContentLoaded', function () {
                 // El slider independiente se inicializa automáticamente
         // No necesitamos delays ni polling
 
-        // Función para generar URL de compartir
-        window.generateShareUrl = function(item, originalUrl) {
-            // ID puede venir como string o number
-            const rawId = item.id != null ? String(item.id) : '';
-            const title = item.title || item.titulo || '';
-            const categoria = item.categoria || item.category || item['Categoría'] || '';
-            const episodioTitulo = item.tituloEpisodio || item.episodeTitle || item['Título episodio'] || '';
-
-                // Reutilizar el mismo algoritmo del extractor: slug minúsculas, solo a-z0-9
-                const slug = (title || 'todogram')
-                    .normalize('NFD')
-                    .replace(/[\u0300-\u036f]/g, '')
-                    .toLowerCase()
-                    .replace(/[^a-z0-9]+/g, '-')
-                    .replace(/^-|-$/g, '');
-
-            // Si es episodio, combinar para mejor semántica (pero el filename usa solo título base)
-            const categorySlug = (categoria || 'general')
+        // Función para generar URL de compartir (modo legacy para NO romper hashtags existentes)
+        // Películas: ID-titulo.html (si hay ID) o peliculas_0-titulo.html
+        // Series/Animes/Documentales: prefix_0-titulo.html
+        // Episodios: mismo prefijo que su categoría (sin tX/eY para respetar formato legado)
+        window.generateShareUrl = function(item) {
+            const categoriaRaw = item.categoria || item.category || item['Categoría'] || '';
+            const categoria = (categoriaRaw || '').toLowerCase();
+            const title = item.title || item.titulo || item['Título'] || '';
+            const toSlug = (txt) => String(txt || 'todogram')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
                 .toLowerCase()
                 .replace(/[^a-z0-9]+/g, '-')
                 .replace(/^-|-$/g, '');
+            const titleSlug = toSlug(title);
+            const tmdbId = item.id || item['ID TMDB'] || '';
 
-            // Nombre de archivo: si hay id => id-slug.html, si no slug.html
-            const filename = rawId ? `${rawId}-${slug}.html` : `${slug}.html`;
+            if (categoria.includes('pelicula') || categoria === 'películas' || categoria === 'peliculas') {
+                if (tmdbId) return `https://jfl4bur.github.io/Todogram/public/share/${tmdbId}-${titleSlug}.html`;
+                return `https://jfl4bur.github.io/Todogram/public/share/peliculas_0-${titleSlug}.html`;
+            }
 
-            return `https://jfl4bur.github.io/Todogram/public/share/${filename}`;
+            let prefix = 'general_0';
+            if (categoria.includes('serie')) prefix = 'series_0';
+            else if (categoria.includes('anime')) prefix = 'animes_0';
+            else if (categoria.includes('documental')) prefix = 'documentales_0';
+            else if (categoria.includes('episodio')) prefix = 'episodios_0';
+
+            return `https://jfl4bur.github.io/Todogram/public/share/${prefix}-${titleSlug}.html`;
         };
 
         // Evento para el botón "Share" dentro del modal de detalles
