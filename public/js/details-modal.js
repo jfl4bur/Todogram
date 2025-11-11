@@ -411,25 +411,7 @@ class DetailsModal {
         };
         
     const trailerUrl = item.trailerUrl || (tmdbData?.trailer_url || '');
-    // Mostrar "Ver Película" solo si hay iframe (Video iframe o Video iframe 1)
-    // Solo mostrar botón si existe iframe explícito (Video iframe / Video iframe 1).
-    function pickPreferredIframe(src){
-        const vals = [
-            src && src.videoIframe,
-            src && src.videoIframe1,
-            src && src['Video iframe'],
-            src && src['Video iframe 1'],
-            src && src['Video iframe1']
-        ];
-        for(const v of vals){
-            if(typeof v === 'string'){
-                const t = v.trim();
-                if(t && !/^null$/i.test(t) && !/^undefined$/i.test(t) && t !== '#') return t;
-            }
-        }
-        return '';
-    }
-    const preferredVideo = pickPreferredIframe(item);
+    const preferredVideo = item.videoUrl || item.videoIframe || item.videoIframe1 || item['Video iframe'] || item['Video iframe 1'] || '';
         
         let metaItems = [];
         
@@ -453,14 +435,14 @@ class DetailsModal {
         let actionButtons = '';
         let secondaryButtons = '';
         
-        if (preferredVideo && String(preferredVideo).trim() !== '') {
+        if (preferredVideo) {
             console.log('DetailsModal: Agregando botón de reproducir con URL:', preferredVideo);
             actionButtons += `<button class="details-modal-action-btn primary big-btn" data-video-url="${preferredVideo}"><i class="fas fa-play"></i><span>Ver Película</span><span class="tooltip">Reproducir</span></button>`;
         } else {
             console.log('DetailsModal: No hay videoUrl disponible para:', item.title);
         }
         
-        if (preferredVideo && String(preferredVideo).trim() !== '') {
+        if (preferredVideo) {
             console.log('DetailsModal: Agregando botón de descargar con URL:', preferredVideo);
             secondaryButtons += `<button class="details-modal-action-btn circular" onclick="window.open('${this.generateDownloadUrl(preferredVideo)}', '_blank')"><i class="fas fa-download"></i><span class="tooltip">Descargar</span></button>`;
         }
