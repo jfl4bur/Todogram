@@ -133,18 +133,28 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Función para generar URL de compartir
         window.generateShareUrl = function(item, originalUrl) {
-            // Obtener ID y título para slug
-            const id = item.id || '';
-            const title = item.title || '';
-            // Alinear el slug con las páginas generadas por el extractor (integrado en admin/extractor.js)
-            // Importante: no quitar acentos; se reemplazan por '-'
-            const titleSlug = title
+            // ID puede venir como string o number
+            const rawId = item.id != null ? String(item.id) : '';
+            const title = item.title || item.titulo || '';
+            const categoria = item.categoria || item.category || item['Categoría'] || '';
+            const episodioTitulo = item.tituloEpisodio || item.episodeTitle || item['Título episodio'] || '';
+
+            // Reutilizar el mismo algoritmo del extractor: slug minúsculas, solo a-z0-9
+            const slug = (title || 'todogram')
                 .toLowerCase()
                 .replace(/[^a-z0-9]+/g, '-')
                 .replace(/^-|-$/g, '');
 
-            // Ruta real publicada en GitHub Pages (incluye /public/)
-            return `https://jfl4bur.github.io/Todogram/public/share/${id}-${titleSlug}.html`;
+            // Si es episodio, combinar para mejor semántica (pero el filename usa solo título base)
+            const categorySlug = (categoria || 'general')
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '-')
+                .replace(/^-|-$/g, '');
+
+            // Nombre de archivo: si hay id => id-slug.html, si no slug.html
+            const filename = rawId ? `${rawId}-${slug}.html` : `${slug}.html`;
+
+            return `https://jfl4bur.github.io/Todogram/public/share/${filename}`;
         };
 
         // Evento para el botón "Share" dentro del modal de detalles
