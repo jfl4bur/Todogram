@@ -411,7 +411,8 @@ class DetailsModal {
         };
         
     const trailerUrl = item.trailerUrl || (tmdbData?.trailer_url || '');
-    const preferredVideo = item.videoUrl || item.videoIframe || item.videoIframe1 || item['Video iframe'] || item['Video iframe 1'] || '';
+    // Mostrar "Ver Película" solo si hay iframe (Video iframe o Video iframe 1)
+    const preferredVideo = item.videoIframe || item.videoIframe1 || item['Video iframe'] || item['Video iframe 1'] || item.videoUrl || '';
         
         let metaItems = [];
         
@@ -435,14 +436,14 @@ class DetailsModal {
         let actionButtons = '';
         let secondaryButtons = '';
         
-        if (preferredVideo) {
+        if (preferredVideo && String(preferredVideo).trim() !== '') {
             console.log('DetailsModal: Agregando botón de reproducir con URL:', preferredVideo);
             actionButtons += `<button class="details-modal-action-btn primary big-btn" data-video-url="${preferredVideo}"><i class="fas fa-play"></i><span>Ver Película</span><span class="tooltip">Reproducir</span></button>`;
         } else {
             console.log('DetailsModal: No hay videoUrl disponible para:', item.title);
         }
         
-        if (preferredVideo) {
+        if (preferredVideo && String(preferredVideo).trim() !== '') {
             console.log('DetailsModal: Agregando botón de descargar con URL:', preferredVideo);
             secondaryButtons += `<button class="details-modal-action-btn circular" onclick="window.open('${this.generateDownloadUrl(preferredVideo)}', '_blank')"><i class="fas fa-download"></i><span class="tooltip">Descargar</span></button>`;
         }
