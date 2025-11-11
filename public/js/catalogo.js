@@ -86,7 +86,10 @@
             genresList: genresList,
             year: d['Año'] || '',
             duration: d['Duración'] || '',
-            videoIframe: d['Video iframe'] || d['Video iframe 1'] || d['Video iframe1'] || '',
+            // Mantener separados los iframes para la lógica estricta de botones.
+            videoIframe: d['Video iframe'] || '',
+            videoIframe1: d['Video iframe 1'] || d['Video iframe1'] || '',
+            // videoUrl se conserva solo por compatibilidad futura pero NO se usa para mostrar el botón.
             videoUrl: d['Video'] || d['Enlace'] || d['Ver Película'] || '',
             trailerUrl: d['Trailer'] || d['TrailerUrl'] || '',
             cast: d['Reparto principal'] || d['Reparto'] || '',
