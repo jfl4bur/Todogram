@@ -131,38 +131,26 @@ document.addEventListener('DOMContentLoaded', function () {
                 // El slider independiente se inicializa automáticamente
         // No necesitamos delays ni polling
 
-        // Función para generar URL de compartir
-        window.generateShareUrl = function(item, originalUrl) {
+        // Función para generar URL de compartir (nuevo formato episodios: id-<slug-episodio>.html sin -epNN)
+        window.generateShareUrl = function(item) {
             try {
-                // Obtener ID y título para slug (con varios fallbacks)
                 const id = (item && (item.id || item.tmdbId || item['ID TMDB'])) ? String(item.id || item.tmdbId || item['ID TMDB']) : '';
-                const title = (item && (item.title || item['Título'])) ? String(item.title || item['Título']) : '';
-                // Alinear el slug con las páginas generadas por el extractor (integrado en admin/extractor.js)
-                // Importante: no quitar acentos; se reemplazan por '-'
-                const titleSlug = title
+                if (!id) return window.location.href;
+
+                // Detectar si es un episodio (propiedades típicas)
+                const isEpisode = !!(item && (item.episodeIndex || item['Título episodio'] || item.isEpisode));
+                let rawTitle = '';
+                if (isEpisode) {
+                    rawTitle = String(item['Título episodio'] || item.title || item['Título'] || '');
+                } else {
+                    rawTitle = String(item.title || item['Título'] || '');
+                }
+                const titleSlug = rawTitle
                     .toLowerCase()
                     .replace(/[^a-z0-9]+/g, '-')
                     .replace(/^-|-$/g, '');
-
-                // Detectar si hay un episodio seleccionado en el hash actual u originalUrl
-                let ep = '';
-                try {
-                    const urlToParse = originalUrl || window.location.href || '';
-                    const hash = urlToParse.includes('#') ? urlToParse.split('#')[1] : '';
-                    if (hash) {
-                        const params = new URLSearchParams(hash.startsWith('?') ? hash.slice(1) : hash);
-                        const epVal = params.get('ep');
-                        if (epVal && /^\d+$/.test(epVal)) ep = epVal;
-                    }
-                } catch (e) { /* ignore */ }
-
-                // Ruta real publicada en GitHub Pages (incluye /public/)
-                if (ep) {
-                    return `https://jfl4bur.github.io/Todogram/public/share/${id}-${titleSlug}-ep${ep}.html`;
-                }
                 return `https://jfl4bur.github.io/Todogram/public/share/${id}-${titleSlug}.html`;
             } catch (e) {
-                // Fallback duro: usar URL actual si algo falla
                 return window.location.href;
             }
         };
