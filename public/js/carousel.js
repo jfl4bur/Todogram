@@ -250,6 +250,13 @@ class EpisodiosSeriesCarousel {
         const gap = 8; // Un poco más de espacio entre ítems
         for (let i = 0; i < this.episodiosData.length; i++) {
             const item = this.episodiosData[i];
+            // Canonical ID para episodios: usar ID TMDB de la serie si está disponible en tmdbUrl
+            try {
+                if (item.tmdbUrl && /\/(movie|tv)\/(\d+)/.test(item.tmdbUrl)) {
+                    const tmdbId = item.tmdbUrl.match(/\/(movie|tv)\/(\d+)/)[2];
+                    if (tmdbId) item.canonicalId = tmdbId;
+                }
+            } catch (e) {}
             const div = document.createElement("div");
             div.className = "custom-carousel-item episodios-series-item";
             div.dataset.itemId = item.id;
@@ -341,7 +348,8 @@ class EpisodiosSeriesCarousel {
                     clearTimeout(this.hoverTimeouts[itemId].modal);
                 }
                 // Hash persistente igual que Series/Animes
-                const hash = `id=${encodeURIComponent(item.id)}&title=${encodeURIComponent(item.title)}`;
+                const canonical = item.canonicalId || item.id;
+                const hash = `id=${encodeURIComponent(canonical)}&title=${encodeURIComponent(item.title)}`;
                 if (window.location.hash !== `#${hash}`) {
                     history.pushState(null, '', `#${hash}`);
                 }
@@ -613,6 +621,12 @@ class EpisodiosAnimesCarousel {
         const gap = 8;
         for (let i = 0; i < this.episodiosData.length; i++) {
             const item = this.episodiosData[i];
+            try {
+                if (item.tmdbUrl && /\/(movie|tv)\/(\d+)/.test(item.tmdbUrl)) {
+                    const tmdbId = item.tmdbUrl.match(/\/(movie|tv)\/(\d+)/)[2];
+                    if (tmdbId) item.canonicalId = tmdbId;
+                }
+            } catch (e) {}
             const div = document.createElement('div');
             // Use the exact same item classes as EpisodiosSeriesCarousel so styles and behavior match
             div.className = 'custom-carousel-item episodios-series-item';
@@ -685,7 +699,8 @@ class EpisodiosAnimesCarousel {
                 e.preventDefault();
                 const itemId = div.dataset.itemId;
                 if (this.hoverTimeouts[itemId]) { clearTimeout(this.hoverTimeouts[itemId].details); clearTimeout(this.hoverTimeouts[itemId].modal); }
-                const hash = `id=${encodeURIComponent(item.id)}&title=${encodeURIComponent(item.title)}`;
+                const canonical = item.canonicalId || item.id;
+                const hash = `id=${encodeURIComponent(canonical)}&title=${encodeURIComponent(item.title)}`;
                 if (window.location.hash !== `#${hash}`) history.pushState(null, '', `#${hash}`);
                 if (window.detailsModal && typeof window.detailsModal.show === 'function') window.detailsModal.show(item, div);
             });
@@ -913,6 +928,12 @@ class EpisodiosDocumentalesCarousel {
         const gap = 8;
         for (let i = 0; i < this.episodiosData.length; i++) {
             const item = this.episodiosData[i];
+            try {
+                if (item.tmdbUrl && /\/(movie|tv)\/(\d+)/.test(item.tmdbUrl)) {
+                    const tmdbId = item.tmdbUrl.match(/\/(movie|tv)\/(\d+)/)[2];
+                    if (tmdbId) item.canonicalId = tmdbId;
+                }
+            } catch (e) {}
             const div = document.createElement('div');
             div.className = 'custom-carousel-item episodios-series-item';
             div.dataset.itemId = item.id;
@@ -981,7 +1002,8 @@ class EpisodiosDocumentalesCarousel {
                 e.preventDefault();
                 const itemId = div.dataset.itemId;
                 if (this.hoverTimeouts[itemId]) { clearTimeout(this.hoverTimeouts[itemId].details); clearTimeout(this.hoverTimeouts[itemId].modal); }
-                const hash = `id=${encodeURIComponent(item.id)}&title=${encodeURIComponent(item.title)}`;
+                const canonical = item.canonicalId || item.id;
+                const hash = `id=${encodeURIComponent(canonical)}&title=${encodeURIComponent(item.title)}`;
                 if (window.location.hash !== `#${hash}`) history.pushState(null, '', `#${hash}`);
                 if (window.detailsModal && typeof window.detailsModal.show === 'function') window.detailsModal.show(item, div);
             });
@@ -1156,7 +1178,7 @@ class AnimesCarousel {
                     item['Categoría'] === 'Animes' && 
                     (!item['Título episodio'] || item['Título episodio'].trim() === '')) {
                     this.animeData.push({
-                        id: `anime_${animeIndex}`,
+                        id: (item['ID TMDB'] ? String(item['ID TMDB']) : `anime_${animeIndex}`),
                         title: item['Título'] || 'Sin título',
                         description: item['Synopsis'] || 'Descripción no disponible',
                         posterUrl: item['Portada'] || '',
@@ -1256,6 +1278,13 @@ class AnimesCarousel {
         const end = Math.min(this.index + step, this.animeData.length);
         for (let i = this.index; i < end; i++) {
             const item = this.animeData[i];
+            // Añadir canonicalId usando tmdbUrl si existe
+            try {
+                if (item.tmdbUrl && /\/(movie|tv)\/(\d+)/.test(item.tmdbUrl)) {
+                    const tmdbId = item.tmdbUrl.match(/\/(movie|tv)\/(\d+)/)[2];
+                    if (tmdbId) item.canonicalId = tmdbId;
+                }
+            } catch (e) {}
             const div = document.createElement("div");
             div.className = "custom-carousel-item";
             div.dataset.itemId = i;
@@ -1337,7 +1366,8 @@ class AnimesCarousel {
                     clearTimeout(this.hoverTimeouts[itemId].modal);
                 }
                 // Actualizar el hash de la URL para persistencia
-                const hash = `id=${encodeURIComponent(item.id)}&title=${encodeURIComponent(item.title)}`;
+                const canonical = item.canonicalId || item.id;
+                const hash = `id=${encodeURIComponent(canonical)}&title=${encodeURIComponent(item.title)}`;
                 if (window.location.hash !== `#${hash}`) {
                     history.pushState(null, '', `#${hash}`);
                 }
@@ -1943,7 +1973,7 @@ class SeriesCarousel {
                     (!item['Título episodio'] || item['Título episodio'].trim() === '')) {
                     
                     this.seriesData.push({
-                        id: `series_${seriesIndex}`,
+                        id: (item['ID TMDB'] ? String(item['ID TMDB']) : `series_${seriesIndex}`),
                         title: item['Título'] || 'Sin título',
                         description: item['Synopsis'] || 'Descripción no disponible',
                         posterUrl: item['Portada'] || '',
@@ -2070,6 +2100,12 @@ class SeriesCarousel {
         
         for (let i = this.index; i < end; i++) {
             const item = this.seriesData[i];
+            try {
+                if (item.tmdbUrl && /\/(movie|tv)\/(\d+)/.test(item.tmdbUrl)) {
+                    const tmdbId = item.tmdbUrl.match(/\/(movie|tv)\/(\d+)/)[2];
+                    if (tmdbId) item.canonicalId = tmdbId;
+                }
+            } catch (e) {}
             const div = document.createElement("div");
             div.className = "custom-carousel-item";
             div.dataset.itemId = item.id;
@@ -2167,6 +2203,15 @@ class SeriesCarousel {
                     clearTimeout(this.hoverTimeouts[itemId].modal);
                 }
                 window.detailsModal.show(item, div);
+                // Opcional: Forzar hash si no se estableció aún
+                try {
+                    const existingHash = window.location.hash;
+                    if (!existingHash.startsWith('#id=')) {
+                        const canonical = item.canonicalId || item.id;
+                        const h = `id=${encodeURIComponent(canonical)}&title=${encodeURIComponent(item.title)}`;
+                        history.replaceState(null, '', `#${h}`);
+                    }
+                } catch (e) {}
             });
 
             this.wrapper.appendChild(div);
@@ -2416,7 +2461,7 @@ class DocumentalesCarousel {
                         // si algo falla, no bloqueramos la carga
                     }
                     this.docuData.push({
-                        id: `docu_${docuIndex}`,
+                        id: (item['ID TMDB'] ? String(item['ID TMDB']) : `docu_${docuIndex}`),
                         title: item['Título'] || 'Sin título',
                         description: item['Synopsis'] || 'Descripción no disponible',
                         posterUrl: item['Portada'] || '',
@@ -2514,6 +2559,12 @@ class DocumentalesCarousel {
         const end = Math.min(this.index + step, this.docuData.length);
         for (let i = this.index; i < end; i++) {
             const item = this.docuData[i];
+            try {
+                if (item.tmdbUrl && /\/(movie|tv)\/(\d+)/.test(item.tmdbUrl)) {
+                    const tmdbId = item.tmdbUrl.match(/\/(movie|tv)\/(\d+)/)[2];
+                    if (tmdbId) item.canonicalId = tmdbId;
+                }
+            } catch (e) {}
             const div = document.createElement("div");
             div.className = "custom-carousel-item";
             div.dataset.itemId = i;
@@ -2595,6 +2646,11 @@ class DocumentalesCarousel {
                     clearTimeout(this.hoverTimeouts[itemId].modal);
                 }
                 window.detailsModal.show(item, div);
+                try {
+                    const canonical = item.canonicalId || item.id;
+                    const h = `id=${encodeURIComponent(canonical)}&title=${encodeURIComponent(item.title)}`;
+                    if (!window.location.hash.startsWith('#id=')) history.replaceState(null, '', `#${h}`);
+                } catch (e) {}
             });
             this.wrapper.appendChild(div);
         }
