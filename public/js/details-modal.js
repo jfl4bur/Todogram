@@ -828,23 +828,10 @@ class DetailsModal {
     }
 
     updateUrlForModal(item) {
-        if (!item) return;
-        // Determinar un ID canónico (TMDB) cuando sea posible
-        let effectiveId = (item.id != null ? String(item.id) : '');
-        try {
-            if (!effectiveId || /^(ep_|docu_|series_|anime_)/.test(effectiveId)) {
-                if (item['ID TMDB']) effectiveId = String(item['ID TMDB']);
-                else if (item.tmdbId) effectiveId = String(item.tmdbId);
-                else if (item.tmdbUrl) {
-                    const m = item.tmdbUrl.match(/\/(movie|tv)\/(\d+)/);
-                    if (m && m[2]) effectiveId = m[2];
-                }
-            }
-        } catch (err) { /* ignore */ }
-        if (!effectiveId) return;
+        if (!item || item.id === '0') return;
         const normalizedTitle = this.normalizeText(item.title);
         // Construir nuevo hash con id y title pero preservar parámetros adicionales existentes (ej. ep)
-        const newHashBase = `id=${effectiveId}&title=${normalizedTitle}`;
+        const newHashBase = `id=${item.id}&title=${normalizedTitle}`;
         const existingHash = window.location.hash.substring(1);
         let extras = '';
         if (existingHash) {
