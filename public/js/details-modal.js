@@ -851,7 +851,28 @@ class DetailsModal {
                 console.warn('DetailsModal.updateUrlForModal: fallo parsing hash existente, sobrescribiendo sin extras', err);
             }
         }
-        const newHash = newHashBase + extras;
+        let newHash = newHashBase + extras;
+        // Si el item mostrado proviene de un episodio y la URL actual ya contiene un slug que corresponde a episodio,
+        // respetar el slug actual (no sobrescribir por el título de la serie) manteniendo id= y ep= si existe.
+        try {
+            const existing = window.location.hash.substring(1);
+            if (existing) {
+                const params = new URLSearchParams(existing);
+                const existingTitle = params.get('title');
+                const existingEp = params.get('ep');
+                // Si el existingTitle no coincide con el normalizedTitle y hay ep (o el título parece un capítulo tipo "10-2024"), preservar existingTitle
+                if (existingTitle) {
+                    const looksEpisode = !!existingEp || /(^\d+[\-_.]+)/.test(existingTitle);
+                    if (looksEpisode && existingTitle !== normalizedTitle) {
+                        // reconstruir hash con el title existente
+                        const extrasObj = {};
+                        for (const [k, v] of params.entries()) { if (k !== 'id' && k !== 'title') extrasObj[k] = v; }
+                        const extraPairs = Object.keys(extrasObj).map(k => `${encodeURIComponent(k)}=${encodeURIComponent(extrasObj[k])}`);
+                        newHash = `id=${canonicalId}&title=${existingTitle}` + (extraPairs.length ? `&${extraPairs.join('&')}` : '');
+                    }
+                }
+            }
+        } catch (err) { /* ignore */ }
         if (window.location.hash.substring(1) !== newHash) {
             // Use pushState so the modal hash becomes a persistent history entry
             try {

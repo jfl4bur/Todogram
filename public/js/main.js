@@ -230,42 +230,77 @@ document.addEventListener('DOMContentLoaded', function () {
                     return;
                 }
                 
-                // Buscar en el carousel de películas primero
-                let item = carousel.moviesData.find(movie => movie.id === urlParams.id);
-                let itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
-                let itemSource = 'peliculas';
+                // Utilidad para normalizar slug igual que generateShareUrl y DetailsModal
+                const makeSlug = (txt) => (txt || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+                const requestedSlug = makeSlug(urlParams.normalizedTitle);
+
+                let item = null;
+                let itemElement = null;
+                let itemSource = null;
+
+                // 1. Prioridad: episodios (series, animes, documentales) cuyo título episodio slug coincide
+                try {
+                    if (!item && window.episodiosCarousel?.episodiosData?.length) {
+                        item = window.episodiosCarousel.episodiosData.find(ep => ep.id === urlParams.id && makeSlug(ep.title) === requestedSlug);
+                        if (item) { itemSource = 'episodios'; itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${item.id}"]`); }
+                    }
+                    if (!item && window.episodiosAnimesCarousel?.episodiosData?.length) {
+                        item = window.episodiosAnimesCarousel.episodiosData.find(ep => ep.id === urlParams.id && makeSlug(ep.title) === requestedSlug);
+                        if (item) { itemSource = 'episodios_animes'; itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${item.id}"]`); }
+                    }
+                    if (!item && window.episodiosDocumentalesCarousel?.episodiosData?.length) {
+                        item = window.episodiosDocumentalesCarousel.episodiosData.find(ep => ep.id === urlParams.id && makeSlug(ep.title) === requestedSlug);
+                        if (item) { itemSource = 'episodios_documentales'; itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${item.id}"]`); }
+                    }
+                } catch (e) { console.warn('Main: fallo buscando episodios por slug', e); }
+
+                // 2. Películas si no se encontró episodio
+                if (!item && carousel.moviesData?.length) {
+                    item = carousel.moviesData.find(movie => movie.id === urlParams.id);
+                    if (item) { itemSource = 'peliculas'; itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`); }
+                }
 
                 // Si no se encuentra en el carousel de películas, buscar en el carrusel de series
-                if (!item && window.seriesCarousel && window.seriesCarousel.seriesData && window.seriesCarousel.seriesData.length > 0) {
-                    item = window.seriesCarousel.seriesData.find(series => series.id === urlParams.id);
-                    if (item) {
-                        itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
-                        itemSource = 'series';
-                        console.log('Serie encontrada en carrusel de series:', item);
-                        console.log('Elemento DOM encontrado para serie:', itemElement);
+                if (!item && window.seriesCarousel?.seriesData?.length) {
+                    // Intentar que si el slug solicitado coincide con algún episodio y no con la serie, no tomar la serie
+                    const candidate = window.seriesCarousel.seriesData.find(series => series.id === urlParams.id);
+                    if (candidate) {
+                        const seriesSlug = makeSlug(candidate.title);
+                        if (seriesSlug === requestedSlug) {
+                            item = candidate; itemSource = 'series'; itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
+                            console.log('Serie encontrada (slug coincide):', candidate);
+                        } else {
+                            console.log('Slug solicitado parece de episodio, se evita sobreescribir con serie');
+                        }
                     }
                 }
 
                 // Si no se encuentra en el carrusel de series, buscar en el carrusel de documentales
 
-                if (!item && window.documentalesCarousel && window.documentalesCarousel.docuData && window.documentalesCarousel.docuData.length > 0) {
-                    item = window.documentalesCarousel.docuData.find(docu => docu.id === urlParams.id);
-                    if (item) {
-                        itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
-                        itemSource = 'documentales';
-                        console.log('Documental encontrado en carrusel de documentales:', item);
-                        console.log('Elemento DOM encontrado para documental:', itemElement);
+                if (!item && window.documentalesCarousel?.docuData?.length) {
+                    const candidate = window.documentalesCarousel.docuData.find(docu => docu.id === urlParams.id);
+                    if (candidate) {
+                        const docSlug = makeSlug(candidate.title);
+                        if (docSlug === requestedSlug) {
+                            item = candidate; itemSource = 'documentales'; itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
+                            console.log('Documental encontrado (slug coincide):', candidate);
+                        } else {
+                            console.log('Slug solicitado parece de episodio documental, se evita sobreescribir con documental base');
+                        }
                     }
                 }
 
                 // Si no se encuentra en documentales, buscar en el carrusel de animes
-                if (!item && window.animesCarousel && window.animesCarousel.animeData && window.animesCarousel.animeData.length > 0) {
-                    item = window.animesCarousel.animeData.find(anime => anime.id === urlParams.id);
-                    if (item) {
-                        itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
-                        itemSource = 'animes';
-                        console.log('Anime encontrado en carrusel de animes:', item);
-                        console.log('Elemento DOM encontrado para anime:', itemElement);
+                if (!item && window.animesCarousel?.animeData?.length) {
+                    const candidate = window.animesCarousel.animeData.find(anime => anime.id === urlParams.id);
+                    if (candidate) {
+                        const animeSlug = makeSlug(candidate.title);
+                        if (animeSlug === requestedSlug) {
+                            item = candidate; itemSource = 'animes'; itemElement = document.querySelector(`.custom-carousel-item[data-item-id="${urlParams.id}"]`);
+                            console.log('Anime encontrado (slug coincide):', candidate);
+                        } else {
+                            console.log('Slug solicitado parece de episodio anime, se evita sobreescribir con anime base');
+                        }
                     }
                 }
 
