@@ -84,7 +84,23 @@ class HoverModal {
     // Accept iframe-based video links too (many records use 'Video iframe')
     // Determinar disponibilidad de video solo si existen los campos iframe declarados
     // Solo considerar iframes reales; excluir enlaces genéricos (videoUrl) para evitar botón en catálogo sin iframe.
-    const preferredVideo = item.videoIframe || item.videoIframe1 || item['Video iframe'] || item['Video iframe 1'] || item['Video iframe1'] || '';
+    function pickPreferredIframe(src){
+        const vals = [
+            src && src.videoIframe,
+            src && src.videoIframe1,
+            src && src['Video iframe'],
+            src && src['Video iframe 1'],
+            src && src['Video iframe1']
+        ];
+        for(const v of vals){
+            if(typeof v === 'string'){
+                const t = v.trim();
+                if(t && !/^null$/i.test(t) && !/^undefined$/i.test(t) && t !== '#') return t;
+            }
+        }
+        return '';
+    }
+    const preferredVideo = pickPreferredIframe(item);
         
         let metaItems = [];
         
