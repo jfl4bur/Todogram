@@ -830,7 +830,21 @@ class DetailsModal {
     updateUrlForModal(item) {
         if (!item) return;
         // Determinar un ID canónico (TMDB) cuando sea posible
-        let effectiveId = (item.id != null ? String(item.id) : '');
+        let effectiveId = '';
+        try {
+            if (item['ID TMDB']) effectiveId = String(item['ID TMDB']);
+            else if (item.tmdbId) effectiveId = String(item.tmdbId);
+            else if (item.tmdbUrl) {
+                const m = String(item.tmdbUrl).match(/\/(movie|tv)\/(\d+)/);
+                if (m && m[2]) effectiveId = m[2];
+            } else if (item.id && /^\d+$/.test(String(item.id))) {
+                effectiveId = String(item.id);
+            } else if (item.id) {
+                const m2 = String(item.id).match(/(\d{3,})/);
+                if (m2) effectiveId = m2[1];
+            }
+        } catch (err) { /* ignore */ }
+        if (!effectiveId) return;
         try {
             if (!effectiveId || /^(ep_|docu_|series_|anime_)/.test(effectiveId)) {
                 if (item['ID TMDB']) effectiveId = String(item['ID TMDB']);
@@ -844,7 +858,15 @@ class DetailsModal {
         if (!effectiveId) return;
         const normalizedTitle = this.normalizeText(item.title);
         // Construir nuevo hash con id y title pero preservar parámetros adicionales existentes (ej. ep)
-        const newHashBase = `id=${effectiveId}&title=${normalizedTitle}`;
+        // Si es episodio, intentar derivar número de episodio para anexarlo (mantener lógica de ep en hash)
+        let epParam = '';
+        try {
+            const candidates = [item.episodioNum, item.episodeIndex, item['Episodios']];
+            for (const c of candidates) {
+                if (c != null && String(c).trim() !== '' && /^\d+$/.test(String(c))) { epParam = String(c); break; }
+            }
+        } catch (e) {}
+        const newHashBase = `id=${effectiveId}&title=${normalizedTitle}` + (epParam ? `&ep=${epParam}` : '');
         const existingHash = window.location.hash.substring(1);
         let extras = '';
         if (existingHash) {
