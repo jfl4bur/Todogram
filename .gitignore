@@ -28,7 +28,8 @@ backups
 
 # Ignorar carpetas
 UTILES/
-admin/
+# Se permite admin para incluir extractor y auto-push en el repositorio
+# admin/
 
 #  SECRET_KEYS
 .env
