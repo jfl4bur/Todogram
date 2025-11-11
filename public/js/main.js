@@ -438,18 +438,14 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             const params = new URLSearchParams(query);
-            const id = params.get('id');
+            const id = params.get('id'); // ahora debe ser TMDB ID numérico cuando exista
             const title = params.get('title');
             const ep = params.get('ep');
             console.log('Parámetros extraídos:', { id, title, ep });
 
             if (!id || !title) return null;
 
-            return {
-                id: id,
-                normalizedTitle: title,
-                ep: ep
-            };
+            return { id, normalizedTitle: title, ep };
         };
     }
 });

@@ -129,8 +129,10 @@ class EpisodiosSeriesCarousel {
             let epIndex = 0;
             for (const item of data) {
                 if (item && typeof item === 'object' && item['Categoría'] === 'Series' && item['Título episodio'] && item['Título episodio'].trim() !== '') {
+                    const tmdbMatch = (item['TMDB'] || '').match(/(movie|tv)\/(\d+)/);
+                    const tmdbNumericId = tmdbMatch ? tmdbMatch[2] : (item['ID TMDB'] || '').toString().trim();
                     this.episodiosData.push({
-                        id: `ep_${epIndex}`,
+                        id: tmdbNumericId || `ep_${epIndex}`,
                         title: item['Título episodio'] || 'Sin título',
                         serie: item['Título'] || '',
                         description: item['Synopsis'] || 'Descripción no disponible',
@@ -156,9 +158,10 @@ class EpisodiosSeriesCarousel {
                 }
             }
             if (this.episodiosData.length === 0) {
+                const fallbackMatch = ("https://www.themoviedb.org/tv/12345").match(/(movie|tv)\/(\d+)/);
                 this.episodiosData = [
                     {
-                        id: "ep_12345",
+                        id: fallbackMatch ? fallbackMatch[2] : "ep_12345",
                         title: "Ejemplo de episodio",
                         serie: "Serie de ejemplo",
                         description: "Este es un episodio de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
@@ -341,7 +344,9 @@ class EpisodiosSeriesCarousel {
                     clearTimeout(this.hoverTimeouts[itemId].modal);
                 }
                 // Hash persistente igual que Series/Animes
-                const hash = `id=${encodeURIComponent(item.id)}&title=${encodeURIComponent(item.title)}`;
+                // Unificar hash usando TMDB ID preferente (tmdbId | 'ID TMDB' | id)
+                const canonicalId = item.tmdbId || item['ID TMDB'] || item.id;
+                const hash = `id=${encodeURIComponent(canonicalId)}&title=${encodeURIComponent(item.title)}`;
                 if (window.location.hash !== `#${hash}`) {
                     history.pushState(null, '', `#${hash}`);
                 }
@@ -548,8 +553,10 @@ class EpisodiosAnimesCarousel {
             let epIndex = 0;
             for (const item of data) {
                 if (item && typeof item === 'object' && item['Categoría'] === 'Animes' && item['Título episodio'] && item['Título episodio'].trim() !== '') {
+                    const tmdbMatch = (item['TMDB'] || '').match(/(movie|tv)\/(\d+)/);
+                    const tmdbNumericId = tmdbMatch ? tmdbMatch[2] : (item['ID TMDB'] || '').toString().trim();
                     this.episodiosData.push({
-                        id: `ep_anime_${epIndex}`,
+                        id: tmdbNumericId || `ep_anime_${epIndex}`,
                         title: item['Título episodio'] || 'Sin título',
                         serie: item['Título'] || '',
                         description: item['Synopsis'] || 'Descripción no disponible',
@@ -685,7 +692,8 @@ class EpisodiosAnimesCarousel {
                 e.preventDefault();
                 const itemId = div.dataset.itemId;
                 if (this.hoverTimeouts[itemId]) { clearTimeout(this.hoverTimeouts[itemId].details); clearTimeout(this.hoverTimeouts[itemId].modal); }
-                const hash = `id=${encodeURIComponent(item.id)}&title=${encodeURIComponent(item.title)}`;
+                const canonicalId = item.tmdbId || item['ID TMDB'] || item.id;
+                const hash = `id=${encodeURIComponent(canonicalId)}&title=${encodeURIComponent(item.title)}`;
                 if (window.location.hash !== `#${hash}`) history.pushState(null, '', `#${hash}`);
                 if (window.detailsModal && typeof window.detailsModal.show === 'function') window.detailsModal.show(item, div);
             });
@@ -848,8 +856,10 @@ class EpisodiosDocumentalesCarousel {
             let epIndex = 0;
             for (const item of data) {
                 if (item && typeof item === 'object' && item['Categoría'] === 'Documentales' && item['Título episodio'] && item['Título episodio'].trim() !== '') {
+                    const tmdbMatch = (item['TMDB'] || '').match(/(movie|tv)\/(\d+)/);
+                    const tmdbNumericId = tmdbMatch ? tmdbMatch[2] : (item['ID TMDB'] || '').toString().trim();
                     this.episodiosData.push({
-                        id: `ep_docu_${epIndex}`,
+                        id: tmdbNumericId || `ep_docu_${epIndex}`,
                         title: item['Título episodio'] || 'Sin título',
                         serie: item['Título'] || '',
                         description: item['Synopsis'] || 'Descripción no disponible',
@@ -981,7 +991,8 @@ class EpisodiosDocumentalesCarousel {
                 e.preventDefault();
                 const itemId = div.dataset.itemId;
                 if (this.hoverTimeouts[itemId]) { clearTimeout(this.hoverTimeouts[itemId].details); clearTimeout(this.hoverTimeouts[itemId].modal); }
-                const hash = `id=${encodeURIComponent(item.id)}&title=${encodeURIComponent(item.title)}`;
+                const canonicalId = item.tmdbId || item['ID TMDB'] || item.id;
+                const hash = `id=${encodeURIComponent(canonicalId)}&title=${encodeURIComponent(item.title)}`;
                 if (window.location.hash !== `#${hash}`) history.pushState(null, '', `#${hash}`);
                 if (window.detailsModal && typeof window.detailsModal.show === 'function') window.detailsModal.show(item, div);
             });
@@ -1155,8 +1166,10 @@ class AnimesCarousel {
                 if (item && typeof item === 'object' && 
                     item['Categoría'] === 'Animes' && 
                     (!item['Título episodio'] || item['Título episodio'].trim() === '')) {
+                    const tmdbMatch = (item['TMDB'] || '').match(/(movie|tv)\/(\d+)/);
+                    const tmdbNumericId = tmdbMatch ? tmdbMatch[2] : (item['ID TMDB'] || '').toString().trim();
                     this.animeData.push({
-                        id: `anime_${animeIndex}`,
+                        id: tmdbNumericId || `anime_${animeIndex}`,
                         title: item['Título'] || 'Sin título',
                         description: item['Synopsis'] || 'Descripción no disponible',
                         posterUrl: item['Portada'] || '',
@@ -1181,9 +1194,10 @@ class AnimesCarousel {
                 }
             }
             if (this.animeData.length === 0) {
+                const fallbackMatch = ("https://www.themoviedb.org/movie/12345").match(/(movie|tv)\/(\d+)/);
                 this.animeData = [
                     {
-                        id: "anime_12345",
+                        id: fallbackMatch ? fallbackMatch[2] : "anime_12345",
                         title: "Ejemplo de anime",
                         description: "Este es un anime de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
                         posterUrl: "https://via.placeholder.com/194x271",
@@ -1209,9 +1223,10 @@ class AnimesCarousel {
             this.showCarousel();
             this.renderItems();
         } catch (error) {
+            const fallbackMatch2 = ("https://www.themoviedb.org/movie/12345").match(/(movie|tv)\/(\d+)/);
             this.animeData = [
                 {
-                    id: "anime_12345",
+                    id: fallbackMatch2 ? fallbackMatch2[2] : "anime_12345",
                     title: "Ejemplo de anime",
                     description: "Este es un anime de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
                     posterUrl: "https://via.placeholder.com/194x271",
@@ -1337,7 +1352,8 @@ class AnimesCarousel {
                     clearTimeout(this.hoverTimeouts[itemId].modal);
                 }
                 // Actualizar el hash de la URL para persistencia
-                const hash = `id=${encodeURIComponent(item.id)}&title=${encodeURIComponent(item.title)}`;
+                const canonicalId = item.tmdbId || item['ID TMDB'] || item.id;
+                const hash = `id=${encodeURIComponent(canonicalId)}&title=${encodeURIComponent(item.title)}`;
                 if (window.location.hash !== `#${hash}`) {
                     history.pushState(null, '', `#${hash}`);
                 }
@@ -1942,8 +1958,11 @@ class SeriesCarousel {
                     item['Categoría'] === 'Series' && 
                     (!item['Título episodio'] || item['Título episodio'].trim() === '')) {
                     
+                    // Preferir TMDB ID para consistencia global
+                    const tmdbMatch = (item['TMDB'] || '').match(/(movie|tv)\/(\d+)/);
+                    const tmdbNumericId = tmdbMatch ? tmdbMatch[2] : (item['ID TMDB'] || '').toString().trim();
                     this.seriesData.push({
-                        id: `series_${seriesIndex}`,
+                        id: tmdbNumericId || `series_${seriesIndex}`,
                         title: item['Título'] || 'Sin título',
                         description: item['Synopsis'] || 'Descripción no disponible',
                         posterUrl: item['Portada'] || '',
@@ -1970,9 +1989,10 @@ class SeriesCarousel {
             console.log(`SeriesCarousel: Se encontraron ${this.seriesData.length} series`);
             
             if (this.seriesData.length === 0) {
+                const fallbackMatch = ("https://www.themoviedb.org/tv/12345").match(/(movie|tv)\/(\d+)/);
                 this.seriesData = [
                     {
-                        id: "series_12345",
+                        id: fallbackMatch ? fallbackMatch[2] : "series_12345",
                         title: "Ejemplo de serie",
                         description: "Esta es una serie de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
                         posterUrl: "https://via.placeholder.com/194x271",
@@ -2004,9 +2024,10 @@ class SeriesCarousel {
             }
         } catch (error) {
             console.error('Error cargando datos de series:', error);
+            const fallbackMatch2 = ("https://www.themoviedb.org/tv/12345").match(/(movie|tv)\/(\d+)/);
             this.seriesData = [
                 {
-                    id: "series_12345",
+                    id: fallbackMatch2 ? fallbackMatch2[2] : "series_12345",
                     title: "Ejemplo de serie",
                     description: "Esta es una serie de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
                     posterUrl: "https://via.placeholder.com/194x271",
@@ -2415,8 +2436,11 @@ class DocumentalesCarousel {
                     } catch (e) {
                         // si algo falla, no bloqueramos la carga
                     }
+                    // Usar ID TMDB como id canónico si existe para consistencia con extractor y share
+                    const tmdbMatch = (item['TMDB'] || '').match(/(movie|tv)\/(\d+)/);
+                    const tmdbNumericId = tmdbMatch ? tmdbMatch[2] : (item['ID TMDB'] || '').toString().trim();
                     this.docuData.push({
-                        id: `docu_${docuIndex}`,
+                        id: tmdbNumericId || `docu_${docuIndex}`,
                         title: item['Título'] || 'Sin título',
                         description: item['Synopsis'] || 'Descripción no disponible',
                         posterUrl: item['Portada'] || '',
@@ -2440,9 +2464,10 @@ class DocumentalesCarousel {
                 }
             }
             if (this.docuData.length === 0) {
+                const fallbackMatch = ("https://www.themoviedb.org/movie/12345").match(/(movie|tv)\/(\d+)/);
                 this.docuData = [
                     {
-                        id: "docu_12345",
+                        id: fallbackMatch ? fallbackMatch[2] : "docu_12345",
                         title: "Ejemplo de documental",
                         description: "Este es un documental de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
                         posterUrl: "https://via.placeholder.com/194x271",
@@ -2467,9 +2492,10 @@ class DocumentalesCarousel {
             this.showCarousel();
             this.renderItems();
         } catch (error) {
+            const fallbackMatch2 = ("https://www.themoviedb.org/movie/12345").match(/(movie|tv)\/(\d+)/);
             this.docuData = [
                 {
-                    id: "docu_12345",
+                    id: fallbackMatch2 ? fallbackMatch2[2] : "docu_12345",
                     title: "Ejemplo de documental",
                     description: "Este es un documental de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
                     posterUrl: "https://via.placeholder.com/194x271",

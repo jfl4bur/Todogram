@@ -828,10 +828,13 @@ class DetailsModal {
     }
 
     updateUrlForModal(item) {
-        if (!item || item.id === '0') return;
+        if (!item) return;
+        // Usar TMDB ID si está disponible; si no, caer a id actual
+        const canonicalId = (item.tmdbId || item['ID TMDB'] || item.id || '').toString();
+        if (!canonicalId || canonicalId === '0') return;
         const normalizedTitle = this.normalizeText(item.title);
         // Construir nuevo hash con id y title pero preservar parámetros adicionales existentes (ej. ep)
-        const newHashBase = `id=${item.id}&title=${normalizedTitle}`;
+        const newHashBase = `id=${canonicalId}&title=${normalizedTitle}`;
         const existingHash = window.location.hash.substring(1);
         let extras = '';
         if (existingHash) {
@@ -899,7 +902,8 @@ class DetailsModal {
         const title = `Mira ${item.title} en nuestra plataforma`;
         const description = item.description || 'Una gran película que no te puedes perder';
         const imageUrl = item.posterUrl || 'https://via.placeholder.com/194x271';
-        const url = `${window.location.origin}${window.location.pathname}#id=${item.id}&title=${this.normalizeText(item.title)}`;
+    const canonicalId = (item.tmdbId || item['ID TMDB'] || item.id || '').toString();
+    const url = `${window.location.origin}${window.location.pathname}#id=${canonicalId}&title=${this.normalizeText(item.title)}`;
         
         // Verificar que los elementos meta existan antes de intentar actualizarlos
         const ogTitle = document.getElementById('og-title');
