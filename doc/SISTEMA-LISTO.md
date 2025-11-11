@@ -49,29 +49,9 @@ window.generateShareUrl = function(item, originalUrl) {
 #### `public/js/hover-modal.js`
 - Restaurado para usar `generateShareUrl`
 
-## 🧪 Validación Completa
+## 🧪 Validación
 
-```bash
-node scripts/test-share.js
-```
-
-Resultado:
-```
-✅ Archivo existe
-✅ Tamaño: 3400 bytes
-✅ Tiene og:title: true
-✅ Tiene og:image: true
-✅ Tiene og:description: true
-✅ Tiene twitter:card: true
-
-📋 CONTENIDO:
-   Título: Los bárbaros
-   Imagen: https://res.cloudinary.com/...
-   Descripción: Durante la crisis económica de 2008...
-   Redirección: https://todogram.free.nf/#id=1478178&title=los-b-rbaros
-
-🎉 TODO CORRECTO!
-```
+Validado manualmente en producción: las páginas de `public/share/` contienen meta tags OG/Twitter correctas y redirigen a la SPA.
 
 ## 📝 Próximos Pasos (SOLO FALTA ESTO)
 
@@ -117,7 +97,6 @@ git push
 
 ### Nuevos
 - `scripts/build-share-pages.js` (generador)
-- `scripts/test-share.js` (validador)
 - `public/share/*.html` (810 páginas)
 - `public/share/index.html` (índice)
 - `doc/share-system-final.md` (documentación completa)

@@ -184,8 +184,8 @@ npx http-server
 │   │   ├── main.js              # 🚀 Inicialización principal
 │   │   ├── share-modal.js       # 🔗 Sistema de compartir
 │   │   └── video-modal.js       # 🎥 Reproductor de video
-│   ├── 📄 template/
-│   │   └── movie-template.html  # 📋 Plantilla para compartir
+│   ├── 📄 share/                
+│   │   └── [id]-[slug].html    # 📋 Páginas estáticas para compartir
 │   └── 🏠 index.html            # 🌟 Página principal
 ├── 📊 data.json                 # 🎬 Base de datos de películas
 ├── 📖 README.md                 # 📚 Documentación
