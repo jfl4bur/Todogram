@@ -8,13 +8,33 @@
         catch(e){ console.error('catalogo load error', e); return []; }
     }
 
+    // Extrae un ID TMDB numérico desde una URL TMDB (movie|tv)
+    function extractTMDBIdFromUrl(url){
+        try{
+            if(!url) return null;
+            const m = String(url).match(/\/\/(?:www\.)?themoviedb\.org\/(movie|tv)\/(\d+)/);
+            if(m && m[2]) return m[2];
+        }catch(e){ /* ignore */ }
+        return null;
+    }
+
     function buildItemFromData(d, index){
         const rawGenres = d['Géneros'] || d['Género'] || '';
         // Normalizar lista de géneros (divisores comunes: · , / | ;)
         const genresList = String(rawGenres).split(/·|\||,|\/|;/).map(s=>s.trim()).filter(Boolean);
         const originalCategory = d['Categoría'] || '';
+        // Determinar el id canónico (numérico TMDB si existe, si no intentar extraer de la URL, si no fallback incremental)
+        let canonicalId = null;
+        try{ if(d['ID TMDB']) canonicalId = String(d['ID TMDB']).trim(); }catch(e){}
+        if(!canonicalId){
+            const parsed = extractTMDBIdFromUrl(d['TMDB'] || d['TMDB URL'] || d['TMDB_URL']);
+            if(parsed) canonicalId = String(parsed);
+        }
+        if(!canonicalId){ canonicalId = `i_${index}`; }
+
         return {
-            id: d['ID TMDB'] ? String(d['ID TMDB']) : `i_${index}`,
+            id: canonicalId,
+            tmdbId: canonicalId && /^\d+$/.test(canonicalId) ? canonicalId : null,
             title: d['Título'] || d['Título original'] || 'Sin título',
             originalTitle: d['Título original'] || '',
             description: d['Synopsis'] || d['Sinopsis'] || d['Descripción'] || '',
@@ -147,6 +167,13 @@
         } catch (e) { console.warn('catalogo: error wiring image loader', e); }
 
         // Helper to open details modal from any input (click, pointer, touch)
+        // Normalizador de slug local (usa global normalizeText si existe)
+        function localNormalizeSlug(t){
+            const s = String(t||'');
+            try{ if(typeof normalizeText === 'function') return normalizeText(s); }catch(e){/*ignore*/}
+            try{ return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'-').replace(/-+/g,'-').replace(/^-|-$/g,''); }catch(e){ return s.toLowerCase().replace(/\s+/g,'-'); }
+        }
+
         const openDetails = () => {
             // Use the same simple flow as carousels: find an existing canonical item if available
             // and delegate entirely to DetailsModal.show so it performs normalization, URL updates
@@ -155,6 +182,19 @@
                 try {
                     const existing = findExistingItemById(it.id);
                     const itemToShow = existing || it;
+                    // Antes de abrir el modal, asegurar hash unificado #id=NUMERIC_ID&title=slug
+                    try{
+                        // Construir slug desde el título (como en generateShareUrl)
+                        const slug = localNormalizeSlug(itemToShow.title);
+                        // Preferir tmdbId numérico (id numérico). Si no es numérico usar su id tal cual.
+                        const numericId = itemToShow.tmdbId || (/^\d+$/.test(itemToShow.id) ? itemToShow.id : itemToShow.tmdbId);
+                        const finalId = numericId || itemToShow.id;
+                        if(finalId){
+                            const targetHash = `#id=${finalId}&title=${slug}`;
+                            // Solo actualizar si el hash actual difiere (evita history spam en pointerup/click duplicados)
+                            if(window.location.hash !== targetHash){ window.location.hash = targetHash; }
+                        }
+                    }catch(e){ console.warn('catalogo: error estableciendo hash unificado', e); }
                     // Instrumentación: log y asegurar window.activeItem antes de delegar
                     try { window.activeItem = itemToShow; } catch(e){}
                     try { console.debug && console.debug('catalogo.openDetails -> calling detailsModal.show', { source: 'catalogo', id: itemToShow.id, title: itemToShow.title }); } catch(e){}
