@@ -134,7 +134,19 @@ document.addEventListener('DOMContentLoaded', function () {
         // Función para generar URL de compartir (nuevo formato episodios: id-<slug-episodio>.html sin -epNN)
         window.generateShareUrl = function(item) {
             try {
-                const id = (item && (item.id || item.tmdbId || item['ID TMDB'])) ? String(item.id || item.tmdbId || item['ID TMDB']) : '';
+                // Elegir SIEMPRE un ID numérico TMDB si está disponible (evitar ep_anime_*, ep_* u otros ids sintéticos)
+                const idCandidates = [];
+                if (item) {
+                    if (item.tmdbId) idCandidates.push(String(item.tmdbId));
+                    if (item['ID TMDB']) idCandidates.push(String(item['ID TMDB']));
+                    if (item.tmdbUrl || item['TMDB']) {
+                        const m = String(item.tmdbUrl || item['TMDB']).match(/(movie|tv)\/(\d+)/);
+                        if (m && m[2]) idCandidates.push(m[2]);
+                    }
+                    if (item.id) idCandidates.push(String(item.id));
+                }
+                const numericId = idCandidates.find(v => /^\d+$/.test(v)) || '';
+                const id = numericId || (idCandidates[0] || '');
                 if (!id) return window.location.href;
 
                 // Detectar si es un episodio (propiedades típicas)

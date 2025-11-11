@@ -553,10 +553,15 @@ class EpisodiosAnimesCarousel {
             let epIndex = 0;
             for (const item of data) {
                 if (item && typeof item === 'object' && item['Categoría'] === 'Animes' && item['Título episodio'] && item['Título episodio'].trim() !== '') {
+                    // Intentar obtener siempre un ID TMDB numérico para el episodio (usamos el ID de la serie/anime)
                     const tmdbMatch = (item['TMDB'] || '').match(/(movie|tv)\/(\d+)/);
-                    const tmdbNumericId = tmdbMatch ? tmdbMatch[2] : (item['ID TMDB'] || '').toString().trim();
+                    const idFromUrl = tmdbMatch ? tmdbMatch[2] : '';
+                    const idFromField = (item['ID TMDB'] || '').toString().trim();
+                    const tmdbNumericId = (idFromUrl && /^\d+$/.test(idFromUrl)) ? idFromUrl : ((/^\d+$/.test(idFromField) ? idFromField : ''));
+                    const finalId = tmdbNumericId || `ep_anime_${epIndex}`; // fallback solo si no hay TMDB
                     this.episodiosData.push({
-                        id: tmdbNumericId || `ep_anime_${epIndex}`,
+                        id: finalId,
+                        tmdbId: tmdbNumericId || '',
                         title: item['Título episodio'] || 'Sin título',
                         serie: item['Título'] || '',
                         description: item['Synopsis'] || 'Descripción no disponible',
