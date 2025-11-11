@@ -2,6 +2,42 @@
 (async function(){
     const CATALOG_HASH = '#catalogo';
 
+    // Asegurar que el catálogo use el mismo formato de compartir que los carruseles.
+    // Si generateShareUrl no está definido (esta página no carga main.js), definimos aquí
+    // una versión equivalente: https://jfl4bur.github.io/Todogram/public/share/<id>-<slug>.html
+    if (typeof window.generateShareUrl !== 'function') {
+        window.generateShareUrl = function(item) {
+            try {
+                if (!item) return window.location.href;
+                const ids = [];
+                if (item.tmdbId) ids.push(String(item.tmdbId));
+                if (item['ID TMDB']) ids.push(String(item['ID TMDB']));
+                if (item.tmdbUrl || item['TMDB']) {
+                    const m = String(item.tmdbUrl || item['TMDB']).match(/(movie|tv)\/(\d+)/);
+                    if (m && m[2]) ids.push(m[2]);
+                }
+                if (item.id) ids.push(String(item.id));
+                const numericId = ids.find(v => /^\d+$/.test(v)) || '';
+                const id = numericId || (ids[0] || '');
+                if (!id) return window.location.href;
+
+                // título para slug: para episodios usa Título episodio si existe
+                const isEpisode = !!(item && (item.episodeIndex || item['Título episodio'] || item.isEpisode));
+                const rawTitle = isEpisode ? (item['Título episodio'] || item.title || item['Título'] || '')
+                                           : (item.title || item['Título'] || '');
+                // Importante: mantener el mismo algoritmo de extractor/main.js (sin quitar diacríticos):
+                // pasar a minúsculas y reemplazar todo lo no [a-z0-9] por '-'
+                const slug = String(rawTitle)
+                    .toLowerCase()
+                    .replace(/[^a-z0-9]+/g, '-')
+                    .replace(/^-|-$/g, '');
+                return `https://jfl4bur.github.io/Todogram/public/share/${id}-${slug}.html`;
+            } catch (e) {
+                return window.location.href;
+            }
+        };
+    }
+
     async function loadData(){
         if(window.sharedData) return window.sharedData;
         try{ const res = await fetch(DATA_URL); if(!res.ok) throw new Error('No se pudo cargar data.json'); const data = await res.json(); window.sharedData = data; return data; }
@@ -182,6 +218,8 @@
                 try {
                     const existing = findExistingItemById(it.id);
                     const itemToShow = existing || it;
+                    // Precalcular shareUrl para que el modal de compartir use la página estática correcta
+                    try { if (typeof window.generateShareUrl === 'function') { itemToShow.shareUrl = window.generateShareUrl(itemToShow); } } catch(e) {}
                     // Antes de abrir el modal, asegurar hash unificado #id=NUMERIC_ID&title=slug
                     try{
                         // Construir slug desde el título (como en generateShareUrl)
