@@ -134,32 +134,12 @@ document.addEventListener('DOMContentLoaded', function () {
         // Función para generar URL de compartir
         window.generateShareUrl = function(item, originalUrl) {
             try {
-                // Resolver ID efectivo (preferir TMDB), y título base para slug
-                let id = '';
-                if (item) {
-                    if (item['ID TMDB']) id = String(item['ID TMDB']);
-                    else if (item.tmdbId) id = String(item.tmdbId);
-                    else if (item.tmdbUrl) {
-                        const m = String(item.tmdbUrl).match(/\/(movie|tv)\/(\d+)/);
-                        if (m && m[2]) id = m[2];
-                    } else if (item.id && /^\d+$/.test(String(item.id))) {
-                        id = String(item.id);
-                    } else if (item.id) {
-                        // último recurso: intentar extraer número de id textual (no ideal)
-                        const m2 = String(item.id).match(/(\d{3,})/);
-                        if (m2) id = m2[1];
-                    }
-                }
-                // Base title: si es episodio, preferir el título de la serie/documental/anime en item.serie o item['Título']
-                let baseTitle = '';
-                if (item) {
-                    if (item.serie) baseTitle = String(item.serie);
-                    else if (item['Título']) baseTitle = String(item['Título']);
-                    else if (item.title) baseTitle = String(item.title);
-                }
+                // Obtener ID y título para slug (con varios fallbacks)
+                const id = (item && (item.id || item.tmdbId || item['ID TMDB'])) ? String(item.id || item.tmdbId || item['ID TMDB']) : '';
+                const title = (item && (item.title || item['Título'])) ? String(item.title || item['Título']) : '';
                 // Alinear el slug con las páginas generadas por el extractor (integrado en admin/extractor.js)
                 // Importante: no quitar acentos; se reemplazan por '-'
-                const titleSlug = baseTitle
+                const titleSlug = title
                     .toLowerCase()
                     .replace(/[^a-z0-9]+/g, '-')
                     .replace(/^-|-$/g, '');
@@ -175,13 +155,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         if (epVal && /^\d+$/.test(epVal)) ep = epVal;
                     }
                 } catch (e) { /* ignore */ }
-                // Si no hay 'ep' en hash, intentar derivarlo del item (episodio)
-                if (!ep && item) {
-                    const candidates = [item.episodioNum, item.episodeIndex, item['Episodios']];
-                    for (const c of candidates) {
-                        if (c != null && String(c).trim() !== '' && /^\d+$/.test(String(c))) { ep = String(c); break; }
-                    }
-                }
 
                 // Ruta real publicada en GitHub Pages (incluye /public/)
                 if (ep) {
