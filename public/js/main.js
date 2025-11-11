@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Obtener ID y título para slug
             const id = item.id || '';
             const title = item.title || '';
-            // Alinear el slug con el generador de páginas (build-share-pages.js)
+            // Alinear el slug con las páginas generadas por el extractor (integrado en admin/extractor.js)
             // Importante: no quitar acentos; se reemplazan por '-'
             const titleSlug = title
                 .toLowerCase()

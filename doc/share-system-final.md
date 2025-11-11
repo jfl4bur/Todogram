@@ -7,9 +7,7 @@ Este sistema genera páginas HTML estáticas con meta tags para Open Graph y Twi
 ## 📋 Cómo Funciona
 
 ### 1. Generación de Páginas Estáticas
-- **Script**: `scripts/build-share-pages.js`
-- **Comando**: `node scripts/build-share-pages.js`
-- **Salida**: `public/share/[ID]-[titulo-slug].html`
+- Integrado en el extractor local (`admin/extractor.js`): tras crear `public/data.json` se generan las páginas en `public/share/[ID]-[titulo-slug].html`.
 
 El script lee `public/data.json` y genera una página HTML estática para cada película/serie con:
 - Meta tags de Open Graph (Facebook, WhatsApp)
@@ -31,11 +29,8 @@ Cuando el usuario hace clic en "Compartir":
 
 ## 🔧 Archivos Modificados
 
-### `scripts/build-share-pages.js`
-```javascript
-// Genera páginas HTML estáticas con meta tags
-node scripts/build-share-pages.js
-```
+### Generación integrada
+El extractor se encarga de generar todas las páginas HTML estáticas con meta tags al finalizar la extracción.
 
 ### `public/js/main.js`
 ```javascript
@@ -67,12 +62,7 @@ this.currentSocialUrl = socialUrl;     // Para redes sociales (página estática
 
 ## 🔄 Actualización de Páginas
 
-Cuando agregues nuevas películas a `data.json`, ejecuta:
-```bash
-node scripts/build-share-pages.js
-```
-
-Esto regenerará todas las páginas con la información actualizada.
+Al ejecutar el extractor local, se regeneran `public/data.json` y todas las páginas estáticas automáticamente.
 
 ## ✅ Validación
 

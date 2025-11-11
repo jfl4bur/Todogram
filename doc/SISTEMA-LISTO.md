@@ -11,10 +11,8 @@ Todo el sistema de compartir en redes sociales está **completamente funcional y
 - Cada película tiene su propia página con meta tags
 - Ejemplo: `1478178-los-b-rbaros.html`
 
-### 2. ✅ Script de generación automática
-- Archivo: `scripts/build-share-pages.js`
-- Comando: `node scripts/build-share-pages.js`
-- Genera todas las páginas desde `data.json`
+### 2. ✅ Generación automática integrada en el extractor
+- La generación de páginas estáticas se ejecuta automáticamente dentro de `admin/extractor.js` tras crear/actualizar `public/data.json`.
 
 ### 3. ✅ Sistema de dos URLs
 **Para copiar** (lo que ve el usuario):
@@ -85,18 +83,10 @@ git push origin main
 
 ## 🔄 Actualizar Páginas
 
-Cuando agregues nuevas películas:
-```bash
-node scripts/build-share-pages.js
-git add public/share/
-git commit -m "Actualizar páginas de compartir"
-git push
-```
+Cuando agregues nuevas películas y ejecutes el extractor local, este generará `public/data.json` y las páginas de `public/share/` automáticamente. Luego utiliza el auto-push local para subir `public/data.json` y `public/share/`.
 
 ## ✅ Archivos Creados/Modificados
 
-### Nuevos
-- `scripts/build-share-pages.js` (generador)
 - `public/share/*.html` (810 páginas)
 - `public/share/index.html` (índice)
 - `doc/share-system-final.md` (documentación completa)
