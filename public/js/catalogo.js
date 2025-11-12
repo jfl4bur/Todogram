@@ -54,6 +54,15 @@
         return null;
     }
 
+    function isValidIframeValue(v){
+        if(!v) return false;
+        const s = String(v).trim();
+        if(!s) return false;
+        // Considerar válidos sólo valores que parezcan un embed/URL real
+        // Aceptamos si contiene '<iframe', 'src=' o 'http'
+        return /<\s*iframe|\bsrc\s*=|https?:\/\//i.test(s);
+    }
+
     function buildItemFromData(d, index){
         const rawGenres = d['Géneros'] || d['Género'] || '';
         // Normalizar lista de géneros (divisores comunes: · , / | ;)
@@ -67,6 +76,10 @@
             if(parsed) canonicalId = String(parsed);
         }
         if(!canonicalId){ canonicalId = `i_${index}`; }
+
+        // Sanitizar iframes: sólo aceptar valores que parezcan reales
+        const vi = isValidIframeValue(d['Video iframe']) ? String(d['Video iframe']).trim() : '';
+        const vi1 = isValidIframeValue(d['Video iframe 1']) ? String(d['Video iframe 1']).trim() : '';
 
         return {
             id: canonicalId,
@@ -86,9 +99,9 @@
             genresList: genresList,
             year: d['Año'] || '',
             duration: d['Duración'] || '',
-            // REGLA ESTRICTA: sólo considerar exactamente "Video iframe" y "Video iframe 1"
-            videoIframe: d['Video iframe'] || '',
-            videoIframe1: d['Video iframe 1'] || '',
+            // REGLA ESTRICTA + sanitización
+            videoIframe: vi,
+            videoIframe1: vi1,
             videoUrl: d['Video'] || d['Enlace'] || d['Ver Película'] || '',
             trailerUrl: d['Trailer'] || d['TrailerUrl'] || '',
             cast: d['Reparto principal'] || d['Reparto'] || '',
