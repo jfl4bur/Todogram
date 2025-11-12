@@ -441,8 +441,8 @@
     async function initPage(rootSelector='#catalogo-page-root'){
         const root = document.querySelector(rootSelector); if(!root){ console.error('Catalogo: root no encontrado', rootSelector); return; }
         // Ensure modals exist (catalog page might be loaded standalone)
-        try{ if(!window.hoverModal && typeof HoverModal === 'function') window.hoverModal = new HoverModal(); }catch(e){}
-        try{ if(!window.detailsModal && typeof DetailsModal === 'function') window.detailsModal = new DetailsModal(); }catch(e){}
+    try{ if(!window.hoverModal && typeof HoverModal === 'function') window.hoverModal = new HoverModal(); }catch(e){}
+    try{ if(!window.detailsModal && typeof DetailsModal === 'function') window.detailsModal = new DetailsModal(); }catch(e){}
         try{ if(!window.videoModal && typeof VideoModal === 'function') window.videoModal = new VideoModal(); }catch(e){}
         try{ if(!window.shareModal && typeof ShareModal === 'function') window.shareModal = new ShareModal(); }catch(e){}
     root.innerHTML = `\n            <div class="catalogo-page">\n                <div class="catalogo-page-header">\n                    <div class="catalogo-controls">\n                        <div class="catalogo-genre-dropdown" id="catalogo-genre-dropdown-page">\n                            <button id="catalogo-genre-button-page" aria-haspopup="true" aria-expanded="false"><span class="label">Todo el catálogo</span>\n                                <svg class="chev" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>\n                            </button>\n                            <div id="catalogo-genre-list-page" class="catalogo-genre-list" style="display:none" role="menu"></div>\n                        </div>\n                    </div>\n                    <div class="catalogo-tabs" id="catalogo-tabs-page">\n                        <button data-tab="Películas" class="catalogo-tab active">Películas</button>\n                        <button data-tab="Series" class="catalogo-tab">Series</button>\n                        <button data-tab="Documentales" class="catalogo-tab">Documentales</button>\n                        <button data-tab="Animes" class="catalogo-tab">Animes</button>\n                    </div>\n                </div>\n                <div class="catalogo-page-body">\n                    <div class="skeleton-catalogo" id="catalogo-skeleton-page" aria-hidden="true">\n                        <div class="skeleton-item-catalogo" role="presentation"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo" role="presentation"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo" role="presentation"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo" role="presentation"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo" role="presentation"><div class="skeleton-spinner"></div></div>\n                        <div class="skeleton-item-catalogo" role="presentation"><div class="skeleton-spinner"></div></div>\n                    </div>\n                    <div class="catalogo-grid" id="catalogo-grid-page" role="list" aria-busy="false"></div>\n                </div>\n            </div>\n        `;
@@ -458,6 +458,47 @@
     function getGenreLabel(){ try{ const lbl = genreBtn && genreBtn.querySelector && genreBtn.querySelector('.label'); return lbl ? lbl.textContent.trim() : (genreBtn ? genreBtn.textContent.replace(' ▾','').trim() : 'Todo el catálogo'); }catch(e){ return 'Todo el catálogo'; } }
     function setGenreLabel(text){ try{ if(!genreBtn) return; const lbl = genreBtn.querySelector && genreBtn.querySelector('.label'); if(lbl) lbl.textContent = text; else genreBtn.textContent = text + ' ▾'; }catch(e){} }
     const grid = document.getElementById('catalogo-grid-page');
+    // Enforcer de regla estricta en modales por si los scripts remotos no están aún actualizados
+    function hasPlayableIframe(item){
+        try{ return !!(item && ((item['Video iframe'] && String(item['Video iframe']).trim()) || (item['Video iframe 1'] && String(item['Video iframe 1']).trim()) || (item.videoIframe && String(item.videoIframe).trim()) || (item.videoIframe1 && String(item.videoIframe1).trim()))); }catch(e){ return false; }
+    }
+
+    // Quitar botón "Ver Película" si no hay iframe válido (Details Modal)
+    try{
+        const detailsRoot = document.getElementById('details-modal-content');
+        if(detailsRoot && !detailsRoot.__strict_enforced){
+            const obs = new MutationObserver(() => {
+                try{
+                    const it = window.activeItem || null;
+                    if(!hasPlayableIframe(it)){
+                        const playBtn = detailsRoot.querySelector('.details-modal-action-btn.primary.big-btn');
+                        if(playBtn) playBtn.remove();
+                    }
+                }catch(e){}
+            });
+            obs.observe(detailsRoot, { subtree:true, childList:true });
+            detailsRoot.__strict_enforced = true;
+        }
+    }catch(e){}
+
+    // Quitar botón "Ver Película" si no hay iframe válido (Hover Modal)
+    try{
+        const hoverRoot = document.getElementById('modal-content');
+        if(hoverRoot && !hoverRoot.__strict_enforced){
+            const obs2 = new MutationObserver(() => {
+                try{
+                    const it = (window.hoverModal && window.hoverModal._currentItem) || window.activeItem || null;
+                    if(!hasPlayableIframe(it)){
+                        const playBtn = hoverRoot.querySelector('.details-modal-action-btn.primary');
+                        if(playBtn) playBtn.remove();
+                    }
+                }catch(e){}
+            });
+            obs2.observe(hoverRoot, { subtree:true, childList:true });
+            hoverRoot.__strict_enforced = true;
+        }
+    }catch(e){}
+
     if(grid){ grid.style.columnGap = grid.style.columnGap || getComputedStyle(document.documentElement).getPropertyValue('--catalogo-gap') || '18px'; grid.style.rowGap = grid.style.rowGap || getComputedStyle(document.documentElement).getPropertyValue('--catalogo-row-gap') || '48px'; }
 
     // Prevent hover modal from showing on touch devices (long-press) and
