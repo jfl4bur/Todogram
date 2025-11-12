@@ -497,7 +497,8 @@ class DetailsModal {
             console.log('DetailsModal: Agregando botón principal', { label: playLabel, url: preferredVideo });
             actionButtons += `<button class="details-modal-action-btn primary big-btn" data-video-url="${preferredVideo}"><i class="fas fa-play"></i><span>${playLabel}</span><span class="tooltip">Reproducir</span></button>`;
         } else {
-            console.log('DetailsModal: Ocultando botón principal (sin Video iframe) para:', item.title);
+            console.log('DetailsModal: Sin video disponible, mostrando botón de detalles para:', item.title);
+            actionButtons += `<button class="details-modal-action-btn primary big-btn" data-open-details="true"><i class="fas fa-info-circle"></i><span>Ver Detalles</span><span class="tooltip">Más información</span></button>`;
         }
         
         if (preferredVideo) {
@@ -699,6 +700,21 @@ class DetailsModal {
                         if (dataVideo) {
                             try { window.open(dataVideo, '_blank'); } catch(e) { console.warn('details-modal: fallback open failed', e); }
                         }
+                    }
+                });
+            });
+
+            this.detailsModalBody.querySelectorAll('.details-modal-action-btn[data-open-details]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    try {
+                        if (this.detailsModalContent && typeof this.detailsModalContent.scrollTo === 'function') {
+                            this.detailsModalContent.scrollTo({ top: 0, behavior: 'smooth' });
+                        } else if (this.detailsModalContent) {
+                            this.detailsModalContent.scrollTop = 0;
+                        }
+                    } catch (err) {
+                        console.warn('details-modal: scroll fallback al hacer clic en botón de detalles', err);
                     }
                 });
             });

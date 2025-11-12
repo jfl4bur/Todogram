@@ -168,6 +168,16 @@ class HoverModal {
                     </button>
                 </div>
             `;
+        } else {
+            actionButtons += `
+                <div class="primary-action-row">
+                    <button class="details-modal-action-btn primary" data-open-details="true">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Ver Detalles</span>
+                        <span class="tooltip">Más información</span>
+                    </button>
+                </div>
+            `;
         }
         
         let secondaryButtons = '<div class="secondary-actions-row">';
@@ -592,8 +602,21 @@ class HoverModal {
     // Delegated click handler for modal content (attached once in constructor)
     _onContentClick(e) {
         e.stopPropagation();
-        // Find actionable elements: data-video-url or share-button
-        const actionEl = e.target.closest('[data-video-url], #share-button');
+        // Find actionable elements: play/trailer buttons, fallback details button or share button
+    const actionEl = e.target.closest('[data-video-url], [data-open-details], #share-button');
+        if (actionEl && actionEl.hasAttribute('data-open-details')) {
+            const item = this._currentItem;
+            const origin = this._currentOrigin;
+            this.close();
+            if (item && window.detailsModal && typeof window.detailsModal.show === 'function') {
+                try {
+                    window.detailsModal.show(item, origin);
+                } catch (err) {
+                    console.warn('hover-modal: fallo al abrir detailsModal desde botón de detalles', err);
+                }
+            }
+            return;
+        }
 
         if (!actionEl) {
             // Clicked on modal content but not on a specific action -> open details
