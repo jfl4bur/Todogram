@@ -91,6 +91,8 @@ function determinePrimaryActionLabel(item){
     return fallback;
 }
 
+const DEFAULT_DETAILS_BACKDROP_PLACEHOLDER = 'https://www.themoviedb.org/assets/2/v4/glyphicons/basic/glyphicons-basic-4-user-grey-d8fe957375e70239d6abdd549fd7568c89281b2179b5f4470e2e12895792dfa5.svg';
+
 class DetailsModal {
     constructor() {
         this.detailsModalOverlay = document.getElementById('details-modal-overlay');
@@ -98,11 +100,15 @@ class DetailsModal {
         this.detailsModalBackdrop = document.getElementById('details-modal-backdrop');
         this.detailsModalBody = document.getElementById('details-modal-body');
         this.detailsModalClose = document.getElementById('details-modal-close');
+        this.detailsModalHeader = this.detailsModalContent ? this.detailsModalContent.querySelector('.details-modal-header') : null;
         this.activeItem = null;
         this.isDetailsModalOpen = false;
     this.preModalHash = null;
         this.TMDB_API_KEY = 'f28077ae6a89b54c86be927ea88d64d9';
         this.domCache = {}; // Cache para elementos DOM frecuentemente usados
+        this._detailsBackdropLoadHandler = null;
+        this._detailsBackdropErrorHandler = null;
+        this._detailsBackdropFallbackApplied = false;
 
         if (!this.detailsModalOverlay || !this.detailsModalContent) {
             console.error("Elementos del modal de detalles no encontrados");
@@ -140,6 +146,63 @@ class DetailsModal {
 
         this.galleryImages = [];
         this.currentGalleryIndex = 0;
+    }
+
+    _detachDetailsBackdropListeners() {
+        if (!this.detailsModalBackdrop) return;
+        if (this._detailsBackdropLoadHandler) {
+            try { this.detailsModalBackdrop.removeEventListener('load', this._detailsBackdropLoadHandler); } catch (e) {}
+            this._detailsBackdropLoadHandler = null;
+        }
+        if (this._detailsBackdropErrorHandler) {
+            try { this.detailsModalBackdrop.removeEventListener('error', this._detailsBackdropErrorHandler); } catch (e) {}
+            this._detailsBackdropErrorHandler = null;
+        }
+    }
+
+    _handleDetailsBackdropSettled() {
+        this._detachDetailsBackdropListeners();
+        try { this.detailsModalBackdrop.classList.remove('backdrop-loading'); } catch (e) {}
+        try { if (this.detailsModalHeader) this.detailsModalHeader.classList.remove('backdrop-loading'); } catch (e) {}
+    }
+
+    _setDetailsBackdropImage(src) {
+        if (!this.detailsModalBackdrop) return;
+
+        this._handleDetailsBackdropSettled();
+
+        try { this.detailsModalBackdrop.classList.add('backdrop-loading'); } catch (e) {}
+        try { if (this.detailsModalHeader) this.detailsModalHeader.classList.add('backdrop-loading'); } catch (e) {}
+
+        const fallback = DEFAULT_DETAILS_BACKDROP_PLACEHOLDER;
+        this._detailsBackdropFallbackApplied = false;
+
+        const onLoad = () => {
+            this._handleDetailsBackdropSettled();
+        };
+
+        const onError = () => {
+            if (!this._detailsBackdropFallbackApplied && fallback) {
+                this._detailsBackdropFallbackApplied = true;
+                this.detailsModalBackdrop.src = fallback;
+            } else {
+                this._handleDetailsBackdropSettled();
+            }
+        };
+
+        this._detailsBackdropLoadHandler = onLoad;
+        this._detailsBackdropErrorHandler = onError;
+
+        try {
+            this.detailsModalBackdrop.addEventListener('load', this._detailsBackdropLoadHandler, { once: true });
+        } catch (e) {
+            this.detailsModalBackdrop.addEventListener('load', this._detailsBackdropLoadHandler);
+        }
+        this.detailsModalBackdrop.addEventListener('error', this._detailsBackdropErrorHandler);
+
+        const finalSrc = src && String(src).trim() ? src : fallback;
+        if (finalSrc === fallback) this._detailsBackdropFallbackApplied = true;
+        this.detailsModalBackdrop.src = finalSrc;
     }
 
     // Abre un player embebido en fullscreen usando un iframe
@@ -461,10 +524,7 @@ class DetailsModal {
         // Usar postersUrl como prioridad (campo "Carteles")
         const backdropUrl = item.postersUrl || item.backgroundUrl || item.posterUrl || (tmdbImages.backdrops[0]?.file_path || item.posterUrl);
         
-        this.detailsModalBackdrop.src = backdropUrl;
-        this.detailsModalBackdrop.onerror = function() {
-            this.src = 'https://www.themoviedb.org/assets/2/v4/glyphicons/basic/glyphicons-basic-4-user-grey-d8fe957375e70239d6abdd549fd7568c89281b2179b5f4470e2e12895792dfa5.svg';
-        };
+        this._setDetailsBackdropImage(backdropUrl);
         
     const trailerUrl = item.trailerUrl || (tmdbData?.trailer_url || '');
     // REGLA ESTRICTA: Sólo considerar iframes/URLs válidos para el botón principal
@@ -825,6 +885,8 @@ class DetailsModal {
             console.warn('DetailsModal.close() called; ms since open:', since);
             console.trace();
         } catch (e) {}
+
+        this._handleDetailsBackdropSettled();
         this.detailsModalContent.style.transform = 'translateY(20px)';
         this.detailsModalContent.style.opacity = '0';
         this.detailsModalOverlay.style.opacity = '0';

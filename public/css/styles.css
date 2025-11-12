@@ -8368,3 +8368,20 @@ body {
     opacity: 1;
     pointer-events: auto;
 }
+
+.modal-header.backdrop-loading,
+.details-modal-header.backdrop-loading {
+    background-color: rgba(42, 42, 42, 0.5);
+}
+
+.modal-header.backdrop-loading::after,
+.details-modal-header.backdrop-loading::after {
+    opacity: 0;
+}
+
+.modal-header.backdrop-loading .modal-backdrop,
+.details-modal-header.backdrop-loading .details-modal-backdrop,
+.modal-backdrop.backdrop-loading,
+.details-modal-backdrop.backdrop-loading {
+    opacity: 0 !important;
+}

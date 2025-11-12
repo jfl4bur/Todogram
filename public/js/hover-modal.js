@@ -53,12 +53,15 @@ function determinePrimaryActionLabel(item){
     return fallback;
 }
 
+const DEFAULT_MODAL_BACKDROP_PLACEHOLDER = 'https://www.themoviedb.org/assets/2/v4/glyphicons/basic/glyphicons-basic-4-user-grey-d8fe957375e70239d6abdd549fd7568c89281b2179b5f4470e2e12895792dfa5.svg';
+
 class HoverModal {
     constructor() {
         this.modalOverlay = document.getElementById('modal-overlay');
         this.modalContent = document.getElementById('modal-content');
         this.modalBackdrop = document.getElementById('modal-backdrop');
         this.modalBody = document.getElementById('modal-body');
+        this.modalHeader = this.modalContent ? this.modalContent.querySelector('.modal-header') : null;
     // Try common carousel/container selectors; fallback to body so positioning still works
     this.carouselContainer = document.querySelector('.carousel-container') || document.querySelector('.catalogo-grid') || document.querySelector('#catalogo-grid-page') || document.body;
         this.activeItem = null;
@@ -97,6 +100,9 @@ class HoverModal {
     this._carouselPositionChanged = false;
     // whether we rendered the visual via portal clone
     this._portalActive = false;
+        this._hoverBackdropLoadHandler = null;
+        this._hoverBackdropErrorHandler = null;
+        this._hoverBackdropFallbackApplied = false;
 
         // Attach delegated listeners once
         this.modalContent.addEventListener('mouseenter', this._onMouseEnter);
@@ -130,10 +136,7 @@ class HoverModal {
         // Usar postersUrl como prioridad (campo "Carteles")
         const backdropUrl = item.postersUrl || item.backgroundUrl || item.posterUrl;
         
-        this.modalBackdrop.src = backdropUrl;
-        this.modalBackdrop.onerror = function() {
-            this.src = 'https://www.themoviedb.org/assets/2/v4/glyphicons/basic/glyphicons-basic-4-user-grey-d8fe957375e70239d6abdd549fd7568c89281b2179b5f4470e2e12895792dfa5.svg';
-        };
+        this._setHoverBackdropImage(backdropUrl);
         
     const trailerUrl = item.trailerUrl;
     // REGLA ESTRICTA: Sólo considerar iframes/URLs válidos para mostrar el botón principal
@@ -395,6 +398,7 @@ class HoverModal {
         // clear any pending hide timer
         this.cancelHide();
         this.isVisible = false;
+        this._handleHoverBackdropSettled();
         // remove show class to trigger hide transition
         this.modalContent.classList.remove('show');
 
@@ -567,6 +571,63 @@ class HoverModal {
             // schedule hide to avoid flicker when moving from item to modal
             this.hide();
         }
+    }
+
+    _detachHoverBackdropListeners() {
+        if (!this.modalBackdrop) return;
+        if (this._hoverBackdropLoadHandler) {
+            try { this.modalBackdrop.removeEventListener('load', this._hoverBackdropLoadHandler); } catch (e) {}
+            this._hoverBackdropLoadHandler = null;
+        }
+        if (this._hoverBackdropErrorHandler) {
+            try { this.modalBackdrop.removeEventListener('error', this._hoverBackdropErrorHandler); } catch (e) {}
+            this._hoverBackdropErrorHandler = null;
+        }
+    }
+
+    _handleHoverBackdropSettled() {
+        this._detachHoverBackdropListeners();
+        try { this.modalBackdrop.classList.remove('backdrop-loading'); } catch (e) {}
+        try { if (this.modalHeader) this.modalHeader.classList.remove('backdrop-loading'); } catch (e) {}
+    }
+
+    _setHoverBackdropImage(src) {
+        if (!this.modalBackdrop) return;
+
+        this._handleHoverBackdropSettled();
+
+        try { this.modalBackdrop.classList.add('backdrop-loading'); } catch (e) {}
+        try { if (this.modalHeader) this.modalHeader.classList.add('backdrop-loading'); } catch (e) {}
+
+        const fallback = DEFAULT_MODAL_BACKDROP_PLACEHOLDER;
+        this._hoverBackdropFallbackApplied = false;
+
+        const onLoad = () => {
+            this._handleHoverBackdropSettled();
+        };
+
+        const onError = () => {
+            if (!this._hoverBackdropFallbackApplied && fallback) {
+                this._hoverBackdropFallbackApplied = true;
+                this.modalBackdrop.src = fallback;
+            } else {
+                this._handleHoverBackdropSettled();
+            }
+        };
+
+        this._hoverBackdropLoadHandler = onLoad;
+        this._hoverBackdropErrorHandler = onError;
+
+        try {
+            this.modalBackdrop.addEventListener('load', this._hoverBackdropLoadHandler, { once: true });
+        } catch (e) {
+            this.modalBackdrop.addEventListener('load', this._hoverBackdropLoadHandler);
+        }
+        this.modalBackdrop.addEventListener('error', this._hoverBackdropErrorHandler);
+
+        const finalSrc = src && String(src).trim() ? src : fallback;
+        if (finalSrc === fallback) this._hoverBackdropFallbackApplied = true;
+        this.modalBackdrop.src = finalSrc;
     }
 
     _onMouseEnter(e){
