@@ -411,8 +411,8 @@ class DetailsModal {
         };
         
     const trailerUrl = item.trailerUrl || (tmdbData?.trailer_url || '');
-    // REGLA ESTRICTA: Sólo considerar los campos "Video iframe" o "Video iframe 1" para mostrar botón Ver Película
-    const preferredVideo = item['Video iframe'] || item['Video iframe 1'] || item.videoIframe || item.videoIframe1 || '';
+    // REGLA ESTRICTA: Sólo considerar los campos EXACTOS "Video iframe" o "Video iframe 1"
+    const preferredVideo = item['Video iframe'] || item['Video iframe 1'] || '';
         
         let metaItems = [];
         
