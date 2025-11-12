@@ -220,14 +220,6 @@
                     const itemToShow = existing || it;
                     // Precalcular shareUrl para que el modal de compartir use la página estática correcta
                     try { if (typeof window.generateShareUrl === 'function') { itemToShow.shareUrl = window.generateShareUrl(itemToShow); } } catch(e) {}
-                    // Refuerzo de campos de video para la regla estricta: exponer claves con espacios si no existen
-                    try {
-                        const r = itemToShow.raw || {};
-                        const vi = itemToShow.videoIframe || r['Video iframe'] || r['Video iframe 1'] || r['Video iframe1'] || '';
-                        const vi1 = itemToShow.videoIframe1 || r['Video iframe 1'] || '';
-                        if (vi && !itemToShow['Video iframe']) itemToShow['Video iframe'] = vi;
-                        if (vi1 && !itemToShow['Video iframe 1']) itemToShow['Video iframe 1'] = vi1;
-                    } catch (e) { /* noop */ }
                     // Antes de abrir el modal, asegurar hash unificado #id=NUMERIC_ID&title=slug
                     try{
                         // Construir slug desde el título (como en generateShareUrl)
