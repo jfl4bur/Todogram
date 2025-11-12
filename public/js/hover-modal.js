@@ -81,8 +81,8 @@ class HoverModal {
         };
         
     const trailerUrl = item.trailerUrl;
-    // Accept iframe-based video links too (many records use 'Video iframe')
-    const preferredVideo = item.videoUrl || item.videoIframe || item.videoIframe1 || item.videoIframe1 || item.videoIframe;
+    // REGLA ESTRICTA: Sólo considerar los campos "Video iframe" o "Video iframe 1" para mostrar botón Ver Película
+    const preferredVideo = item['Video iframe'] || item['Video iframe 1'] || item.videoIframe || item.videoIframe1 || '';
         
         let metaItems = [];
         
@@ -102,7 +102,7 @@ class HoverModal {
         
         let actionButtons = '';
         
-        if (preferredVideo) {
+        if (preferredVideo && String(preferredVideo).trim() !== '') {
             actionButtons += `
                 <div class="primary-action-row">
                     <button class="details-modal-action-btn primary" data-video-url="${preferredVideo}">

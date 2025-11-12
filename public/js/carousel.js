@@ -46,10 +46,9 @@ class EpisodiosSeriesCarousel {
         this.itemsPerPage = 0;
         this.index = 0;
         this.step = 0;
-        this.moreAppended = false;
-        this.episodiosData = [];
-        this.hoverTimeouts = {};
-        if (!this.wrapper || !this.skeleton || !this.carouselContainer) return;
+    this.moreAppended = false;
+    this.hoverTimeouts = {};
+    if (!this.wrapper || !this.skeleton || !this.carouselContainer) return;
         if (!this.carouselPrev || !this.carouselNext || !this.carouselNav) {
             const observer = new MutationObserver(() => {
                 this.carouselPrev = document.getElementById('episodios-series-carousel-prev');
@@ -61,7 +60,6 @@ class EpisodiosSeriesCarousel {
                 }
             });
             observer.observe(document.body, { childList: true, subtree: true });
-            return;
         }
         this.init();
     }
@@ -145,7 +143,10 @@ class EpisodiosSeriesCarousel {
                         ageRating: item['Clasificación'] || '',
                         link: item['Enlace'] || '#',
                         trailerUrl: item['Trailer'] || '',
-                        videoUrl: item['Video iframe'] || '',
+                        // REGLA ESTRICTA: sólo usar Video iframe / Video iframe 1
+                        videoUrl: item['Video iframe'] || item['Video iframe 1'] || '',
+                        videoIframe: item['Video iframe'] || '',
+                        videoIframe1: item['Video iframe 1'] || '',
                         tmdbUrl: item['TMDB'] || '',
                         audiosCount: item['Audios'] ? item['Audios'].split(',').length : 0,
                         subtitlesCount: item['Subtítulos'] ? item['Subtítulos'].split(',').length : 0,
@@ -159,7 +160,7 @@ class EpisodiosSeriesCarousel {
             }
             if (this.episodiosData.length === 0) {
                 const fallbackMatch = ("https://www.themoviedb.org/tv/12345").match(/(movie|tv)\/(\d+)/);
-                this.episodiosData = [
+                    this.episodiosData = [
                     {
                         id: fallbackMatch ? fallbackMatch[2] : "ep_12345",
                         title: "Ejemplo de episodio",
@@ -174,7 +175,9 @@ class EpisodiosSeriesCarousel {
                         ageRating: "16",
                         link: "#",
                         trailerUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-                        videoUrl: "https://ejemplo.com/video.mp4",
+                            videoUrl: "",
+                            videoIframe: "",
+                            videoIframe1: "",
                         tmdbUrl: "https://www.themoviedb.org/tv/12345",
                         audiosCount: 1,
                         subtitlesCount: 1,
@@ -574,7 +577,10 @@ class EpisodiosAnimesCarousel {
                         ageRating: item['Clasificación'] || '',
                         link: item['Enlace'] || '#',
                         trailerUrl: item['Trailer'] || '',
-                        videoUrl: item['Video iframe'] || '',
+                        // REGLA ESTRICTA: sólo usar Video iframe / Video iframe 1
+                        videoUrl: item['Video iframe'] || item['Video iframe 1'] || '',
+                        videoIframe: item['Video iframe'] || '',
+                        videoIframe1: item['Video iframe 1'] || '',
                         tmdbUrl: item['TMDB'] || '',
                         audiosCount: item['Audios'] ? item['Audios'].split(',').length : 0,
                         subtitlesCount: item['Subtítulos'] ? item['Subtítulos'].split(',').length : 0,
@@ -877,7 +883,10 @@ class EpisodiosDocumentalesCarousel {
                         ageRating: item['Clasificación'] || '',
                         link: item['Enlace'] || '#',
                         trailerUrl: item['Trailer'] || '',
-                        videoUrl: item['Video iframe'] || '',
+                        // REGLA ESTRICTA: sólo usar Video iframe / Video iframe 1
+                        videoUrl: item['Video iframe'] || item['Video iframe 1'] || '',
+                        videoIframe: item['Video iframe'] || '',
+                        videoIframe1: item['Video iframe 1'] || '',
                         tmdbUrl: item['TMDB'] || '',
                         audiosCount: item['Audios'] ? item['Audios'].split(',').length : 0,
                         subtitlesCount: item['Subtítulos'] ? item['Subtítulos'].split(',').length : 0,
@@ -1187,7 +1196,10 @@ class AnimesCarousel {
                         ageRating: item['Clasificación'] || '',
                         link: item['Enlace'] || '#',
                         trailerUrl: item['Trailer'] || '',
-                        videoUrl: item['Video iframe'] || '',
+                        // REGLA ESTRICTA: sólo usar Video iframe / Video iframe 1
+                        videoUrl: item['Video iframe'] || item['Video iframe 1'] || '',
+                        videoIframe: item['Video iframe'] || '',
+                        videoIframe1: item['Video iframe 1'] || '',
                         tmdbUrl: item['TMDB'] || '',
                         audiosCount: item['Audios'] ? item['Audios'].split(',').length : 0,
                         subtitlesCount: item['Subtítulos'] ? item['Subtítulos'].split(',').length : 0,
@@ -1514,7 +1526,10 @@ class Carousel {
                     ageRating: item['Clasificación'] || '',
                     link: item['Enlace'] || '#',
                     trailerUrl: item['Trailer'] || '',
-                    videoUrl: item['Video iframe'] || '',
+                    // REGLA ESTRICTA: sólo usar Video iframe / Video iframe 1
+                    videoUrl: item['Video iframe'] || item['Video iframe 1'] || '',
+                    videoIframe: item['Video iframe'] || '',
+                    videoIframe1: item['Video iframe 1'] || '',
                     tmdbUrl: item['TMDB'] || '',
                     audiosCount: item['Audios'] ? item['Audios'].split(',').length : 0,
                     subtitlesCount: item['Subtítulos'] ? item['Subtítulos'].split(',').length : 0,
@@ -1980,7 +1995,10 @@ class SeriesCarousel {
                         ageRating: item['Clasificación'] || '',
                         link: item['Enlace'] || '#',
                         trailerUrl: item['Trailer'] || '',
-                        videoUrl: item['Video iframe'] || '',
+                        // REGLA ESTRICTA: sólo usar Video iframe / Video iframe 1
+                        videoUrl: item['Video iframe'] || item['Video iframe 1'] || '',
+                        videoIframe: item['Video iframe'] || '',
+                        videoIframe1: item['Video iframe 1'] || '',
                         tmdbUrl: item['TMDB'] || '',
                         audiosCount: item['Audios'] ? item['Audios'].split(',').length : 0,
                         subtitlesCount: item['Subtítulos'] ? item['Subtítulos'].split(',').length : 0,
@@ -2458,7 +2476,10 @@ class DocumentalesCarousel {
                         ageRating: item['Clasificación'] || '',
                         link: item['Enlace'] || '#',
                         trailerUrl: item['Trailer'] || '',
-                        videoUrl: item['Video iframe'] || '',
+                        // REGLA ESTRICTA: sólo usar Video iframe / Video iframe 1
+                        videoUrl: item['Video iframe'] || item['Video iframe 1'] || '',
+                        videoIframe: item['Video iframe'] || '',
+                        videoIframe1: item['Video iframe 1'] || '',
                         tmdbUrl: item['TMDB'] || '',
                         audiosCount: item['Audios'] ? item['Audios'].split(',').length : 0,
                         subtitlesCount: item['Subtítulos'] ? item['Subtítulos'].split(',').length : 0,
