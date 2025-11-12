@@ -306,7 +306,10 @@
                         if(finalId){
                             const targetHash = `#id=${finalId}&title=${slug}`;
                             // Solo actualizar si el hash actual difiere (evita history spam en pointerup/click duplicados)
-                            if(window.location.hash !== targetHash){ window.location.hash = targetHash; }
+                            if(window.location.hash !== targetHash){
+                                try { window.__catalogIgnoreNextHashChange = true; } catch (err) {}
+                                window.location.hash = targetHash;
+                            }
                         }
                     }catch(e){ console.warn('catalogo: error estableciendo hash unificado', e); }
                     // Instrumentación: log y asegurar window.activeItem antes de delegar
@@ -966,6 +969,10 @@
 
         // hash change: update filters and optionally open details if id present
         window.addEventListener('hashchange', ()=>{
+            if (window.__catalogIgnoreNextHashChange) {
+                try { window.__catalogIgnoreNextHashChange = false; } catch (err) { window.__catalogIgnoreNextHashChange = false; }
+                return;
+            }
             const parsed = parseCatalogHash();
             if(parsed){
                 if(parsed.tab){
