@@ -643,6 +643,23 @@ class DetailsModal {
             ${postersGallery}
             ${backdropsGallery}
         `;
+
+        // Reemplazar esqueletos inmediatamente para evitar parpadeos y respetar el flujo del contenido
+        try {
+            if (posters.length > 0) {
+                const postersSection = this.createGallerySection(posters, 'Carteles', 'posters');
+                const postersContainer = this.detailsModalBody.querySelector('.details-modal-gallery-section:has(.gallery-skeleton)');
+                if (postersContainer) postersContainer.outerHTML = postersSection;
+            }
+            if (backdrops.length > 0) {
+                const backdropsSection = this.createGallerySection(backdrops, 'Imágenes de fondo', 'backdrops');
+                const backdropsContainer = this.detailsModalBody.querySelectorAll('.details-modal-gallery-section:has(.gallery-skeleton)')[1] || 
+                                           this.detailsModalBody.querySelector('.details-modal-gallery-section:has(.gallery-skeleton)');
+                if (backdropsContainer) backdropsContainer.outerHTML = backdropsSection;
+            }
+        } catch (err) {
+            console.warn('details-modal: fallo reemplazando galerías', err);
+        }
         
         void this.detailsModalOverlay.offsetWidth;
         
@@ -651,19 +668,6 @@ class DetailsModal {
         this.detailsModalContent.style.opacity = '1';
         
         setTimeout(() => {
-            if (posters.length > 0) {
-                const postersSection = this.createGallerySection(posters, 'Carteles', 'posters');
-                const postersContainer = this.detailsModalBody.querySelector('.details-modal-gallery-section:has(.gallery-skeleton)');
-                if (postersContainer) postersContainer.outerHTML = postersSection;
-            }
-            
-            if (backdrops.length > 0) {
-                const backdropsSection = this.createGallerySection(backdrops, 'Imágenes de fondo', 'backdrops');
-                const backdropsContainer = this.detailsModalBody.querySelectorAll('.details-modal-gallery-section:has(.gallery-skeleton)')[1] || 
-                                           this.detailsModalBody.querySelector('.details-modal-gallery-section:has(.gallery-skeleton)');
-                if (backdropsContainer) backdropsContainer.outerHTML = backdropsSection;
-            }
-            
             this.detailsModalBody.querySelectorAll('.details-modal-action-btn[data-video-url]').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
