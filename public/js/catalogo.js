@@ -55,7 +55,7 @@
     }
 
     function buildItemFromData(d, index){
-        const rawGenres = d['Géneros'] || d['Género'] || '';
+    const rawGenres = d['Géneros'] || d['Género'] || '';
         // Normalizar lista de géneros (divisores comunes: · , / | ;)
         const genresList = String(rawGenres).split(/·|\||,|\/|;/).map(s=>s.trim()).filter(Boolean);
         const originalCategory = d['Categoría'] || '';
@@ -68,6 +68,8 @@
         }
         if(!canonicalId){ canonicalId = `i_${index}`; }
 
+        const videoIframePrimary = (d['Video iframe'] || '').toString().trim();
+        const videoIframeSecondary = (d['Video iframe 1'] || d['Video iframe1'] || '').toString().trim();
         return {
             id: canonicalId,
             tmdbId: canonicalId && /^\d+$/.test(canonicalId) ? canonicalId : null,
@@ -86,7 +88,10 @@
             genresList: genresList,
             year: d['Año'] || '',
             duration: d['Duración'] || '',
-            videoIframe: d['Video iframe'] || d['Video iframe 1'] || d['Video iframe1'] || '',
+            videoIframe: videoIframePrimary,
+            videoIframe1: videoIframeSecondary,
+            'Video iframe': videoIframePrimary,
+            'Video iframe 1': videoIframeSecondary,
             videoUrl: d['Video'] || d['Enlace'] || d['Ver Película'] || '',
             trailerUrl: d['Trailer'] || d['TrailerUrl'] || '',
             cast: d['Reparto principal'] || d['Reparto'] || '',
@@ -218,6 +223,15 @@
                 try {
                     const existing = findExistingItemById(it.id);
                     const itemToShow = existing || it;
+                    // Garantizar que los campos de video queden alineados con la regla estricta
+                    try {
+                        const fallbackVideo = (it && typeof it.videoIframe === 'string') ? it.videoIframe : '';
+                        const fallbackVideo1 = (it && typeof it.videoIframe1 === 'string') ? it.videoIframe1 : '';
+                        itemToShow.videoIframe = (itemToShow.videoIframe && typeof itemToShow.videoIframe === 'string') ? itemToShow.videoIframe.trim() : fallbackVideo;
+                        itemToShow.videoIframe1 = (itemToShow.videoIframe1 && typeof itemToShow.videoIframe1 === 'string') ? itemToShow.videoIframe1.trim() : fallbackVideo1;
+                        itemToShow['Video iframe'] = itemToShow.videoIframe || fallbackVideo;
+                        itemToShow['Video iframe 1'] = itemToShow.videoIframe1 || fallbackVideo1;
+                    } catch(e) { /* ignore */ }
                     // Precalcular shareUrl para que el modal de compartir use la página estática correcta
                     try { if (typeof window.generateShareUrl === 'function') { itemToShow.shareUrl = window.generateShareUrl(itemToShow); } } catch(e) {}
                     // Antes de abrir el modal, asegurar hash unificado #id=NUMERIC_ID&title=slug
