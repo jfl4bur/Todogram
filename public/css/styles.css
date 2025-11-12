@@ -8374,9 +8374,23 @@ body {
     background-color: rgba(42, 42, 42, 0.5);
 }
 
-.modal-header.backdrop-loading::after,
+.modal-header.backdrop-loading::after {
+    z-index: 1100;
+    position: absolute;
+    inset: 0px;
+    top: 5px;
+    border-radius: inherit;
+    background: linear-gradient(transparent 40%, rgb(0, 0, 0) 100%);
+}
+
+
 .details-modal-header.backdrop-loading::after {
-    opacity: 0;
+    z-index: 1100;
+    position: absolute;
+    inset: 0px;
+    top: 5px;
+    border-radius: inherit;
+    background: linear-gradient(rgba(16, 16, 16, 0) 40%, rgb(16, 16, 16) 100%);
 }
 
 .modal-header.backdrop-loading .modal-backdrop,
