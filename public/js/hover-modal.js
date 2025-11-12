@@ -17,6 +17,42 @@ function pickHoverPreferredVideo(){
     return '';
 }
 
+function isEpisodeItem(item){
+    if(!item || typeof item !== 'object') return false;
+    if(item.isEpisode) return true;
+    if(item.episodioNum || item.temporada) return true;
+    const raw = (item.raw && typeof item.raw === 'object') ? item.raw : item;
+    const keys = ['Título episodio', 'Título episodio completo', 'Título episodio 1', 'Título episodio (completo)', 'episodeTitle', 'episodeIndex'];
+    for(const key of keys){
+        if(raw && raw[key] && String(raw[key]).trim() !== '') return true;
+    }
+    return false;
+}
+
+function determinePrimaryActionLabel(item){
+    const fallback = 'Ver Película';
+    if(!item || typeof item !== 'object') return fallback;
+    if(isEpisodeItem(item)) return 'Ver Episodio';
+    const candidates = [];
+    if(item.category) candidates.push(item.category);
+    if(item.originalCategory) candidates.push(item.originalCategory);
+    if(item['Categoría']) candidates.push(item['Categoría']);
+    if(item.categoryLabel) candidates.push(item.categoryLabel);
+    if(item.raw && typeof item.raw === 'object'){
+        if(item.raw['Categoría']) candidates.push(item.raw['Categoría']);
+        if(item.raw.category) candidates.push(item.raw.category);
+    }
+    for(const candidate of candidates){
+        const normalized = String(candidate || '').trim().toLowerCase();
+        if(!normalized) continue;
+        if(normalized.includes('documental')) return 'Ver Documental';
+        if(normalized.includes('anime')) return 'Ver Anime';
+        if(normalized.includes('serie')) return 'Ver Serie';
+        if(normalized.includes('episodio')) return 'Ver Episodio';
+    }
+    return fallback;
+}
+
 class HoverModal {
     constructor() {
         this.modalOverlay = document.getElementById('modal-overlay');
@@ -100,8 +136,9 @@ class HoverModal {
         };
         
     const trailerUrl = item.trailerUrl;
-    // REGLA ESTRICTA: Sólo considerar iframes/URLs válidos para mostrar el botón Ver Película
+    // REGLA ESTRICTA: Sólo considerar iframes/URLs válidos para mostrar el botón principal
     const preferredVideo = pickHoverPreferredVideo(item['Video iframe'], item['Video iframe 1'], item.videoIframe, item.videoIframe1, item.videoUrl);
+    const primaryLabel = determinePrimaryActionLabel(item);
         
         let metaItems = [];
         
@@ -126,7 +163,7 @@ class HoverModal {
                 <div class="primary-action-row">
                     <button class="details-modal-action-btn primary" data-video-url="${preferredVideo}">
                         <i class="fas fa-play"></i>
-                        <span>Ver Película</span>
+                        <span>${primaryLabel}</span>
                         <span class="tooltip">Reproducir</span>
                     </button>
                 </div>

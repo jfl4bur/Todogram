@@ -132,6 +132,7 @@ class EpisodiosSeriesCarousel {
                     this.episodiosData.push({
                         id: tmdbNumericId || `ep_${epIndex}`,
                         title: item['Título episodio'] || 'Sin título',
+                        category: 'Series',
                         serie: item['Título'] || '',
                         description: item['Synopsis'] || 'Descripción no disponible',
                         posterUrl: item['Portada'] || '',
@@ -153,7 +154,8 @@ class EpisodiosSeriesCarousel {
                         audioList: item['Audios'] ? item['Audios'].split(',') : [],
                         subtitleList: item['Subtítulos'] ? item['Subtítulos'].split(',') : [],
                         episodioNum: item['Episodio'] || '',
-                        temporada: item['Temporada'] || ''
+                        temporada: item['Temporada'] || '',
+                        isEpisode: true
                     });
                     epIndex++;
                 }
@@ -164,6 +166,7 @@ class EpisodiosSeriesCarousel {
                     {
                         id: fallbackMatch ? fallbackMatch[2] : "ep_12345",
                         title: "Ejemplo de episodio",
+                        category: "Series",
                         serie: "Serie de ejemplo",
                         description: "Este es un episodio de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
                         posterUrl: "https://via.placeholder.com/246x138",
@@ -184,7 +187,8 @@ class EpisodiosSeriesCarousel {
                         audioList: ["Español"],
                         subtitleList: ["Español"],
                         episodioNum: "1",
-                        temporada: "1"
+                        temporada: "1",
+                        isEpisode: true
                     }
                 ];
             }
@@ -201,6 +205,7 @@ class EpisodiosSeriesCarousel {
                 {
                     id: "ep_12345",
                     title: "Ejemplo de episodio",
+                    category: "Series",
                     serie: "Serie de ejemplo",
                     description: "Este es un episodio de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
                     posterUrl: "https://via.placeholder.com/246x138",
@@ -219,7 +224,8 @@ class EpisodiosSeriesCarousel {
                     audioList: ["Español"],
                     subtitleList: ["Español"],
                     episodioNum: "1",
-                    temporada: "1"
+                    temporada: "1",
+                    isEpisode: true
                 }
             ];
             this.showCarousel();
@@ -566,6 +572,7 @@ class EpisodiosAnimesCarousel {
                         id: finalId,
                         tmdbId: tmdbNumericId || '',
                         title: item['Título episodio'] || 'Sin título',
+                        category: 'Animes',
                         serie: item['Título'] || '',
                         description: item['Synopsis'] || 'Descripción no disponible',
                         posterUrl: item['Portada'] || '',
@@ -587,20 +594,21 @@ class EpisodiosAnimesCarousel {
                         audioList: item['Audios'] ? item['Audios'].split(',') : [],
                         subtitleList: item['Subtítulos'] ? item['Subtítulos'].split(',') : [],
                         episodioNum: item['Episodio'] || '',
-                        temporada: item['Temporada'] || ''
+                        temporada: item['Temporada'] || '',
+                        isEpisode: true
                     });
                     epIndex++;
                 }
             }
             if (this.episodiosData.length === 0) {
-                this.episodiosData = [{ id: "ep_anime_12345", title: "Ejemplo de episodio", serie: "Anime de ejemplo", description: "Ejemplo", posterUrl: "https://via.placeholder.com/246x138", backgroundUrl: "https://via.placeholder.com/246x138", year: "2023", duration: "24 min", genre: "Animación", rating: "8.0", ageRating: "13", link: "#", trailerUrl: "", videoUrl: "", tmdbUrl: "", audiosCount: 1, subtitlesCount: 1, audioList: ["JP"], subtitleList: ["ESP"], episodioNum: "1", temporada: "1" }];
+                this.episodiosData = [{ id: "ep_anime_12345", title: "Ejemplo de episodio", category: "Animes", serie: "Anime de ejemplo", description: "Ejemplo", posterUrl: "https://via.placeholder.com/246x138", backgroundUrl: "https://via.placeholder.com/246x138", year: "2023", duration: "24 min", genre: "Animación", rating: "8.0", ageRating: "13", link: "#", trailerUrl: "", videoUrl: "", tmdbUrl: "", audiosCount: 1, subtitlesCount: 1, audioList: ["JP"], subtitleList: ["ESP"], episodioNum: "1", temporada: "1", isEpisode: true }];
             }
             this.showCarousel();
             this.renderItems();
             setTimeout(() => this.scrollToHash(), 0);
             if (window.notifyDataLoaded) window.notifyDataLoaded();
         } catch (error) {
-            this.episodiosData = [{ id: "ep_anime_12345", title: "Ejemplo de episodio", serie: "Anime de ejemplo", description: "Ejemplo", posterUrl: "https://via.placeholder.com/246x138", backgroundUrl: "https://via.placeholder.com/246x138", year: "2023", duration: "24 min", genre: "Animación", rating: "8.0", ageRating: "13", link: "#", trailerUrl: "", videoUrl: "", tmdbUrl: "", audiosCount: 1, subtitlesCount: 1, audioList: ["JP"], subtitleList: ["ESP"], episodioNum: "1", temporada: "1" }];
+            this.episodiosData = [{ id: "ep_anime_12345", title: "Ejemplo de episodio", category: "Animes", serie: "Anime de ejemplo", description: "Ejemplo", posterUrl: "https://via.placeholder.com/246x138", backgroundUrl: "https://via.placeholder.com/246x138", year: "2023", duration: "24 min", genre: "Animación", rating: "8.0", ageRating: "13", link: "#", trailerUrl: "", videoUrl: "", tmdbUrl: "", audiosCount: 1, subtitlesCount: 1, audioList: ["JP"], subtitleList: ["ESP"], episodioNum: "1", temporada: "1", isEpisode: true }];
             this.showCarousel();
             this.renderItems();
             setTimeout(() => this.scrollToHash(), 0);
@@ -872,6 +880,7 @@ class EpisodiosDocumentalesCarousel {
                     this.episodiosData.push({
                         id: tmdbNumericId || `ep_docu_${epIndex}`,
                         title: item['Título episodio'] || 'Sin título',
+                        category: 'Documentales',
                         serie: item['Título'] || '',
                         description: item['Synopsis'] || 'Descripción no disponible',
                         posterUrl: item['Portada'] || '',
@@ -893,20 +902,21 @@ class EpisodiosDocumentalesCarousel {
                         audioList: item['Audios'] ? item['Audios'].split(',') : [],
                         subtitleList: item['Subtítulos'] ? item['Subtítulos'].split(',') : [],
                         episodioNum: item['Episodio'] || '',
-                        temporada: item['Temporada'] || ''
+                        temporada: item['Temporada'] || '',
+                        isEpisode: true
                     });
                     epIndex++;
                 }
             }
             if (this.episodiosData.length === 0) {
-                this.episodiosData = [{ id: "ep_docu_12345", title: "Ejemplo de episodio documental", serie: "Documental de ejemplo", description: "Ejemplo", posterUrl: "https://via.placeholder.com/246x138", backgroundUrl: "https://via.placeholder.com/246x138", year: "2023", duration: "30 min", genre: "Documental", rating: "7.5", ageRating: "0", link: "#", trailerUrl: "", videoUrl: "", tmdbUrl: "", audiosCount: 1, subtitlesCount: 1, audioList: ["Español"], subtitleList: ["Español"], episodioNum: "1", temporada: "1" }];
+                this.episodiosData = [{ id: "ep_docu_12345", title: "Ejemplo de episodio documental", category: "Documentales", serie: "Documental de ejemplo", description: "Ejemplo", posterUrl: "https://via.placeholder.com/246x138", backgroundUrl: "https://via.placeholder.com/246x138", year: "2023", duration: "30 min", genre: "Documental", rating: "7.5", ageRating: "0", link: "#", trailerUrl: "", videoUrl: "", tmdbUrl: "", audiosCount: 1, subtitlesCount: 1, audioList: ["Español"], subtitleList: ["Español"], episodioNum: "1", temporada: "1", isEpisode: true }];
             }
             this.showCarousel();
             this.renderItems();
             setTimeout(() => this.scrollToHash(), 0);
             if (window.notifyDataLoaded) window.notifyDataLoaded();
         } catch (error) {
-            this.episodiosData = [{ id: "ep_docu_12345", title: "Ejemplo de episodio documental", serie: "Documental de ejemplo", description: "Ejemplo", posterUrl: "https://via.placeholder.com/246x138", backgroundUrl: "https://via.placeholder.com/246x138", year: "2023", duration: "30 min", genre: "Documental", rating: "7.5", ageRating: "0", link: "#", trailerUrl: "", videoUrl: "", tmdbUrl: "", audiosCount: 1, subtitlesCount: 1, audioList: ["Español"], subtitleList: ["Español"], episodioNum: "1", temporada: "1" }];
+            this.episodiosData = [{ id: "ep_docu_12345", title: "Ejemplo de episodio documental", category: "Documentales", serie: "Documental de ejemplo", description: "Ejemplo", posterUrl: "https://via.placeholder.com/246x138", backgroundUrl: "https://via.placeholder.com/246x138", year: "2023", duration: "30 min", genre: "Documental", rating: "7.5", ageRating: "0", link: "#", trailerUrl: "", videoUrl: "", tmdbUrl: "", audiosCount: 1, subtitlesCount: 1, audioList: ["Español"], subtitleList: ["Español"], episodioNum: "1", temporada: "1", isEpisode: true }];
             this.showCarousel();
             this.renderItems();
             setTimeout(() => this.scrollToHash(), 0);
@@ -1185,6 +1195,7 @@ class AnimesCarousel {
                     this.animeData.push({
                         id: tmdbNumericId || `anime_${animeIndex}`,
                         title: item['Título'] || 'Sin título',
+                        category: 'Animes',
                         description: item['Synopsis'] || 'Descripción no disponible',
                         posterUrl: item['Portada'] || '',
                         postersUrl: item['Carteles'] || '',
@@ -1212,28 +1223,31 @@ class AnimesCarousel {
             }
             if (this.animeData.length === 0) {
                 const fallbackMatch = ("https://www.themoviedb.org/movie/12345").match(/(movie|tv)\/(\d+)/);
-                this.animeData = [
+                this.episodiosData = [
                     {
-                        id: fallbackMatch ? fallbackMatch[2] : "anime_12345",
-                        title: "Ejemplo de anime",
-                        description: "Este es un anime de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
-                        posterUrl: "https://via.placeholder.com/194x271",
-                        postersUrl: "https://via.placeholder.com/194x271",
-                        backgroundUrl: "https://via.placeholder.com/194x271",
+                        id: "ep_12345",
+                        title: "Ejemplo de episodio",
+                        category: "Series",
+                        serie: "Serie de ejemplo",
+                        description: "Este es un episodio de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
+                        posterUrl: "https://via.placeholder.com/246x138",
+                        backgroundUrl: "https://via.placeholder.com/246x138",
                         year: "2023",
-                        duration: "24 min",
-                        genre: "Acción",
+                        duration: "45 min",
+                        genre: "Drama",
                         rating: "8.5",
-                        ageRating: "TP",
+                        ageRating: "16",
                         link: "#",
                         trailerUrl: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
                         videoUrl: "https://ejemplo.com/video.mp4",
-                        tmdbUrl: "https://www.themoviedb.org/movie/12345",
+                        tmdbUrl: "https://www.themoviedb.org/tv/12345",
                         audiosCount: 1,
                         subtitlesCount: 1,
                         audioList: ["Español"],
                         subtitleList: ["Español"],
-                        episodes: []
+                        episodioNum: "1",
+                        temporada: "1",
+                        isEpisode: true
                     }
                 ];
             }
@@ -1244,7 +1258,8 @@ class AnimesCarousel {
             this.animeData = [
                 {
                     id: fallbackMatch2 ? fallbackMatch2[2] : "anime_12345",
-                    title: "Ejemplo de anime",
+                        title: "Ejemplo de anime",
+                        category: "Animes",
                     description: "Este es un anime de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
                     posterUrl: "https://via.placeholder.com/194x271",
                     postersUrl: "https://via.placeholder.com/194x271",
@@ -1512,6 +1527,7 @@ class Carousel {
                     id: item['ID TMDB'] || index.toString(),
                     'ID TMDB': item['ID TMDB'] || index.toString(),
                     title: item['Título'] || 'Sin título',
+                    category: 'Películas',
                     'Título': item['Título'] || 'Sin título',
                     description: item['Synopsis'] || 'Descripción no disponible',
                     'Synopsis': item['Synopsis'] || 'Descripción no disponible',
@@ -1542,6 +1558,7 @@ class Carousel {
                     {
                         id: "12345",
                         title: "Ejemplo de película",
+                        category: "Películas",
                         description: "Esta es una película de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
                         posterUrl: "https://via.placeholder.com/194x271",
                         postersUrl: "https://via.placeholder.com/194x271",
@@ -1575,7 +1592,8 @@ class Carousel {
             this.moviesData = [
                 {
                     id: "12345",
-                    title: "Ejemplo de película",
+                        title: "Ejemplo de película",
+                        category: "Películas",
                     description: "Esta es una película de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
                     posterUrl: "https://via.placeholder.com/194x271",
                     postersUrl: "https://via.placeholder.com/194x271",
@@ -1984,6 +2002,7 @@ class SeriesCarousel {
                     this.seriesData.push({
                         id: tmdbNumericId || `series_${seriesIndex}`,
                         title: item['Título'] || 'Sin título',
+                        category: 'Series',
                         description: item['Synopsis'] || 'Descripción no disponible',
                         posterUrl: item['Portada'] || '',
                         postersUrl: item['Carteles'] || '',
@@ -2017,6 +2036,7 @@ class SeriesCarousel {
                     {
                         id: fallbackMatch ? fallbackMatch[2] : "series_12345",
                         title: "Ejemplo de serie",
+                        category: "Series",
                         description: "Esta es una serie de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
                         posterUrl: "https://via.placeholder.com/194x271",
                         postersUrl: "https://via.placeholder.com/194x271",
@@ -2051,7 +2071,8 @@ class SeriesCarousel {
             this.seriesData = [
                 {
                     id: fallbackMatch2 ? fallbackMatch2[2] : "series_12345",
-                    title: "Ejemplo de serie",
+                        title: "Ejemplo de serie",
+                        category: "Series",
                     description: "Esta es una serie de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
                     posterUrl: "https://via.placeholder.com/194x271",
                     postersUrl: "https://via.placeholder.com/194x271",
@@ -2465,6 +2486,7 @@ class DocumentalesCarousel {
                     this.docuData.push({
                         id: tmdbNumericId || `docu_${docuIndex}`,
                         title: item['Título'] || 'Sin título',
+                        category: 'Documentales',
                         description: item['Synopsis'] || 'Descripción no disponible',
                         posterUrl: item['Portada'] || '',
                         postersUrl: item['Carteles'] || '',
@@ -2495,6 +2517,7 @@ class DocumentalesCarousel {
                     {
                         id: fallbackMatch ? fallbackMatch[2] : "docu_12345",
                         title: "Ejemplo de documental",
+                        category: "Documentales",
                         description: "Este es un documental de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
                         posterUrl: "https://via.placeholder.com/194x271",
                         postersUrl: "https://via.placeholder.com/194x271",
@@ -2522,7 +2545,8 @@ class DocumentalesCarousel {
             this.docuData = [
                 {
                     id: fallbackMatch2 ? fallbackMatch2[2] : "docu_12345",
-                    title: "Ejemplo de documental",
+                        title: "Ejemplo de documental",
+                        category: "Documentales",
                     description: "Este es un documental de ejemplo que se muestra cuando no se pueden cargar los datos reales.",
                     posterUrl: "https://via.placeholder.com/194x271",
                     postersUrl: "https://via.placeholder.com/194x271",

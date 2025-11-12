@@ -67,10 +67,11 @@
     }
 
     function buildItemFromData(d, index){
-    const rawGenres = d['Géneros'] || d['Género'] || '';
+        const rawGenres = d['Géneros'] || d['Género'] || '';
         // Normalizar lista de géneros (divisores comunes: · , / | ;)
         const genresList = String(rawGenres).split(/·|\||,|\/|;/).map(s=>s.trim()).filter(Boolean);
         const originalCategory = d['Categoría'] || '';
+        const isEpisodeItem = hasEpisodeInfo(d);
         // Determinar el id canónico (numérico TMDB si existe, si no intentar extraer de la URL, si no fallback incremental)
         let canonicalId = null;
         try{ if(d['ID TMDB']) canonicalId = String(d['ID TMDB']).trim(); }catch(e){}
@@ -80,8 +81,8 @@
         }
         if(!canonicalId){ canonicalId = `i_${index}`; }
 
-    const videoIframePrimary = normalizeIframeValue(d['Video iframe']);
-    const videoIframeSecondary = normalizeIframeValue(d['Video iframe 1'] || d['Video iframe1']);
+        const videoIframePrimary = normalizeIframeValue(d['Video iframe']);
+        const videoIframeSecondary = normalizeIframeValue(d['Video iframe 1'] || d['Video iframe1']);
         return {
             id: canonicalId,
             tmdbId: canonicalId && /^\d+$/.test(canonicalId) ? canonicalId : null,
@@ -93,6 +94,7 @@
             backgroundUrl: d['Carteles'] || d['Portada'] || '',
             category: originalCategory || 'Películas',
             originalCategory: originalCategory,
+            isEpisode: !!isEpisodeItem,
             // item.genre es la propiedad que esperan los modales (una cadena legible)
             genre: genresList.length ? genresList[0] : '',
             // mantener también la lista completa

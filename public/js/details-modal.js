@@ -55,6 +55,42 @@ function pickPreferredVideo(){
     return '';
 }
 
+function isEpisodeItem(item){
+    if(!item || typeof item !== 'object') return false;
+    if(item.isEpisode) return true;
+    if(item.episodioNum || item.temporada) return true;
+    const raw = (item.raw && typeof item.raw === 'object') ? item.raw : item;
+    const keys = ['Título episodio', 'Título episodio completo', 'Título episodio 1', 'Título episodio (completo)', 'episodeTitle', 'episodeIndex'];
+    for(const key of keys){
+        if(raw && raw[key] && String(raw[key]).trim() !== '') return true;
+    }
+    return false;
+}
+
+function determinePrimaryActionLabel(item){
+    const fallback = 'Ver Película';
+    if(!item || typeof item !== 'object') return fallback;
+    if(isEpisodeItem(item)) return 'Ver Episodio';
+    const candidates = [];
+    if(item.category) candidates.push(item.category);
+    if(item.originalCategory) candidates.push(item.originalCategory);
+    if(item['Categoría']) candidates.push(item['Categoría']);
+    if(item.categoryLabel) candidates.push(item.categoryLabel);
+    if(item.raw && typeof item.raw === 'object'){
+        if(item.raw['Categoría']) candidates.push(item.raw['Categoría']);
+        if(item.raw.category) candidates.push(item.raw.category);
+    }
+    for(const candidate of candidates){
+        const normalized = String(candidate || '').trim().toLowerCase();
+        if(!normalized) continue;
+        if(normalized.includes('documental')) return 'Ver Documental';
+        if(normalized.includes('anime')) return 'Ver Anime';
+        if(normalized.includes('serie')) return 'Ver Serie';
+        if(normalized.includes('episodio')) return 'Ver Episodio';
+    }
+    return fallback;
+}
+
 class DetailsModal {
     constructor() {
         this.detailsModalOverlay = document.getElementById('details-modal-overlay');
@@ -431,8 +467,9 @@ class DetailsModal {
         };
         
     const trailerUrl = item.trailerUrl || (tmdbData?.trailer_url || '');
-    // REGLA ESTRICTA: Sólo considerar iframes/URLs válidos para el botón Ver Película
+    // REGLA ESTRICTA: Sólo considerar iframes/URLs válidos para el botón principal
     const preferredVideo = pickPreferredVideo(item['Video iframe'], item['Video iframe 1'], item.videoIframe, item.videoIframe1, item.videoUrl);
+    const playLabel = determinePrimaryActionLabel(item);
         
         let metaItems = [];
         
@@ -457,10 +494,10 @@ class DetailsModal {
         let secondaryButtons = '';
         
         if (preferredVideo) {
-            console.log('DetailsModal: Agregando botón Ver Película (regla estricta) URL:', preferredVideo);
-            actionButtons += `<button class="details-modal-action-btn primary big-btn" data-video-url="${preferredVideo}"><i class="fas fa-play"></i><span>Ver Película</span><span class="tooltip">Reproducir</span></button>`;
+            console.log('DetailsModal: Agregando botón principal', { label: playLabel, url: preferredVideo });
+            actionButtons += `<button class="details-modal-action-btn primary big-btn" data-video-url="${preferredVideo}"><i class="fas fa-play"></i><span>${playLabel}</span><span class="tooltip">Reproducir</span></button>`;
         } else {
-            console.log('DetailsModal: Ocultando botón Ver Película (sin Video iframe) para:', item.title);
+            console.log('DetailsModal: Ocultando botón principal (sin Video iframe) para:', item.title);
         }
         
         if (preferredVideo) {
