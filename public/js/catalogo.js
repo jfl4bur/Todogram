@@ -38,6 +38,18 @@
         };
     }
 
+    function normalizeIframeValue(value){
+        try{
+            const raw = String(value || '').trim();
+            if(!raw) return '';
+            // Admitir códigos iframe completos o URLs directas http(s)//
+            const lower = raw.toLowerCase();
+            if(lower.includes('<iframe') && lower.includes('src=')) return raw;
+            if(/^https?:\/\//i.test(raw) || raw.startsWith('//')) return raw;
+            return '';
+        }catch(e){ return ''; }
+    }
+
     async function loadData(){
         if(window.sharedData) return window.sharedData;
         try{ const res = await fetch(DATA_URL); if(!res.ok) throw new Error('No se pudo cargar data.json'); const data = await res.json(); window.sharedData = data; return data; }
@@ -68,8 +80,8 @@
         }
         if(!canonicalId){ canonicalId = `i_${index}`; }
 
-        const videoIframePrimary = (d['Video iframe'] || '').toString().trim();
-        const videoIframeSecondary = (d['Video iframe 1'] || d['Video iframe1'] || '').toString().trim();
+    const videoIframePrimary = normalizeIframeValue(d['Video iframe']);
+    const videoIframeSecondary = normalizeIframeValue(d['Video iframe 1'] || d['Video iframe1']);
         return {
             id: canonicalId,
             tmdbId: canonicalId && /^\d+$/.test(canonicalId) ? canonicalId : null,

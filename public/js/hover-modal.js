@@ -1,3 +1,22 @@
+function normalizeHoverIframe(value){
+    try{
+        const raw = String(value || '').trim();
+        if(!raw) return '';
+        const lower = raw.toLowerCase();
+        if(lower.includes('<iframe') && lower.includes('src=')) return raw;
+        if(/^https?:\/\//i.test(raw) || raw.startsWith('//')) return raw;
+        return '';
+    }catch(e){ return ''; }
+}
+
+function pickHoverPreferredVideo(){
+    for(let i=0;i<arguments.length;i++){
+        const normalized = normalizeHoverIframe(arguments[i]);
+        if(normalized) return normalized;
+    }
+    return '';
+}
+
 class HoverModal {
     constructor() {
         this.modalOverlay = document.getElementById('modal-overlay');
@@ -81,8 +100,8 @@ class HoverModal {
         };
         
     const trailerUrl = item.trailerUrl;
-    // REGLA ESTRICTA: Sólo considerar los campos "Video iframe" o "Video iframe 1" para mostrar botón Ver Película
-    const preferredVideo = item['Video iframe'] || item['Video iframe 1'] || item.videoIframe || item.videoIframe1 || '';
+    // REGLA ESTRICTA: Sólo considerar iframes/URLs válidos para mostrar el botón Ver Película
+    const preferredVideo = pickHoverPreferredVideo(item['Video iframe'], item['Video iframe 1'], item.videoIframe, item.videoIframe1, item.videoUrl);
         
         let metaItems = [];
         
@@ -102,7 +121,7 @@ class HoverModal {
         
         let actionButtons = '';
         
-        if (preferredVideo && String(preferredVideo).trim() !== '') {
+        if (preferredVideo) {
             actionButtons += `
                 <div class="primary-action-row">
                     <button class="details-modal-action-btn primary" data-video-url="${preferredVideo}">

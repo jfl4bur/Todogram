@@ -35,6 +35,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 });
+
+function normalizeIframeSource(value){
+    try{
+        const raw = String(value || '').trim();
+        if(!raw) return '';
+        const lower = raw.toLowerCase();
+        if(lower.includes('<iframe') && lower.includes('src=')) return raw;
+        if(/^https?:\/\//i.test(raw) || raw.startsWith('//')) return raw;
+        return '';
+    }catch(e){ return ''; }
+}
+
+function pickPreferredVideo(){
+    for(let i=0;i<arguments.length;i++){
+        const normalized = normalizeIframeSource(arguments[i]);
+        if(normalized) return normalized;
+    }
+    return '';
+}
+
 class DetailsModal {
     constructor() {
         this.detailsModalOverlay = document.getElementById('details-modal-overlay');
@@ -411,8 +431,8 @@ class DetailsModal {
         };
         
     const trailerUrl = item.trailerUrl || (tmdbData?.trailer_url || '');
-    // REGLA ESTRICTA: Sólo considerar los campos "Video iframe" o "Video iframe 1" para mostrar botón Ver Película
-    const preferredVideo = item['Video iframe'] || item['Video iframe 1'] || item.videoIframe || item.videoIframe1 || '';
+    // REGLA ESTRICTA: Sólo considerar iframes/URLs válidos para el botón Ver Película
+    const preferredVideo = pickPreferredVideo(item['Video iframe'], item['Video iframe 1'], item.videoIframe, item.videoIframe1, item.videoUrl);
         
         let metaItems = [];
         
@@ -436,14 +456,14 @@ class DetailsModal {
         let actionButtons = '';
         let secondaryButtons = '';
         
-        if (preferredVideo && String(preferredVideo).trim() !== '') {
+        if (preferredVideo) {
             console.log('DetailsModal: Agregando botón Ver Película (regla estricta) URL:', preferredVideo);
             actionButtons += `<button class="details-modal-action-btn primary big-btn" data-video-url="${preferredVideo}"><i class="fas fa-play"></i><span>Ver Película</span><span class="tooltip">Reproducir</span></button>`;
         } else {
             console.log('DetailsModal: Ocultando botón Ver Película (sin Video iframe) para:', item.title);
         }
         
-        if (preferredVideo && String(preferredVideo).trim() !== '') {
+        if (preferredVideo) {
             console.log('DetailsModal: Agregando botón Descargar (regla estricta) URL:', preferredVideo);
             secondaryButtons += `<button class="details-modal-action-btn circular" onclick="window.open('${this.generateDownloadUrl(preferredVideo)}', '_blank')"><i class="fas fa-download"></i><span class="tooltip">Descargar</span></button>`;
         }
