@@ -92,7 +92,8 @@
             videoIframe1: videoIframeSecondary,
             'Video iframe': videoIframePrimary,
             'Video iframe 1': videoIframeSecondary,
-            videoUrl: d['Video'] || d['Enlace'] || d['Ver Película'] || '',
+            // Alineado con la regla estricta: sólo considerar los iframes para reproducir
+            videoUrl: videoIframePrimary || videoIframeSecondary,
             trailerUrl: d['Trailer'] || d['TrailerUrl'] || '',
             cast: d['Reparto principal'] || d['Reparto'] || '',
             director: d['Director(es)'] || d['Director'] || '',
