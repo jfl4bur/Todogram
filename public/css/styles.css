@@ -1679,6 +1679,7 @@ button:focus {
     max-width: 90%;
     max-height: 90%;
     text-align: center;
+    display: contents;
 }
 
 .gallery-modal-image {
@@ -1693,7 +1694,7 @@ button:focus {
     top: 15px;
     right: 15px;
     color: #fff;
-    font-size: 40px;
+    font-size: 70px;
     cursor: pointer;
     z-index: 10;
 }
@@ -1701,17 +1702,17 @@ button:focus {
 .gallery-modal-prev,
 .gallery-modal-next {
     position: absolute;
-    top: 50%;
+    top: 93%;
     transform: translateY(-50%);
     color: white;
-    font-size: 30px;
+    font-size: 70px;
     cursor: pointer;
     background: rgba(0,0,0,0.5);
     border: none;
     padding: 15px;
     border-radius: 50%;
-    width: 50px;
-    height: 50px;
+    width: 90px;
+    height: 90px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1734,11 +1735,11 @@ button:focus {
 
 .gallery-modal-counter {
     position: absolute;
-    bottom: 20px;
+    bottom: 35px;
     left: 0;
     right: 0;
     color: white;
-    font-size: 16px;
+    font-size: 32px;
     text-align: center;
 }  
 
