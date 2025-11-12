@@ -146,7 +146,51 @@
         return Math.max(1, Math.floor((containerWidth + gap) / (itemW + gap)));
     }
 
-    function findExistingItemById(id){
+    function hasEpisodeInfo(candidate){
+        if(!candidate || typeof candidate !== 'object') return false;
+        const raw = candidate.raw && typeof candidate.raw === 'object' ? candidate.raw : candidate;
+        const keys = ['Título episodio', 'Título episodio completo', 'Título episodio 1', 'Episodio', 'Título episodio (completo)', 'episodeIndex', 'episodioNum'];
+        try {
+            return keys.some(key => raw && raw[key] && String(raw[key]).trim() !== '');
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function normalizeTitleValue(value){
+        return String(value || '').trim().toLowerCase();
+    }
+
+    function pickCandidateByReference(candidates, referenceItem){
+        if(!candidates || !candidates.length) return null;
+        if(referenceItem){
+            const refHasEpisode = hasEpisodeInfo(referenceItem);
+            const sameEpisodeFlag = candidates.filter(c => hasEpisodeInfo(c) === refHasEpisode);
+            if(sameEpisodeFlag.length === 1) return sameEpisodeFlag[0];
+            const narrowed = sameEpisodeFlag.length > 0 ? sameEpisodeFlag : candidates;
+            const refTitle = normalizeTitleValue(referenceItem.title || (referenceItem.raw && referenceItem.raw['Título']));
+            if(refTitle){
+                const titleMatch = narrowed.find(c => normalizeTitleValue(c.title || (c.raw && c.raw['Título'])) === refTitle);
+                if(titleMatch) return titleMatch;
+            }
+            if(narrowed.includes(referenceItem)) return referenceItem;
+            if(referenceItem.raw){
+                const refRaw = referenceItem.raw;
+                const refEpisodeTitle = normalizeTitleValue(refRaw['Título episodio']);
+                if(refEpisodeTitle){
+                    const epMatch = narrowed.find(c => {
+                        const candRaw = c.raw || {};
+                        return normalizeTitleValue(candRaw['Título episodio']) === refEpisodeTitle;
+                    });
+                    if(epMatch) return epMatch;
+                }
+            }
+            if(narrowed.length === 1) return narrowed[0];
+        }
+        return candidates[0];
+    }
+
+    function findExistingItemById(id, referenceItem){
         if(!id) return null;
         // Candidate sources where carousels keep their data
         const sources = [
@@ -160,12 +204,13 @@
         ];
         for(const src of sources){
             if(!src || !Array.isArray(src)) continue;
-            const found = src.find(x => String(x.id) === String(id));
-            if(found) return found;
+            const matches = src.filter(x => String(x.id) === String(id));
+            const selected = pickCandidateByReference(matches, referenceItem);
+            if(selected) return selected;
         }
-        // fallback to catalog state
-        const foundLocal = state.allItems.find(x => String(x.id) === String(id));
-        return foundLocal || null;
+        // fallback to catalog state (consider duplicates with same id)
+        const localMatches = state.allItems.filter(x => String(x.id) === String(id));
+        return pickCandidateByReference(localMatches, referenceItem) || null;
     }
 
     // Safe helper to find a rendered .catalogo-item by data-item-id without assuming CSS.escape exists
@@ -192,6 +237,7 @@
         d.className='catalogo-item';
         d.dataset.itemId = it.id;
         d.setAttribute('role','listitem');
+        d.__catalogItem = it;
         // Use poster-sized loader while image loads (same loader used in peliculas carousel)
         d.innerHTML = `
             <div class="poster-container">
@@ -234,7 +280,7 @@
             // and UI wiring. Avoid mutating global overlays or window.activeItem here.
             if (window.detailsModal && typeof window.detailsModal.show === 'function') {
                 try {
-                    const existing = findExistingItemById(it.id);
+                    const existing = findExistingItemById(it.id, it);
                     const itemToShow = existing || it;
                     // Garantizar que los campos de video queden alineados con la regla estricta
                     try {
@@ -703,13 +749,14 @@
 
             // find index in filteredItems matching id and normalized title when possible
             let idx = -1;
+            let referenceItem = null;
             try {
                 for(let i=0;i<state.filteredItems.length;i++){
                     const it = state.filteredItems[i];
                     if(String(it.id) === String(id)){
                         if(decodedTitle){
-                            if(normalize(it.title) === normalize(decodedTitle)) { idx = i; break; }
-                        } else { idx = i; break; }
+                            if(normalize(it.title) === normalize(decodedTitle)) { idx = i; referenceItem = it; break; }
+                        } else { idx = i; referenceItem = it; break; }
                     }
                 }
             } catch (err) {
@@ -722,7 +769,7 @@
                 // Fallback: item might be outside current filteredItems (different filters) or
                 // not yet present due to lazy loading. Try to find the item globally and open it directly.
                 try {
-                    const globalItem = findExistingItemById(id) || state.allItems.find(x => String(x.id) === String(id));
+                    const globalItem = findExistingItemById(id, referenceItem) || referenceItem || state.allItems.find(x => String(x.id) === String(id));
                     if (globalItem && window.detailsModal && typeof window.detailsModal.show === 'function') {
                             const el = grid ? querySelectorByDataId(grid, id) : null;
                         try { 
@@ -740,7 +787,7 @@
             const tryOpen = () => {
                 if(state.renderedCount > idx){
                     const el = grid.querySelector(`.catalogo-item[data-item-id="${CSS.escape(id)}"]`);
-                    const item = findExistingItemById(id) || state.allItems.find(x=>String(x.id)===String(id));
+                    const item = findExistingItemById(id, referenceItem) || referenceItem || state.allItems.find(x=>String(x.id)===String(id));
                     if(el){
                         try { el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); } catch(e){}
                     }
@@ -971,7 +1018,9 @@
                 if (!itemEl || !grid.contains(itemEl)) return;
                 const itemId = itemEl.dataset.itemId;
                 if (!itemId) return;
-                const item = findExistingItemById(itemId) || state.allItems.find(x => String(x.id) === String(itemId));
+                const elementItem = itemEl.__catalogItem || null;
+                const item = findExistingItemById(itemId, elementItem) || elementItem || state.allItems.find(x => String(x.id) === String(itemId));
+                if(!itemEl.__catalogItem && item) { itemEl.__catalogItem = item; }
                 // clear any previous timer on this element
                 try { if (itemEl._hoverTimer) { clearTimeout(itemEl._hoverTimer); itemEl._hoverTimer = null; } } catch(e){}
                 if (item && window.hoverModal && typeof window.hoverModal.show === 'function') {
