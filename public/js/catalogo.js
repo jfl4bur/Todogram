@@ -102,6 +102,7 @@
             genresList: genresList,
             year: d['Año'] || '',
             duration: d['Duración'] || '',
+            rating: (d['Puntuación 1-10'] || d['Puntuación'] || d['Puntuacion'] || '').toString().trim(),
             videoIframe: videoIframePrimary,
             videoIframe1: videoIframeSecondary,
             'Video iframe': videoIframePrimary,
