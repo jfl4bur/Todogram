@@ -2978,8 +2978,8 @@ button:focus {
 }
 
 .details-modal-gallery-item.more {
-    width: 120px;
-    height: 180px;
+    /* width: 120px; */
+    /* height: 180px; */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -4869,8 +4869,8 @@ slider-footer-content {
 }
 
 .details-modal-gallery-item.more {
-    width: 120px;
-    height: 180px;
+    /* width: 120px; */
+    /* height: 180px; */
     display: flex;
     flex-direction: column;
     align-items: center;
