@@ -223,11 +223,10 @@
                     // Refuerzo de campos de video para la regla estricta: exponer claves con espacios si no existen
                     try {
                         const r = itemToShow.raw || {};
-                        const vi = (r['Video iframe'] && String(r['Video iframe']).trim() !== '') ? r['Video iframe'] : '';
-                        const vi1 = (r['Video iframe 1'] && String(r['Video iframe 1']).trim() !== '') ? r['Video iframe 1'] : '';
-                        // Asignar sólo si existen exactamente esos campos; de lo contrario, eliminar claves para evitar valores rezagados
-                        if (vi) itemToShow['Video iframe'] = vi; else { try { delete itemToShow['Video iframe']; } catch(_){} }
-                        if (vi1) itemToShow['Video iframe 1'] = vi1; else { try { delete itemToShow['Video iframe 1']; } catch(_){} }
+                        const vi = itemToShow.videoIframe || r['Video iframe'] || r['Video iframe 1'] || r['Video iframe1'] || '';
+                        const vi1 = itemToShow.videoIframe1 || r['Video iframe 1'] || '';
+                        if (vi && !itemToShow['Video iframe']) itemToShow['Video iframe'] = vi;
+                        if (vi1 && !itemToShow['Video iframe 1']) itemToShow['Video iframe 1'] = vi1;
                     } catch (e) { /* noop */ }
                     // Antes de abrir el modal, asegurar hash unificado #id=NUMERIC_ID&title=slug
                     try{
