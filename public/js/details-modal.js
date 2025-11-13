@@ -1624,6 +1624,9 @@ class DetailsModal {
         };
 
         const cleanupFns = [];
+        const pointerMediaQuery = (window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)')) || null;
+        const allowHoverInteractions = !!(pointerMediaQuery && pointerMediaQuery.matches);
+        const HOVER_SHOW_DELAY = 900; // ms, align with catalog grid & carousels
 
         cards.forEach(card => {
             const idx = Number(card.getAttribute('data-similar-index') || '0');
@@ -1649,15 +1652,30 @@ class DetailsModal {
             };
             card.addEventListener('keydown', onKeyDown);
             cleanupFns.push(() => card.removeEventListener('keydown', onKeyDown));
-            if (window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+            if (allowHoverInteractions) {
                 const onMouseEnter = () => {
-                    if (window.hoverModal && typeof window.hoverModal.show === 'function') {
-                        window.hoverModal.show(data, card);
+                    if (!window.hoverModal || typeof window.hoverModal.show !== 'function') return;
+                    if (card._hoverTimer) {
+                        clearTimeout(card._hoverTimer);
+                        card._hoverTimer = null;
                     }
+                    card._hoverTimer = setTimeout(() => {
+                        try {
+                            window.hoverModal.show(data, card);
+                            if (window.hoverModal.cancelHide) window.hoverModal.cancelHide();
+                        } catch (err) {
+                            console.error('hoverModal.show error', err);
+                        }
+                        card._hoverTimer = null;
+                    }, HOVER_SHOW_DELAY);
                 };
                 const onMouseLeave = () => {
+                    if (card._hoverTimer) {
+                        clearTimeout(card._hoverTimer);
+                        card._hoverTimer = null;
+                    }
                     if (window.hoverModal && typeof window.hoverModal.hide === 'function') {
-                    window.hoverModal.hide(160);
+                        window.hoverModal.hide(160);
                     }
                 };
                 card.addEventListener('mouseenter', onMouseEnter);
@@ -1665,6 +1683,10 @@ class DetailsModal {
                 cleanupFns.push(() => {
                     card.removeEventListener('mouseenter', onMouseEnter);
                     card.removeEventListener('mouseleave', onMouseLeave);
+                    if (card._hoverTimer) {
+                        clearTimeout(card._hoverTimer);
+                        card._hoverTimer = null;
+                    }
                 });
             }
         });
