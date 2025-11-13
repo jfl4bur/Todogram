@@ -67,8 +67,9 @@ class HoverModal {
         this.activeItem = null;
         this.hoverModalItem = null;
         this.hoverModalOrigin = { x: 0, y: 0 };
-        this.hoverModalTimeout = null;
-        this.isVisible = false;
+    this.hoverModalTimeout = null;
+    this.isVisible = false;
+    this._isInsideDetailsContext = false;
 
         if (!this.modalOverlay || !this.modalContent) {
             console.error("Elementos del hover modal no encontrados");
@@ -120,6 +121,20 @@ class HoverModal {
         try {
             allowInsideDetails = !!(itemElement.dataset && itemElement.dataset.allowHoverInsideDetails === 'true');
         } catch (e) {}
+
+        this._isInsideDetailsContext = allowInsideDetails;
+
+        if (allowInsideDetails) {
+            try {
+                this.modalOverlay.style.zIndex = '13010';
+                this.modalContent.style.zIndex = '13011';
+            } catch (e) {}
+        } else {
+            try {
+                this.modalOverlay.style.zIndex = '';
+                this.modalContent.style.zIndex = '';
+            } catch (e) {}
+        }
 
         if (!allowInsideDetails) {
             // If details modal is open, do not show hover to avoid intercepting clicks
@@ -422,6 +437,11 @@ class HoverModal {
                     // hide overlay immediately when modal finished closing
                     this.modalOverlay.style.display = 'none';
                     this.modalOverlay.style.pointerEvents = 'none';
+                    try {
+                        this.modalOverlay.style.zIndex = '';
+                        this.modalContent.style.zIndex = '';
+                    } catch (e) {}
+                    this._isInsideDetailsContext = false;
                     // animate portal clone back to origin and restore origin visibility
                     try { this._removePortal(true); } catch (e) {}
                     window.isModalOpen = false;
@@ -545,6 +565,11 @@ class HoverModal {
             try {
                 this.modalOverlay.style.display = 'none';
                 this.modalOverlay.style.pointerEvents = 'none';
+                try {
+                    this.modalOverlay.style.zIndex = '';
+                    this.modalContent.style.zIndex = '';
+                } catch (e) {}
+                this._isInsideDetailsContext = false;
                 window.isModalOpen = false;
             } catch (e) {}
             try {
