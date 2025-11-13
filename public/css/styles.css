@@ -1086,11 +1086,11 @@ button:focus {
 
 
     @media (max-width: 1400px) {
-        .details-modal-similar-grid{--similar-columns:4}
+        .details-modal-similar-grid{--similar-columns: 5;}
     }
 
     @media (max-width: 1150px) {
-        .details-modal-similar-grid{--similar-columns:3}
+        .details-modal-similar-grid{--similar-columns: 5;}
     }
 
     /* Header season filter */
@@ -7139,7 +7139,7 @@ body {
     }
 
     .details-modal-similar-section{margin-top:36px}
-    .details-modal-similar-grid{--similar-columns:3;grid-template-columns:repeat(var(--similar-columns,3),minmax(0,1fr));gap:12px}
+    .details-modal-similar-grid{--similar-columns: 5;grid-template-columns:repeat(var(--similar-columns,3),minmax(0,1fr));gap:12px}
     .details-modal-similar-card-label{padding:14px 12px 10px}
     .details-modal-similar-toggle{padding:6px 14px;font-size:0.85rem}
     
@@ -7532,6 +7532,11 @@ body {
 }
 
 @media (max-width:600px) {
+        .details-modal-similar-grid {
+        --similar-columns: 4;
+        grid-template-columns: repeat(var(--similar-columns, 3), minmax(0, 1fr));
+        gap: 12px;
+    }
     .kKgBzW {
         font-size: 1.2rem !important;
         margin-left: 10px !important;
@@ -7543,6 +7548,11 @@ body {
 }
 
 @media (max-width: 480px) {
+        .details-modal-similar-grid {
+        --similar-columns: 3;
+        grid-template-columns: repeat(var(--similar-columns, 3), minmax(0, 1fr));
+        gap: 12px;
+    }
     .kKgBzW {
         font-size: 1rem !important;
         margin-left: 0 !important;
