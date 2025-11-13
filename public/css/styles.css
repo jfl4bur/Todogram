@@ -246,7 +246,7 @@ button:focus {
     justify-content: center;
     align-items: center;
     gap: 10px;
-    margin-bottom: 20px;
+    margin-right: 20px;
 }
 
 /* Estilos personalizados para los scrollbars */
@@ -1666,14 +1666,6 @@ button:focus {
     padding-right: 0px !important;
 }
 
-.secondary-actions-row {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
-}
-
 /* Estilos personalizados para los scrollbars */
 .details-modal-overlay::-webkit-scrollbar {
     width: 6px;
@@ -2425,18 +2417,6 @@ button:focus {
         transition: max-height 320ms ease, opacity 220ms ease;
     }
 
-    .details-modal-episode-synopsis.collapsed,
-    .details-modal-description.collapsed {
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 4;
-        line-clamp: 4;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        max-height: calc(1.5em * 4); /* line-height * lines */
-        opacity: 1;
-    }
-
     .details-modal-episode-synopsis.expanded,
     .details-modal-description.expanded {
         display: block;
@@ -2757,9 +2737,11 @@ button:focus {
 
 .details-modal-actions {
     display: flex;
-    gap: 12px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
+    -webkit-box-align: center;
+    align-items: center;
+    -webkit-box-pack: justify;
+    justify-content: space-between;
+    gap: 8px;
 }
 
 .details-modal-action-btn {
@@ -2767,13 +2749,13 @@ button:focus {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 10px 20px;
+    padding: 15px 20px;
     border-radius: 4px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
     border: none;
-    font-size: 0.9rem;
+    font-size: 1.2rem;
     position: relative;
 }
 
@@ -2802,10 +2784,10 @@ button:focus {
 }
 
 .details-modal-action-btn.circular:hover {
-    background-color: white;
     opacity: 1;
     transform: scale(1);
-    color: #000;
+    border: none;
+    background-color: rgba(240, 240, 240, 0.15);
 }
 
 .details-modal-action-btn:hover {
@@ -2819,8 +2801,9 @@ button:focus {
 }
 
 .details-modal-action-btn svg {
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
+    fill: rgb(240, 240, 240);
 }
 
 .details-modal-action-btn i {
@@ -2844,7 +2827,7 @@ button:focus {
 
 .details-modal-action-btn .tooltip {
     position: absolute;
-    bottom: 100%;
+    bottom: 135%;
     left: 50%;
     transform: translateX(-50%);
     background-color: white;
@@ -2883,7 +2866,7 @@ button:focus {
 }
 
 .details-modal-description {
-    margin-bottom: 24px;
+    margin: 24px 0;
     line-height: 1.6;
     color: var(--text-muted); /* mismo gris que las sinopsis de episodios */
 }
@@ -4669,28 +4652,6 @@ slider-footer-content {
     display: block;
 }
 
-.details-modal-actions {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-}
-
-.details-modal-action-btn {
-    font-family: 'Slider Sans UI', sans-serif;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px 20px;
-    border-radius: 4px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    border: none;
-    font-size: 0.9rem;
-    position: relative;
-}
-
 .details-modal-action-btn.primary {
     background-color: var(--primary-color);
     color: white;
@@ -4711,15 +4672,8 @@ slider-footer-content {
     background-color: transparent;
     transition: all 0.3s ease;
     opacity: 0.7;
-    transform: scale(0.9);
-    color: rgba(255, 255, 255, 0.9);
-}
-
-.details-modal-action-btn.circular:hover {
-    background-color: white;
-    opacity: 1;
     transform: scale(1);
-    color: #000;
+    color: rgba(255, 255, 255, 0.9);
 }
 
 .details-modal-action-btn:hover {
@@ -4730,36 +4684,6 @@ slider-footer-content {
 .details-modal-action-btn i,
 .details-modal-action-btn svg {
     margin-right: 8px;
-}
-
-.details-modal-action-btn svg {
-    width: 18px;
-    height: 18px;
-}
-
-.details-modal-action-btn.circular i,
-.details-modal-action-btn.circular svg {
-    margin-right: 0;
-}
-
-.details-modal-action-btn .tooltip {
-    position: absolute;
-    bottom: 100%;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: white;
-    color: black;
-    padding: 6px 12px;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    white-space: nowrap;
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.2s ease;
-    margin-bottom: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-    font-weight: bold;
-    z-index: 10;
 }
 
 .details-modal-action-btn .tooltip::after {
@@ -4780,12 +4704,6 @@ slider-footer-content {
     margin-bottom: 16px;
     text-align: center;
     padding: 0 20px;
-}
-
-.details-modal-description {
-    margin-bottom: 24px;
-    line-height: 1.6;
-    color: var(--text-muted); /* mismo gris que las sinopsis de episodios */
 }
 
 .details-modal-info {
