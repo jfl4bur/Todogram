@@ -1067,10 +1067,22 @@ button:focus {
     .details-modal-similar-card.hover-zoom .details-modal-similar-poster img{transform:scale(1.05)}
     .details-modal-similar-card.hover-zoom-closing{transform:translateY(0);transition:transform 0.2s ease}
     .details-modal-similar-card.hidden-by-rowlimit{display:none !important}
-    .details-modal-similar-fade{position:absolute;left:0;right:0;bottom:0;height:140px;background:linear-gradient(180deg,rgba(12,12,12,0) 0%,rgba(12,12,12,0.95) 88%);pointer-events:none;opacity:0;transition:opacity 0.3s ease}
-    .details-modal-similar-section.is-expandable .details-modal-similar-fade{opacity:1}
+    .details-modal-similar-fade{position:absolute;left:0;right:0;bottom:0;height: 77px;background: linear-gradient(180deg, rgb(12 12 12 / 0%) 0%, rgba(12, 12, 12, 0.95) 88%);pointer-events:none;opacity:0;transition:opacity 0.3s ease;z-index: 0;background: linear-gradient(rgba(16, 16, 16, 0) 0%, #1a1a1a 100%);}
+    .details-modal-similar-section.is-expandable .details-modal-similar-fade{opacity:1;}
     .details-modal-similar-section.is-expanded .details-modal-similar-fade{opacity:0}
     .details-modal-similar-loading{display:flex;align-items:center;justify-content:center;padding:32px 0}
+
+.details-modal-similar-grid::after {
+    content: "";
+    position: absolute;
+    bottom: 0px;
+    left: 0px;
+    width: 100%;
+    height: 158px;
+    background: linear-gradient(#2a2a2a00 0%, rgb(16 16 16) 100%);
+    z-index: 0;
+    }
+
 
     @media (max-width: 1400px) {
         .details-modal-similar-grid{--similar-columns:4}

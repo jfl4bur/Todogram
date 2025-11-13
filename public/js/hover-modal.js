@@ -283,15 +283,6 @@ class HoverModal {
             this.modalContent.style.setProperty('--modal-start-scale', String(startScale));
         } catch (e) {}
 
-        // If we are reusing the same DOM node for another origin, restart the
-        // transition so the opening animation runs fully on quick hovers.
-        try {
-            if (this.modalContent.classList.contains('show') && this._currentOrigin !== itemElement) {
-                this.modalContent.classList.remove('show');
-                void this.modalContent.offsetWidth;
-            }
-        } catch (e) {}
-
         // Show the hover modal immediately (no wait). If a portal clone exists
         // it will animate under the modal; ensure modal gets the 'show' class.
         try {
