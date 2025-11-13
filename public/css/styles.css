@@ -7061,8 +7061,7 @@ body {
     }
     
     .details-modal-actions {
-        flex-direction: column;
-        gap: 8px;
+        display: inline;
     }
     
     .details-modal-action-btn {
@@ -7073,6 +7072,9 @@ body {
     
     .details-modal-action-btn.primary {
         order: -1; /* Mover el botón principal arriba */
+        font-size: 1.3rem;
+        padding: 13px 0;
+        margin-bottom: 25px;
     }
     
     .details-modal-action-btn.circular {
