@@ -834,8 +834,7 @@ button:focus {
     /* include centering translate and an initial scale variable so JS can set the start scale */
     /* JS sets --modal-start-scale before adding .show; default is 1 */
     transform: translate(-50%, -50%) scale(var(--modal-start-scale, 1)) translateY(20px);
-    /* faster, smoother transitions */
-    transition: opacity 140ms cubic-bezier(.2,.8,.2,1), transform 140ms cubic-bezier(.2,.8,.2,1);
+    transition: opacity 220ms cubic-bezier(.2,.8,.2,1), transform 220ms cubic-bezier(.2,.8,.2,1);
     pointer-events: auto;
     z-index: 1001;
     will-change: transform, opacity;

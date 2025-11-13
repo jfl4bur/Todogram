@@ -496,8 +496,8 @@ class HoverModal {
                             // trigger scale down while keeping z-index
                             origin.classList.add('hover-zoom-closing');
 
-                            // fallback: if transitionend doesn't fire, force cleanup after shorter timeout for snappier UX
-                            // adjusted to match faster closing transition (70ms) -> use 120ms as safety window
+                            // fallback: si transitionend no se dispara, forzar la limpieza tras el tiempo de animación
+                            // ahora alineado con la duración estándar del hover modal (~220ms)
                             setTimeout(() => {
                                 try {
                                     if (this._scaleDownHandler) {
@@ -515,7 +515,7 @@ class HoverModal {
                                 this._currentSection = null;
                                 this._currentItem = null;
                                 this._currentOrigin = null;
-                            }, 120);
+                            }, 260);
                         } else {
                             // no origin — just clear wrapper/state
                             try {
@@ -952,7 +952,7 @@ class HoverModal {
                             // animate to target translate + target scale
                             // ensure clone is visible and non-interactive
                             clone.style.pointerEvents = 'none';
-                            clone.style.transition = 'transform 120ms ease-out, opacity 120ms ease-out';
+                            clone.style.transition = 'transform 220ms ease-out, opacity 220ms ease-out';
                             // ensure GPU-acceleration hints
                             clone.style.willChange = 'transform';
 
@@ -1011,7 +1011,7 @@ class HoverModal {
                                 try { clone.removeEventListener('transitionend', onEnd); } catch(e){}
                                 cleanup();
                                 if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
-                            }, 180);
+                            }, 360);
                             return;
 
                         } else {
@@ -1022,7 +1022,7 @@ class HoverModal {
                             try {
                                 // recompute origin rect in case layout changed
                                 const targetRect = origin.getBoundingClientRect();
-                                clone.style.transition = 'transform 120ms ease-out, left 120ms ease-out, top 120ms ease-out, width 120ms ease-out, height 120ms ease-out, opacity 120ms ease-out';
+                                clone.style.transition = 'transform 220ms ease-out, left 220ms ease-out, top 220ms ease-out, width 220ms ease-out, height 220ms ease-out, opacity 220ms ease-out';
                                 clone.style.pointerEvents = 'none';
 
                                 try {
@@ -1065,7 +1065,7 @@ class HoverModal {
                                     try { clone.removeEventListener('transitionend', onEnd2); } catch(e){}
                                     cleanup2();
                                     if (this._portalTimeout) { try { clearTimeout(this._portalTimeout); } catch(e){} this._portalTimeout = null; }
-                                }, 180);
+                                }, 360);
                                 return;
                             } catch (e) {
                                 console.warn('hover-modal: portal animateBack (carousel) failed', e);
