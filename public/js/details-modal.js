@@ -1598,16 +1598,20 @@ class DetailsModal {
         section.innerHTML = `
             <div class="details-modal-similar-header">
                 <h3 class="details-modal-similar-title">Películas similares</h3>
+            </div>
+            <div class="details-modal-similar-grid-wrapper">
+                <div class="details-modal-similar-grid" data-state="collapsed">
+                    ${cardsMarkup}
+                </div>
+                <div class="details-modal-similar-fade"></div>
+            </div>
+            <div class="details-modal-similar-toggle-wrapper">
                 <button type="button" class="details-modal-similar-toggle" data-expanded="false">
                     <span class="label-expand">Ver más</span>
                     <span class="label-collapse">Ver menos</span>
                     <svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
             </div>
-            <div class="details-modal-similar-grid" data-state="collapsed">
-                ${cardsMarkup}
-            </div>
-            <div class="details-modal-similar-fade"></div>
         `;
         return section;
     }
@@ -1616,6 +1620,8 @@ class DetailsModal {
         if (!section) return;
         const grid = section.querySelector('.details-modal-similar-grid');
         const toggleBtn = section.querySelector('.details-modal-similar-toggle');
+        const fadeEl = section.querySelector('.details-modal-similar-fade');
+        const toggleWrapper = section.querySelector('.details-modal-similar-toggle-wrapper');
         if (!grid) return;
         const cards = Array.from(grid.querySelectorAll('.details-modal-similar-card'));
         if (!cards.length) return;
@@ -1631,12 +1637,14 @@ class DetailsModal {
             } catch (err) {}
         };
 
+        const cleanupFns = [];
+
         cards.forEach(card => {
             const idx = Number(card.getAttribute('data-similar-index') || '0');
             const data = similarItems[idx];
             if (!data) return;
             ensureShareUrl(data);
-            card.addEventListener('click', (ev) => {
+            const onClick = (ev) => {
                 ev.preventDefault();
                 ev.stopPropagation();
                 try { window.activeItem = data; } catch (err) {}
@@ -1644,22 +1652,33 @@ class DetailsModal {
                     window.hoverModal.hide(0);
                 }
                 detailsInstance.show(data, card);
-            });
-            card.addEventListener('keydown', (ev) => {
+            };
+            card.addEventListener('click', onClick);
+            cleanupFns.push(() => card.removeEventListener('click', onClick));
+
+            const onKeyDown = (ev) => {
                 if (ev.key !== 'Enter' && ev.key !== ' ') return;
                 ev.preventDefault();
                 card.click();
-            });
+            };
+            card.addEventListener('keydown', onKeyDown);
+            cleanupFns.push(() => card.removeEventListener('keydown', onKeyDown));
             if (window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-                card.addEventListener('mouseenter', () => {
+                const onMouseEnter = () => {
                     if (window.hoverModal && typeof window.hoverModal.show === 'function') {
                         window.hoverModal.show(data, card);
                     }
-                });
-                card.addEventListener('mouseleave', () => {
+                };
+                const onMouseLeave = () => {
                     if (window.hoverModal && typeof window.hoverModal.hide === 'function') {
                         window.hoverModal.hide(80);
                     }
+                };
+                card.addEventListener('mouseenter', onMouseEnter);
+                card.addEventListener('mouseleave', onMouseLeave);
+                cleanupFns.push(() => {
+                    card.removeEventListener('mouseenter', onMouseEnter);
+                    card.removeEventListener('mouseleave', onMouseLeave);
                 });
             }
         });
@@ -1690,11 +1709,18 @@ class DetailsModal {
             grid.style.maxHeight = `${isExpanded ? expandedHeight : collapsedHeight}px`;
             const isExpandable = rowsNeeded > COLLAPSED_ROWS + 0.2;
             section.classList.toggle('is-expandable', isExpandable);
+            if (fadeEl) {
+                const shouldShowFade = isExpandable && !isExpanded;
+                fadeEl.style.opacity = shouldShowFade ? '1' : '0';
+                fadeEl.style.pointerEvents = shouldShowFade ? '' : 'none';
+            }
             if (toggleBtn) {
                 if (isExpandable) {
                     toggleBtn.style.display = '';
+                    if (toggleWrapper) toggleWrapper.style.display = '';
                 } else {
                     toggleBtn.style.display = 'none';
+                    if (toggleWrapper) toggleWrapper.style.display = 'none';
                     toggleBtn.dataset.expanded = 'false';
                     grid.dataset.state = 'collapsed';
                     section.classList.remove('is-expanded');
@@ -1756,6 +1782,16 @@ class DetailsModal {
             this.similarSectionCleanup.push(() => {
                 toggleBtn.removeEventListener('click', onToggleClick);
                 toggleBtn.removeEventListener('keydown', onToggleKey);
+            });
+        }
+
+        if (cleanupFns.length) {
+            this.similarSectionCleanup.push(() => {
+                cleanupFns.forEach(fn => {
+                    try {
+                        fn();
+                    } catch (err) {}
+                });
             });
         }
     }
