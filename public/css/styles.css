@@ -1056,7 +1056,7 @@ button:focus {
     .details-modal-similar-toggle[data-expanded="true"] .label-expand{display:none}
     .details-modal-similar-toggle[data-expanded="true"] .label-collapse{display:inline}
     .details-modal-similar-toggle[data-expanded="true"] svg{transform:rotate(180deg)}
-    .details-modal-similar-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--item-width,194px),1fr));column-gap:var(--catalogo-gap,4px);row-gap:75px;overflow:hidden;transition:max-height 0.4s ease}
+    .details-modal-similar-grid{--similar-columns:5;display:grid;grid-template-columns:repeat(var(--similar-columns,5),minmax(0,1fr));column-gap:var(--catalogo-gap,4px);row-gap:75px;overflow:hidden;transition:max-height 0.4s ease}
     .details-modal-similar-card{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;background:transparent;border-radius:0;overflow:visible;box-shadow:none;cursor:pointer;transform-origin:var(--hover-transform-origin,center center);transition:transform 0.12s cubic-bezier(.2,.8,.2,1);outline:none}
     .details-modal-similar-card:focus{box-shadow:0 0 0 2px rgba(255,255,255,0.32)}
     .details-modal-similar-poster{position:relative;width:100%;aspect-ratio:194/271;background:#232323;overflow:hidden}
@@ -1071,6 +1071,14 @@ button:focus {
     .details-modal-similar-section.is-expandable .details-modal-similar-fade{opacity:1}
     .details-modal-similar-section.is-expanded .details-modal-similar-fade{opacity:0}
     .details-modal-similar-loading{display:flex;align-items:center;justify-content:center;padding:32px 0}
+
+    @media (max-width: 1400px) {
+        .details-modal-similar-grid{--similar-columns:4}
+    }
+
+    @media (max-width: 1150px) {
+        .details-modal-similar-grid{--similar-columns:3}
+    }
 
     /* Header season filter */
     .details-modal-episodes-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
@@ -7117,7 +7125,7 @@ body {
     }
 
     .details-modal-similar-section{margin-top:36px}
-    .details-modal-similar-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px}
+    .details-modal-similar-grid{--similar-columns:3;grid-template-columns:repeat(var(--similar-columns,3),minmax(0,1fr));gap:12px}
     .details-modal-similar-card-label{padding:14px 12px 10px}
     .details-modal-similar-toggle{padding:6px 14px;font-size:0.85rem}
     

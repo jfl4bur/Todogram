@@ -1612,7 +1612,7 @@ class DetailsModal {
         const cards = Array.from(grid.querySelectorAll('.details-modal-similar-card'));
         if (!cards.length) return;
         const detailsInstance = this;
-        const COLLAPSED_ROWS = 2.5;
+    const COLLAPSED_ROWS = 2.75;
         const MAX_ROWS = 7;
 
         const ensureShareUrl = (candidate) => {
@@ -1657,7 +1657,7 @@ class DetailsModal {
                 };
                 const onMouseLeave = () => {
                     if (window.hoverModal && typeof window.hoverModal.hide === 'function') {
-                        window.hoverModal.hide(80);
+                    window.hoverModal.hide(160);
                     }
                 };
                 card.addEventListener('mouseenter', onMouseEnter);
@@ -1677,7 +1677,11 @@ class DetailsModal {
             if (!sampleCard) return;
             const rect = sampleCard.getBoundingClientRect();
             if (!rect.width || !rect.height) return;
-            const columns = Math.max(1, Math.round((grid.clientWidth + gapX) / (rect.width + gapX)));
+            let columns = Math.max(1, Math.round((grid.clientWidth + gapX) / (rect.width + gapX)));
+            const cssColumns = parseFloat((styles.getPropertyValue('--similar-columns') || '').trim()) || null;
+            if (Number.isFinite(cssColumns) && cssColumns > 0) {
+                columns = Math.min(columns, cssColumns);
+            }
             const maxItems = columns * MAX_ROWS;
             cards.forEach((card, index) => {
                 if (index < maxItems) card.classList.remove('hidden-by-rowlimit');

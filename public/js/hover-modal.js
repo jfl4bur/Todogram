@@ -885,8 +885,14 @@ class HoverModal {
             try { origin.style.visibility = 'hidden'; } catch (e) {}
 
             // force reflow then add hover-zoom to animate
+            const previousTransition = clone.style.transition;
+            clone.style.transition = 'none';
             void clone.offsetWidth;
-            clone.classList.add('hover-zoom');
+            clone.style.transition = previousTransition || '';
+            requestAnimationFrame(() => {
+                if (!clone.isConnected) return;
+                clone.classList.add('hover-zoom');
+            });
 
             this._portalEl = clone;
             // mark portal active so we skip origin animations
