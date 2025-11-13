@@ -4518,18 +4518,23 @@ slider-footer-content {
     position: absolute;
     top: 20px;
     right: 20px;
-    background-color: rgba(0, 0, 0, 0.7);
-    border: none;
-    color: white;
     width: 36px;
     height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
     z-index: 10;
     transition: all 0.2s ease;
+    outline: none;
+    display: flex;
+    -webkit-box-align: center;
+    align-items: center;
+    -webkit-box-pack: center;
+    justify-content: center;
+    padding: 0px;
+    border-radius: 100%;
+    cursor: pointer;
+    min-width: 32px;
+    min-height: 32px;
+    background: rgba(0, 0, 0, 0.55);
+    border: 1px solid rgba(240, 240, 240, 0.64);
 }
 
 .details-modal-close:hover {
