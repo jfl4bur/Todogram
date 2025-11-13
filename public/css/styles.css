@@ -1048,11 +1048,12 @@ button:focus {
     .details-modal-similar-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
     .details-modal-similar-title{margin:0;font-size:1.4rem;font-weight:700}
     .details-modal-similar-grid-wrapper{position:relative;margin-top:18px}
-    .details-modal-similar-toggle-wrapper{display:flex;justify-content:center;margin-top:26px}
-    .details-modal-similar-toggle{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.16);color:inherit;padding:8px 16px;border-radius:999px;font-size:0.9rem;cursor:pointer;transition:background 0.2s ease,border-color 0.2s ease;white-space:nowrap}
-    .details-modal-similar-toggle:hover{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.32)}
-    .details-modal-similar-toggle svg{transition:transform 0.3s ease}
-    .details-modal-similar-toggle .label-collapse{display:none}
+    .details-modal-similar-toggle-wrapper{display:flex;justify-content:center;}
+    .details-modal-similar-toggle{display:flex;align-items:center;background:rgba(255,255,255,0.06);border: 0px solid rgba(255,255,255,0.16);color:inherit;background: rgba(255, 255, 255, 0.12);border-color: rgba(255, 255, 255, 0.32);padding: 0;border-radius:999px;font-size: 1.3rem;cursor:pointer;transition:background 0.2s ease,border-color 0.2s ease;white-space:nowrap;width: 36px;height: 36px;min-width: 32px;min-height: 32px;justify-content: center;}
+    .details-modal-similar-toggle:hover{/* background:rgba(255,255,255,0.12); *//* border-color:rgba(255,255,255,0.32); */background: rgba(255, 255, 255, 0.06);border: 0px solid rgba(255, 255, 255, 0.16);}
+    .details-modal-similar-toggle svg{transition:transform 0.3s ease;width: 31px;height: 31px;}
+    .label-collapse, .label-expand {display: none;}
+    .details-modal-similar-toggle .label-collapse{display: none !important;}
     .details-modal-similar-toggle[data-expanded="true"] .label-expand{display:none}
     .details-modal-similar-toggle[data-expanded="true"] .label-collapse{display:inline}
     .details-modal-similar-toggle[data-expanded="true"] svg{transform:rotate(180deg)}
@@ -4588,7 +4589,7 @@ slider-footer-content {
 
 .details-modal-body {
     padding: 24px;
-    color: white;
+    color: rgb(240, 240, 240);
 }
 
 .details-modal-title {
