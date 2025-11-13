@@ -1044,7 +1044,7 @@ button:focus {
     .details-modal-body .details-modal-episodes .details-modal-episode-item .details-modal-episode-thumb{max-width:45%;}
     .details-modal-body .details-modal-episodes .details-modal-episode-item{align-items:flex-start}
 
-    .details-modal-similar-section{margin-top:48px;position:relative}
+    .details-modal-similar-section{margin-top:48px;position:relative;margin-bottom: 25px;}
     .details-modal-similar-header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
     .details-modal-similar-title{margin:0;font-size:1.4rem;font-weight:700}
     .details-modal-similar-grid-wrapper{position:relative;margin-top:18px}
