@@ -4529,6 +4529,7 @@ slider-footer-content {
 .details-modal-overlay.show .details-modal-content {
     transform: translateY(0);
     opacity: 1;
+    margin-bottom: 20px;
 }
 
 .details-modal-header {
