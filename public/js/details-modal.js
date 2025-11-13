@@ -280,9 +280,8 @@ class DetailsModal {
         el.style.overflow = 'hidden';
         // from collapsed state (max-height probably set)
         const startHeight = el.getBoundingClientRect().height;
-        // temporarily set max-height to none to measure full height
-        const prevMax = el.style.maxHeight;
-        el.style.maxHeight = 'none';
+    // temporarily set max-height to none to measure full height
+    el.style.maxHeight = 'none';
         const fullHeight = el.scrollHeight;
         // restore to start height then animate to fullHeight
         el.style.maxHeight = startHeight + 'px';
@@ -301,23 +300,74 @@ class DetailsModal {
         el.classList.add('expanded');
     }
 
+    _getCollapsedSynopsisTarget(el) {
+        if (!el) return 'calc(1.5em * 4)';
+        const data = el.dataset || {};
+        const storedPx = parseFloat(data.collapsedHeightPx || '');
+        if (!Number.isNaN(storedPx) && storedPx > 0) {
+            return storedPx + 'px';
+        }
+        const stored = data.collapsedMaxHeight;
+        if (stored) return stored;
+        try {
+            const computed = window.getComputedStyle(el);
+            const maxHeight = computed.maxHeight;
+            if (maxHeight && maxHeight !== 'none') return maxHeight;
+            const lineHeightValue = computed.lineHeight;
+            let lineHeight = parseFloat(lineHeightValue);
+            if (!Number.isFinite(lineHeight) || lineHeight <= 0) {
+                const fontSize = parseFloat(computed.fontSize);
+                if (Number.isFinite(fontSize) && fontSize > 0) {
+                    lineHeight = fontSize * 1.4;
+                }
+            }
+            if (!Number.isFinite(lineHeight) || lineHeight <= 0) {
+                lineHeight = 22;
+            }
+            const clampRaw = data.collapsedLines || computed.getPropertyValue('-webkit-line-clamp') || computed.getPropertyValue('line-clamp') || '';
+            let clamp = parseInt(clampRaw, 10);
+            if (!Number.isFinite(clamp) || clamp <= 0) clamp = 4;
+            return (lineHeight * clamp) + 'px';
+        } catch (err) {
+            return 'calc(1.5em * 4)';
+        }
+    }
+
+    _rememberCollapsedSynopsisHeight(el) {
+        if (!el) return;
+        requestAnimationFrame(() => {
+            if (!el.classList.contains('collapsed')) return;
+            const rect = el.getBoundingClientRect();
+            if (rect && rect.height > 0) {
+                el.dataset.collapsedHeightPx = String(rect.height);
+            }
+        });
+    }
+
     animateCollapse(el) {
         if (!el) return;
         el.style.transition = 'max-height 320ms ease, opacity 220ms ease';
         el.style.overflow = 'hidden';
         // measure current full height
         const fullHeight = el.scrollHeight;
-        // set max-height to full height then to 0
+        // resolve target collapsed height (default to 4 lines)
+        const targetHeight = this._getCollapsedSynopsisTarget(el);
+        // set max-height to full height then to collapsed target
         el.style.maxHeight = fullHeight + 'px';
         // force reflow
         void el.offsetHeight;
         requestAnimationFrame(() => {
-            el.style.maxHeight = '0px';
+            el.style.maxHeight = targetHeight;
         });
-        const cleanup = () => {
-            el.style.maxHeight = '';
+        let cleaned = false;
+        const cleanup = (evt) => {
+            if (cleaned) return;
+            if (evt && evt.target !== el) return;
+            cleaned = true;
+            el.style.maxHeight = targetHeight;
             el.style.overflow = '';
             el.removeEventListener('transitionend', cleanup);
+            this._rememberCollapsedSynopsisHeight(el);
         };
         el.addEventListener('transitionend', cleanup);
         el.classList.remove('expanded');
@@ -842,6 +892,8 @@ class DetailsModal {
             if (mainDesc) {
                 mainDesc.classList.add('collapsed');
                 mainDesc.style.maxHeight = 'calc(1.5em * 4)';
+                mainDesc.dataset.collapsedMaxHeight = 'calc(1.5em * 4)';
+                this._rememberCollapsedSynopsisHeight(mainDesc);
                 mainDesc.addEventListener('click', (e) => {
                     e.stopPropagation();
                     this.toggleSynopsisElement(mainDesc);
@@ -1341,6 +1393,8 @@ class DetailsModal {
                 container.querySelectorAll('.details-modal-episode-synopsis').forEach(syn => {
                     syn.classList.add('collapsed');
                     syn.style.maxHeight = 'calc(1.5em * 4)';
+                    syn.dataset.collapsedMaxHeight = 'calc(1.5em * 4)';
+                    this._rememberCollapsedSynopsisHeight(syn);
                     syn.addEventListener('click', (e) => {
                         e.stopPropagation();
                         this.toggleSynopsisElement(syn);

@@ -1240,7 +1240,7 @@ button:focus {
 }
 
 /* chevron rotation (ensure transition) */
-.catalogo-genre-dropdown > button .chev{ transition: transform .18s ease; }
+.catalogo-genre-dropdown > button .chev{transition: transform .18s ease;width: 24px;height: 24px;}
 .catalogo-genre-dropdown.open > button .chev{ transform: rotate(180deg); }
 .catalogo-genre-list button:hover{ background: rgba(255,255,255,0.02); color: var(--text-color); }
 .catalogo-genre-list button.selected{color:var(--text-color);font-weight:700}
