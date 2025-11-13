@@ -5602,7 +5602,7 @@ html {
   max-width: 900px;
   background: linear-gradient(rgb(16, 16, 16) 87.2%, rgb(28, 28, 28) 100%);
   box-shadow: rgba(0, 0, 0, 0.784) 0px 2px 15px 0;
-  border-radius: 8px;
+  border-radius: 24px;
   overflow: hidden;
   margin: 0 auto;
   transform: translateY(20px);
