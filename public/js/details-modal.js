@@ -1571,26 +1571,12 @@ class DetailsModal {
         const escapeAttr = (value) => escapeHtml(value).replace(/"/g, '&quot;');
         const cardsMarkup = similarItems.map((sim, index) => {
             const poster = sim.posterUrl || sim.backgroundUrl || 'https://via.placeholder.com/210x315?text=Sin+imagen';
-            const meta = sim._similarMeta || this._prepareItemForSimilarity(sim) || {};
-            const yearLabel = sim.year || '';
-            const ratingLabel = sim.rating || '';
-            const primaryGenre = meta.genres && meta.genres.length ? meta.genres[0] : '';
             const safePoster = escapeAttr(poster);
-            const safeTitle = escapeHtml(sim.title || '');
             const safeTitleAttr = escapeAttr(sim.title || '');
-            const metaPieces = [];
-            if (yearLabel) metaPieces.push(escapeHtml(yearLabel));
-            if (ratingLabel) metaPieces.push(`<span class="details-modal-similar-rating"><i class="fas fa-star"></i> ${escapeHtml(ratingLabel)}</span>`);
-            if (primaryGenre) metaPieces.push(escapeHtml(primaryGenre));
-            const metaHtml = metaPieces.length ? `<div class="details-modal-similar-card-meta">${metaPieces.join(' · ')}</div>` : '';
             return `
                 <article class="details-modal-similar-card" data-similar-index="${index}" data-item-id="${escapeAttr(sim.id || '')}" data-allow-hover-inside-details="true" role="button" tabindex="0" aria-label="Ver detalles de ${safeTitleAttr}">
-                    <div class="details-modal-similar-card-media">
-                        <img src="${safePoster}" alt="${safeTitle}" loading="lazy">
-                    </div>
-                    <div class="details-modal-similar-card-label">
-                        <span class="details-modal-similar-card-title">${safeTitle}</span>
-                        ${metaHtml}
+                    <div class="details-modal-similar-poster">
+                        <img src="${safePoster}" alt="${safeTitleAttr}" loading="lazy">
                     </div>
                 </article>
             `;

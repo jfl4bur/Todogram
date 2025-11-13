@@ -254,7 +254,7 @@ class HoverModal {
         // This addresses cases where HoverModal was instantiated before the
         // catalog DOM existed (so constructor fallback picked body).
         try {
-            const candidate = itemElement.closest('.carousel-container, .catalogo-grid, #catalogo-grid-page') || document.body;
+            const candidate = itemElement.closest('.carousel-container, .catalogo-grid, #catalogo-grid-page, .details-modal-body, .details-modal-content') || document.body;
             // update carouselContainer to the candidate for this show() call
             this.carouselContainer = candidate || document.body;
             // If possible, move the modalContent into the carouselContainer so the browser
