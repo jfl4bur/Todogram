@@ -347,8 +347,9 @@ class HoverModal {
                 }
             }
         } catch(e){}
-        this._currentItem = item;
-        this._currentOrigin = itemElement;
+    const previousOrigin = this._currentOrigin;
+    this._currentItem = item;
+    this._currentOrigin = itemElement;
         // add hover-zoom class to keep the item scaled while hover modal is visible
         try {
             if (this._currentOrigin && this._currentOrigin.classList) {
@@ -383,7 +384,7 @@ class HoverModal {
                     // the carousel's overflow behavior which would break pagination.
                     try {
                         const shouldPortal = !isEpisodios;
-                        if (shouldPortal) this._createPortalForOrigin(this._currentOrigin);
+                        if (shouldPortal) this._createPortalForOrigin(this._currentOrigin, previousOrigin);
                     } catch (pe) {}
 
                     // Only add hover class to the original origin if we did NOT
@@ -818,10 +819,10 @@ class HoverModal {
 
     /* Portal helpers: clone origin into document.body so it can visually escape
        ancestor clipping without modifying carousel overflow (which breaks pagination). */
-    _createPortalForOrigin(origin) {
+    _createPortalForOrigin(origin, previousOrigin = null) {
         try {
             // remove any existing portal
-            this._removePortal();
+            this._removePortal(false, previousOrigin);
             if (!origin || !(origin instanceof HTMLElement)) return;
 
             const rect = origin.getBoundingClientRect();
@@ -896,11 +897,11 @@ class HoverModal {
         }
     }
 
-    _removePortal(animateBack = false) {
+    _removePortal(animateBack = false, originToRestore = null) {
         try {
             if (!this._portalEl) return;
             const clone = this._portalEl;
-            const origin = this._currentOrigin;
+            const origin = originToRestore || this._currentOrigin;
             // If requested, animate the clone back to the origin rect before removing
                 // If requested, animate the clone back to the origin.
                 // Use a different strategy depending on where the origin lives:
@@ -1082,8 +1083,9 @@ class HoverModal {
                 try { this._portalEl.parentElement.removeChild(this._portalEl); } catch (e) {}
             }
             this._portalEl = null;
-            if (this._currentOrigin && this._currentOrigin.style) {
-                try { this._currentOrigin.style.visibility = ''; } catch (e) {}
+            const restoreTarget = originToRestore || this._currentOrigin;
+            if (restoreTarget && restoreTarget.style) {
+                try { restoreTarget.style.visibility = ''; } catch (e) {}
             }
             this._portalActive = false;
             this._portalAnimating = false;
