@@ -2856,15 +2856,6 @@ button:focus {
     border-color: white transparent transparent transparent;
 }
 
-.details-modal-tagline {
-    font-size: 1.1rem;
-    font-style: italic;
-    color: rgba(255, 255, 255, 0.8);
-    margin-bottom: 16px;
-    text-align: center;
-    padding: 0 20px;
-}
-
 .details-modal-description {
     margin: 24px 0;
     line-height: 1.6;
@@ -4687,10 +4678,10 @@ slider-footer-content {
 .details-modal-tagline {
     font-size: 1.1rem;
     font-style: italic;
-    color: rgba(255, 255, 255, 0.8);
+    color: rgb(255 255 255 / 40%);
     margin-bottom: 16px;
     text-align: center;
-    padding: 0 20px;
+    padding: 20px 40px 0 20px;
 }
 
 .details-modal-info {
