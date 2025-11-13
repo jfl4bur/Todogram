@@ -1595,7 +1595,7 @@ class DetailsModal {
                 <button type="button" class="details-modal-similar-toggle" data-expanded="false">
                     <span class="label-expand">Ver más</span>
                     <span class="label-collapse">Ver menos</span>
-                    <svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><polygon points="16.345 22.75 17.405 21.69 8.716 13 17.405 4.31 16.345 3.25 6.595 13" transform="rotate(-90 12 13)"></polygon></svg>
                 </button>
             </div>
         `;
