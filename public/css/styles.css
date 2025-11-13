@@ -2181,6 +2181,8 @@ button:focus {
 .modal-content.show {
     opacity: 1;
     transform: translate(-50%, -50%) translateY(0);
+    border-radius: 8px;
+    box-shadow: rgba(0, 0, 0, 0.65) 0px 0px 50px 16px;
 }
 
 /* Backdrop fade for hover modal (subtle) */
