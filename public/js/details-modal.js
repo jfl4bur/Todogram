@@ -146,6 +146,7 @@ class DetailsModal {
 
         this.galleryImages = [];
         this.currentGalleryIndex = 0;
+        this.similarSectionCleanup = [];
     }
 
     _detachDetailsBackdropListeners() {
@@ -538,6 +539,7 @@ class DetailsModal {
         // Instrumentación temporal: marcar timestamp de apertura para depuración
         try { this._openedAt = Date.now(); console.log('DetailsModal: show() timestamp', this._openedAt); } catch(e){}
         this.updateUrlForModal(item);
+        this.cleanupSimilarSection();
         
         this.detailsModalBody.innerHTML = `
             <div style="display:flex; justify-content:center; align-items:center; height:100%;">
@@ -752,6 +754,7 @@ class DetailsModal {
             ${castSection}
             ${postersGallery}
             ${backdropsGallery}
+            <div class="details-modal-similar-placeholder"></div>
         `;
 
         // Reemplazar esqueletos inmediatamente para evitar parpadeos y respetar el flujo del contenido
@@ -770,6 +773,8 @@ class DetailsModal {
         } catch (err) {
             console.warn('details-modal: fallo reemplazando galerías', err);
         }
+
+        this.insertSimilarSection(item).catch(err => console.warn('details-modal: similar section error', err));
         
         void this.detailsModalOverlay.offsetWidth;
         
@@ -937,6 +942,8 @@ class DetailsModal {
             console.warn('DetailsModal.close() called; ms since open:', since);
             console.trace();
         } catch (e) {}
+
+        this.cleanupSimilarSection();
 
         this._handleDetailsBackdropSettled();
         this.detailsModalContent.style.transform = 'translateY(20px)';
@@ -1343,6 +1350,440 @@ class DetailsModal {
             }
             console.error('DetailsModal: No se pudo cargar data.json en ninguna ruta probada');
             return [];
+        }
+    }
+
+    cleanupSimilarSection() {
+        if (!Array.isArray(this.similarSectionCleanup)) {
+            this.similarSectionCleanup = [];
+            return;
+        }
+        this.similarSectionCleanup.forEach(fn => {
+            try {
+                if (typeof fn === 'function') fn();
+            } catch (err) {
+                console.warn('DetailsModal: cleanupSimilarSection error', err);
+            }
+        });
+        this.similarSectionCleanup.length = 0;
+    }
+
+    _splitGenres(value) {
+        if (!value) return [];
+        if (Array.isArray(value)) {
+            return value.map(v => String(v).trim()).filter(Boolean);
+        }
+        return String(value)
+            .split(/·|\||,|\/|;|&|\s+y\s+/i)
+            .map(v => v.trim())
+            .filter(Boolean);
+    }
+
+    _getGenreListFromItem(item) {
+        const genres = [];
+        if (!item || typeof item !== 'object') return genres;
+        try {
+            if (Array.isArray(item.genresList)) {
+                item.genresList.forEach(g => {
+                    const trimmed = String(g || '').trim();
+                    if (trimmed) genres.push(trimmed);
+                });
+            }
+        } catch (err) {}
+        const sources = [item.genres, item.genre, item['Géneros'], item['Género']];
+        sources.forEach(src => {
+            this._splitGenres(src).forEach(g => genres.push(g));
+        });
+        const seen = new Set();
+        return genres.filter(g => {
+            const key = String(g || '').toLowerCase();
+            if (!key || seen.has(key)) return false;
+            seen.add(key);
+            return true;
+        });
+    }
+
+    _prepareItemForSimilarity(item) {
+        if (!item || typeof item !== 'object') return null;
+        const rawTitle = String(item.title || item['Título'] || '').trim();
+        const normalizedTitle = rawTitle ? this.normalizeText(rawTitle) : '';
+        const categoryCandidates = [item.category, item.originalCategory, item['Categoría']]
+            .map(v => (v ? String(v).trim().toLowerCase() : ''))
+            .filter(Boolean);
+        const category = categoryCandidates.length ? categoryCandidates[0] : '';
+        const genres = this._getGenreListFromItem(item);
+        const genreSet = new Set(genres.map(g => g.toLowerCase()));
+        const yearValue = parseInt(item.year || item['Año'] || '', 10);
+        const ratingRaw = item.rating || item['Puntuación 1-10'] || item['Puntuación'] || item['Puntuacion'];
+        const ratingValue = parseFloat(ratingRaw);
+        const idCandidates = [
+            item.tmdbId,
+            item['ID TMDB'],
+            item.id,
+            item.tmdb_id,
+            item.id_tmdb
+        ].map(v => (v != null ? String(v).trim() : '')).filter(Boolean);
+        const numericId = idCandidates.find(v => /^\d+$/.test(v)) || null;
+        const canonicalId = numericId || (idCandidates.length ? idCandidates[0] : null);
+        return {
+            normalizedTitle,
+            genreSet,
+            genres,
+            category,
+            yearValue: Number.isFinite(yearValue) ? yearValue : null,
+            ratingValue: Number.isFinite(ratingValue) ? ratingValue : null,
+            numericId,
+            canonicalId,
+            isEpisode: !!isEpisodeItem(item)
+        };
+    }
+
+    _normalizeRawDataItem(raw, index = 0) {
+        if (!raw || typeof raw !== 'object') return null;
+        const title = raw['Título'] || raw['Título original'] || raw['Title'] || '';
+        if (!String(title || '').trim()) return null;
+        const candidate = {
+            id: ((raw['ID TMDB'] || raw['ID'] || raw['id'] || `raw_${index}`) || '').toString().trim(),
+            title: String(title).trim(),
+            originalTitle: raw['Título original'] || '',
+            description: raw['Synopsis'] || raw['Sinopsis'] || raw['Descripción'] || '',
+            posterUrl: raw['Portada'] || raw['Carteles'] || '',
+            backgroundUrl: raw['Carteles'] || raw['Portada'] || '',
+            category: raw['Categoría'] || '',
+            originalCategory: raw['Categoría'] || '',
+            genres: raw['Géneros'] || raw['Género'] || '',
+            year: raw['Año'] || '',
+            duration: raw['Duración'] || '',
+            rating: (raw['Puntuación 1-10'] || raw['Puntuación'] || raw['Puntuacion'] || '').toString().trim(),
+            videoIframe: normalizeIframeSource(raw['Video iframe']),
+            videoIframe1: normalizeIframeSource(raw['Video iframe 1'] || raw['Video iframe1']),
+            trailerUrl: raw['Trailer'] || raw['TrailerUrl'] || '',
+            cast: raw['Reparto principal'] || raw['Reparto'] || '',
+            director: raw['Director(es)'] || raw['Director'] || '',
+            writers: raw['Escritor(es)'] || raw['Escritor'] || '',
+            tmdbUrl: raw['TMDB'] || raw['TMDB URL'] || raw['TMDB_URL'] || '',
+            audiosCount: raw['Audios'] ? String(raw['Audios']).split(',').filter(Boolean).length : 0,
+            subtitlesCount: raw['Subtítulos'] ? String(raw['Subtítulos']).split(',').filter(Boolean).length : 0,
+            audioList: raw['Audios'] ? String(raw['Audios']).split(',').map(s => s.trim()).filter(Boolean) : [],
+            subtitleList: raw['Subtítulos'] ? String(raw['Subtítulos']).split(',').map(s => s.trim()).filter(Boolean) : [],
+            episodioNum: raw['Episodio'] || '',
+            temporada: raw['Temporada'] || '',
+            raw
+        };
+        candidate['Video iframe'] = candidate.videoIframe;
+        candidate['Video iframe 1'] = candidate.videoIframe1;
+        const tmdbMatch = (candidate.tmdbUrl || '').match(/(movie|tv)\/(\d+)/);
+        if (tmdbMatch && tmdbMatch[2]) {
+            candidate.tmdbId = tmdbMatch[2];
+            if (!candidate.id) candidate.id = tmdbMatch[2];
+        } else if (raw['ID TMDB']) {
+            candidate.tmdbId = String(raw['ID TMDB']).trim();
+            if (!candidate.id) candidate.id = candidate.tmdbId;
+        }
+        const genresList = this._splitGenres(candidate.genres);
+        candidate.genresList = genresList;
+        if (!candidate.genre && genresList.length) candidate.genre = genresList[0];
+        if (!candidate.posterUrl && candidate.backgroundUrl) candidate.posterUrl = candidate.backgroundUrl;
+        candidate.videoUrl = candidate.videoIframe || candidate.videoIframe1 || '';
+        candidate.isEpisode = !!isEpisodeItem(candidate);
+        candidate._similarMeta = this._prepareItemForSimilarity(candidate);
+        return candidate;
+    }
+
+    async findSimilarItems(item, maxResults = 56) {
+        try {
+            const baseMeta = this._prepareItemForSimilarity(item);
+            if (!baseMeta) return [];
+            if (baseMeta.isEpisode) return [];
+            const allData = await this.loadAllData();
+            if (!Array.isArray(allData) || allData.length === 0) return [];
+            const baseIds = new Set();
+            if (baseMeta.canonicalId) baseIds.add(String(baseMeta.canonicalId));
+            if (item && item.id) baseIds.add(String(item.id));
+            if (item && item.tmdbId) baseIds.add(String(item.tmdbId));
+            if (item && item['ID TMDB']) baseIds.add(String(item['ID TMDB']));
+            const baseGenres = baseMeta.genreSet || new Set();
+            const baseCategory = baseMeta.category;
+            const baseYear = baseMeta.yearValue;
+            const baseIsEpisode = !!baseMeta.isEpisode;
+            const results = [];
+            const seen = new Set();
+            for (let i = 0; i < allData.length; i++) {
+                const candidate = this._normalizeRawDataItem(allData[i], i);
+                if (!candidate || !candidate._similarMeta) continue;
+                const meta = candidate._similarMeta;
+                const candidateId = meta.canonicalId || candidate.id;
+                const candidateKey = `${candidateId || ''}|${meta.normalizedTitle || ''}`;
+                if (candidateKey && seen.has(candidateKey)) continue;
+                seen.add(candidateKey);
+                if (candidateId && baseIds.has(String(candidateId))) continue;
+                if (meta.normalizedTitle && baseMeta.normalizedTitle && meta.normalizedTitle === baseMeta.normalizedTitle) continue;
+                if (!baseIsEpisode && meta.isEpisode) continue;
+                let score = 0;
+                let sharedGenres = 0;
+                if (baseGenres.size && meta.genreSet && meta.genreSet.size) {
+                    meta.genreSet.forEach(g => { if (baseGenres.has(g)) sharedGenres++; });
+                }
+                if (sharedGenres) score += sharedGenres * 8;
+                if (!sharedGenres && !baseGenres.size) score += 3;
+                if (baseCategory && meta.category && baseCategory === meta.category) score += 6;
+                if (baseYear && meta.yearValue) {
+                    const diff = Math.abs(baseYear - meta.yearValue);
+                    if (diff === 0) score += 5;
+                    else if (diff === 1) score += 4;
+                    else if (diff <= 3) score += 3;
+                    else if (diff <= 5) score += 2;
+                    else score += 1;
+                }
+                if (meta.ratingValue) score += meta.ratingValue * 0.5;
+                if (candidate.posterUrl) score += 2;
+                if (candidate.videoUrl) score += 1;
+                if (!Number.isFinite(score) || score <= 0) score = candidate.posterUrl ? 1.5 : 1;
+                results.push({ item: candidate, score });
+            }
+            if (!results.length) return [];
+            results.sort((a, b) => {
+                if (b.score !== a.score) return b.score - a.score;
+                const br = b.item._similarMeta?.ratingValue || 0;
+                const ar = a.item._similarMeta?.ratingValue || 0;
+                if (br !== ar) return br - ar;
+                const by = b.item._similarMeta?.yearValue || 0;
+                const ay = a.item._similarMeta?.yearValue || 0;
+                return by - ay;
+            });
+            return results.slice(0, maxResults).map(entry => {
+                const sim = entry.item;
+                if (!sim['Video iframe']) sim['Video iframe'] = sim.videoIframe || '';
+                if (!sim['Video iframe 1']) sim['Video iframe 1'] = sim.videoIframe1 || '';
+                return sim;
+            });
+        } catch (err) {
+            console.warn('DetailsModal: findSimilarItems error', err);
+            return [];
+        }
+    }
+
+    createSimilarSectionElement(similarItems) {
+        if (!Array.isArray(similarItems) || similarItems.length === 0) return null;
+        const section = document.createElement('section');
+        section.className = 'details-modal-similar-section';
+    const escapeHtml = (value) => String(value == null ? '' : value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const escapeAttr = (value) => escapeHtml(value).replace(/"/g, '&quot;');
+        const cardsMarkup = similarItems.map((sim, index) => {
+            const poster = sim.posterUrl || sim.backgroundUrl || 'https://via.placeholder.com/210x315?text=Sin+imagen';
+            const meta = sim._similarMeta || this._prepareItemForSimilarity(sim) || {};
+            const yearLabel = sim.year || '';
+            const ratingLabel = sim.rating || '';
+            const primaryGenre = meta.genres && meta.genres.length ? meta.genres[0] : '';
+            const safePoster = escapeAttr(poster);
+            const safeTitle = escapeHtml(sim.title || '');
+            const safeTitleAttr = escapeAttr(sim.title || '');
+            const metaPieces = [];
+            if (yearLabel) metaPieces.push(escapeHtml(yearLabel));
+            if (ratingLabel) metaPieces.push(`<span class="details-modal-similar-rating"><i class="fas fa-star"></i> ${escapeHtml(ratingLabel)}</span>`);
+            if (primaryGenre) metaPieces.push(escapeHtml(primaryGenre));
+            const metaHtml = metaPieces.length ? `<div class="details-modal-similar-card-meta">${metaPieces.join(' · ')}</div>` : '';
+            return `
+                <article class="details-modal-similar-card" data-similar-index="${index}" data-item-id="${escapeAttr(sim.id || '')}" data-allow-hover-inside-details="true" role="button" tabindex="0" aria-label="Ver detalles de ${safeTitleAttr}">
+                    <div class="details-modal-similar-card-media">
+                        <img src="${safePoster}" alt="${safeTitle}" loading="lazy">
+                    </div>
+                    <div class="details-modal-similar-card-label">
+                        <span class="details-modal-similar-card-title">${safeTitle}</span>
+                        ${metaHtml}
+                    </div>
+                </article>
+            `;
+        }).join('');
+        section.innerHTML = `
+            <div class="details-modal-similar-header">
+                <h3 class="details-modal-similar-title">Películas similares</h3>
+                <button type="button" class="details-modal-similar-toggle" data-expanded="false">
+                    <span class="label-expand">Ver más</span>
+                    <span class="label-collapse">Ver menos</span>
+                    <svg class="chevron-icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+            </div>
+            <div class="details-modal-similar-grid" data-state="collapsed">
+                ${cardsMarkup}
+            </div>
+            <div class="details-modal-similar-fade"></div>
+        `;
+        return section;
+    }
+
+    setupSimilarSection(section, similarItems) {
+        if (!section) return;
+        const grid = section.querySelector('.details-modal-similar-grid');
+        const toggleBtn = section.querySelector('.details-modal-similar-toggle');
+        if (!grid) return;
+        const cards = Array.from(grid.querySelectorAll('.details-modal-similar-card'));
+        if (!cards.length) return;
+        const detailsInstance = this;
+        const COLLAPSED_ROWS = 2.5;
+        const MAX_ROWS = 7;
+
+        const ensureShareUrl = (candidate) => {
+            try {
+                if (!candidate.shareUrl && typeof window.generateShareUrl === 'function') {
+                    candidate.shareUrl = window.generateShareUrl(candidate);
+                }
+            } catch (err) {}
+        };
+
+        cards.forEach(card => {
+            const idx = Number(card.getAttribute('data-similar-index') || '0');
+            const data = similarItems[idx];
+            if (!data) return;
+            ensureShareUrl(data);
+            card.addEventListener('click', (ev) => {
+                ev.preventDefault();
+                ev.stopPropagation();
+                try { window.activeItem = data; } catch (err) {}
+                if (window.hoverModal && typeof window.hoverModal.hide === 'function') {
+                    window.hoverModal.hide(0);
+                }
+                detailsInstance.show(data, card);
+            });
+            card.addEventListener('keydown', (ev) => {
+                if (ev.key !== 'Enter' && ev.key !== ' ') return;
+                ev.preventDefault();
+                card.click();
+            });
+            if (window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+                card.addEventListener('mouseenter', () => {
+                    if (window.hoverModal && typeof window.hoverModal.show === 'function') {
+                        window.hoverModal.show(data, card);
+                    }
+                });
+                card.addEventListener('mouseleave', () => {
+                    if (window.hoverModal && typeof window.hoverModal.hide === 'function') {
+                        window.hoverModal.hide(80);
+                    }
+                });
+            }
+        });
+
+        const updateLayout = () => {
+            const styles = getComputedStyle(grid);
+            const gapY = parseFloat(styles.rowGap || styles.gap || '0');
+            const gapX = parseFloat(styles.columnGap || styles.gap || '0');
+            const sampleCard = cards.find(card => !card.classList.contains('hidden-by-rowlimit')) || cards[0];
+            if (!sampleCard) return;
+            const rect = sampleCard.getBoundingClientRect();
+            if (!rect.width || !rect.height) return;
+            const columns = Math.max(1, Math.round((grid.clientWidth + gapX) / (rect.width + gapX)));
+            const maxItems = columns * MAX_ROWS;
+            cards.forEach((card, index) => {
+                if (index < maxItems) card.classList.remove('hidden-by-rowlimit');
+                else card.classList.add('hidden-by-rowlimit');
+            });
+            const visibleCards = cards.filter(card => !card.classList.contains('hidden-by-rowlimit'));
+            const rowsNeeded = visibleCards.length ? Math.ceil(visibleCards.length / columns) : 0;
+            const collapsedRows = Math.min(rowsNeeded, COLLAPSED_ROWS);
+            const expandedRows = Math.min(rowsNeeded, MAX_ROWS);
+            const collapsedHeight = collapsedRows ? (rect.height * collapsedRows) + (collapsedRows > 1 ? gapY * (collapsedRows - 1) : 0) : 0;
+            const expandedHeight = expandedRows ? (rect.height * expandedRows) + (expandedRows > 1 ? gapY * (expandedRows - 1) : 0) : collapsedHeight;
+            grid.dataset.collapsedHeight = collapsedHeight;
+            grid.dataset.expandedHeight = expandedHeight;
+            const isExpanded = grid.dataset.state === 'expanded';
+            grid.style.maxHeight = `${isExpanded ? expandedHeight : collapsedHeight}px`;
+            const isExpandable = rowsNeeded > COLLAPSED_ROWS + 0.2;
+            section.classList.toggle('is-expandable', isExpandable);
+            if (toggleBtn) {
+                if (isExpandable) {
+                    toggleBtn.style.display = '';
+                } else {
+                    toggleBtn.style.display = 'none';
+                    toggleBtn.dataset.expanded = 'false';
+                    grid.dataset.state = 'collapsed';
+                    section.classList.remove('is-expanded');
+                    grid.style.maxHeight = `${collapsedHeight}px`;
+                }
+            }
+        };
+
+        const scheduleUpdate = () => {
+            if (grid._similarLayoutFrame) cancelAnimationFrame(grid._similarLayoutFrame);
+            grid._similarLayoutFrame = requestAnimationFrame(updateLayout);
+        };
+
+        const resizeHandler = () => scheduleUpdate();
+        window.addEventListener('resize', resizeHandler, { passive: true });
+        this.similarSectionCleanup.push(() => {
+            window.removeEventListener('resize', resizeHandler);
+            if (grid._similarLayoutFrame) cancelAnimationFrame(grid._similarLayoutFrame);
+        });
+
+        cards.forEach(card => {
+            const img = card.querySelector('img');
+            if (img && !img.complete) {
+                const onLoad = () => scheduleUpdate();
+                img.addEventListener('load', onLoad, { once: true });
+                img.addEventListener('error', onLoad, { once: true });
+            }
+        });
+
+        scheduleUpdate();
+        setTimeout(scheduleUpdate, 80);
+
+        if (toggleBtn) {
+            const onToggleClick = (ev) => {
+                ev.preventDefault();
+                const expanded = toggleBtn.dataset.expanded === 'true';
+                const collapsedHeight = parseFloat(grid.dataset.collapsedHeight || '0');
+                const expandedHeight = parseFloat(grid.dataset.expandedHeight || '0');
+                if (expanded) {
+                    toggleBtn.dataset.expanded = 'false';
+                    grid.dataset.state = 'collapsed';
+                    section.classList.remove('is-expanded');
+                    grid.style.maxHeight = `${collapsedHeight}px`;
+                } else {
+                    toggleBtn.dataset.expanded = 'true';
+                    grid.dataset.state = 'expanded';
+                    section.classList.add('is-expanded');
+                    grid.style.maxHeight = `${expandedHeight}px`;
+                }
+                scheduleUpdate();
+            };
+            const onToggleKey = (ev) => {
+                if (ev.key !== 'Enter' && ev.key !== ' ') return;
+                ev.preventDefault();
+                onToggleClick(ev);
+            };
+            toggleBtn.addEventListener('click', onToggleClick);
+            toggleBtn.addEventListener('keydown', onToggleKey);
+            this.similarSectionCleanup.push(() => {
+                toggleBtn.removeEventListener('click', onToggleClick);
+                toggleBtn.removeEventListener('keydown', onToggleKey);
+            });
+        }
+    }
+
+    async insertSimilarSection(item) {
+        try {
+            this.cleanupSimilarSection();
+            const placeholder = this.detailsModalBody ? this.detailsModalBody.querySelector('.details-modal-similar-placeholder') : null;
+            if (!placeholder) return;
+            placeholder.innerHTML = `<div class="details-modal-similar-loading"><div class="skeleton-spinner"></div></div>`;
+            const similarItems = await this.findSimilarItems(item);
+            if (!similarItems || similarItems.length === 0) {
+                placeholder.innerHTML = '';
+                return;
+            }
+            const section = this.createSimilarSectionElement(similarItems);
+            if (!section) {
+                placeholder.innerHTML = '';
+                return;
+            }
+            placeholder.replaceWith(section);
+            this.setupSimilarSection(section, similarItems);
+        } catch (err) {
+            console.warn('DetailsModal: insertSimilarSection error', err);
+            try {
+                const placeholder = this.detailsModalBody ? this.detailsModalBody.querySelector('.details-modal-similar-placeholder') : null;
+                if (placeholder) placeholder.innerHTML = '';
+            } catch (err2) {}
         }
     }
 
