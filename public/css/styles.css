@@ -1408,16 +1408,16 @@ button:focus {
 .hover-portal-clone {
     pointer-events: none;
     will-change: transform, left, top;
-    /* use gentler easing to avoid elastic overshoot when repositioning */
-    transition: transform 100ms ease-out, left 100ms ease-out, top 100ms ease-out, opacity 100ms ease-out;
+    /* ritmo alineado con hover modal: easing suave y duraciones más largas */
+    transition: transform 220ms ease-out, left 220ms ease-out, top 220ms ease-out, opacity 220ms ease-out;
     transform-origin: var(--hover-transform-origin, center center);
 }
 
 /* Visual scale for portal clone when hover is active */
 .hover-portal-clone.hover-zoom {
     transform: translateX(var(--hover-translate-x, 0)) scale(1.3);
-    /* avoid highly springy bezier here; use ease-out for predictable motion */
-    transition: transform 120ms ease-out, opacity 120ms ease-out;
+    /* mantener ease-out pero con duración consistente */
+    transition: transform 220ms ease-out, opacity 220ms ease-out;
 }
 
 /* While scaling down, keep the high z-index until the transform transition ends */
@@ -1426,7 +1426,7 @@ button:focus {
        translation without scaling. The portal clone handles the visual
        scale return animation. */
     transform: translateX(0);
-    transition: transform 70ms cubic-bezier(.2,.8,.2,1);
+    transition: transform 220ms cubic-bezier(.2,.8,.2,1);
     z-index: 10900;
     transform-origin: var(--hover-transform-origin, center center);
 }
@@ -2185,17 +2185,12 @@ button:focus {
     position: absolute;
     background: linear-gradient(rgb(0, 0, 0) 72.64%, rgb(20, 20, 20) 100%);
     width: calc(var(--item-width) * var(--modal-scale));
-    /* height: calc(var(--item-height) * var(--modal-scale)); */
     border-radius: 2px;
-    /* softer shadow to match carousel feel */
     box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-    /* overflow: hidden; */
     transform-origin: center;
     opacity: 0;
-    /* include centering translate so JS doesn't need to overwrite transform */
-    transform: translate(-50%, -50%) translateY(20px);
-    /* faster, smoother transitions */
-    transition: opacity 100ms cubic-bezier(.2,.8,.2,1), transform 100ms cubic-bezier(.2,.8,.2,1);
+    transform: translate(-50%, -50%) scale(var(--modal-start-scale, 1)) translateY(20px);
+    transition: opacity 220ms cubic-bezier(.2,.8,.2,1), transform 220ms cubic-bezier(.2,.8,.2,1);
     pointer-events: auto;
     z-index: 1001;
     will-change: transform, opacity;
@@ -2207,7 +2202,7 @@ button:focus {
 
 .modal-content.show {
     opacity: 1;
-    transform: translate(-50%, -50%) translateY(0);
+    transform: translate(-50%, -50%) scale(1) translateY(0);
     border-radius: 8px;
     box-shadow: rgba(0, 0, 0, 0.65) 0px 0px 50px 16px;
 }

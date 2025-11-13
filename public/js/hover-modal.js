@@ -602,7 +602,7 @@ class HoverModal {
     _onMouseLeave(e) {
         if (!window.matchMedia("(max-width: 768px)").matches) {
             // schedule hide to avoid flicker when moving from item to modal
-            this.hide();
+            this.hide(160);
         }
     }
 
