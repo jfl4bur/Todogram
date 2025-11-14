@@ -2972,7 +2972,7 @@ button:focus {
 
 .details-modal-crew-directors .details-modal-crew-item {
     flex: 1 1 auto;
-    width: 100%;
+    /* width: 100%; */
 }
 
 .details-modal-crew-writers .details-modal-crew-list {
@@ -2982,7 +2982,7 @@ button:focus {
 }
 
 .details-modal-crew-writers .details-modal-crew-item {
-    width: 100%;
+    /* width: 100%; */
     flex: initial;
 }
 
