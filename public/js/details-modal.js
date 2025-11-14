@@ -557,7 +557,11 @@ class DetailsModal {
             // ciclo de evento. Ignoramos clicks en el overlay durante un breve intervalo
             // tras abrir el modal.
             try {
-                if (this._suppressOverlayClickUntil && Date.now() < this._suppressOverlayClickUntil) return;
+                const now = Date.now();
+                if ((this._suppressOverlayClickUntil && now < this._suppressOverlayClickUntil) ||
+                    (this._suppressCloseUntil && now < this._suppressCloseUntil)) {
+                    return;
+                }
             } catch (err) {}
             if (e.target === this.detailsModalOverlay) {
                 this.close();
@@ -614,8 +618,13 @@ class DetailsModal {
                     this.detailsModalBackdrop.classList.add('backdrop-hidden');
                 }
             } catch (e) {}
-            // Forzar scroll suave al tope sobre el contenedor correcto
-            this.scrollOverlayToTop('smooth');
+            // Proteger contra cierres/overlays por clicks residuales y forzar scroll al tope
+            try { this._suppressOverlayClickUntil = Date.now() + 600; } catch(e) {}
+            try { this._suppressCloseUntil = Date.now() + 1200; } catch(e) {}
+            // Scroll inmediato y reintentos programados por cambios de layout
+            this.scrollOverlayToTop('auto');
+            requestAnimationFrame(() => this.scrollOverlayToTop('auto'));
+            setTimeout(() => this.scrollOverlayToTop('auto'), 140);
         }
         // Instrumentación temporal: marcar timestamp de apertura para depuración
         try { this._openedAt = Date.now(); console.log('DetailsModal: show() timestamp', this._openedAt); } catch(e){}
@@ -1023,6 +1032,12 @@ class DetailsModal {
 
         window.activeItem = item;
         console.log('DetailsModal: Modal completado para:', item.title);
+
+        // Asegurar posición top tras cargas diferidas (imágenes/galleries/episodios)
+        try {
+            setTimeout(() => this.scrollOverlayToTop('auto'), 220);
+            setTimeout(() => this.scrollOverlayToTop('auto'), 420);
+        } catch (e) {}
     }
 
     close() {
