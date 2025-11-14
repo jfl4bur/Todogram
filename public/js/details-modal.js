@@ -543,6 +543,7 @@ class DetailsModal {
         this.updateUrlForModal(item);
         this.cleanupSimilarSection();
     this.cleanupEpisodesSection();
+        this.scrollModalToTop('auto');
         
         this.detailsModalBody.innerHTML = `
             <div style="display:flex; justify-content:center; align-items:center; height:100%;">
@@ -1658,6 +1659,7 @@ class DetailsModal {
                     section.classList.add('is-expanded');
                 }
                 scheduleUpdate();
+                this.scrollElementIntoView(toggleBtn, { behavior: 'smooth', block: 'start', offset: 16 });
             };
             const onToggleKey = (ev) => {
                 if (ev.key !== 'Enter' && ev.key !== ' ') return;
@@ -1697,6 +1699,38 @@ class DetailsModal {
         };
 
         this.episodesSectionCleanup.push(cleanup);
+    }
+
+    scrollModalToTop(behavior = 'auto') {
+        const container = this.detailsModalContent;
+        if (!container) return;
+        try {
+            container.scrollTo({ top: 0, behavior });
+        } catch (err) {
+            try { container.scrollTop = 0; } catch (_) {}
+        }
+    }
+
+    scrollElementIntoView(element, { behavior = 'smooth', block = 'start', offset = 0 } = {}) {
+        const container = this.detailsModalContent;
+        if (!container || !element) return;
+        requestAnimationFrame(() => {
+            try {
+                const containerRect = container.getBoundingClientRect();
+                const elementRect = element.getBoundingClientRect();
+                const currentScroll = container.scrollTop || 0;
+                let targetTop = elementRect.top - containerRect.top + currentScroll - offset;
+                if (block === 'center') {
+                    targetTop -= (container.clientHeight / 2) - (elementRect.height / 2);
+                } else if (block === 'end') {
+                    targetTop -= container.clientHeight - elementRect.height;
+                }
+                if (targetTop < 0) targetTop = 0;
+                container.scrollTo({ top: targetTop, behavior });
+            } catch (err) {
+                try { element.scrollIntoView({ behavior, block }); } catch (_) {}
+            }
+        });
     }
 
     _splitGenres(value) {
@@ -2114,6 +2148,7 @@ class DetailsModal {
                     grid.style.maxHeight = `${expandedHeight}px`;
                 }
                 scheduleUpdate();
+                detailsInstance.scrollElementIntoView(toggleBtn, { behavior: 'smooth', block: 'start', offset: 16 });
             };
             const onToggleKey = (ev) => {
                 if (ev.key !== 'Enter' && ev.key !== ' ') return;
