@@ -2704,6 +2704,14 @@ button:focus {
 /* === Skeleton para modal de detalles === */
 /* Skeleton nuevo basado en clases reales para alineación exacta */
 .skeleton-block {background:var(--skel-bg,#262626);border-radius:6px;animation: skelPulse 1.6s ease-in-out infinite;display:block}
+/* Botón primario ancho del skeleton (alineado al botón real) */
+.skeleton-btn-primary {width:68%;max-width:460px;height:46px;border-radius:12px;margin:12px 0 18px;display:block}
+/* Botones secundarios circulares del skeleton */
+.skeleton-btn-circular {width:46px;height:46px;border-radius:50%;display:inline-block}
+@media (max-width: 780px) {
+    .skeleton-btn-primary {width:100%;max-width:none;margin:8px 0 14px}
+    .details-modal-actions .primary-action-row {justify-content:flex-start}
+}
 .skeleton-title {height:42px;width:70%;}
 .skeleton-line {height:16px;width:40%;}
 .skeleton-meta .skeleton-block {height:16px}

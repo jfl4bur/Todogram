@@ -158,9 +158,10 @@ class DetailsModal {
         const line = (w, h=14) => `<div class="skeleton-block" style="width:${w};height:${h}px"></div>`;
         const textLines = (n, h=14, w='100%') => Array.from({length:n}).map(()=>line(w,h)).join('');
         const title = `<h1 class="details-modal-title skeleton-block skeleton-title"></h1>`;
-        const original = `<div class="details-modal-original-title skeleton-block skeleton-line"></div>`;
-        const meta = `<div class="details-modal-meta skeleton-meta">${['12%','9%','16%','7%'].map(w=>`<span class=\\"details-modal-meta-item skeleton-block\\" style=\\"width:${w};height:16px\\"></span>`).join('')}</div>`;
-        const actions = `<div class="details-modal-actions"><div class="primary-action-row">${['42%','30%'].map(w=>`<button class=\\"details-modal-action-btn primary big-btn skeleton-block\\" style=\\"width:${w};height:46px\\"></button>`).join('')}</div><div class="secondary-actions-row">${['46px','46px','46px'].map(w=>`<button class=\\"details-modal-action-btn circular skeleton-block\\" style=\\"width:46px;height:46px\\"></button>`).join('')}</div></div>`;
+    const original = `<div class="details-modal-original-title skeleton-block skeleton-line"></div>`;
+    const meta = `<div class="details-modal-meta skeleton-meta">${['12%','9%','16%','7%'].map(w=>`<span class=\\"details-modal-meta-item skeleton-block\\" style=\\"width:${w};height:16px\\"></span>`).join('')}</div>`;
+    // Legacy acciones skeleton (dos botones primarios y tres secundarios) eliminado para evitar flicker y tamaño incorrecto en móvil.
+        const actions = `<div class="details-modal-actions"><div class="primary-action-row"><button class="details-modal-action-btn primary big-btn skeleton-block skeleton-btn-primary" aria-hidden="true"></button></div><div class="secondary-actions-row">${['1','2','3'].map(()=>`<button class=\\"details-modal-action-btn circular skeleton-block skeleton-btn-circular\\" aria-hidden=\\"true\\"></button>`).join('')}</div></div>`;
         const description = `<div class="details-modal-description skeleton-text">${textLines(3,16)}</div>`;
         const info = `<div class="details-modal-info">${Array.from({length:4}).map(()=>`<div class=\\"details-modal-info-item\\"><div class=\\"details-modal-info-label skeleton-block\\" style=\\"width:90px;height:14px\\"></div><div class=\\"details-modal-info-value skeleton-block\\" style=\\"width:160px;height:14px\\"></div></div>`).join('')}</div>`;
         const crew = `<div class="details-modal-crew-duo"><div class="details-modal-crew-section skeleton-crew-col">${textLines(3,18,'100%')}</div><div class="details-modal-crew-section skeleton-crew-col">${textLines(5,18,'100%')}</div></div>`;
@@ -640,35 +641,31 @@ class DetailsModal {
             // Proteger contra cierres/overlays por clicks residuales y forzar scroll al tope
             try { this._suppressOverlayClickUntil = Date.now() + 600; } catch(e) {}
             try { this._suppressCloseUntil = Date.now() + 1200; } catch(e) {}
-            // Scroll inmediato y reintentos programados por cambios de layout
-            this.scrollOverlayToTop('auto');
-            requestAnimationFrame(() => this.scrollOverlayToTop('auto'));
-            setTimeout(() => this.scrollOverlayToTop('auto'), 140);
         }
         // Forzar scroll top si la navegación proviene de una tarjeta de similares
         if (this._forceScrollTopOnNextShow) {
             this._forceScrollTopOnNextShow = false;
             try {
-                const hardReset = (el) => { if (el) { el.scrollTop = 0; } };
-                hardReset(this.detailsModalOverlay);
-                hardReset(this.detailsModalContent);
-                hardReset(this.detailsModalBody);
-                // rAF y timeouts para cubrir imágenes/galerías tardías
-                requestAnimationFrame(() => {
-                    hardReset(this.detailsModalOverlay);
-                    hardReset(this.detailsModalContent);
-                    hardReset(this.detailsModalBody);
-                });
-                setTimeout(() => {
-                    hardReset(this.detailsModalOverlay);
-                    hardReset(this.detailsModalContent);
-                    hardReset(this.detailsModalBody);
-                }, 120);
-                setTimeout(() => {
-                    hardReset(this.detailsModalOverlay);
-                    hardReset(this.detailsModalContent);
-                    hardReset(this.detailsModalBody);
-                }, 300);
+                // Animación suave: solo si veníamos de scroll > 0
+                const scrollers = [this.detailsModalOverlay, this.detailsModalContent, this.detailsModalBody].filter(Boolean);
+                const prev = this._prevScrollAmount || 0;
+                const doSmooth = prev > 20; // si había desplazamiento real
+                const smoothScroll = (el) => {
+                    try {
+                        if (!el) return;
+                        if (doSmooth && typeof el.scrollTo === 'function') {
+                            el.scrollTo({ top: 0, behavior: 'smooth' });
+                        } else {
+                            el.scrollTop = 0;
+                        }
+                    } catch (e) { /* ignore */ }
+                };
+                // Scroll inicial (smooth)
+                scrollers.forEach(smoothScroll);
+                // Reintentos para asegurar posición tras relayouts
+                requestAnimationFrame(() => scrollers.forEach(smoothScroll));
+                setTimeout(() => scrollers.forEach(smoothScroll), 160);
+                setTimeout(() => scrollers.forEach(smoothScroll), 360);
             } catch (e) { /* ignore */ }
         }
         // Instrumentación temporal: marcar timestamp de apertura para depuración
@@ -2140,6 +2137,12 @@ class DetailsModal {
                 try { detailsInstance._suppressCloseUntil = Date.now() + 1200; } catch (e) {}
                 // Flag para forzar scroll al inicio en show()
                 try { detailsInstance._forceScrollTopOnNextShow = true; } catch (e) {}
+                // Guardar scroll actual para decidir si hacer animación suave
+                try {
+                    const currentScroll = (detailsInstance.detailsModalOverlay && detailsInstance.detailsModalOverlay.scrollTop) ||
+                        (detailsInstance.detailsModalContent && detailsInstance.detailsModalContent.scrollTop) || 0;
+                    detailsInstance._prevScrollAmount = currentScroll;
+                } catch (e) {}
                 try { window.activeItem = data; } catch (err) {}
                 if (window.hoverModal && typeof window.hoverModal.hide === 'function') {
                     window.hoverModal.hide(0);
@@ -2150,12 +2153,6 @@ class DetailsModal {
                         detailsInstance.detailsModalBackdrop.style.opacity = '0';
                         detailsInstance.detailsModalBackdrop.classList.add('backdrop-hidden');
                     }
-                    // Scroll inmediato previo (sin animación) para reducir salto perceptible
-                    try {
-                        if (detailsInstance.detailsModalOverlay) detailsInstance.detailsModalOverlay.scrollTop = 0;
-                        if (detailsInstance.detailsModalContent) detailsInstance.detailsModalContent.scrollTop = 0;
-                        if (detailsInstance.detailsModalBody) detailsInstance.detailsModalBody.scrollTop = 0;
-                    } catch (e) {}
                 } catch (e) {}
                 let p;
                 try {
