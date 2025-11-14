@@ -2965,6 +2965,27 @@ button:focus {
     color: rgba(255, 255, 255, 0.7);
 }
 
+.details-modal-crew-directors .details-modal-crew-list {
+    flex-direction: column;
+    gap: 12px;
+}
+
+.details-modal-crew-directors .details-modal-crew-item {
+    flex: 1 1 auto;
+    width: 100%;
+}
+
+.details-modal-crew-writers .details-modal-crew-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.details-modal-crew-writers .details-modal-crew-item {
+    width: 100%;
+    flex: initial;
+}
+
 .details-modal-cast {
     margin-top: 24px;
 }
