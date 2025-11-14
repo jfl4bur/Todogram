@@ -504,6 +504,7 @@ class DetailsModal {
 
     async show(item, itemElement) {
         const triggeredFromSimilar = !!(itemElement && itemElement.closest && itemElement.closest('.details-modal-similar-card'));
+        const wasOpen = this.isDetailsModalOpen;
     // Normalize: if catalogo passed a 'raw' original row, copy common local fields so this modal can use them
         try {
             const raw = item && item.raw ? item.raw : null;
@@ -528,7 +529,7 @@ class DetailsModal {
             trailerUrl: item.trailerUrl,
             tmdbUrl: item.tmdbUrl
         });
-        if (!this.isDetailsModalOpen) {
+        if (!wasOpen) {
             const currentHashSnapshot = window.location.hash || '';
             if (currentHashSnapshot && !currentHashSnapshot.startsWith('#id=')) {
                 this.preModalHash = currentHashSnapshot;
@@ -544,7 +545,14 @@ class DetailsModal {
         this.updateUrlForModal(item);
         this.cleanupSimilarSection();
         this.cleanupEpisodesSection();
-        this.scrollModalToTop(triggeredFromSimilar ? 'smooth' : 'auto');
+        if (!wasOpen) {
+            this.scrollModalToTop('auto');
+        }
+
+        const previousHeight = this.detailsModalBody ? this.detailsModalBody.offsetHeight : 0;
+        if (previousHeight > 0) {
+            this.detailsModalBody.style.minHeight = `${Math.ceil(previousHeight)}px`;
+        }
         
         this.detailsModalBody.innerHTML = `
             <div style="display:flex; justify-content:center; align-items:center; height:100%;">
@@ -552,15 +560,17 @@ class DetailsModal {
             </div>
         `;
         
-        this.detailsModalOverlay.style.display = 'block';
-        this.detailsModalOverlay.classList.add('show');
-    // Evitar que el click/tap original que abrió el modal (mismo evento)
-    // se propague a overlay y cierre el modal inmediatamente.
-    try { this._suppressOverlayClickUntil = Date.now() + 350; } catch (e) {}
-        document.body.style.overflow = 'hidden';
-        console.log('DetailsModal: Modal overlay mostrado con clase show');
+        if (!wasOpen) {
+            this.detailsModalOverlay.style.display = 'block';
+            this.detailsModalOverlay.classList.add('show');
+            // Evitar que el click/tap original que abrió el modal (mismo evento)
+            // se propague a overlay y cierre el modal inmediatamente.
+            try { this._suppressOverlayClickUntil = Date.now() + 350; } catch (e) {}
+            document.body.style.overflow = 'hidden';
+            console.log('DetailsModal: Modal overlay mostrado con clase show');
+        }
         
-        if (this.isIOS()) {
+    if (!wasOpen && this.isIOS()) {
             document.getElementById('ios-helper').offsetHeight;
             this.detailsModalContent.style.display = 'none';
             setTimeout(() => {
@@ -768,8 +778,14 @@ class DetailsModal {
             <div class="details-modal-similar-placeholder"></div>
         `;
 
+        requestAnimationFrame(() => {
+            if (this.detailsModalBody) this.detailsModalBody.style.minHeight = '';
+        });
+
         if (triggeredFromSimilar) {
-            setTimeout(() => this.scrollModalToTop('smooth'), 320);
+            const smoothScroll = () => this.scrollModalToTop('smooth');
+            requestAnimationFrame(smoothScroll);
+            setTimeout(smoothScroll, 280);
         }
 
         // Reemplazar esqueletos inmediatamente para evitar parpadeos y respetar el flujo del contenido
@@ -1650,10 +1666,19 @@ class DetailsModal {
         });
 
         if (toggleBtn) {
-            const ensureToggleVisible = () => {
-                const opts = { behavior: 'smooth', block: 'start', offset: 16 };
-                detailsInstance.scrollElementIntoView(toggleBtn, opts);
-                setTimeout(() => detailsInstance.scrollElementIntoView(toggleBtn, opts), 420);
+            const ensureToggleVisible = (mode = 'default') => {
+                const target = toggleWrapper || toggleBtn;
+                if (!target) return;
+                const baseOpts = { behavior: 'smooth', block: 'start' };
+                if (mode === 'collapse') {
+                    const collapseOpts = { ...baseOpts, offset: 24 };
+                    setTimeout(() => detailsInstance.scrollElementIntoView(target, collapseOpts), 120);
+                    setTimeout(() => detailsInstance.scrollElementIntoView(target, collapseOpts), 360);
+                } else {
+                    const expandOpts = { ...baseOpts, offset: 16 };
+                    detailsInstance.scrollElementIntoView(target, expandOpts);
+                    setTimeout(() => detailsInstance.scrollElementIntoView(target, expandOpts), 420);
+                }
             };
             const onToggleClick = (ev) => {
                 ev.preventDefault();
@@ -1670,7 +1695,7 @@ class DetailsModal {
                     section.classList.add('is-expanded');
                 }
                 scheduleUpdate();
-                ensureToggleVisible();
+                ensureToggleVisible(expanded ? 'collapse' : 'expand');
             };
             const onToggleKey = (ev) => {
                 if (ev.key !== 'Enter' && ev.key !== ' ') return;
@@ -2142,10 +2167,19 @@ class DetailsModal {
         setTimeout(scheduleUpdate, 80);
 
         if (toggleBtn) {
-            const ensureToggleVisible = () => {
-                const opts = { behavior: 'smooth', block: 'start', offset: 16 };
-                detailsInstance.scrollElementIntoView(toggleBtn, opts);
-                setTimeout(() => detailsInstance.scrollElementIntoView(toggleBtn, opts), 420);
+            const ensureToggleVisible = (mode = 'default') => {
+                const target = toggleWrapper || toggleBtn;
+                if (!target) return;
+                const baseOpts = { behavior: 'smooth', block: 'start' };
+                if (mode === 'collapse') {
+                    const collapseOpts = { ...baseOpts, offset: 20 };
+                    setTimeout(() => detailsInstance.scrollElementIntoView(target, collapseOpts), 120);
+                    setTimeout(() => detailsInstance.scrollElementIntoView(target, collapseOpts), 360);
+                } else {
+                    const expandOpts = { ...baseOpts, offset: 16 };
+                    detailsInstance.scrollElementIntoView(target, expandOpts);
+                    setTimeout(() => detailsInstance.scrollElementIntoView(target, expandOpts), 420);
+                }
             };
             const onToggleClick = (ev) => {
                 ev.preventDefault();
@@ -2164,7 +2198,7 @@ class DetailsModal {
                     grid.style.maxHeight = `${expandedHeight}px`;
                 }
                 scheduleUpdate();
-                ensureToggleVisible();
+                ensureToggleVisible(expanded ? 'collapse' : 'expand');
             };
             const onToggleKey = (ev) => {
                 if (ev.key !== 'Enter' && ev.key !== ' ') return;
