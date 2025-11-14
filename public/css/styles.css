@@ -2708,6 +2708,30 @@ button:focus {
 .skeleton-btn-primary {width:68%;max-width:460px;min-width:150px;height:52px;border-radius:12px;margin:12px 0 18px;display:block;background:#3a3a3a}
 /* Botones secundarios circulares del skeleton */
 .skeleton-btn-circular {width:52px;height:52px;min-width:52px;border-radius:50%;display:inline-block;background:#3a3a3a}
+/* Fuerza de estilos del skeleton por encima de los estilos de botones reales */
+.details-modal-actions .details-modal-action-btn.skeleton-btn-primary {
+    background:#3a3a3a !important;
+    border:none !important;
+    box-shadow:none !important;
+    color:transparent !important;
+    height:52px !important;
+    min-width:150px !important;
+    padding:0 !important;
+    line-height:0 !important;
+    border-radius:12px !important;
+}
+.details-modal-actions .details-modal-action-btn.skeleton-btn-circular {
+    background:#3a3a3a !important;
+    border:none !important;
+    box-shadow:none !important;
+    color:transparent !important;
+    width:52px !important;
+    height:52px !important;
+    min-width:52px !important;
+    padding:0 !important;
+    line-height:0 !important;
+    border-radius:50% !important;
+}
 @media (max-width: 780px) {
     .skeleton-btn-primary {width:100%;max-width:none;margin:8px 0 14px}
     .details-modal-actions .primary-action-row {justify-content:flex-start}
