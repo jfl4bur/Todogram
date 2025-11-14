@@ -1076,7 +1076,7 @@ button:focus {
     .details-modal-similar-card{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;background:transparent;border-radius:0;overflow:visible;box-shadow:none;cursor:pointer;transform-origin:var(--hover-transform-origin,center center);transition:transform 0.12s cubic-bezier(.2,.8,.2,1);outline:none}
     .details-modal-similar-card:focus{box-shadow:0 0 0 2px rgba(255,255,255,0.32)}
     .details-modal-similar-poster{position:relative;width:100%;aspect-ratio:194/271;background:#232323;overflow:hidden}
-    .details-modal-similar-poster img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.3s ease}
+    .details-modal-similar-poster img{width:100%;height:100%;object-fit: fill;display:block;transition:transform 0.3s ease}
     .details-modal-similar-card:hover,
     .details-modal-similar-card.hover-zoom{transform:translateY(-4px);box-shadow:0 8px 16px rgba(0,0,0,0.6);z-index:2}
     .details-modal-similar-card:hover .details-modal-similar-poster img,
