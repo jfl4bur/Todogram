@@ -619,8 +619,8 @@ class DetailsModal {
         this.updateUrlForModal(item);
         this.cleanupSimilarSection();
         this.cleanupEpisodesSection();
-        // Solo desplazar inmediatamente al top si es la primera apertura
-        if (!wasOpen) {
+        // Si viene de "similares" o es primera apertura, subir al top instantáneamente
+        if (triggeredFromSimilar || !wasOpen) {
             this.scrollModalToTop('auto');
         }
 
@@ -857,13 +857,7 @@ class DetailsModal {
             if (this.detailsModalBody) this.detailsModalBody.style.minHeight = '';
         });
 
-        // Si venimos de una tarjeta similar y el modal ya estaba abierto,
-        // esperar a que el backdrop nuevo esté listo y entonces hacer scroll suave al top
-        if (triggeredFromSimilar && wasOpen) {
-            this.waitForBackdrop(1200).then(() => {
-                this.scrollModalToTop('smooth');
-            });
-        }
+        // Eliminado el scroll diferido: al venir de similares ya subimos arriba instantáneamente al inicio
 
         // Reemplazar esqueletos inmediatamente para evitar parpadeos y respetar el flujo del contenido
         try {
@@ -2147,6 +2141,8 @@ class DetailsModal {
                 if (window.hoverModal && typeof window.hoverModal.hide === 'function') {
                     window.hoverModal.hide(0);
                 }
+                // Subir al top instantáneamente antes de cambiar el contenido
+                try { detailsInstance.scrollModalToTop('auto'); } catch (_) {}
                 detailsInstance.show(data, card);
             };
             card.addEventListener('click', onClick);
