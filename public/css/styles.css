@@ -295,22 +295,11 @@ button:focus {
 
 /* También aplicar a details-modal-overlay usado en catalogo/index */
 .details-modal-overlay, .details-modal-content, .details-modal-body {
-    scrollbar-width: thin; /* Firefox visible */
-    -ms-overflow-style: auto; /* IE/Edge legacy */
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 .details-modal-overlay::-webkit-scrollbar, .details-modal-content::-webkit-scrollbar, .details-modal-body::-webkit-scrollbar {
-    width: 8px; /* Visible scrollbar */
-}
-.details-modal-overlay::-webkit-scrollbar-track, .details-modal-content::-webkit-scrollbar-track, .details-modal-body::-webkit-scrollbar-track {
-    background: rgba(255,255,255,0.08);
-    border-radius: 4px;
-}
-.details-modal-overlay::-webkit-scrollbar-thumb, .details-modal-content::-webkit-scrollbar-thumb, .details-modal-body::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.35);
-    border-radius: 4px;
-}
-.details-modal-overlay::-webkit-scrollbar-thumb:hover, .details-modal-content::-webkit-scrollbar-thumb:hover, .details-modal-body::-webkit-scrollbar-thumb:hover {
-    background: rgba(255,255,255,0.55);
+    display: none;
 }
 .carousel-section-background {
        background: linear-gradient(rgba(249, 203, 40, 0) 11.35%, rgba(249, 203, 40, 0.24) 100%);
@@ -1087,7 +1076,7 @@ button:focus {
     .details-modal-similar-card{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;background:transparent;border-radius:0;overflow:visible;box-shadow:none;cursor:pointer;transform-origin:var(--hover-transform-origin,center center);transition:transform 0.12s cubic-bezier(.2,.8,.2,1);outline:none}
     .details-modal-similar-card:focus{box-shadow:0 0 0 2px rgba(255,255,255,0.32)}
     .details-modal-similar-poster{position:relative;width:100%;aspect-ratio:194/271;background:#232323;overflow:hidden}
-    .details-modal-similar-poster img{width:100%;height:100%;object-fit: fill;display:block;transition:transform 0.3s ease}
+    .details-modal-similar-poster img{width:100%;height:100%;object-fit:cover;display:block;transition:transform 0.3s ease}
     .details-modal-similar-card:hover,
     .details-modal-similar-card.hover-zoom{transform:translateY(-4px);box-shadow:0 8px 16px rgba(0,0,0,0.6);z-index:2}
     .details-modal-similar-card:hover .details-modal-similar-poster img,
@@ -3519,43 +3508,22 @@ ease-out;
     text-align: center;
 }
 
-/* Hide scrollbars inside MOST modals for a cleaner UI, pero mantener visibles los del details-modal */
-.modal-overlay, .share-modal-overlay, .video-modal-overlay, .gallery-image-modal {
+/* Hide scrollbars inside modals for a cleaner UI (works across browsers) */
+.modal-overlay, .details-modal-overlay, .share-modal-overlay, .video-modal-overlay, .gallery-image-modal {
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
 }
-.modal-overlay::-webkit-scrollbar, .share-modal-overlay::-webkit-scrollbar, .video-modal-overlay::-webkit-scrollbar, .gallery-image-modal::-webkit-scrollbar {
+.modal-overlay::-webkit-scrollbar, .details-modal-overlay::-webkit-scrollbar, .share-modal-overlay::-webkit-scrollbar, .video-modal-overlay::-webkit-scrollbar, .gallery-image-modal::-webkit-scrollbar {
     display: none; /* Safari and Chrome */
 }
 
-/* También ocultar en contenidos de otros modals (excepto details) */
-.modal-content, .share-modal-content, .video-modal-content, .gallery-image-modal-content {
+/* Also hide scrollbars for modal content areas if any overflow occurs */
+.modal-content, .details-modal-content, .share-modal-content, .video-modal-content, .gallery-image-modal-content {
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
-.modal-content::-webkit-scrollbar, .share-modal-content::-webkit-scrollbar, .video-modal-content::-webkit-scrollbar, .gallery-image-modal-content::-webkit-scrollbar {
+.modal-content::-webkit-scrollbar, .details-modal-content::-webkit-scrollbar, .share-modal-content::-webkit-scrollbar, .video-modal-content::-webkit-scrollbar, .gallery-image-modal-content::-webkit-scrollbar {
     display: none;
-}
-
-/* Overrides explícitos para asegurar que el scrollbar del details-modal sea visible en cualquier caso */
-.details-modal-overlay, .details-modal-content, .details-modal-body {
-    scrollbar-width: thin !important; /* Firefox */
-    -ms-overflow-style: auto !important; /* IE/Edge legacy */
-}
-.details-modal-overlay::-webkit-scrollbar, .details-modal-content::-webkit-scrollbar, .details-modal-body::-webkit-scrollbar {
-    width: 8px !important;
-    display: block !important;
-}
-.details-modal-overlay::-webkit-scrollbar-track, .details-modal-content::-webkit-scrollbar-track, .details-modal-body::-webkit-scrollbar-track {
-    background: rgba(255,255,255,0.08) !important;
-    border-radius: 4px !important;
-}
-.details-modal-overlay::-webkit-scrollbar-thumb, .details-modal-content::-webkit-scrollbar-thumb, .details-modal-body::-webkit-scrollbar-thumb {
-    background: rgba(255,255,255,0.35) !important;
-    border-radius: 4px !important;
-}
-.details-modal-overlay::-webkit-scrollbar-thumb:hover, .details-modal-content::-webkit-scrollbar-thumb:hover, .details-modal-body::-webkit-scrollbar-thumb:hover {
-    background: rgba(255,255,255,0.55) !important;
 }
 
 .share-options {

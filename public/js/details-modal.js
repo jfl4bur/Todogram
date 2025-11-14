@@ -149,26 +149,6 @@ class DetailsModal {
         this.similarSectionCleanup = [];
         this.episodesSectionCleanup = [];
         this.activeEpisodesSection = null;
-
-        // Esperas para saber cuándo el backdrop terminó de cargar/settle
-        this._backdropWaiters = [];
-    }
-
-    _getScrollContainer() {
-        // Prefer the element that actually scrolls (overlay usually has overflow-y: auto)
-        try {
-            const overlay = this.detailsModalOverlay;
-            const content = this.detailsModalContent;
-            if (!overlay && !content) return null;
-            const overlayCanScroll = overlay && (overlay.scrollHeight > overlay.clientHeight);
-            const contentCanScroll = content && (content.scrollHeight > content.clientHeight);
-            if (overlayCanScroll && !contentCanScroll) return overlay;
-            if (contentCanScroll && !overlayCanScroll) return content;
-            // If both/neither, prefer overlay (it wraps the header/backdrop region)
-            return overlay || content || null;
-        } catch (e) {
-            return this.detailsModalContent || this.detailsModalOverlay || null;
-        }
     }
 
     _detachDetailsBackdropListeners() {
@@ -187,99 +167,45 @@ class DetailsModal {
         this._detachDetailsBackdropListeners();
         try { this.detailsModalBackdrop.classList.remove('backdrop-loading'); } catch (e) {}
         try { if (this.detailsModalHeader) this.detailsModalHeader.classList.remove('backdrop-loading'); } catch (e) {}
-        try {
-            if (this.detailsModalBackdrop) this.detailsModalBackdrop.style.opacity = '1';
-        } catch (e) {}
-        try {
-            if (Array.isArray(this._backdropWaiters) && this._backdropWaiters.length) {
-                const waiters = this._backdropWaiters.slice(0);
-                this._backdropWaiters.length = 0;
-                waiters.forEach(fn => { try { fn(); } catch(_){} });
-            }
-        } catch (e) {}
-    }
-
-    waitForBackdrop(timeoutMs = 1200) {
-        return new Promise(resolve => {
-            try {
-                if (!Array.isArray(this._backdropWaiters)) this._backdropWaiters = [];
-                this._backdropWaiters.push(resolve);
-                if (timeoutMs > 0) setTimeout(() => resolve(), timeoutMs);
-            } catch (e) { resolve(); }
-        });
     }
 
     _setDetailsBackdropImage(src) {
         if (!this.detailsModalBackdrop) return;
+
+        this._handleDetailsBackdropSettled();
+
+        try { this.detailsModalBackdrop.classList.add('backdrop-loading'); } catch (e) {}
+        try { if (this.detailsModalHeader) this.detailsModalHeader.classList.add('backdrop-loading'); } catch (e) {}
+
         const fallback = DEFAULT_DETAILS_BACKDROP_PLACEHOLDER;
-        const finalSrc = src && String(src).trim() ? src : fallback;
-        const currentSrc = this.detailsModalBackdrop.getAttribute('src') || '';
+        this._detailsBackdropFallbackApplied = false;
 
-        if (currentSrc === finalSrc && !this.detailsModalBackdrop.classList.contains('backdrop-loading')) {
-            requestAnimationFrame(() => {
-                try { this.detailsModalBackdrop.classList.remove('backdrop-loading'); } catch (e) {}
-                try { if (this.detailsModalHeader) this.detailsModalHeader.classList.remove('backdrop-loading'); } catch (e) {}
-                try { this.detailsModalBackdrop.style.opacity = '1'; } catch (e) {}
-            });
-            return;
-        }
-
-        this._detachDetailsBackdropListeners();
-        this._detailsBackdropFallbackApplied = finalSrc === fallback;
-
-        const markLoading = () => {
-            try { this.detailsModalBackdrop.classList.add('backdrop-loading'); } catch (e) {}
-            try { if (this.detailsModalHeader) this.detailsModalHeader.classList.add('backdrop-loading'); } catch (e) {}
-            try {
-                if (!this.detailsModalBackdrop.style.transition) {
-                    this.detailsModalBackdrop.style.transition = 'opacity 220ms ease';
-                }
-                this.detailsModalBackdrop.style.opacity = '0';
-            } catch (e) {}
-        };
-
-        const settle = () => {
+        const onLoad = () => {
             this._handleDetailsBackdropSettled();
         };
 
-        const attachListeners = (expectedSrc) => {
-            this._detachDetailsBackdropListeners();
-            this._detailsBackdropLoadHandler = () => {
-                if (this.detailsModalBackdrop.getAttribute('src') === expectedSrc) {
-                    settle();
-                }
-            };
-            this._detailsBackdropErrorHandler = () => {
-                if (!this._detailsBackdropFallbackApplied && fallback && expectedSrc !== fallback) {
-                    this._detailsBackdropFallbackApplied = true;
-                    markLoading();
-                    attachListeners(fallback);
-                    this.detailsModalBackdrop.src = fallback;
-                    return;
-                }
-                settle();
-            };
-            this.detailsModalBackdrop.addEventListener('load', this._detailsBackdropLoadHandler);
-            this.detailsModalBackdrop.addEventListener('error', this._detailsBackdropErrorHandler);
+        const onError = () => {
+            if (!this._detailsBackdropFallbackApplied && fallback) {
+                this._detailsBackdropFallbackApplied = true;
+                this.detailsModalBackdrop.src = fallback;
+            } else {
+                this._handleDetailsBackdropSettled();
+            }
         };
 
-        markLoading();
-        // Limpiar el src actual para evitar que se vea el backdrop anterior un instante
+        this._detailsBackdropLoadHandler = onLoad;
+        this._detailsBackdropErrorHandler = onError;
+
         try {
-            if (currentSrc && currentSrc !== finalSrc) {
-                this.detailsModalBackdrop.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACw='; // 1x1 transparente
-            }
-        } catch (_) {}
-
-        if (currentSrc === finalSrc) {
-            requestAnimationFrame(settle);
-            return;
+            this.detailsModalBackdrop.addEventListener('load', this._detailsBackdropLoadHandler, { once: true });
+        } catch (e) {
+            this.detailsModalBackdrop.addEventListener('load', this._detailsBackdropLoadHandler);
         }
+        this.detailsModalBackdrop.addEventListener('error', this._detailsBackdropErrorHandler);
 
-        attachListeners(finalSrc);
-        requestAnimationFrame(() => {
-            this.detailsModalBackdrop.src = finalSrc;
-        });
+        const finalSrc = src && String(src).trim() ? src : fallback;
+        if (finalSrc === fallback) this._detailsBackdropFallbackApplied = true;
+        this.detailsModalBackdrop.src = finalSrc;
     }
 
     // Abre un player embebido en fullscreen usando un iframe
@@ -577,25 +503,7 @@ class DetailsModal {
     }
 
     async show(item, itemElement) {
-        const triggeredFromSimilar = !!(itemElement && itemElement.closest && itemElement.closest('.details-modal-similar-card'));
-        const wasOpen = this.isDetailsModalOpen;
-        // Si cambiamos desde una tarjeta similar y el modal ya estaba abierto, ocultar el backdrop ANTES de iniciar el scroll
-        if (wasOpen && triggeredFromSimilar && this.detailsModalBackdrop) {
-            try {
-                // Quitar transición para ocultar instantáneamente
-                const prevTransition = this.detailsModalBackdrop.style.transition;
-                this.detailsModalBackdrop.style.transition = 'none';
-                this.detailsModalBackdrop.style.opacity = '0';
-                // Reemplazar src por transparente para evitar ver el fotograma anterior
-                if (this.detailsModalBackdrop.getAttribute('src')) {
-                    this.detailsModalBackdrop.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACw=';
-                }
-                // Forzar reflow y restaurar transición suave para la nueva imagen
-                void this.detailsModalBackdrop.offsetWidth;
-                this.detailsModalBackdrop.style.transition = prevTransition || 'opacity 220ms ease';
-            } catch (e) { /* noop */ }
-        }
-    // Normalize: if catalogo passed a 'raw' original row, copy common local fields so this modal can use them
+        // Normalize: if catalogo passed a 'raw' original row, copy common local fields so this modal can use them
         try {
             const raw = item && item.raw ? item.raw : null;
             if (raw) {
@@ -619,7 +527,7 @@ class DetailsModal {
             trailerUrl: item.trailerUrl,
             tmdbUrl: item.tmdbUrl
         });
-        if (!wasOpen) {
+        if (!this.isDetailsModalOpen) {
             const currentHashSnapshot = window.location.hash || '';
             if (currentHashSnapshot && !currentHashSnapshot.startsWith('#id=')) {
                 this.preModalHash = currentHashSnapshot;
@@ -634,23 +542,7 @@ class DetailsModal {
         try { this._openedAt = Date.now(); console.log('DetailsModal: show() timestamp', this._openedAt); } catch(e){}
         this.updateUrlForModal(item);
         this.cleanupSimilarSection();
-        this.cleanupEpisodesSection();
-        // Solo desplazar inmediatamente al top si es la primera apertura
-        // Bloquear scroll de fondo siempre mientras el modal está abierto
-        try { document.documentElement.classList.add('details-modal-open'); } catch(_){}
-        try { document.body.classList.add('details-modal-open'); document.body.style.overflow='hidden'; } catch(_){}
-
-        if (!wasOpen) {
-            this.scrollModalToTop('auto');
-        } else if (triggeredFromSimilar) {
-            // Scroll suave inmediato hacia el top (ya backdrop oculto) para la transición pedida
-            this.scrollModalToTop('smooth');
-        }
-
-        const previousHeight = this.detailsModalBody ? this.detailsModalBody.offsetHeight : 0;
-        if (previousHeight > 0) {
-            this.detailsModalBody.style.minHeight = `${Math.ceil(previousHeight)}px`;
-        }
+    this.cleanupEpisodesSection();
         
         this.detailsModalBody.innerHTML = `
             <div style="display:flex; justify-content:center; align-items:center; height:100%;">
@@ -658,17 +550,15 @@ class DetailsModal {
             </div>
         `;
         
-        if (!wasOpen) {
-            this.detailsModalOverlay.style.display = 'block';
-            this.detailsModalOverlay.classList.add('show');
-            // Evitar que el click/tap original que abrió el modal (mismo evento)
-            // se propague a overlay y cierre el modal inmediatamente.
-            try { this._suppressOverlayClickUntil = Date.now() + 350; } catch (e) {}
-            document.body.style.overflow = 'hidden';
-            console.log('DetailsModal: Modal overlay mostrado con clase show');
-        }
+        this.detailsModalOverlay.style.display = 'block';
+        this.detailsModalOverlay.classList.add('show');
+    // Evitar que el click/tap original que abrió el modal (mismo evento)
+    // se propague a overlay y cierre el modal inmediatamente.
+    try { this._suppressOverlayClickUntil = Date.now() + 350; } catch (e) {}
+        document.body.style.overflow = 'hidden';
+        console.log('DetailsModal: Modal overlay mostrado con clase show');
         
-    if (!wasOpen && this.isIOS()) {
+        if (this.isIOS()) {
             document.getElementById('ios-helper').offsetHeight;
             this.detailsModalContent.style.display = 'none';
             setTimeout(() => {
@@ -689,7 +579,7 @@ class DetailsModal {
         // Usar postersUrl como prioridad (campo "Carteles")
         const backdropUrl = item.postersUrl || item.backgroundUrl || item.posterUrl || (tmdbImages.backdrops[0]?.file_path || item.posterUrl);
         
-    this._setDetailsBackdropImage(backdropUrl);
+        this._setDetailsBackdropImage(backdropUrl);
         
     const trailerUrl = item.trailerUrl || (tmdbData?.trailer_url || '');
     // REGLA ESTRICTA: Sólo considerar iframes/URLs válidos para el botón principal
@@ -876,14 +766,6 @@ class DetailsModal {
             <div class="details-modal-similar-placeholder"></div>
         `;
 
-        requestAnimationFrame(() => {
-            if (this.detailsModalBody) this.detailsModalBody.style.minHeight = '';
-        });
-
-        // Si venimos de una tarjeta similar y el modal ya estaba abierto,
-        // esperar a que el backdrop nuevo esté listo y entonces hacer scroll suave al top
-        // Ya se produjo el scroll inicial si venía de similares; no repetir aquí
-
         // Reemplazar esqueletos inmediatamente para evitar parpadeos y respetar el flujo del contenido
         try {
             if (posters.length > 0) {
@@ -1033,12 +915,7 @@ class DetailsModal {
             }
         }, 50);
 
-        // Insertar episodios y tras montar forzar posición al inicio si la sección existe
-        this.insertEpisodesSection(item)
-            .then(() => {
-                try { this.scrollModalToTop('auto'); } catch(_){}
-            })
-            .catch(err => console.warn('DetailsModal: insertEpisodesSection fallo', err));
+        this.insertEpisodesSection(item).catch(err => console.warn('DetailsModal: insertEpisodesSection fallo', err));
         
         if (this.isIOS()) {
             this.detailsModalContent.style.animation = 'none';
@@ -1543,7 +1420,6 @@ class DetailsModal {
         if (!Array.isArray(this.episodesSectionCleanup)) this.episodesSectionCleanup = [];
 
         const cleanupFns = [];
-        const detailsInstance = this;
         const list = section.querySelector('.details-modal-episodes-list');
         if (!list) return;
         const toggleBtn = section.querySelector('.details-modal-episodes-toggle');
@@ -1767,65 +1643,9 @@ class DetailsModal {
         });
 
         if (toggleBtn) {
-            const ensureToggleVisible = (mode = 'default') => {
-                const target = toggleWrapper || toggleBtn;
-                if (!target) return;
-                const baseOpts = { behavior: 'smooth', block: 'start' };
-                if (Array.isArray(toggleBtn._ensureScrollTimers)) {
-                    toggleBtn._ensureScrollTimers.forEach(id => clearTimeout(id));
-                }
-                toggleBtn._ensureScrollTimers = [];
-                const schedule = (delay, offset) => {
-                    const timer = setTimeout(() => {
-                        detailsInstance.scrollElementIntoView(target, { ...baseOpts, offset });
-                    }, delay);
-                    toggleBtn._ensureScrollTimers.push(timer);
-                };
-                switch (mode) {
-                    case 'collapse-start':
-                        schedule(60, 28);
-                        schedule(240, 28);
-                        break;
-                    case 'collapse-final':
-                        schedule(24, 30);
-                        schedule(300, 30);
-                        break;
-                    default:
-                        schedule(0, 22);
-                        schedule(220, 22);
-                        break;
-                }
-            };
             const onToggleClick = (ev) => {
                 ev.preventDefault();
                 const expanded = toggleBtn.dataset.expanded === 'true';
-                let lastCollapsedCard = null;
-                if (expanded) {
-                    // Antes de colapsar, determinar la última tarjeta que quedará visible
-                    try {
-                        const allCards = cards.filter(c => !c.classList.contains('hidden-by-rowlimit'));
-                        const currentCols = parseInt((getComputedStyle(grid).getPropertyValue('--similar-columns')||'5').trim(),10) || 5;
-                        const maxVisibleCollapsed = Math.ceil(currentCols * 2.75); // Aproximación de filas colapsadas
-                        if (allCards.length >= maxVisibleCollapsed) {
-                            lastCollapsedCard = allCards[maxVisibleCollapsed - 1];
-                        } else if (allCards.length > 0) {
-                            lastCollapsedCard = allCards[allCards.length - 1];
-                        }
-                    } catch(_){}
-                }
-                let lastCollapsedItem = null;
-                if (expanded) {
-                    // Estamos a punto de colapsar: capturar el último episodio que permanecerá visible
-                    try {
-                        const visibleCards = items.filter(it => it.style.display !== 'none');
-                        const collapsedCount = COLLAPSED_VISIBLE_COUNT;
-                        if (visibleCards.length >= collapsedCount) {
-                            lastCollapsedItem = visibleCards[collapsedCount - 1];
-                        } else if (visibleCards.length > 0) {
-                            lastCollapsedItem = visibleCards[visibleCards.length - 1];
-                        }
-                    } catch(_){}
-                }
                 if (expanded) {
                     toggleBtn.dataset.expanded = 'false';
                     toggleBtn.setAttribute('aria-expanded', 'false');
@@ -1838,20 +1658,6 @@ class DetailsModal {
                     section.classList.add('is-expanded');
                 }
                 scheduleUpdate();
-                // Solo desplazamos al colapsar (para que el botón quede visible). No al expandir
-                if (expanded) ensureToggleVisible('collapse-start');
-                if (expanded && lastCollapsedItem) {
-                    // Tras la transición, asegurar visibilidad completa del último item colapsado
-                    const afterTransition = () => {
-                        detailsInstance.scrollElementFullyIntoView(lastCollapsedItem, { behavior: 'smooth', offsetTop: 10, offsetBottom: 18 });
-                    };
-                    list.addEventListener('transitionend', function handler(ev){
-                        if (ev.target === list && ev.propertyName === 'max-height') {
-                            list.removeEventListener('transitionend', handler);
-                            requestAnimationFrame(afterTransition);
-                        }
-                    });
-                }
             };
             const onToggleKey = (ev) => {
                 if (ev.key !== 'Enter' && ev.key !== ' ') return;
@@ -1860,20 +1666,9 @@ class DetailsModal {
             };
             toggleBtn.addEventListener('click', onToggleClick);
             toggleBtn.addEventListener('keydown', onToggleKey);
-            const onTransitionEnd = (ev) => {
-                if (ev.target !== list || ev.propertyName !== 'max-height') return;
-                const isExpandedNow = toggleBtn.dataset.expanded === 'true';
-                if (!isExpandedNow) ensureToggleVisible('collapse-final');
-            };
-            list.addEventListener('transitionend', onTransitionEnd);
             cleanupFns.push(() => {
                 toggleBtn.removeEventListener('click', onToggleClick);
                 toggleBtn.removeEventListener('keydown', onToggleKey);
-                list.removeEventListener('transitionend', onTransitionEnd);
-                if (Array.isArray(toggleBtn._ensureScrollTimers)) {
-                    toggleBtn._ensureScrollTimers.forEach(id => clearTimeout(id));
-                    toggleBtn._ensureScrollTimers = [];
-                }
             });
         }
 
@@ -1902,68 +1697,6 @@ class DetailsModal {
         };
 
         this.episodesSectionCleanup.push(cleanup);
-    }
-
-    scrollModalToTop(behavior = 'auto') {
-        const container = this._getScrollContainer();
-        if (!container) return;
-        try {
-            container.scrollTo({ top: 0, behavior });
-        } catch (err) {
-            try { container.scrollTop = 0; } catch (_) {}
-        }
-    }
-
-    scrollElementIntoView(element, { behavior = 'smooth', block = 'start', offset = 0 } = {}) {
-        const container = this._getScrollContainer();
-        if (!container || !element) return;
-        requestAnimationFrame(() => {
-            try {
-                const containerRect = container.getBoundingClientRect();
-                const elementRect = element.getBoundingClientRect();
-                const currentScroll = container.scrollTop || 0;
-                let targetTop = elementRect.top - containerRect.top + currentScroll - offset;
-                if (block === 'center') {
-                    targetTop -= (container.clientHeight / 2) - (elementRect.height / 2);
-                } else if (block === 'end') {
-                    targetTop -= container.clientHeight - elementRect.height;
-                }
-                if (targetTop < 0) targetTop = 0;
-                const maxScroll = Math.max(0, (container.scrollHeight || 0) - container.clientHeight);
-                if (targetTop > maxScroll) targetTop = maxScroll;
-                container.scrollTo({ top: targetTop, behavior });
-            } catch (err) {
-                try { element.scrollIntoView({ behavior, block }); } catch (_) {}
-            }
-        });
-    }
-
-    // Asegura que el elemento queda completamente visible dentro del contenedor (sin cortar parte inferior)
-    scrollElementFullyIntoView(element, { behavior = 'smooth', offsetTop = 8, offsetBottom = 12 } = {}) {
-        const container = this._getScrollContainer();
-        if (!container || !element) return;
-        requestAnimationFrame(() => {
-            try {
-                const containerRect = container.getBoundingClientRect();
-                const elementRect = element.getBoundingClientRect();
-                const currentScroll = container.scrollTop || 0;
-                let newScroll = currentScroll;
-                // Si la parte superior está por encima del viewport interno
-                if (elementRect.top < containerRect.top + offsetTop) {
-                    newScroll -= (containerRect.top + offsetTop - elementRect.top);
-                }
-                // Si la parte inferior queda fuera
-                if (elementRect.bottom > containerRect.bottom - offsetBottom) {
-                    newScroll += (elementRect.bottom - (containerRect.bottom - offsetBottom));
-                }
-                const maxScroll = Math.max(0, container.scrollHeight - container.clientHeight);
-                if (newScroll < 0) newScroll = 0;
-                if (newScroll > maxScroll) newScroll = maxScroll;
-                container.scrollTo({ top: newScroll, behavior });
-            } catch (e) {
-                try { element.scrollIntoView({ behavior, block: 'nearest' }); } catch(_){}
-            }
-        });
     }
 
     _splitGenres(value) {
@@ -2364,58 +2097,9 @@ class DetailsModal {
         setTimeout(scheduleUpdate, 80);
 
         if (toggleBtn) {
-            const ensureToggleVisible = (mode = 'default') => {
-                const target = toggleWrapper || toggleBtn;
-                if (!target) return;
-                const baseOpts = { behavior: 'smooth', block: 'start' };
-                if (Array.isArray(toggleBtn._ensureScrollTimers)) {
-                    toggleBtn._ensureScrollTimers.forEach(id => clearTimeout(id));
-                }
-                toggleBtn._ensureScrollTimers = [];
-                const schedule = (delay, offset) => {
-                    const timer = setTimeout(() => {
-                        detailsInstance.scrollElementIntoView(target, { ...baseOpts, offset });
-                    }, delay);
-                    toggleBtn._ensureScrollTimers.push(timer);
-                };
-                switch (mode) {
-                    case 'collapse-start':
-                        schedule(80, 26);
-                        schedule(260, 26);
-                        break;
-                    case 'collapse-final':
-                        schedule(30, 28);
-                        schedule(320, 28);
-                        break;
-                    default:
-                        schedule(0, 20);
-                        schedule(220, 20);
-                        break;
-                }
-            };
             const onToggleClick = (ev) => {
                 ev.preventDefault();
                 const expanded = toggleBtn.dataset.expanded === 'true';
-                // Determinar la última tarjeta que quedará visible tras colapsar
-                let lastCollapsedCard = null;
-                if (expanded) {
-                    try {
-                        const styles = getComputedStyle(grid);
-                        const gapX = parseFloat(styles.columnGap || styles.gap || '0');
-                        const sampleCard = cards.find(c => !c.classList.contains('hidden-by-rowlimit')) || cards[0];
-                        const rect = sampleCard ? sampleCard.getBoundingClientRect() : null;
-                        let columns = 1;
-                        if (rect && rect.width) {
-                            columns = Math.max(1, Math.round((grid.clientWidth + gapX) / (rect.width + gapX)));
-                        }
-                        const maxCollapsedVisible = Math.ceil(columns * COLLAPSED_ROWS);
-                        const visibleCards = cards.filter(c => !c.classList.contains('hidden-by-rowlimit'));
-                        if (visibleCards.length) {
-                            const idx = Math.min(maxCollapsedVisible - 1, visibleCards.length - 1);
-                            lastCollapsedCard = visibleCards[idx];
-                        }
-                    } catch(_){}
-                }
                 const collapsedHeight = parseFloat(grid.dataset.collapsedHeight || '0');
                 const expandedHeight = parseFloat(grid.dataset.expandedHeight || '0');
                 if (expanded) {
@@ -2430,19 +2114,6 @@ class DetailsModal {
                     grid.style.maxHeight = `${expandedHeight}px`;
                 }
                 scheduleUpdate();
-                // Solo desplazamos al colapsar (para que el botón y última tarjeta queden visibles). No al expandir
-                if (expanded) ensureToggleVisible('collapse-start');
-                if (expanded && lastCollapsedCard) {
-                    const afterTransition = () => {
-                        detailsInstance.scrollElementFullyIntoView(lastCollapsedCard, { behavior: 'smooth', offsetTop: 10, offsetBottom: 18 });
-                    };
-                    grid.addEventListener('transitionend', function handler(ev){
-                        if (ev.target === grid && ev.propertyName === 'max-height') {
-                            grid.removeEventListener('transitionend', handler);
-                            requestAnimationFrame(afterTransition);
-                        }
-                    });
-                }
             };
             const onToggleKey = (ev) => {
                 if (ev.key !== 'Enter' && ev.key !== ' ') return;
@@ -2451,20 +2122,9 @@ class DetailsModal {
             };
             toggleBtn.addEventListener('click', onToggleClick);
             toggleBtn.addEventListener('keydown', onToggleKey);
-            const onTransitionEnd = (ev) => {
-                if (ev.target !== grid || ev.propertyName !== 'max-height') return;
-                const isExpandedNow = toggleBtn.dataset.expanded === 'true';
-                if (!isExpandedNow) ensureToggleVisible('collapse-final');
-            };
-            grid.addEventListener('transitionend', onTransitionEnd);
             this.similarSectionCleanup.push(() => {
                 toggleBtn.removeEventListener('click', onToggleClick);
                 toggleBtn.removeEventListener('keydown', onToggleKey);
-                grid.removeEventListener('transitionend', onTransitionEnd);
-                if (Array.isArray(toggleBtn._ensureScrollTimers)) {
-                    toggleBtn._ensureScrollTimers.forEach(id => clearTimeout(id));
-                    toggleBtn._ensureScrollTimers = [];
-                }
             });
         }
 
