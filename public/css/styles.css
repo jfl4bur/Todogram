@@ -2701,6 +2701,35 @@ button:focus {
     color: white;
 }
 
+/* === Skeleton para modal de detalles === */
+.details-modal-skeleton {animation: fadeIn 0.25s ease;}
+.details-skel-header {position:relative;height:0;padding-bottom:42.25%;border-radius:4px;overflow:hidden;margin-bottom:22px;background:#111}
+.details-skel-backdrop {position:absolute;inset:0;background:linear-gradient(120deg,#1f1f1f 0%,#2a2a2a 40%,#1f1f1f 80%);background-size:200% 100%;animation: skelShimmer 2.2s infinite linear}
+.details-skel-body {display:flex;flex-direction:column;gap:20px}
+.details-skel-title {height:40px;width:70%;background:var(--skel-bg,#262626);border-radius:6px;animation: skelPulse 1.8s ease-in-out infinite}
+.details-skel-meta {display:flex;gap:12px;flex-wrap:wrap}
+.details-skel-meta .details-skel-line {height:14px}
+.details-skel-line {background:var(--skel-bg,#262626);border-radius:4px;animation: skelPulse 1.8s ease-in-out infinite}
+.details-skel-actions {display:flex;gap:16px}
+.details-skel-description {display:flex;flex-direction:column;gap:10px}
+.details-skel-crew-duo {display:grid;grid-template-columns:1fr 2fr;gap:28px}
+.details-skel-crew-col {display:flex;flex-direction:column;gap:10px}
+.details-skel-gallery {display:flex;gap:10px;flex-wrap:wrap}
+.details-skel-gallery-item {height:120px;flex:0 0 120px;background:var(--skel-bg,#262626);border-radius:6px;animation: skelPulse 1.8s ease-in-out infinite}
+.details-skel-similar {display:flex;flex-direction:column;gap:16px;margin-top:10px}
+.details-skel-section-title {height:26px;width:190px;background:var(--skel-bg,#262626);border-radius:6px;animation: skelPulse 1.8s ease-in-out infinite}
+.details-skel-section-title.small {width:140px}
+.details-skel-similar-grid {display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.details-skel-similar-card {aspect-ratio:194/271;background:var(--skel-bg,#262626);border-radius:4px;animation: skelPulse 1.8s ease-in-out infinite}
+.details-skel-episodes {display:flex;flex-direction:column;gap:14px}
+.details-skel-episode-item {display:flex;gap:16px;align-items:flex-start}
+.details-skel-episode-item .thumb {width:180px;flex:0 0 180px;aspect-ratio:16/9;background:var(--skel-bg,#262626);border-radius:6px;animation: skelPulse 1.8s ease-in-out infinite}
+.details-skel-episode-item .meta {flex:1;display:flex;flex-direction:column;gap:10px}
+
+@keyframes skelPulse {0%{opacity:.55}50%{opacity:.85}100%{opacity:.55}}
+@keyframes skelShimmer {0%{background-position:0% 0%}100%{background-position:200% 0%}}
+@keyframes fadeIn {from{opacity:0}to{opacity:1}}
+
 .details-modal-title {
     font-family: 'Slider Sans UI', sans-serif;
     font-size: 2.2rem;

@@ -152,6 +152,35 @@ class DetailsModal {
         this._scrollLock = null;
     }
 
+    createDetailsSkeletonMarkup() {
+        // Esqueleto visual para cada bloque del modal: título, meta, botones, descripción, crew, galerías, similares, episodios
+        const line = (w, h=14) => `<div class="details-skel-line" style="width:${w};height:${h}px"></div>`;
+        const blockLines = (count=4, w="100%") => Array.from({length:count}).map(()=>line(w)).join("");
+        const posterRect = `<div class="details-skel-backdrop"></div>`;
+        const title = `<div class="details-skel-title"></div>`;
+        const meta = `<div class="details-skel-meta">${line('12%')} ${line('8%')} ${line('10%')} ${line('6%')}</div>`;
+        const actions = `<div class="details-skel-actions">${line('26%',34)}${line('34%',34)}${line('10%',34)}</div>`;
+        const description = `<div class="details-skel-description">${blockLines(3,'100%')}</div>`;
+        const crew = `<div class="details-skel-crew-duo"><div class="details-skel-crew-col">${blockLines(3,'85%')}</div><div class="details-skel-crew-col">${blockLines(5,'95%')}</div></div>`;
+        const gallery = `<div class="details-skel-gallery">${['18%','18%','18%','18%','18%'].map(w=>`<div class=\"details-skel-gallery-item\" style=\"width:${w}\"></div>`).join('')}</div>`;
+        const similar = `<div class="details-skel-similar"><div class="details-skel-section-title"></div><div class="details-skel-similar-grid">${Array.from({length:5}).map(()=>`<div class=\"details-skel-similar-card\"></div>`).join('')}</div></div>`;
+        const episodes = `<div class="details-skel-episodes"><div class="details-skel-section-title small"></div>${Array.from({length:3}).map(()=>`<div class=\"details-skel-episode-item\"><div class=\"thumb\"></div><div class=\"meta\">${blockLines(2,'100%')}</div></div>`).join('')}</div>`;
+        return `
+        <div class="details-modal-skeleton" aria-hidden="true">
+            <div class="details-skel-header">${posterRect}</div>
+            <div class="details-skel-body">
+                ${title}
+                ${meta}
+                ${actions}
+                ${description}
+                ${crew}
+                ${gallery}
+                ${similar}
+                ${episodes}
+            </div>
+        </div>`;
+    }
+
     _getScrollbarWidth() {
         try {
             const w = window.innerWidth - document.documentElement.clientWidth;
@@ -632,11 +661,8 @@ class DetailsModal {
         this.cleanupSimilarSection();
     this.cleanupEpisodesSection();
         
-        this.detailsModalBody.innerHTML = `
-            <div style="display:flex; justify-content:center; align-items:center; height:100%;">
-                <div class="skeleton-spinner"></div>
-            </div>
-        `;
+        // Renderizar esqueleto completo mientras se cargan datos reales
+        this.detailsModalBody.innerHTML = this.createDetailsSkeletonMarkup();
         
         this.detailsModalOverlay.style.display = 'block';
         this.detailsModalOverlay.classList.add('show');
