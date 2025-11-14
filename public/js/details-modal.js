@@ -151,6 +151,23 @@ class DetailsModal {
         this.activeEpisodesSection = null;
     }
 
+    _getScrollContainer() {
+        // Prefer the element that actually scrolls (overlay usually has overflow-y: auto)
+        try {
+            const overlay = this.detailsModalOverlay;
+            const content = this.detailsModalContent;
+            if (!overlay && !content) return null;
+            const overlayCanScroll = overlay && (overlay.scrollHeight > overlay.clientHeight);
+            const contentCanScroll = content && (content.scrollHeight > content.clientHeight);
+            if (overlayCanScroll && !contentCanScroll) return overlay;
+            if (contentCanScroll && !overlayCanScroll) return content;
+            // If both/neither, prefer overlay (it wraps the header/backdrop region)
+            return overlay || content || null;
+        } catch (e) {
+            return this.detailsModalContent || this.detailsModalOverlay || null;
+        }
+    }
+
     _detachDetailsBackdropListeners() {
         if (!this.detailsModalBackdrop) return;
         if (this._detailsBackdropLoadHandler) {
@@ -1797,7 +1814,7 @@ class DetailsModal {
     }
 
     scrollModalToTop(behavior = 'auto') {
-        const container = this.detailsModalContent;
+        const container = this._getScrollContainer();
         if (!container) return;
         try {
             container.scrollTo({ top: 0, behavior });
@@ -1807,7 +1824,7 @@ class DetailsModal {
     }
 
     scrollElementIntoView(element, { behavior = 'smooth', block = 'start', offset = 0 } = {}) {
-        const container = this.detailsModalContent;
+        const container = this._getScrollContainer();
         if (!container || !element) return;
         requestAnimationFrame(() => {
             try {
