@@ -619,9 +619,16 @@ class DetailsModal {
         this.updateUrlForModal(item);
         this.cleanupSimilarSection();
         this.cleanupEpisodesSection();
-        // Si viene de "similares" o es primera apertura, subir al top instantáneamente
-        if (triggeredFromSimilar || !wasOpen) {
+        // Solo desplazar inmediatamente al top si es la primera apertura
+        // Bloquear scroll de fondo siempre mientras el modal está abierto
+        try { document.documentElement.classList.add('details-modal-open'); } catch(_){}
+        try { document.body.classList.add('details-modal-open'); document.body.style.overflow='hidden'; } catch(_){}
+
+        if (!wasOpen) {
             this.scrollModalToTop('auto');
+        } else if (triggeredFromSimilar) {
+            // Scroll suave inmediato hacia el top (sin esperar a backdrop) para la transición pedida
+            this.scrollModalToTop('smooth');
         }
 
         const previousHeight = this.detailsModalBody ? this.detailsModalBody.offsetHeight : 0;
@@ -857,7 +864,9 @@ class DetailsModal {
             if (this.detailsModalBody) this.detailsModalBody.style.minHeight = '';
         });
 
-        // Eliminado el scroll diferido: al venir de similares ya subimos arriba instantáneamente al inicio
+        // Si venimos de una tarjeta similar y el modal ya estaba abierto,
+        // esperar a que el backdrop nuevo esté listo y entonces hacer scroll suave al top
+        // Ya se produjo el scroll inicial si venía de similares; no repetir aquí
 
         // Reemplazar esqueletos inmediatamente para evitar parpadeos y respetar el flujo del contenido
         try {
@@ -1769,6 +1778,33 @@ class DetailsModal {
             const onToggleClick = (ev) => {
                 ev.preventDefault();
                 const expanded = toggleBtn.dataset.expanded === 'true';
+                let lastCollapsedCard = null;
+                if (expanded) {
+                    // Antes de colapsar, determinar la última tarjeta que quedará visible
+                    try {
+                        const allCards = cards.filter(c => !c.classList.contains('hidden-by-rowlimit'));
+                        const currentCols = parseInt((getComputedStyle(grid).getPropertyValue('--similar-columns')||'5').trim(),10) || 5;
+                        const maxVisibleCollapsed = Math.ceil(currentCols * 2.75); // Aproximación de filas colapsadas
+                        if (allCards.length >= maxVisibleCollapsed) {
+                            lastCollapsedCard = allCards[maxVisibleCollapsed - 1];
+                        } else if (allCards.length > 0) {
+                            lastCollapsedCard = allCards[allCards.length - 1];
+                        }
+                    } catch(_){}
+                }
+                let lastCollapsedItem = null;
+                if (expanded) {
+                    // Estamos a punto de colapsar: capturar el último episodio que permanecerá visible
+                    try {
+                        const visibleCards = items.filter(it => it.style.display !== 'none');
+                        const collapsedCount = COLLAPSED_VISIBLE_COUNT;
+                        if (visibleCards.length >= collapsedCount) {
+                            lastCollapsedItem = visibleCards[collapsedCount - 1];
+                        } else if (visibleCards.length > 0) {
+                            lastCollapsedItem = visibleCards[visibleCards.length - 1];
+                        }
+                    } catch(_){}
+                }
                 if (expanded) {
                     toggleBtn.dataset.expanded = 'false';
                     toggleBtn.setAttribute('aria-expanded', 'false');
@@ -1783,6 +1819,18 @@ class DetailsModal {
                 scheduleUpdate();
                 // Solo desplazamos al colapsar (para que el botón quede visible). No al expandir
                 if (expanded) ensureToggleVisible('collapse-start');
+                if (expanded && lastCollapsedItem) {
+                    // Tras la transición, asegurar que el último item colapsado sigue visible
+                    const afterTransition = () => {
+                        detailsInstance.scrollElementIntoView(lastCollapsedItem, { behavior: 'smooth', block: 'start', offset: 12 });
+                    };
+                    list.addEventListener('transitionend', function handler(ev){
+                        if (ev.target === list && ev.propertyName === 'max-height') {
+                            list.removeEventListener('transitionend', handler);
+                            requestAnimationFrame(afterTransition);
+                        }
+                    });
+                }
             };
             const onToggleKey = (ev) => {
                 if (ev.key !== 'Enter' && ev.key !== ' ') return;
@@ -2141,8 +2189,6 @@ class DetailsModal {
                 if (window.hoverModal && typeof window.hoverModal.hide === 'function') {
                     window.hoverModal.hide(0);
                 }
-                // Subir al top instantáneamente antes de cambiar el contenido
-                try { detailsInstance.scrollModalToTop('auto'); } catch (_) {}
                 detailsInstance.show(data, card);
             };
             card.addEventListener('click', onClick);
@@ -2317,6 +2363,17 @@ class DetailsModal {
                 scheduleUpdate();
                 // Solo desplazamos al colapsar (para que el botón quede visible). No al expandir
                 if (expanded) ensureToggleVisible('collapse-start');
+                if (expanded && lastCollapsedCard) {
+                    const afterTransition = () => {
+                        detailsInstance.scrollElementIntoView(lastCollapsedCard, { behavior: 'smooth', block: 'start', offset: 12 });
+                    };
+                    grid.addEventListener('transitionend', function handler(ev){
+                        if (ev.target === grid && ev.propertyName === 'max-height') {
+                            grid.removeEventListener('transitionend', handler);
+                            requestAnimationFrame(afterTransition);
+                        }
+                    });
+                }
             };
             const onToggleKey = (ev) => {
                 if (ev.key !== 'Enter' && ev.key !== ' ') return;
