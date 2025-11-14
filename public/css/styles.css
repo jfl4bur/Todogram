@@ -2904,15 +2904,20 @@ button:focus {
 }
 
 .details-modal-crew-duo {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
     gap: 24px;
     margin-bottom: 24px;
 }
 
 .details-modal-crew-duo .details-modal-crew {
-    flex: 1 1 260px;
     margin-bottom: 0;
+}
+
+@media (max-width: 820px) {
+    .details-modal-crew-duo {
+        grid-template-columns: 1fr;
+    }
 }
 
 .details-modal-crew-title {
