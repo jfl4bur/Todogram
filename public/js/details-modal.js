@@ -162,7 +162,8 @@ class DetailsModal {
     const meta = `<div class="details-modal-meta skeleton-meta">${['12%','9%','16%','7%'].map(w=>`<span class=\\"details-modal-meta-item skeleton-block\\" style=\\"width:${w};height:16px\\"></span>`).join('')}</div>`;
     // Legacy acciones skeleton (dos botones primarios y tres secundarios) eliminado para evitar flicker y tamaño incorrecto en móvil.
     // Simplificamos skeleton de acciones usando divs neutros para evitar heredar estilos de .details-modal-action-btn
-    const actions = `<div class=\"details-modal-actions actions-skeleton\"><div class=\"primary-action-row\"><div class=\"skeleton-block skeleton-btn-primary\" aria-hidden=\"true\"></div></div><div class=\"secondary-actions-row\">${['1','2','3'].map(()=>`<div class=\\\"skeleton-block skeleton-btn-circular\\\" aria-hidden=\\\"true\\\"></div>`).join('')}</div></div>`;
+    const circles = Array.from({length:3}, () => '<div class="skeleton-block skeleton-btn-circular" aria-hidden="true"></div>').join('');
+    const actions = `<div class="details-modal-actions actions-skeleton"><div class="primary-action-row"><div class="skeleton-block skeleton-btn-primary" aria-hidden="true"></div></div><div class="secondary-actions-row">${circles}</div></div>`;
         const description = `<div class="details-modal-description skeleton-text">${textLines(3,16)}</div>`;
         const info = `<div class="details-modal-info">${Array.from({length:4}).map(()=>`<div class=\\"details-modal-info-item\\"><div class=\\"details-modal-info-label skeleton-block\\" style=\\"width:90px;height:14px\\"></div><div class=\\"details-modal-info-value skeleton-block\\" style=\\"width:160px;height:14px\\"></div></div>`).join('')}</div>`;
         const crew = `<div class="details-modal-crew-duo"><div class="details-modal-crew-section skeleton-crew-col">${textLines(3,18,'100%')}</div><div class="details-modal-crew-section skeleton-crew-col">${textLines(5,18,'100%')}</div></div>`;

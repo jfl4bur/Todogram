@@ -2708,6 +2708,9 @@ button:focus {
 .skeleton-btn-primary {width:68%;max-width:460px;min-width:150px;height:52px;border-radius:999px;margin:12px 0 18px;display:block;background:#3a3a3a}
 /* Botones secundarios circulares del skeleton */
 .skeleton-btn-circular {width:52px;height:52px;min-width:52px;border-radius:50%;display:inline-block;background:#3a3a3a}
+/* Ajustes de layout específicos para el skeleton de acciones */
+.actions-skeleton .secondary-actions-row {margin-top:8px;display:flex;gap:12px;justify-content:flex-start}
+.actions-skeleton .primary-action-row {display:flex;justify-content:flex-start}
 /* Fuerza de estilos del skeleton por encima de los estilos de botones reales */
 /* Skeleton acciones aislado sin heredar estilos de botones reales */
 .actions-skeleton .skeleton-btn-primary {background:#3a3a3a;border:none;box-shadow:none;color:transparent}
