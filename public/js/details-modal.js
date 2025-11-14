@@ -154,31 +154,21 @@ class DetailsModal {
 
     createDetailsSkeletonMarkup() {
         // Esqueleto visual para cada bloque del modal: título, meta, botones, descripción, crew, galerías, similares, episodios
-        const line = (w, h=14) => `<div class="details-skel-line" style="width:${w};height:${h}px"></div>`;
-        const blockLines = (count=4, w="100%") => Array.from({length:count}).map(()=>line(w)).join("");
-        const posterRect = `<div class="details-skel-backdrop"></div>`;
-        const title = `<div class="details-skel-title"></div>`;
-        const meta = `<div class="details-skel-meta">${line('12%')} ${line('8%')} ${line('10%')} ${line('6%')}</div>`;
-        const actions = `<div class="details-skel-actions">${line('26%',34)}${line('34%',34)}${line('10%',34)}</div>`;
-        const description = `<div class="details-skel-description">${blockLines(3,'100%')}</div>`;
-        const crew = `<div class="details-skel-crew-duo"><div class="details-skel-crew-col">${blockLines(3,'85%')}</div><div class="details-skel-crew-col">${blockLines(5,'95%')}</div></div>`;
-        const gallery = `<div class="details-skel-gallery">${['18%','18%','18%','18%','18%'].map(w=>`<div class=\"details-skel-gallery-item\" style=\"width:${w}\"></div>`).join('')}</div>`;
-        const similar = `<div class="details-skel-similar"><div class="details-skel-section-title"></div><div class="details-skel-similar-grid">${Array.from({length:5}).map(()=>`<div class=\"details-skel-similar-card\"></div>`).join('')}</div></div>`;
-        const episodes = `<div class="details-skel-episodes"><div class="details-skel-section-title small"></div>${Array.from({length:3}).map(()=>`<div class=\"details-skel-episode-item\"><div class=\"thumb\"></div><div class=\"meta\">${blockLines(2,'100%')}</div></div>`).join('')}</div>`;
-        return `
-        <div class="details-modal-skeleton" aria-hidden="true">
-            <div class="details-skel-header">${posterRect}</div>
-            <div class="details-skel-body">
-                ${title}
-                ${meta}
-                ${actions}
-                ${description}
-                ${crew}
-                ${gallery}
-                ${similar}
-                ${episodes}
-            </div>
-        </div>`;
+        // Nuevo skeleton alineado: usamos las clases reales para conservar padding/margins.
+        const line = (w, h=14) => `<div class="skeleton-block" style="width:${w};height:${h}px"></div>`;
+        const textLines = (n, h=14, w='100%') => Array.from({length:n}).map(()=>line(w,h)).join('');
+        const title = `<h1 class="details-modal-title skeleton-block skeleton-title"></h1>`;
+        const original = `<div class="details-modal-original-title skeleton-block skeleton-line"></div>`;
+        const meta = `<div class="details-modal-meta skeleton-meta">${['12%','9%','16%','7%'].map(w=>`<span class=\\"details-modal-meta-item skeleton-block\\" style=\\"width:${w};height:16px\\"></span>`).join('')}</div>`;
+        const actions = `<div class="details-modal-actions"><div class="primary-action-row">${['42%','30%'].map(w=>`<button class=\\"details-modal-action-btn primary big-btn skeleton-block\\" style=\\"width:${w};height:46px\\"></button>`).join('')}</div><div class="secondary-actions-row">${['46px','46px','46px'].map(w=>`<button class=\\"details-modal-action-btn circular skeleton-block\\" style=\\"width:46px;height:46px\\"></button>`).join('')}</div></div>`;
+        const description = `<div class="details-modal-description skeleton-text">${textLines(3,16)}</div>`;
+        const info = `<div class="details-modal-info">${Array.from({length:4}).map(()=>`<div class=\\"details-modal-info-item\\"><div class=\\"details-modal-info-label skeleton-block\\" style=\\"width:90px;height:14px\\"></div><div class=\\"details-modal-info-value skeleton-block\\" style=\\"width:160px;height:14px\\"></div></div>`).join('')}</div>`;
+        const crew = `<div class="details-modal-crew-duo"><div class="details-modal-crew-section skeleton-crew-col">${textLines(3,18,'100%')}</div><div class="details-modal-crew-section skeleton-crew-col">${textLines(5,18,'100%')}</div></div>`;
+        const cast = `<div class="details-modal-cast-section">${textLines(3,18,'100%')}</div>`;
+        const gallery = `<div class="details-modal-gallery-section"><div class="details-modal-gallery-list">${Array.from({length:5}).map(()=>`<div class=\\"details-modal-gallery-item skeleton-block\\" style=\\"width:18%;aspect-ratio:2/3\\"></div>`).join('')}</div></div>`;
+        const similar = `<div class="details-modal-similar-placeholder"><div class="details-similar-skeleton-grid">${Array.from({length:5}).map(()=>`<div class=\\"details-similar-skeleton-card skeleton-block\\" style=\\"aspect-ratio:194/271\\"></div>`).join('')}</div></div>`;
+        const episodes = `<div class="details-modal-episodes-skeleton">${Array.from({length:3}).map(()=>`<div class=\\"details-modal-episode-item\\"><div class=\\"details-modal-episode-thumb skeleton-block\\"></div><div class=\\"details-modal-episode-meta\\">${textLines(2,14,'100%')}</div></div>`).join('')}</div>`;
+        return `${title}${original}${meta}${actions}${description}${info}${crew}${cast}${gallery}${similar}${episodes}`;
     }
 
     _getScrollbarWidth() {
