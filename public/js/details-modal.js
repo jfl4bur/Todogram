@@ -167,44 +167,73 @@ class DetailsModal {
         this._detachDetailsBackdropListeners();
         try { this.detailsModalBackdrop.classList.remove('backdrop-loading'); } catch (e) {}
         try { if (this.detailsModalHeader) this.detailsModalHeader.classList.remove('backdrop-loading'); } catch (e) {}
+        try {
+            if (this.detailsModalBackdrop) this.detailsModalBackdrop.style.opacity = '1';
+        } catch (e) {}
     }
 
     _setDetailsBackdropImage(src) {
         if (!this.detailsModalBackdrop) return;
-
-        this._handleDetailsBackdropSettled();
-
-        try { this.detailsModalBackdrop.classList.add('backdrop-loading'); } catch (e) {}
-        try { if (this.detailsModalHeader) this.detailsModalHeader.classList.add('backdrop-loading'); } catch (e) {}
-
         const fallback = DEFAULT_DETAILS_BACKDROP_PLACEHOLDER;
-        this._detailsBackdropFallbackApplied = false;
+        const finalSrc = src && String(src).trim() ? src : fallback;
+        const currentSrc = this.detailsModalBackdrop.getAttribute('src') || '';
 
-        const onLoad = () => {
+        if (currentSrc === finalSrc && !this.detailsModalBackdrop.classList.contains('backdrop-loading')) {
+            requestAnimationFrame(() => {
+                try { this.detailsModalBackdrop.classList.remove('backdrop-loading'); } catch (e) {}
+                try { if (this.detailsModalHeader) this.detailsModalHeader.classList.remove('backdrop-loading'); } catch (e) {}
+                try { this.detailsModalBackdrop.style.opacity = '1'; } catch (e) {}
+            });
+            return;
+        }
+
+        this._detachDetailsBackdropListeners();
+        this._detailsBackdropFallbackApplied = finalSrc === fallback;
+
+        const markLoading = () => {
+            try { this.detailsModalBackdrop.classList.add('backdrop-loading'); } catch (e) {}
+            try { if (this.detailsModalHeader) this.detailsModalHeader.classList.add('backdrop-loading'); } catch (e) {}
+            try {
+                if (!this.detailsModalBackdrop.style.transition) {
+                    this.detailsModalBackdrop.style.transition = 'opacity 220ms ease';
+                }
+                this.detailsModalBackdrop.style.opacity = '0';
+            } catch (e) {}
+        };
+
+        const settle = () => {
             this._handleDetailsBackdropSettled();
         };
 
-        const onError = () => {
-            if (!this._detailsBackdropFallbackApplied && fallback) {
-                this._detailsBackdropFallbackApplied = true;
-                this.detailsModalBackdrop.src = fallback;
-            } else {
-                this._handleDetailsBackdropSettled();
-            }
+        const attachListeners = (expectedSrc) => {
+            this._detachDetailsBackdropListeners();
+            this._detailsBackdropLoadHandler = () => {
+                if (this.detailsModalBackdrop.getAttribute('src') === expectedSrc) {
+                    settle();
+                }
+            };
+            this._detailsBackdropErrorHandler = () => {
+                if (!this._detailsBackdropFallbackApplied && fallback && expectedSrc !== fallback) {
+                    this._detailsBackdropFallbackApplied = true;
+                    markLoading();
+                    attachListeners(fallback);
+                    this.detailsModalBackdrop.src = fallback;
+                    return;
+                }
+                settle();
+            };
+            this.detailsModalBackdrop.addEventListener('load', this._detailsBackdropLoadHandler);
+            this.detailsModalBackdrop.addEventListener('error', this._detailsBackdropErrorHandler);
         };
 
-        this._detailsBackdropLoadHandler = onLoad;
-        this._detailsBackdropErrorHandler = onError;
+        markLoading();
 
-        try {
-            this.detailsModalBackdrop.addEventListener('load', this._detailsBackdropLoadHandler, { once: true });
-        } catch (e) {
-            this.detailsModalBackdrop.addEventListener('load', this._detailsBackdropLoadHandler);
+        if (currentSrc === finalSrc) {
+            requestAnimationFrame(settle);
+            return;
         }
-        this.detailsModalBackdrop.addEventListener('error', this._detailsBackdropErrorHandler);
 
-        const finalSrc = src && String(src).trim() ? src : fallback;
-        if (finalSrc === fallback) this._detailsBackdropFallbackApplied = true;
+        attachListeners(finalSrc);
         this.detailsModalBackdrop.src = finalSrc;
     }
 
@@ -545,7 +574,7 @@ class DetailsModal {
         this.updateUrlForModal(item);
         this.cleanupSimilarSection();
         this.cleanupEpisodesSection();
-        if (!wasOpen) {
+        if (triggeredFromSimilar || !wasOpen) {
             this.scrollModalToTop('auto');
         }
 
@@ -1670,14 +1699,33 @@ class DetailsModal {
                 const target = toggleWrapper || toggleBtn;
                 if (!target) return;
                 const baseOpts = { behavior: 'smooth', block: 'start' };
-                if (mode === 'collapse') {
-                    const collapseOpts = { ...baseOpts, offset: 24 };
-                    setTimeout(() => detailsInstance.scrollElementIntoView(target, collapseOpts), 120);
-                    setTimeout(() => detailsInstance.scrollElementIntoView(target, collapseOpts), 360);
-                } else {
-                    const expandOpts = { ...baseOpts, offset: 16 };
-                    detailsInstance.scrollElementIntoView(target, expandOpts);
-                    setTimeout(() => detailsInstance.scrollElementIntoView(target, expandOpts), 420);
+                if (Array.isArray(toggleBtn._ensureScrollTimers)) {
+                    toggleBtn._ensureScrollTimers.forEach(id => clearTimeout(id));
+                }
+                toggleBtn._ensureScrollTimers = [];
+                const schedule = (delay, offset) => {
+                    const timer = setTimeout(() => {
+                        detailsInstance.scrollElementIntoView(target, { ...baseOpts, offset });
+                    }, delay);
+                    toggleBtn._ensureScrollTimers.push(timer);
+                };
+                switch (mode) {
+                    case 'collapse-start':
+                        schedule(60, 28);
+                        schedule(240, 28);
+                        break;
+                    case 'collapse-final':
+                        schedule(24, 30);
+                        schedule(300, 30);
+                        break;
+                    case 'expand':
+                        schedule(0, 18);
+                        schedule(420, 18);
+                        break;
+                    default:
+                        schedule(0, 22);
+                        schedule(220, 22);
+                        break;
                 }
             };
             const onToggleClick = (ev) => {
@@ -1695,7 +1743,7 @@ class DetailsModal {
                     section.classList.add('is-expanded');
                 }
                 scheduleUpdate();
-                ensureToggleVisible(expanded ? 'collapse' : 'expand');
+                ensureToggleVisible(expanded ? 'collapse-start' : 'expand');
             };
             const onToggleKey = (ev) => {
                 if (ev.key !== 'Enter' && ev.key !== ' ') return;
@@ -1704,9 +1752,20 @@ class DetailsModal {
             };
             toggleBtn.addEventListener('click', onToggleClick);
             toggleBtn.addEventListener('keydown', onToggleKey);
+            const onTransitionEnd = (ev) => {
+                if (ev.target !== list || ev.propertyName !== 'max-height') return;
+                const isExpandedNow = toggleBtn.dataset.expanded === 'true';
+                if (!isExpandedNow) ensureToggleVisible('collapse-final');
+            };
+            list.addEventListener('transitionend', onTransitionEnd);
             cleanupFns.push(() => {
                 toggleBtn.removeEventListener('click', onToggleClick);
                 toggleBtn.removeEventListener('keydown', onToggleKey);
+                list.removeEventListener('transitionend', onTransitionEnd);
+                if (Array.isArray(toggleBtn._ensureScrollTimers)) {
+                    toggleBtn._ensureScrollTimers.forEach(id => clearTimeout(id));
+                    toggleBtn._ensureScrollTimers = [];
+                }
             });
         }
 
@@ -1762,6 +1821,8 @@ class DetailsModal {
                     targetTop -= container.clientHeight - elementRect.height;
                 }
                 if (targetTop < 0) targetTop = 0;
+                const maxScroll = Math.max(0, (container.scrollHeight || 0) - container.clientHeight);
+                if (targetTop > maxScroll) targetTop = maxScroll;
                 container.scrollTo({ top: targetTop, behavior });
             } catch (err) {
                 try { element.scrollIntoView({ behavior, block }); } catch (_) {}
@@ -2171,14 +2232,33 @@ class DetailsModal {
                 const target = toggleWrapper || toggleBtn;
                 if (!target) return;
                 const baseOpts = { behavior: 'smooth', block: 'start' };
-                if (mode === 'collapse') {
-                    const collapseOpts = { ...baseOpts, offset: 20 };
-                    setTimeout(() => detailsInstance.scrollElementIntoView(target, collapseOpts), 120);
-                    setTimeout(() => detailsInstance.scrollElementIntoView(target, collapseOpts), 360);
-                } else {
-                    const expandOpts = { ...baseOpts, offset: 16 };
-                    detailsInstance.scrollElementIntoView(target, expandOpts);
-                    setTimeout(() => detailsInstance.scrollElementIntoView(target, expandOpts), 420);
+                if (Array.isArray(toggleBtn._ensureScrollTimers)) {
+                    toggleBtn._ensureScrollTimers.forEach(id => clearTimeout(id));
+                }
+                toggleBtn._ensureScrollTimers = [];
+                const schedule = (delay, offset) => {
+                    const timer = setTimeout(() => {
+                        detailsInstance.scrollElementIntoView(target, { ...baseOpts, offset });
+                    }, delay);
+                    toggleBtn._ensureScrollTimers.push(timer);
+                };
+                switch (mode) {
+                    case 'collapse-start':
+                        schedule(80, 26);
+                        schedule(260, 26);
+                        break;
+                    case 'collapse-final':
+                        schedule(30, 28);
+                        schedule(320, 28);
+                        break;
+                    case 'expand':
+                        schedule(0, 18);
+                        schedule(420, 18);
+                        break;
+                    default:
+                        schedule(0, 20);
+                        schedule(220, 20);
+                        break;
                 }
             };
             const onToggleClick = (ev) => {
@@ -2198,7 +2278,7 @@ class DetailsModal {
                     grid.style.maxHeight = `${expandedHeight}px`;
                 }
                 scheduleUpdate();
-                ensureToggleVisible(expanded ? 'collapse' : 'expand');
+                ensureToggleVisible(expanded ? 'collapse-start' : 'expand');
             };
             const onToggleKey = (ev) => {
                 if (ev.key !== 'Enter' && ev.key !== ' ') return;
@@ -2207,9 +2287,20 @@ class DetailsModal {
             };
             toggleBtn.addEventListener('click', onToggleClick);
             toggleBtn.addEventListener('keydown', onToggleKey);
+            const onTransitionEnd = (ev) => {
+                if (ev.target !== grid || ev.propertyName !== 'max-height') return;
+                const isExpandedNow = toggleBtn.dataset.expanded === 'true';
+                if (!isExpandedNow) ensureToggleVisible('collapse-final');
+            };
+            grid.addEventListener('transitionend', onTransitionEnd);
             this.similarSectionCleanup.push(() => {
                 toggleBtn.removeEventListener('click', onToggleClick);
                 toggleBtn.removeEventListener('keydown', onToggleKey);
+                grid.removeEventListener('transitionend', onTransitionEnd);
+                if (Array.isArray(toggleBtn._ensureScrollTimers)) {
+                    toggleBtn._ensureScrollTimers.forEach(id => clearTimeout(id));
+                    toggleBtn._ensureScrollTimers = [];
+                }
             });
         }
 
