@@ -301,6 +301,24 @@ button:focus {
 .details-modal-overlay::-webkit-scrollbar, .details-modal-content::-webkit-scrollbar, .details-modal-body::-webkit-scrollbar {
     display: none;
 }
+
+/* Override: en el modal de detalles queremos ver la barra de scroll */
+.details-modal-overlay, .details-modal-content, .details-modal-body {
+    scrollbar-width: thin;
+    -ms-overflow-style: auto;
+}
+.details-modal-overlay::-webkit-scrollbar, .details-modal-content::-webkit-scrollbar, .details-modal-body::-webkit-scrollbar {
+    display: block;
+    width: 10px;
+    height: 10px;
+}
+.details-modal-overlay::-webkit-scrollbar-thumb, .details-modal-content::-webkit-scrollbar-thumb, .details-modal-body::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.28);
+    border-radius: 8px;
+}
+.details-modal-overlay::-webkit-scrollbar-track, .details-modal-content::-webkit-scrollbar-track, .details-modal-body::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.06);
+}
 .carousel-section-background {
        background: linear-gradient(rgba(249, 203, 40, 0) 11.35%, rgba(249, 203, 40, 0.24) 100%);
 }  

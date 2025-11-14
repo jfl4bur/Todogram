@@ -167,6 +167,12 @@ class DetailsModal {
         this._detachDetailsBackdropListeners();
         try { this.detailsModalBackdrop.classList.remove('backdrop-loading'); } catch (e) {}
         try { if (this.detailsModalHeader) this.detailsModalHeader.classList.remove('backdrop-loading'); } catch (e) {}
+        try {
+            if (this.detailsModalBackdrop) {
+                this.detailsModalBackdrop.classList.remove('backdrop-hidden');
+                this.detailsModalBackdrop.style.opacity = '';
+            }
+        } catch (e) {}
     }
 
     _setDetailsBackdropImage(src) {
@@ -503,6 +509,7 @@ class DetailsModal {
     }
 
     async show(item, itemElement) {
+        const wasAlreadyOpen = !!this.isDetailsModalOpen;
         // Normalize: if catalogo passed a 'raw' original row, copy common local fields so this modal can use them
         try {
             const raw = item && item.raw ? item.raw : null;
@@ -538,6 +545,19 @@ class DetailsModal {
             }
         }
         this.isDetailsModalOpen = true;
+        // Si ya estaba abierto: ocultar backdrop actual y empezar scroll suave al tope inmediatamente
+        if (wasAlreadyOpen) {
+            try {
+                if (this.detailsModalBackdrop) {
+                    this.detailsModalBackdrop.style.opacity = '0';
+                    this.detailsModalBackdrop.classList.add('backdrop-hidden');
+                }
+            } catch (e) {}
+            try {
+                const scroller = this.detailsModalOverlay || document.scrollingElement || document.documentElement;
+                scroller.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (e) {}
+        }
         // Instrumentación temporal: marcar timestamp de apertura para depuración
         try { this._openedAt = Date.now(); console.log('DetailsModal: show() timestamp', this._openedAt); } catch(e){}
         this.updateUrlForModal(item);
@@ -1651,6 +1671,25 @@ class DetailsModal {
                     toggleBtn.setAttribute('aria-expanded', 'false');
                     list.dataset.state = 'collapsed';
                     section.classList.remove('is-expanded');
+                    // Tras colapsar, hacer scroll para asegurar que el último ítem visible quede en pantalla
+                    setTimeout(() => {
+                        try {
+                            const scroller = this.detailsModalOverlay || document.scrollingElement || document.documentElement;
+                            const vis = visibleItems();
+                            if (vis.length) {
+                                const lastIndex = Math.min(COLLAPSED_VISIBLE_COUNT, vis.length) - 1;
+                                const target = vis[Math.max(0, lastIndex)];
+                                if (target && typeof target.scrollIntoView === 'function') {
+                                    target.scrollIntoView({ behavior: 'smooth', block: 'end' });
+                                } else if (target && scroller) {
+                                    const r = target.getBoundingClientRect();
+                                    const sR = (scroller.getBoundingClientRect ? scroller.getBoundingClientRect() : { top: 0, bottom: window.innerHeight });
+                                    const delta = (r.bottom - sR.bottom) + 24;
+                                    if (delta > 0) scroller.scrollTo({ top: scroller.scrollTop + delta, behavior: 'smooth' });
+                                }
+                            }
+                        } catch (e) {}
+                    }, 140);
                 } else {
                     toggleBtn.dataset.expanded = 'true';
                     toggleBtn.setAttribute('aria-expanded', 'true');
