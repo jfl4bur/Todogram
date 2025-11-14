@@ -4616,8 +4616,10 @@ slider-footer-content {
 }
 
 .details-modal-body {
-    padding: 24px;
+    padding: 0 24px 24px 24px;
     color: rgb(240, 240, 240);
+    margin-top: -90px;
+    position: relative;
 }
 
 .details-modal-title {
