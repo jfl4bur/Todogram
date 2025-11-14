@@ -503,6 +503,7 @@ class DetailsModal {
     }
 
     async show(item, itemElement) {
+        const triggeredFromSimilar = !!(itemElement && itemElement.closest && itemElement.closest('.details-modal-similar-card'));
         // Normalize: if catalogo passed a 'raw' original row, copy common local fields so this modal can use them
         try {
             const raw = item && item.raw ? item.raw : null;
@@ -766,6 +767,10 @@ class DetailsModal {
             ${backdropsGallery}
             <div class="details-modal-similar-placeholder"></div>
         `;
+
+        requestAnimationFrame(() => {
+            this.scrollModalToTop(triggeredFromSimilar ? 'smooth' : 'auto');
+        });
 
         // Reemplazar esqueletos inmediatamente para evitar parpadeos y respetar el flujo del contenido
         try {
@@ -1644,6 +1649,11 @@ class DetailsModal {
         });
 
         if (toggleBtn) {
+            const ensureToggleVisible = () => {
+                const opts = { behavior: 'smooth', block: 'start', offset: 16 };
+                this.scrollElementIntoView(toggleBtn, opts);
+                setTimeout(() => this.scrollElementIntoView(toggleBtn, opts), 220);
+            };
             const onToggleClick = (ev) => {
                 ev.preventDefault();
                 const expanded = toggleBtn.dataset.expanded === 'true';
@@ -1659,7 +1669,7 @@ class DetailsModal {
                     section.classList.add('is-expanded');
                 }
                 scheduleUpdate();
-                this.scrollElementIntoView(toggleBtn, { behavior: 'smooth', block: 'start', offset: 16 });
+                ensureToggleVisible();
             };
             const onToggleKey = (ev) => {
                 if (ev.key !== 'Enter' && ev.key !== ' ') return;
@@ -2131,6 +2141,11 @@ class DetailsModal {
         setTimeout(scheduleUpdate, 80);
 
         if (toggleBtn) {
+            const ensureToggleVisible = () => {
+                const opts = { behavior: 'smooth', block: 'start', offset: 16 };
+                detailsInstance.scrollElementIntoView(toggleBtn, opts);
+                setTimeout(() => detailsInstance.scrollElementIntoView(toggleBtn, opts), 220);
+            };
             const onToggleClick = (ev) => {
                 ev.preventDefault();
                 const expanded = toggleBtn.dataset.expanded === 'true';
@@ -2148,7 +2163,7 @@ class DetailsModal {
                     grid.style.maxHeight = `${expandedHeight}px`;
                 }
                 scheduleUpdate();
-                detailsInstance.scrollElementIntoView(toggleBtn, { behavior: 'smooth', block: 'start', offset: 16 });
+                ensureToggleVisible();
             };
             const onToggleKey = (ev) => {
                 if (ev.key !== 'Enter' && ev.key !== ' ') return;
