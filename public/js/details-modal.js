@@ -504,7 +504,7 @@ class DetailsModal {
 
     async show(item, itemElement) {
         const triggeredFromSimilar = !!(itemElement && itemElement.closest && itemElement.closest('.details-modal-similar-card'));
-        // Normalize: if catalogo passed a 'raw' original row, copy common local fields so this modal can use them
+    // Normalize: if catalogo passed a 'raw' original row, copy common local fields so this modal can use them
         try {
             const raw = item && item.raw ? item.raw : null;
             if (raw) {
@@ -543,8 +543,8 @@ class DetailsModal {
         try { this._openedAt = Date.now(); console.log('DetailsModal: show() timestamp', this._openedAt); } catch(e){}
         this.updateUrlForModal(item);
         this.cleanupSimilarSection();
-    this.cleanupEpisodesSection();
-        this.scrollModalToTop('auto');
+        this.cleanupEpisodesSection();
+        this.scrollModalToTop(triggeredFromSimilar ? 'smooth' : 'auto');
         
         this.detailsModalBody.innerHTML = `
             <div style="display:flex; justify-content:center; align-items:center; height:100%;">
@@ -768,9 +768,9 @@ class DetailsModal {
             <div class="details-modal-similar-placeholder"></div>
         `;
 
-        requestAnimationFrame(() => {
-            this.scrollModalToTop(triggeredFromSimilar ? 'smooth' : 'auto');
-        });
+        if (triggeredFromSimilar) {
+            setTimeout(() => this.scrollModalToTop('smooth'), 320);
+        }
 
         // Reemplazar esqueletos inmediatamente para evitar parpadeos y respetar el flujo del contenido
         try {
@@ -1426,6 +1426,7 @@ class DetailsModal {
         if (!Array.isArray(this.episodesSectionCleanup)) this.episodesSectionCleanup = [];
 
         const cleanupFns = [];
+        const detailsInstance = this;
         const list = section.querySelector('.details-modal-episodes-list');
         if (!list) return;
         const toggleBtn = section.querySelector('.details-modal-episodes-toggle');
@@ -1651,8 +1652,8 @@ class DetailsModal {
         if (toggleBtn) {
             const ensureToggleVisible = () => {
                 const opts = { behavior: 'smooth', block: 'start', offset: 16 };
-                this.scrollElementIntoView(toggleBtn, opts);
-                setTimeout(() => this.scrollElementIntoView(toggleBtn, opts), 220);
+                detailsInstance.scrollElementIntoView(toggleBtn, opts);
+                setTimeout(() => detailsInstance.scrollElementIntoView(toggleBtn, opts), 420);
             };
             const onToggleClick = (ev) => {
                 ev.preventDefault();
@@ -2144,7 +2145,7 @@ class DetailsModal {
             const ensureToggleVisible = () => {
                 const opts = { behavior: 'smooth', block: 'start', offset: 16 };
                 detailsInstance.scrollElementIntoView(toggleBtn, opts);
-                setTimeout(() => detailsInstance.scrollElementIntoView(toggleBtn, opts), 220);
+                setTimeout(() => detailsInstance.scrollElementIntoView(toggleBtn, opts), 420);
             };
             const onToggleClick = (ev) => {
                 ev.preventDefault();
