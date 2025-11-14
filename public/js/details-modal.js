@@ -149,6 +149,9 @@ class DetailsModal {
         this.similarSectionCleanup = [];
         this.episodesSectionCleanup = [];
         this.activeEpisodesSection = null;
+
+        // Esperas para saber cuándo el backdrop terminó de cargar/settle
+        this._backdropWaiters = [];
     }
 
     _getScrollContainer() {
@@ -187,6 +190,23 @@ class DetailsModal {
         try {
             if (this.detailsModalBackdrop) this.detailsModalBackdrop.style.opacity = '1';
         } catch (e) {}
+        try {
+            if (Array.isArray(this._backdropWaiters) && this._backdropWaiters.length) {
+                const waiters = this._backdropWaiters.slice(0);
+                this._backdropWaiters.length = 0;
+                waiters.forEach(fn => { try { fn(); } catch(_){} });
+            }
+        } catch (e) {}
+    }
+
+    waitForBackdrop(timeoutMs = 1200) {
+        return new Promise(resolve => {
+            try {
+                if (!Array.isArray(this._backdropWaiters)) this._backdropWaiters = [];
+                this._backdropWaiters.push(resolve);
+                if (timeoutMs > 0) setTimeout(() => resolve(), timeoutMs);
+            } catch (e) { resolve(); }
+        });
     }
 
     _setDetailsBackdropImage(src) {
@@ -244,6 +264,12 @@ class DetailsModal {
         };
 
         markLoading();
+        // Limpiar el src actual para evitar que se vea el backdrop anterior un instante
+        try {
+            if (currentSrc && currentSrc !== finalSrc) {
+                this.detailsModalBackdrop.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACw='; // 1x1 transparente
+            }
+        } catch (_) {}
 
         if (currentSrc === finalSrc) {
             requestAnimationFrame(settle);
@@ -251,7 +277,9 @@ class DetailsModal {
         }
 
         attachListeners(finalSrc);
-        this.detailsModalBackdrop.src = finalSrc;
+        requestAnimationFrame(() => {
+            this.detailsModalBackdrop.src = finalSrc;
+        });
     }
 
     // Abre un player embebido en fullscreen usando un iframe
@@ -591,7 +619,8 @@ class DetailsModal {
         this.updateUrlForModal(item);
         this.cleanupSimilarSection();
         this.cleanupEpisodesSection();
-        if (triggeredFromSimilar || !wasOpen) {
+        // Solo desplazar inmediatamente al top si es la primera apertura
+        if (!wasOpen) {
             this.scrollModalToTop('auto');
         }
 
@@ -637,7 +666,7 @@ class DetailsModal {
         // Usar postersUrl como prioridad (campo "Carteles")
         const backdropUrl = item.postersUrl || item.backgroundUrl || item.posterUrl || (tmdbImages.backdrops[0]?.file_path || item.posterUrl);
         
-        this._setDetailsBackdropImage(backdropUrl);
+    this._setDetailsBackdropImage(backdropUrl);
         
     const trailerUrl = item.trailerUrl || (tmdbData?.trailer_url || '');
     // REGLA ESTRICTA: Sólo considerar iframes/URLs válidos para el botón principal
@@ -828,10 +857,12 @@ class DetailsModal {
             if (this.detailsModalBody) this.detailsModalBody.style.minHeight = '';
         });
 
-        if (triggeredFromSimilar) {
-            const smoothScroll = () => this.scrollModalToTop('smooth');
-            requestAnimationFrame(smoothScroll);
-            setTimeout(smoothScroll, 280);
+        // Si venimos de una tarjeta similar y el modal ya estaba abierto,
+        // esperar a que el backdrop nuevo esté listo y entonces hacer scroll suave al top
+        if (triggeredFromSimilar && wasOpen) {
+            this.waitForBackdrop(1200).then(() => {
+                this.scrollModalToTop('smooth');
+            });
         }
 
         // Reemplazar esqueletos inmediatamente para evitar parpadeos y respetar el flujo del contenido
@@ -1735,10 +1766,6 @@ class DetailsModal {
                         schedule(24, 30);
                         schedule(300, 30);
                         break;
-                    case 'expand':
-                        schedule(0, 18);
-                        schedule(420, 18);
-                        break;
                     default:
                         schedule(0, 22);
                         schedule(220, 22);
@@ -1760,7 +1787,8 @@ class DetailsModal {
                     section.classList.add('is-expanded');
                 }
                 scheduleUpdate();
-                ensureToggleVisible(expanded ? 'collapse-start' : 'expand');
+                // Solo desplazamos al colapsar (para que el botón quede visible). No al expandir
+                if (expanded) ensureToggleVisible('collapse-start');
             };
             const onToggleKey = (ev) => {
                 if (ev.key !== 'Enter' && ev.key !== ' ') return;
@@ -2268,10 +2296,6 @@ class DetailsModal {
                         schedule(30, 28);
                         schedule(320, 28);
                         break;
-                    case 'expand':
-                        schedule(0, 18);
-                        schedule(420, 18);
-                        break;
                     default:
                         schedule(0, 20);
                         schedule(220, 20);
@@ -2295,7 +2319,8 @@ class DetailsModal {
                     grid.style.maxHeight = `${expandedHeight}px`;
                 }
                 scheduleUpdate();
-                ensureToggleVisible(expanded ? 'collapse-start' : 'expand');
+                // Solo desplazamos al colapsar (para que el botón quede visible). No al expandir
+                if (expanded) ensureToggleVisible('collapse-start');
             };
             const onToggleKey = (ev) => {
                 if (ev.key !== 'Enter' && ev.key !== ' ') return;
