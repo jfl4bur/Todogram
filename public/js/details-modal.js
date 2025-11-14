@@ -645,6 +645,32 @@ class DetailsModal {
             requestAnimationFrame(() => this.scrollOverlayToTop('auto'));
             setTimeout(() => this.scrollOverlayToTop('auto'), 140);
         }
+        // Forzar scroll top si la navegación proviene de una tarjeta de similares
+        if (this._forceScrollTopOnNextShow) {
+            this._forceScrollTopOnNextShow = false;
+            try {
+                const hardReset = (el) => { if (el) { el.scrollTop = 0; } };
+                hardReset(this.detailsModalOverlay);
+                hardReset(this.detailsModalContent);
+                hardReset(this.detailsModalBody);
+                // rAF y timeouts para cubrir imágenes/galerías tardías
+                requestAnimationFrame(() => {
+                    hardReset(this.detailsModalOverlay);
+                    hardReset(this.detailsModalContent);
+                    hardReset(this.detailsModalBody);
+                });
+                setTimeout(() => {
+                    hardReset(this.detailsModalOverlay);
+                    hardReset(this.detailsModalContent);
+                    hardReset(this.detailsModalBody);
+                }, 120);
+                setTimeout(() => {
+                    hardReset(this.detailsModalOverlay);
+                    hardReset(this.detailsModalContent);
+                    hardReset(this.detailsModalBody);
+                }, 300);
+            } catch (e) { /* ignore */ }
+        }
         // Instrumentación temporal: marcar timestamp de apertura para depuración
         try { this._openedAt = Date.now(); console.log('DetailsModal: show() timestamp', this._openedAt); } catch(e){}
         this.updateUrlForModal(item);
@@ -2112,6 +2138,8 @@ class DetailsModal {
                 ev.stopPropagation();
                 // Marcar navegación interna para suprimir cierres accidentales y permitir transición fluida
                 try { detailsInstance._suppressCloseUntil = Date.now() + 1200; } catch (e) {}
+                // Flag para forzar scroll al inicio en show()
+                try { detailsInstance._forceScrollTopOnNextShow = true; } catch (e) {}
                 try { window.activeItem = data; } catch (err) {}
                 if (window.hoverModal && typeof window.hoverModal.hide === 'function') {
                     window.hoverModal.hide(0);
@@ -2122,7 +2150,12 @@ class DetailsModal {
                         detailsInstance.detailsModalBackdrop.style.opacity = '0';
                         detailsInstance.detailsModalBackdrop.classList.add('backdrop-hidden');
                     }
-                    detailsInstance.scrollOverlayToTop('smooth');
+                    // Scroll inmediato previo (sin animación) para reducir salto perceptible
+                    try {
+                        if (detailsInstance.detailsModalOverlay) detailsInstance.detailsModalOverlay.scrollTop = 0;
+                        if (detailsInstance.detailsModalContent) detailsInstance.detailsModalContent.scrollTop = 0;
+                        if (detailsInstance.detailsModalBody) detailsInstance.detailsModalBody.scrollTop = 0;
+                    } catch (e) {}
                 } catch (e) {}
                 let p;
                 try {
