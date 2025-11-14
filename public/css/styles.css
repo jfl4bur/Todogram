@@ -2696,11 +2696,6 @@ button:focus {
     transform: scale(1.1);
 }
 
-.details-modal-body {
-    padding: 24px;
-    color: white;
-}
-
 /* === Skeleton para modal de detalles === */
 /* Skeleton nuevo basado en clases reales para alineación exacta */
 .skeleton-block {background:var(--skel-bg,#262626);border-radius:6px;animation: skelPulse 1.6s ease-in-out infinite;display:block}
@@ -2821,6 +2816,7 @@ button:focus {
     -webkit-box-pack: justify;
     justify-content: space-between;
     gap: 8px;
+    margin-bottom: 25px;
 }
 
 .details-modal-action-btn {
@@ -2836,6 +2832,7 @@ button:focus {
     border: none;
     font-size: 1.1rem;
     position: relative;
+    z-index: 1111;
 }
 
 .details-modal-action-btn.primary {
