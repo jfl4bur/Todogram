@@ -149,7 +149,6 @@ class DetailsModal {
         this.similarSectionCleanup = [];
         this.episodesSectionCleanup = [];
         this.activeEpisodesSection = null;
-        this._keepBackdropHidden = false;
     }
 
     _detachDetailsBackdropListeners() {
@@ -183,11 +182,6 @@ class DetailsModal {
 
         const onLoad = () => {
             this._handleDetailsBackdropSettled();
-            // Unhide backdrop once new image is ready if it was forced hidden
-            if (this._keepBackdropHidden) {
-                try { this.detailsModalBackdrop.classList.remove('backdrop-force-hidden'); } catch (e) {}
-                this._keepBackdropHidden = false;
-            }
         };
 
         const onError = () => {
@@ -196,10 +190,6 @@ class DetailsModal {
                 this.detailsModalBackdrop.src = fallback;
             } else {
                 this._handleDetailsBackdropSettled();
-                if (this._keepBackdropHidden) {
-                    try { this.detailsModalBackdrop.classList.remove('backdrop-force-hidden'); } catch (e) {}
-                    this._keepBackdropHidden = false;
-                }
             }
         };
 
@@ -216,26 +206,6 @@ class DetailsModal {
         const finalSrc = src && String(src).trim() ? src : fallback;
         if (finalSrc === fallback) this._detailsBackdropFallbackApplied = true;
         this.detailsModalBackdrop.src = finalSrc;
-    }
-
-    // Start an in-place transition to another item without closing the modal
-    transitionToItem(item, sourceEl) {
-        try {
-            if (this.detailsModalBackdrop) {
-                this._keepBackdropHidden = true;
-                this.detailsModalBackdrop.classList.add('backdrop-force-hidden');
-            }
-        } catch (e) {}
-        // Smooth scroll to top immediately
-        try {
-            if (this.detailsModalContent && typeof this.detailsModalContent.scrollTo === 'function') {
-                this.detailsModalContent.scrollTo({ top: 0, behavior: 'smooth' });
-            } else if (this.detailsModalContent) {
-                this.detailsModalContent.scrollTop = 0;
-            }
-        } catch (e) {}
-        // Load new data while scrolling
-        try { this.show(item, sourceEl); } catch (e) { console.warn('DetailsModal.transitionToItem show error', e); }
     }
 
     // Abre un player embebido en fullscreen usando un iframe
@@ -585,9 +555,7 @@ class DetailsModal {
     // Evitar que el click/tap original que abrió el modal (mismo evento)
     // se propague a overlay y cierre el modal inmediatamente.
     try { this._suppressOverlayClickUntil = Date.now() + 350; } catch (e) {}
-    // Block background page scroll while modal is open
-    try { this._prevBodyOverflow = document.body.style.overflow; document.body.style.overflow = 'hidden'; } catch (e) {}
-    try { this._prevHtmlOverflow = document.documentElement.style.overflow; document.documentElement.style.overflow = 'hidden'; } catch (e) {}
+        document.body.style.overflow = 'hidden';
         console.log('DetailsModal: Modal overlay mostrado con clase show');
         
         if (this.isIOS()) {
@@ -995,8 +963,7 @@ class DetailsModal {
         setTimeout(() => {
             this.detailsModalOverlay.style.display = 'none';
             this.detailsModalOverlay.classList.remove('show');
-            try { document.body.style.overflow = (this._prevBodyOverflow != null) ? this._prevBodyOverflow : 'auto'; } catch (e) {}
-            try { document.documentElement.style.overflow = (this._prevHtmlOverflow != null) ? this._prevHtmlOverflow : 'auto'; } catch (e) {}
+            document.body.style.overflow = 'auto';
             this.isDetailsModalOpen = false;
             window.activeItem = null;
             try { console.log('DetailsModal.close(): calling restoreUrl()'); } catch(e){}
@@ -1684,22 +1651,6 @@ class DetailsModal {
                     toggleBtn.setAttribute('aria-expanded', 'false');
                     list.dataset.state = 'collapsed';
                     section.classList.remove('is-expanded');
-                    // After collapsing, ensure the last visible episode remains on screen
-                    requestAnimationFrame(() => {
-                        try {
-                            const contentEl = this.detailsModalContent;
-                            const wrapper = section.querySelector('.details-modal-episodes-list-wrapper') || list;
-                            const collapsedHeight = parseFloat(list.dataset.collapsedHeight || '0') || 0;
-                            if (contentEl && collapsedHeight > 0 && wrapper) {
-                                const contentTop = contentEl.getBoundingClientRect().top;
-                                const wrapperTop = wrapper.getBoundingClientRect().top;
-                                const wrapperOffset = wrapperTop - contentTop + contentEl.scrollTop;
-                                const extra = 32; // show some padding below last visible card
-                                const target = Math.max(0, wrapperOffset + collapsedHeight - contentEl.clientHeight + extra);
-                                contentEl.scrollTo({ top: target, behavior: 'smooth' });
-                            }
-                        } catch (e) { console.warn('episodes collapse scroll adjust failed', e); }
-                    });
                 } else {
                     toggleBtn.dataset.expanded = 'true';
                     toggleBtn.setAttribute('aria-expanded', 'true');
@@ -2020,12 +1971,7 @@ class DetailsModal {
                 if (window.hoverModal && typeof window.hoverModal.hide === 'function') {
                     window.hoverModal.hide(0);
                 }
-                // In-place transition without closing the modal
-                if (detailsInstance && typeof detailsInstance.transitionToItem === 'function') {
-                    detailsInstance.transitionToItem(data, card);
-                } else {
-                    detailsInstance.show(data, card);
-                }
+                detailsInstance.show(data, card);
             };
             card.addEventListener('click', onClick);
             cleanupFns.push(() => card.removeEventListener('click', onClick));
