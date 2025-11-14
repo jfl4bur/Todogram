@@ -169,9 +169,10 @@ class DetailsModal {
         const crew = `<div class="details-modal-crew-duo"><div class="details-modal-crew-section skeleton-crew-col">${textLines(3,18,'100%')}</div><div class="details-modal-crew-section skeleton-crew-col">${textLines(5,18,'100%')}</div></div>`;
         const cast = `<div class="details-modal-cast-section">${textLines(3,18,'100%')}</div>`;
         const gallery = `<div class="details-modal-gallery-section"><div class="details-modal-gallery-list">${Array.from({length:5}).map(()=>`<div class=\\"details-modal-gallery-item skeleton-block\\" style=\\"width:18%;aspect-ratio:2/3\\"></div>`).join('')}</div></div>`;
-        const similar = `<div class="details-modal-similar-placeholder"><div class="details-similar-skeleton-grid">${Array.from({length:5}).map(()=>`<div class=\\"details-similar-skeleton-card skeleton-block\\" style=\\"aspect-ratio:194/271\\"></div>`).join('')}</div></div>`;
-        const episodes = `<div class="details-modal-episodes-skeleton">${Array.from({length:3}).map(()=>`<div class=\\"details-modal-episode-item\\"><div class=\\"details-modal-episode-thumb skeleton-block\\"></div><div class=\\"details-modal-episode-meta\\">${textLines(2,14,'100%')}</div></div>`).join('')}</div>`;
-        return `${title}${original}${meta}${actions}${description}${info}${crew}${cast}${gallery}${similar}${episodes}`;
+    const similar = `<div class="details-modal-similar-placeholder"><div class="details-similar-skeleton-grid">${Array.from({length:5}).map(()=>`<div class=\\"details-similar-skeleton-card skeleton-block\\" style=\\"aspect-ratio:194/271\\"></div>`).join('')}</div></div>`;
+    const episodes = `<div class="details-modal-episodes-skeleton">${Array.from({length:3}).map(()=>`<div class=\\"details-modal-episode-item\\"><div class=\\"details-modal-episode-thumb skeleton-block\\"></div><div class=\\"details-modal-episode-meta\\">${textLines(2,14,'100%')}</div></div>`).join('')}</div>`;
+    // Nuevo orden: Título -> Acciones -> Título original -> Meta -> resto
+    return `${title}${actions}${original}${meta}${description}${info}${crew}${cast}${gallery}${similar}${episodes}`;
     }
 
     _getScrollbarWidth() {
@@ -880,13 +881,13 @@ class DetailsModal {
         
         this.detailsModalBody.innerHTML = `
             <h1 class="details-modal-title">${item.title}</h1>
-            ${tmdbData?.original_title && tmdbData.original_title.toLowerCase() !== item.title.toLowerCase() ? `<div class="details-modal-original-title">${tmdbData.original_title}</div>` : ''}
-            <div class="details-modal-meta">${metaItems.join('<span class="details-modal-meta-separator">•</span>')}</div>
-            ${audioSubtitlesSection}
             <div class="details-modal-actions">
                 <div class="primary-action-row">${actionButtons}</div>
                 <div class="secondary-actions-row">${secondaryButtons}</div>
             </div>
+            ${tmdbData?.original_title && tmdbData.original_title.toLowerCase() !== item.title.toLowerCase() ? `<div class="details-modal-original-title">${tmdbData.original_title}</div>` : ''}
+            <div class="details-modal-meta">${metaItems.join('<span class="details-modal-meta-separator">•</span>')}</div>
+            ${audioSubtitlesSection}
             ${taglineSection}
             <div class="details-modal-description">${description}</div>
             <div class="details-modal-info">${infoItems}</div>
