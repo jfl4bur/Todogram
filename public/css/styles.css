@@ -293,13 +293,23 @@ button:focus {
     display: none; /* WebKit */
 }
 
-/* También aplicar a details-modal-overlay usado en catalogo/index */
+/* Re-enable visible scrollbars for details modal */
 .details-modal-overlay, .details-modal-content, .details-modal-body {
-    scrollbar-width: none;
-    -ms-overflow-style: none;
+    scrollbar-width: auto;
+    -ms-overflow-style: auto;
 }
-.details-modal-overlay::-webkit-scrollbar, .details-modal-content::-webkit-scrollbar, .details-modal-body::-webkit-scrollbar {
-    display: none;
+.details-modal-overlay::-webkit-scrollbar,
+.details-modal-content::-webkit-scrollbar,
+.details-modal-body::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+.details-modal-content::-webkit-scrollbar-track, .details-modal-body::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.08);
+}
+.details-modal-content::-webkit-scrollbar-thumb, .details-modal-body::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: 4px;
 }
 .carousel-section-background {
        background: linear-gradient(rgba(249, 203, 40, 0) 11.35%, rgba(249, 203, 40, 0.24) 100%);
@@ -1087,6 +1097,9 @@ button:focus {
     .details-modal-similar-section.is-expandable .details-modal-similar-fade{opacity:1;}
     .details-modal-similar-section.is-expanded .details-modal-similar-fade{opacity:0}
     .details-modal-similar-loading{display:flex;align-items:center;justify-content:center;padding:32px 0}
+
+    /* Backdrop instant hide during in-place transitions */
+    .backdrop-force-hidden{opacity:0 !important;visibility:hidden !important}
 
 .details-modal-similar-grid::after {
     /* content: ""; */
