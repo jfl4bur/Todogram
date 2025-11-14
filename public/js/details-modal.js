@@ -579,6 +579,22 @@ class DetailsModal {
     async show(item, itemElement) {
         const triggeredFromSimilar = !!(itemElement && itemElement.closest && itemElement.closest('.details-modal-similar-card'));
         const wasOpen = this.isDetailsModalOpen;
+        // Si cambiamos desde una tarjeta similar y el modal ya estaba abierto, ocultar el backdrop ANTES de iniciar el scroll
+        if (wasOpen && triggeredFromSimilar && this.detailsModalBackdrop) {
+            try {
+                // Quitar transición para ocultar instantáneamente
+                const prevTransition = this.detailsModalBackdrop.style.transition;
+                this.detailsModalBackdrop.style.transition = 'none';
+                this.detailsModalBackdrop.style.opacity = '0';
+                // Reemplazar src por transparente para evitar ver el fotograma anterior
+                if (this.detailsModalBackdrop.getAttribute('src')) {
+                    this.detailsModalBackdrop.src = 'data:image/gif;base64,R0lGODlhAQABAAAAACw=';
+                }
+                // Forzar reflow y restaurar transición suave para la nueva imagen
+                void this.detailsModalBackdrop.offsetWidth;
+                this.detailsModalBackdrop.style.transition = prevTransition || 'opacity 220ms ease';
+            } catch (e) { /* noop */ }
+        }
     // Normalize: if catalogo passed a 'raw' original row, copy common local fields so this modal can use them
         try {
             const raw = item && item.raw ? item.raw : null;
@@ -627,7 +643,7 @@ class DetailsModal {
         if (!wasOpen) {
             this.scrollModalToTop('auto');
         } else if (triggeredFromSimilar) {
-            // Scroll suave inmediato hacia el top (sin esperar a backdrop) para la transición pedida
+            // Scroll suave inmediato hacia el top (ya backdrop oculto) para la transición pedida
             this.scrollModalToTop('smooth');
         }
 
@@ -1017,7 +1033,12 @@ class DetailsModal {
             }
         }, 50);
 
-        this.insertEpisodesSection(item).catch(err => console.warn('DetailsModal: insertEpisodesSection fallo', err));
+        // Insertar episodios y tras montar forzar posición al inicio si la sección existe
+        this.insertEpisodesSection(item)
+            .then(() => {
+                try { this.scrollModalToTop('auto'); } catch(_){}
+            })
+            .catch(err => console.warn('DetailsModal: insertEpisodesSection fallo', err));
         
         if (this.isIOS()) {
             this.detailsModalContent.style.animation = 'none';
@@ -1820,9 +1841,9 @@ class DetailsModal {
                 // Solo desplazamos al colapsar (para que el botón quede visible). No al expandir
                 if (expanded) ensureToggleVisible('collapse-start');
                 if (expanded && lastCollapsedItem) {
-                    // Tras la transición, asegurar que el último item colapsado sigue visible
+                    // Tras la transición, asegurar visibilidad completa del último item colapsado
                     const afterTransition = () => {
-                        detailsInstance.scrollElementIntoView(lastCollapsedItem, { behavior: 'smooth', block: 'start', offset: 12 });
+                        detailsInstance.scrollElementFullyIntoView(lastCollapsedItem, { behavior: 'smooth', offsetTop: 10, offsetBottom: 18 });
                     };
                     list.addEventListener('transitionend', function handler(ev){
                         if (ev.target === list && ev.propertyName === 'max-height') {
@@ -1913,6 +1934,34 @@ class DetailsModal {
                 container.scrollTo({ top: targetTop, behavior });
             } catch (err) {
                 try { element.scrollIntoView({ behavior, block }); } catch (_) {}
+            }
+        });
+    }
+
+    // Asegura que el elemento queda completamente visible dentro del contenedor (sin cortar parte inferior)
+    scrollElementFullyIntoView(element, { behavior = 'smooth', offsetTop = 8, offsetBottom = 12 } = {}) {
+        const container = this._getScrollContainer();
+        if (!container || !element) return;
+        requestAnimationFrame(() => {
+            try {
+                const containerRect = container.getBoundingClientRect();
+                const elementRect = element.getBoundingClientRect();
+                const currentScroll = container.scrollTop || 0;
+                let newScroll = currentScroll;
+                // Si la parte superior está por encima del viewport interno
+                if (elementRect.top < containerRect.top + offsetTop) {
+                    newScroll -= (containerRect.top + offsetTop - elementRect.top);
+                }
+                // Si la parte inferior queda fuera
+                if (elementRect.bottom > containerRect.bottom - offsetBottom) {
+                    newScroll += (elementRect.bottom - (containerRect.bottom - offsetBottom));
+                }
+                const maxScroll = Math.max(0, container.scrollHeight - container.clientHeight);
+                if (newScroll < 0) newScroll = 0;
+                if (newScroll > maxScroll) newScroll = maxScroll;
+                container.scrollTo({ top: newScroll, behavior });
+            } catch (e) {
+                try { element.scrollIntoView({ behavior, block: 'nearest' }); } catch(_){}
             }
         });
     }
@@ -2347,6 +2396,26 @@ class DetailsModal {
             const onToggleClick = (ev) => {
                 ev.preventDefault();
                 const expanded = toggleBtn.dataset.expanded === 'true';
+                // Determinar la última tarjeta que quedará visible tras colapsar
+                let lastCollapsedCard = null;
+                if (expanded) {
+                    try {
+                        const styles = getComputedStyle(grid);
+                        const gapX = parseFloat(styles.columnGap || styles.gap || '0');
+                        const sampleCard = cards.find(c => !c.classList.contains('hidden-by-rowlimit')) || cards[0];
+                        const rect = sampleCard ? sampleCard.getBoundingClientRect() : null;
+                        let columns = 1;
+                        if (rect && rect.width) {
+                            columns = Math.max(1, Math.round((grid.clientWidth + gapX) / (rect.width + gapX)));
+                        }
+                        const maxCollapsedVisible = Math.ceil(columns * COLLAPSED_ROWS);
+                        const visibleCards = cards.filter(c => !c.classList.contains('hidden-by-rowlimit'));
+                        if (visibleCards.length) {
+                            const idx = Math.min(maxCollapsedVisible - 1, visibleCards.length - 1);
+                            lastCollapsedCard = visibleCards[idx];
+                        }
+                    } catch(_){}
+                }
                 const collapsedHeight = parseFloat(grid.dataset.collapsedHeight || '0');
                 const expandedHeight = parseFloat(grid.dataset.expandedHeight || '0');
                 if (expanded) {
@@ -2361,11 +2430,11 @@ class DetailsModal {
                     grid.style.maxHeight = `${expandedHeight}px`;
                 }
                 scheduleUpdate();
-                // Solo desplazamos al colapsar (para que el botón quede visible). No al expandir
+                // Solo desplazamos al colapsar (para que el botón y última tarjeta queden visibles). No al expandir
                 if (expanded) ensureToggleVisible('collapse-start');
                 if (expanded && lastCollapsedCard) {
                     const afterTransition = () => {
-                        detailsInstance.scrollElementIntoView(lastCollapsedCard, { behavior: 'smooth', block: 'start', offset: 12 });
+                        detailsInstance.scrollElementFullyIntoView(lastCollapsedCard, { behavior: 'smooth', offsetTop: 10, offsetBottom: 18 });
                     };
                     grid.addEventListener('transitionend', function handler(ev){
                         if (ev.target === grid && ev.propertyName === 'max-height') {
