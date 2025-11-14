@@ -1040,6 +1040,21 @@ button:focus {
     .details-modal-episode-thumb img{max-width:100%;height:auto}
     .details-modal-episode-thumb{max-height:220px}
 
+.chevplay{width:24px;height:24px;fill:rgb(3,125,77);vertical-align:middle}
+.details-modal-episodes-list-wrapper{position:relative;overflow:hidden}
+.details-modal-episodes-list{position:relative;overflow:hidden;transition:max-height 0.4s ease;will-change:max-height}
+.details-modal-episodes-fade{position:absolute;left:0;right:0;bottom:0;height:96px;background:linear-gradient(180deg,rgba(17,17,17,0) 0%,rgba(17,17,17,0.92) 100%);pointer-events:none;opacity:0;transition:opacity 0.3s ease}
+.details-modal-episodes.is-expandable .details-modal-episodes-fade{opacity:1}
+.details-modal-episodes.is-expanded .details-modal-episodes-fade{opacity:0}
+.details-modal-episodes-toggle-wrapper{display:flex;justify-content:center;margin-top:14px}
+.details-modal-episodes-toggle{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.16);color:inherit;padding:6px 18px;border-radius:999px;font-size:0.95rem;font-weight:600;cursor:pointer;transition:background 0.2s ease,border-color 0.2s ease}
+.details-modal-episodes-toggle:hover{background:rgba(255,255,255,0.12);border-color:rgba(255,255,255,0.28)}
+.details-modal-episodes-toggle svg{transition:transform 0.3s ease;width:20px;height:20px;fill:none}
+.details-modal-episodes-toggle .label-collapse{display:none}
+.details-modal-episodes-toggle[data-expanded="true"] svg{transform:rotate(180deg)}
+.details-modal-episodes-toggle[data-expanded="true"] .label-expand{display:none}
+.details-modal-episodes-toggle[data-expanded="true"] .label-collapse{display:inline}
+
     /* If modal content area is narrow, force thumbnails smaller */
     .details-modal-body .details-modal-episodes .details-modal-episode-item .details-modal-episode-thumb{max-width:45%;}
     .details-modal-body .details-modal-episodes .details-modal-episode-item{align-items:flex-start}

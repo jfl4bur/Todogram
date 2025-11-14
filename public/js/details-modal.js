@@ -147,6 +147,8 @@ class DetailsModal {
         this.galleryImages = [];
         this.currentGalleryIndex = 0;
         this.similarSectionCleanup = [];
+        this.episodesSectionCleanup = [];
+        this.activeEpisodesSection = null;
     }
 
     _detachDetailsBackdropListeners() {
@@ -540,6 +542,7 @@ class DetailsModal {
         try { this._openedAt = Date.now(); console.log('DetailsModal: show() timestamp', this._openedAt); } catch(e){}
         this.updateUrlForModal(item);
         this.cleanupSimilarSection();
+    this.cleanupEpisodesSection();
         
         this.detailsModalBody.innerHTML = `
             <div style="display:flex; justify-content:center; align-items:center; height:100%;">
@@ -944,6 +947,7 @@ class DetailsModal {
         } catch (e) {}
 
         this.cleanupSimilarSection();
+    this.cleanupEpisodesSection();
 
         this._handleDetailsBackdropSettled();
         this.detailsModalContent.style.transform = 'translateY(20px)';
@@ -1366,6 +1370,323 @@ class DetailsModal {
             }
         });
         this.similarSectionCleanup.length = 0;
+    }
+
+    cleanupEpisodesSection() {
+        if (!Array.isArray(this.episodesSectionCleanup)) {
+            this.episodesSectionCleanup = [];
+        } else {
+            this.episodesSectionCleanup.forEach(fn => {
+                try {
+                    if (typeof fn === 'function') fn();
+                } catch (err) {
+                    console.warn('DetailsModal: cleanupEpisodesSection error', err);
+                }
+            });
+            this.episodesSectionCleanup.length = 0;
+        }
+        this.activeEpisodesSection = null;
+    }
+
+    _mountEpisodesSection(sectionHtml, item) {
+        if (!sectionHtml || !this.detailsModalBody) return;
+        const placeholderParent = this.detailsModalBody;
+        const desc = placeholderParent.querySelector('.details-modal-description');
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = sectionHtml;
+        const section = wrapper.firstElementChild;
+        if (!section) return;
+        if (desc) {
+            desc.insertAdjacentElement('afterend', section);
+        } else {
+            placeholderParent.insertAdjacentElement('beforeend', section);
+        }
+        this.activeEpisodesSection = section;
+        this.setupEpisodesSection(section, item);
+    }
+
+    setupEpisodesSection(section, item) {
+        if (!section) return;
+        if (!Array.isArray(this.episodesSectionCleanup)) this.episodesSectionCleanup = [];
+
+        const cleanupFns = [];
+        const list = section.querySelector('.details-modal-episodes-list');
+        if (!list) return;
+        const toggleBtn = section.querySelector('.details-modal-episodes-toggle');
+        const toggleWrapper = section.querySelector('.details-modal-episodes-toggle-wrapper');
+        const fadeEl = section.querySelector('.details-modal-episodes-fade');
+        const items = Array.from(list.querySelectorAll('.details-modal-episode-item'));
+
+        const COLLAPSED_VISIBLE_COUNT = 3;
+        const PARTIAL_NEXT_FRACTION = 0.8;
+
+        const scheduleUpdate = () => {
+            if (list._episodeLayoutFrame) cancelAnimationFrame(list._episodeLayoutFrame);
+            list._episodeLayoutFrame = requestAnimationFrame(() => {
+                list._episodeLayoutFrame = null;
+                updateLayout();
+            });
+        };
+
+        const visibleItems = () => (
+            Array.from(list.children).filter(child => {
+                const styles = window.getComputedStyle(child);
+                if (styles.display === 'none' || styles.visibility === 'hidden') return false;
+                if (child.offsetParent) return true;
+                // allow absolutely positioned items still visible
+                return styles.position === 'fixed' || styles.position === 'absolute';
+            })
+        );
+
+        const updateEpisodeHash = (cardEl) => {
+            if (!cardEl) return;
+            try {
+                const outerItem = item;
+                const currentItem = window.activeItem || outerItem;
+                const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
+                const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
+                const epHash = cardEl.getAttribute('data-ep-hash') || '';
+                const params = epHash ? { ep: epHash.replace(/^ep=/, '') } : {};
+                const newHash = this.buildModalHash(baseId, normalized, params);
+                if (window.location.hash.substring(1) !== newHash) {
+                    window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
+                }
+            } catch (err) {
+                console.warn('DetailsModal: no se pudo actualizar hash de episodio', err);
+            }
+        };
+
+        const openCardVideo = (cardEl) => {
+            if (!cardEl) return;
+            const url = cardEl.getAttribute('data-video-url');
+            if (url) this.openEpisodePlayer(url);
+        };
+
+        items.forEach(card => {
+            const onCardClick = (e) => {
+                if (e.target.closest('.details-modal-episode-play')) return;
+                updateEpisodeHash(card);
+                openCardVideo(card);
+            };
+            card.addEventListener('click', onCardClick);
+            cleanupFns.push(() => card.removeEventListener('click', onCardClick));
+        });
+
+        const playButtons = section.querySelectorAll('.details-modal-episode-play');
+        playButtons.forEach(btn => {
+            const card = btn.closest('.details-modal-episode-item');
+            const onPlayClick = (e) => {
+                e.stopPropagation();
+                updateEpisodeHash(card);
+                const url = btn.getAttribute('data-video-url') || (card ? card.getAttribute('data-video-url') : null);
+                if (url) this.openEpisodePlayer(url);
+            };
+            btn.addEventListener('click', onPlayClick);
+            cleanupFns.push(() => btn.removeEventListener('click', onPlayClick));
+        });
+
+        const synopsisEls = section.querySelectorAll('.details-modal-episode-synopsis');
+        synopsisEls.forEach(syn => {
+            syn.classList.add('collapsed');
+            syn.style.maxHeight = 'calc(1.5em * 4)';
+            syn.dataset.collapsedMaxHeight = 'calc(1.5em * 4)';
+            this._rememberCollapsedSynopsisHeight(syn);
+            const onSynopsisClick = (e) => {
+                e.stopPropagation();
+                this.toggleSynopsisElement(syn);
+                requestAnimationFrame(() => scheduleUpdate());
+            };
+            syn.addEventListener('click', onSynopsisClick);
+            cleanupFns.push(() => syn.removeEventListener('click', onSynopsisClick));
+        });
+
+        const titles = section.querySelectorAll('.details-modal-episode-title');
+        titles.forEach(titleEl => {
+            titleEl.style.cursor = 'pointer';
+            const onTitleClick = (e) => {
+                e.stopPropagation();
+                const card = titleEl.closest('.details-modal-episode-item');
+                updateEpisodeHash(card);
+                openCardVideo(card);
+            };
+            titleEl.addEventListener('click', onTitleClick);
+            cleanupFns.push(() => titleEl.removeEventListener('click', onTitleClick));
+        });
+
+        const seasonSelect = section.querySelector('.details-modal-season-select');
+        if (seasonSelect) {
+            const filterContainer = seasonSelect.closest('.details-modal-season-filter');
+            const onMouseDown = () => { if (filterContainer) filterContainer.classList.add('open'); };
+            const onBlur = () => { if (filterContainer) filterContainer.classList.remove('open'); };
+            seasonSelect.addEventListener('mousedown', onMouseDown);
+            seasonSelect.addEventListener('blur', onBlur);
+            cleanupFns.push(() => {
+                seasonSelect.removeEventListener('mousedown', onMouseDown);
+                seasonSelect.removeEventListener('blur', onBlur);
+            });
+
+            const onSeasonChange = () => {
+                if (filterContainer) filterContainer.classList.remove('open');
+                const val = seasonSelect.value;
+                items.forEach(it => {
+                    const s = it.getAttribute('data-season');
+                    if (val === 'all' || !val) {
+                        it.style.display = '';
+                    } else {
+                        it.style.display = (String(s) === String(val)) ? '' : 'none';
+                    }
+                });
+                requestAnimationFrame(() => scheduleUpdate());
+            };
+            seasonSelect.addEventListener('change', onSeasonChange);
+            cleanupFns.push(() => seasonSelect.removeEventListener('change', onSeasonChange));
+        }
+
+        const updateLayout = () => {
+            const visible = visibleItems();
+            if (!visible.length) {
+                list.dataset.collapsedHeight = '0';
+                list.dataset.expandedHeight = '0';
+                list.style.maxHeight = '0px';
+                section.classList.remove('is-expandable', 'is-expanded');
+                if (toggleWrapper) toggleWrapper.style.display = 'none';
+                if (toggleBtn) {
+                    toggleBtn.dataset.expanded = 'false';
+                    toggleBtn.setAttribute('aria-expanded', 'false');
+                }
+                if (fadeEl) {
+                    fadeEl.style.opacity = '0';
+                    fadeEl.style.pointerEvents = 'none';
+                }
+                return;
+            }
+
+            const styles = window.getComputedStyle(list);
+            const gap = parseFloat(styles.rowGap || styles.gap || '0') || 0;
+            let expandedHeight = 0;
+            let collapsedHeight = 0;
+
+            visible.forEach((itemEl, idx) => {
+                const rect = itemEl.getBoundingClientRect();
+                const itemHeight = rect.height;
+                if (!itemHeight) return;
+                expandedHeight += itemHeight;
+                if (idx < visible.length - 1) expandedHeight += gap;
+
+                if (visible.length <= COLLAPSED_VISIBLE_COUNT) return;
+
+                if (idx < COLLAPSED_VISIBLE_COUNT) {
+                    collapsedHeight += itemHeight;
+                    if (idx < COLLAPSED_VISIBLE_COUNT - 1) collapsedHeight += gap;
+                } else if (idx === COLLAPSED_VISIBLE_COUNT) {
+                    collapsedHeight += itemHeight * PARTIAL_NEXT_FRACTION;
+                    collapsedHeight += gap * PARTIAL_NEXT_FRACTION;
+                }
+            });
+
+            if (visible.length <= COLLAPSED_VISIBLE_COUNT) {
+                collapsedHeight = expandedHeight;
+            }
+            if (!Number.isFinite(collapsedHeight) || collapsedHeight <= 0 || collapsedHeight > expandedHeight) {
+                collapsedHeight = expandedHeight;
+            }
+
+            list.dataset.collapsedHeight = String(collapsedHeight);
+            list.dataset.expandedHeight = String(expandedHeight);
+
+            const isExpanded = list.dataset.state === 'expanded';
+            const targetHeight = isExpanded ? expandedHeight : collapsedHeight;
+            list.style.maxHeight = `${targetHeight}px`;
+
+            const isExpandable = expandedHeight > collapsedHeight + 1 && visible.length > COLLAPSED_VISIBLE_COUNT;
+            section.classList.toggle('is-expandable', isExpandable);
+            section.classList.toggle('is-expanded', isExpanded && isExpandable);
+
+            if (toggleWrapper) toggleWrapper.style.display = isExpandable ? '' : 'none';
+            if (toggleBtn) {
+                if (!isExpandable) {
+                    toggleBtn.dataset.expanded = 'false';
+                    toggleBtn.setAttribute('aria-expanded', 'false');
+                } else {
+                    toggleBtn.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+                }
+            }
+
+            if (fadeEl) {
+                const shouldShowFade = isExpandable && !isExpanded;
+                fadeEl.style.opacity = shouldShowFade ? '1' : '0';
+                fadeEl.style.pointerEvents = shouldShowFade ? '' : 'none';
+            }
+        };
+
+        const resizeHandler = () => scheduleUpdate();
+        window.addEventListener('resize', resizeHandler, { passive: true });
+        cleanupFns.push(() => window.removeEventListener('resize', resizeHandler));
+
+        items.forEach(card => {
+            const img = card.querySelector('img');
+            if (img && !img.complete) {
+                const onImgSettled = () => scheduleUpdate();
+                img.addEventListener('load', onImgSettled, { once: true });
+                img.addEventListener('error', onImgSettled, { once: true });
+            }
+        });
+
+        if (toggleBtn) {
+            const onToggleClick = (ev) => {
+                ev.preventDefault();
+                const expanded = toggleBtn.dataset.expanded === 'true';
+                if (expanded) {
+                    toggleBtn.dataset.expanded = 'false';
+                    toggleBtn.setAttribute('aria-expanded', 'false');
+                    list.dataset.state = 'collapsed';
+                    section.classList.remove('is-expanded');
+                } else {
+                    toggleBtn.dataset.expanded = 'true';
+                    toggleBtn.setAttribute('aria-expanded', 'true');
+                    list.dataset.state = 'expanded';
+                    section.classList.add('is-expanded');
+                }
+                scheduleUpdate();
+            };
+            const onToggleKey = (ev) => {
+                if (ev.key !== 'Enter' && ev.key !== ' ') return;
+                ev.preventDefault();
+                onToggleClick(ev);
+            };
+            toggleBtn.addEventListener('click', onToggleClick);
+            toggleBtn.addEventListener('keydown', onToggleKey);
+            cleanupFns.push(() => {
+                toggleBtn.removeEventListener('click', onToggleClick);
+                toggleBtn.removeEventListener('keydown', onToggleKey);
+            });
+        }
+
+        list.dataset.state = 'collapsed';
+        updateLayout();
+        scheduleUpdate();
+        setTimeout(() => scheduleUpdate(), 120);
+
+        const cleanup = () => {
+            cleanupFns.forEach(fn => {
+                try {
+                    fn();
+                } catch (err) {
+                    console.warn('DetailsModal: cleanupEpisodesSection handler error', err);
+                }
+            });
+            if (list._episodeLayoutFrame) {
+                cancelAnimationFrame(list._episodeLayoutFrame);
+                list._episodeLayoutFrame = null;
+            }
+            list.style.maxHeight = '';
+            list.dataset.state = 'collapsed';
+            if (this.activeEpisodesSection === section) {
+                this.activeEpisodesSection = null;
+            }
+        };
+
+        this.episodesSectionCleanup.push(cleanup);
     }
 
     _splitGenres(value) {
@@ -1838,78 +2159,14 @@ class DetailsModal {
     // Inserta la sección de episodios debajo de la sinopsis (si aplica)
     async insertEpisodesSection(item) {
         try {
-            const sectionHtml = await this.getEpisodesSection(item);
+            this.cleanupEpisodesSection();
+            let sectionHtml = await this.getEpisodesSection(item);
             if (!sectionHtml) {
-                // Si no hay sección, opcionalmente insertar texto que indique que no hay episodios
-                // Reintentar una vez después de un pequeño delay por si la data llega justo después
                 await new Promise(r => setTimeout(r, 200));
-                const sectionHtml2 = await this.getEpisodesSection(item);
-                if (!sectionHtml2) return;
-                // Si ahora hay sección, usarla
-                desc && desc.insertAdjacentHTML('afterend', sectionHtml2);
-                return;
+                sectionHtml = await this.getEpisodesSection(item);
+                if (!sectionHtml) return;
             }
-            // Buscar el nodo de descripción actual y añadir la sección después
-            const desc = this.detailsModalBody.querySelector('.details-modal-description');
-            if (!desc) {
-                // Si no existe la descripción, anexar al final
-                this.detailsModalBody.insertAdjacentHTML('beforeend', sectionHtml);
-                return;
-            }
-            desc.insertAdjacentHTML('afterend', sectionHtml);
-
-            // Añadir listeners para botones de episodio (si los hay)
-            const container = this.detailsModalBody.querySelector('.details-modal-episodes-list');
-            if (container) {
-                container.querySelectorAll('.details-modal-episode-play').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const url = btn.getAttribute('data-video-url');
-                        // Abrir player embebido en pantalla completa
-                        if (url) this.openEpisodePlayer(url);
-                    });
-                });
-                // Click en la tarjeta del episodio abre también el player (si no se pulsa el botón)
-                container.querySelectorAll('.details-modal-episode-item').forEach(card => {
-                    card.addEventListener('click', (e) => {
-                        // Si el click fue en el botón, ya manejado
-                        if (e.target.closest('.details-modal-episode-play')) return;
-                        const url = card.getAttribute('data-video-url');
-                        if (url) this.openEpisodePlayer(url);
-                    });
-                });
-                // Inicializar sinopsis de episodios como colapsadas y añadir toggle
-                container.querySelectorAll('.details-modal-episode-synopsis').forEach(syn => {
-                    syn.classList.add('collapsed');
-                    syn.style.maxHeight = 'calc(1.5em * 4)';
-                    syn.dataset.collapsedMaxHeight = 'calc(1.5em * 4)';
-                    this._rememberCollapsedSynopsisHeight(syn);
-                    syn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        this.toggleSynopsisElement(syn);
-                    });
-                });
-                // Añadir listener en títulos para actualizar hash del navegador
-                const outerItem = item;
-                container.querySelectorAll('.details-modal-episode-title').forEach(titleEl => {
-                    titleEl.style.cursor = 'pointer';
-                    titleEl.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        const epHash = titleEl.getAttribute('data-ep-hash') || '';
-                        const currentItem = window.activeItem || outerItem;
-                        const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
-                        const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
-                        const newHash = this.buildModalHash(baseId, normalized, epHash ? {ep: epHash.replace(/^ep=/,'')} : {});
-                        if (window.location.hash.substring(1) !== newHash) {
-                            window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
-                        }
-                        // además abrir el reproductor si la tarjeta tiene URL de video
-                        const card = titleEl.closest('.details-modal-episode-item');
-                        const videoUrl = card ? card.getAttribute('data-video-url') : null;
-                        if (videoUrl) this.openEpisodePlayer(videoUrl);
-                    });
-                });
-            }
+            this._mountEpisodesSection(sectionHtml, item);
         } catch (err) {
             console.error('DetailsModal: error insertando sección de episodios', err);
         }
@@ -1982,8 +2239,8 @@ class DetailsModal {
         const seasonsSet = new Set(episodes.map(e => e.season).filter(s => s !== null && s !== undefined && !Number.isNaN(s)));
         const seasons = Array.from(seasonsSet).sort((a,b)=>a-b);
 
-            const listItems = episodes.map(ep => {
-            const playBtnInner = ep.video ? `<button class="details-modal-episode-play" data-video-url="${ep.video}" aria-label="Reproducir episodio"><i class="fas fa-play"></i></button>` : '';
+        const listItems = episodes.map(ep => {
+            const playBtnInner = ep.video ? `<button type="button" class="details-modal-episode-play" data-video-url="${ep.video}" aria-label="Reproducir episodio"><svg xmlns="http://www.w3.org/2000/svg" id="CLOSE" fill="PR_WHITE" viewBox="0 0 24 24" class="chevplay"><polygon points="8 5 8 19 19 12"></polygon></svg></button>` : '';
             const episodeNumber = ep.episodeIndex ? `<div class="details-modal-episode-number">${ep.episodeIndex}</div>` : '';
             const thumbImg = ep.thumb ? `<div class="details-modal-episode-thumb">${episodeNumber}<img src="${ep.thumb}" loading="lazy" alt="${ep.title}"><div class="details-modal-play-overlay">${playBtnInner}</div></div>` : `<div class="details-modal-episode-thumb placeholder">${episodeNumber}<div class="details-modal-play-overlay">${playBtnInner}</div></div>`;
             const synopsisHtml = ep.synopsis ? `<div class="details-modal-episode-synopsis">${ep.synopsis}</div>` : '';
@@ -2007,89 +2264,7 @@ class DetailsModal {
         }
         headerHtml += `</div>`;
 
-        const section = `<div class="details-modal-episodes">${headerHtml}<div class="details-modal-episodes-list">${listItems}</div></div>`;
-
-        // Delegar listeners para reproducir si hay video
-        // (se añadirá en el setTimeout posterior que añade listeners a botones existentes)
-        setTimeout(() => {
-            const container = this.detailsModalBody.querySelector('.details-modal-episodes-list');
-            if (!container) return;
-            container.querySelectorAll('.details-modal-episode-play').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const card = btn.closest('.details-modal-episode-item');
-                    const url = btn.getAttribute('data-video-url') || (card ? card.getAttribute('data-video-url') : null);
-                    // actualizar hash para este episodio
-                    try {
-                        const outerItem = item;
-                        const currentItem = window.activeItem || outerItem;
-                        const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
-                        const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
-                        const epHash = card ? (card.getAttribute('data-ep-hash') || '') : '';
-                        const newHash = this.buildModalHash(baseId, normalized, epHash ? {ep: epHash.replace(/^ep=/,'')} : {});
-                        if (window.location.hash.substring(1) !== newHash) {
-                            window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
-                        }
-                    } catch (err) {
-                        console.warn('DetailsModal: no se pudo actualizar hash de episodio', err);
-                    }
-                    if (url) this.openEpisodePlayer(url);
-                });
-            });
-            // Inicializar filtro de temporada si existe
-            const seasonSelect = this.detailsModalBody.querySelector('#season-select');
-            if (seasonSelect) {
-                const filterContainer = seasonSelect.closest('.details-modal-season-filter');
-                
-                // Detectar cuando el select se abre/cierra
-                seasonSelect.addEventListener('mousedown', () => {
-                    if (filterContainer) filterContainer.classList.add('open');
-                });
-                seasonSelect.addEventListener('blur', () => {
-                    if (filterContainer) filterContainer.classList.remove('open');
-                });
-                seasonSelect.addEventListener('change', () => {
-                    if (filterContainer) filterContainer.classList.remove('open');
-                });
-                
-                seasonSelect.addEventListener('change', (e) => {
-                    const val = seasonSelect.value;
-                    const items = this.detailsModalBody.querySelectorAll('.details-modal-episode-item');
-                    items.forEach(it => {
-                        const s = it.getAttribute('data-season');
-                        if (val === 'all') {
-                            it.style.display = '';
-                        } else {
-                            if (String(s) === String(val)) it.style.display = '';
-                            else it.style.display = 'none';
-                        }
-                    });
-                });
-            }
-            // Click en la tarjeta del episodio abre también el player (si no se pulsa el botón)
-            container.querySelectorAll('.details-modal-episode-item').forEach(card => {
-                card.addEventListener('click', (e) => {
-                    // Si el click fue en el botón, ya manejado
-                    if (e.target.closest('.details-modal-episode-play')) return;
-                    const url = card.getAttribute('data-video-url');
-                    // actualizar hash para este episodio al click en la tarjeta
-                    try {
-                        const outerItem = item;
-                        const currentItem = window.activeItem || outerItem;
-                        const baseId = currentItem?.id || currentItem?.['ID TMDB'] || '';
-                        const normalized = currentItem ? this.normalizeText(currentItem.title || currentItem['Título'] || '') : '';
-                        const epHash = card.getAttribute('data-ep-hash') || '';
-                        const newHash = this.buildModalHash(baseId, normalized, epHash ? {ep: epHash.replace(/^ep=/,'')} : {});
-                        if (window.location.hash.substring(1) !== newHash) {
-                            window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
-                        }
-                    } catch (err) {
-                        console.warn('DetailsModal: no se pudo actualizar hash de episodio (card click)', err);
-                    }
-                    if (url) this.openEpisodePlayer(url);
-                });
-            });
-        }, 300);
+    const section = `<div class="details-modal-episodes">${headerHtml}<div class="details-modal-episodes-list-wrapper"><div class="details-modal-episodes-list" data-state="collapsed">${listItems}</div><div class="details-modal-episodes-fade"></div></div><div class="details-modal-episodes-toggle-wrapper"><button type="button" class="details-modal-episodes-toggle" data-expanded="false" aria-expanded="false"><span class="label-expand">Ver más</span><span class="label-collapse">Ver menos</span><svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></div>`;
 
         // Estilos para el header del selector (inserción segura si no existe)
         const styleHeaderExists = !!document.getElementById('details-modal-episodes-header-styles');
