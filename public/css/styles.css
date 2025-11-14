@@ -2903,6 +2903,18 @@ button:focus {
     margin-bottom: 24px;
 }
 
+.details-modal-crew-duo {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    margin-bottom: 24px;
+}
+
+.details-modal-crew-duo .details-modal-crew {
+    flex: 1 1 260px;
+    margin-bottom: 0;
+}
+
 .details-modal-crew-title {
     font-size: 1.2rem;
     margin-bottom: 12px;

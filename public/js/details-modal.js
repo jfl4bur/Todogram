@@ -718,6 +718,13 @@ class DetailsModal {
             }));
             castSection = this.createCastSection(cast);
         }
+
+        let crewSections = '';
+        if (directorsSection && writersSection) {
+            crewSections = `<div class="details-modal-crew-duo">${directorsSection}${writersSection}</div>`;
+        } else {
+            crewSections = `${directorsSection || ''}${writersSection || ''}`;
+        }
         
         let posters = tmdbImages.posters || [];
         let backdrops = tmdbImages.backdrops || [];
@@ -752,8 +759,7 @@ class DetailsModal {
             ${taglineSection}
             <div class="details-modal-description">${description}</div>
             <div class="details-modal-info">${infoItems}</div>
-            ${directorsSection}
-            ${writersSection}
+            ${crewSections}
             ${castSection}
             ${postersGallery}
             ${backdropsGallery}
