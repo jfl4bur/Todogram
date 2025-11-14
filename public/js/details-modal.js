@@ -198,12 +198,14 @@ class DetailsModal {
                 } catch (e) { try { node.scrollTop = 0; } catch (e2) {} }
                 return canScroll;
             };
-            // Priorizar el contenedor de contenido del modal (suele ser el scroller real)
+            // Intentar primero el body interno (si alguna regla CSS le otorga overflow)
+            const didScrollBody = scrollNodeToTop(this.detailsModalBody);
+            // Luego el contenedor de contenido
             const didScrollContent = scrollNodeToTop(this.detailsModalContent);
-            // También intentar el overlay como respaldo
+            // Luego el overlay (scroll principal definido en CSS)
             const didScrollOverlay = scrollNodeToTop(this.detailsModalOverlay);
-            // Como último recurso, intentar documento
-            if (!didScrollContent && !didScrollOverlay) {
+            // Último recurso: documento
+            if (!didScrollBody && !didScrollContent && !didScrollOverlay) {
                 const doc = document.scrollingElement || document.documentElement || document.body;
                 scrollNodeToTop(doc);
             }
@@ -1029,6 +1031,14 @@ class DetailsModal {
             const since = this._openedAt ? (Date.now() - this._openedAt) : null;
             console.warn('DetailsModal.close() called; ms since open:', since);
             console.trace();
+        } catch (e) {}
+
+        // Suprimir cierre si estamos navegando internamente entre similares
+        try {
+            if (this._suppressCloseUntil && Date.now() < this._suppressCloseUntil) {
+                console.warn('DetailsModal.close(): cierre suprimido (navegación interna activa)');
+                return;
+            }
         } catch (e) {}
 
         this.cleanupSimilarSection();
@@ -2069,6 +2079,8 @@ class DetailsModal {
             const onClick = (ev) => {
                 ev.preventDefault();
                 ev.stopPropagation();
+                // Marcar navegación interna para suprimir cierres accidentales y permitir transición fluida
+                try { detailsInstance._suppressCloseUntil = Date.now() + 1200; } catch (e) {}
                 try { window.activeItem = data; } catch (err) {}
                 if (window.hoverModal && typeof window.hoverModal.hide === 'function') {
                     window.hoverModal.hide(0);
@@ -2081,7 +2093,18 @@ class DetailsModal {
                     }
                     detailsInstance.scrollOverlayToTop('smooth');
                 } catch (e) {}
-                detailsInstance.show(data, card);
+                let p;
+                try {
+                    p = detailsInstance.show(data, card);
+                } catch (err) {
+                    console.error('Similar click: show() lanzó excepción', err);
+                }
+                if (p && typeof p.then === 'function') {
+                    p.catch(err => {
+                        console.error('Similar click: show() promise rejected', err);
+                        // No cerrar el modal automáticamente en error; mantener estado para diagnóstico
+                    });
+                }
             };
             card.addEventListener('click', onClick);
             cleanupFns.push(() => card.removeEventListener('click', onClick));
