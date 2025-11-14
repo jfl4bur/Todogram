@@ -2619,6 +2619,14 @@ button:focus {
     opacity: 1;
 }
 
+/* Asegurar visibilidad de la barra de scroll del overlay del modal */
+.details-modal-overlay.scrollbar-visible {
+    scrollbar-width: auto !important;
+}
+.details-modal-overlay.scrollbar-visible::-webkit-scrollbar {
+    display: block !important;
+}
+
 .details-modal-content {
     width: 100%;
     max-width: 900px;

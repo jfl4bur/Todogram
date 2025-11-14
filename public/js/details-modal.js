@@ -149,6 +149,51 @@ class DetailsModal {
         this.similarSectionCleanup = [];
         this.episodesSectionCleanup = [];
         this.activeEpisodesSection = null;
+        this._scrollLock = null;
+    }
+
+    _getScrollbarWidth() {
+        try {
+            const w = window.innerWidth - document.documentElement.clientWidth;
+            return w > 0 ? w : 0;
+        } catch (e) { return 0; }
+    }
+
+    lockScroll() {
+        try {
+            if (this._scrollLock && this._scrollLock.locked) return;
+            const top = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
+            const left = window.scrollX || document.documentElement.scrollLeft || document.body.scrollLeft || 0;
+            const pr = this._getScrollbarWidth();
+            this._scrollLock = { locked: true, top, left, paddingRight: pr, prevBodyOverflow: document.body.style.overflow, prevHtmlOverflow: document.documentElement.style.overflow, prevBodyPr: document.body.style.paddingRight };
+            document.documentElement.classList.add('no-scroll');
+            document.body.classList.add('no-scroll');
+            document.documentElement.style.overflow = 'hidden';
+            document.body.style.overflow = 'hidden';
+            if (pr > 0) document.body.style.paddingRight = `${pr}px`;
+            window.scrollTo(left, top);
+        } catch (e) {}
+    }
+
+    unlockScroll() {
+        try {
+            if (!this._scrollLock) return;
+            document.documentElement.classList.remove('no-scroll');
+            document.body.classList.remove('no-scroll');
+            if (this._scrollLock.prevHtmlOverflow != null) document.documentElement.style.overflow = this._scrollLock.prevHtmlOverflow;
+            if (this._scrollLock.prevBodyOverflow != null) document.body.style.overflow = this._scrollLock.prevBodyOverflow;
+            if (this._scrollLock.prevBodyPr != null) document.body.style.paddingRight = this._scrollLock.prevBodyPr;
+            this._scrollLock = null;
+        } catch (e) {}
+    }
+
+    scrollOverlayToTop(behavior = 'smooth') {
+        try {
+            const scroller = this.detailsModalOverlay || document.scrollingElement || document.documentElement;
+            if (!scroller) return;
+            if (typeof scroller.scrollTo === 'function') scroller.scrollTo({ top: 0, behavior });
+            else scroller.scrollTop = 0;
+        } catch (e) {}
     }
 
     _detachDetailsBackdropListeners() {
@@ -572,10 +617,12 @@ class DetailsModal {
         
         this.detailsModalOverlay.style.display = 'block';
         this.detailsModalOverlay.classList.add('show');
-    // Evitar que el click/tap original que abrió el modal (mismo evento)
+        this.detailsModalOverlay.classList.add('scrollbar-visible');
+        // Evitar que el click/tap original que abrió el modal (mismo evento)
     // se propague a overlay y cierre el modal inmediatamente.
     try { this._suppressOverlayClickUntil = Date.now() + 350; } catch (e) {}
-        document.body.style.overflow = 'hidden';
+        // Bloquear scroll del documento principal de forma robusta
+        this.lockScroll();
         console.log('DetailsModal: Modal overlay mostrado con clase show');
         
         if (this.isIOS()) {
@@ -988,6 +1035,7 @@ class DetailsModal {
             window.activeItem = null;
             try { console.log('DetailsModal.close(): calling restoreUrl()'); } catch(e){}
             this.restoreUrl();
+            this.unlockScroll();
         }, 300);
     }
     
@@ -2010,6 +2058,14 @@ class DetailsModal {
                 if (window.hoverModal && typeof window.hoverModal.hide === 'function') {
                     window.hoverModal.hide(0);
                 }
+                // Ocultar backdrop actual y desplazar al top del overlay antes de cargar el nuevo contenido
+                try {
+                    if (detailsInstance.detailsModalBackdrop) {
+                        detailsInstance.detailsModalBackdrop.style.opacity = '0';
+                        detailsInstance.detailsModalBackdrop.classList.add('backdrop-hidden');
+                    }
+                    detailsInstance.scrollOverlayToTop('smooth');
+                } catch (e) {}
                 detailsInstance.show(data, card);
             };
             card.addEventListener('click', onClick);
