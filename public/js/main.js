@@ -443,6 +443,17 @@ document.addEventListener('DOMContentLoaded', function () {
         // Manejar cambios en el hash de la URL
         let lastHash = window.location.hash;
         window.addEventListener('hashchange', function() {
+            // Ignorar cambios de hash causados por acciones internas controladas
+            try {
+                if (window.__catalogIgnoreNextHashChange) {
+                    window.__catalogIgnoreNextHashChange = false;
+                    return;
+                }
+                if (window.__detailsIgnoreNextHashChange) {
+                    window.__detailsIgnoreNextHashChange = false;
+                    return;
+                }
+            } catch (e) { /* ignore */ }
             const newHash = window.location.hash;
             if (newHash !== lastHash) {
                 lastHash = newHash;

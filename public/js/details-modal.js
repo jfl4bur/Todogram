@@ -189,10 +189,24 @@ class DetailsModal {
 
     scrollOverlayToTop(behavior = 'smooth') {
         try {
-            const scroller = this.detailsModalOverlay || document.scrollingElement || document.documentElement;
-            if (!scroller) return;
-            if (typeof scroller.scrollTo === 'function') scroller.scrollTo({ top: 0, behavior });
-            else scroller.scrollTop = 0;
+            const scrollNodeToTop = (node) => {
+                if (!node) return false;
+                const canScroll = (node.scrollHeight || 0) > (node.clientHeight || 0);
+                try {
+                    if (typeof node.scrollTo === 'function') node.scrollTo({ top: 0, behavior });
+                    else node.scrollTop = 0;
+                } catch (e) { try { node.scrollTop = 0; } catch (e2) {} }
+                return canScroll;
+            };
+            // Priorizar el contenedor de contenido del modal (suele ser el scroller real)
+            const didScrollContent = scrollNodeToTop(this.detailsModalContent);
+            // También intentar el overlay como respaldo
+            const didScrollOverlay = scrollNodeToTop(this.detailsModalOverlay);
+            // Como último recurso, intentar documento
+            if (!didScrollContent && !didScrollOverlay) {
+                const doc = document.scrollingElement || document.documentElement || document.body;
+                scrollNodeToTop(doc);
+            }
         } catch (e) {}
     }
 
@@ -598,10 +612,8 @@ class DetailsModal {
                     this.detailsModalBackdrop.classList.add('backdrop-hidden');
                 }
             } catch (e) {}
-            try {
-                const scroller = this.detailsModalOverlay || document.scrollingElement || document.documentElement;
-                scroller.scrollTo({ top: 0, behavior: 'smooth' });
-            } catch (e) {}
+            // Forzar scroll suave al tope sobre el contenedor correcto
+            this.scrollOverlayToTop('smooth');
         }
         // Instrumentación temporal: marcar timestamp de apertura para depuración
         try { this._openedAt = Date.now(); console.log('DetailsModal: show() timestamp', this._openedAt); } catch(e){}
@@ -1153,9 +1165,12 @@ class DetailsModal {
         if (window.location.hash.substring(1) !== newHash) {
             // Use pushState so the modal hash becomes a persistent history entry
             try {
+                // Marcar este cambio para que hashchange lo ignore (evita re-entradas/cierres)
+                try { window.__detailsIgnoreNextHashChange = true; } catch (e) {}
                 window.history.pushState(null, null, `${window.location.pathname}#${newHash}`);
             } catch (err) {
                 // fallback to replaceState if pushState is unavailable for any reason
+                try { window.__detailsIgnoreNextHashChange = true; } catch (e2) {}
                 window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
             }
         }
