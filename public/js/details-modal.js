@@ -219,6 +219,41 @@ class DetailsModal {
         } catch (e) { return 'Títulos similares'; }
     }
 
+    _fallbackHeaderForType(type) {
+        if (type === 'documental') return 'Documentales recomendados';
+        if (type === 'serie') return 'Series recomendadas';
+        if (type === 'anime') return 'Animes recomendados';
+        return 'Películas recomendadas';
+    }
+
+    _buildFallbackSameTypeItems(allData, baseType, baseMeta, baseIds, maxResults = 24) {
+        try {
+            const out = [];
+            const seen = new Set();
+            for (let i = 0; i < allData.length; i++) {
+                const candidate = this._normalizeRawDataItem(allData[i], i);
+                if (!candidate || !candidate._similarMeta) continue;
+                const meta = candidate._similarMeta;
+                if (isEpisodeItem(candidate)) continue;
+                const candType = this._classifyCategory(meta.category);
+                if (baseType && candType && candType !== baseType) continue;
+                const candidateId = meta.canonicalId || candidate.id;
+                if (candidateId && baseIds.has(String(candidateId))) continue;
+                const key = `${candidateId || ''}|${meta.normalizedTitle || ''}`;
+                if (seen.has(key)) continue;
+                seen.add(key);
+                let score = 0;
+                if (candidate.posterUrl) score += 4;
+                if (candidate.videoUrl) score += 1.5;
+                if (Number.isFinite(meta.ratingValue)) score += meta.ratingValue * 0.4;
+                if (Number.isFinite(meta.yearValue)) score += Math.max(0, 2030 - meta.yearValue) * 0.001; // ligera preferencia por recientes
+                out.push({ item: candidate, score });
+            }
+            out.sort((a,b)=> b.score - a.score);
+            return out.slice(0, maxResults).map(e=>e.item);
+        } catch (e) { return []; }
+    }
+
     lockScroll() {
         try {
             if (this._scrollLock && this._scrollLock.locked) return;
@@ -2438,9 +2473,24 @@ class DetailsModal {
             }
 
             if (!similarItems || similarItems.length === 0) {
-                placeholder.innerHTML = '';
-                return;
+                // Fallback: construir recomendaciones del mismo tipo
+                try {
+                    const all = await this.loadAllData();
+                    const baseMeta2 = this._prepareItemForSimilarity(item) || {};
+                    const baseIds2 = new Set();
+                    if (baseMeta2?.canonicalId) baseIds2.add(String(baseMeta2.canonicalId));
+                    if (item && item.id) baseIds2.add(String(item.id));
+                    if (item && item.tmdbId) baseIds2.add(String(item.tmdbId));
+                    if (item && item['ID TMDB']) baseIds2.add(String(item['ID TMDB']));
+                    const baseType2 = this._classifyCategory(baseMeta2.category);
+                    const fallbackItems = this._buildFallbackSameTypeItems(all || [], baseType2, baseMeta2, baseIds2, 24);
+                    if (fallbackItems.length) {
+                        headerLabel = this._fallbackHeaderForType(baseType2);
+                        similarItems = fallbackItems;
+                    }
+                } catch (e) {}
             }
+            if (!similarItems || similarItems.length === 0) { placeholder.innerHTML = ''; return; }
             const section = this.createSimilarSectionElement(similarItems, headerLabel);
             if (!section) {
                 placeholder.innerHTML = '';
