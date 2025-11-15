@@ -64,7 +64,8 @@ function isEpisodeItem(item){
     for(const key of episodeTitleKeys){
         if(raw && raw[key] && String(raw[key]).trim() !== '') return true;
     }
-    const episodeIndexKeys = ['Episodio', 'Episodios', 'episodeIndex', 'episodioNum', 'Capítulo', 'Capitulo'];
+    // No usar 'Episodios' porque suele ser un conteo en fichas de series (padre)
+    const episodeIndexKeys = ['Episodio', 'episodeIndex', 'episodioNum', 'Capítulo', 'Capitulo'];
     for(const key of episodeIndexKeys){
         const v = raw ? raw[key] : undefined;
         if(v === 0) return true;
@@ -194,7 +195,8 @@ class DetailsModal {
             const c = String(rawCat || '').trim().toLowerCase();
             if (!c) return null;
             if (c.includes('anime')) return 'anime';
-            if (c.includes('serie')) return 'serie';
+            // series: incluye variantes comunes
+            if (c.includes('serie') || c.includes('series') || c.includes('tv') || c.includes('televisión') || c.includes('television') || c.includes('miniserie') || c.includes('mini serie')) return 'serie';
             if (c.includes('documental')) return 'documental';
             if (c.includes('película') || c.includes('pelicula') || c.includes('movie') || c.includes('film')) return 'pelicula';
             return null;
