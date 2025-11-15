@@ -2037,6 +2037,9 @@ class DetailsModal {
             const baseIsEpisode = !!baseMeta.isEpisode;
             const results = [];
             const seen = new Set();
+            const seenSeriesRepresentative = new Set();
+            const allowEpisodeRepresentatives = baseType && ['serie','anime','documental'].includes(baseType);
+            const baseTitleNorm = (baseMeta.normalizedTitle || '').trim();
             for (let i = 0; i < allData.length; i++) {
                 const candidate = this._normalizeRawDataItem(allData[i], i);
                 if (!candidate || !candidate._similarMeta) continue;
@@ -2047,7 +2050,16 @@ class DetailsModal {
                 seen.add(candidateKey);
                 if (candidateId && baseIds.has(String(candidateId))) continue;
                 if (meta.normalizedTitle && baseMeta.normalizedTitle && meta.normalizedTitle === baseMeta.normalizedTitle) continue;
-                if (!baseIsEpisode && meta.isEpisode) continue;
+                if (!baseIsEpisode && meta.isEpisode) {
+                    if (!allowEpisodeRepresentatives) continue;
+                    // usar episodios sólo como representantes de su serie/anime/documental
+                    const seriesNorm = (meta.normalizedTitle || '').trim();
+                    if (!seriesNorm || seriesNorm === baseTitleNorm) continue; // no incluir episodios de la misma serie
+                    if (seenSeriesRepresentative.has(seriesNorm)) continue; // ya tenemos representante
+                    seenSeriesRepresentative.add(seriesNorm);
+                    candidate._episodeRepresentative = true;
+                    // Continuamos calculando score con los mismos criterios (excepto año/puntuación si no disponibles)
+                }
                 // Filtrar por mismo tipo de categoría cuando sea detectable
                 const candType = this._classifyCategory(meta.category);
                 if (baseType && candType && candType !== baseType) continue;
@@ -2085,6 +2097,12 @@ class DetailsModal {
             });
             return results.slice(0, maxResults).map(entry => {
                 const sim = entry.item;
+                // Si es representante de serie (a partir de episodio), limpiar campos de episodio
+                if (sim._episodeRepresentative) {
+                    delete sim.episodioNum;
+                    delete sim.temporada;
+                    sim.isEpisode = false;
+                }
                 if (!sim['Video iframe']) sim['Video iframe'] = sim.videoIframe || '';
                 if (!sim['Video iframe 1']) sim['Video iframe 1'] = sim.videoIframe1 || '';
                 return sim;
@@ -2393,6 +2411,35 @@ class DetailsModal {
                         const t = this._classifyCategory(parent.category);
                         headerLabel = t==='serie' ? 'Serie relacionada' : t==='anime' ? 'Anime relacionado' : t==='documental' ? 'Documental relacionado' : 'Título relacionado';
                         similarItems = [parent];
+                    } else {
+                        // Fallback: sintetizar un "padre" desde episodios con mismo título
+                        const episodeGroup = (Array.isArray(all) ? all : [])
+                          .map((r,i)=>this._normalizeRawDataItem(r,i))
+                          .filter(Boolean)
+                          .filter(c => isEpisodeItem(c))
+                          .filter(c => (this.normalizeText(c.title || '') || '').trim() === baseTitleNorm);
+                        if (episodeGroup.length) {
+                            const first = episodeGroup[0];
+                            const pseudo = {
+                                id: first.id || `serie_${baseTitleNorm}`,
+                                title: first.title || item.title || 'Título',
+                                category: first.category || 'Serie',
+                                originalCategory: first.originalCategory || first.category || 'Serie',
+                                posterUrl: first.posterUrl || first.backgroundUrl || '',
+                                backgroundUrl: first.backgroundUrl || first.posterUrl || '',
+                                description: first.description || '',
+                                videoIframe: first.videoIframe || '',
+                                videoIframe1: first.videoIframe1 || '',
+                                genres: first.genres || '',
+                                year: first.year || '',
+                                rating: first.rating || '',
+                                _similarMeta: this._prepareItemForSimilarity(first),
+                                isEpisode: false
+                            };
+                            const t = this._classifyCategory(pseudo.category);
+                            headerLabel = t==='serie' ? 'Serie relacionada' : t==='anime' ? 'Anime relacionado' : t==='documental' ? 'Documental relacionado' : 'Título relacionado';
+                            similarItems = [pseudo];
+                        }
                     }
                 } catch (e) {}
             } else {
