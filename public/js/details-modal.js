@@ -988,6 +988,15 @@ class DetailsModal {
         }
 
         this.insertSimilarSection(item).catch(err => console.warn('details-modal: similar section error', err));
+        // Asegurar un espacio al final del contenido para que en iOS Safari no tape el botón inferior
+        try {
+            const body = this.detailsModalBody;
+            if (body && !body.querySelector('.details-modal-bottom-spacer')) {
+                const spacer = document.createElement('div');
+                spacer.className = 'details-modal-bottom-spacer';
+                body.appendChild(spacer);
+            }
+        } catch (e) {}
         
         void this.detailsModalOverlay.offsetWidth;
         

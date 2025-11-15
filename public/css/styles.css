@@ -2613,7 +2613,7 @@ button:focus {
     transition: opacity 0.3s ease;
     padding-top: 20px;
     /* Asegurar espacio para la barra inferior de Safari/iOS y que el botón de "Ver más" no quede oculto */
-    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
     /* Mejor desplazamiento en iOS */
     -webkit-overflow-scrolling: touch;
     /* Usar viewport dinámico para que el contenedor alcance realmente el final en Safari iOS */
@@ -8491,4 +8491,9 @@ ease;
 .modal-backdrop.backdrop-loading,
 .details-modal-backdrop.backdrop-loading {
     opacity: 0 !important;
+}
+
+/* Espaciador final dentro del modal para asegurar tap targets visibles en iOS */
+.details-modal-bottom-spacer {
+    height: calc(72px + env(safe-area-inset-bottom, 0px));
 }
