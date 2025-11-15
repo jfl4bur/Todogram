@@ -182,6 +182,34 @@ class DetailsModal {
         } catch (e) { return 0; }
     }
 
+    _classifyCategory(rawCat) {
+        try {
+            const c = String(rawCat || '').trim().toLowerCase();
+            if (!c) return null;
+            if (c.includes('anime')) return 'anime';
+            if (c.includes('serie')) return 'serie';
+            if (c.includes('documental')) return 'documental';
+            if (c.includes('película') || c.includes('pelicula') || c.includes('movie') || c.includes('film')) return 'pelicula';
+            return null;
+        } catch (e) { return null; }
+    }
+
+    _similarHeaderLabelFor(item) {
+        try {
+            if (!item) return 'Títulos similares';
+            const meta = this._prepareItemForSimilarity(item) || {};
+            if (meta.isEpisode) {
+                // Para episodios personalizaremos en insertSimilarSection tras resolver el padre
+                return 'Contenido relacionado';
+            }
+            const type = this._classifyCategory(meta.category);
+            if (type === 'documental') return 'Documentales similares';
+            if (type === 'serie') return 'Series similares';
+            if (type === 'anime') return 'Animes similares';
+            return 'Películas similares';
+        } catch (e) { return 'Títulos similares'; }
+    }
+
     lockScroll() {
         try {
             if (this._scrollLock && this._scrollLock.locked) return;
@@ -2004,6 +2032,7 @@ class DetailsModal {
             if (item && item['ID TMDB']) baseIds.add(String(item['ID TMDB']));
             const baseGenres = baseMeta.genreSet || new Set();
             const baseCategory = baseMeta.category;
+            const baseType = this._classifyCategory(baseCategory);
             const baseYear = baseMeta.yearValue;
             const baseIsEpisode = !!baseMeta.isEpisode;
             const results = [];
@@ -2019,6 +2048,9 @@ class DetailsModal {
                 if (candidateId && baseIds.has(String(candidateId))) continue;
                 if (meta.normalizedTitle && baseMeta.normalizedTitle && meta.normalizedTitle === baseMeta.normalizedTitle) continue;
                 if (!baseIsEpisode && meta.isEpisode) continue;
+                // Filtrar por mismo tipo de categoría cuando sea detectable
+                const candType = this._classifyCategory(meta.category);
+                if (baseType && candType && candType !== baseType) continue;
                 let score = 0;
                 let sharedGenres = 0;
                 if (baseGenres.size && meta.genreSet && meta.genreSet.size) {
@@ -2063,7 +2095,7 @@ class DetailsModal {
         }
     }
 
-    createSimilarSectionElement(similarItems) {
+    createSimilarSectionElement(similarItems, headerLabel = 'Títulos similares') {
         if (!Array.isArray(similarItems) || similarItems.length === 0) return null;
         const section = document.createElement('section');
         section.className = 'details-modal-similar-section';
@@ -2083,7 +2115,7 @@ class DetailsModal {
         }).join('');
         section.innerHTML = `
             <div class="details-modal-similar-header">
-                <h3 class="details-modal-similar-title">Películas similares</h3>
+                <h3 class="details-modal-similar-title">${headerLabel}</h3>
             </div>
             <div class="details-modal-similar-grid-wrapper">
                 <div class="details-modal-similar-grid" data-state="collapsed">
@@ -2341,13 +2373,37 @@ class DetailsModal {
             this.cleanupSimilarSection();
             const placeholder = this.detailsModalBody ? this.detailsModalBody.querySelector('.details-modal-similar-placeholder') : null;
             if (!placeholder) return;
-            placeholder.innerHTML = `<div class="details-modal-similar-loading"><div class="skeleton-spinner"></div></div>`;
-            const similarItems = await this.findSimilarItems(item);
+            placeholder.innerHTML = `<div class=\"details-modal-similar-loading\"><div class=\"skeleton-spinner\"></div></div>`;
+
+            let similarItems = [];
+            let headerLabel = this._similarHeaderLabelFor(item);
+            const baseMeta = this._prepareItemForSimilarity(item) || {};
+
+            if (baseMeta.isEpisode) {
+                try {
+                    const all = await this.loadAllData();
+                    const baseTitleNorm = (this.normalizeText(item.title || item['Título'] || '') || '').trim();
+                    const parentCandidates = (Array.isArray(all) ? all : [])
+                        .map((r,i) => this._normalizeRawDataItem(r,i))
+                        .filter(Boolean)
+                        .filter(c => !isEpisodeItem(c))
+                        .filter(c => (this.normalizeText(c.title || '') || '').trim() === baseTitleNorm);
+                    const parent = parentCandidates[0] || null;
+                    if (parent) {
+                        const t = this._classifyCategory(parent.category);
+                        headerLabel = t==='serie' ? 'Serie relacionada' : t==='anime' ? 'Anime relacionado' : t==='documental' ? 'Documental relacionado' : 'Título relacionado';
+                        similarItems = [parent];
+                    }
+                } catch (e) {}
+            } else {
+                similarItems = await this.findSimilarItems(item);
+            }
+
             if (!similarItems || similarItems.length === 0) {
                 placeholder.innerHTML = '';
                 return;
             }
-            const section = this.createSimilarSectionElement(similarItems);
+            const section = this.createSimilarSectionElement(similarItems, headerLabel);
             if (!section) {
                 placeholder.innerHTML = '';
                 return;
