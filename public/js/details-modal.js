@@ -57,13 +57,20 @@ function pickPreferredVideo(){
 
 function isEpisodeItem(item){
     if(!item || typeof item !== 'object') return false;
-    if(item.isEpisode) return true;
-    if(item.episodioNum || item.temporada) return true;
+    if(item.isEpisode === true) return true;
     const raw = (item.raw && typeof item.raw === 'object') ? item.raw : item;
-    const keys = ['Título episodio', 'Título episodio completo', 'Título episodio 1', 'Título episodio (completo)', 'episodeTitle', 'episodeIndex'];
-    for(const key of keys){
+    // Señales fuertes de episodio: título de episodio o número de episodio
+    const episodeTitleKeys = ['Título episodio', 'Título episodio completo', 'Título episodio 1', 'Título episodio (completo)', 'episodeTitle'];
+    for(const key of episodeTitleKeys){
         if(raw && raw[key] && String(raw[key]).trim() !== '') return true;
     }
+    const episodeIndexKeys = ['Episodio', 'Episodios', 'episodeIndex', 'episodioNum', 'Capítulo', 'Capitulo'];
+    for(const key of episodeIndexKeys){
+        const v = raw ? raw[key] : undefined;
+        if(v === 0) return true;
+        if(v != null && String(v).trim() !== '') return true;
+    }
+    // NO considerar únicamente 'Temporada' como episodio (muchas fichas de serie tienen temporada pero no son un episodio)
     return false;
 }
 
