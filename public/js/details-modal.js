@@ -2511,10 +2511,41 @@ class DetailsModal {
     async insertEpisodesSection(item) {
         try {
             this.cleanupEpisodesSection();
-            let sectionHtml = await this.getEpisodesSection(item);
+            // Si el item es un episodio, intentar resolver el "padre" (serie) para listar todos los episodios
+            let baseForEpisodes = item;
+            try {
+                if (isEpisodeItem && isEpisodeItem(item)) {
+                    const all = await this.loadAllData();
+                    const baseTitleNorm = (this.normalizeText(item.title || item['Título'] || '') || '').trim();
+                    // Buscar un candidato que no sea episodio con el mismo título normalizado
+                    const parentCandidates = (Array.isArray(all) ? all : [])
+                        .map((r,i) => this._normalizeRawDataItem(r,i))
+                        .filter(Boolean)
+                        .filter(c => !isEpisodeItem(c))
+                        .filter(c => (this.normalizeText(c.title || '') || '').trim() === baseTitleNorm);
+                    const parent = parentCandidates[0] || null;
+                    if (parent) {
+                        baseForEpisodes = parent;
+                    } else {
+                        // Fallback: sintetizar un objeto mínimo con el título/ID TMDB del episodio para que getEpisodesSection matchee por título/ID
+                        const tmdbId = (item['ID TMDB'] || item.id_tmdb || item.tmdbId || (item.tmdbUrl ? (item.tmdbUrl.match(/(movie|tv)\/(\d+)/)?.[2]) : '')) || '';
+                        const seriesTitle = item['Título'] || item.title || '';
+                        baseForEpisodes = {
+                            title: seriesTitle,
+                            ['Título']: seriesTitle,
+                            ['ID TMDB']: tmdbId,
+                            tmdbId: tmdbId,
+                            category: 'Serie',
+                            originalCategory: 'Serie'
+                        };
+                    }
+                }
+            } catch (e) { /* no-op, usar item como base */ }
+
+            let sectionHtml = await this.getEpisodesSection(baseForEpisodes);
             if (!sectionHtml) {
                 await new Promise(r => setTimeout(r, 200));
-                sectionHtml = await this.getEpisodesSection(item);
+                sectionHtml = await this.getEpisodesSection(baseForEpisodes);
                 if (!sectionHtml) return;
             }
             this._mountEpisodesSection(sectionHtml, item);
