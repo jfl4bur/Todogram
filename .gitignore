@@ -35,3 +35,6 @@ admin/
 
 # Ignorar los scripts de sincronización locales
 GEMINI.md
+index.hml
+/public/catalogo/index.html
+main.js
