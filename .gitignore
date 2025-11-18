@@ -29,6 +29,7 @@ backups
 # Ignorar carpetas
 UTILES/
 admin/
+doc/
 
 #  SECRET_KEYS
 .env
@@ -38,3 +39,4 @@ GEMINI.md
 index.html
 public/catalogo/index.html
 main.js
+package.json
