@@ -221,34 +221,6 @@ class DetailsModal {
 
     _fallbackHeaderForType(type) {
         if (type === 'documental') return 'Documentales recomendados';
-        if (type === 'serie') return 'Series recomendadas';
-        if (type === 'anime') return 'Animes recomendados';
-        return 'Películas recomendadas';
-    }
-
-    _buildFallbackSameTypeItems(allData, baseType, baseMeta, baseIds, maxResults = 24) {
-        try {
-            const out = [];
-            const seen = new Set();
-            for (let i = 0; i < allData.length; i++) {
-                const candidate = this._normalizeRawDataItem(allData[i], i);
-                if (!candidate || !candidate._similarMeta) continue;
-                const meta = candidate._similarMeta;
-                if (isEpisodeItem(candidate)) continue;
-                const candType = this._classifyCategory(meta.category);
-                if (baseType && candType && candType !== baseType) continue;
-            try { this.detailsModalBackdrop.removeEventListener('load', this._detailsBackdropLoadHandler); } catch (e) { }
-            this._detailsBackdropLoadHandler = null;
-        }
-        if (this._detailsBackdropErrorHandler) {
-            try { this.detailsModalBackdrop.removeEventListener('error', this._detailsBackdropErrorHandler); } catch (e) { }
-            this._detailsBackdropErrorHandler = null;
-        }
-    }
-
-    _handleDetailsBackdropSettled() {
-        this._detachDetailsBackdropListeners();
-        try { this.detailsModalBackdrop.classList.remove('backdrop-loading'); } catch (e) { }
         try { if (this.detailsModalHeader) this.detailsModalHeader.classList.remove('backdrop-loading'); } catch (e) { }
         try {
             if (this.detailsModalBackdrop) {
