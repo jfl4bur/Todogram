@@ -1,10 +1,10 @@
 // Permitir que otros scripts llamen a detailsModal.show mediante window.openDetailsModal
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     if (window.detailsModal) {
         window.openDetailsModal = (item, origen) => window.detailsModal.show(item);
     }
     // Helper to open the share modal consistently from any context
-    window.openShareModal = function(item) {
+    window.openShareModal = function (item) {
         try {
             if (!window.shareModal && typeof ShareModal === 'function') {
                 window.shareModal = new ShareModal();
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 const currentUrl = window.location.href;
                 let shareUrl = null;
-                try { shareUrl = (typeof window.generateShareUrl === 'function') ? window.generateShareUrl(item, currentUrl) : null; } catch(e) { shareUrl = null; }
+                try { shareUrl = (typeof window.generateShareUrl === 'function') ? window.generateShareUrl(item, currentUrl) : null; } catch (e) { shareUrl = null; }
                 window.shareModal.show({ ...item, shareUrl });
                 return true;
             } catch (err) {
@@ -36,65 +36,65 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 });
 
-function normalizeIframeSource(value){
-    try{
+function normalizeIframeSource(value) {
+    try {
         const raw = String(value || '').trim();
-        if(!raw) return '';
+        if (!raw) return '';
         const lower = raw.toLowerCase();
-        if(lower.includes('<iframe') && lower.includes('src=')) return raw;
-        if(/^https?:\/\//i.test(raw) || raw.startsWith('//')) return raw;
+        if (lower.includes('<iframe') && lower.includes('src=')) return raw;
+        if (/^https?:\/\//i.test(raw) || raw.startsWith('//')) return raw;
         return '';
-    }catch(e){ return ''; }
+    } catch (e) { return ''; }
 }
 
-function pickPreferredVideo(){
-    for(let i=0;i<arguments.length;i++){
+function pickPreferredVideo() {
+    for (let i = 0; i < arguments.length; i++) {
         const normalized = normalizeIframeSource(arguments[i]);
-        if(normalized) return normalized;
+        if (normalized) return normalized;
     }
     return '';
 }
 
-function isEpisodeItem(item){
-    if(!item || typeof item !== 'object') return false;
-    if(item.isEpisode === true) return true;
+function isEpisodeItem(item) {
+    if (!item || typeof item !== 'object') return false;
+    if (item.isEpisode === true) return true;
     const raw = (item.raw && typeof item.raw === 'object') ? item.raw : item;
     // Señales fuertes de episodio: título de episodio o número de episodio
     const episodeTitleKeys = ['Título episodio', 'Título episodio completo', 'Título episodio 1', 'Título episodio (completo)', 'episodeTitle'];
-    for(const key of episodeTitleKeys){
-        if(raw && raw[key] && String(raw[key]).trim() !== '') return true;
+    for (const key of episodeTitleKeys) {
+        if (raw && raw[key] && String(raw[key]).trim() !== '') return true;
     }
     // No usar 'Episodios' porque suele ser un conteo en fichas de series (padre)
     const episodeIndexKeys = ['Episodio', 'episodeIndex', 'episodioNum', 'Capítulo', 'Capitulo'];
-    for(const key of episodeIndexKeys){
+    for (const key of episodeIndexKeys) {
         const v = raw ? raw[key] : undefined;
-        if(v === 0) return true;
-        if(v != null && String(v).trim() !== '') return true;
+        if (v === 0) return true;
+        if (v != null && String(v).trim() !== '') return true;
     }
     // NO considerar únicamente 'Temporada' como episodio (muchas fichas de serie tienen temporada pero no son un episodio)
     return false;
 }
 
-function determinePrimaryActionLabel(item){
+function determinePrimaryActionLabel(item) {
     const fallback = 'Ver Película';
-    if(!item || typeof item !== 'object') return fallback;
-    if(isEpisodeItem(item)) return 'Ver Episodio';
+    if (!item || typeof item !== 'object') return fallback;
+    if (isEpisodeItem(item)) return 'Ver Episodio';
     const candidates = [];
-    if(item.category) candidates.push(item.category);
-    if(item.originalCategory) candidates.push(item.originalCategory);
-    if(item['Categoría']) candidates.push(item['Categoría']);
-    if(item.categoryLabel) candidates.push(item.categoryLabel);
-    if(item.raw && typeof item.raw === 'object'){
-        if(item.raw['Categoría']) candidates.push(item.raw['Categoría']);
-        if(item.raw.category) candidates.push(item.raw.category);
+    if (item.category) candidates.push(item.category);
+    if (item.originalCategory) candidates.push(item.originalCategory);
+    if (item['Categoría']) candidates.push(item['Categoría']);
+    if (item.categoryLabel) candidates.push(item.categoryLabel);
+    if (item.raw && typeof item.raw === 'object') {
+        if (item.raw['Categoría']) candidates.push(item.raw['Categoría']);
+        if (item.raw.category) candidates.push(item.raw.category);
     }
-    for(const candidate of candidates){
+    for (const candidate of candidates) {
         const normalized = String(candidate || '').trim().toLowerCase();
-        if(!normalized) continue;
-        if(normalized.includes('documental')) return 'Ver Documental';
-        if(normalized.includes('anime')) return 'Ver Anime';
-        if(normalized.includes('serie')) return 'Ver Serie';
-        if(normalized.includes('episodio')) return 'Ver Episodio';
+        if (!normalized) continue;
+        if (normalized.includes('documental')) return 'Ver Documental';
+        if (normalized.includes('anime')) return 'Ver Anime';
+        if (normalized.includes('serie')) return 'Ver Serie';
+        if (normalized.includes('episodio')) return 'Ver Episodio';
     }
     return fallback;
 }
@@ -111,7 +111,7 @@ class DetailsModal {
         this.detailsModalHeader = this.detailsModalContent ? this.detailsModalContent.querySelector('.details-modal-header') : null;
         this.activeItem = null;
         this.isDetailsModalOpen = false;
-    this.preModalHash = null;
+        this.preModalHash = null;
         this.TMDB_API_KEY = 'f28077ae6a89b54c86be927ea88d64d9';
         this.domCache = {}; // Cache para elementos DOM frecuentemente usados
         this._detailsBackdropLoadHandler = null;
@@ -124,7 +124,7 @@ class DetailsModal {
         }
 
         this.setupEventListeners();
-        
+
         this.galleryModal = document.createElement('div');
         this.galleryModal.id = 'gallery-modal';
         this.galleryModal.className = 'gallery-modal';
@@ -163,24 +163,24 @@ class DetailsModal {
     createDetailsSkeletonMarkup() {
         // Esqueleto visual para cada bloque del modal: título, meta, botones, descripción, crew, galerías, similares, episodios
         // Nuevo skeleton alineado: usamos las clases reales para conservar padding/margins.
-        const line = (w, h=14) => `<div class="skeleton-block" style="width:${w};height:${h}px"></div>`;
-        const textLines = (n, h=14, w='100%') => Array.from({length:n}).map(()=>line(w,h)).join('');
+        const line = (w, h = 14) => `<div class="skeleton-block" style="width:${w};height:${h}px"></div>`;
+        const textLines = (n, h = 14, w = '100%') => Array.from({ length: n }).map(() => line(w, h)).join('');
         const title = `<h1 class="details-modal-title skeleton-block skeleton-title"></h1>`;
-    const original = `<div class="details-modal-original-title skeleton-block skeleton-line"></div>`;
-    const meta = `<div class="details-modal-meta skeleton-meta">${['12%','9%','16%','7%'].map(w=>`<span class=\\"details-modal-meta-item skeleton-block\\" style=\\"width:${w};height:16px\\"></span>`).join('')}</div>`;
-    // Legacy acciones skeleton (dos botones primarios y tres secundarios) eliminado para evitar flicker y tamaño incorrecto en móvil.
-    // Simplificamos skeleton de acciones usando divs neutros para evitar heredar estilos de .details-modal-action-btn
-    const circles = Array.from({length:3}, () => '<div class="skeleton-block skeleton-btn-circular" aria-hidden="true"></div>').join('');
-    const actions = `<div class="details-modal-actions actions-skeleton"><div class="primary-action-row"><div class="skeleton-block skeleton-btn-primary" aria-hidden="true"></div></div><div class="secondary-actions-row">${circles}</div></div>`;
-        const description = `<div class="details-modal-description skeleton-text">${textLines(3,16)}</div>`;
-        const info = `<div class="details-modal-info">${Array.from({length:4}).map(()=>`<div class=\\"details-modal-info-item\\"><div class=\\"details-modal-info-label skeleton-block\\" style=\\"width:90px;height:14px\\"></div><div class=\\"details-modal-info-value skeleton-block\\" style=\\"width:160px;height:14px\\"></div></div>`).join('')}</div>`;
-        const crew = `<div class="details-modal-crew-duo"><div class="details-modal-crew-section skeleton-crew-col">${textLines(3,18,'100%')}</div><div class="details-modal-crew-section skeleton-crew-col">${textLines(5,18,'100%')}</div></div>`;
-        const cast = `<div class="details-modal-cast-section">${textLines(3,18,'100%')}</div>`;
-        const gallery = `<div class="details-modal-gallery-section"><div class="details-modal-gallery-list">${Array.from({length:5}).map(()=>`<div class=\\"details-modal-gallery-item skeleton-block\\" style=\\"width:18%;aspect-ratio:2/3\\"></div>`).join('')}</div></div>`;
-    const similar = `<div class="details-modal-similar-placeholder"><div class="details-similar-skeleton-grid">${Array.from({length:5}).map(()=>`<div class=\\"details-similar-skeleton-card skeleton-block\\" style=\\"aspect-ratio:194/271\\"></div>`).join('')}</div></div>`;
-    const episodes = `<div class="details-modal-episodes-skeleton">${Array.from({length:3}).map(()=>`<div class=\\"details-modal-episode-item\\"><div class=\\"details-modal-episode-thumb skeleton-block\\"></div><div class=\\"details-modal-episode-meta\\">${textLines(2,14,'100%')}</div></div>`).join('')}</div>`;
-    // Nuevo orden: Título -> Acciones -> Título original -> Meta -> resto
-    return `${title}${actions}${original}${meta}${description}${info}${crew}${cast}${gallery}${similar}${episodes}`;
+        const original = `<div class="details-modal-original-title skeleton-block skeleton-line"></div>`;
+        const meta = `<div class="details-modal-meta skeleton-meta">${['12%', '9%', '16%', '7%'].map(w => `<span class=\\"details-modal-meta-item skeleton-block\\" style=\\"width:${w};height:16px\\"></span>`).join('')}</div>`;
+        // Legacy acciones skeleton (dos botones primarios y tres secundarios) eliminado para evitar flicker y tamaño incorrecto en móvil.
+        // Simplificamos skeleton de acciones usando divs neutros para evitar heredar estilos de .details-modal-action-btn
+        const circles = Array.from({ length: 3 }, () => '<div class="skeleton-block skeleton-btn-circular" aria-hidden="true"></div>').join('');
+        const actions = `<div class="details-modal-actions actions-skeleton"><div class="primary-action-row"><div class="skeleton-block skeleton-btn-primary" aria-hidden="true"></div></div><div class="secondary-actions-row">${circles}</div></div>`;
+        const description = `<div class="details-modal-description skeleton-text">${textLines(3, 16)}</div>`;
+        const info = `<div class="details-modal-info">${Array.from({ length: 4 }).map(() => `<div class=\\"details-modal-info-item\\"><div class=\\"details-modal-info-label skeleton-block\\" style=\\"width:90px;height:14px\\"></div><div class=\\"details-modal-info-value skeleton-block\\" style=\\"width:160px;height:14px\\"></div></div>`).join('')}</div>`;
+        const crew = `<div class="details-modal-crew-duo"><div class="details-modal-crew-section skeleton-crew-col">${textLines(3, 18, '100%')}</div><div class="details-modal-crew-section skeleton-crew-col">${textLines(5, 18, '100%')}</div></div>`;
+        const cast = `<div class="details-modal-cast-section">${textLines(3, 18, '100%')}</div>`;
+        const gallery = `<div class="details-modal-gallery-section"><div class="details-modal-gallery-list">${Array.from({ length: 5 }).map(() => `<div class=\\"details-modal-gallery-item skeleton-block\\" style=\\"width:18%;aspect-ratio:2/3\\"></div>`).join('')}</div></div>`;
+        const similar = `<div class="details-modal-similar-placeholder"><div class="details-similar-skeleton-grid">${Array.from({ length: 5 }).map(() => `<div class=\\"details-similar-skeleton-card skeleton-block\\" style=\\"aspect-ratio:194/271\\"></div>`).join('')}</div></div>`;
+        const episodes = `<div class="details-modal-episodes-skeleton">${Array.from({ length: 3 }).map(() => `<div class=\\"details-modal-episode-item\\"><div class=\\"details-modal-episode-thumb skeleton-block\\"></div><div class=\\"details-modal-episode-meta\\">${textLines(2, 14, '100%')}</div></div>`).join('')}</div>`;
+        // Nuevo orden: Título -> Acciones -> Título original -> Meta -> resto
+        return `${title}${actions}${original}${meta}${description}${info}${crew}${cast}${gallery}${similar}${episodes}`;
     }
 
     _getScrollbarWidth() {
@@ -242,55 +242,6 @@ class DetailsModal {
                 const key = `${candidateId || ''}|${meta.normalizedTitle || ''}`;
                 if (seen.has(key)) continue;
                 seen.add(key);
-                let score = 0;
-                if (candidate.posterUrl) score += 4;
-                if (candidate.videoUrl) score += 1.5;
-                if (Number.isFinite(meta.ratingValue)) score += meta.ratingValue * 0.4;
-                if (Number.isFinite(meta.yearValue)) score += Math.max(0, 2030 - meta.yearValue) * 0.001; // ligera preferencia por recientes
-                out.push({ item: candidate, score });
-            }
-            out.sort((a,b)=> b.score - a.score);
-            return out.slice(0, maxResults).map(e=>e.item);
-        } catch (e) { return []; }
-    }
-
-    lockScroll() {
-        try {
-            if (this._scrollLock && this._scrollLock.locked) return;
-            const top = window.scrollY || document.documentElement.scrollTop || document.body.scrollTop || 0;
-            const left = window.scrollX || document.documentElement.scrollLeft || document.body.scrollLeft || 0;
-            const pr = this._getScrollbarWidth();
-            this._scrollLock = { locked: true, top, left, paddingRight: pr, prevBodyOverflow: document.body.style.overflow, prevHtmlOverflow: document.documentElement.style.overflow, prevBodyPr: document.body.style.paddingRight };
-            document.documentElement.classList.add('no-scroll');
-            document.body.classList.add('no-scroll');
-            document.documentElement.style.overflow = 'hidden';
-            document.body.style.overflow = 'hidden';
-            if (pr > 0) document.body.style.paddingRight = `${pr}px`;
-            window.scrollTo(left, top);
-        } catch (e) {}
-    }
-
-    unlockScroll() {
-        try {
-            if (!this._scrollLock) return;
-            document.documentElement.classList.remove('no-scroll');
-            document.body.classList.remove('no-scroll');
-            if (this._scrollLock.prevHtmlOverflow != null) document.documentElement.style.overflow = this._scrollLock.prevHtmlOverflow;
-            if (this._scrollLock.prevBodyOverflow != null) document.body.style.overflow = this._scrollLock.prevBodyOverflow;
-            if (this._scrollLock.prevBodyPr != null) document.body.style.paddingRight = this._scrollLock.prevBodyPr;
-            this._scrollLock = null;
-        } catch (e) {}
-    }
-
-    scrollOverlayToTop(behavior = 'smooth') {
-        try {
-            const scrollNodeToTop = (node) => {
-                if (!node) return false;
-                const canScroll = (node.scrollHeight || 0) > (node.clientHeight || 0);
-                try {
-                    if (typeof node.scrollTo === 'function') node.scrollTo({ top: 0, behavior });
-                    else node.scrollTop = 0;
-                } catch (e) { try { node.scrollTop = 0; } catch (e2) {} }
                 return canScroll;
             };
             // Intentar primero el body interno (si alguna regla CSS le otorga overflow)
@@ -304,31 +255,31 @@ class DetailsModal {
                 const doc = document.scrollingElement || document.documentElement || document.body;
                 scrollNodeToTop(doc);
             }
-        } catch (e) {}
+        } catch (e) { }
     }
 
     _detachDetailsBackdropListeners() {
         if (!this.detailsModalBackdrop) return;
         if (this._detailsBackdropLoadHandler) {
-            try { this.detailsModalBackdrop.removeEventListener('load', this._detailsBackdropLoadHandler); } catch (e) {}
+            try { this.detailsModalBackdrop.removeEventListener('load', this._detailsBackdropLoadHandler); } catch (e) { }
             this._detailsBackdropLoadHandler = null;
         }
         if (this._detailsBackdropErrorHandler) {
-            try { this.detailsModalBackdrop.removeEventListener('error', this._detailsBackdropErrorHandler); } catch (e) {}
+            try { this.detailsModalBackdrop.removeEventListener('error', this._detailsBackdropErrorHandler); } catch (e) { }
             this._detailsBackdropErrorHandler = null;
         }
     }
 
     _handleDetailsBackdropSettled() {
         this._detachDetailsBackdropListeners();
-        try { this.detailsModalBackdrop.classList.remove('backdrop-loading'); } catch (e) {}
-        try { if (this.detailsModalHeader) this.detailsModalHeader.classList.remove('backdrop-loading'); } catch (e) {}
+        try { this.detailsModalBackdrop.classList.remove('backdrop-loading'); } catch (e) { }
+        try { if (this.detailsModalHeader) this.detailsModalHeader.classList.remove('backdrop-loading'); } catch (e) { }
         try {
             if (this.detailsModalBackdrop) {
                 this.detailsModalBackdrop.classList.remove('backdrop-hidden');
                 this.detailsModalBackdrop.style.opacity = '';
             }
-        } catch (e) {}
+        } catch (e) { }
     }
 
     _setDetailsBackdropImage(src) {
@@ -336,8 +287,8 @@ class DetailsModal {
 
         this._handleDetailsBackdropSettled();
 
-        try { this.detailsModalBackdrop.classList.add('backdrop-loading'); } catch (e) {}
-        try { if (this.detailsModalHeader) this.detailsModalHeader.classList.add('backdrop-loading'); } catch (e) {}
+        try { this.detailsModalBackdrop.classList.add('backdrop-loading'); } catch (e) { }
+        try { if (this.detailsModalHeader) this.detailsModalHeader.classList.add('backdrop-loading'); } catch (e) { }
 
         const fallback = DEFAULT_DETAILS_BACKDROP_PLACEHOLDER;
         this._detailsBackdropFallbackApplied = false;
@@ -445,8 +396,8 @@ class DetailsModal {
         el.style.overflow = 'hidden';
         // from collapsed state (max-height probably set)
         const startHeight = el.getBoundingClientRect().height;
-    // temporarily set max-height to none to measure full height
-    el.style.maxHeight = 'none';
+        // temporarily set max-height to none to measure full height
+        el.style.maxHeight = 'none';
         const fullHeight = el.scrollHeight;
         // restore to start height then animate to fullHeight
         el.style.maxHeight = startHeight + 'px';
@@ -644,7 +595,7 @@ class DetailsModal {
             e.stopPropagation();
             this.close();
         });
-        
+
         this.detailsModalOverlay.addEventListener('click', (e) => {
             // Evitar que el mismo tap/click que abrió el modal lo cierre de inmediato.
             // Algunos navegadores/reproducciones de eventos en móviles pueden reenfocar
@@ -657,7 +608,7 @@ class DetailsModal {
                     (this._suppressCloseUntil && now < this._suppressCloseUntil)) {
                     return;
                 }
-            } catch (err) {}
+            } catch (err) { }
             if (e.target === this.detailsModalOverlay) {
                 this.close();
             }
@@ -712,10 +663,10 @@ class DetailsModal {
                     this.detailsModalBackdrop.style.opacity = '0';
                     this.detailsModalBackdrop.classList.add('backdrop-hidden');
                 }
-            } catch (e) {}
+            } catch (e) { }
             // Proteger contra cierres/overlays por clicks residuales y forzar scroll al tope
-            try { this._suppressOverlayClickUntil = Date.now() + 600; } catch(e) {}
-            try { this._suppressCloseUntil = Date.now() + 1200; } catch(e) {}
+            try { this._suppressOverlayClickUntil = Date.now() + 600; } catch (e) { }
+            try { this._suppressCloseUntil = Date.now() + 1200; } catch (e) { }
         }
         // Forzar scroll top si la navegación proviene de una tarjeta de similares
         if (this._forceScrollTopOnNextShow) {
@@ -744,24 +695,24 @@ class DetailsModal {
             } catch (e) { /* ignore */ }
         }
         // Instrumentación temporal: marcar timestamp de apertura para depuración
-        try { this._openedAt = Date.now(); console.log('DetailsModal: show() timestamp', this._openedAt); } catch(e){}
+        try { this._openedAt = Date.now(); console.log('DetailsModal: show() timestamp', this._openedAt); } catch (e) { }
         this.updateUrlForModal(item);
         this.cleanupSimilarSection();
-    this.cleanupEpisodesSection();
-        
+        this.cleanupEpisodesSection();
+
         // Renderizar esqueleto completo mientras se cargan datos reales
         this.detailsModalBody.innerHTML = this.createDetailsSkeletonMarkup();
-        
+
         this.detailsModalOverlay.style.display = 'block';
         this.detailsModalOverlay.classList.add('show');
         this.detailsModalOverlay.classList.add('scrollbar-visible');
         // Evitar que el click/tap original que abrió el modal (mismo evento)
-    // se propague a overlay y cierre el modal inmediatamente.
-    try { this._suppressOverlayClickUntil = Date.now() + 350; } catch (e) {}
+        // se propague a overlay y cierre el modal inmediatamente.
+        try { this._suppressOverlayClickUntil = Date.now() + 350; } catch (e) { }
         // Bloquear scroll del documento principal de forma robusta
         this.lockScroll();
         console.log('DetailsModal: Modal overlay mostrado con clase show');
-        
+
         if (this.isIOS()) {
             document.getElementById('ios-helper').offsetHeight;
             this.detailsModalContent.style.display = 'none';
@@ -774,44 +725,44 @@ class DetailsModal {
         if (item.tmdbUrl) {
             tmdbData = await this.fetchTMDBData(item.tmdbUrl);
         }
-        
+
         let tmdbImages = { posters: [], backdrops: [] };
         if (item.tmdbUrl) {
             tmdbImages = await this.fetchTMDBImages(item.tmdbUrl);
         }
-        
+
         // Usar postersUrl como prioridad (campo "Carteles")
         const backdropUrl = item.postersUrl || item.backgroundUrl || item.posterUrl || (tmdbImages.backdrops[0]?.file_path || item.posterUrl);
-        
+
         this._setDetailsBackdropImage(backdropUrl);
-        
-    const trailerUrl = item.trailerUrl || (tmdbData?.trailer_url || '');
-    // REGLA ESTRICTA: Sólo considerar iframes/URLs válidos para el botón principal
-    const preferredVideo = pickPreferredVideo(item['Video iframe'], item['Video iframe 1'], item.videoIframe, item.videoIframe1, item.videoUrl);
-    const playLabel = determinePrimaryActionLabel(item);
-        
+
+        const trailerUrl = item.trailerUrl || (tmdbData?.trailer_url || '');
+        // REGLA ESTRICTA: Sólo considerar iframes/URLs válidos para el botón principal
+        const preferredVideo = pickPreferredVideo(item['Video iframe'], item['Video iframe 1'], item.videoIframe, item.videoIframe1, item.videoUrl);
+        const playLabel = determinePrimaryActionLabel(item);
+
         let metaItems = [];
-        
+
         if (item.year) metaItems.push(`<span class="details-modal-meta-item">${item.year}</span>`);
         if (item.duration) metaItems.push(`<span class="details-modal-meta-item">${item.duration}</span>`);
         if (item.genre) metaItems.push(`<span class="details-modal-meta-item">${item.genre}</span>`);
-        
+
         const ageRating = tmdbData?.certification || item.ageRating;
         if (ageRating) metaItems.push(`<span class="details-modal-meta-item"> <span class="age-rating">${ageRating}</span></span>`);
-        
+
         if (item.rating) metaItems.push(`<span class="details-modal-meta-item rating"><i class="fas fa-star"></i> ${item.rating}${item.tmdbUrl ? `<img src="https://www.themoviedb.org/assets/2/v4/logos/v2/blue_short-8e7b30f73a4020692ccca9c88bafe5dcb6f8a62a4c6bc55cd9ba82bb2cd95f6c.svg" class="details-modal-tmdb-logo" alt="TMDB" onclick="window.open('${item.tmdbUrl}', '_blank')">` : ''}</span>`);
-        
+
         // Usar datos locales para audio y subtítulos
         const audioSubtitlesSection = this.createAudioSubtitlesSection(
-            item.audiosCount || 0, 
-            item.subtitlesCount || 0, 
-            item.audioList || [], 
+            item.audiosCount || 0,
+            item.subtitlesCount || 0,
+            item.audioList || [],
             item.subtitleList || []
         );
-        
+
         let actionButtons = '';
         let secondaryButtons = '';
-        
+
         if (preferredVideo) {
             console.log('DetailsModal: Agregando botón principal', { label: playLabel, url: preferredVideo });
             actionButtons += `<button class="details-modal-action-btn primary big-btn" data-video-url="${preferredVideo}"><i class="fas fa-play"></i><span>${playLabel}</span><span class="tooltip">Reproducir</span></button>`;
@@ -819,76 +770,76 @@ class DetailsModal {
             console.log('DetailsModal: Sin video disponible, mostrando botón de detalles para:', item.title);
             actionButtons += `<button class="details-modal-action-btn primary big-btn" data-open-details="true"><i class="fas fa-info-circle"></i><span>Ver Detalles</span><span class="tooltip">Más información</span></button>`;
         }
-        
+
         if (preferredVideo) {
             console.log('DetailsModal: Agregando botón Descargar (regla estricta) URL:', preferredVideo);
             secondaryButtons += `<button class="details-modal-action-btn circular" onclick="window.open('${this.generateDownloadUrl(preferredVideo)}', '_blank')"><i class="fas fa-download"></i><span class="tooltip">Descargar</span></button>`;
         }
-        
+
         if (trailerUrl) {
             secondaryButtons += `<button class="details-modal-action-btn circular" data-video-url="${trailerUrl}"><svg class="chevtrailer" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><path d="M2.64092 22C1.73625 22 1 21.2522 1 20.332V3.66802C1 2.74777 1.73625 2 2.64092 2H21.3591C22.2637 2 23 2.74777 23 3.66802V20.332C23 21.2522 22.2637 22 21.3591 22H2.64092ZM1.93084 21.0404H22.0566V10.0958H1.93084V21.0404ZM20.4248 9.14782H22.0555V2.9596H16.3749L20.426 9.14782H20.4248ZM14.5803 9.14782H19.3028L15.2494 2.9596H10.5292L14.5803 9.14782ZM8.73465 9.14782H13.456L9.4049 2.9596H4.68355L8.73465 9.14782ZM1.94336 9.14782H7.61035L3.55925 2.9596H1.94222V9.14782H1.94336Z" fill="#F0F0F0"></path><path d="M11 13L14 15.0007L11 17V13Z" fill="#F0F0F0"></path></g></svg><span class="tooltip">Ver Tráiler</span></button>`;
         }
-        
+
         secondaryButtons += `<button class="details-modal-action-btn circular" id="share-button"><svg class="chevcomartir" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3.75,12.5 C3.75,11.4665 4.59075,10.625 5.625,10.625 C6.65925,10.625 7.5,11.4665 7.5,12.5 C7.5,13.5343 6.65925,14.375 5.625,14.375 C4.59075,14.375 3.75,13.5343 3.75,12.5 Z M16.5,18.875 C16.5,17.8407 17.3407,17 18.375,17 C19.4093,17 20.25,17.8407 20.25,18.875 C20.25,19.9093 19.4093,20.75 18.375,20.75 C17.3407,20.75 16.5,19.9093 16.5,18.875 Z M16.5,6.125 C16.5,5.0915 17.3407,4.25 18.375,4.25 C19.4093,4.25 20.25,5.0915 20.25,6.125 C20.25,7.1585 19.4093,8 18.375,8 C17.3407,8 16.5,7.1585 16.5,6.125 Z M2.25,12.5 C2.25,14.3638 3.76125,15.875 5.625,15.875 C6.612,15.875 7.49175,15.4437 8.109,14.768 L15.0638,18.245 C15.0248,18.4497 15,18.659 15,18.875 C15,20.7388 16.5112,22.25 18.375,22.25 C20.2388,22.25 21.75,20.7388 21.75,18.875 C21.75,17.0112 20.2388,15.5 18.375,15.5 C17.2642,15.5 16.287,16.0445 15.672,16.8725 L8.84475,13.4585 C8.93625,13.1532 9,12.8352 9,12.5 C9,12.1648 8.93625,11.8468 8.84475,11.5415 L15.672,8.1275 C16.287,8.95625 17.2642,9.5 18.375,9.5 C20.2388,9.5 21.75,7.98875 21.75,6.125 C21.75,4.26125 20.2388,2.75 18.375,2.75 C16.5112,2.75 15,4.26125 15,6.125 C15,6.341 15.0248,6.55025 15.0638,6.75425 L8.109,10.232 C7.49175,9.55625 6.612,9.125 5.625,9.125 C3.76125,9.125 2.25,10.6363 2.25,12.5 Z"></path></svg><span class="tooltip">Compartir</span></button>`;
-        
+
         let infoItems = '';
-        
+
         // Título original (usar datos locales si no hay TMDB)
         const originalTitle = tmdbData?.original_title || item.originalTitle;
         if (originalTitle && originalTitle.toLowerCase() !== item.title.toLowerCase()) {
             infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Título original</div><div class="details-modal-info-value">${originalTitle}</div></div>`;
         }
-        
+
         if (item.year) {
             infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Año</div><div class="details-modal-info-value">${item.year}</div></div>`;
         }
-        
+
         if (item.duration) {
             infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Duración</div><div class="details-modal-info-value">${item.duration}</div></div>`;
         }
-        
+
         if (item.genre) {
             infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Género</div><div class="details-modal-info-value">${item.genre}</div></div>`;
         }
-        
+
         if (ageRating) {
             infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Clasificación</div><div class="details-modal-info-value"> <span class="age-rating">${ageRating}</span></div></div>`;
         }
-        
+
         // Productora(s) (usar datos locales si no hay TMDB)
         const productionCompanies = tmdbData?.production_companies || item.productionCompanies;
         if (productionCompanies) {
             infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Productora(s)</div><div class="details-modal-info-value">${productionCompanies}</div></div>`;
         }
-        
+
         // País(es) (usar datos locales si no hay TMDB)
         const productionCountries = tmdbData?.production_countries || item.productionCountries;
         if (productionCountries) {
             infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">País(es)</div><div class="details-modal-info-value">${productionCountries}</div></div>`;
         }
-        
+
         if (tmdbData?.status) {
             infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Estado</div><div class="details-modal-info-value">${tmdbData.status}</div></div>`;
         }
-        
+
         // Idioma(s) original(es) (usar datos locales si no hay TMDB)
         const spokenLanguages = tmdbData?.spoken_languages || item.spokenLanguages;
         if (spokenLanguages) {
             infoItems += `<div class="details-modal-info-item"><div class="details-modal-info-label">Idioma(s) original(es)</div><div class="details-modal-info-value">${spokenLanguages}</div></div>`;
         }
-        
+
         let taglineSection = '';
         if (tmdbData?.tagline) {
             taglineSection = `<div class="details-modal-tagline">"${tmdbData.tagline}"</div>`;
         }
-        
+
         const description = item.description || (tmdbData?.overview || 'Descripción no disponible');
-        
+
         // Crear secciones de crew y cast usando datos locales si no hay TMDB
         let directorsSection = '';
         let writersSection = '';
         let castSection = '';
-        
+
         if (tmdbData?.directors?.length > 0) {
             directorsSection = this.createCrewSection(tmdbData.directors, 'Director(es)');
         } else if (item.director) {
@@ -899,7 +850,7 @@ class DetailsModal {
             }));
             directorsSection = this.createCrewSection(directors, 'Director(es)');
         }
-        
+
         if (tmdbData?.writers?.length > 0) {
             writersSection = this.createCrewSection(tmdbData.writers, 'Escritor(es)');
         } else if (item.writers) {
@@ -910,7 +861,7 @@ class DetailsModal {
             }));
             writersSection = this.createCrewSection(writers, 'Escritor(es)');
         }
-        
+
         if (tmdbData?.cast?.length > 0) {
             castSection = this.createCastSection(tmdbData.cast);
         } else if (item.cast) {
@@ -929,7 +880,7 @@ class DetailsModal {
         } else {
             crewSections = `${directorsSection || ''}${writersSection || ''}`;
         }
-        
+
         let posters = tmdbImages.posters || [];
         let backdrops = tmdbImages.backdrops || [];
         // If local data contains single URL strings for posters/backdrops, convert to expected structure
@@ -947,10 +898,10 @@ class DetailsModal {
         } catch (e) {
             console.warn('DetailsModal: fallo construyendo poster/backdrop arrays desde datos locales', e);
         }
-        
+
         const postersGallery = posters.length > 0 ? this.createGallerySkeleton('poster', 5) : '';
         const backdropsGallery = backdrops.length > 0 ? this.createGallerySkeleton('backdrop', 4) : '';
-        
+
         this.detailsModalBody.innerHTML = `
             <h1 class="details-modal-title">${item.title}</h1>
             <div class="details-modal-actions">
@@ -979,8 +930,8 @@ class DetailsModal {
             }
             if (backdrops.length > 0) {
                 const backdropsSection = this.createGallerySection(backdrops, 'Imágenes de fondo', 'backdrops');
-                const backdropsContainer = this.detailsModalBody.querySelectorAll('.details-modal-gallery-section:has(.gallery-skeleton)')[1] || 
-                                           this.detailsModalBody.querySelector('.details-modal-gallery-section:has(.gallery-skeleton)');
+                const backdropsContainer = this.detailsModalBody.querySelectorAll('.details-modal-gallery-section:has(.gallery-skeleton)')[1] ||
+                    this.detailsModalBody.querySelector('.details-modal-gallery-section:has(.gallery-skeleton)');
                 if (backdropsContainer) backdropsContainer.outerHTML = backdropsSection;
             }
         } catch (err) {
@@ -996,14 +947,14 @@ class DetailsModal {
                 spacer.className = 'details-modal-bottom-spacer';
                 body.appendChild(spacer);
             }
-        } catch (e) {}
-        
+        } catch (e) { }
+
         void this.detailsModalOverlay.offsetWidth;
-        
+
         this.detailsModalOverlay.style.opacity = '1';
         this.detailsModalContent.style.transform = 'translateY(0)';
         this.detailsModalContent.style.opacity = '1';
-        
+
         setTimeout(() => {
             this.detailsModalBody.querySelectorAll('.details-modal-action-btn[data-video-url]').forEach(btn => {
                 btn.addEventListener('click', (e) => {
@@ -1039,7 +990,7 @@ class DetailsModal {
                     } else {
                         // No VideoModal available; try using the attribute raw URL via direct window.open as last resort
                         if (dataVideo) {
-                            try { window.open(dataVideo, '_blank'); } catch(e) { console.warn('details-modal: fallback open failed', e); }
+                            try { window.open(dataVideo, '_blank'); } catch (e) { console.warn('details-modal: fallback open failed', e); }
                         }
                     }
                 });
@@ -1065,23 +1016,23 @@ class DetailsModal {
                 if (btn._touchHandlersAttached) return;
                 btn._touchHandlersAttached = true;
                 // Ensure active class does not remain after an interaction
-                btn.addEventListener('click', (e) => { try { btn.classList.remove('active'); } catch (err) {} });
-                btn.addEventListener('touchend', () => { try { btn.classList.remove('active'); } catch (err) {} }, { passive: true });
-                btn.addEventListener('touchcancel', () => { try { btn.classList.remove('active'); } catch (err) {} }, { passive: true });
+                btn.addEventListener('click', (e) => { try { btn.classList.remove('active'); } catch (err) { } });
+                btn.addEventListener('touchend', () => { try { btn.classList.remove('active'); } catch (err) { } }, { passive: true });
+                btn.addEventListener('touchcancel', () => { try { btn.classList.remove('active'); } catch (err) { } }, { passive: true });
             });
-            
+
             this.detailsModalBody.querySelectorAll('.details-modal-gallery-item').forEach(item => {
                 item.addEventListener('click', (e) => {
                     const galleryType = item.getAttribute('data-gallery-type');
                     const showMore = item.getAttribute('data-show-more');
                     const index = parseInt(item.getAttribute('data-index') || 0);
                     const images = galleryType === 'posters' ? posters : backdrops;
-                    
+
                     if (showMore === 'true') this.showGallery(images, 0);
                     else if (images && images.length > 0) this.showGallery(images, index);
                 });
             });
-            
+
             const shareBtn = this.detailsModalBody.querySelector('#share-button');
             if (shareBtn) {
                 shareBtn.addEventListener('click', (e) => {
@@ -1097,7 +1048,7 @@ class DetailsModal {
                             if (!window.shareModal && typeof ShareModal === 'function') window.shareModal = new ShareModal();
                             const currentUrl = window.location.href;
                             let shareUrl = null;
-                            try { shareUrl = (typeof window.generateShareUrl === 'function') ? window.generateShareUrl(shareItem, currentUrl) : null; } catch(err) { shareUrl = null; }
+                            try { shareUrl = (typeof window.generateShareUrl === 'function') ? window.generateShareUrl(shareItem, currentUrl) : null; } catch (err) { shareUrl = null; }
                             if (window.shareModal && typeof window.shareModal.show === 'function') {
                                 window.shareModal.show({ ...shareItem, shareUrl });
                             } else {
@@ -1129,14 +1080,14 @@ class DetailsModal {
         }, 50);
 
         this.insertEpisodesSection(item).catch(err => console.warn('DetailsModal: insertEpisodesSection fallo', err));
-        
+
         if (this.isIOS()) {
             this.detailsModalContent.style.animation = 'none';
             requestAnimationFrame(() => {
                 this.detailsModalContent.style.animation = 'iosModalIn 0.4s ease-out forwards';
             });
         }
-        
+
         // Ensure shareUrl is set for the active item so share button always has a target
         try {
             if (item && !item.shareUrl) {
@@ -1160,7 +1111,7 @@ class DetailsModal {
         try {
             setTimeout(() => this.scrollOverlayToTop('auto'), 220);
             setTimeout(() => this.scrollOverlayToTop('auto'), 420);
-        } catch (e) {}
+        } catch (e) { }
     }
 
     close() {
@@ -1169,7 +1120,7 @@ class DetailsModal {
             const since = this._openedAt ? (Date.now() - this._openedAt) : null;
             console.warn('DetailsModal.close() called; ms since open:', since);
             console.trace();
-        } catch (e) {}
+        } catch (e) { }
 
         // Suprimir cierre si estamos navegando internamente entre similares
         try {
@@ -1177,31 +1128,31 @@ class DetailsModal {
                 console.warn('DetailsModal.close(): cierre suprimido (navegación interna activa)');
                 return;
             }
-        } catch (e) {}
+        } catch (e) { }
 
         this.cleanupSimilarSection();
-    this.cleanupEpisodesSection();
+        this.cleanupEpisodesSection();
 
         this._handleDetailsBackdropSettled();
         this.detailsModalContent.style.transform = 'translateY(20px)';
         this.detailsModalContent.style.opacity = '0';
         this.detailsModalOverlay.style.opacity = '0';
-        
+
         setTimeout(() => {
             this.detailsModalOverlay.style.display = 'none';
             this.detailsModalOverlay.classList.remove('show');
             document.body.style.overflow = 'auto';
             this.isDetailsModalOpen = false;
             window.activeItem = null;
-            try { console.log('DetailsModal.close(): calling restoreUrl()'); } catch(e){}
+            try { console.log('DetailsModal.close(): calling restoreUrl()'); } catch (e) { }
             this.restoreUrl();
             this.unlockScroll();
         }, 300);
     }
-    
+
     showGallery(images, startIndex = 0) {
         if (!images || images.length === 0) return;
-        
+
         this.galleryImages = images;
         this.currentGalleryIndex = startIndex;
         this.updateGalleryImage();
@@ -1235,7 +1186,7 @@ class DetailsModal {
 
     handleGalleryKeydown = (e) => {
         if (!this.galleryModal.style.display || this.galleryModal.style.display === 'none') return;
-        
+
         switch (e.key) {
             case 'ArrowLeft': this.navigateGallery(-1); break;
             case 'ArrowRight': this.navigateGallery(1); break;
@@ -1245,15 +1196,15 @@ class DetailsModal {
 
     handleGalleryWheel = (e) => {
         if (!this.galleryModal.style.display || this.galleryModal.style.display === 'none') return;
-        
+
         e.preventDefault();
         if (e.deltaY > 0) this.navigateGallery(1);
         else this.navigateGallery(-1);
     };
 
     isIOS() {
-        return /iPad|iPhone|iPod/.test(navigator.platform) || 
-              (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        return /iPad|iPhone|iPod/.test(navigator.platform) ||
+            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
     }
 
     normalizeText(text) {
@@ -1314,11 +1265,11 @@ class DetailsModal {
             // Use pushState so the modal hash becomes a persistent history entry
             try {
                 // Marcar este cambio para que hashchange lo ignore (evita re-entradas/cierres)
-                try { window.__detailsIgnoreNextHashChange = true; } catch (e) {}
+                try { window.__detailsIgnoreNextHashChange = true; } catch (e) { }
                 window.history.pushState(null, null, `${window.location.pathname}#${newHash}`);
             } catch (err) {
                 // fallback to replaceState if pushState is unavailable for any reason
-                try { window.__detailsIgnoreNextHashChange = true; } catch (e2) {}
+                try { window.__detailsIgnoreNextHashChange = true; } catch (e2) { }
                 window.history.replaceState(null, null, `${window.location.pathname}#${newHash}`);
             }
         }
@@ -1363,9 +1314,9 @@ class DetailsModal {
         const title = `Mira ${item.title} en nuestra plataforma`;
         const description = item.description || 'Una gran película que no te puedes perder';
         const imageUrl = item.posterUrl || 'https://via.placeholder.com/194x271';
-    const canonicalId = (item.tmdbId || item['ID TMDB'] || item.id || '').toString();
-    const url = `${window.location.origin}${window.location.pathname}#id=${canonicalId}&title=${this.normalizeText(item.title)}`;
-        
+        const canonicalId = (item.tmdbId || item['ID TMDB'] || item.id || '').toString();
+        const url = `${window.location.origin}${window.location.pathname}#id=${canonicalId}&title=${this.normalizeText(item.title)}`;
+
         // Verificar que los elementos meta existan antes de intentar actualizarlos
         const ogTitle = document.getElementById('og-title');
         const ogDescription = document.getElementById('og-description');
@@ -1374,7 +1325,7 @@ class DetailsModal {
         const twitterTitle = document.getElementById('twitter-title');
         const twitterDescription = document.getElementById('twitter-description');
         const twitterImage = document.getElementById('twitter-image');
-        
+
         if (ogTitle) ogTitle.content = title;
         if (ogDescription) ogDescription.content = description;
         if (ogImage) ogImage.content = imageUrl;
@@ -1382,7 +1333,7 @@ class DetailsModal {
         if (twitterTitle) twitterTitle.content = title;
         if (twitterDescription) twitterDescription.content = description;
         if (twitterImage) twitterImage.content = imageUrl;
-        
+
         const canonicalLink = document.querySelector('link[rel="canonical"]') || document.createElement('link');
         canonicalLink.rel = 'canonical';
         canonicalLink.href = url;
@@ -1511,11 +1462,11 @@ class DetailsModal {
     createAudioSubtitlesSection(audiosCount, subtitlesCount, audioList, subtitleList) {
         let audioContent = '';
         let subtitleContent = '';
-        
+
         // Verificar que audioList y subtitleList existan y sean arrays
         const safeAudioList = Array.isArray(audioList) ? audioList : [];
         const safeSubtitleList = Array.isArray(subtitleList) ? subtitleList : [];
-        
+
         if (safeAudioList.length > 0) {
             audioContent = `<div class="audio-subtitles-item" onclick="this.classList.toggle('expanded')"><i class="fas fa-volume-up"></i><span>Audios (${audiosCount || 0})</span><div class="expandable-content">${safeAudioList.map(audio => `<div>· ${audio}</div>`).join('')}</div></div>`;
         }
@@ -1899,7 +1850,7 @@ class DetailsModal {
                                     if (delta > 0) scroller.scrollTo({ top: scroller.scrollTop + delta, behavior: 'smooth' });
                                 }
                             }
-                        } catch (e) {}
+                        } catch (e) { }
                     }, 140);
                 } else {
                     toggleBtn.dataset.expanded = 'true';
@@ -1970,7 +1921,7 @@ class DetailsModal {
                     if (trimmed) genres.push(trimmed);
                 });
             }
-        } catch (err) {}
+        } catch (err) { }
         const sources = [item.genres, item.genre, item['Géneros'], item['Género']];
         sources.forEach(src => {
             this._splitGenres(src).forEach(g => genres.push(g));
@@ -2152,7 +2103,7 @@ class DetailsModal {
         if (!Array.isArray(similarItems) || similarItems.length === 0) return null;
         const section = document.createElement('section');
         section.className = 'details-modal-similar-section';
-    const escapeHtml = (value) => String(value == null ? '' : value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const escapeHtml = (value) => String(value == null ? '' : value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         const escapeAttr = (value) => escapeHtml(value).replace(/"/g, '&quot;');
         const cardsMarkup = similarItems.map((sim, index) => {
             const poster = sim.posterUrl || sim.backgroundUrl || 'https://via.placeholder.com/210x315?text=Sin+imagen';
@@ -2197,7 +2148,7 @@ class DetailsModal {
         const cards = Array.from(grid.querySelectorAll('.details-modal-similar-card'));
         if (!cards.length) return;
         const detailsInstance = this;
-    const COLLAPSED_ROWS = 2.75;
+        const COLLAPSED_ROWS = 2.75;
         const MAX_ROWS = 7;
 
         const ensureShareUrl = (candidate) => {
@@ -2205,7 +2156,7 @@ class DetailsModal {
                 if (!candidate.shareUrl && typeof window.generateShareUrl === 'function') {
                     candidate.shareUrl = window.generateShareUrl(candidate);
                 }
-            } catch (err) {}
+            } catch (err) { }
         };
 
         const cleanupFns = [];
@@ -2222,16 +2173,16 @@ class DetailsModal {
                 ev.preventDefault();
                 ev.stopPropagation();
                 // Marcar navegación interna para suprimir cierres accidentales y permitir transición fluida
-                try { detailsInstance._suppressCloseUntil = Date.now() + 1200; } catch (e) {}
+                try { detailsInstance._suppressCloseUntil = Date.now() + 1200; } catch (e) { }
                 // Flag para forzar scroll al inicio en show()
-                try { detailsInstance._forceScrollTopOnNextShow = true; } catch (e) {}
+                try { detailsInstance._forceScrollTopOnNextShow = true; } catch (e) { }
                 // Guardar scroll actual para decidir si hacer animación suave
                 try {
                     const currentScroll = (detailsInstance.detailsModalOverlay && detailsInstance.detailsModalOverlay.scrollTop) ||
                         (detailsInstance.detailsModalContent && detailsInstance.detailsModalContent.scrollTop) || 0;
                     detailsInstance._prevScrollAmount = currentScroll;
-                } catch (e) {}
-                try { window.activeItem = data; } catch (err) {}
+                } catch (e) { }
+                try { window.activeItem = data; } catch (err) { }
                 if (window.hoverModal && typeof window.hoverModal.hide === 'function') {
                     window.hoverModal.hide(0);
                 }
@@ -2241,7 +2192,7 @@ class DetailsModal {
                         detailsInstance.detailsModalBackdrop.style.opacity = '0';
                         detailsInstance.detailsModalBackdrop.classList.add('backdrop-hidden');
                     }
-                } catch (e) {}
+                } catch (e) { }
                 let p;
                 try {
                     p = detailsInstance.show(data, card);
@@ -2415,7 +2366,7 @@ class DetailsModal {
                 cleanupFns.forEach(fn => {
                     try {
                         fn();
-                    } catch (err) {}
+                    } catch (err) { }
                 });
             });
         }
@@ -2437,22 +2388,22 @@ class DetailsModal {
                     const all = await this.loadAllData();
                     const baseTitleNorm = (this.normalizeText(item.title || item['Título'] || '') || '').trim();
                     const parentCandidates = (Array.isArray(all) ? all : [])
-                        .map((r,i) => this._normalizeRawDataItem(r,i))
+                        .map((r, i) => this._normalizeRawDataItem(r, i))
                         .filter(Boolean)
                         .filter(c => !isEpisodeItem(c))
                         .filter(c => (this.normalizeText(c.title || '') || '').trim() === baseTitleNorm);
                     const parent = parentCandidates[0] || null;
                     if (parent) {
                         const t = this._classifyCategory(parent.category);
-                        headerLabel = t==='serie' ? 'Serie relacionada' : t==='anime' ? 'Anime relacionado' : t==='documental' ? 'Documental relacionado' : 'Título relacionado';
+                        headerLabel = t === 'serie' ? 'Serie relacionada' : t === 'anime' ? 'Anime relacionado' : t === 'documental' ? 'Documental relacionado' : 'Título relacionado';
                         similarItems = [parent];
                     } else {
                         // Fallback: sintetizar un "padre" desde episodios con mismo título
                         const episodeGroup = (Array.isArray(all) ? all : [])
-                          .map((r,i)=>this._normalizeRawDataItem(r,i))
-                          .filter(Boolean)
-                          .filter(c => isEpisodeItem(c))
-                          .filter(c => (this.normalizeText(c.title || '') || '').trim() === baseTitleNorm);
+                            .map((r, i) => this._normalizeRawDataItem(r, i))
+                            .filter(Boolean)
+                            .filter(c => isEpisodeItem(c))
+                            .filter(c => (this.normalizeText(c.title || '') || '').trim() === baseTitleNorm);
                         if (episodeGroup.length) {
                             const first = episodeGroup[0];
                             const pseudo = {
@@ -2472,11 +2423,11 @@ class DetailsModal {
                                 isEpisode: false
                             };
                             const t = this._classifyCategory(pseudo.category);
-                            headerLabel = t==='serie' ? 'Serie relacionada' : t==='anime' ? 'Anime relacionado' : t==='documental' ? 'Documental relacionado' : 'Título relacionado';
+                            headerLabel = t === 'serie' ? 'Serie relacionada' : t === 'anime' ? 'Anime relacionado' : t === 'documental' ? 'Documental relacionado' : 'Título relacionado';
                             similarItems = [pseudo];
                         }
                     }
-                } catch (e) {}
+                } catch (e) { }
             } else {
                 similarItems = await this.findSimilarItems(item);
             }
@@ -2497,7 +2448,7 @@ class DetailsModal {
                         headerLabel = this._fallbackHeaderForType(baseType2);
                         similarItems = fallbackItems;
                     }
-                } catch (e) {}
+                } catch (e) { }
             }
             if (!similarItems || similarItems.length === 0) { placeholder.innerHTML = ''; return; }
             const section = this.createSimilarSectionElement(similarItems, headerLabel);
@@ -2512,7 +2463,7 @@ class DetailsModal {
             try {
                 const placeholder = this.detailsModalBody ? this.detailsModalBody.querySelector('.details-modal-similar-placeholder') : null;
                 if (placeholder) placeholder.innerHTML = '';
-            } catch (err2) {}
+            } catch (err2) { }
         }
     }
 
@@ -2528,7 +2479,7 @@ class DetailsModal {
                     const baseTitleNorm = (this.normalizeText(item.title || item['Título'] || '') || '').trim();
                     // Buscar un candidato que no sea episodio con el mismo título normalizado
                     const parentCandidates = (Array.isArray(all) ? all : [])
-                        .map((r,i) => this._normalizeRawDataItem(r,i))
+                        .map((r, i) => this._normalizeRawDataItem(r, i))
                         .filter(Boolean)
                         .filter(c => !isEpisodeItem(c))
                         .filter(c => (this.normalizeText(c.title || '') || '').trim() === baseTitleNorm);
@@ -2568,8 +2519,8 @@ class DetailsModal {
         // Solo aplicable si hay un título de episodio o la categoría indica series/animes
         console.log('DetailsModal: getEpisodesSection llamado para item:', item && (item['Título'] || item.title));
         if (!item) return '';
-    // No depender de la categoría del item: mostrar episodios si existen entradas relacionadas con el mismo título
-    const itemEpisodeTitle = (item['Título episodio'] || item['Título episodio'] === 0) ? String(item['Título episodio']).trim() : '';
+        // No depender de la categoría del item: mostrar episodios si existen entradas relacionadas con el mismo título
+        const itemEpisodeTitle = (item['Título episodio'] || item['Título episodio'] === 0) ? String(item['Título episodio']).trim() : '';
 
         const allData = await this.loadAllData();
         console.log('DetailsModal: getEpisodesSection -> datos cargados, total items:', Array.isArray(allData) ? allData.length : 0);
@@ -2619,7 +2570,7 @@ class DetailsModal {
             .sort((a, b) => {
                 if (a.season !== null && b.season !== null && a.season !== b.season) return a.season - b.season;
                 if (a.episodeIndex !== null && b.episodeIndex !== null) return a.episodeIndex - b.episodeIndex;
-                return a.title.localeCompare(b.title, undefined, {numeric: true});
+                return a.title.localeCompare(b.title, undefined, { numeric: true });
             });
 
         if (episodes.length === 0) return '';
@@ -2628,7 +2579,7 @@ class DetailsModal {
         // Construir cards con miniatura, título y sinopsis
         // Calcular temporadas únicas (omitimos null/undefined)
         const seasonsSet = new Set(episodes.map(e => e.season).filter(s => s !== null && s !== undefined && !Number.isNaN(s)));
-        const seasons = Array.from(seasonsSet).sort((a,b)=>a-b);
+        const seasons = Array.from(seasonsSet).sort((a, b) => a - b);
 
         const listItems = episodes.map(ep => {
             const playBtnInner = ep.video ? `<button type="button" class="details-modal-episode-play" data-video-url="${ep.video}" aria-label="Reproducir episodio"><svg xmlns="http://www.w3.org/2000/svg" id="CLOSE" fill="PR_WHITE" viewBox="0 0 24 24" class="chevplay"><polygon points="8 5 8 19 19 12"></polygon></svg></button>` : '';
@@ -2655,7 +2606,7 @@ class DetailsModal {
         }
         headerHtml += `</div>`;
 
-    const section = `<div class="details-modal-episodes">${headerHtml}<div class="details-modal-episodes-list-wrapper"><div class="details-modal-episodes-list" data-state="collapsed">${listItems}</div><div class="details-modal-episodes-fade"></div></div><div class="details-modal-episodes-toggle-wrapper"><button type="button" class="details-modal-episodes-toggle" data-expanded="false" aria-expanded="false"><span class="label-expand">Ver más</span><span class="label-collapse">Ver menos</span><svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></div>`;
+        const section = `<div class="details-modal-episodes">${headerHtml}<div class="details-modal-episodes-list-wrapper"><div class="details-modal-episodes-list" data-state="collapsed">${listItems}</div><div class="details-modal-episodes-fade"></div></div><div class="details-modal-episodes-toggle-wrapper"><button type="button" class="details-modal-episodes-toggle" data-expanded="false" aria-expanded="false"><span class="label-expand">Ver más</span><span class="label-collapse">Ver menos</span><svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div></div>`;
 
         // Estilos para el header del selector (inserción segura si no existe)
         const styleHeaderExists = !!document.getElementById('details-modal-episodes-header-styles');
@@ -2719,7 +2670,7 @@ class DetailsModal {
             }
 
             // Loguear resumen de episodios encontrados para debugging
-            console.log('DetailsModal: openEpisodeByNumber -> episodios candidatos:', episodes.map(e => ({episodeIndex: e.episodeIndex, title: e.title, hasVideo: !!e.video})).slice(0,50));
+            console.log('DetailsModal: openEpisodeByNumber -> episodios candidatos:', episodes.map(e => ({ episodeIndex: e.episodeIndex, title: e.title, hasVideo: !!e.video })).slice(0, 50));
             if (found && found.video) {
                 console.log('DetailsModal: reproducir episodio encontrado para ep=', epNumber, found);
                 this.openEpisodePlayer(found.video);
