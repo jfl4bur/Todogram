@@ -237,30 +237,6 @@ class DetailsModal {
                 if (isEpisodeItem(candidate)) continue;
                 const candType = this._classifyCategory(meta.category);
                 if (baseType && candType && candType !== baseType) continue;
-                const candidateId = meta.canonicalId || candidate.id;
-                if (candidateId && baseIds.has(String(candidateId))) continue;
-                const key = `${candidateId || ''}|${meta.normalizedTitle || ''}`;
-                if (seen.has(key)) continue;
-                seen.add(key);
-                return canScroll;
-            };
-            // Intentar primero el body interno (si alguna regla CSS le otorga overflow)
-            const didScrollBody = scrollNodeToTop(this.detailsModalBody);
-            // Luego el contenedor de contenido
-            const didScrollContent = scrollNodeToTop(this.detailsModalContent);
-            // Luego el overlay (scroll principal definido en CSS)
-            const didScrollOverlay = scrollNodeToTop(this.detailsModalOverlay);
-            // Último recurso: documento
-            if (!didScrollBody && !didScrollContent && !didScrollOverlay) {
-                const doc = document.scrollingElement || document.documentElement || document.body;
-                scrollNodeToTop(doc);
-            }
-        } catch (e) { }
-    }
-
-    _detachDetailsBackdropListeners() {
-        if (!this.detailsModalBackdrop) return;
-        if (this._detailsBackdropLoadHandler) {
             try { this.detailsModalBackdrop.removeEventListener('load', this._detailsBackdropLoadHandler); } catch (e) { }
             this._detailsBackdropLoadHandler = null;
         }
