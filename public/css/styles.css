@@ -1,3 +1,33 @@
+/* todo.css deduplicated: one @media per query, ordered by breakpoint (desc) */
+
+/* Consolidated media queries generated from styles.css - exact content grouped by query */
+
+/* Root (non-@media) rules */
+
+/* Global scrollbar style to match details modal */
+html, body {
+    scrollbar-width: thin;
+    -ms-overflow-style: auto;
+}
+
+html::-webkit-scrollbar, body::-webkit-scrollbar {
+    display: block;
+    width: 10px;
+    height: 10px;
+}
+
+html::-webkit-scrollbar-thumb, body::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.28);
+    border-radius: 8px;
+}
+
+html::-webkit-scrollbar-track, body::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.06);
+}
+
+/* Important: ensure the details modal is above any generic hover/modal overlays
+    which may have very high z-index values elsewhere. This avoids click interception
+    by other overlay elements when the details modal is open (fixes catalog issue).
 */
 .details-modal-content {
     z-index: 12002 !important;
@@ -288,6 +318,32 @@ button:focus {
 .details-modal-overlay, .details-modal-content, .details-modal-body {
     scrollbar-width: none;
     -ms-overflow-style: none;
+}
+.details-modal-overlay::-webkit-scrollbar, .details-modal-content::-webkit-scrollbar, .details-modal-body::-webkit-scrollbar {
+    display: none;
+}
+
+/* Override: en el modal de detalles queremos ver la barra de scroll */
+.details-modal-overlay, .details-modal-content, .details-modal-body {
+    scrollbar-width: thin;
+    -ms-overflow-style: auto;
+}
+.details-modal-overlay::-webkit-scrollbar, .details-modal-content::-webkit-scrollbar, .details-modal-body::-webkit-scrollbar {
+    display: block;
+    width: 10px;
+    height: 10px;
+}
+.details-modal-overlay::-webkit-scrollbar-thumb, .details-modal-content::-webkit-scrollbar-thumb, .details-modal-body::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.28);
+    border-radius: 8px;
+}
+.details-modal-overlay::-webkit-scrollbar-track, .details-modal-content::-webkit-scrollbar-track, .details-modal-body::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.06);
+}
+.carousel-section-background {
+       background: linear-gradient(rgba(249, 203, 40, 0) 11.35%, rgba(249, 203, 40, 0.24) 100%);
+}  
+/* Estilos para el modal de galería */
 .gallery-modal {
     display: none;
     position: fixed;
