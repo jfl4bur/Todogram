@@ -249,36 +249,6 @@ button:focus {
     margin-right: 20px;
 }
 
-/* Estilos globales de scrollbar (Index y Catálogo) - Basados en details-modal */
-::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-}
-
-::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.28);
-    border-radius: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.06);
-}
-
-body::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
-}
-
-body::-webkit-scrollbar-thumb {
-    background: rgba(255, 255, 255, 0.28);
-    border-radius: 8px;
-}
-
-body::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.06);
-}
-
-
 /* Estilos personalizados para los scrollbars */
 .details-modal-overlay::-webkit-scrollbar {
     width: 6px;
