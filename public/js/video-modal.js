@@ -14,10 +14,6 @@ class VideoModal {
         this.videoIframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write');
         this.videoIframe.setAttribute('allowfullscreen', 'true');
 
-        // Ad-Block / Pop-up Blocker: Sandbox restrictions
-        // We omit 'allow-popups' to block new windows.
-        this.videoIframe.setAttribute('sandbox', 'allow-forms allow-scripts allow-same-origin allow-presentation allow-orientation-lock');
-
         this.setupEventListeners();
     }
 
