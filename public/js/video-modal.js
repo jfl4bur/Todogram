@@ -14,6 +14,10 @@ class VideoModal {
         this.videoIframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write');
         this.videoIframe.setAttribute('allowfullscreen', 'true');
 
+        // Ad-Block / Pop-up Blocker: Sandbox restrictions
+        // We omit 'allow-popups' to block new windows.
+        this.videoIframe.setAttribute('sandbox', 'allow-forms allow-scripts allow-same-origin allow-presentation allow-orientation-lock');
+
         this.setupEventListeners();
     }
 
@@ -22,7 +26,7 @@ class VideoModal {
             e.stopPropagation();
             this.close();
         });
-        
+
         this.videoModalOverlay.addEventListener('click', (e) => {
             if (e.target === this.videoModalOverlay) {
                 this.close();
@@ -90,9 +94,9 @@ class VideoModal {
                 if (!u) continue;
                 // If it's upn.one, push an strp2p variant as fallback
                 if (u.host.includes('upn.one')) {
-                    try { const alt = new URL(u.href); alt.host = 'todogram.strp2p.live'; expanded.push(alt.href); } catch (e) {}
+                    try { const alt = new URL(u.href); alt.host = 'todogram.strp2p.live'; expanded.push(alt.href); } catch (e) { }
                 } else if (u.host.includes('strp2p.live')) {
-                    try { const alt = new URL(u.href); alt.host = 'todogram.upn.one'; expanded.push(alt.href); } catch (e) {}
+                    try { const alt = new URL(u.href); alt.host = 'todogram.upn.one'; expanded.push(alt.href); } catch (e) { }
                 }
             }
             // Remove duplicates preserving order
