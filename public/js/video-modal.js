@@ -4,6 +4,32 @@ class VideoModal {
         this.videoModalClose = document.getElementById('video-modal-close');
         this.videoIframe = document.getElementById('video-iframe');
         this.isPlaying = false;
+        
+        // Option B Button creation
+        this.optionBBtn = document.createElement('button');
+        this.optionBBtn.innerText = 'Opción B';
+        this.optionBBtn.className = 'video-modal-option-b';
+        // Style it to look like a button next to close
+        this.optionBBtn.style.cssText = `
+position: absolute;
+top: 20px;
+right: 80px; /* Left of the close button */
+z - index: 10001;
+background: rgba(255, 255, 255, 0.2);
+color: white;
+border: 1px solid white;
+padding: 5px 10px;
+cursor: pointer;
+border - radius: 5px;
+display: none; /* Hidden by default */
+`;
+        if (this.videoModalOverlay) {
+            this.videoModalOverlay.appendChild(this.optionBBtn);
+        }
+
+        this.currentVideo1 = null;
+        this.currentVideo2 = null;
+        this.activeVideo = 1;
 
         if (!this.videoModalOverlay || !this.videoIframe) {
             console.error("Elementos del modal de video no encontrados");
@@ -18,8 +44,7 @@ class VideoModal {
     }
 
     setupEventListeners() {
-        this.videoModalClose.addEventListener('click', (e) => {
-            e.stopPropagation();
+        this.videoModalClose.addEventListener('click', () => {
             this.close();
         });
 
@@ -28,10 +53,45 @@ class VideoModal {
                 this.close();
             }
         });
+        
+        // Option B click handler
+        this.optionBBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent closing modal
+            this.toggleVideoSource();
+        });
     }
 
-    play(url) {
-        if (!url || this.isPlaying) return;
+    toggleVideoSource() {
+        if (this.activeVideo === 1 && this.currentVideo2) {
+            this.activeVideo = 2;
+            this.optionBBtn.innerText = 'Opción A';
+            this.loadVideo(this.currentVideo2);
+        } else if (this.activeVideo === 2 && this.currentVideo1) {
+            this.activeVideo = 1;
+            this.optionBBtn.innerText = 'Opción B';
+            this.loadVideo(this.currentVideo1);
+        }
+    }
+
+    play(url1, url2 = null) {
+        this.currentVideo1 = url1;
+        this.currentVideo2 = url2;
+        this.activeVideo = 1;
+        
+        // Reset button state
+        this.optionBBtn.innerText = 'Opción B';
+        
+        if (this.currentVideo2) {
+            this.optionBBtn.style.display = 'block';
+        } else {
+            this.optionBBtn.style.display = 'none';
+        }
+
+        this.loadVideo(url1);
+    }
+
+    loadVideo(url) {
+        if (!url || this.isPlaying) return; // Only prevent re-play if already playing the *same* video, or if no URL
 
         // If caller passed an item object or an array of URLs, normalize to candidate list
         const normalizeToCandidates = (input) => {
@@ -174,32 +234,32 @@ class VideoModal {
         return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0` : '';
     }
 
-    getUpnEmbedUrl(url) {
-        if (!url) return '';
-        // For upn embeds we use the url as-is (it already contains the fragment/hash player info)
-        return url;
-    }
+getUpnEmbedUrl(url) {
+    if (!url) return '';
+    // For upn embeds we use the url as-is (it already contains the fragment/hash player info)
+    return url;
+}
 
-    showLoadError() {
-        try {
-            // display a small message overlay inside the video modal when both sources fail
-            const container = this.videoModalOverlay.querySelector('.video-error-message') || document.createElement('div');
-            container.className = 'video-error-message';
-            container.innerHTML = `<div style="padding:20px;color:white;background:rgba(0,0,0,0.85);border-radius:8px;max-width:560px;margin:40px auto;text-align:center;">No se pudo cargar el reproductor. Intenta recargar la página o prueba otro enlace.</div>`;
-            // remove existing placeholders
-            const existing = this.videoModalOverlay.querySelector('.video-error-message');
-            if (existing) existing.remove();
-            this.videoModalOverlay.appendChild(container);
-            // allow user to close
+showLoadError() {
+    try {
+        // display a small message overlay inside the video modal when both sources fail
+        const container = this.videoModalOverlay.querySelector('.video-error-message') || document.createElement('div');
+        container.className = 'video-error-message';
+        container.innerHTML = `<div style="padding:20px;color:white;background:rgba(0,0,0,0.85);border-radius:8px;max-width:560px;margin:40px auto;text-align:center;">No se pudo cargar el reproductor. Intenta recargar la página o prueba otro enlace.</div>`;
+        // remove existing placeholders
+        const existing = this.videoModalOverlay.querySelector('.video-error-message');
+        if (existing) existing.remove();
+        this.videoModalOverlay.appendChild(container);
+        // allow user to close
+        setTimeout(() => {
+            // keep until user closes or 4s then auto-hide
             setTimeout(() => {
-                // keep until user closes or 4s then auto-hide
-                setTimeout(() => {
-                    const el = this.videoModalOverlay.querySelector('.video-error-message');
-                    if (el) el.remove();
-                }, 4000);
-            }, 50);
-        } catch (e) {
-            console.error('VideoModal.showLoadError error', e);
-        }
+                const el = this.videoModalOverlay.querySelector('.video-error-message');
+                if (el) el.remove();
+            }, 4000);
+        }, 50);
+    } catch (e) {
+        console.error('VideoModal.showLoadError error', e);
     }
+}
 }
