@@ -148,7 +148,15 @@ class VideoModal {
 
             // Set iframe to candidate using the PROXY for ad-blocking
             // IMPORTANTE: Asegúrate de que proxy_player.php esté en la carpeta raíz (htdocs) de tu hosting.
-            const proxyUrl = `https://todogram.free.nf/proxy_player.php?url=${encodeURIComponent(src)}`;
+            // FIX: Extraemos el 'hash' (#id) del video original y lo añadimos al final de la URL del proxy.
+            // Muchos reproductores (como upnshare) usan el hash para saber qué video reproducir.
+            let hash = '';
+            try {
+                const urlObj = new URL(src);
+                hash = urlObj.hash;
+            } catch (e) { }
+
+            const proxyUrl = `https://todogram.free.nf/proxy_player.php?url=${encodeURIComponent(src)}${hash}`;
             try { iframe.src = proxyUrl; } catch (e) { cleanupAttempt(); attemptNext(); }
             // Ensure modal visible
             this.isPlaying = true;
