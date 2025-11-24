@@ -148,7 +148,7 @@ class VideoModal {
 
             // Set iframe to candidate using the PROXY for ad-blocking
             // IMPORTANTE: Asegúrate de que proxy_player.php esté en la carpeta raíz (htdocs) de tu hosting.
-            const proxyUrl = `https://todogram.free.nf/public/proxy_player.php?url=${encodeURIComponent(src)}`;
+            const proxyUrl = `https://todogram.free.nf/proxy_player.php?url=${encodeURIComponent(src)}`;
             try { iframe.src = proxyUrl; } catch (e) { cleanupAttempt(); attemptNext(); }
             // Ensure modal visible
             this.isPlaying = true;
