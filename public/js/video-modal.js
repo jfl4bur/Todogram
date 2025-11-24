@@ -10,6 +10,10 @@ class VideoModal {
             return;
         }
 
+        // Fix for mobile/TV playback: ensure iframe has necessary permissions
+        this.videoIframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write');
+        this.videoIframe.setAttribute('allowfullscreen', 'true');
+
         this.setupEventListeners();
     }
 
