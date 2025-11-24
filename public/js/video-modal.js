@@ -5,6 +5,10 @@ class VideoModal {
         this.videoIframe = document.getElementById('video-iframe');
         this.isPlaying = false;
 
+        // State for alternative video sources
+        this.videoCandidates = [];
+        this.currentVideoIndex = 0;
+
         if (!this.videoModalOverlay || !this.videoIframe) {
             console.error("Elementos del modal de video no encontrados");
             return;
@@ -14,7 +18,48 @@ class VideoModal {
         this.videoIframe.setAttribute('allow', 'autoplay; fullscreen; picture-in-picture; encrypted-media; gyroscope; accelerometer; clipboard-write');
         this.videoIframe.setAttribute('allowfullscreen', 'true');
 
+        // Create Option B button dynamically
+        this.createOptionBButton();
+
         this.setupEventListeners();
+    }
+
+    createOptionBButton() {
+        // Create Option B button if it doesn't exist
+        if (!document.getElementById('video-modal-option-b')) {
+            const optionBBtn = document.createElement('button');
+            optionBBtn.id = 'video-modal-option-b';
+            optionBBtn.className = 'video-modal-option-b';
+            optionBBtn.textContent = 'Opción B';
+            optionBBtn.style.cssText = `
+                position: absolute;
+                top: 20px;
+                right: 80px;
+                background: rgba(0, 0, 0, 0.7);
+                color: white;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                border-radius: 4px;
+                padding: 8px 16px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 500;
+                z-index: 1001;
+                display: none;
+                transition: background 0.2s;
+            `;
+            optionBBtn.addEventListener('mouseenter', () => {
+                optionBBtn.style.background = 'rgba(255, 255, 255, 0.2)';
+            });
+            optionBBtn.addEventListener('mouseleave', () => {
+                optionBBtn.style.background = 'rgba(0, 0, 0, 0.7)';
+            });
+            optionBBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.switchToAlternative();
+            });
+            this.videoModalOverlay.appendChild(optionBBtn);
+        }
+        this.videoModalOptionB = document.getElementById('video-modal-option-b');
     }
 
     setupEventListeners() {
@@ -28,6 +73,34 @@ class VideoModal {
                 this.close();
             }
         });
+    }
+
+    switchToAlternative() {
+        if (this.videoCandidates.length <= 1) return;
+
+        // Move to next candidate
+        this.currentVideoIndex = (this.currentVideoIndex + 1) % this.videoCandidates.length;
+        const nextUrl = this.videoCandidates[this.currentVideoIndex];
+
+        console.log(`Switching to alternative video ${this.currentVideoIndex + 1}/${this.videoCandidates.length}:`, nextUrl);
+
+        // Update iframe src directly
+        this.videoIframe.src = '';
+        setTimeout(() => {
+            this.videoIframe.src = nextUrl;
+        }, 100);
+    }
+
+    updateOptionBButton() {
+        if (!this.videoModalOptionB) return;
+
+        // Show button only if there are multiple candidates
+        if (this.videoCandidates.length > 1) {
+            this.videoModalOptionB.style.display = 'block';
+            this.videoModalOptionB.textContent = `Opción ${this.currentVideoIndex + 1}/${this.videoCandidates.length}`;
+        } else {
+            this.videoModalOptionB.style.display = 'none';
+        }
     }
 
     play(url) {
@@ -99,7 +172,12 @@ class VideoModal {
             return [...new Set(expanded)];
         };
 
-        const expandedCandidates = expandCandidates(candidates);
+        const allCandidates = expandCandidates(candidates);
+
+        // Store candidates for Option B button
+        this.videoCandidates = allCandidates;
+        this.currentVideoIndex = 0;
+        this.updateOptionBButton();
 
         // Attempt to load candidates sequentially
         const iframe = this.videoIframe;
@@ -164,6 +242,11 @@ class VideoModal {
         this.videoIframe.src = '';
         this.videoModalOverlay.style.display = 'none';
         document.body.style.overflow = 'auto';
+
+        // Reset Option B button state
+        this.videoCandidates = [];
+        this.currentVideoIndex = 0;
+        this.updateOptionBButton();
     }
 
     getYouTubeEmbedUrl(url) {
