@@ -5487,7 +5487,7 @@ slider-footer-content {
 
 .share-preview-content {
     flex: 1;
-    padding: 15px;
+    padding: 0px 15px 0px 15px;
     background-color: #2a2a2a;
 }
 
