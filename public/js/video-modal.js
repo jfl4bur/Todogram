@@ -146,8 +146,10 @@ class VideoModal {
                 attemptNext();
             }, 4000);
 
-            // Set iframe to candidate
-            try { iframe.src = src; } catch (e) { cleanupAttempt(); attemptNext(); }
+            // Set iframe to candidate using the PROXY for ad-blocking
+            // We encode the original URL to pass it safely as a parameter
+            const proxyUrl = `../proxy_player.php?url=${encodeURIComponent(src)}`;
+            try { iframe.src = proxyUrl; } catch (e) { cleanupAttempt(); attemptNext(); }
             // Ensure modal visible
             this.isPlaying = true;
             this.videoModalOverlay.style.display = 'flex';
