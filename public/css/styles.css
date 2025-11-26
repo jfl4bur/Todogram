@@ -4785,7 +4785,7 @@ slider-footer-content {
 
 .details-modal-action-btn i,
 .details-modal-action-btn svg {
-    margin-right: 8px;
+    margin-right: 6px;
 }
 
 .details-modal-action-btn .tooltip::after {

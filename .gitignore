@@ -37,6 +37,7 @@ doc/
 # Ignorar los scripts de sincronización locales
 GEMINI.md
 index.html
-public/catalogo/index.html
+index_local.html
+public/catalogo/
 main.js
 package.json
